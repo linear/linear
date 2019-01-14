@@ -1,8 +1,10 @@
 import { Binding, BindingInstance } from "./generated-binding";
 import { HttpLink } from "apollo-link-http";
+import { onError } from "apollo-link-error";
 import * as fetch from "isomorphic-fetch";
 import { makeRemoteExecutableSchema } from "graphql-tools";
 import linearSchema from "./linearSchema";
+import { GraphQLError } from "graphql";
 
 export interface LinearLinkOptions {
   token: string;
@@ -17,17 +19,24 @@ export class LinearLink extends HttpLink {
     }
     super({
       uri: "https://api.linear.app/graphql",
-      headers: { Authorization: `Bearer ${options.token}` },
+      headers: { Authorization: options.token },
       fetch
     });
   }
 }
 
+// https://github.com/graphql-binding/graphql-binding/issues/173#issuecomment-446366548
+const errorLink = onError(args => {
+  if (args.graphQLErrors && args.graphQLErrors.length === 1) {
+    args.response.errors = args.graphQLErrors.concat(new GraphQLError(""));
+  }
+});
+
 class LinearBinding extends Binding {
   constructor(options: LinearLinkOptions) {
     const schema = makeRemoteExecutableSchema({
       schema: linearSchema,
-      link: new LinearLink(options)
+      link: errorLink.concat(new LinearLink(options))
     });
     super({ schema });
   }

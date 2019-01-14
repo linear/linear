@@ -22,6 +22,7 @@
   "dependencies": {
     "@types/graphql": "14.0.4",
     "@types/isomorphic-fetch": "0.0.34",
+    "apollo-link-error": "^1.1.5",
     "apollo-link-http": "1.5.9",
     "cross-fetch": "3.0.0",
     "graphql": "0.13.0",
