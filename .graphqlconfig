@@ -1,0 +1,18 @@
+{
+  "schemaPath": "src/schema-raw.graphql",
+  "extensions": {
+    "endpoints": {
+      "default": "http://localhost:8090/graphql"
+    },
+    "codegen": {
+      "generator": "graphql-binding",
+      "language": "typescript",
+      "input": {
+        "schema": "src/schema.ts"
+      },
+      "output": {
+        "binding": "src/generated-binding.ts"
+      }
+    }
+  }
+}

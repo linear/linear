@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "moduleResolution": "node",
+    "module": "es2015",
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "lib": ["esnext.asynciterable", "es2016", "dom"]
+  },
+  "exclude": ["node_modules", "dist", "example"]
+}
