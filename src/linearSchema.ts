@@ -3,7 +3,7 @@
  */
 export default `
 # source: http://localhost:8090/graphql
-# timestamp: Mon Jan 14 2019 10:31:51 GMT-0800 (Pacific Standard Time)
+# timestamp: Sat Jan 19 2019 16:33:21 GMT-0800 (Pacific Standard Time)
 
 """An API key"""
 type ApiKey {
@@ -87,8 +87,11 @@ type Comment {
   """The time at which the model was archived."""
   archivedAt: DateTime
 
-  """Comment content"""
+  """Comment content in markdown format."""
   body: String!
+
+  """Comment content as a Prosemirror document."""
+  bodyData: JSON
 
   """The issue that the comment is associated with."""
   issue: Issue!
@@ -101,8 +104,11 @@ input CommentCreateInput {
   """The identifier. If none is provided, the backend will generate one"""
   id: String
 
-  """The comment content."""
+  """The comment content in markdown format."""
   body: String!
+
+  """The comment content as a Prosemirror document."""
+  bodyData: JSON
 
   """The issue to associate the comment with."""
   issueId: String!
@@ -116,6 +122,9 @@ type CommentPayload {
 input CommentUpdateInput {
   """The comment content."""
   body: String!
+
+  """The comment content as a Prosemirror document."""
+  bodyData: JSON
 }
 
 input CreateOrganizationInput {
@@ -286,14 +295,17 @@ type Issue {
   """The issue's title."""
   title: String!
 
-  """The issue's description in markdown."""
+  """The issue's description in markdown format."""
   description: String
+
+  """The issue's description as a Prosemirror document."""
+  descriptionData: JSON
+
+  """The priority of the issue."""
+  priority: Float!
 
   """Comments associated with the issue"""
   comments: [Comment!]!
-
-  """Labels associated with the issue."""
-  labels: [IssueLabel!]!
 
   """The project that the issue is associated with."""
   project: Project!
@@ -321,6 +333,7 @@ type Issue {
 
   """The time at which the issue was moved into canceled state."""
   canceledAt: DateTime
+  labels: [IssueLabel!]!
 }
 
 input IssueCreateInput {
@@ -330,11 +343,17 @@ input IssueCreateInput {
   """The issue's title."""
   title: String!
 
-  """The issue's description."""
+  """The issue description in markdown format."""
   description: String
+
+  """The issue description as a Prosemirror document."""
+  descriptionData: JSON
 
   """The id of the user to assign the issue to."""
   assigneeId: String
+
+  """The priority of the issue"""
+  priority: Float
 
   """The ids of the users subscribing to this ticket."""
   subscriberIds: [String!]
@@ -413,11 +432,17 @@ input IssueUpdateInput {
   """The issue's title."""
   title: String
 
-  """The issues description."""
+  """The issue description in markdown format."""
   description: String
+
+  """The issue description as a Prosemirror document."""
+  descriptionData: JSON
 
   """The id of the user to assign the issue to."""
   assigneeId: String
+
+  """The priority of the issue."""
+  priority: Float
 
   """The ids of the users subscribing to this ticket."""
   subscriberIds: [String!]
@@ -434,6 +459,11 @@ input IssueUpdateInput {
   """The order of the item in its column on the board."""
   boardOrder: Float
 }
+
+"""
+The JSON scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
 
 type Mutation {
   """Creates a new api key."""

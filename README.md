@@ -18,13 +18,22 @@ const linear = new Linear({
 // Making a query
 const projects = await linear.query.projects();
 
-// Creating a new issue through mutation
-const newIssue = await linear.mutation.issueCreate({
-  input: {
-    projectId: projects[0].id,
-    title: "Serious bug"
+// Creating a new issue through mutation with return value
+const newIssue = await linear.mutation.issueCreate(
+  {
+    input: {
+      projectId: projects[0].id,
+      title: "Serious bug"
+    }
+  },
+  `
+{
+  issue {
+    id
   }
-});
+}
+`
+);
 ```
 
 ## Documentation
