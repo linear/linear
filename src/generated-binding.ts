@@ -375,7 +375,7 @@ export interface IssueCreateInput {
   labelIds?: String[] | String | null;
   projectId: String;
   stateId?: String | null;
-  boardOrder: Float;
+  boardOrder?: Float;
 }
 
 export interface IssueLabelCreateInput {
