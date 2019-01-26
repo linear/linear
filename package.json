@@ -1,6 +1,6 @@
 {
   "name": "@linear/sdk",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Linear API SDK",
   "main": "dist/index.js",
   "umd:main": "dist/index.umd.js",
