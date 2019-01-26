@@ -1,80 +1,79 @@
-yarn run v1.12.3
-$ /Users/jorilallo/projects/linear-sdk/node_modules/.bin/graphql-markdown ./src/schema.graphql
 # Schema Types
 
 <details>
   <summary><strong>Table of Contents</strong></summary>
 
-  * [Query](#query)
-  * [Mutation](#mutation)
-  * [Objects](#objects)
-    * [ApiKey](#apikey)
-    * [ApiKeyPayload](#apikeypayload)
-    * [ArchivePayload](#archivepayload)
-    * [BackendEntity](#backendentity)
-    * [ClientEntity](#cliententity)
-    * [Comment](#comment)
-    * [CommentPayload](#commentpayload)
-    * [GitHubCommitPayload](#githubcommitpayload)
-    * [GitHubPullRequestPayload](#githubpullrequestpayload)
-    * [ImageUploadPayload](#imageuploadpayload)
-    * [Integration](#integration)
-    * [IntegrationPayload](#integrationpayload)
-    * [IntegrationResource](#integrationresource)
-    * [IntegrationResourceData](#integrationresourcedata)
-    * [IntegrationSettings](#integrationsettings)
-    * [Issue](#issue)
-    * [IssueLabel](#issuelabel)
-    * [IssueLabelPayload](#issuelabelpayload)
-    * [IssuePayload](#issuepayload)
-    * [Notification](#notification)
-    * [NotificationPayload](#notificationpayload)
-    * [Organization](#organization)
-    * [OrganizationPayload](#organizationpayload)
-    * [Project](#project)
-    * [ProjectPayload](#projectpayload)
-    * [ProjectState](#projectstate)
-    * [ProjectStatePayload](#projectstatepayload)
-    * [PushSubscription](#pushsubscription)
-    * [PushSubscriptionPayload](#pushsubscriptionpayload)
-    * [SlackPostSettings](#slackpostsettings)
-    * [SyncResponse](#syncresponse)
-    * [UploadFile](#uploadfile)
-    * [User](#user)
-    * [UserAccount](#useraccount)
-    * [UserGoogleAuthPayload](#usergoogleauthpayload)
-    * [UserPayload](#userpayload)
-    * [UserSettings](#usersettings)
-    * [UserSettingsPayload](#usersettingspayload)
-  * [Inputs](#inputs)
-    * [ApiKeyCreateInput](#apikeycreateinput)
-    * [CommentCreateInput](#commentcreateinput)
-    * [CommentUpdateInput](#commentupdateinput)
-    * [CreateOrganizationInput](#createorganizationinput)
-    * [CreateUserInput](#createuserinput)
-    * [IssueCreateInput](#issuecreateinput)
-    * [IssueLabelCreateInput](#issuelabelcreateinput)
-    * [IssueUpdateInput](#issueupdateinput)
-    * [NotificationUpdateInput](#notificationupdateinput)
-    * [ProjectCreateInput](#projectcreateinput)
-    * [ProjectStateCreateInput](#projectstatecreateinput)
-    * [ProjectStateUpdateInput](#projectstateupdateinput)
-    * [ProjectUpdateInput](#projectupdateinput)
-    * [PushSubscriptionCreateInput](#pushsubscriptioncreateinput)
-    * [UpdateOrganizationInput](#updateorganizationinput)
-    * [UpdateUserInput](#updateuserinput)
-    * [UserSettingsUpdateInput](#usersettingsupdateinput)
-  * [Scalars](#scalars)
-    * [Boolean](#boolean)
-    * [DateTime](#datetime)
-    * [Email](#email)
-    * [Float](#float)
-    * [String](#string)
-    * [UUID](#uuid)
+- [Query](#query)
+- [Mutation](#mutation)
+- [Objects](#objects)
+  - [ApiKey](#apikey)
+  - [ApiKeyPayload](#apikeypayload)
+  - [ArchivePayload](#archivepayload)
+  - [BackendEntity](#backendentity)
+  - [ClientEntity](#cliententity)
+  - [Comment](#comment)
+  - [CommentPayload](#commentpayload)
+  - [GitHubCommitPayload](#githubcommitpayload)
+  - [GitHubPullRequestPayload](#githubpullrequestpayload)
+  - [ImageUploadPayload](#imageuploadpayload)
+  - [Integration](#integration)
+  - [IntegrationPayload](#integrationpayload)
+  - [IntegrationResource](#integrationresource)
+  - [IntegrationResourceData](#integrationresourcedata)
+  - [IntegrationSettings](#integrationsettings)
+  - [Issue](#issue)
+  - [IssueLabel](#issuelabel)
+  - [IssueLabelPayload](#issuelabelpayload)
+  - [IssuePayload](#issuepayload)
+  - [Notification](#notification)
+  - [NotificationPayload](#notificationpayload)
+  - [Organization](#organization)
+  - [OrganizationPayload](#organizationpayload)
+  - [Project](#project)
+  - [ProjectPayload](#projectpayload)
+  - [ProjectState](#projectstate)
+  - [ProjectStatePayload](#projectstatepayload)
+  - [PushSubscription](#pushsubscription)
+  - [PushSubscriptionPayload](#pushsubscriptionpayload)
+  - [SlackPostSettings](#slackpostsettings)
+  - [SyncResponse](#syncresponse)
+  - [UploadFile](#uploadfile)
+  - [User](#user)
+  - [UserAccount](#useraccount)
+  - [UserGoogleAuthPayload](#usergoogleauthpayload)
+  - [UserPayload](#userpayload)
+  - [UserSettings](#usersettings)
+  - [UserSettingsPayload](#usersettingspayload)
+- [Inputs](#inputs)
+  - [ApiKeyCreateInput](#apikeycreateinput)
+  - [CommentCreateInput](#commentcreateinput)
+  - [CommentUpdateInput](#commentupdateinput)
+  - [CreateOrganizationInput](#createorganizationinput)
+  - [CreateUserInput](#createuserinput)
+  - [IssueCreateInput](#issuecreateinput)
+  - [IssueLabelCreateInput](#issuelabelcreateinput)
+  - [IssueUpdateInput](#issueupdateinput)
+  - [NotificationUpdateInput](#notificationupdateinput)
+  - [ProjectCreateInput](#projectcreateinput)
+  - [ProjectStateCreateInput](#projectstatecreateinput)
+  - [ProjectStateUpdateInput](#projectstateupdateinput)
+  - [ProjectUpdateInput](#projectupdateinput)
+  - [PushSubscriptionCreateInput](#pushsubscriptioncreateinput)
+  - [UpdateOrganizationInput](#updateorganizationinput)
+  - [UpdateUserInput](#updateuserinput)
+  - [UserSettingsUpdateInput](#usersettingsupdateinput)
+- [Scalars](#scalars)
+  - [Boolean](#boolean)
+  - [DateTime](#datetime)
+  - [Email](#email)
+  - [Float](#float)
+  - [String](#string)
+  - [UUID](#uuid)
 
 </details>
 
 ## Query
+
 <table>
 <thead>
 <tr>
@@ -356,6 +355,7 @@ Fetches a specific user.
 </table>
 
 ## Mutation
+
 <table>
 <thead>
 <tr>
@@ -1970,7 +1970,7 @@ The workflow state that the issue is associated with.
 </tr>
 <tr>
 <td colspan="2" valign="top"><strong>boardOrder</strong></td>
-<td valign="top"><a href="#float">Float</a>!</td>
+<td valign="top"><a href="#float">Float</a></td>
 <td>
 
 The order of the item in its column on the board.
@@ -3294,7 +3294,7 @@ The API key label.
 <td valign="top"><a href="#string">String</a>!</td>
 <td>
 
-The API key value (format: /^[a-zA-Z0-9]{40}$/).
+The API key value (format: /^[a-zA-Z0-9]{40}\$/).
 
 </td>
 </tr>
@@ -4090,7 +4090,7 @@ The Email scalar type represents E-Mail addresses compliant to RFC 822.
 
 ### Float
 
-The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point). 
+The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).
 
 ### String
 
@@ -4099,5 +4099,3 @@ The `String` scalar type represents textual data, represented as UTF-8 character
 ### UUID
 
 The UUID scalar type represents a UUID.
-
-Done in 0.42s.
