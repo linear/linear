@@ -36,6 +36,20 @@ const newIssue = await linear.mutation.issueCreate(
 );
 ```
 
+If you want to be more specific on return values with your queries, you can also pass GraphQL query with the query call:
+
+```js
+// Get project id for an issue
+const issue = await linear.getIssue(issueId, "{ id project { id } }");
+console.log(issue.project.id);
+
+// Fetch project states with associated projects ids
+const states = await linear.client.query.projectStates(
+  {},
+  `{ id name project { id } }`
+);
+```
+
 ## Documentation
 
 - **[API reference](https://github.com/linearapp/linear-node-sdk/blob/master/schema.md)**
