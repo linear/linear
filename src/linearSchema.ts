@@ -368,7 +368,7 @@ input IssueCreateInput {
   stateId: String
 
   """The order of the item in its column on the board."""
-  boardOrder: Float!
+  boardOrder: Float
 }
 
 """Issue labels."""
