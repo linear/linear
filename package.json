@@ -1,0 +1,23 @@
+{
+  "name": "linear",
+  "private": true,
+  "license": "MIT",
+  "author": "Linear.app",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "lerna run build",
+    "test": "lerna run test"
+  },
+  "devDependencies": {
+    "lerna": "3.13.2",
+    "prettier": "1.16.4",
+    "tslint": "5.15.0",
+    "typescript": "3.4.3"
+  },
+  "engines": {
+    "node": "10.x.x",
+    "yarn": "1.x"
+  }
+}

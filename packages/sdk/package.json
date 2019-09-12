@@ -1,0 +1,44 @@
+{
+  "name": "@linear/sdk",
+  "version": "0.0.3",
+  "description": "Linear API SDK",
+  "author": "Linear.app",
+  "main": "dist/index.js",
+  "typings": "dist/index",
+  "umd:main": "dist/index.umd.js",
+  "module": "dist/index.mjs",
+  "source": "src/index.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -b",
+    "update-schema": "graphql get-schema -p default",
+    "generate": "graphql codegen",
+    "docs": "graphql-markdown ./src/schema.graphql > schema.md",
+    "bundle": "microbundle",
+    "dev": "microbundle watch"
+  },
+  "resolutions": {
+    "graphql": "14.1.1",
+    "module": "1.2.5"
+  },
+  "dependencies": {
+    "@types/node-fetch": "^2.3.2",
+    "apollo-link-error": "1.1.5",
+    "apollo-link-http": "1.5.9",
+    "cross-fetch": "3.0.0",
+    "graphql": "14.1.1",
+    "isomorphic-fetch": "2.2.1",
+    "module": "1.2.5",
+    "node-fetch": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/graphql": "14.0.4",
+    "@types/isomorphic-fetch": "0.0.34",
+    "graphql-binding": "2.4.1",
+    "graphql-cli": "3.0.4",
+    "graphql-markdown": "5.0.1",
+    "graphql-tools": "4.0.3",
+    "microbundle": "0.9.0",
+    "typescript": "3.4.3"
+  }
+}

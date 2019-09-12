@@ -1,0 +1,10 @@
+{
+  "extends": "../../config/tsconfig",
+  "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "references": [{ "path": "../sdk" }]
+}

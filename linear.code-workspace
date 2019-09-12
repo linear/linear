@@ -1,0 +1,53 @@
+{
+  "folders": [
+    {
+      "path": "./"
+    }
+  ],
+  "settings": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/build/*": true,
+      "**/dist/*": true
+    },
+    "editor.rulers": [120],
+    "files.exclude": {
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.DS_Store": true,
+      "**/build": true,
+      "**/dist": true,
+      "**/node_modules": true,
+      "**/*.tsbuildinfo": true
+    },
+    "cSpell.language": "en"
+  },
+  "extensions": {
+    "recommendations": [
+      "christian-kohler.path-intellisense",
+      "eamodio.gitlens",
+      "esbenp.prettier-vscode",
+      "jpoissonnier.vscode-styled-components",
+      "ms-vscode.vscode-typescript-tslint-plugin",
+      "robinbentley.sass-indented",
+      "steoates.autoimport",
+      "streetsidesoftware.code-spell-checker"
+    ]
+  },
+  "launch": {
+    "configurations": [
+      {
+        "name": "VSCode Linear Plugin",
+        "type": "extensionHost",
+        "request": "launch",
+        "runtimeExecutable": "${execPath}",
+        "preLaunchTask": null,
+        "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-extension"],
+        "outFiles": ["${workspaceFolder}/packages/vscode-extension/dist/**/*.js"]
+      }
+    ],
+    "compounds": []
+  }
+}

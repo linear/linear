@@ -1,0 +1,18 @@
+<svg width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+<rect width="64" height="64" fill="white"/>
+</mask>
+<g mask="url(#mask0)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M53.1699 55.9989C53.6663 55.5601 54.1524 55.1032 54.6273 54.6284C67.1241 42.1316 67.1241 21.8703 54.6273 9.37353C42.1305 -3.12325 21.8692 -3.12325 9.37246 9.37353C8.89758 9.84841 8.44075 10.3345 8.00196 10.831L53.1699 55.9989Z" fill="#5E6AD2"/>
+<mask id="mask1" mask-type="alpha" maskUnits="userSpaceOnUse" x="-14" y="-14" width="92" height="92">
+<ellipse cx="32" cy="32.0009" rx="32" ry="32" transform="rotate(-45 32 32.0009)" fill="#5E6AD2"/>
+</mask>
+<g mask="url(#mask1)">
+<rect x="3.71582" y="15.0313" width="4" height="64" transform="rotate(-45 3.71582 15.0313)" fill="#5E6AD2"/>
+<rect x="-0.526855" y="19.2737" width="4" height="64" transform="rotate(-45 -0.526855 19.2737)" fill="#5E6AD2"/>
+<rect x="-13.2549" y="32.0009" width="4" height="64" transform="rotate(-45 -13.2549 32.0009)" fill="#5E6AD2"/>
+<rect x="-9.01221" y="27.7585" width="4" height="64" transform="rotate(-45 -9.01221 27.7585)" fill="#5E6AD2"/>
+<rect x="-4.76953" y="23.5161" width="4" height="64" transform="rotate(-45 -4.76953 23.5161)" fill="#5E6AD2"/>
+</g>
+</g>
+</svg>
