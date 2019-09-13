@@ -1,98 +1,95 @@
-# @linear/cli
+# linear-cli
 
-Command line tool to create Linear issues using your favorite editor.
+A cli tool to interface with linear
 
-## Installation
+[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
+[![Version](https://img.shields.io/npm/v/linear-cli.svg)](https://npmjs.org/package/linear-cli)
+[![Downloads/week](https://img.shields.io/npm/dw/linear-cli.svg)](https://npmjs.org/package/linear-cli)
+[![License](https://img.shields.io/npm/l/linear-cli.svg)](https://github.com/zephraph/linear-cli/blob/master/package.json)
 
-Install from NPM as global command:
+<!-- toc -->
 
-```
-npm install @linear/cli -g
+- [linear-cli](#linear-cli)
+- [Usage](#usage)
+- [Commands](#commands)
+- [Contributing](#contributing)
+  <!-- tocstop -->
 
-# ...or with yarn:
+# Usage
 
-yarn global add @linear/cli
-```
+<!-- usage -->
 
-After installation you need to login and provide your developer key which can be create in [settings](https://linear.app/settings):
-
-```
-linear login
-```
-
-If you need to change your settings later, you can use the same command or edit `.linearrc` from your home folder. To use VS Code as editor, you need to set it to wait similar to when using with `git`: `code --wait`
-
-## Usage
-
-### New issue
-
-Create new Linear issue with interactive prompts:
-
-```
-linear issue
-```
-
-If you want to create issue directly without user input:
-
-```
-linear issue "New issue title" --description "More detailed description" --skipInput
+```sh-session
+$ npm install -g linear-cli
+$ linear COMMAND
+running command...
+$ linear (-v|--version|version)
+linear-cli/0.0.0 darwin-x64 node-v10.15.3
+$ linear --help [COMMAND]
+USAGE
+  $ linear COMMAND
+...
 ```
 
-### New comment
+<!-- usagestop -->
 
-Create a new issue comment with your editor:
+# Commands
 
-```
-linear comment ENG-123
-```
+<!-- commands -->
 
-Create without editor:
+- [`linear create`](#linear-create)
+- [`linear help [COMMAND]`](#linear-help-command)
 
-```
-linear comment ENG-123 --comment "This seems great."
-```
+## `linear create`
 
-### Change issue status
-
-Update issue's status through interactive prompt:
+Creates a new issue. Flags not provided will be prompted for at runtime.
 
 ```
-linear status ENG-123
+USAGE
+  $ linear create
+
+OPTIONS
+  -T, --team=team
+  -h, --help         show CLI help
+  -l, --label=label  label to be added to the issue
+  -t, --title=title
+
+EXAMPLE
+  $ linear create
+  $ linear create --title "Fix a bug" --label Bug
 ```
 
-### Close issue
+_See code: [src/commands/create.ts](https://github.com/zephraph/linear-cli/blob/v0.0.0/src/commands/create.ts)_
 
-Mark issue as done:
+## `linear help [COMMAND]`
 
-```
-linear close ENG-123
-```
-
-### Assign issue
-
-Update issue's assignee through interactive prompt:
+display help for linear
 
 ```
-linear assign ENG-13
+USAGE
+  $ linear help [COMMAND]
+
+ARGUMENTS
+  COMMAND  command to show help for
+
+OPTIONS
+  --all  see all commands in CLI
 ```
 
-## Development
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v2.2.1/src/commands/help.ts)_
 
-Install dependencies:
+<!-- commandsstop -->
+
+# Contributing
+
+Install dependencies via yarn
 
 ```
 yarn
 ```
 
-Link the package locally and start development server:
+Start dev watch mode to ensure ts types are up-to-date
 
 ```
-yarn link
 yarn dev
 ```
-
-After development server is running, you'll be able to test the CLI by running `linear` like it would be installed globally.
-
-## License
-
-MIT

@@ -1,10 +1,14 @@
 {
-  "extends": "../../config/tsconfig",
   "compilerOptions": {
-    "declaration": false,
-    "declarationMap": false,
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "declaration": true,
+    "importHelpers": true,
+    "module": "commonjs",
+    "outDir": "lib",
+    "rootDir": "src",
+    "strict": true,
+    "moduleResolution": "node",
+    "target": "es2018",
+    "esModuleInterop": true
   },
-  "references": [{ "path": "../sdk" }]
+  "include": ["src/**/*"]
 }

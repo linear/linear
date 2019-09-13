@@ -1,37 +1,69 @@
 {
   "name": "@linear/cli",
-  "version": "0.0.1",
-  "description": "Command line tools for Linear",
-  "author": "Linear.app",
-  "main": "index.ts",
-  "license": "MIT",
+  "description": "A cli tool to interface with linear",
+  "version": "0.1.0",
+  "author": "Justin Bennett @zephraph",
   "bin": {
-    "linear": "./dist/index.js"
+    "linear": "./bin/run"
   },
-  "scripts": {
-    "build": "tsc -b",
-    "dev": "tsc -b --watch",
-    "start": "ts-node src/index.ts"
-  },
+  "bugs": "https://github.com/linearapp/linear/issues",
   "dependencies": {
-    "@linear/sdk": "0.0.3",
-    "chalk": "2.4.2",
-    "commander": "2.19.0",
-    "inquirer": "6.2.1",
-    "isomorphic-fetch": "2.2.1",
-    "lodash": "4.17.11",
-    "open": "0.0.5",
-    "ora": "3.0.0"
+    "@linear/sdk": "^0.1.0",
+    "@oclif/command": "^1",
+    "@oclif/config": "^1",
+    "@oclif/plugin-help": "^2",
+    "await-to-js": "^2.1.1",
+    "dedent": "^0.7.0",
+    "graphql-request": "^1.8.2",
+    "prompts": "^2.2.1",
+    "tagged-template-noop": "^2.1.0",
+    "tslib": "^1"
   },
   "devDependencies": {
-    "@types/chalk": "2.2.0",
-    "@types/commander": "2.12.2",
-    "@types/inquirer": "0.0.43",
-    "@types/isomorphic-fetch": "0.0.34",
-    "@types/lodash": "4.14.120",
-    "@types/open": "0.0.29",
-    "@types/ora": "3.0.0",
-    "ts-node": "8.0.3",
-    "typescript": "3.4.3"
-  }
+    "@graphql-codegen/cli": "^1.7.0",
+    "@graphql-codegen/near-operation-file-preset": "^1.7.0",
+    "@graphql-codegen/typescript": "^1.7.0",
+    "@graphql-codegen/typescript-operations": "^1.7.0",
+    "@oclif/dev-cli": "^1",
+    "@types/dedent": "^0.7.0",
+    "@types/node": "^10",
+    "@types/prompts": "^2.0.1",
+    "dotenv-cli": "^2.0.1",
+    "globby": "^10",
+    "graphql": "^14.5.4",
+    "ts-node": "^8"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://github.com/linearapp/linear",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "linear",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "linearapp/linear",
+  "scripts": {
+    "start": "dotenv ./bin/run",
+    "postpack": "rm -f oclif.manifest.json",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "echo NO TESTS",
+    "version": "oclif-dev readme && git add README.md",
+    "generate": "graphql-codegen",
+    "dev": "concurrently -k -n 'cli|gql-codegen,cli|tsc' 'yarn generate -w' 'tsc -b -w'"
+  },
+  "types": "lib/index.d.ts"
 }
