@@ -202,6 +202,54 @@ export type EmailUnsubscribePayload = {
   success: Scalars["Boolean"];
 };
 
+/** User favorites presented in the sidebar. */
+export type Favorite = {
+  __typename?: "Favorite";
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   **/
+  updatedAt: Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The type of the favorite. */
+  type: Scalars["String"];
+  /** Favorited issue. */
+  issue?: Maybe<Issue>;
+  /** Favorited project. */
+  project?: Maybe<Project>;
+  /** Favorited cycle. */
+  cycle?: Maybe<Cycle>;
+  /** Favorited issue label. */
+  label?: Maybe<IssueLabel>;
+  /** The owner of the favorite */
+  user: User;
+};
+
+export type FavoriteCreateInput = {
+  /** The identifier. If none is provided, the backend will generate one */
+  id?: Maybe<Scalars["String"]>;
+  /** The identifier of the issue to favorite. */
+  issueId?: Maybe<Scalars["String"]>;
+  /** The identifier of the project to favorite. */
+  projectId?: Maybe<Scalars["String"]>;
+  /** The identifier of the cycle to favorite. */
+  cycleId?: Maybe<Scalars["String"]>;
+  /** The identifier of the label to favorite. */
+  labelId?: Maybe<Scalars["String"]>;
+};
+
+export type FavoritePayload = {
+  __typename?: "FavoritePayload";
+  lastSyncId: Scalars["Float"];
+  favorite: Favorite;
+  success: Scalars["Boolean"];
+};
+
 export type FeedbackCreateInput = {
   /** The feedback the user sent */
   feedback: Scalars["String"];
@@ -589,13 +637,17 @@ export type Mutation = {
   debugFailWithInternalError: DebugPayload;
   /** Unsubscribes the user from one type of emails. */
   emailUnsubscribe: EmailUnsubscribePayload;
+  /** Creates a new favorite (project, cycle etc). */
+  favoriteCreate: FavoritePayload;
+  /** Archives a favorite reference. */
+  favoriteArchive: ArchivePayload;
   /** Saves user feedback. */
   feedbackCreate: FeedbackPayload;
   /** XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage */
   fileUpload: UploadPayload;
   /** Upload an image from an URL to Linear. */
   imageUploadFromUrl: ImageUploadFromUrlPayload;
-  /** Connects to organization with the Github App. */
+  /** Connects to organization with the GitHub App. */
   integrationGithubConnect: IntegrationPayload;
   /** Integrates the organization with Slack. */
   integrationSlack: IntegrationPayload;
@@ -715,6 +767,14 @@ export type MutationEmailUnsubscribeArgs = {
   input: EmailUnsubscribeInput;
 };
 
+export type MutationFavoriteCreateArgs = {
+  input: FavoriteCreateInput;
+};
+
+export type MutationFavoriteArchiveArgs = {
+  id: Scalars["String"];
+};
+
 export type MutationFeedbackCreateArgs = {
   input: FeedbackCreateInput;
 };
@@ -832,6 +892,7 @@ export type MutationPushSubscriptionArchiveArgs = {
 };
 
 export type MutationSubscriptionSessionCreateArgs = {
+  update?: Maybe<Scalars["Boolean"]>;
   plan: Scalars["String"];
 };
 
@@ -1176,6 +1237,10 @@ export type Query = {
   cycles: Array<Cycle>;
   /** One specific cycle. */
   cycle: Cycle;
+  /** The user's favorites. */
+  favorites: Array<Favorite>;
+  /** One specific favorite. */
+  favorite: Favorite;
   /** All integrations. */
   integrations: Array<Integration>;
   /** One specific integration. */
@@ -1245,6 +1310,10 @@ export type QueryCommentArgs = {
 };
 
 export type QueryCycleArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryFavoriteArgs = {
   id: Scalars["String"];
 };
 

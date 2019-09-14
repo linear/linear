@@ -5,7 +5,7 @@ import { client } from "../client";
 
 export default class Create extends Command {
   public static description = dedent`
-    Creates a new issue. Flags not provided will be prompted for at runtime.
+    Creates a new issue
   `;
 
   public static examples = [
@@ -69,14 +69,14 @@ export default class Create extends Command {
       title = answer.title as string;
     }
 
-    if (!labels || labels.length === 0) {
-      const labelList = await client.label.getFromTeamByNames(team, labels);
-      if (labelList.length !== 0) {
+    if (!labels || labels.length !== 0) {
+      const teamLabels = await client.label.getNamesFromTeam({ id: team });
+      if (teamLabels.length !== 0) {
         const answer = await prompt({
           type: "multiselect",
           name: "labels",
           message: "Add labels to the issue",
-          choices: labelList.map(label => ({
+          choices: teamLabels.map(label => ({
             title: label.name,
             value: label.id,
           })),

@@ -6,9 +6,12 @@ import {
   TeamFromCliQuery,
   TeamFromCliQueryVariables,
   TeamNamesFromCliQuery,
+  GetTeamNamesFromCliQuery,
 } from "./team.generated";
 
-gql`
+export type TeamSelection = { id: string } | { name: string } | { key: string };
+
+const TeamDetails = gql`
   fragment TeamDetails on Team {
     id
     key
@@ -16,10 +19,22 @@ gql`
   }
 `;
 
+export const getTeamIdFromSelection = async (client: Linear, selection: TeamSelection) => {
+  if ("id" in selection) {
+    return selection.id;
+  } else if ("key" in selection) {
+    return getTeamIdFromKey(client, selection.key);
+  } else if ("name" in selection) {
+    return getTeamIdFromName(client, selection.name);
+  } else {
+    throw new Error(`Unknown team selection ${selection}`);
+  }
+};
+
 /**
  * Gets the UUID of a team from the team's key (like `LNR`)
  */
-export const getIdFromKey = async (client: Linear, key: string) => {
+export const getTeamIdFromKey = async (client: Linear, key: string) => {
   const { teams } = await client.request<TeamKeysFromCliQuery>(gql`
     query teamKeysFromCLI {
       teams {
@@ -28,13 +43,30 @@ export const getIdFromKey = async (client: Linear, key: string) => {
       }
     }
   `);
-  const team = teams.find(t => t.key === key);
+  const team = teams.find(t => t.key.toUpperCase() === key.toUpperCase());
+  return team && team.id;
+};
+
+/**
+ * Gets the UUID of a team from the team's name
+ */
+export const getTeamIdFromName = async (client: Linear, name: string) => {
+  const { teams } = await client.request<GetTeamNamesFromCliQuery>(gql`
+    query GetTeamNamesFromCLI {
+      teams {
+        id
+        name
+      }
+    }
+  `);
+  const team = teams.find(t => t.name.toLowerCase() === name.toLowerCase());
   return team && team.id;
 };
 
 export const getTeam = async (client: Linear, id: string) => {
   const { team } = await client.request<TeamFromCliQuery, TeamFromCliQueryVariables>(
     gql`
+      ${TeamDetails}
       query teamFromCLI($id: String!) {
         team(id: $id) {
           ...TeamDetails
@@ -63,6 +95,7 @@ export const getTeamByName = async (client: Linear, name: string) => {
 
 export const getTeams = async (client: Linear) => {
   const { teams } = await client.request<TeamsFromCliQuery>(gql`
+    ${TeamDetails}
     query teamsFromCLI {
       teams {
         ...TeamDetails

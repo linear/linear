@@ -63,7 +63,7 @@
     "test": "echo NO TESTS",
     "version": "oclif-dev readme && git add README.md",
     "generate": "graphql-codegen",
-    "dev": "concurrently -k -n 'cli|gql-codegen,cli|tsc' 'yarn generate -w' 'tsc -b -w'"
+    "dev": "tsc -b -w"
   },
   "types": "lib/index.d.ts"
 }

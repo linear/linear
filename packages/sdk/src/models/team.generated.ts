@@ -16,6 +16,17 @@ export type TeamKeysFromCliQuery = (
   )> }
 );
 
+export type GetTeamNamesFromCliQueryVariables = {};
+
+
+export type GetTeamNamesFromCliQuery = (
+  { __typename?: 'Query' }
+  & { teams: Array<(
+    { __typename?: 'Team' }
+    & Pick<Types.Team, 'id' | 'name'>
+  )> }
+);
+
 export type TeamFromCliQueryVariables = {
   id: Types.Scalars['String']
 };
