@@ -1,4 +1,3 @@
-// tslint:disable:no-invalid-this
 import { gql } from "gql";
 import { Linear } from "../linear";
 import {

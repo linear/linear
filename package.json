@@ -9,7 +9,8 @@
   "scripts": {
     "build": "lerna run build",
     "test": "lerna run test",
-    "generate": "lerna run generate"
+    "generate": "lerna run generate",
+    "cli": "yarn workspace @linear/cli start"
   },
   "devDependencies": {
     "lerna": "3.13.2",

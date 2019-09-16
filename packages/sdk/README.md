@@ -12,42 +12,10 @@ yarn install @linear/sdk
 import { Linear } from "@linear/sdk";
 
 const linear = new Linear({
-  token: "<your developer key>"
+  apiKey: "<your developer key>",
 });
 
-// Making a query
-const projects = await linear.query.projects();
-
-// Creating a new issue through mutation with return value
-const newIssue = await linear.mutation.issueCreate(
-  {
-    input: {
-      projectId: projects[0].id,
-      title: "Serious bug"
-    }
-  },
-  `
-{
-  issue {
-    id
-  }
-}
-`
-);
-```
-
-If you want to be more specific on return values with your queries, you can also pass GraphQL query with the query call:
-
-```js
-// Get project id for an issue
-const issue = await linear.getIssue(issueId, "{ id project { id } }");
-console.log(issue.project.id);
-
-// Fetch project states with associated projects ids
-const states = await linear.client.query.projectStates(
-  {},
-  `{ id name project { id } }`
-);
+const issue = await linear.issue.get({ key: "LNR-123" });
 ```
 
 ## Documentation

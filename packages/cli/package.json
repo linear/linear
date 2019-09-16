@@ -14,16 +14,11 @@
     "@oclif/plugin-help": "^2",
     "await-to-js": "^2.1.1",
     "dedent": "^0.7.0",
-    "graphql-request": "^1.8.2",
     "prompts": "^2.2.1",
     "tagged-template-noop": "^2.1.0",
     "tslib": "^1"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^1.7.0",
-    "@graphql-codegen/near-operation-file-preset": "^1.7.0",
-    "@graphql-codegen/typescript": "^1.7.0",
-    "@graphql-codegen/typescript-operations": "^1.7.0",
     "@oclif/dev-cli": "^1",
     "@types/dedent": "^0.7.0",
     "@types/node": "^10",
@@ -62,7 +57,6 @@
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "echo NO TESTS",
     "version": "oclif-dev readme && git add README.md",
-    "generate": "graphql-codegen",
     "dev": "tsc -b -w"
   },
   "types": "lib/index.d.ts"
