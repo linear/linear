@@ -44,7 +44,7 @@ export const getTeamIdFromKey = async (client: Linear, key: string) => {
     }
   `);
   const team = teams.find(t => t.key.toUpperCase() === key.toUpperCase());
-  return team && team.id;
+  return (team && team.id) || null;
 };
 
 /**
@@ -60,7 +60,7 @@ export const getTeamIdFromName = async (client: Linear, name: string) => {
     }
   `);
   const team = teams.find(t => t.name.toLowerCase() === name.toLowerCase());
-  return team && team.id;
+  return (team && team.id) || null;
 };
 
 export const getTeam = async (client: Linear, id: string) => {
