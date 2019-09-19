@@ -9,6 +9,21 @@ export type LabelDetailsFragment = (
   ) }
 );
 
+export type GetIssueLabelIdsFromCliQueryVariables = {};
+
+
+export type GetIssueLabelIdsFromCliQuery = (
+  { __typename?: 'Query' }
+  & { issueLabels: Array<(
+    { __typename?: 'IssueLabel' }
+    & Pick<Types.IssueLabel, 'id' | 'name'>
+    & { team: (
+      { __typename?: 'Team' }
+      & Pick<Types.Team, 'id'>
+    ) }
+  )> }
+);
+
 export type GetLabelFromCliQueryVariables = {
   id: Types.Scalars['String']
 };

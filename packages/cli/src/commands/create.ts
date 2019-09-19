@@ -70,7 +70,7 @@ export default class Create extends Command {
     }
 
     if (!labels || labels.length !== 0) {
-      const teamLabels = await client.label.getNamesFromTeam({ id: team });
+      const teamLabels = await client.label.getAllForTeam({ id: team });
       if (teamLabels.length !== 0) {
         const answer = await prompt({
           type: "multiselect",
@@ -87,8 +87,8 @@ export default class Create extends Command {
 
     client.issue.create({
       title,
-      teamId: team,
-      labelIds: labels,
+      team: { id: team },
+      labels: labels.map(id => ({ id })),
     });
   }
 }

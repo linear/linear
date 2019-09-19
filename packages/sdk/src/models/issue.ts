@@ -10,7 +10,8 @@ import {
   GetIssueFromCliQuery,
   GetIssueFromCliQueryVariables,
 } from "./issue.generated";
-import { getTeamIdFromKey } from "./team";
+import { getTeamIdFromKey, TeamSelection, getTeamIdFromSelection } from "./team";
+import { LabelSelection, getLabelIdFromSelection } from "./label";
 
 /**
  * An object containing the UUID of an issue or an object containing the issue key.
@@ -105,8 +106,25 @@ export const getIssueByKey = async (client: Linear, key: string) => {
   }
 };
 
-export const createIssue = async (client: Linear, issueInput: CreateIssueFromCliMutationVariables) =>
-  client.request<CreateIssueFromCliMutation, CreateIssueFromCliMutationVariables>(
+interface IssueCreationOptions {
+  title: string;
+  team: TeamSelection;
+  labels: LabelSelection[];
+}
+
+export const createIssue = async (client: Linear, issueInput: IssueCreationOptions) => {
+  const teamId = await getTeamIdFromSelection(client, issueInput.team);
+  if (!teamId) {
+    throw new Error(`Failed to find team id for selection ${issueInput.team}`);
+  }
+  const labelIds = (await Promise.all(
+    issueInput.labels.map(label => getLabelIdFromSelection(client, label))
+  )) as string[]; // TS 3.7 will make this cleaner with type assertions
+  if (labelIds.some(id => id === null)) {
+    throw new Error(`One of the labels of the selection is invalid ${issueInput.labels}`);
+  }
+
+  return client.request<CreateIssueFromCliMutation, CreateIssueFromCliMutationVariables>(
     gql`
       mutation CreateIssueFromCLI($title: String!, $teamId: String!, $labelIds: [String!]) {
         issueCreate(input: { title: $title, teamId: $teamId, labelIds: $labelIds }) {
@@ -120,8 +138,13 @@ export const createIssue = async (client: Linear, issueInput: CreateIssueFromCli
         }
       }
     `,
-    issueInput
+    {
+      title: issueInput.title,
+      teamId,
+      labelIds,
+    }
   );
+};
 
 export const updateIssue = async (client: Linear, issueInput: UpdateIssueFromCliMutationVariables) =>
   client.request<UpdateIssueFromCliMutation, UpdateIssueFromCliMutationVariables>(

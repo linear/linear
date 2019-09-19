@@ -6,9 +6,12 @@ import {
   GetAllLabelsFromCliQuery,
   GetLabelsOfIssueFromCliQuery,
   GetLabelsOfIssueFromCliQueryVariables,
+  GetIssueLabelIdsFromCliQuery,
 } from "./label.generated";
 import { IssueSelection, getIssueIdFromSelection, updateIssue } from "./issue";
 import { TeamSelection, getTeamIdFromSelection } from "./team";
+
+export type LabelSelection = { id: string } | { name: string; team: TeamSelection };
 
 export const LabelDetails = gql`
   fragment LabelDetails on IssueLabel {
@@ -21,7 +24,34 @@ export const LabelDetails = gql`
   }
 `;
 
-export const getLabel = async (client: Linear, id: string) => {
+export const getLabelIdFromSelection = async (client: Linear, selection: LabelSelection) => {
+  if ("id" in selection) {
+    return selection.id;
+  } else if ("name" in selection && "team" in selection) {
+    const teamId = await getTeamIdFromSelection(client, selection.team);
+    const { issueLabels } = await client.request<GetIssueLabelIdsFromCliQuery>(gql`
+      query GetIssueLabelIdsFromCLI {
+        issueLabels {
+          id
+          name
+          team {
+            id
+          }
+        }
+      }
+    `);
+    const label = issueLabels.find(issueLabel => issueLabel.name === selection.name && issueLabel.team.id === teamId);
+    return label ? label.id : null;
+  } else {
+    throw new Error(`Unknown label selection ${selection}`);
+  }
+};
+
+export const getLabel = async (client: Linear, selection: LabelSelection) => {
+  const id = await getLabelIdFromSelection(client, selection);
+  if (!id) {
+    throw new Error(`Couldn't find id for label selection ${selection}`);
+  }
   const { issueLabel } = await client.request<GetLabelFromCliQuery, GetLabelFromCliQueryVariables>(
     gql`
       ${LabelDetails}
@@ -49,13 +79,18 @@ export const getAllLabels = async (client: Linear) => {
   return issueLabels;
 };
 
-export const getTeamLabelsByName = async (client: Linear, teamSelection: TeamSelection) => {
+export const getTeamLabels = async (client: Linear, teamSelection: TeamSelection) => {
   const teamId = await getTeamIdFromSelection(client, teamSelection);
   if (!teamId) {
     throw new Error(`Team with selection ${teamSelection} does not exist`);
   }
   const labels = await getAllLabels(client);
   return labels.filter(label => label.team.id === teamId);
+};
+
+export const getLabelByName = async (client: Linear, teamSelection: TeamSelection, name: string) => {
+  const labels = await getTeamLabels(client, teamSelection);
+  return labels.find(label => label.name === name);
 };
 
 /**
@@ -95,5 +130,5 @@ export const addLabelsToIssue = async (client: Linear, issueSelection: IssueSele
 export const label = (client: Linear) => ({
   get: getLabel.bind(null, client),
   getAll: getAllLabels.bind(null, client),
-  getNamesFromTeam: getTeamLabelsByName.bind(null, client), // 🤮
+  getAllForTeam: getTeamLabels.bind(null, client),
 });
