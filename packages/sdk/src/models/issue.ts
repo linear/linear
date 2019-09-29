@@ -11,6 +11,7 @@ import {
   UpdateIssueFromCliMutationVariables,
 } from "./issue.generated";
 import { getLabelIdFromSelection, LabelSelection } from "./label";
+import { Priority } from "./priority";
 import { getTeamIdFromKey, getTeamIdFromSelection, TeamSelection } from "./team";
 
 /**
@@ -112,7 +113,7 @@ interface IssueCreationOptions {
   description?: string;
   state?: string;
   assignee?: string;
-  priority?: string;
+  priority?: Priority;
   labels?: LabelSelection[];
   estimate?: string;
   project?: string;
@@ -134,8 +135,32 @@ export const createIssue = async (client: Linear, issueInput: IssueCreationOptio
 
   return client.request<CreateIssueFromCliMutation, CreateIssueFromCliMutationVariables>(
     gql`
-      mutation CreateIssueFromCLI($title: String!, $teamId: String!, $labelIds: [String!]) {
-        issueCreate(input: { title: $title, teamId: $teamId, labelIds: $labelIds }) {
+      mutation CreateIssueFromCLI(
+        $title: String!
+        $teamId: String!
+        $labelIds: [String!]
+        $description: String
+        $assigneeId: String
+        $priority: Int
+        $estimate: Int
+        $cycleId: String
+        $projectId: String
+        $stateId: String
+      ) {
+        issueCreate(
+          input: {
+            title: $title
+            teamId: $teamId
+            labelIds: $labelIds
+            description: $description
+            assigneeId: $assigneeId
+            estimate: $estimate
+            priority: $priority
+            cycleId: $cycleId
+            projectId: $projectId
+            stateId: $stateId
+          }
+        ) {
           issue {
             id
             number

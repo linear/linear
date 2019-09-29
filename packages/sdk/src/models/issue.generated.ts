@@ -51,7 +51,14 @@ export type GetTeamIssueIdsFromCliQuery = (
 export type CreateIssueFromCliMutationVariables = {
   title: Types.Scalars['String'],
   teamId: Types.Scalars['String'],
-  labelIds?: Types.Maybe<Array<Types.Scalars['String']>>
+  labelIds?: Types.Maybe<Array<Types.Scalars['String']>>,
+  description?: Types.Maybe<Types.Scalars['String']>,
+  assigneeId?: Types.Maybe<Types.Scalars['String']>,
+  priority?: Types.Maybe<Types.Scalars['Int']>,
+  estimate?: Types.Maybe<Types.Scalars['Int']>,
+  cycleId?: Types.Maybe<Types.Scalars['String']>,
+  projectId?: Types.Maybe<Types.Scalars['String']>,
+  stateId?: Types.Maybe<Types.Scalars['String']>
 };
 
 
