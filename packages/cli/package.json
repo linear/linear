@@ -26,6 +26,7 @@
     "lint": "tslint -p .",
     "patch-package": "patch-package",
     "postpack": "rm -f oclif.manifest.json",
+    "prepare": "patch-package",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "echo NO TESTS",
     "version": "oclif-dev readme && git add README.md",
