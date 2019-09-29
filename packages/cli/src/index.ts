@@ -34,7 +34,7 @@ Object.values(commands)
   });
 
 // Print out help if valid command or option isn't provided
-if (!unknown.includes("-c") && args.length < 3) {
+if (!unknown.includes("-c") && unknown.includes("-z") && args.length < 3) {
   program.outputHelp();
   process.exit(1);
 }
