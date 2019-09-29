@@ -7,7 +7,7 @@ const accumulateLabels = (label: string, previousLabels: string) => Array.from(n
 const registerIssueOptions = (command: Command) =>
   command
     .option("-c, --create <title>", "create an issue")
-    .option("-e, --edit <description>", "edit the issue description")
+    .option("-d, --description <description>", "set the description")
     .option("-s, --state <state>", "set the state")
     .option("-a, --assignee <user>", "add an assignee")
     .option("-p, --priority <priority>", "set the priority")
@@ -16,9 +16,11 @@ const registerIssueOptions = (command: Command) =>
     .option("-E, --estimate <estimate>", "change the estimate")
     .option("-P, --project <project>", "set the project")
     .option("-C, --cycle <cycle>", "add to a cycle")
+    .option("--archive", "archive this issue")
     .action((issueKey, cmd) => {
       const {
-        create: title,
+        archive,
+        create: newTitle,
         state,
         assignee,
         priority,
@@ -33,11 +35,14 @@ const registerIssueOptions = (command: Command) =>
         cmd.outputHelp();
         process.exit(1);
       }
-      if (!issueKey && !title) {
+      if (!issueKey && !newTitle) {
         console.error(`Expected to be called with '-c title' or ABC-123`);
       }
-      if (title) {
-        console.log("creating issue", title);
+      if (archive && (!issueKey || newTitle)) {
+        console.error(`Can't archive issue without issueKey or while creating a new issue`);
+      }
+      if (newTitle) {
+        console.log("creating issue", newTitle);
       }
       if (state) {
         console.log("setting issue state to", state);
