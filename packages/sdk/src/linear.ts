@@ -7,6 +7,8 @@ import { label } from "./models/label";
 interface LinearArgs {
   apiKey: string;
   url?: string;
+  /**  Only intended to be used for testing */
+  mockClient?: GraphQLClient;
 }
 
 export class Linear {
@@ -14,13 +16,15 @@ export class Linear {
   public team: ReturnType<typeof team>;
   public label: ReturnType<typeof label>;
 
-  public constructor({ apiKey, url = "https://api.linear.app/graphql" }: LinearArgs) {
-    this.client = new GraphQLClient(url, {
-      headers: {
-        Authorization: apiKey,
-        "Content-Type": "application/json",
-      },
-    });
+  public constructor({ apiKey, url = "https://api.linear.app/graphql", mockClient }: LinearArgs) {
+    this.client =
+      mockClient ||
+      new GraphQLClient(url, {
+        headers: {
+          Authorization: apiKey,
+          "Content-Type": "application/json",
+        },
+      });
     this.issue = issue(this);
     this.team = team(this);
     this.label = label(this);
