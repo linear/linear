@@ -4,60 +4,51 @@
   "version": "0.1.0",
   "author": "Justin Bennett @zephraph",
   "bin": {
-    "linear": "./bin/run"
+    "linear": "./lib/index.js"
   },
   "bugs": "https://github.com/linearapp/linear/issues",
-  "dependencies": {
-    "@linear/sdk": "^0.1.0",
-    "@oclif/command": "^1",
-    "@oclif/config": "^1",
-    "@oclif/plugin-help": "^2",
-    "await-to-js": "^2.1.1",
-    "dedent": "^0.7.0",
-    "prompts": "^2.2.1",
-    "tagged-template-noop": "^2.1.0",
-    "tslib": "^1"
-  },
-  "devDependencies": {
-    "@oclif/dev-cli": "^1",
-    "@types/dedent": "^0.7.0",
-    "@types/node": "^10",
-    "@types/prompts": "^2.0.1",
-    "dotenv-cli": "^2.0.1",
-    "globby": "^10",
-    "graphql": "^14.5.4",
-    "ts-node": "^8"
-  },
   "engines": {
     "node": ">=8.0.0"
   },
   "files": [
-    "/bin",
-    "/lib",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "/lib"
   ],
   "homepage": "https://github.com/linearapp/linear",
   "keywords": [
-    "oclif"
+    "linear",
+    "cli"
   ],
   "license": "MIT",
   "main": "lib/index.js",
-  "oclif": {
-    "commands": "./lib/commands",
-    "bin": "linear",
-    "plugins": [
-      "@oclif/plugin-help"
-    ]
-  },
   "repository": "linearapp/linear",
   "scripts": {
-    "start": "dotenv ./bin/run",
+    "start": "dotenv ./lib/index.js",
+    "patch-package": "patch-package",
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "echo NO TESTS",
     "version": "oclif-dev readme && git add README.md",
     "dev": "tsc -b -w"
   },
-  "types": "lib/index.d.ts"
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@linear/sdk": "^0.1.0",
+    "await-to-js": "^2.1.1",
+    "commander": "^3.0.2",
+    "dedent": "^0.7.0",
+    "prompts": "^2.2.1",
+    "require-all": "^3.0.0",
+    "tagged-template-noop": "^2.1.0",
+    "tslib": "^1"
+  },
+  "devDependencies": {
+    "@types/dedent": "^0.7.0",
+    "@types/node": "^10",
+    "@types/prompts": "^2.0.1",
+    "dotenv-cli": "^2.0.1",
+    "graphql": "^14.5.4",
+    "jest": "^24.9.0",
+    "patch-package": "^6.2.0",
+    "ts-node": "^8"
+  }
 }

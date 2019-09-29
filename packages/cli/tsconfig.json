@@ -10,5 +10,5 @@
     "target": "es2018",
     "esModuleInterop": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "types/*"]
 }
