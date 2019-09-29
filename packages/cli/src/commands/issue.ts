@@ -1,5 +1,6 @@
 import { Command, CommanderStatic } from "commander";
 import { client } from "../client";
+import { teamPrompt } from "../prompts";
 import { extraHelp } from "../shared";
 
 const accumulateLabels = (label: string, previousLabels: string) => Array.from(new Set(previousLabels.concat(label)));
@@ -7,6 +8,7 @@ const accumulateLabels = (label: string, previousLabels: string) => Array.from(n
 const registerIssueOptions = (command: Command) =>
   command
     .option("-c, --create <title>", "create an issue")
+    .option("-t, --team <team>", "team to create in or move to")
     .option("-d, --description <description>", "set the description")
     .option("-s, --state <state>", "set the state")
     .option("-a, --assignee <user>", "add an assignee")
@@ -17,7 +19,7 @@ const registerIssueOptions = (command: Command) =>
     .option("-P, --project <project>", "set the project")
     .option("-C, --cycle <cycle>", "add to a cycle")
     .option("--archive", "archive this issue")
-    .action((issueKey, cmd) => {
+    .action(async (issueKey, cmd) => {
       const {
         archive,
         create: newTitle,
@@ -30,6 +32,8 @@ const registerIssueOptions = (command: Command) =>
         project,
         cycle,
       } = cmd;
+      let { team } = cmd;
+
       if (issueKey && !issueKey.match(/[A-Za-z]+-\d+/)) {
         console.error(`Invalid issue key ${issueKey} expected something like ABC-123\n`);
         cmd.outputHelp();
@@ -37,12 +41,21 @@ const registerIssueOptions = (command: Command) =>
       }
       if (!issueKey && !newTitle) {
         console.error(`Expected to be called with '-c title' or ABC-123`);
+        process.exit(1);
       }
       if (archive && (!issueKey || newTitle)) {
         console.error(`Can't archive issue without issueKey or while creating a new issue`);
+        process.exit(1);
       }
       if (newTitle) {
-        console.log("creating issue", newTitle);
+        if (!team || team === "?") {
+          console.log("prompting for team...");
+          team = (await teamPrompt()).team;
+        }
+        console.log("creating issue", newTitle, team);
+        // client.issue.create({
+        //   title: newTitle,
+        // });
       }
       if (state) {
         console.log("setting issue state to", state);

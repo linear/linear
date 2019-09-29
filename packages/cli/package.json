@@ -38,7 +38,8 @@
     "await-to-js": "^2.1.1",
     "commander": "^3.0.2",
     "dedent": "^0.7.0",
-    "prompts": "^2.2.1",
+    "enquirer": "^2.3.2",
+    "enquirer-prompt-editor": "^2.0.1",
     "require-all": "^3.0.0",
     "tagged-template-noop": "^2.1.0",
     "tslib": "^1"
