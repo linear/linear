@@ -53,7 +53,7 @@
     "no-var-keyword": true,
     "no-var-requires": true,
     "only-arrow-functions": [true, "allow-declarations", "allow-named-functions"],
-    "ordered-imports": false,
+    "ordered-imports": true,
     "prefer-conditional-expression": true,
     "prefer-const": true,
     "prefer-method-signature": true,
