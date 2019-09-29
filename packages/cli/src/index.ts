@@ -8,7 +8,10 @@ interface CommandModule {
   register(program: CommanderStatic): void;
 }
 
-program.name("linear").usage("[options] [command|issueKey]");
+program
+  .name("linear")
+  .usage("[options] [command|issueKey]")
+  .description("Welcome to the Linear CLI. Use this command to create, edit, or view an issue.");
 
 const commands = requireAll<CommandModule>({
   dirname: `${__dirname}/commands`,
@@ -18,8 +21,8 @@ const { args, unknown } = program.parseOptions(process.argv);
 
 // HACK: Only register the issue command as the global default if valid
 // command isn't passed in. This way we don't pollute the global option
-// space with options from issue.
-if ((args.length === 2 && unknown.includes("-c")) || (args.length === 3 && !Object.keys(commands).includes(args[2]))) {
+// space with options from the issue command.
+if (args.length === 2 || (args.length === 3 && !Object.keys(commands).includes(args[2]))) {
   // @ts-ignore
   global.registerIssueGlobally = true;
 }
@@ -30,8 +33,8 @@ Object.values(commands)
     command.register(program);
   });
 
+// Print out help if valid command or option isn't provided
 if (!unknown.includes("-c") && args.length < 3) {
-  program.option("-c, --create", "create an issue");
   program.outputHelp();
   process.exit(1);
 }

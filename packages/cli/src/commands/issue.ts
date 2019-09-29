@@ -1,5 +1,6 @@
 import { CommanderStatic, Command } from "commander";
 import { client } from "../client";
+import { extraHelp } from "../shared";
 
 const accumulateLabels = (label: string, previousLabels: string) => Array.from(new Set(previousLabels.concat(label)));
 
@@ -44,7 +45,8 @@ const registerIssueOptions = (command: Command) =>
       if (assignee) {
         console.log("setting assignee to", assignee);
       }
-    });
+    })
+    .on("--help", extraHelp);
 
 export const register = (program: CommanderStatic) => {
   // @ts-ignore

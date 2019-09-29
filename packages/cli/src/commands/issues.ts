@@ -1,4 +1,5 @@
 import { CommanderStatic, Command } from "commander";
+import { extraHelp } from "../shared";
 
 export const register = (program: CommanderStatic): any => {
   program
@@ -22,5 +23,6 @@ export const register = (program: CommanderStatic): any => {
       if (all || closed) {
         console.log("List my closed issues");
       }
-    });
+    })
+    .on("--help", extraHelp);
 };
