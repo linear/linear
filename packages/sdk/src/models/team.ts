@@ -1,12 +1,12 @@
 import { gql } from "gql";
 import { Linear } from "../linear";
 import {
-  TeamKeysFromCliQuery,
-  TeamsFromCliQuery,
+  GetTeamNamesFromCliQuery,
   TeamFromCliQuery,
   TeamFromCliQueryVariables,
+  TeamKeysFromCliQuery,
   TeamNamesFromCliQuery,
-  GetTeamNamesFromCliQuery,
+  TeamsFromCliQuery,
 } from "./team.generated";
 
 export type TeamSelection = { id: string } | { name: string } | { key: string };
@@ -89,7 +89,7 @@ export const getTeamByName = async (client: Linear, name: string) => {
       }
     `
   );
-  const team = teams.find(team => team.name === name);
+  const team = teams.find(t => t.name === name);
   return team ? getTeam(client, team.id) : undefined;
 };
 
@@ -105,7 +105,7 @@ export const getTeams = async (client: Linear) => {
   return teams;
 };
 
-export const team = (client: Linear) => ({
+export const registerTeam = (client: Linear) => ({
   get: getTeam.bind(null, client),
   getAll: getTeams.bind(null, client),
   getByName: getTeamByName.bind(null, client),

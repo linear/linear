@@ -1,4 +1,4 @@
-import { CommanderStatic, Command } from "commander";
+import { Command, CommanderStatic } from "commander";
 import { client } from "../client";
 import { extraHelp } from "../shared";
 
@@ -16,7 +16,7 @@ const registerIssueOptions = (command: Command) =>
     .option("-E, --estimate <estimate>", "change the estimate")
     .option("-P, --project <project>", "set the project")
     .option("-C, --cycle <cycle>", "add to a cycle")
-    .action((issueKey, command) => {
+    .action((issueKey, cmd) => {
       const {
         create: title,
         state,
@@ -27,10 +27,10 @@ const registerIssueOptions = (command: Command) =>
         estimate,
         project,
         cycle,
-      } = command;
+      } = cmd;
       if (issueKey && !issueKey.match(/[A-Za-z]+-\d+/)) {
         console.error(`Invalid issue key ${issueKey} expected something like ABC-123\n`);
-        command.outputHelp();
+        cmd.outputHelp();
         process.exit(1);
       }
       if (!issueKey && !title) {

@@ -1,4 +1,4 @@
-import { CommanderStatic, Command } from "commander";
+import { Command, CommanderStatic } from "commander";
 import { extraHelp } from "../shared";
 
 export const register = (program: CommanderStatic): any => {

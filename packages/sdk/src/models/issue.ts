@@ -3,15 +3,15 @@ import { Linear } from "../linear";
 import {
   CreateIssueFromCliMutation,
   CreateIssueFromCliMutationVariables,
-  UpdateIssueFromCliMutation,
-  UpdateIssueFromCliMutationVariables,
-  GetTeamIssueIdsFromCliQuery,
-  GetTeamIssueIdsFromCliQueryVariables,
   GetIssueFromCliQuery,
   GetIssueFromCliQueryVariables,
+  GetTeamIssueIdsFromCliQuery,
+  GetTeamIssueIdsFromCliQueryVariables,
+  UpdateIssueFromCliMutation,
+  UpdateIssueFromCliMutationVariables,
 } from "./issue.generated";
-import { getTeamIdFromKey, TeamSelection, getTeamIdFromSelection } from "./team";
-import { LabelSelection, getLabelIdFromSelection } from "./label";
+import { getLabelIdFromSelection, LabelSelection } from "./label";
+import { getTeamIdFromKey, getTeamIdFromSelection, TeamSelection } from "./team";
 
 /**
  * An object containing the UUID of an issue or an object containing the issue key.
@@ -82,7 +82,7 @@ export const getIssueIdFromKey = async (client: Linear, key: string) => {
     `,
     { teamId }
   );
-  const issue = team.issues.find(issue => issue.number === parseInt(issueNumber));
+  const issue = team.issues.find(i => i.number === parseInt(issueNumber));
   if (issue) {
     return issue.id;
   } else {
@@ -107,9 +107,16 @@ export const getIssueByKey = async (client: Linear, key: string) => {
 };
 
 interface IssueCreationOptions {
-  title: string;
   team: TeamSelection;
-  labels: LabelSelection[];
+  title: string;
+  description?: string;
+  state?: any;
+  assignee?: any;
+  priority?: any;
+  labels?: LabelSelection[];
+  estimate?: any;
+  project?: any;
+  cycle?: any;
 }
 
 export const createIssue = async (client: Linear, issueInput: IssueCreationOptions) => {
@@ -117,10 +124,11 @@ export const createIssue = async (client: Linear, issueInput: IssueCreationOptio
   if (!teamId) {
     throw new Error(`Failed to find team id for selection ${issueInput.team}`);
   }
-  const labelIds = (await Promise.all(
-    issueInput.labels.map(label => getLabelIdFromSelection(client, label))
-  )) as string[]; // TS 3.7 will make this cleaner with type assertions
-  if (labelIds.some(id => id === null)) {
+
+  const labelIds = issueInput.labels
+    ? ((await Promise.all(issueInput.labels.map(label => getLabelIdFromSelection(client, label)))) as string[]) // TS 3.7 will make this cleaner with type assertions
+    : undefined;
+  if (labelIds && labelIds.some(id => id === null)) {
     throw new Error(`One of the labels of the selection is invalid ${issueInput.labels}`);
   }
 
@@ -164,7 +172,7 @@ export const updateIssue = async (client: Linear, issueInput: UpdateIssueFromCli
     issueInput
   );
 
-export const issue = (client: Linear) => ({
+export const registerIssue = (client: Linear) => ({
   create: createIssue.bind(null, client),
   get: getIssue.bind(null, client),
   getAll: getAllIssues.bind(null, client),

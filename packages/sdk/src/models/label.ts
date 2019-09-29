@@ -1,15 +1,15 @@
-import { Linear } from "../linear";
 import { gql } from "gql";
+import { Linear } from "../linear";
+import { getIssueIdFromSelection, IssueSelection, updateIssue } from "./issue";
 import {
+  GetAllLabelsFromCliQuery,
+  GetIssueLabelIdsFromCliQuery,
   GetLabelFromCliQuery,
   GetLabelFromCliQueryVariables,
-  GetAllLabelsFromCliQuery,
   GetLabelsOfIssueFromCliQuery,
   GetLabelsOfIssueFromCliQueryVariables,
-  GetIssueLabelIdsFromCliQuery,
 } from "./label.generated";
-import { IssueSelection, getIssueIdFromSelection, updateIssue } from "./issue";
-import { TeamSelection, getTeamIdFromSelection } from "./team";
+import { getTeamIdFromSelection, TeamSelection } from "./team";
 
 export type LabelSelection = { id: string } | { name: string; team: TeamSelection };
 
@@ -127,7 +127,7 @@ export const addLabelsToIssue = async (client: Linear, issueSelection: IssueSele
   return updateIssue(client, { id: issueId, labelIds });
 };
 
-export const label = (client: Linear) => ({
+export const registerLabel = (client: Linear) => ({
   get: getLabel.bind(null, client),
   getAll: getAllLabels.bind(null, client),
   getAllForTeam: getTeamLabels.bind(null, client),

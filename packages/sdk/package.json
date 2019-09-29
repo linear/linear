@@ -11,6 +11,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -b",
+    "lint": "tslint -p .",
     "generate": "graphql-codegen",
     "bundle": "microbundle",
     "watch": "microbundle watch",

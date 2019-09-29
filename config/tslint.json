@@ -46,7 +46,7 @@
     "no-misused-new": true,
     "no-null-keyword": false,
     "no-parameter-reassignment": true,
-    "no-shadowed-variable": false,
+    "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-unnecessary-type-assertion": true,
     "no-unnecessary-initializer": true,

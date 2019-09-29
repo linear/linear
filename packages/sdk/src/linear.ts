@@ -1,8 +1,8 @@
 /* tslint:disable:no-any */
 import { GraphQLClient } from "graphql-request";
-import { issue } from "./models/issue";
-import { team } from "./models/team";
-import { label } from "./models/label";
+import { registerIssue } from "./models/issue";
+import { registerLabel } from "./models/label";
+import { registerTeam } from "./models/team";
 
 interface LinearArgs {
   apiKey: string;
@@ -12,9 +12,9 @@ interface LinearArgs {
 }
 
 export class Linear {
-  public issue: ReturnType<typeof issue>;
-  public team: ReturnType<typeof team>;
-  public label: ReturnType<typeof label>;
+  public issue: ReturnType<typeof registerIssue>;
+  public team: ReturnType<typeof registerTeam>;
+  public label: ReturnType<typeof registerLabel>;
 
   public constructor({ apiKey, url = "https://api.linear.app/graphql", mockClient }: LinearArgs) {
     this.client =
@@ -25,9 +25,9 @@ export class Linear {
           "Content-Type": "application/json",
         },
       });
-    this.issue = issue(this);
-    this.team = team(this);
-    this.label = label(this);
+    this.issue = registerIssue(this);
+    this.team = registerTeam(this);
+    this.label = registerLabel(this);
   }
 
   public request<Return>(query: string): Promise<Return>;

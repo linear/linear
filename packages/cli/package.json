@@ -23,6 +23,7 @@
   "repository": "linearapp/linear",
   "scripts": {
     "start": "dotenv ./lib/index.js",
+    "lint": "tslint -p .",
     "patch-package": "patch-package",
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
