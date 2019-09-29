@@ -1,3 +1,4 @@
+/* tslint:disable */
 export type Maybe<T> = T | null;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -224,6 +225,22 @@ export type EmailUnsubscribePayload = {
    __typename?: 'EmailUnsubscribePayload',
   lastSyncId: Scalars['Float'],
   /** Whether the operation was successful. */
+  success: Scalars['Boolean'],
+};
+
+export type EventCreateInput = {
+  /** The category of the event to create. */
+  category: Scalars['String'],
+  /** The subject of the event. */
+  subject: Scalars['String'],
+  /** The target id of the event. */
+  targetId?: Maybe<Scalars['String']>,
+  /** The value of the event. */
+  value?: Maybe<Scalars['Float']>,
+};
+
+export type EventPayload = {
+   __typename?: 'EventPayload',
   success: Scalars['Boolean'],
 };
 
@@ -643,6 +660,8 @@ export type IssueUpdateInput = {
 
 export type Mutation = {
    __typename?: 'Mutation',
+  /** Creates a new event. */
+  eventCreate: EventPayload,
   /** Creates a new API key. */
   apiKeyCreate: ApiKeyPayload,
   /** Archives an API key. */
@@ -707,10 +726,6 @@ export type Mutation = {
   organizationInviteArchive: ArchivePayload,
   /** Updates the user's organization. This mutation requires organization admin privileges. */
   organizationUpdate: OrganizationPayload,
-  /** Creates a new pinned issue reference. */
-  pinnedIssueCreate: PinnedIssuePayload,
-  /** Archives a pinned issue reference. */
-  pinnedIssueArchive: ArchivePayload,
   /** Creates a new project. */
   projectCreate: ProjectPayload,
   /** Updates a project. */
@@ -747,12 +762,19 @@ export type Mutation = {
   subscribeToNewsletter: SubscribeToNewsletterPayload,
   /** Creates a new whitelist entry. Superuser privileges required. */
   whiteListEntryCreate: WhiteListEntryPayload,
+  /** Sends an welcome email to a whitelisted user. Superuser privileges required */
+  whiteListWelcomeEmailer: WhiteListEntryPayload,
   /** Creates a new state, adding it to the workflow of a team. */
   workflowStateCreate: WorkflowStatePayload,
   /** Updates a state. */
   workflowStateUpdate: WorkflowStatePayload,
   /** Archives a state. Only states with issues that have all been archived can be archived. */
   workflowStateArchive: ArchivePayload,
+};
+
+
+export type MutationEventCreateArgs = {
+  input: EventCreateInput
 };
 
 
@@ -920,16 +942,6 @@ export type MutationOrganizationUpdateArgs = {
 };
 
 
-export type MutationPinnedIssueCreateArgs = {
-  input: PinnedIssueCreateInput
-};
-
-
-export type MutationPinnedIssueArchiveArgs = {
-  id: Scalars['String']
-};
-
-
 export type MutationProjectCreateArgs = {
   input: ProjectCreateInput
 };
@@ -1018,6 +1030,15 @@ export type MutationSubscribeToNewsletterArgs = {
 
 export type MutationWhiteListEntryCreateArgs = {
   input: WhiteListEntryCreateInput
+};
+
+
+export type MutationWhiteListWelcomeEmailerArgs = {
+  senderEmail: Scalars['String'],
+  senderName: Scalars['String'],
+  toName: Scalars['String'],
+  domain: Scalars['String'],
+  toEmail: Scalars['String']
 };
 
 
@@ -1155,40 +1176,6 @@ export type OrganizationPayload = {
    __typename?: 'OrganizationPayload',
   lastSyncId: Scalars['Float'],
   organization?: Maybe<Organization>,
-  success: Scalars['Boolean'],
-};
-
-/** An issue that has been pinned by a user. */
-export type PinnedIssue = {
-   __typename?: 'PinnedIssue',
-  /** The unique identifier of the entity. */
-  id: Scalars['ID'],
-  /** The time at which the entity was created. */
-  createdAt: Scalars['DateTime'],
-  /** 
- * The last time at which the entity was updated. This is the same as the creation time if the 
-   *     entity hasn't been update after creation.
- **/
-  updatedAt: Scalars['DateTime'],
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars['DateTime']>,
-  /** The pinning user. */
-  user: User,
-  /** The pinned issue. */
-  issue: Issue,
-};
-
-export type PinnedIssueCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one */
-  id?: Maybe<Scalars['String']>,
-  /** The identifier of the issue to pin. */
-  issueId: Scalars['String'],
-};
-
-export type PinnedIssuePayload = {
-   __typename?: 'PinnedIssuePayload',
-  lastSyncId: Scalars['Float'],
-  pinnedIssue: PinnedIssue,
   success: Scalars['Boolean'],
 };
 
@@ -1346,8 +1333,6 @@ export type Query = {
   organizationInvite: IssueLabel,
   /** The user's organization. */
   organization: Organization,
-  /** The users pinned issues. */
-  pinnedIssues: Array<PinnedIssue>,
   /** All projects. */
   projects: Array<Project>,
   /** One specific project. */
@@ -1705,8 +1690,6 @@ export type User = {
   notifications: Array<Notification>,
   /** Push subscriptions associated with the user. */
   pushSubscriptions: Array<PushSubscription>,
-  /** Pinned issues of the user. */
-  pinnedIssues: Array<PinnedIssue>,
   /** Developer API keys associated with the user. */
   apiKeys: Array<ApiKey>,
   /** The organization that the user is associated with. */

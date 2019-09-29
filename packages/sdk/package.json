@@ -27,6 +27,7 @@
     "tagged-template-noop": "^2.1.0"
   },
   "devDependencies": {
+    "@graphql-codegen/add": "^1.7.0",
     "@graphql-codegen/cli": "^1.7.0",
     "@graphql-codegen/near-operation-file-preset": "^1.7.0",
     "@graphql-codegen/typescript": "^1.7.0",

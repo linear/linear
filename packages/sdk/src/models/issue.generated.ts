@@ -1,3 +1,4 @@
+/* tslint:disable */
 import * as Types from '../schema';
 
 export type IssueDetailsFragment = (

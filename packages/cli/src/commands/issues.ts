@@ -1,7 +1,7 @@
 import { Command, CommanderStatic } from "commander";
 import { extraHelp } from "../shared";
 
-export const register = (program: CommanderStatic): any => {
+export const register = (program: CommanderStatic) => {
   program
     .command("issues")
     .description("List your issues with different filters")

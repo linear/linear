@@ -30,7 +30,7 @@
         ]
       }
     ],
-    "no-any": false,
+    "no-any": true,
     "no-arg": true,
     "no-console": false,
     "no-debugger": true,

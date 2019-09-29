@@ -110,13 +110,13 @@ interface IssueCreationOptions {
   team: TeamSelection;
   title: string;
   description?: string;
-  state?: any;
-  assignee?: any;
-  priority?: any;
+  state?: string;
+  assignee?: string;
+  priority?: string;
   labels?: LabelSelection[];
-  estimate?: any;
-  project?: any;
-  cycle?: any;
+  estimate?: string;
+  project?: string;
+  cycle?: string;
 }
 
 export const createIssue = async (client: Linear, issueInput: IssueCreationOptions) => {
