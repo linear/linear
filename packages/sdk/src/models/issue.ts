@@ -190,6 +190,7 @@ export const createIssue = async (client: Linear, issueInput: IssueCreationOptio
           issue {
             id
             number
+            url
             team {
               key
             }

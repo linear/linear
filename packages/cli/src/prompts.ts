@@ -1,4 +1,6 @@
 import { prompt } from "enquirer";
+import open from "open";
+import os from "os";
 import { client } from "./client";
 
 export { prompt } from "enquirer";
@@ -15,7 +17,10 @@ export const teamPrompt = async () =>
     type: "select",
     name: "team",
     message: "Pick a team",
-    choices: (await client.team.getAll()).map(t => t.name),
+    choices: (await client.team.getAll()).map(t => ({
+      name: t.id,
+      message: t.name,
+    })),
   });
 
 type AfterResolve<T> = T extends Promise<infer U> ? U : T;
@@ -43,3 +48,17 @@ export const issuePrompt = async (teamName?: string) => {
     })),
   });
 };
+
+export const openPrompt = async (url: string) =>
+  prompt<{ answer: boolean }>({
+    type: "confirm",
+    name: "answer",
+    message: `Would you like to open ${url.split("/").pop()}?`,
+  }).then(({ answer }) => {
+    const link = os.platform() === "darwin" ? url.replace("https://linear.app/", "linear://") : url;
+    if (answer) {
+      open(link);
+    } else {
+      console.log(`You can always open it later at ${link}`);
+    }
+  });

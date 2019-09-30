@@ -89,7 +89,7 @@ export type CreateIssueFromCliMutation = (
     { __typename?: 'IssuePayload' }
     & { issue: Types.Maybe<(
       { __typename?: 'Issue' }
-      & Pick<Types.Issue, 'id' | 'number'>
+      & Pick<Types.Issue, 'id' | 'number' | 'url'>
       & { team: (
         { __typename?: 'Team' }
         & Pick<Types.Team, 'key'>

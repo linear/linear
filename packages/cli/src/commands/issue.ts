@@ -1,6 +1,6 @@
 import { Command, CommanderStatic } from "commander";
 import { client } from "../client";
-import { issuePrompt, prompt, teamPrompt, titlePrompt } from "../prompts";
+import { issuePrompt, openPrompt, prompt, teamPrompt, titlePrompt } from "../prompts";
 import { extraHelp } from "../shared";
 
 const accumulateLabels = (label: string, previousLabels: string) =>
@@ -75,7 +75,13 @@ const registerIssueOptions = (command: Command) =>
         if (!team || team === "?") {
           team = (await teamPrompt()).team;
         }
-        console.log("creating issue", newTitle, team);
+        const {
+          issueCreate: { issue },
+        } = await client.issue.create({
+          title: newTitle,
+          team: { id: team },
+        });
+        await openPrompt(issue!.url);
       }
       if (state) {
         console.log("setting issue state to", state);
@@ -89,9 +95,7 @@ const registerIssueOptions = (command: Command) =>
 export const register = (program: CommanderStatic) => {
   // @ts-ignore
   if (global.registerIssueGlobally) {
-    // const { args } = program.parseOptions(process.argv);
     registerIssueOptions(program.arguments("[issueKey]"));
-    // program.emit("command:*");
   }
   registerIssueOptions(program.command("issue [issueKey]").description("View, create, or update an issue"));
 };
