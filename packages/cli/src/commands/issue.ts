@@ -1,7 +1,6 @@
-import { program } from "@babel/types";
 import { Command, CommanderStatic } from "commander";
 import { client } from "../client";
-import { prompt, teamPrompt, titlePrompt } from "../prompts";
+import { issuePrompt, prompt, teamPrompt, titlePrompt } from "../prompts";
 import { extraHelp } from "../shared";
 
 const accumulateLabels = (label: string, previousLabels: string) =>
@@ -22,15 +21,16 @@ const registerIssueOptions = (command: Command) =>
     .option("-C, --cycle <cycle>", "add to a cycle")
     .option("--archive", "archive this issue")
     .action(async (issueKey, cmd) => {
+      let key = issueKey;
       const { archive, state, assignee, priority, label: labels, rename: renamedTitle, estimate, project, cycle } = cmd;
       let { team, create: newTitle } = cmd;
 
-      if (issueKey && !issueKey.match(/[A-Za-z]+-\d+/)) {
-        console.error(`Invalid issue key ${issueKey} expected something like ABC-123\n`);
+      if (key && !key.match(/[A-Za-z]+-\d+/)) {
+        console.error(`Invalid issue key ${key} expected something like ABC-123\n`);
         cmd.outputHelp();
         process.exit(1);
       }
-      if (!issueKey && !newTitle) {
+      if (!key && !newTitle) {
         const { action } = await prompt({
           type: "select",
           name: "action",
@@ -47,20 +47,27 @@ const registerIssueOptions = (command: Command) =>
         switch (action) {
           case "get":
             console.log("find an issue...");
+            const { teamKnown } = await prompt({
+              type: "confirm",
+              name: "teamKnown",
+              message: "Do you know which team the issue belows to?",
+            });
+            if (teamKnown) {
+              team = (await teamPrompt()).team;
+            }
+            key = (await issuePrompt(team)).issueKey;
             break;
           case "create":
             const { title } = await titlePrompt();
             newTitle = title;
             break;
           case "help":
-            console.log("outputing help...");
             command.outputHelp();
           default:
-            console.log("default case", action);
             process.exit();
         }
       }
-      if (archive && (!issueKey || newTitle)) {
+      if (archive && (!key || newTitle)) {
         console.error(`Can't archive issue without issueKey or while creating a new issue`);
         process.exit(1);
       }
@@ -69,9 +76,6 @@ const registerIssueOptions = (command: Command) =>
           team = (await teamPrompt()).team;
         }
         console.log("creating issue", newTitle, team);
-        // client.issue.create({
-        //   title: newTitle,
-        // });
       }
       if (state) {
         console.log("setting issue state to", state);

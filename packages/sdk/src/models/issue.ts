@@ -3,6 +3,8 @@ import { Linear } from "../linear";
 import {
   CreateIssueFromCliMutation,
   CreateIssueFromCliMutationVariables,
+  GetAllIssuesFromCliQuery,
+  GetAllTeamIssuesFromCliQuery,
   GetIssueFromCliQuery,
   GetIssueFromCliQueryVariables,
   GetTeamIssueIdsFromCliQuery,
@@ -11,6 +13,7 @@ import {
   UpdateIssueFromCliMutationVariables,
 } from "./issue.generated";
 import { getLabelIdFromSelection, LabelSelection } from "./label";
+import { GetAllLabelsFromCliQueryVariables } from "./label.generated";
 import { Priority } from "./priority";
 import { getTeamIdFromKey, getTeamIdFromSelection, TeamSelection } from "./team";
 
@@ -28,7 +31,13 @@ export const IssueDetails = gql`
     description
     priority
     estimate
-    assignee
+    assignee {
+      id
+      name
+    }
+    team {
+      key
+    }
     labels {
       id
       name
@@ -37,7 +46,7 @@ export const IssueDetails = gql`
 `;
 
 export const getAllIssues = async (client: Linear) =>
-  client.request(gql`
+  client.request<GetAllIssuesFromCliQuery>(gql`
     ${IssueDetails}
     query GetAllIssuesFromCLI {
       issues {
@@ -45,6 +54,23 @@ export const getAllIssues = async (client: Linear) =>
       }
     }
   `);
+
+export const getAllTeamIssues = async (client: Linear, team: TeamSelection) => {
+  const teamId = await getTeamIdFromSelection(client, team);
+  return client.request<GetAllTeamIssuesFromCliQuery, GetAllLabelsFromCliQueryVariables>(
+    gql`
+      ${IssueDetails}
+      query GetAllTeamIssuesFromCLI($teamId: String!) {
+        team(id: $teamId) {
+          issues {
+            ...IssueDetails
+          }
+        }
+      }
+    `,
+    { teamId }
+  );
+};
 
 export const getIssue = async (client: Linear, selection: IssueSelection) => {
   if ("id" in selection) {
@@ -203,4 +229,5 @@ export const registerIssue = (client: Linear) => ({
   getAll: getAllIssues.bind(null, client),
   getIdFromKey: getIssueByKey.bind(null, client),
   getByKey: getIssueByKey.bind(null, client),
+  getAllFromTeam: getAllTeamIssues.bind(null, client),
 });

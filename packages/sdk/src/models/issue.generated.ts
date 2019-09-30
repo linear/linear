@@ -3,8 +3,14 @@ import * as Types from '../schema';
 
 export type IssueDetailsFragment = (
   { __typename?: 'Issue' }
-  & Pick<Types.Issue, 'id' | 'title' | 'number' | 'description' | 'priority' | 'estimate' | 'assignee'>
-  & { labels: Array<(
+  & Pick<Types.Issue, 'id' | 'title' | 'number' | 'description' | 'priority' | 'estimate'>
+  & { assignee: Types.Maybe<(
+    { __typename?: 'User' }
+    & Pick<Types.User, 'id' | 'name'>
+  )>, team: (
+    { __typename?: 'Team' }
+    & Pick<Types.Team, 'key'>
+  ), labels: Array<(
     { __typename?: 'IssueLabel' }
     & Pick<Types.IssueLabel, 'id' | 'name'>
   )> }
@@ -18,6 +24,21 @@ export type GetAllIssuesFromCliQuery = (
   & { issues: Array<{ __typename?: 'Issue' }
     & IssueDetailsFragment
   > }
+);
+
+export type GetAllTeamIssuesFromCliQueryVariables = {
+  teamId: Types.Scalars['String']
+};
+
+
+export type GetAllTeamIssuesFromCliQuery = (
+  { __typename?: 'Query' }
+  & { team: (
+    { __typename?: 'Team' }
+    & { issues: Array<{ __typename?: 'Issue' }
+      & IssueDetailsFragment
+    > }
+  ) }
 );
 
 export type GetIssueFromCliQueryVariables = {
