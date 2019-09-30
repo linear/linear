@@ -1,0 +1,21 @@
+schema: https://api.linear.app/graphql
+pluckConfig:
+  modules:
+    - name: "gql"
+      identifier: "gql"
+
+generates:
+  src/schema.ts:
+    plugins:
+      - typescript
+      - add: "/* tslint:disable */"
+  src/:
+    preset: near-operation-file
+    documents:
+      - "src/**/*.ts"
+    presetConfig:
+      extension: .generated.ts
+      baseTypesPath: schema.ts
+    plugins:
+      - typescript-operations
+      - add: "/* tslint:disable */"

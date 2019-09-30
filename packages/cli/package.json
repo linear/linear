@@ -1,37 +1,58 @@
 {
   "name": "@linear/cli",
-  "version": "0.0.1",
-  "description": "Command line tools for Linear",
-  "author": "Linear.app",
-  "main": "index.ts",
-  "license": "MIT",
+  "description": "A cli tool to interface with linear",
+  "version": "0.1.0",
+  "author": "Justin Bennett @zephraph",
   "bin": {
-    "linear": "./dist/index.js"
+    "linear": "./lib/index.js"
   },
+  "bugs": "https://github.com/linearapp/linear/issues",
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/lib"
+  ],
+  "homepage": "https://github.com/linearapp/linear",
+  "keywords": [
+    "linear",
+    "cli"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "repository": "linearapp/linear",
   "scripts": {
-    "build": "tsc -b",
-    "dev": "tsc -b --watch",
-    "start": "ts-node src/index.ts"
+    "start": "dotenv ./lib/index.js",
+    "lint": "tslint -p .",
+    "patch-package": "patch-package",
+    "postpack": "rm -f oclif.manifest.json",
+    "prepare": "patch-package",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "echo NO TESTS",
+    "version": "oclif-dev readme && git add README.md",
+    "dev": "tsc -b -w"
   },
+  "types": "lib/index.d.ts",
   "dependencies": {
-    "@linear/sdk": "0.0.3",
-    "chalk": "2.4.2",
-    "commander": "2.19.0",
-    "inquirer": "6.2.1",
-    "isomorphic-fetch": "2.2.1",
-    "lodash": "4.17.11",
-    "open": "0.0.5",
-    "ora": "3.0.0"
+    "@linear/sdk": "^0.1.0",
+    "await-to-js": "^2.1.1",
+    "commander": "^3.0.2",
+    "dedent": "^0.7.0",
+    "enquirer": "^2.3.2",
+    "enquirer-prompt-editor": "^2.0.1",
+    "open": "^6.4.0",
+    "require-all": "^3.0.0",
+    "tagged-template-noop": "^2.1.0",
+    "tslib": "^1"
   },
   "devDependencies": {
-    "@types/chalk": "2.2.0",
-    "@types/commander": "2.12.2",
-    "@types/inquirer": "0.0.43",
-    "@types/isomorphic-fetch": "0.0.34",
-    "@types/lodash": "4.14.120",
-    "@types/open": "0.0.29",
-    "@types/ora": "3.0.0",
-    "ts-node": "8.0.3",
-    "typescript": "3.4.3"
+    "@types/dedent": "^0.7.0",
+    "@types/node": "^10",
+    "@types/prompts": "^2.0.1",
+    "dotenv-cli": "^2.0.1",
+    "graphql": "^14.5.4",
+    "jest": "^24.9.0",
+    "patch-package": "^6.2.0",
+    "ts-node": "^8"
   }
 }

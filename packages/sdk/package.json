@@ -1,6 +1,6 @@
 {
   "name": "@linear/sdk",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Linear API SDK",
   "author": "Linear.app",
   "main": "dist/index.js",
@@ -11,34 +11,28 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -b",
-    "update-schema": "graphql get-schema -p default",
-    "generate": "graphql codegen",
-    "docs": "graphql-markdown ./src/schema.graphql > schema.md",
+    "lint": "tslint -p .",
+    "generate": "graphql-codegen",
     "bundle": "microbundle",
-    "dev": "microbundle watch"
+    "watch": "microbundle watch",
+    "dev": "concurrently -k -n 'sdk|microbundle,sdk|gql-codegen' 'yarn watch' 'yarn generate -w'"
   },
   "resolutions": {
     "graphql": "14.1.1",
     "module": "1.2.5"
   },
   "dependencies": {
-    "@types/node-fetch": "^2.3.2",
-    "apollo-link-error": "1.1.5",
-    "apollo-link-http": "1.5.9",
-    "cross-fetch": "3.0.0",
     "graphql": "14.1.1",
-    "isomorphic-fetch": "2.2.1",
-    "module": "1.2.5",
-    "node-fetch": "^2.3.0"
+    "graphql-request": "^1.8.2",
+    "tagged-template-noop": "^2.1.0"
   },
   "devDependencies": {
+    "@graphql-codegen/add": "^1.7.0",
+    "@graphql-codegen/cli": "^1.7.0",
+    "@graphql-codegen/near-operation-file-preset": "^1.7.0",
+    "@graphql-codegen/typescript": "^1.7.0",
+    "@graphql-codegen/typescript-operations": "^1.7.0",
     "@types/graphql": "14.0.4",
-    "@types/isomorphic-fetch": "0.0.34",
-    "graphql-binding": "2.4.1",
-    "graphql-cli": "3.0.4",
-    "graphql-markdown": "5.0.1",
-    "graphql-tools": "4.0.3",
-    "microbundle": "0.9.0",
-    "typescript": "3.4.3"
+    "microbundle": "0.9.0"
   }
 }

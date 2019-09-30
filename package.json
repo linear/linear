@@ -7,17 +7,23 @@
     "packages/*"
   ],
   "scripts": {
+    "lint": "lerna run lint",
     "build": "lerna run build",
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "generate": "lerna run generate",
+    "cli": "yarn workspace @linear/cli start"
   },
   "devDependencies": {
     "lerna": "3.13.2",
     "prettier": "1.16.4",
     "tslint": "5.15.0",
-    "typescript": "3.4.3"
+    "typescript": "^3.6.3"
   },
   "engines": {
     "node": "10.x.x",
     "yarn": "1.x"
+  },
+  "dependencies": {
+    "concurrently": "^4.1.2"
   }
 }

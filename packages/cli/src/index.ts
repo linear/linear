@@ -1,78 +1,42 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 
-import program from "commander";
-import { login, logout } from "./commands/auth";
-import { issueAssign } from "./commands/issueAssign";
-import { issueClose } from "./commands/issueClose";
-import { CommentIssueArgs, issueComment } from "./commands/issueComment";
-import { issueStatus } from "./commands/issueStatus";
-import { newIssue, NewIssueArgs } from "./commands/newIssue";
-import { openIssue } from "./commands/openIssue";
-import { loadConfig } from "./config";
+import program, { CommanderStatic } from "commander";
+import requireAll from "require-all";
 
-(async () => {
-  program.version(process.env.npm_package_version || "");
+interface CommandModule {
+  name: string;
+  register(program: CommanderStatic): void;
+}
 
-  // Unauthenticated commands
+program
+  .name("linear")
+  .usage("[options] [command|issueKey]")
+  .description("Welcome to the Linear CLI. Use this command to create, edit, or view an issue.");
 
-  program
-    .command("login")
-    .description("Login to Linear")
-    .action(login);
+const commands = requireAll<CommandModule>({
+  dirname: `${__dirname}/commands`,
+});
 
-  // Authenticated commands
+const { args, unknown } = program.parseOptions(process.argv);
 
-  const config = loadConfig();
-  if (!config) {
-    await login;
-  } else {
-    program
-      .command("logout")
-      .description("Logout session")
-      .action(logout);
+// HACK: Only register the issue command as the global default if valid
+// command isn't passed in. This way we don't pollute the global option
+// space with options from the issue command.
+if (args.length === 2 || (args.length === 3 && !Object.keys(commands).includes(args[2]))) {
+  // @ts-ignore
+  global.registerIssueGlobally = true;
+}
 
-    program
-      .command("issue [title]")
-      .alias("i")
-      .option("--description <description>", "Issue description")
-      .option("--skipInput", "Skip user input (title required)")
-      .description("Create a new issue")
-      .action((title: string, args: NewIssueArgs) =>
-        newIssue(config!, title, args)
-      );
+Object.values(commands)
+  .filter(command => "register" in command)
+  .forEach(command => {
+    command.register(program);
+  });
 
-    program
-      .command("comment <issueId>")
-      .alias("c")
-      .option("--comment <comment>", "Comment")
-      .description(
-        "Comment on issue. If `--comment` is omitted, interactive comment composer is opened"
-      )
-      .action((issueId: string, args: CommentIssueArgs) =>
-        issueComment(config!, issueId, args)
-      );
+// Print out help if valid command or option isn't provided
+if (!unknown.includes("-c") && unknown.includes("-z") && args.length < 3) {
+  program.outputHelp();
+  process.exit(1);
+}
 
-    program
-      .command("close <issueId>")
-      .description("Mark issue as done.")
-      .action((issueId: string) => issueClose(config!, issueId));
-
-    program
-      .command("status <issueId>")
-      .description("Change issue status.")
-      .action((issueId: string) => issueStatus(config!, issueId));
-
-    program
-      .command("assign <issueId>")
-      .description("Change issue assignee.")
-      .action((issueId: string) => issueAssign(config!, issueId));
-
-    program
-      .command("open [issue ID]")
-      .alias("o")
-      .description("Opens issue in the browser")
-      .action(openIssue);
-  }
-
-  program.parse(process.argv);
-})();
+program.parse(process.argv);
