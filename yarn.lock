@@ -1459,6 +1459,16 @@ aggregate-error@3.0.0:
     clean-stack "^2.0.0"
     indent-string "^3.2.0"
 
+ajv@^6.10.2:
+  version "6.10.2"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.10.2.tgz#d3cea04d6b017b2894ad69040fec8b623eb4bd52"
+  integrity sha512-TXtUUEYHuaTEbLZWIKUr5pmBuhDLy+8KYtPYdcV8qC+pOZL+NKqYwvWSRrVXHn+ZmRRAu8vJTAznH7Oag6RVRw==
+  dependencies:
+    fast-deep-equal "^2.0.1"
+    fast-json-stable-stringify "^2.0.0"
+    json-schema-traverse "^0.4.1"
+    uri-js "^4.2.2"
+
 ajv@^6.5.5:
   version "6.10.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.10.0.tgz#90d0d54439da587cd7e843bfb7045f50bd22bdf1"
@@ -1585,6 +1595,11 @@ aproba@^1.0.3, aproba@^1.1.1:
 aproba@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/aproba/-/aproba-2.0.0.tgz#52520b8ae5b569215b354efc0caa3fe1e45a8adc"
+
+arch@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/arch/-/arch-2.1.1.tgz#8f5c2731aa35a30929221bb0640eed65175ec84e"
+  integrity sha512-BLM56aPo9vLLFVa8+/+pJLnrZ7QGGTVHWsCwieAWT9o9K8UeGaQbzZbGoabWLOo2ksBCztoXdqBZBplqLDDCSg==
 
 are-we-there-yet@~1.1.2:
   version "1.1.5"
@@ -2284,6 +2299,14 @@ cli-width@^2.0.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-2.2.0.tgz#ff19ede8a9a5e579324147b0c11f0fbcbabed639"
 
+clipboardy@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/clipboardy/-/clipboardy-2.1.0.tgz#0123a0c8fac92f256dc56335e0bb8be97a4909a5"
+  integrity sha512-2pzOUxWcLlXWtn+Jd6js3o12TysNOOVes/aQfg+MT/35vrxWzedHlLwyoJpXjsFKWm95BTNEcMGD9+a7mKzZkQ==
+  dependencies:
+    arch "^2.1.1"
+    execa "^1.0.0"
+
 cliui@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/cliui/-/cliui-3.2.0.tgz#120601537a916d29940f934da3b48d585a39213d"
@@ -2504,6 +2527,22 @@ concurrently@^4.1.2:
     supports-color "^4.5.0"
     tree-kill "^1.2.1"
     yargs "^12.0.5"
+
+conf@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/conf/-/conf-6.1.0.tgz#6a667ec511f4b717c9aaba35551f34f912fa74aa"
+  integrity sha512-NjzT0zGZ7iy88ybk4ysz4YDMcGTEJzS2wFNKyQd1ChqcZfF6IKY1j+1+q5Dubu8si2skcMfA86t13vNz1mJckA==
+  dependencies:
+    ajv "^6.10.2"
+    debounce-fn "^3.0.1"
+    dot-prop "^5.0.0"
+    env-paths "^2.2.0"
+    json-schema-typed "^7.0.1"
+    make-dir "^3.0.0"
+    onetime "^5.1.0"
+    pkg-up "^3.0.1"
+    semver "^6.2.0"
+    write-file-atomic "^3.0.0"
 
 config-chain@^1.1.11:
   version "1.1.12"
@@ -2991,6 +3030,13 @@ dateformat@^3.0.0:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-3.0.3.tgz#a6e37499a4d9a9cf85ef5872044d62901c9889ae"
 
+debounce-fn@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/debounce-fn/-/debounce-fn-3.0.1.tgz#034afe8b904d985d1ec1aa589cd15f388741d680"
+  integrity sha512-aBoJh5AhpqlRoHZjHmOzZlRx+wz2xVwGL9rjs+Kj0EWUrL4/h4K7OD176thl2Tdoqui/AaA4xhHrNArGLAaI3Q==
+  dependencies:
+    mimic-fn "^2.1.0"
+
 debounce@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.0.tgz#44a540abc0ea9943018dc0eaa95cce87f65cd131"
@@ -3230,6 +3276,13 @@ dot-prop@^4.1.0, dot-prop@^4.1.1, dot-prop@^4.2.0:
   dependencies:
     is-obj "^1.0.0"
 
+dot-prop@^5.0.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/dot-prop/-/dot-prop-5.1.0.tgz#bdd8c986a77b83e3fca524e53786df916cabbd8a"
+  integrity sha512-n1oC6NBF+KM9oVXtjmen4Yo7HyAVWV2UUl50dCYJdw2924K6dX9bf9TTTWaKtYlRn0FEtxG27KS80ayVLixxJA==
+  dependencies:
+    is-obj "^2.0.0"
+
 dotenv-cli@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/dotenv-cli/-/dotenv-cli-2.0.1.tgz#6ee43d11018e55d24d2d136a6cc21904e237abef"
@@ -3336,6 +3389,11 @@ enquirer@^2.3.0, enquirer@^2.3.2:
 entities@^1.1.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.2.tgz#bdfa735299664dfafd34529ed4f8522a275fea56"
+
+env-paths@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-2.2.0.tgz#cdca557dc009152917d6166e2febe1f039685e43"
+  integrity sha512-6u0VYSCo/OW6IoD5WCLLy9JUGARbamfSavcNXry/eu8aHVFei6CD3Sw+VGX5alea1i9pgPHW0mbu6Xj0uBh7gA==
 
 err-code@^1.0.0:
   version "1.1.2"
@@ -4815,6 +4873,11 @@ is-obj@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/is-obj/-/is-obj-1.0.1.tgz#3e4729ac1f5fde025cd7d83a896dab9f4f67db0f"
 
+is-obj@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/is-obj/-/is-obj-2.0.0.tgz#473fb05d973705e3fd9620545018ca8e22ef4982"
+  integrity sha512-drqDG3cbczxxEJRoOXcOjtdp1J/lyp1mNn0xaznRs8+muBhgQcrnbspox5X5fOw0HnMnbfDzvnEMEtqDEJEo8w==
+
 is-observable@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-observable/-/is-observable-1.1.0.tgz#b3e986c8f44de950867cab5403f5a3465005975e"
@@ -4909,7 +4972,7 @@ is-text-path@^1.0.0:
   dependencies:
     text-extensions "^1.0.0"
 
-is-typedarray@~1.0.0:
+is-typedarray@^1.0.0, is-typedarray@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-typedarray/-/is-typedarray-1.0.0.tgz#e479c80858df0c1b11ddda6940f96011fcda4a9a"
 
@@ -5462,6 +5525,11 @@ json-schema-traverse@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz#69f6a87d9513ab8bb8fe63bdb0979c448e684660"
 
+json-schema-typed@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/json-schema-typed/-/json-schema-typed-7.0.1.tgz#5e56564b5a0950423e22b285a30ade219e38084d"
+  integrity sha512-IqUK+Cqc8/MqHsCvv1TMccbKdBzoATOLHXZAF5UDu70/CCxo648cHUig24hc+XTK53TyeNk1UeVTlc2Haovtsw==
+
 json-schema@0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/json-schema/-/json-schema-0.2.3.tgz#b480c892e59a2f05954ce727bd3f2a4e882f9e13"
@@ -5925,6 +5993,13 @@ make-dir@^2.1.0:
   dependencies:
     pify "^4.0.1"
     semver "^5.6.0"
+
+make-dir@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-3.0.0.tgz#1b5f39f6b9270ed33f9f054c5c0f84304989f801"
+  integrity sha512-grNJDhb8b1Jm1qeqW5R/O63wUo4UXo2v2HMic6YT9i/HBlF93S8jkMgH7yugvY9ABDShH4VZMn8I+U8+fCNegw==
+  dependencies:
+    semver "^6.0.0"
 
 make-error@^1.1.1:
   version "1.3.5"
@@ -7090,6 +7165,13 @@ pkg-dir@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/pkg-dir/-/pkg-dir-3.0.0.tgz#2749020f239ed990881b1f71210d51eb6523bea3"
   integrity sha512-/E57AYkoeQ25qkxMj5PBOVgF8Kiu/h7cYS30Z5+R7WaiCCBfLq58ZI/dSeaEKb9WVJV5n/03QwrN3IeWIFllvw==
+  dependencies:
+    find-up "^3.0.0"
+
+pkg-up@^3.0.1:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/pkg-up/-/pkg-up-3.1.0.tgz#100ec235cc150e4fd42519412596a28512a0def5"
+  integrity sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==
   dependencies:
     find-up "^3.0.0"
 
@@ -9413,6 +9495,13 @@ type-fest@^0.5.2:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.5.2.tgz#d6ef42a0356c6cd45f49485c3b6281fc148e48a2"
   integrity sha512-DWkS49EQKVX//Tbupb9TFa19c7+MK1XmzkrZUR8TAktmE/DizXoaoJV6TZ/tSIPXipqNiRI6CyAe7x69Jb6RSw==
 
+typedarray-to-buffer@^3.1.5:
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/typedarray-to-buffer/-/typedarray-to-buffer-3.1.5.tgz#a97ee7a9ff42691b9f783ff1bc5112fe3fca9080"
+  integrity sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==
+  dependencies:
+    is-typedarray "^1.0.0"
+
 typedarray@^0.0.6, typedarray@~0.0.5:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
@@ -9845,6 +9934,16 @@ write-file-atomic@^2.0.0, write-file-atomic@^2.3.0:
     graceful-fs "^4.1.11"
     imurmurhash "^0.1.4"
     signal-exit "^3.0.2"
+
+write-file-atomic@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/write-file-atomic/-/write-file-atomic-3.0.0.tgz#1b64dbbf77cb58fd09056963d63e62667ab4fb21"
+  integrity sha512-EIgkf60l2oWsffja2Sf2AL384dx328c0B+cIYPTQq5q2rOYuDV00/iPFBOUiDKKwKMOhkymH8AidPaRvzfxY+Q==
+  dependencies:
+    imurmurhash "^0.1.4"
+    is-typedarray "^1.0.0"
+    signal-exit "^3.0.2"
+    typedarray-to-buffer "^3.1.5"
 
 write-json-file@^2.2.0, write-json-file@^2.3.0:
   version "2.3.0"

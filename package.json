@@ -11,7 +11,8 @@
     "build": "lerna run build",
     "test": "lerna run test",
     "generate": "lerna run generate",
-    "cli": "yarn workspace @linear/cli start"
+    "cli": "yarn workspace @linear/cli start",
+    "prepare": "patch-package"
   },
   "devDependencies": {
     "lerna": "3.13.2",

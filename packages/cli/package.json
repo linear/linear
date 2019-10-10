@@ -23,6 +23,7 @@
   "repository": "linearapp/linear",
   "scripts": {
     "start": "dotenv ./lib/index.js",
+    "build": "tsc -b",
     "lint": "tslint -p .",
     "patch-package": "patch-package",
     "postpack": "rm -f oclif.manifest.json",
@@ -36,7 +37,9 @@
   "dependencies": {
     "@linear/sdk": "^0.1.0",
     "await-to-js": "^2.1.1",
+    "clipboardy": "^2.1.0",
     "commander": "^3.0.2",
+    "conf": "^6.1.0",
     "dedent": "^0.7.0",
     "enquirer": "^2.3.2",
     "enquirer-prompt-editor": "^2.0.1",

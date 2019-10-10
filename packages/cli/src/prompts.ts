@@ -1,9 +1,10 @@
 import { prompt } from "enquirer";
 import open from "open";
 import os from "os";
-import { client } from "./client";
 
 export { prompt } from "enquirer";
+
+type Client = typeof import("./client").client;
 
 export const titlePrompt = async () =>
   prompt<{ title: string }>({
@@ -12,8 +13,11 @@ export const titlePrompt = async () =>
     message: "Write an issue title",
   });
 
-export const teamPrompt = async () =>
-  prompt<{ team: string }>({
+export const teamPrompt = async () => {
+  const { client } = await import("./client");
+  return prompt<{
+    team: string;
+  }>({
     type: "select",
     name: "team",
     message: "Pick a team",
@@ -22,11 +26,13 @@ export const teamPrompt = async () =>
       message: t.name,
     })),
   });
+};
 
 type AfterResolve<T> = T extends Promise<infer U> ? U : T;
-type IssuesType = AfterResolve<ReturnType<typeof client.issue.getAll>>;
+type IssuesType = AfterResolve<ReturnType<Client["issue"]["getAll"]>>;
 
 export const issuePrompt = async (teamName?: string) => {
+  const { client } = await import("./client");
   let issues: IssuesType["issues"];
   if (teamName) {
     const { team } = await client.issue.getAllFromTeam({ name: teamName });
@@ -49,16 +55,24 @@ export const issuePrompt = async (teamName?: string) => {
   });
 };
 
-export const openPrompt = async (url: string) =>
-  prompt<{ answer: boolean }>({
-    type: "confirm",
-    name: "answer",
-    message: `Would you like to open ${url.split("/").pop()}?`,
-  }).then(({ answer }) => {
-    const link = os.platform() === "darwin" ? url.replace("https://linear.app/", "linear://") : url;
-    if (answer) {
-      open(link);
-    } else {
-      console.log(`You can always open it later at ${link}`);
-    }
+export const openPrompt = async (url: string, force = false) => {
+  const shouldOpen =
+    force ||
+    (await prompt<{
+      answer: boolean;
+    }>({
+      type: "confirm",
+      name: "answer",
+      message: `Would you like to open ${url.replace("https://linear.app/", "")} in linear?`,
+    }).then(({ answer }) => answer));
+
+  const link = os.platform() === "darwin" ? url.replace("https://linear.app/", "linear://") : url;
+  shouldOpen ? open(link) : console.log(`You can always open it later at ${link}`);
+};
+
+export const apiKeyPrompt = async () =>
+  prompt<{ apiKey: string }>({
+    type: "password",
+    name: "apiKey",
+    message: "Enter your linear api key",
   });
