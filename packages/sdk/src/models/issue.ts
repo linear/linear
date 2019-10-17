@@ -1,4 +1,4 @@
-import { gql } from "gql";
+import { gql } from "../gql";
 import { Linear } from "../linear";
 import {
   CreateIssueFromCliMutation,
