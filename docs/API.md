@@ -33,6 +33,18 @@ To make your first requests, it's recommended to use an API client which support
 
 Once you have your client installed, you can start making queries (read) and mutations (write) to the API.
 
+To get information about the authenticated user, you can use the `viewer` query:
+
+```graphql
+query {
+  viewer {
+    id
+    name
+    email
+  }
+}
+```
+
 As issues (and most other objects) are team based, you first need to get the ID of the team you want to interact with:
 
 ```graphql
