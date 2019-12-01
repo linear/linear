@@ -23,7 +23,7 @@ curl \
   -X POST \
   -H "Content-Type: application/json" \
   -H "Authorization: SB2Tb3GaNezZlIAXRoid3f7enyYO5G643y4009vC" \
-  --data '{ "query": "{ issues { id title } }" }' \
+  --data '{ "query": "{ issues { edges { node { id title } } } }" }' \
   https://api.linear.app/graphql
 ```
 
@@ -49,9 +49,14 @@ As issues (and most other objects) are team based, you first need to get the ID 
 
 ```graphql
 query {
+{
   teams {
-    id
-    name
+    edges {
+      node {
+    		id
+        name
+      }
+    }
   }
 }
 ```
@@ -65,15 +70,19 @@ query {
     name
 
     issues {
-      id
-      title
-      description
-      assignee {
-        id
-        name
+      edges {
+        node {
+          id
+          title
+          description
+          assignee {
+            id
+            name
+          }
+          createdAt
+          archivedAt
+        }
       }
-      createdAt
-      archivedAt
     }
   }
 }
