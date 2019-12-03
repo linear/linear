@@ -50,8 +50,10 @@ As issues (and most other objects) are team based, you first need to get the ID 
 ```graphql
 query {
   teams {
-    id
-    name
+    nodes {
+      id
+      name
+    }
   }
 }
 ```
@@ -65,15 +67,17 @@ query {
     name
 
     issues {
-      id
-      title
-      description
-      assignee {
+      nodes {
         id
-        name
+        title
+        description
+        assignee {
+          id
+          name
+        }
+        createdAt
+        archivedAt
       }
-      createdAt
-      archivedAt
     }
   }
 }
