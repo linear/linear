@@ -7,9 +7,8 @@ export class IssuesNodeProvider implements vscode.TreeDataProvider<Issue> {
   public constructor() {
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     this.linear = new Linear({
-      token: "fCzG6qAHVzRXZePyV1STfbCsMqfhtuSxHssG4W5I",
+      token: "",
     });
-    // TODO: Revoke this key once auth is in
     this.refresh();
   }
 
