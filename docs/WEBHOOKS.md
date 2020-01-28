@@ -47,7 +47,7 @@ app.use(bodyParser.json());
 // Receive HTTP POST requests
 app.post("/my-linear-webhook", (req, res) => {
   const payload = req.body;
-  const { action, data, type, timestamp } = payload;
+  const { action, data, type, createdAt } = payload;
 
   // Do something neat with the data received!
 
@@ -184,7 +184,6 @@ The payload will be sent with the following HTTP headers:
   Accept-Charset: utf-8
   Content-Type: application/json; charset=utf-8
   Linear-Delivery: 234d1a4e-b617-4388-90fe-adc3633d6b72
-  Linear-Event: Comment
   User-Agent: Linear-Webhook
 ```
 
@@ -197,11 +196,13 @@ Where the custom headers include:
 
 The Payload body has the following structure:
 
-| Field     | Description                                                                        |
-| --------- | ---------------------------------------------------------------------------------- |
-| `action`  | The type of the action that took place, currently `create` or `update`.            |
-| `data`    | The serialized value of the subject entity.                                        |
-| `changes` | For `update` actions, a delta object containing only the fields that were updated. |
+| Field         | Description                                                                               |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| `action`      | The type of the action that took place, currently `create` or `update`.                   |
+| `type`        | The type of entity that was targeted by the action.                                       |
+| `createdAt`   | The date and time that the action took place.                                             |
+| `data`        | The serialized value of the subject entity.                                               |
+| `updatedFrom` | For `update` actions, an object containing the previous values of all updated properties. |
 
 For example:
 
@@ -219,6 +220,6 @@ For example:
     "userId": "aacdca22-6266-4c0a-ab3c-8fa70a26765c"
   },
   "type": "Comment",
-  "timestamp": 1579783998
+  "createdAt": "2020-01-23T12:53:18.084Z"
 }
 ```
