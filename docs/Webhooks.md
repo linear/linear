@@ -202,6 +202,7 @@ The Payload body has the following structure:
 | `type`        | The type of entity that was targeted by the action.                                       |
 | `createdAt`   | The date and time that the action took place.                                             |
 | `data`        | The serialized value of the subject entity.                                               |
+| `url`.        | URL where you can open up the subject entity.                                             |
 | `updatedFrom` | For `update` actions, an object containing the previous values of all updated properties. |
 
 For example:
@@ -220,6 +221,7 @@ For example:
     "userId": "aacdca22-6266-4c0a-ab3c-8fa70a26765c"
   },
   "type": "Comment",
+  "url": "https://linear.app/issue/LIN-1778/foo-bar#comment-77217de3-fb52-4dad-bb9a-b356beb93de8",
   "createdAt": "2020-01-23T12:53:18.084Z"
 }
 ```
