@@ -202,7 +202,7 @@ The Payload body has the following structure:
 | `type`        | The type of entity that was targeted by the action.                                       |
 | `createdAt`   | The date and time that the action took place.                                             |
 | `data`        | The serialized value of the subject entity.                                               |
-| `url`.        | URL where you can open up the subject entity.                                             |
+| `url`         | URL where you can open up the subject entity.                                             |
 | `updatedFrom` | For `update` actions, an object containing the previous values of all updated properties. |
 
 For example:
