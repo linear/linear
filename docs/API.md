@@ -1,6 +1,6 @@
 # Linear GraphQL API
 
-Linear's public API is build using GraphQL. It's the same API we use internally for developing our applications.
+Linear's public API is built using GraphQL. It's the same API we use internally for developing our applications.
 
 If you're new to GraphQL, Apollo has [resources for beginners](https://blog.apollographql.com/the-basics-of-graphql-in-5-links-9e1dc4cac055). [The official documentation](https://graphql.org/) is another good starting point.
 
@@ -29,7 +29,7 @@ curl \
 
 ## Getting started
 
-To make your first requests, it's recommended to use an API client which supports GraphQL. [Insomnia](https://insomnia.rest/) is a free HTTP client which supports GraphQL. [GraphQL Playground](https://github.com/prisma/graphql-playground) from Prisma is a dedicated GraphQL client which also has a desktop app.
+To make your first requests, it's recommended to use an API client that supports GraphQL. [Insomnia](https://insomnia.rest/) is a free HTTP client that supports GraphQL. [GraphQL Playground](https://github.com/prisma/graphql-playground) from Prisma is a dedicated GraphQL client that also has a desktop app.
 
 Once you have your client installed, you can start making queries (read) and mutations (write) to the API.
 
@@ -109,4 +109,4 @@ To get the full list of available queries and mutations, introspect the API sche
 
 ## Support
 
-If you ran into problems or have questions or suggestions, you can join our customer Slack or send us a not (hello@linear.app). Both options are available through the user menu in the Linear application.
+If you run into problems or have questions or suggestions, you can join our customer Slack or send us a note (hello@linear.app). Both options are available through the user menu in the Linear application.
