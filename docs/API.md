@@ -22,8 +22,8 @@ Right now we support personal API keys, which can be created in the [API setting
 curl \
   -X POST \
   -H "Content-Type: application/json" \
-  -H "Authorization: SB2Tb3GaNezZlIAXRoid3f7enyYO5G643y4009vC" \
-  --data '{ "query": "{ issues { id title } }" }' \
+  -H "Authorization: <Replace this with your API Key>" \
+  --data '{ "query": "{ issues { nodes { id title } } }" }' \
   https://api.linear.app/graphql
 ```
 
