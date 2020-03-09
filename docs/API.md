@@ -107,6 +107,45 @@ This mutation will create a new issue and return its `id` and `title` if the cal
 
 To get the full list of available queries and mutations, introspect the API schema using your favorite GraphQL client.
 
+## Pagination
+
+All list responses from queries return paginated results. We implement Relay style cursor-based pagination model with `first`/`after` and `last`/`before` pagination arguments. To simply query get first 10 issues for your organization:
+
+```graphql
+query {
+  issues(first: 10) {
+    edges {
+      node {
+        id
+        title
+      }
+      cursor
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+```
+
+The first 50 results are returned by default without query arguments. Pagination also supports simpler syntax where instead of edges you can directly get all the nodes similar to GitHub's GraphQL API:
+
+```graphql
+query {
+  teams {
+    nodes {
+      id
+      name
+    }
+  }
+}
+```
+
+### Archived resources
+
+Archived resources are hidden by default from the paginated responses. They can be included by passing optional `includeArchived: true` as a query parameter for pagination.
+
 ## Support
 
 If you run into problems or have questions or suggestions, you can join our customer Slack or send us a note (hello@linear.app). Both options are available through the user menu in the Linear application.
