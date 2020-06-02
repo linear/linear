@@ -2,7 +2,7 @@
   "name": "linear",
   "private": true,
   "license": "MIT",
-  "author": "Linear.app",
+  "author": "Linear Orbit, Inc",
   "workspaces": [
     "packages/*"
   ],
