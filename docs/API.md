@@ -83,6 +83,18 @@ query {
 }
 ```
 
+We can also get an issue by id:
+
+```graphql
+query {
+  issue(id: "BLA-123") {
+    id
+    title
+    description
+  }
+}
+```
+
 To create a new issue, we'll need to a mutation:
 
 ```graphql
@@ -137,6 +149,93 @@ query {
     nodes {
       id
       name
+    }
+  }
+}
+```
+
+## Other Examples
+
+### Queries
+
+There are many ways to fetch issues. One commmon use case is to get all the issues assigned to a user.
+
+First let's find our user's id:
+
+```graphql
+query {
+  users {
+    nodes {
+      name
+      id
+    }
+  }
+}
+```
+
+Now we can use the assignedIssues field on User:
+
+```graphql
+query {
+  user(id: "USERID") {
+    id
+    name
+    assignedIssues {
+      nodes {
+        id
+        title
+      }
+    }
+  }
+}
+```
+
+We can do the same thing with WorkflowStates:
+
+```graphql
+query {
+  workflowStates {
+    nodes{
+      id
+      name
+    }
+  }
+}
+```
+
+```graphql
+query {
+  workflowState(id: "WORKFLOW_ID") {
+    issues {
+      nodes {
+        title
+      }
+    }
+  }
+}
+```
+
+### Mutations
+
+A common use case is to update an issue. To do this we can use the issueUpdate mutation, using the input field to include whatever it is we want to change.
+
+```graphql
+mutation {
+  issueUpdate(
+    id: "BLA-123",
+    input: {
+      title: "New Issue Title"
+      stateId: "NEW-STATE-ID",
+    }
+  ) {
+    success
+    issue {
+      id
+      title
+      state {
+        id
+        name
+      }
     }
   }
 }
