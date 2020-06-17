@@ -95,7 +95,7 @@ query {
 }
 ```
 
-To create a new issue, we'll need to a mutation:
+To create a new issue, we'll need to create a mutation:
 
 ```graphql
 mutation {
@@ -173,7 +173,7 @@ query {
 }
 ```
 
-Now we can use the assignedIssues field on User:
+Now we can use the `assignedIssues` field on User:
 
 ```graphql
 query {
@@ -190,7 +190,7 @@ query {
 }
 ```
 
-We can do the same thing with WorkflowStates:
+We can do the same thing with `workflowStates`:
 
 ```graphql
 query {
@@ -217,7 +217,7 @@ query {
 
 ### Mutations
 
-A common use case is to update an issue. To do this we can use the issueUpdate mutation, using the input field to include whatever it is we want to change.
+A common use case is to update an issue. To do this we can use the `issueUpdate` mutation, using the input field to include whatever it is we want to change.
 
 ```graphql
 mutation {
