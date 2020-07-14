@@ -181,10 +181,10 @@ The format of the payload body reflects that of the corresponding GraphQL entity
 The payload will be sent with the following HTTP headers:
 
 ```http
-  Accept-Charset: utf-8
-  Content-Type: application/json; charset=utf-8
-  Linear-Delivery: 234d1a4e-b617-4388-90fe-adc3633d6b72
-  User-Agent: Linear-Webhook
+Accept-Charset: utf-8
+Content-Type: application/json; charset=utf-8
+Linear-Delivery: 234d1a4e-b617-4388-90fe-adc3633d6b72
+User-Agent: Linear-Webhook
 ```
 
 Where the custom headers include:
@@ -198,7 +198,7 @@ The Payload body has the following structure:
 
 | Field         | Description                                                                               |
 | ------------- | ----------------------------------------------------------------------------------------- |
-| `action`      | The type of the action that took place, currently `create` or `update`.                   |
+| `action`      | The type of the action that took place: `create`, `update` or `remove`.                   |
 | `type`        | The type of entity that was targeted by the action.                                       |
 | `createdAt`   | The date and time that the action took place.                                             |
 | `data`        | The serialized value of the subject entity.                                               |
