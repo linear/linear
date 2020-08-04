@@ -1,9 +1,10 @@
 # Linear API
 
-**WARNING**: This is pre-alpha software and mostly does _not_ work yet. Feel free to poke around, ask questions, and open PRs, but don't be surprised if things don't work yet.
+**WARNING**: The CLI and SDK in this repository are not up to date. For now we recommend everyone to use the Linear GraphQL API directly. For a reference client implementation, check out the [linear-import](https://github.com/linearapp/linear-import) repository.
 
 This monorepo contains tools and documentation for Linear's API.
 
 ## Documentation
 
 - [Linear GraphQL API](https://github.com/linearapp/linear/blob/master/docs/API.md)
+- [Linear Webhooks](https://github.com/linearapp/linear/blob/master/docs/Webhooks.md)
