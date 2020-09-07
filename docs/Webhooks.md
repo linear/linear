@@ -184,15 +184,16 @@ The payload will be sent with the following HTTP headers:
 Accept-Charset: utf-8
 Content-Type: application/json; charset=utf-8
 Linear-Delivery: 234d1a4e-b617-4388-90fe-adc3633d6b72
+Linear-Event: Issue
 User-Agent: Linear-Webhook
 ```
 
 Where the custom headers include:
 
-| Name              | Description                                     |
-| ----------------- | ----------------------------------------------- |
-| `Linear-Delivery` | An UUID (v4) uniquely identifying this payload. |
-| `Linear-Event`    | The Entity type which triggered this event .    |
+| Name              | Description                                                       |
+| ----------------- | ----------------------------------------------------------------- |
+| `Linear-Delivery` | An UUID (v4) uniquely identifying this payload.                   |
+| `Linear-Event`    | The Entity type which triggered this event: `Issue` or `Comment`. |
 
 The Payload body has the following structure:
 
