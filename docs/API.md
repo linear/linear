@@ -154,6 +154,22 @@ query {
 }
 ```
 
+By default results are ordered by `createdAt` field. To get most recently updated resources, you can alternatively order by `updatedAt` field:
+
+```graphql
+query {
+  issues(orderBy: updatedAt) {
+    nodes {
+      id
+      identifier
+      title
+      createdAt
+      updatedAt
+    }
+  }
+}
+```
+
 ## Other Examples
 
 ### Queries
@@ -190,7 +206,7 @@ query {
 }
 ```
 
-We can do the same thing with `workflowStates`:
+We can do the same thing with `workflowStates` which reprecent status fields for teams:
 
 ```graphql
 query {
