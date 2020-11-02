@@ -2,13 +2,6 @@ overwrite: true
 schema: "https://api.linear.app/graphql"
 documents: "./src/documents/**"
 generates:
-  src/_generated/schema-types.ts:
-    plugins:
-      - "typescript"
-      - "typescript-operations"
-  src/_generated/schema-documents.ts:
-    plugins:
-      - "typescript-document-nodes"
   src/_generated/schema-sdk.ts:
     plugins:
       - "typescript"

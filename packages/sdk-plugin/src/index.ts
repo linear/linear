@@ -2,17 +2,17 @@ import { extname } from "path";
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
 import { LoadedFragment, RawClientSideBasePluginConfig } from "@graphql-codegen/visitor-plugin-common";
 import { concatAST, DocumentNode, FragmentDefinitionNode, GraphQLSchema, Kind, visit } from "graphql";
-import { RawGenericSdkPluginConfig } from "./config";
-import { GenericSdkVisitor } from "./visitor";
+import { RawSdkPluginConfig } from "./config";
+import { SdkVisitor } from "./visitor";
 
 function nonNullable<T>(value: T): value is NonNullable<T> {
   return value !== null && value !== undefined;
 }
 
-export const plugin: PluginFunction<RawGenericSdkPluginConfig> = (
+export const plugin: PluginFunction<RawSdkPluginConfig> = (
   schema: GraphQLSchema,
   documents: Types.DocumentFile[],
-  config: RawGenericSdkPluginConfig
+  config: RawSdkPluginConfig
 ) => {
   const nodes = documents.reduce<DocumentNode[]>((prev, v) => {
     return [...prev, v.document].filter(nonNullable);
@@ -31,7 +31,8 @@ export const plugin: PluginFunction<RawGenericSdkPluginConfig> = (
     ),
     ...(config.externalFragments || []),
   ];
-  const visitor = new GenericSdkVisitor(schema, allFragments, config);
+
+  const visitor = new SdkVisitor(schema, allFragments, config, documents);
   const visitorResult = visit(allAst, { leave: visitor });
 
   return {
@@ -51,8 +52,8 @@ export const validate: PluginValidateFn = async (
   outputFile: string
 ) => {
   if (extname(outputFile) !== ".ts") {
-    throw new Error(`Plugin "typescript-generic-sdk" requires extension to be ".ts"!`);
+    throw new Error(`Plugin "@linear/sdk-plugin" requires extension to be ".ts"!`);
   }
 };
 
-export { GenericSdkVisitor };
+export { SdkVisitor };

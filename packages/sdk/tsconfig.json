@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "extends": "../../tsconfig",
   "compilerOptions": {
     "rootDir": "src",
@@ -7,11 +6,4 @@
     "declarationDir": "dist"
   },
   "exclude": ["./src/_tests", "dist", "rollup.config.js", "./src/scratch.ts"]
-=======
-  "extends": "../../config/tsconfig",
-  "compilerOptions": {
-    "baseUrl": "./src",
-    "outDir": "./dist"
-  }
->>>>>>> Initial sdk generation plugin
 }
