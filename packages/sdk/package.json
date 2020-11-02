@@ -1,5 +1,6 @@
 {
   "name": "@linear/sdk",
+<<<<<<< HEAD
   "description": "The Linear Client SDK for interacting with the Linear GraphQL API",
   "version": "1.1.5",
   "author": "Linear Orbit, Inc",
@@ -58,4 +59,55 @@
     "access": "public"
   },
   "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
+=======
+  "version": "1.0.0",
+  "author": "Linear Orbit, Inc",
+  "license": "MIT",
+  "engines": {
+    "node": "13.x",
+    "yarn": "1.x"
+  },
+  "scripts": {
+    "test": "npx jest -w 4",
+    "test:update": "npx jest -w 4 -u",
+    "test:ci": "npx jest -w 1",
+    "tsc": "npx tsc --noEmit",
+    "build": "yarn build:clean && npx tsc",
+    "build:clean": "npx rimraf dist",
+    "generate": "yarn generate:clean && npx graphql-codegen --config codegen.yml",
+    "generate:clean": "npx rimraf src/_generated"
+  },
+  "dependencies": {
+    "@graphql-codegen/cli": "^1.19.0",
+    "@graphql-codegen/introspection": "1.18.0",
+    "@graphql-codegen/typescript": "1.17.11",
+    "@graphql-codegen/typescript-document-nodes": "1.17.8",
+    "@graphql-codegen/typescript-graphql-request": "2.0.2",
+    "@graphql-codegen/typescript-operations": "1.17.8",
+    "auto-bind": "4.0.0",
+    "graphql": "15.4.0",
+    "typescript": "4.0.5"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "testMatch": [
+      "**/*.tests.ts?(x)"
+    ],
+    "transform": {
+      "^.*\\.tsx?$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    }
+  }
+>>>>>>> Initial sdk generation plugin
 }

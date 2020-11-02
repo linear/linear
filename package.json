@@ -23,6 +23,7 @@
     "generate:sdk": "lerna run build:codegen-sdk && lerna run generate:sdk",
     "generate:test": "lerna run build:codegen-test && lerna run generate:test",
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
+<<<<<<< HEAD
     "mock": "npx graphql-faker packages/sdk/src/schema.graphql",
     "schema": "lerna run generate:schema",
     "test:ci": "npx jest -w 1",
@@ -65,6 +66,35 @@
     "ts-jest": "^26.4.4",
     "tslib": "^2.1.0",
     "typescript": "^4.0.5"
+=======
+    "tsc": "lerna run tsc --parallel",
+    "build": "yarn generate && lerna run build",
+    "generate": "lerna run build-plugin && lerna run generate --parallel && yarn prettier",
+    "prettier": "npx prettier --write **/*.{json,ts,js}"
+  },
+  "dependencies": {
+    "@linear/sdk": "file:packages/sdk",
+    "@linear/sdk-plugin": "file:packages/sdk-plugin",
+    "@types/jest": "26.0.15"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "4.6.0",
+    "@typescript-eslint/parser": "4.6.0",
+    "eslint": "7.12.1",
+    "eslint-config-prettier": "6.15.0",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-jsdoc": "30.7.6",
+    "eslint-plugin-no-null": "1.0.2",
+    "husky": "4.3.0",
+    "lerna": "3.22.1",
+    "lint-staged": "10.5.1",
+    "prettier": "2.1.2",
+    "rimraf": "3.0.2",
+    "ts-jest": "26.4.3"
+>>>>>>> Initial sdk generation plugin
+  },
+  "resolutions": {
+    "typescript": "4.0.5"
   },
   "lint-staged": {
     "*.{js,ts,tsx,json,css,yaml}": [
@@ -76,8 +106,12 @@
   },
   "husky": {
     "hooks": {
+<<<<<<< HEAD
       "commit-msg": "npx commitlint -E  HUSKY_GIT_PARAMS",
       "pre-commit": "npx lint-staged"
+=======
+      "pre-commit": "yarn build && npx lint-staged"
+>>>>>>> Initial sdk generation plugin
     }
   },
   "commitlint": {

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
 node_modules/
 dist/
 .changeset/
+=======
+graphql.schema.json
+>>>>>>> Initial sdk generation plugin

@@ -93,7 +93,11 @@ module.exports = {
   },
   overrides: [
     {
+<<<<<<< HEAD
       files: ["**/_generated*"],
+=======
+      files: ["**/_generated/**/*.ts"],
+>>>>>>> Initial sdk generation plugin
       rules: {
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-explicit-any": "off",

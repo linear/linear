@@ -16,6 +16,7 @@
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": true,
+    "resolveJsonModule": true,
     "noImplicitThis": false,
     "noUnusedLocals": false,
     "resolveJsonModule": true,
