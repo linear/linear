@@ -4945,24 +4945,71 @@ export const ViewerDocument = gql`
     }
   }
 `;
+
+export type LinearSdkWrapper = <T>(action: () => Promise<T>) => Promise<T>;
+
+export enum LinearSdkStatus {
+  "success" = "success",
+  "error" = "error",
+}
+
+export interface LinearSdkResponse<T> {
+  status: LinearSdkStatus;
+  data?: T;
+  error?: Error;
+}
+
+export type LinearSdkHandler<T> = () => Promise<LinearSdkResponse<T>>;
+
+export function linearSdkHandler<T>(sdkFunction: () => Promise<T>): LinearSdkHandler<T> {
+  return async function handler() {
+    try {
+      const response = await sdkFunction();
+      return {
+        status: LinearSdkStatus.success,
+        data: response,
+      };
+    } catch (error) {
+      return {
+        status: LinearSdkStatus.error,
+        error,
+      };
+    }
+  };
+}
+
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R>;
 
-export function createRawLinearSdk<C>(requester: Requester<C>) {
+const defaultWrapper: LinearSdkWrapper = sdkFunction => sdkFunction();
+
+export function createRawLinearSdk<C>(requester: Requester<C>, withWrapper: LinearSdkWrapper = defaultWrapper) {
   return {
-    issue(variables: IssueQueryVariables, options?: C): Promise<IssueQuery> {
-      return requester<IssueQuery, IssueQueryVariables>(IssueDocument, variables, options);
+    issue(variables: IssueQueryVariables, options?: C): Promise<LinearSdkResponse<IssueQuery>> {
+      return withWrapper(
+        linearSdkHandler(() => requester<IssueQuery, IssueQueryVariables>(IssueDocument, variables, options))
+      );
     },
-    createIssue(variables: CreateIssueMutationVariables, options?: C): Promise<CreateIssueMutation> {
-      return requester<CreateIssueMutation, CreateIssueMutationVariables>(CreateIssueDocument, variables, options);
+    createIssue(variables: CreateIssueMutationVariables, options?: C): Promise<LinearSdkResponse<CreateIssueMutation>> {
+      return withWrapper(
+        linearSdkHandler(() =>
+          requester<CreateIssueMutation, CreateIssueMutationVariables>(CreateIssueDocument, variables, options)
+        )
+      );
     },
-    teams(variables?: TeamsQueryVariables, options?: C): Promise<TeamsQuery> {
-      return requester<TeamsQuery, TeamsQueryVariables>(TeamsDocument, variables, options);
+    teams(variables?: TeamsQueryVariables, options?: C): Promise<LinearSdkResponse<TeamsQuery>> {
+      return withWrapper(
+        linearSdkHandler(() => requester<TeamsQuery, TeamsQueryVariables>(TeamsDocument, variables, options))
+      );
     },
-    team(variables: TeamQueryVariables, options?: C): Promise<TeamQuery> {
-      return requester<TeamQuery, TeamQueryVariables>(TeamDocument, variables, options);
+    team(variables: TeamQueryVariables, options?: C): Promise<LinearSdkResponse<TeamQuery>> {
+      return withWrapper(
+        linearSdkHandler(() => requester<TeamQuery, TeamQueryVariables>(TeamDocument, variables, options))
+      );
     },
-    viewer(variables?: ViewerQueryVariables, options?: C): Promise<ViewerQuery> {
-      return requester<ViewerQuery, ViewerQueryVariables>(ViewerDocument, variables, options);
+    viewer(variables?: ViewerQueryVariables, options?: C): Promise<LinearSdkResponse<ViewerQuery>> {
+      return withWrapper(
+        linearSdkHandler(() => requester<ViewerQuery, ViewerQueryVariables>(ViewerDocument, variables, options))
+      );
     },
   };
 }

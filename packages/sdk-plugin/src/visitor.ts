@@ -22,6 +22,10 @@ export interface SdkOperation {
   operationVariablesTypes: string;
 }
 
+const additionalExportedTypes = `
+export type LinearSdkWrapper = <T>(action: () => Promise<T>) => Promise<T>;
+`;
+
 export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPluginConfig> {
   private _operationsToInclude: SdkOperation[] = [];
 
@@ -84,8 +88,10 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
 
       return `${o.node.name?.value ?? "UNKNOWN_NODE_NAME"}(variables${optionalVariables ? "?" : ""}: ${
         o.operationVariablesTypes
-      }, options?: C): ${returnType}<${o.operationResultType}> {
-return requester<${o.operationResultType}, ${o.operationVariablesTypes}>(${o.documentVariableName}, variables, options);
+      }, options?: C): ${returnType}<LinearSdkResponse<${o.operationResultType}>> {
+return withWrapper(linearSdkHandler(() => requester<${o.operationResultType}, ${o.operationVariablesTypes}>(${
+        o.documentVariableName
+      }, variables, options)));
 }`;
     });
   }
@@ -95,11 +101,45 @@ return requester<${o.operationResultType}, ${o.operationVariablesTypes}>(${o.doc
     const allPossibleActions = this.getActions().map(s => indentMultiline(s, 2));
 
     return `
+${additionalExportedTypes}
+
+export enum LinearSdkStatus {
+  "success" = "success",
+  "error" = "error",
+}
+
+export interface LinearSdkResponse<T> {
+  status: LinearSdkStatus;
+  data?: T;
+  error?: Error;
+}
+
+export type LinearSdkHandler<T> = () => Promise<LinearSdkResponse<T>>;
+
+export function linearSdkHandler<T>(sdkFunction: () => Promise<T>): LinearSdkHandler<T> {
+  return async function handler() {
+    try {
+      const response = await sdkFunction();
+      return {
+        status: LinearSdkStatus.success,
+        data: response,
+      };
+    } catch (error) {
+      return {
+        status: LinearSdkStatus.error,
+        error,
+      };
+    }
+  };
+}
+
 export type Requester<C= {}> = <R, V>(doc: ${
       this.config.documentMode === DocumentMode.string ? "string" : "DocumentNode"
     }, vars?: V, options?: C) => ${usingObservable ? "Promise<R> & Observable<R>" : "Promise<R>"}
 
-export function createRawLinearSdk<C>(requester: Requester<C>) {
+const defaultWrapper: LinearSdkWrapper = sdkFunction => sdkFunction();
+
+export function createRawLinearSdk<C>(requester: Requester<C>, withWrapper: LinearSdkWrapper = defaultWrapper) {
   return {
 ${allPossibleActions.join(",\n")}
   };
