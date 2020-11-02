@@ -196,7 +196,7 @@ export type QueryApiKeysArgs = {
 };
 
 export type QueryApplicationArgs = {
-  redirectUri: Scalars["String"];
+  redirectUri?: Maybe<Scalars["String"]>;
   clientId: Scalars["String"];
 };
 
@@ -4831,10 +4831,24 @@ export type OrganizationDomainSimplePayload = {
   success: Scalars["Boolean"];
 };
 
-export type ViewQueryVariables = Exact<{ [key: string]: never }>;
+export type IssueFragmentFragment = { __typename?: "Issue" } & Pick<Issue, "id" | "title" | "description">;
 
-export type ViewQuery = { __typename?: "Query" } & {
-  viewer: { __typename?: "User" } & Pick<User, "id" | "name" | "email">;
+export type IssueQueryVariables = Exact<{
+  issueId: Scalars["String"];
+}>;
+
+export type IssueQuery = { __typename?: "Query" } & { issue: { __typename?: "Issue" } & IssueFragmentFragment };
+
+export type CreateIssueMutationVariables = Exact<{
+  teamId: Scalars["String"];
+  title: Scalars["String"];
+  description: Scalars["String"];
+}>;
+
+export type CreateIssueMutation = { __typename?: "Mutation" } & {
+  issueCreate: { __typename?: "IssuePayload" } & Pick<IssuePayload, "success"> & {
+      issue?: Maybe<{ __typename?: "Issue" } & IssueFragmentFragment>;
+    };
 };
 
 export type TeamsQueryVariables = Exact<{ [key: string]: never }>;
@@ -4859,14 +4873,37 @@ export type TeamQuery = { __typename?: "Query" } & {
     };
 };
 
-export const ViewDocument = gql`
-  query view {
-    viewer {
-      id
-      name
-      email
+export type ViewerQueryVariables = Exact<{ [key: string]: never }>;
+
+export type ViewerQuery = { __typename?: "Query" } & {
+  viewer: { __typename?: "User" } & Pick<User, "id" | "name" | "email">;
+};
+
+export const IssueFragmentFragmentDoc = gql`
+  fragment IssueFragment on Issue {
+    id
+    title
+    description
+  }
+`;
+export const IssueDocument = gql`
+  query issue($issueId: String!) {
+    issue(id: $issueId) {
+      ...IssueFragment
     }
   }
+  ${IssueFragmentFragmentDoc}
+`;
+export const CreateIssueDocument = gql`
+  mutation createIssue($teamId: String!, $title: String!, $description: String!) {
+    issueCreate(input: { title: $title, description: $description, teamId: $teamId }) {
+      success
+      issue {
+        ...IssueFragment
+      }
+    }
+  }
+  ${IssueFragmentFragmentDoc}
 `;
 export const TeamsDocument = gql`
   query teams {
@@ -4899,11 +4936,24 @@ export const TeamDocument = gql`
     }
   }
 `;
+export const ViewerDocument = gql`
+  query viewer {
+    viewer {
+      id
+      name
+      email
+    }
+  }
+`;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R>;
-export function getSdk<C>(requester: Requester<C>) {
+
+export function createRawLinearSdk<C>(requester: Requester<C>) {
   return {
-    view(variables?: ViewQueryVariables, options?: C): Promise<ViewQuery> {
-      return requester<ViewQuery, ViewQueryVariables>(ViewDocument, variables, options);
+    issue(variables: IssueQueryVariables, options?: C): Promise<IssueQuery> {
+      return requester<IssueQuery, IssueQueryVariables>(IssueDocument, variables, options);
+    },
+    createIssue(variables: CreateIssueMutationVariables, options?: C): Promise<CreateIssueMutation> {
+      return requester<CreateIssueMutation, CreateIssueMutationVariables>(CreateIssueDocument, variables, options);
     },
     teams(variables?: TeamsQueryVariables, options?: C): Promise<TeamsQuery> {
       return requester<TeamsQuery, TeamsQueryVariables>(TeamsDocument, variables, options);
@@ -4911,6 +4961,10 @@ export function getSdk<C>(requester: Requester<C>) {
     team(variables: TeamQueryVariables, options?: C): Promise<TeamQuery> {
       return requester<TeamQuery, TeamQueryVariables>(TeamDocument, variables, options);
     },
+    viewer(variables?: ViewerQueryVariables, options?: C): Promise<ViewerQuery> {
+      return requester<ViewerQuery, ViewerQueryVariables>(ViewerDocument, variables, options);
+    },
   };
 }
-export type Sdk = ReturnType<typeof getSdk>;
+
+export type Sdk = ReturnType<typeof createRawLinearSdk>;

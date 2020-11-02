@@ -13,11 +13,13 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "test": "lerna run test --parallel",
+    "test:watch": "lerna run test:watch --parallel",
     "test:update": "lerna run test:update --parallel",
     "test:ci": "lerna run test:ci",
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
     "tsc": "lerna run tsc --parallel",
     "build": "yarn generate && lerna run build",
+    "build:watch": "lerna run build:watch",
     "generate": "lerna run build-plugin && lerna run generate --parallel && yarn prettier",
     "prettier": "npx prettier --write **/*.{json,ts,js}"
   },
@@ -27,6 +29,7 @@
     "@types/jest": "26.0.15"
   },
   "devDependencies": {
+    "@types/express": "4.17.8",
     "@typescript-eslint/eslint-plugin": "4.6.0",
     "@typescript-eslint/parser": "4.6.0",
     "eslint": "7.12.1",
@@ -35,6 +38,7 @@
     "eslint-plugin-jsdoc": "30.7.6",
     "eslint-plugin-no-null": "1.0.2",
     "husky": "4.3.0",
+    "jest": "26.6.2",
     "lerna": "3.22.1",
     "lint-staged": "10.5.1",
     "prettier": "2.1.2",
@@ -54,7 +58,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn build && npx lint-staged"
+      "pre-commit": "yarn build && yarn test && npx lint-staged"
     }
   }
 }

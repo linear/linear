@@ -1,0 +1,20 @@
+fragment IssueFragment on Issue {
+  id
+  title
+  description
+}
+
+query issue($issueId: String!) {
+  issue(id: $issueId) {
+    ...IssueFragment
+  }
+}
+
+mutation createIssue($teamId: String!, $title: String!, $description: String!) {
+  issueCreate(input: { title: $title, description: $description, teamId: $teamId }) {
+    success
+    issue {
+      ...IssueFragment
+    }
+  }
+}

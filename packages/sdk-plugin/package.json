@@ -9,9 +9,6 @@
     "yarn": "1.x"
   },
   "scripts": {
-    "test": "npx jest -w 4",
-    "test:update": "npx jest -w 4 -u",
-    "test:ci": "npx jest -w 1",
     "tsc": "npx tsc --noEmit",
     "build": "yarn build:clean && npx tsc",
     "build:watch": "yarn build --watch",
