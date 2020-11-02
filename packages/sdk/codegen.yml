@@ -3,10 +3,14 @@ schema: "https://api.linear.app/graphql"
 documents: "./src/documents/**"
 generates:
   src/_generated/schema-sdk.ts:
+    hooks:
+      afterOneFileWrite:
+        - prettier --write
     plugins:
       - "typescript"
       - "typescript-operations"
-      - "@linear/sdk-plugin"
+      # - "@linear/sdk-plugin"
+      - "../sdk-plugin/dist/index.js"
   src/_generated/graphql.schema.json:
     plugins:
       - "introspection"

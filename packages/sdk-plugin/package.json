@@ -10,10 +10,9 @@
   },
   "scripts": {
     "tsc": "npx tsc --noEmit",
-    "build": "yarn build:clean && npx tsc",
+    "build:plugin": "yarn build:clean && npx tsc",
     "build:watch": "yarn build --watch",
-    "build:clean": "npx rimraf dist",
-    "build-plugin": "yarn build"
+    "build:clean": "npx rimraf dist"
   },
   "dependencies": {
     "@graphql-codegen/plugin-helpers": "1.18.0",
