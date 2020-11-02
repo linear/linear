@@ -17,12 +17,14 @@
     "test:ci": "lerna run test:ci",
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
     "tsc": "lerna run tsc --parallel",
-    "build": "lerna run build --parallel",
+    "build": "yarn generate && lerna run build",
+    "generate": "lerna run build-plugin && lerna run generate --parallel && yarn prettier",
     "prettier": "npx prettier --write **/*.{json,ts,js}"
   },
   "dependencies": {
-    "jest": "26.6.1",
-    "typescript": "4.0.5"
+    "@linear/sdk": "file:packages/sdk",
+    "@linear/sdk-plugin": "file:packages/sdk-plugin",
+    "@types/jest": "26.0.15"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "4.6.0",
@@ -36,7 +38,11 @@
     "lerna": "3.22.1",
     "lint-staged": "10.5.1",
     "prettier": "2.1.2",
+    "rimraf": "3.0.2",
     "ts-jest": "26.4.3"
+  },
+  "resolutions": {
+    "typescript": "4.0.5"
   },
   "lint-staged": {
     "*.{js,ts,tsx,json,css,yaml}": [
@@ -48,7 +54,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npx lint-staged"
+      "pre-commit": "yarn build && npx lint-staged"
     }
   }
 }

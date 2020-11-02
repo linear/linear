@@ -103,5 +103,16 @@ module.exports = {
     "prefer-arrow-functions": "off",
     "prefer-const": "warn",
   },
-  overrides: [],
+  overrides: [
+    {
+      files: ["**/_generated/**/*.ts"],
+      rules: {
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/array-type": "off",
+        "@typescript-eslint/ban-types": "off",
+        "id-blacklist": "off",
+      },
+    },
+  ],
 };
