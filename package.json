@@ -1,29 +1,54 @@
 {
   "name": "linear",
   "private": true,
-  "license": "MIT",
   "author": "Linear Orbit, Inc",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "lint": "lerna run lint",
-    "build": "lerna run build",
-    "test": "lerna run test",
-    "generate": "lerna run generate",
-    "cli": "yarn workspace @linear/cli start"
-  },
-  "devDependencies": {
-    "lerna": "3.13.2",
-    "prettier": "1.16.4",
-    "tslint": "5.15.0",
-    "typescript": "^3.6.3"
-  },
+  "license": "MIT",
   "engines": {
-    "node": "10.x.x",
+    "node": "13.x",
     "yarn": "1.x"
   },
+  "workspaces": [
+    "./packages/*"
+  ],
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "test": "lerna run test --parallel",
+    "test:update": "lerna run test:update --parallel",
+    "test:ci": "lerna run test:ci",
+    "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
+    "tsc": "lerna run tsc --parallel",
+    "build": "lerna run build --parallel",
+    "prettier": "npx prettier --write **/*.{json,ts,js}"
+  },
   "dependencies": {
-    "concurrently": "^4.1.2"
+    "jest": "26.6.1",
+    "typescript": "4.0.5"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "4.6.0",
+    "@typescript-eslint/parser": "4.6.0",
+    "eslint": "7.12.1",
+    "eslint-config-prettier": "6.15.0",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-jsdoc": "30.7.6",
+    "eslint-plugin-no-null": "1.0.2",
+    "husky": "4.3.0",
+    "lerna": "3.22.1",
+    "lint-staged": "10.5.1",
+    "prettier": "2.1.2",
+    "ts-jest": "26.4.3"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,json,css,yaml}": [
+      "npx prettier --write"
+    ],
+    "*.{js,ts,tsx}": [
+      "npx eslint --max-warnings 0 --fix -c .eslintrc.precommit.json"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npx lint-staged"
+    }
   }
 }

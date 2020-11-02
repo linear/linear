@@ -1,0 +1,69 @@
+{
+  "launch": {
+    "configurations": []
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": []
+  },
+  "folders": [
+    {
+      "path": "./"
+    }
+  ],
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "christian-kohler.path-intellisense",
+      "eamodio.gitlens",
+      "esbenp.prettier-vscode"
+    ]
+  },
+  "settings": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "search.exclude": {
+      "**/bower_components": true,
+      "**/build": true,
+      "**/dist": true,
+      "**/node_modules": true
+    },
+    "editor.rulers": [
+      120
+    ],
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    },
+    "files.exclude": {
+      "**/.cache": true,
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/build": true,
+      "**/dist": true,
+      "**/node_modules": true
+    },
+    "gitlens.advanced.messages": {
+      "suppressShowKeyBindingsNotice": true
+    },
+    "gitlens.hovers.currentLine.over": "line",
+    "gitlens.codeLens.enabled": false,
+    "gitlens.currentLine.enabled": false,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "eslint.options": {
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            "vars": "all",
+            "args": "after-used",
+            "argsIgnorePattern": "(^_|type|returns|of)",
+            "ignoreRestSiblings": true
+          }
+        ]
+      }
+    }
+  }
+}

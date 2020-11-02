@@ -1,0 +1,38 @@
+{
+  "name": "@linear/schema",
+  "version": "1.0.0",
+  "author": "Linear Orbit, Inc",
+  "license": "MIT",
+  "engines": {
+    "node": "13.x",
+    "yarn": "1.x"
+  },
+  "scripts": {
+    "test": "npx jest -w 4",
+    "test:update": "npx jest -w 4 -u",
+    "test:ci": "npx jest -w 1",
+    "tsc": "npx tsc --noEmit",
+    "build": "npx tsc"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "testMatch": [
+      "**/*.tests.ts?(x)"
+    ],
+    "transform": {
+      "^.*\\.tsx?$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    }
+  }
+}
