@@ -8,7 +8,11 @@ import {
   RawClientSideBasePluginConfig,
 } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
-import { GraphQLSchema, Kind, OperationDefinitionNode } from "graphql";
+import { GraphQLSchema, OperationDefinitionNode } from "graphql";
+import { getSdkAction } from "./sdkAction";
+import { getSdkFunction } from "./sdkFunction";
+import { getSdkHandler } from "./sdkHandler";
+import { getSdkWrapper } from "./sdkWrapper";
 
 /**
  * Definition of an operation for outputting an sdk function
@@ -27,9 +31,14 @@ export interface SdkOperation {
 }
 
 /**
+ * Default plugin config
+ */
+export type SdkPluginConfig = ClientSideBasePluginConfig;
+
+/**
  * Graphql-codegen visitor for processing the ast
  */
-export class SdkVisitor extends ClientSideBaseVisitor<RawClientSideBasePluginConfig, ClientSideBasePluginConfig> {
+export class SdkVisitor extends ClientSideBaseVisitor<RawClientSideBasePluginConfig, SdkPluginConfig> {
   private _operationsToInclude: SdkOperation[] = [];
 
   /**
@@ -44,6 +53,12 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawClientSideBasePluginCon
     super(schema, fragments, rawConfig, {}, documents);
 
     autoBind(this);
+
+    /** Import DocumentNode type */
+    if (this.config.documentMode !== DocumentMode.string) {
+      const importType = this.config.useTypeImports ? "import type" : "import";
+      this._additionalImports.push(`${importType} { DocumentNode } from 'graphql';`);
+    }
   }
 
   /**
@@ -68,97 +83,20 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawClientSideBasePluginCon
   }
 
   /**
-   * Any types required by the generated sdk
-   */
-  private getSdkTypes(): string {
-    return `
-export type LinearSdkWrapper = <T>(action: () => Promise<T>) => Promise<T>;
-
-export enum LinearSdkStatus {
-  "success" = "success",
-  "error" = "error",
-}
-
-export interface LinearSdkResponse<T> {
-  status: LinearSdkStatus;
-  data?: T;
-  error?: Error;
-}
-
-export type LinearSdkHandler<T> = () => Promise<LinearSdkResponse<T>>;
-
-export type Requester<C= {}> = <R, V>(doc: ${
-      this.config.documentMode === DocumentMode.string ? "string" : "DocumentNode"
-    }, vars?: V, options?: C) => Promise<R>
-`;
-  }
-
-  /**
-   * Catch and handle any errors from the sdk function
-   */
-  private getSdkErrorHandler(): string {
-    return `
-      export function linearSdkHandler<T>(sdkFunction: () => Promise<T>): LinearSdkHandler<T> {
-        return async function handler() {
-          try {
-            const response = await sdkFunction();
-            return {
-              status: LinearSdkStatus.success,
-              data: response,
-            };
-          } catch (error) {
-            return {
-              status: LinearSdkStatus.error,
-              error,
-            };
-          }
-        };
-      }
-      `;
-  }
-
-  /**
-   * Process each operation and return a generated sdk function
-   */
-  private getSdkActions() {
-    return this._operationsToInclude.map(o => {
-      const optionalVariables =
-        !o.node.variableDefinitions ||
-        o.node.variableDefinitions.length === 0 ||
-        o.node.variableDefinitions.every(v => v.type.kind !== Kind.NON_NULL_TYPE || v.defaultValue);
-
-      const functionName = o.node.name?.value ?? "UNKNOWN_NODE_NAME";
-      const variableType = o.operationVariablesTypes;
-      const argDefinition = `variables${optionalVariables ? "?" : ""}: ${variableType}`;
-      const resultType = o.operationResultType;
-      const documentName = o.documentVariableName;
-
-      /** Build a function for this graphql operation */
-      return `${functionName}(${argDefinition}, options?: C): Promise<LinearSdkResponse<${resultType}>> {
-  return withWrapper(linearSdkHandler(() => requester<${resultType}, ${variableType}>(${documentName}, variables, options)));
-}`;
-    });
-  }
-
-  /**
    * Return the generated Linear sdk string content
    */
   public get sdkContent(): string {
+    const sdkContent = this._operationsToInclude
+      .map(getSdkAction)
+      .map(s => indentMultiline(s, 2))
+      .join(",\n");
+
     return `
-${this.getSdkTypes()}
+      ${getSdkHandler()}
 
-${this.getSdkErrorHandler()}
+      ${getSdkWrapper()}
 
-const defaultWrapper: LinearSdkWrapper = sdkFunction => sdkFunction();
-
-export function createRawLinearSdk<C>(requester: Requester<C>, withWrapper: LinearSdkWrapper = defaultWrapper) {
-  return {
-${this.getSdkActions()
-  .map(s => indentMultiline(s, 2))
-  .join(",\n")}
-  };
-}
-
-export type Sdk = ReturnType<typeof createRawLinearSdk>;`;
+      ${getSdkFunction(sdkContent, this.config)}
+    `;
   }
 }

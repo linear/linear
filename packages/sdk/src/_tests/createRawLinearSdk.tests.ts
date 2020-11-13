@@ -5,19 +5,19 @@ describe("createRawLinearSdk", () => {
   it("calls the requester", async () => {
     const requester = jest.fn();
     const sdk = createRawLinearSdk(requester);
-    const variables = { teamId: "asd" };
+    const id = "asd";
     const options = { asd: "qwe" };
 
-    await sdk.team(variables, options);
+    await sdk.team(id, options);
 
-    expect(requester).toHaveBeenCalledWith(TeamDocument, variables, options);
+    expect(requester).toHaveBeenCalledWith(TeamDocument, { id }, options);
   });
 
   it("wraps the requester", async () => {
     const wrapper = jest.fn();
     const sdk = createRawLinearSdk(jest.fn(), wrapper);
 
-    await sdk.team({ teamId: "asd" });
+    await sdk.team("asd");
 
     expect(wrapper).toHaveBeenCalledTimes(1);
   });
@@ -29,7 +29,7 @@ describe("createRawLinearSdk", () => {
       return Promise.resolve(data) as any;
     });
 
-    const response = await sdk.team({ teamId: "asd" });
+    const response = await sdk.team("asd");
 
     expect(response.status).toEqual(LinearSdkStatus.success);
     expect(response.data).toEqual(data);
@@ -41,7 +41,7 @@ describe("createRawLinearSdk", () => {
       throw new Error("test error");
     });
 
-    const response = await sdk.team({ teamId: "asd" });
+    const response = await sdk.team("asd");
 
     expect(response.status).toEqual(LinearSdkStatus.error);
     expect(response.data).toBeUndefined();
