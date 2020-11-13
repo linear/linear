@@ -9,8 +9,7 @@ generates:
     plugins:
       - "typescript"
       - "typescript-operations"
-      # - "@linear/sdk-plugin"
-      - "../sdk-plugin/dist/index.js"
+      - "@linear/sdk-plugin"
   src/_generated/graphql.schema.json:
     plugins:
       - "introspection"
