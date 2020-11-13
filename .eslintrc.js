@@ -56,19 +56,8 @@ module.exports = {
     eqeqeq: ["error", "always"],
     "id-blacklist": ["warn", "any", "String", "string", "Boolean", "boolean", "Undefined", "undefined"],
     "id-match": "error",
-    "import/order": [
-      "warn",
-      {
-        pathGroups: [
-          {
-            pattern: "~/**",
-            group: "external",
-          },
-        ],
-      },
-    ],
     "jsdoc/check-alignment": "warn",
-    "jsdoc/check-indentation": "off", // TODO: enable
+    "jsdoc/check-indentation": "off",
     "jsdoc/newline-after-description": "warn",
     "linebreak-style": "off",
     "no-caller": "error",
@@ -85,8 +74,7 @@ module.exports = {
       "warn",
       {
         vars: "all",
-        args: "none", // "after-used", TODO: enable
-        // argsIgnorePattern: "^_",
+        args: "after-used",
         ignoreRestSiblings: true,
       },
     ],
