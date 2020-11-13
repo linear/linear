@@ -1,11 +1,3 @@
-<<<<<<< HEAD
 node_modules/
 dist/
 .changeset/
-=======
-graphql.schema.json
-<<<<<<< HEAD
->>>>>>> Initial sdk generation plugin
-=======
-dist/
->>>>>>> Add tests for sdk wrapper
