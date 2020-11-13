@@ -9,8 +9,8 @@ query teams {
 }
 
 # Get one team by id
-query team($teamId: String!) {
-  team(id: $teamId) {
+query team($id: String!) {
+  team(id: $id) {
     id
     name
 

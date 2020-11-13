@@ -13,10 +13,11 @@
     "test:update": "yarn test -u",
     "test:ci": "npx jest -w 1",
     "tsc": "npx tsc --noEmit",
-    "build": "yarn build:clean && npx tsc",
+    "build": "yarn build:generate && yarn build:clean && npx tsc",
     "build:clean": "npx rimraf dist",
-    "generate": "yarn generate:clean && npx graphql-codegen --config codegen.yml",
-    "generate:clean": "npx rimraf src/_generated"
+    "build:generate": "yarn build:generate:clean && npx graphql-codegen --config codegen.yml",
+    "build:generate:watch": "yarn build:generate --watch",
+    "build:generate:clean": "npx rimraf src/_generated"
   },
   "dependencies": {
     "graphql": "15.4.0",

@@ -1,0 +1,17 @@
+export default {
+  HANDLER_NAME: "linearSdkHandler",
+  HANDLER_TYPE: "LinearSdkHandler",
+  ID_KEY: "id",
+  ID_TYPE: "string",
+  OPTIONS_NAME: "opts",
+  REQUESTER_NAME: "requester",
+  REQUESTER_TYPE: "Requester",
+  RESPONSE_TYPE: "LinearSdkResponse",
+  SDK_NAME: "createRawLinearSdk",
+  SDK_TYPE: "LinearSdk",
+  STATUS_TYPE: "LinearSdkStatus",
+  VARIABLE_NAME: "vars",
+  WRAPPER_DEFAULT_NAME: "defaultSdkWrapper",
+  WRAPPER_NAME: "sdkWrapper",
+  WRAPPER_TYPE: "LinearSdkWrapper",
+};

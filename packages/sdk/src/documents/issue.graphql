@@ -1,7 +1,46 @@
 fragment IssueFragment on Issue {
   id
+  createdAt
+  updatedAt
+  archivedAt
+  number
   title
   description
+  priority
+  estimate
+  boardOrder
+  startedAt
+  completedAt
+  canceledAt
+  autoClosedAt
+  autoArchivedAt
+  dueDate
+  previousIdentifiers
+  identifier
+  priorityLabel
+  url
+  team {
+    id
+  }
+  cycle {
+    id
+  }
+  state {
+    id
+  }
+  assignee {
+    id
+  }
+  parent {
+    id
+  }
+  project {
+    id
+  }
+  branchName
+  creator {
+    id
+  }
 }
 
 # Get one issue by id
@@ -11,8 +50,34 @@ query issue($id: String!) {
   }
 }
 
+# Query for many issues
+query issues(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  issues(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    edges {
+      cursor
+      node {
+        ...IssueFragment
+      }
+    }
+  }
+}
+
 # Create one issue
-mutation createIssue($teamId: String!, $title: String!, $description: String!) {
+mutation issueCreate($teamId: String!, $title: String!, $description: String!) {
   issueCreate(input: { title: $title, description: $description, teamId: $teamId }) {
     success
     issue {

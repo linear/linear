@@ -4999,7 +4999,38 @@ export type OrganizationDomainSimplePayload = {
   success: Scalars["Boolean"];
 };
 
-export type IssueFragmentFragment = { __typename?: "Issue" } & Pick<Issue, "id" | "title" | "description">;
+export type IssueFragmentFragment = { __typename?: "Issue" } & Pick<
+  Issue,
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "archivedAt"
+  | "number"
+  | "title"
+  | "description"
+  | "priority"
+  | "estimate"
+  | "boardOrder"
+  | "startedAt"
+  | "completedAt"
+  | "canceledAt"
+  | "autoClosedAt"
+  | "autoArchivedAt"
+  | "dueDate"
+  | "previousIdentifiers"
+  | "identifier"
+  | "priorityLabel"
+  | "url"
+  | "branchName"
+> & {
+    team: { __typename?: "Team" } & Pick<Team, "id">;
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
+    assignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    parent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
 
 export type IssueQueryVariables = Exact<{
   id: Scalars["String"];
@@ -5007,13 +5038,32 @@ export type IssueQueryVariables = Exact<{
 
 export type IssueQuery = { __typename?: "Query" } & { issue: { __typename?: "Issue" } & IssueFragmentFragment };
 
-export type CreateIssueMutationVariables = Exact<{
+export type IssuesQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type IssuesQuery = { __typename?: "Query" } & {
+  issues: { __typename?: "IssueConnection" } & {
+    edges: Array<
+      { __typename?: "IssueEdge" } & Pick<IssueEdge, "cursor"> & {
+          node: { __typename?: "Issue" } & IssueFragmentFragment;
+        }
+    >;
+  };
+};
+
+export type IssueCreateMutationVariables = Exact<{
   teamId: Scalars["String"];
   title: Scalars["String"];
   description: Scalars["String"];
 }>;
 
-export type CreateIssueMutation = { __typename?: "Mutation" } & {
+export type IssueCreateMutation = { __typename?: "Mutation" } & {
   issueCreate: { __typename?: "IssuePayload" } & Pick<IssuePayload, "success"> & {
       issue?: Maybe<{ __typename?: "Issue" } & IssueFragmentFragment>;
     };
@@ -5026,7 +5076,7 @@ export type TeamsQuery = { __typename?: "Query" } & {
 };
 
 export type TeamQueryVariables = Exact<{
-  teamId: Scalars["String"];
+  id: Scalars["String"];
 }>;
 
 export type TeamQuery = { __typename?: "Query" } & {
@@ -5050,8 +5100,47 @@ export type ViewerQuery = { __typename?: "Query" } & {
 export const IssueFragmentFragmentDoc = gql`
   fragment IssueFragment on Issue {
     id
+    createdAt
+    updatedAt
+    archivedAt
+    number
     title
     description
+    priority
+    estimate
+    boardOrder
+    startedAt
+    completedAt
+    canceledAt
+    autoClosedAt
+    autoArchivedAt
+    dueDate
+    previousIdentifiers
+    identifier
+    priorityLabel
+    url
+    team {
+      id
+    }
+    cycle {
+      id
+    }
+    state {
+      id
+    }
+    assignee {
+      id
+    }
+    parent {
+      id
+    }
+    project {
+      id
+    }
+    branchName
+    creator {
+      id
+    }
   }
 `;
 export const IssueDocument = gql`
@@ -5062,8 +5151,35 @@ export const IssueDocument = gql`
   }
   ${IssueFragmentFragmentDoc}
 `;
-export const CreateIssueDocument = gql`
-  mutation createIssue($teamId: String!, $title: String!, $description: String!) {
+export const IssuesDocument = gql`
+  query issues(
+    $before: String
+    $after: String
+    $first: Int
+    $last: Int
+    $includeArchived: Boolean
+    $orderBy: PaginationOrderBy
+  ) {
+    issues(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      edges {
+        cursor
+        node {
+          ...IssueFragment
+        }
+      }
+    }
+  }
+  ${IssueFragmentFragmentDoc}
+`;
+export const IssueCreateDocument = gql`
+  mutation issueCreate($teamId: String!, $title: String!, $description: String!) {
     issueCreate(input: { title: $title, description: $description, teamId: $teamId }) {
       success
       issue {
@@ -5084,8 +5200,8 @@ export const TeamsDocument = gql`
   }
 `;
 export const TeamDocument = gql`
-  query team($teamId: String!) {
-    team(id: $teamId) {
+  query team($id: String!) {
+    team(id: $id) {
       id
       name
       issues {
@@ -5113,8 +5229,6 @@ export const ViewerDocument = gql`
     }
   }
 `;
-
-export type LinearSdkWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
 export enum LinearSdkStatus {
   "success" = "success",
@@ -5146,40 +5260,43 @@ export function linearSdkHandler<T>(sdkFunction: () => Promise<T>): LinearSdkHan
   };
 }
 
-export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R>;
+export type LinearSdkWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
-const defaultWrapper: LinearSdkWrapper = sdkFunction => sdkFunction();
+const defaultSdkWrapper: LinearSdkWrapper = sdkFunction => sdkFunction();
 
-export function createRawLinearSdk<C>(requester: Requester<C>, withWrapper: LinearSdkWrapper = defaultWrapper) {
+export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, opts?: C) => Promise<R>;
+
+export function createRawLinearSdk<C>(requester: Requester<C>, sdkWrapper: LinearSdkWrapper = defaultSdkWrapper) {
   return {
-    issue(variables: IssueQueryVariables, options?: C): Promise<LinearSdkResponse<IssueQuery>> {
-      return withWrapper(
-        linearSdkHandler(() => requester<IssueQuery, IssueQueryVariables>(IssueDocument, variables, options))
+    issue(id: string, opts?: C): Promise<LinearSdkResponse<IssueQuery>> {
+      return sdkWrapper(
+        linearSdkHandler(() => requester<IssueQuery, IssueQueryVariables>(IssueDocument, { id }, opts))
       );
     },
-    createIssue(variables: CreateIssueMutationVariables, options?: C): Promise<LinearSdkResponse<CreateIssueMutation>> {
-      return withWrapper(
+    issues(vars?: IssuesQueryVariables, opts?: C): Promise<LinearSdkResponse<IssuesQuery>> {
+      return sdkWrapper(
+        linearSdkHandler(() => requester<IssuesQuery, IssuesQueryVariables>(IssuesDocument, vars, opts))
+      );
+    },
+    issueCreate(vars: IssueCreateMutationVariables, opts?: C): Promise<LinearSdkResponse<IssueCreateMutation>> {
+      return sdkWrapper(
         linearSdkHandler(() =>
-          requester<CreateIssueMutation, CreateIssueMutationVariables>(CreateIssueDocument, variables, options)
+          requester<IssueCreateMutation, IssueCreateMutationVariables>(IssueCreateDocument, vars, opts)
         )
       );
     },
-    teams(variables?: TeamsQueryVariables, options?: C): Promise<LinearSdkResponse<TeamsQuery>> {
-      return withWrapper(
-        linearSdkHandler(() => requester<TeamsQuery, TeamsQueryVariables>(TeamsDocument, variables, options))
-      );
+    teams(vars?: TeamsQueryVariables, opts?: C): Promise<LinearSdkResponse<TeamsQuery>> {
+      return sdkWrapper(linearSdkHandler(() => requester<TeamsQuery, TeamsQueryVariables>(TeamsDocument, vars, opts)));
     },
-    team(variables: TeamQueryVariables, options?: C): Promise<LinearSdkResponse<TeamQuery>> {
-      return withWrapper(
-        linearSdkHandler(() => requester<TeamQuery, TeamQueryVariables>(TeamDocument, variables, options))
-      );
+    team(id: string, opts?: C): Promise<LinearSdkResponse<TeamQuery>> {
+      return sdkWrapper(linearSdkHandler(() => requester<TeamQuery, TeamQueryVariables>(TeamDocument, { id }, opts)));
     },
-    viewer(variables?: ViewerQueryVariables, options?: C): Promise<LinearSdkResponse<ViewerQuery>> {
-      return withWrapper(
-        linearSdkHandler(() => requester<ViewerQuery, ViewerQueryVariables>(ViewerDocument, variables, options))
+    viewer(vars?: ViewerQueryVariables, opts?: C): Promise<LinearSdkResponse<ViewerQuery>> {
+      return sdkWrapper(
+        linearSdkHandler(() => requester<ViewerQuery, ViewerQueryVariables>(ViewerDocument, vars, opts))
       );
     },
   };
 }
 
-export type Sdk = ReturnType<typeof createRawLinearSdk>;
+export type LinearSdk = ReturnType<typeof createRawLinearSdk>;

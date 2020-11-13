@@ -2,7 +2,7 @@ import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin
 import { LoadedFragment, RawClientSideBasePluginConfig } from "@graphql-codegen/visitor-plugin-common";
 import { concatAST, DocumentNode, FragmentDefinitionNode, GraphQLSchema, Kind, visit } from "graphql";
 import { extname } from "path";
-import { nonNullable } from "utils";
+import { nonNullable } from "./utils";
 import { SdkVisitor } from "./visitor";
 
 /**
