@@ -1,45 +1,64 @@
-import { createServer, Server } from "http";
 import body from "body-parser";
 import express, { Application, Request } from "express";
 import getPort from "get-port";
+import { createServer, Server } from "http";
 import { JsonObject } from "type-fest";
 
+/** Mock key used to test auth */
 export const MOCK_API_KEY = "mock-api-key";
 
 type CapturedRequest = Pick<Request, "headers" | "method" | "body">;
 
-type Context = {
+/**
+ * Test server for returning mocked responses
+ */
+type MockContext = {
+  /** Raw express application */
   server: Application;
+  /** Raw test server */
   nodeServer: Server;
+  /** Url to listen on */
   url: string;
-  /**
-   * Setup a response that will be sent to requests
-   */
-  res: <S extends MockSpec>(spec?: S) => MockResult<S>;
+  /** Mock result returned from the test server */
+  res: <S extends MockSpec>(spec: S) => MockResult<S>;
 };
 
-type MockSpec = {
+/**
+ * Description of the mocked response to return
+ */
+interface MockSpec {
+  /** The headers to return from the test request */
   headers?: Record<string, string>;
+  /** The body data to return from the test request */
   body?: {
     data?: JsonObject;
     extensions?: JsonObject;
     errors?: JsonObject;
   };
-};
+}
 
-type MockResult<Spec extends MockSpec> = {
+/**
+ * Returned result from a call to the test server
+ */
+interface MockResult<Spec extends MockSpec> {
+  /** Input for the mocked response */
   spec: Spec;
+  /** A list of all requests made to the test server */
   requests: {
     method: string;
-    headers: Record<string, string>;
+    headers: Record<string, string | string[] | undefined>;
     body: JsonObject;
   }[];
-};
+}
 
-export function setupTestServer(): Context {
-  const ctx = {} as Context;
+/**
+ *  Create and return a mocked express server for testing
+ */
+export function createTestServer(): MockContext {
+  const ctx = {} as MockContext;
 
   beforeAll(async done => {
+    /** Initialise the test server */
     const port = await getPort();
     ctx.server = express();
     ctx.server.use(body.json());
@@ -49,42 +68,43 @@ export function setupTestServer(): Context {
     ctx.nodeServer.once("listening", done);
     ctx.url = `http://localhost:${port}`;
 
-    ctx.res = spec => {
+    /** Provide function for mocking the response */
+    ctx.res = function createMockResponse<S extends MockSpec>(spec: S) {
       const requests: CapturedRequest[] = [];
+
+      /** Listen to all routes */
       ctx.server.use("*", function mock(req, res) {
         if (req.headers.authorization !== MOCK_API_KEY) {
+          /** Handle invalid auth headers */
           res.sendStatus(401);
         } else {
           req.headers.host = "DYNAMIC";
+
+          /** Record test request */
           requests.push({
             method: req.method,
             headers: req.headers,
             body: req.body,
           });
+
+          /** Set response headers */
           if (spec?.headers) {
             Object.entries(spec.headers).forEach(([name, value]) => {
               res.setHeader(name, value);
             });
           }
+
+          /** Return a valid response with mocked response body */
           res.send(spec?.body ?? { data: {} });
         }
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return { spec, requests: requests } as any;
+
+      return { spec, requests };
     };
   });
 
-  afterEach(() => {
-    // https://stackoverflow.com/questions/10378690/remove-route-mappings-in-nodejs-express/28369539#28369539
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ctx.server._router.stack.forEach((item: any, i: number) => {
-      if (item.name === "mock") {
-        ctx.server._router.stack.splice(i, 1);
-      }
-    });
-  });
-
   afterAll(done => {
+    /** Stop the test server */
     ctx.nodeServer.close(done);
   });
 

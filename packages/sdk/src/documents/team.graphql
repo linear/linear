@@ -1,3 +1,4 @@
+# Get all connected teams
 query teams {
   teams {
     nodes {
@@ -7,6 +8,7 @@ query teams {
   }
 }
 
+# Get one team by id
 query team($teamId: String!) {
   team(id: $teamId) {
     id
