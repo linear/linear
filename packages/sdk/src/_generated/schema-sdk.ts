@@ -94,6 +94,10 @@ export type Query = {
   /** [ALPHA] Search issues. This query is experimental and is subject to change without notice. */
   issueSearch: IssueConnection;
   issues: IssueConnection;
+  /** One specific milestone. */
+  milestone: Milestone;
+  /** All milestones. */
+  milestones: MilestoneConnection;
   /** The user's settings. */
   notification: UserSettings;
   /** All notifications. */
@@ -353,6 +357,19 @@ export type QueryIssueSearchArgs = {
 };
 
 export type QueryIssuesArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryMilestoneArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryMilestonesArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -664,6 +681,8 @@ export type Issue = Node & {
   previousIdentifiers: Array<Scalars["String"]>;
   /** Issue's human readable identifier (e.g. ENG-123). */
   identifier: Scalars["String"];
+  /** Label for the priority. */
+  priorityLabel: Scalars["String"];
   /** Issue URL. */
   url: Scalars["String"];
   /** The team that the issue is associated with. */
@@ -678,6 +697,8 @@ export type Issue = Node & {
   parent?: Maybe<Issue>;
   /** The project that the issue is associated with. */
   project?: Maybe<Project>;
+  /** Suggested branch name for the issue. */
+  branchName: Scalars["String"];
   /** Users who are subscribed to the issue. */
   subscribers: UserConnection;
   /** The user who created the issue. */
@@ -1150,10 +1171,18 @@ export type Project = Node & {
   description: Scalars["String"];
   /** The project's unique URL slug. */
   slugId: Scalars["String"];
+  /** The icon of the project. */
+  icon?: Maybe<Scalars["String"]>;
   /** The project's color. */
   color: Scalars["String"];
   /** The type of the state. */
   state: Scalars["String"];
+  /** The user who created the project. */
+  creator: User;
+  /** The project lead. */
+  lead?: Maybe<User>;
+  /** The milestone that this project is associated with. */
+  milestone?: Maybe<Milestone>;
   /** The estimated completion date of the project. */
   targetDate?: Maybe<Scalars["TimelessDateScalar"]>;
   /** The time at which the project was moved into started state. */
@@ -1178,8 +1207,8 @@ export type Project = Node & {
   slackIssueStatuses: Scalars["Boolean"];
   /** Teams associated with this project. */
   teams: TeamConnection;
-  /** The user who created the project. */
-  creator: User;
+  /** Users that are members of the project. */
+  members: UserConnection;
   /** Issues associated with the project. */
   issues: IssueConnection;
   /** Links associated with the project. */
@@ -1188,6 +1217,16 @@ export type Project = Node & {
 
 /** A project. */
 export type ProjectTeamsArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** A project. */
+export type ProjectMembersArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -1216,6 +1255,143 @@ export type ProjectLinksArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+/** A milestone that contains projects. */
+export type Milestone = Node & {
+  __typename?: "Milestone";
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The name of the milestone. */
+  name: Scalars["String"];
+  /** The organization that the milestone belongs to. */
+  organization: Organization;
+  /** The sort order for the milestone. */
+  sortOrder: Scalars["Float"];
+  /** Projects associated with the milestone. */
+  projects: ProjectConnection;
+};
+
+/** A milestone that contains projects. */
+export type MilestoneProjectsArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** An organization. Organizations are root-level objects that contain user accounts and teams. */
+export type Organization = Node & {
+  __typename?: "Organization";
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The organization's name. */
+  name: Scalars["String"];
+  /** The organization's unique URL key. */
+  urlKey: Scalars["String"];
+  /** The organization's logo URL. */
+  logoUrl?: Maybe<Scalars["String"]>;
+  upgradeThresholdExceeded: Scalars["Boolean"];
+  /** Rolling 30-day total upload volume for the organization, in megabytes. */
+  periodUploadVolume: Scalars["Float"];
+  /** How git branches are formatted. If null, default formatting will be used. */
+  gitBranchFormat: Scalars["String"];
+  /** Whether the Git integration linkback messages should be sent. */
+  gitLinkbackMessagesEnabled: Scalars["Boolean"];
+  /** Whether the organization is using project milestones. */
+  projectMilestonesEnabled: Scalars["Boolean"];
+  /** Whether SAML authentication is enabled for organization. */
+  samlEnabled: Scalars["Boolean"];
+  /** Allowed authentication providers, empty array means all are allowed */
+  allowedAuthServices: Array<Scalars["String"]>;
+  /** Users associated with the organization. */
+  users: UserConnection;
+  /** Teams associated with the organization. */
+  teams: TeamConnection;
+  /** Milestones associated with the organization. */
+  mildestones: MilestoneConnection;
+  /** Integrations associated with the organization. */
+  integrations: IntegrationConnection;
+  /** The organization's subscription to a paid plan. */
+  subscription?: Maybe<Subscription>;
+  /** Number of active users in the organization. */
+  userCount: Scalars["Int"];
+  /** Number of issues in the organization. */
+  createdIssueCount: Scalars["Int"];
+};
+
+/** An organization. Organizations are root-level objects that contain user accounts and teams. */
+export type OrganizationUsersArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** An organization. Organizations are root-level objects that contain user accounts and teams. */
+export type OrganizationTeamsArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** An organization. Organizations are root-level objects that contain user accounts and teams. */
+export type OrganizationMildestonesArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** An organization. Organizations are root-level objects that contain user accounts and teams. */
+export type OrganizationIntegrationsArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type UserConnection = {
+  __typename?: "UserConnection";
+  edges: Array<UserEdge>;
+  nodes: Array<User>;
+  pageInfo: PageInfo;
+};
+
+export type UserEdge = {
+  __typename?: "UserEdge";
+  node: User;
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+};
+
 export type TeamConnection = {
   __typename?: "TeamConnection";
   edges: Array<TeamEdge>;
@@ -1228,6 +1404,121 @@ export type TeamEdge = {
   node: Team;
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
+};
+
+export type MilestoneConnection = {
+  __typename?: "MilestoneConnection";
+  edges: Array<MilestoneEdge>;
+  nodes: Array<Milestone>;
+  pageInfo: PageInfo;
+};
+
+export type MilestoneEdge = {
+  __typename?: "MilestoneEdge";
+  node: Milestone;
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+};
+
+export type IntegrationConnection = {
+  __typename?: "IntegrationConnection";
+  edges: Array<IntegrationEdge>;
+  nodes: Array<Integration>;
+  pageInfo: PageInfo;
+};
+
+export type IntegrationEdge = {
+  __typename?: "IntegrationEdge";
+  node: Integration;
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+};
+
+/** An integration with an external service. */
+export type Integration = Node & {
+  __typename?: "Integration";
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The integration's type. */
+  service: Scalars["String"];
+  /** The external service identifier. */
+  serviceId?: Maybe<Scalars["String"]>;
+  /** Settings related to the integration. */
+  settings: IntegrationSettings;
+  /** The organization that the integration is associated with. */
+  organization: Organization;
+  /** The team that the integration is associated with. */
+  team?: Maybe<Team>;
+  /** The user that added the integration. */
+  creator: User;
+};
+
+/** The integration resource's settings */
+export type IntegrationSettings = {
+  __typename?: "IntegrationSettings";
+  slackPost?: Maybe<SlackPostSettings>;
+  slackProjectPost?: Maybe<SlackPostSettings>;
+  googleSheets?: Maybe<GoogleSheetsSettings>;
+  sentry?: Maybe<SentrySettings>;
+};
+
+/** Slack notification specific settings. */
+export type SlackPostSettings = {
+  __typename?: "SlackPostSettings";
+  channel: Scalars["String"];
+  channelId: Scalars["String"];
+  configurationUrl: Scalars["String"];
+};
+
+/** Google Sheets specific settings. */
+export type GoogleSheetsSettings = {
+  __typename?: "GoogleSheetsSettings";
+  spreadsheetId: Scalars["String"];
+  spreadsheetUrl: Scalars["String"];
+  sheetId: Scalars["Float"];
+  updatedIssuesAt: Scalars["DateTime"];
+};
+
+/** Sentry specific settings. */
+export type SentrySettings = {
+  __typename?: "SentrySettings";
+  /** The slug of the Sentry organization being connected. */
+  organizationSlug: Scalars["String"];
+};
+
+/** The subscription of an organization. */
+export type Subscription = Node & {
+  __typename?: "Subscription";
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The subscription type. */
+  type: Scalars["String"];
+  /** The number of seats in the subscription. */
+  seats: Scalars["Float"];
+  /** The creator of the subscription. */
+  creator?: Maybe<User>;
+  /** The organization that the subscription is associated with. */
+  organization: Organization;
+  /** The date the subscription was canceled, if any. */
+  canceledAt?: Maybe<Scalars["DateTime"]>;
 };
 
 export type ProjectLinkConnection = {
@@ -1374,196 +1665,6 @@ export type IssueLabelIssuesArgs = {
   last?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-};
-
-/** An organization. Organizations are root-level objects that contain user accounts and teams. */
-export type Organization = Node & {
-  __typename?: "Organization";
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The organization's name. */
-  name: Scalars["String"];
-  /** The organization's unique URL key. */
-  urlKey: Scalars["String"];
-  /** The organization's logo URL. */
-  logoUrl?: Maybe<Scalars["String"]>;
-  upgradeThresholdExceeded: Scalars["Boolean"];
-  /** Rolling 30-day total upload volume for the organization, in megabytes. */
-  periodUploadVolume: Scalars["Float"];
-  /** How git branches are formatted. If null, default formatting will be used. */
-  gitBranchFormat: Scalars["String"];
-  /** Whether the Git integration linkback messages should be sent. */
-  gitLinkbackMessagesEnabled: Scalars["Boolean"];
-  /** Whether SAML authentication is enabled for organization. */
-  samlEnabled: Scalars["Boolean"];
-  /** Allowed authentication providers, empty array means all are allowed */
-  allowedAuthServices: Array<Scalars["String"]>;
-  /** Users associated with the organization. */
-  users: UserConnection;
-  /** Teams associated with the organization. */
-  teams: TeamConnection;
-  /** Integrations associated with the organization. */
-  integrations: IntegrationConnection;
-  /** The organization's subscription to a paid plan. */
-  subscription?: Maybe<Subscription>;
-  /** Number of active users in the organization. */
-  userCount: Scalars["Int"];
-  /** Number of issues in the organization. */
-  createdIssueCount: Scalars["Int"];
-};
-
-/** An organization. Organizations are root-level objects that contain user accounts and teams. */
-export type OrganizationUsersArgs = {
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
-/** An organization. Organizations are root-level objects that contain user accounts and teams. */
-export type OrganizationTeamsArgs = {
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
-/** An organization. Organizations are root-level objects that contain user accounts and teams. */
-export type OrganizationIntegrationsArgs = {
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
-export type UserConnection = {
-  __typename?: "UserConnection";
-  edges: Array<UserEdge>;
-  nodes: Array<User>;
-  pageInfo: PageInfo;
-};
-
-export type UserEdge = {
-  __typename?: "UserEdge";
-  node: User;
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-};
-
-export type IntegrationConnection = {
-  __typename?: "IntegrationConnection";
-  edges: Array<IntegrationEdge>;
-  nodes: Array<Integration>;
-  pageInfo: PageInfo;
-};
-
-export type IntegrationEdge = {
-  __typename?: "IntegrationEdge";
-  node: Integration;
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-};
-
-/** An integration with an external service. */
-export type Integration = Node & {
-  __typename?: "Integration";
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The integration's type. */
-  service: Scalars["String"];
-  /** The external service identifier. */
-  serviceId?: Maybe<Scalars["String"]>;
-  /** Settings related to the integration. */
-  settings: IntegrationSettings;
-  /** The organization that the integration is associated with. */
-  organization: Organization;
-  /** The team that the integration is associated with. */
-  team?: Maybe<Team>;
-  /** The user that added the integration. */
-  creator: User;
-};
-
-/** The integration resource's settings */
-export type IntegrationSettings = {
-  __typename?: "IntegrationSettings";
-  slackPost?: Maybe<SlackPostSettings>;
-  slackProjectPost?: Maybe<SlackPostSettings>;
-  googleSheets?: Maybe<GoogleSheetsSettings>;
-  sentry?: Maybe<SentrySettings>;
-};
-
-/** Slack notification specific settings. */
-export type SlackPostSettings = {
-  __typename?: "SlackPostSettings";
-  channel: Scalars["String"];
-  channelId: Scalars["String"];
-  configurationUrl: Scalars["String"];
-};
-
-/** Google Sheets specific settings. */
-export type GoogleSheetsSettings = {
-  __typename?: "GoogleSheetsSettings";
-  spreadsheetId: Scalars["String"];
-  spreadsheetUrl: Scalars["String"];
-  sheetId: Scalars["Float"];
-  updatedIssuesAt: Scalars["DateTime"];
-};
-
-/** Sentry specific settings. */
-export type SentrySettings = {
-  __typename?: "SentrySettings";
-  /** The slug of the Sentry organization being connected. */
-  organizationSlug: Scalars["String"];
-};
-
-/** The subscription of an organization. */
-export type Subscription = Node & {
-  __typename?: "Subscription";
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The subscription type. */
-  type: Scalars["String"];
-  /** The number of seats in the subscription. */
-  seats: Scalars["Float"];
-  /** The creator of the subscription. */
-  creator?: Maybe<User>;
-  /** The organization that the subscription is associated with. */
-  organization: Organization;
-  /** The date the subscription was canceled, if any. */
-  canceledAt?: Maybe<Scalars["DateTime"]>;
 };
 
 export type WebhookConnection = {
@@ -2023,6 +2124,8 @@ export type OrganizationAdminPrivileged = Node & {
   gitBranchFormat: Scalars["String"];
   /** Whether the Git integration linkback messages should be sent. */
   gitLinkbackMessagesEnabled: Scalars["Boolean"];
+  /** Whether the organization is using project milestones. */
+  projectMilestonesEnabled: Scalars["Boolean"];
   /** Whether SAML authentication is enabled for organization. */
   samlEnabled: Scalars["Boolean"];
   /** Allowed authentication providers, empty array means all are allowed */
@@ -2031,6 +2134,8 @@ export type OrganizationAdminPrivileged = Node & {
   users: UserConnection;
   /** Teams associated with the organization. */
   teams: TeamConnection;
+  /** Milestones associated with the organization. */
+  mildestones: MilestoneConnection;
   /** Integrations associated with the organization. */
   integrations: IntegrationConnection;
   /** The organization's subscription to a paid plan. Super user required. */
@@ -2302,6 +2407,8 @@ export type Favorite = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The type of the favorite. */
   type: Scalars["String"];
+  /** The order of the item in the favorites list. */
+  sortOrder: Scalars["Float"];
   /** The owner of the favorite. */
   user: User;
   /** Favorited issue. */
@@ -2620,6 +2727,10 @@ export type Mutation = {
   adminBulkEmail: AdminCommandPayload;
   /** Creates a stripe customer for an organization. */
   adminCreateStripeCustomer: AdminCommandPayload;
+  /** Schedules a task. Currently only anonymous tasks without any parameters can be scheduled. */
+  adminScheduleAnonymousTask: AdminCommandPayload;
+  /** Changes the email address for the user account and all of its users. */
+  adminUserAccountChangeEmail: UserAccountAdminPrivileged;
   /** [Deprecated] Creates a new event. */
   eventCreate: EventPayload;
   /** Creates a new API key. */
@@ -2676,6 +2787,8 @@ export type Mutation = {
   emojiDelete: ArchivePayload;
   /** Creates a new favorite (project, cycle etc). */
   favoriteCreate: FavoritePayload;
+  /** Updates a favorite. */
+  favoriteUpdate: FavoritePayload;
   /** Deletes a favorite reference. */
   favoriteDelete: ArchivePayload;
   /** Saves user feedback. */
@@ -2730,6 +2843,12 @@ export type Mutation = {
   issueArchive: ArchivePayload;
   /** Unarchives an issue. */
   issueUnarchive: ArchivePayload;
+  /** Creates a new milestone. */
+  milestoneCreate: MilestonePayload;
+  /** Updates a milestone. */
+  milestoneUpdate: MilestonePayload;
+  /** Archives a milestone. */
+  milestoneArchive: ArchivePayload;
   /** Creates a notification. */
   notificationCreate: NotificationPayload;
   /** Updates a notification. */
@@ -2746,6 +2865,10 @@ export type Mutation = {
   notificationSubscriptionDelete: ArchivePayload;
   /** Creates a new OAuth client. */
   oauthClientCreate: OauthClientPayload;
+  /** Updates an OAuth client. */
+  oauthClientUpdate: OauthClientPayload;
+  /** Archives an OAuth client. */
+  oauthClientArchive: ArchivePayload;
   /** Verifies a domain to be added to an organization. */
   organizationDomainVerify: OrganizationDomainPayload;
   /** Adds a domain to be allowed for an organization. */
@@ -2891,6 +3014,15 @@ export type MutationAdminCreateStripeCustomerArgs = {
   organizationId: Scalars["String"];
 };
 
+export type MutationAdminScheduleAnonymousTaskArgs = {
+  taskName: Scalars["String"];
+};
+
+export type MutationAdminUserAccountChangeEmailArgs = {
+  newEmail: Scalars["String"];
+  id: Scalars["String"];
+};
+
 export type MutationEventCreateArgs = {
   input: EventCreateInput;
 };
@@ -2993,6 +3125,11 @@ export type MutationEmojiDeleteArgs = {
 
 export type MutationFavoriteCreateArgs = {
   input: FavoriteCreateInput;
+};
+
+export type MutationFavoriteUpdateArgs = {
+  input: FavoriteUpdateInput;
+  id: Scalars["String"];
 };
 
 export type MutationFavoriteDeleteArgs = {
@@ -3122,6 +3259,19 @@ export type MutationIssueUnarchiveArgs = {
   id: Scalars["String"];
 };
 
+export type MutationMilestoneCreateArgs = {
+  input: MilestoneCreateInput;
+};
+
+export type MutationMilestoneUpdateArgs = {
+  input: MilestoneUpdateInput;
+  id: Scalars["String"];
+};
+
+export type MutationMilestoneArchiveArgs = {
+  id: Scalars["String"];
+};
+
 export type MutationNotificationCreateArgs = {
   input: NotificationUpdateInput;
   id: Scalars["String"];
@@ -3154,6 +3304,15 @@ export type MutationNotificationSubscriptionDeleteArgs = {
 
 export type MutationOauthClientCreateArgs = {
   input: OauthClientCreateInput;
+};
+
+export type MutationOauthClientUpdateArgs = {
+  input: OauthClientUpdateInput;
+  id: Scalars["String"];
+};
+
+export type MutationOauthClientArchiveArgs = {
+  id: Scalars["String"];
 };
 
 export type MutationOrganizationDomainVerifyArgs = {
@@ -3364,6 +3523,8 @@ export type UpdateOrganizationInput = {
   gitBranchFormat?: Maybe<Scalars["String"]>;
   /** Whether the Git integration linkback messages should be sent. */
   gitLinkbackMessagesEnabled?: Maybe<Scalars["Boolean"]>;
+  /** Whether the organization is using project milestones. */
+  projectMilestonesEnabled?: Maybe<Scalars["Boolean"]>;
   /** Linear Preview feature flags */
   linearPreviewFlags?: Maybe<Scalars["JSONObject"]>;
 };
@@ -3641,7 +3802,7 @@ export type CustomViewCreateInput = {
   /** The description of the custom view. */
   description?: Maybe<Scalars["String"]>;
   /** The icon of the custom view. */
-  icon?: Maybe<DecorativeIconType>;
+  icon?: Maybe<Scalars["String"]>;
   /** The color of the icon of the custom view. */
   color?: Maybe<Scalars["String"]>;
   /** The id of the team associated with the custom view. */
@@ -3651,66 +3812,6 @@ export type CustomViewCreateInput = {
   /** Whether the custom view is shared with everyone in the organization. */
   shared?: Maybe<Scalars["Boolean"]>;
 };
-
-/** The type of a decorative icon */
-export enum DecorativeIconType {
-  CustomView = "CustomView",
-  Bug = "Bug",
-  Calendar = "Calendar",
-  Apple = "Apple",
-  Android = "Android",
-  Page = "Page",
-  Team = "Team",
-  Starred = "Starred",
-  LightBulb = "LightBulb",
-  Bolt = "Bolt",
-  Alert = "Alert",
-  MobilePhone = "MobilePhone",
-  Computer = "Computer",
-  Clock = "Clock",
-  Lock = "Lock",
-  Folder = "Folder",
-  Phone = "Phone",
-  Dashboard = "Dashboard",
-  Pin = "Pin",
-  BarChart = "BarChart",
-  Dollar = "Dollar",
-  Cloud = "Cloud",
-  Chat = "Chat",
-  Compass = "Compass",
-  DesignTools = "DesignTools",
-  Tablet = "Tablet",
-  Server = "Server",
-  GitLab = "GitLab",
-  GitHub = "GitHub",
-  CreditCard = "CreditCard",
-  Briefcase = "Briefcase",
-  Airplane = "Airplane",
-  Home = "Home",
-  Camera = "Camera",
-  Gears = "Gears",
-  Image = "Image",
-  Face = "Face",
-  Ship = "Ship",
-  Book = "Book",
-  Mountain = "Mountain",
-  Send = "Send",
-  Cube = "Cube",
-  Recycle = "Recycle",
-  ThumbsUp = "ThumbsUp",
-  Flower = "Flower",
-  Chart = "Chart",
-  Heart = "Heart",
-  Bookmark = "Bookmark",
-  Video = "Video",
-  Sun = "Sun",
-  Inbox = "Inbox",
-  Subscribe = "Subscribe",
-  Bucket = "Bucket",
-  Brush = "Brush",
-  Trash = "Trash",
-  Link = "Link",
-}
 
 export type CustomViewPayload = {
   __typename?: "CustomViewPayload";
@@ -3728,7 +3829,7 @@ export type CustomViewUpdateInput = {
   /** The description of the custom view. */
   description?: Maybe<Scalars["String"]>;
   /** The icon of the custom view. */
-  icon?: Maybe<DecorativeIconType>;
+  icon?: Maybe<Scalars["String"]>;
   /** The color of the icon of the custom view. */
   color?: Maybe<Scalars["String"]>;
   /** The id of the team associated with the custom view. */
@@ -3830,6 +3931,8 @@ export type FavoriteCreateInput = {
   customViewId?: Maybe<Scalars["String"]>;
   /** The identifier of the label to favorite. */
   labelId?: Maybe<Scalars["String"]>;
+  /** The position of the item in the favorites list. */
+  sortOrder?: Maybe<Scalars["Float"]>;
 };
 
 export type FavoritePayload = {
@@ -3840,6 +3943,11 @@ export type FavoritePayload = {
   favorite: Favorite;
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+export type FavoriteUpdateInput = {
+  /** The position of the item in the favorites list. */
+  sortOrder?: Maybe<Scalars["Float"]>;
 };
 
 export type FeedbackCreateInput = {
@@ -4059,6 +4167,34 @@ export type IssueUpdateInput = {
   dueDate?: Maybe<Scalars["TimelessDateScalar"]>;
 };
 
+export type MilestoneCreateInput = {
+  /** The identifier. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The name of the milestone. */
+  name: Scalars["String"];
+  /** The identifier of the team associated with the milestone. */
+  teamId: Scalars["String"];
+  /** The sort order of the milestone. */
+  sortOrder?: Maybe<Scalars["Float"]>;
+};
+
+export type MilestonePayload = {
+  __typename?: "MilestonePayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The milesteone that was created or updated. */
+  milestone?: Maybe<Milestone>;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type MilestoneUpdateInput = {
+  /** The name of the milestone. */
+  name?: Maybe<Scalars["String"]>;
+  /** The sort order of the milestone. */
+  sortOrder?: Maybe<Scalars["Float"]>;
+};
+
 export type NotificationUpdateInput = {
   /** The time when notification was marked as read. */
   readAt?: Maybe<Scalars["DateTime"]>;
@@ -4100,13 +4236,13 @@ export type OauthClientCreateInput = {
   name: Scalars["String"];
   /** User facing description of the application. */
   description?: Maybe<Scalars["String"]>;
-  /** Name of the developer of the application */
+  /** Name of the developer of the application. */
   developer: Scalars["String"];
-  /** Url of the developer (homepage or docs) */
+  /** Url of the developer (homepage or docs). */
   developerUrl: Scalars["String"];
   /** List of allowed redirect URIs for the application. */
   redirectUris: Array<Scalars["String"]>;
-  /** URL for the app icon */
+  /** URL for the app icon. */
   imageUrl?: Maybe<Scalars["String"]>;
 };
 
@@ -4150,6 +4286,21 @@ export type OauthClient = Node & {
   clientSecret: Scalars["String"];
   /** List of allowed redirect URIs for the application. */
   redirectUris: Array<Scalars["String"]>;
+};
+
+export type OauthClientUpdateInput = {
+  /** The application's name. */
+  name?: Maybe<Scalars["String"]>;
+  /** User facing description of the application. */
+  description?: Maybe<Scalars["String"]>;
+  /** Name of the developer of the application. */
+  developer?: Maybe<Scalars["String"]>;
+  /** URL of the developer (homepage or docs). */
+  developerUrl?: Maybe<Scalars["String"]>;
+  /** List of allowed redirect URIs for the application. */
+  redirectUris?: Maybe<Array<Scalars["String"]>>;
+  /** URL for the app icon. */
+  imageUrl?: Maybe<Scalars["String"]>;
 };
 
 export type OrganizationDomainVerificationInput = {
@@ -4251,14 +4402,22 @@ export type ProjectCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The name of the project. */
   name: Scalars["String"];
+  /** The icon of the project. */
+  icon?: Maybe<Scalars["String"]>;
   /** The color of the project. */
   color?: Maybe<Scalars["String"]>;
   /** The state of the project. */
   state?: Maybe<Scalars["String"]>;
   /** The description for the project. */
   description?: Maybe<Scalars["String"]>;
+  /** The identifier of the milestone to associate the project with. */
+  milestoneId?: Maybe<Scalars["String"]>;
   /** The identifiers of the teams this project is associated with. */
   teamIds: Array<Scalars["String"]>;
+  /** The identifier of the project lead. */
+  leadId?: Maybe<Scalars["String"]>;
+  /** The identifiers of the members of this project. */
+  memberIds?: Maybe<Array<Scalars["String"]>>;
   /** The planned target date of the project. */
   targetDate?: Maybe<Scalars["TimelessDateScalar"]>;
 };
@@ -4280,10 +4439,18 @@ export type ProjectUpdateInput = {
   name?: Maybe<Scalars["String"]>;
   /** The description for the project. */
   description?: Maybe<Scalars["String"]>;
+  /** The identifier of the milestone to associate the project with. */
+  milestoneId?: Maybe<Scalars["String"]>;
+  /** The icon of the project. */
+  icon?: Maybe<Scalars["String"]>;
   /** The color of the project. */
   color?: Maybe<Scalars["String"]>;
   /** The identifiers of the teams this project is associated with. */
   teamIds?: Maybe<Array<Scalars["String"]>>;
+  /** The identifier of the project lead. */
+  leadId?: Maybe<Scalars["String"]>;
+  /** The identifiers of the members of this project. */
+  memberIds?: Maybe<Array<Scalars["String"]>>;
   /** The planned target date of the project. */
   targetDate?: Maybe<Scalars["TimelessDateScalar"]>;
   /** Whether to send new issue notifications to Slack. */
@@ -4590,6 +4757,7 @@ export enum UserFlagType {
   FigmaPromptDismissed = "figmaPromptDismissed",
   MigrateThemePreference = "migrateThemePreference",
   ListSelectionTip = "listSelectionTip",
+  ClearedAllNotifications = "clearedAllNotifications",
 }
 
 export type UserSubscribeToNewsletterPayload = {
@@ -4834,7 +5002,7 @@ export type OrganizationDomainSimplePayload = {
 export type IssueFragmentFragment = { __typename?: "Issue" } & Pick<Issue, "id" | "title" | "description">;
 
 export type IssueQueryVariables = Exact<{
-  issueId: Scalars["String"];
+  id: Scalars["String"];
 }>;
 
 export type IssueQuery = { __typename?: "Query" } & { issue: { __typename?: "Issue" } & IssueFragmentFragment };
@@ -4887,8 +5055,8 @@ export const IssueFragmentFragmentDoc = gql`
   }
 `;
 export const IssueDocument = gql`
-  query issue($issueId: String!) {
-    issue(id: $issueId) {
+  query issue($id: String!) {
+    issue(id: $id) {
       ...IssueFragment
     }
   }

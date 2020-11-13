@@ -1,8 +1,8 @@
 import { createLinearSdk } from "../index";
 import { LinearSdkStatus } from "../_generated/schema-sdk";
-import { MOCK_API_KEY, setupTestServer } from "./_mock";
+import { createTestServer, MOCK_API_KEY } from "./_mock";
 
-const ctx = setupTestServer();
+const ctx = createTestServer();
 
 describe("createLinearSdk", () => {
   it("makes query to baseUrl", async () => {
