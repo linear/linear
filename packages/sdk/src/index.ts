@@ -3,9 +3,9 @@ import { GraphQLClient } from "graphql-request";
 import { RequestInit } from "graphql-request/dist/types.dom";
 import packageInfo from "../package.json";
 import { serializeUserAgent } from "./utils";
-import { createRawLinearSdk } from "./_generated/schema-sdk";
+import { createRawLinearSdk } from "./_generated/sdk-api";
 
-export * from "./_generated/schema-sdk";
+export * from "./_generated/sdk-api";
 
 /**
  * Input options for creating a Linear sdk with graphql-request

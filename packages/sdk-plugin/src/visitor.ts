@@ -1,18 +1,11 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
-import {
-  ClientSideBasePluginConfig,
-  ClientSideBaseVisitor,
-  DocumentMode,
-  indentMultiline,
-  LoadedFragment,
-  RawClientSideBasePluginConfig,
-} from "@graphql-codegen/visitor-plugin-common";
+import { ClientSideBaseVisitor, indentMultiline, LoadedFragment } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
-import { GraphQLSchema, OperationDefinitionNode } from "graphql";
-import { getSdkAction } from "./sdkAction";
-import { getSdkFunction } from "./sdkFunction";
-import { getSdkHandler } from "./sdkHandler";
-import { getSdkWrapper } from "./sdkWrapper";
+import { concatAST, DocumentNode, GraphQLSchema, OperationDefinitionNode, visit } from "graphql";
+import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
+import c, { getApiFunctionName, getApiFunctionType } from "./constants";
+import { getOperation } from "./operation";
+import { filterJoin, printArgList } from "./utils";
 
 /**
  * Definition of an operation for outputting an sdk function
@@ -31,15 +24,53 @@ export interface SdkOperation {
 }
 
 /**
- * Default plugin config
+ * Initialise and process a vistor for each node in the documents
  */
-export type SdkPluginConfig = ClientSideBasePluginConfig;
+export function createVisitor(
+  schema: GraphQLSchema,
+  documents: Types.DocumentFile[],
+  documentNodes: DocumentNode[],
+  fragments: LoadedFragment[],
+  config: RawSdkPluginConfig,
+  nestedKey?: string
+): {
+  ast: DocumentNode;
+  visitor: SdkVisitor;
+  result: {
+    fragments: string;
+    definitions: unknown[];
+  };
+} {
+  /** Ensure the documents validate as a single application */
+  const ast = concatAST(documentNodes);
+
+  /** Create an ast visitor configured with the plugin input */
+  const visitor = new SdkVisitor(schema, fragments, config, documents, nestedKey);
+
+  /** Process each node of the ast with the visitor */
+  const result = visit(ast, { leave: visitor });
+
+  return {
+    ast,
+    visitor,
+    result,
+  };
+}
 
 /**
  * Graphql-codegen visitor for processing the ast
+ *
+ * @param name the name of the function
+ * @param type the name of the type of the function
+ * @param initialArgs any additional args to be used at the start of the function definition
+ * @param schema the graphql schema to validate against
+ * @param fragments graphql fragments
+ * @param rawConfig the plugin config
+ * @param documents the list of graphql operations
  */
-export class SdkVisitor extends ClientSideBaseVisitor<RawClientSideBasePluginConfig, SdkPluginConfig> {
+export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPluginConfig> {
   private _operationsToInclude: SdkOperation[] = [];
+  private _nestedApiKey: string | undefined;
 
   /**
    * Initialise the visitor
@@ -47,18 +78,30 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawClientSideBasePluginCon
   public constructor(
     schema: GraphQLSchema,
     fragments: LoadedFragment[],
-    rawConfig: RawClientSideBasePluginConfig,
-    documents?: Types.DocumentFile[]
+    rawConfig: RawSdkPluginConfig,
+    documents?: Types.DocumentFile[],
+    nestedApiKey?: string
   ) {
-    super(schema, fragments, rawConfig, {}, documents);
+    super(
+      schema,
+      fragments,
+      rawConfig,
+      {
+        nestedApiKeys: rawConfig.nestedApiKeys,
+        typeFile: rawConfig.typeFile,
+        documentFile: rawConfig.documentFile,
+      },
+      documents
+    );
 
     autoBind(this);
 
-    /** Import DocumentNode type */
-    if (this.config.documentMode !== DocumentMode.string) {
-      const importType = this.config.useTypeImports ? "import type" : "import";
-      this._additionalImports.push(`${importType} { DocumentNode } from 'graphql';`);
-    }
+    this._nestedApiKey = nestedApiKey;
+  }
+
+  public getImports(): string[] {
+    /** Do not add any additional imports */
+    return [];
   }
 
   /**
@@ -83,20 +126,36 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawClientSideBasePluginCon
   }
 
   /**
-   * Return the generated Linear sdk string content
+   * Return the generated sdk string content
    */
   public get sdkContent(): string {
-    const sdkContent = this._operationsToInclude
-      .map(getSdkAction)
-      .map(s => indentMultiline(s, 2))
-      .join(",\n");
+    /** For each operation get the function string content */
+    const operations = filterJoin(
+      this._operationsToInclude
+        .map(o => getOperation(o, this.config, this._nestedApiKey))
+        .map(s => indentMultiline(s, 2)),
+      ",\n"
+    );
 
+    const args = printArgList([
+      /** Add an initial id arg if in a nested api */
+      this._nestedApiKey ? `${c.ID_NAME}: string` : "",
+      /** The requester function arg */
+      `${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}<C>`,
+      /** The wrapper function arg */
+      `${c.WRAPPER_NAME}: ${c.WRAPPER_TYPE} = ${c.WRAPPER_DEFAULT_NAME}`,
+    ]);
+
+    const apiName = getApiFunctionName(this._nestedApiKey);
+    const apiType = getApiFunctionType(this._nestedApiKey);
     return `
-      ${getSdkHandler()}
-
-      ${getSdkWrapper()}
-
-      ${getSdkFunction(sdkContent, this.config)}
+      export function ${apiName}<C>(${args}) {
+        return {
+          ${operations}
+        };
+      }
+      
+      export type ${apiType} = ReturnType<typeof ${apiName}>;
     `;
   }
 }

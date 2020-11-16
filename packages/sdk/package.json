@@ -8,10 +8,6 @@
     "yarn": "1.x"
   },
   "scripts": {
-    "test": "npx jest -w 4",
-    "test:watch": "yarn test --watch",
-    "test:update": "yarn test -u",
-    "test:ci": "npx jest -w 1",
     "tsc": "npx tsc --noEmit",
     "build": "yarn build:generate && yarn build:clean && npx tsc",
     "build:clean": "npx rimraf dist",
@@ -20,28 +16,11 @@
     "build:generate:clean": "npx rimraf src/_generated"
   },
   "dependencies": {
+    "@graphql-codegen/introspection": "1.18.0",
+    "@graphql-codegen/typescript": "1.17.11",
+    "@graphql-codegen/typescript-document-nodes": "1.17.8",
+    "@graphql-codegen/typescript-operations": "1.17.9",
     "graphql": "15.4.0",
     "graphql-request": "3.3.0"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json"
-    ],
-    "testMatch": [
-      "**/*.tests.ts?(x)"
-    ],
-    "transform": {
-      "^.*\\.tsx?$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "tsconfig.json"
-      }
-    }
   }
 }

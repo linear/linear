@@ -18,10 +18,10 @@ export function getSdkHandler(): string {
     
     export type ${c.HANDLER_TYPE}<T> = () => Promise<${c.RESPONSE_TYPE}<T>>;
 
-    export function ${c.HANDLER_NAME}<T>(sdkFunction: () => Promise<T>): ${c.HANDLER_TYPE}<T> {
+    export function ${c.HANDLER_NAME}<T>(operation: () => Promise<T>): ${c.HANDLER_TYPE}<T> {
       return async function handler() {
         try {
-          const response = await sdkFunction();
+          const response = await operation();
           return {
             status: ${c.STATUS_TYPE}.success,
             data: response,
