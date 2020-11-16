@@ -70,7 +70,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn build && yarn test && npx lint-staged"
+      "pre-commit": "npx lint-staged",
+      "pre-push": "yarn build && yarn test"
     }
   },
   "jest": {
