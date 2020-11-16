@@ -7,6 +7,6 @@ export function getSdkWrapper(): string {
   return `
     export type ${c.WRAPPER_TYPE} = <T>(action: () => Promise<T>) => Promise<T>;
     
-    const ${c.WRAPPER_DEFAULT_NAME}: ${c.WRAPPER_TYPE} = sdkFunction => sdkFunction();
+    const ${c.WRAPPER_DEFAULT_NAME}: ${c.WRAPPER_TYPE} = operation => operation();
   `;
 }

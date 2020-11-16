@@ -1,0 +1,86 @@
+# Get information about the user
+query viewer {
+  viewer {
+    id
+    name
+    email
+  }
+}
+
+# Get all connected teams
+query teams {
+  teams {
+    nodes {
+      ...TeamFragment
+    }
+  }
+}
+
+# Get one team by id
+query team($id: String!) {
+  team(id: $id) {
+    ...TeamFragment
+  }
+}
+
+# Query for many issues
+query issues(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  issues(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    edges {
+      cursor
+      node {
+        ...IssueFragment
+      }
+    }
+  }
+}
+
+# Query for many issues within a team
+query teamIssues(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+  $id: String!
+) {
+  team(id: $id) {
+    issues(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      edges {
+        cursor
+        node {
+          ...IssueFragment
+        }
+      }
+    }
+  }
+}
+
+# Get one issue by id
+query issue($id: String!) {
+  issue(id: $id) {
+    ...IssueFragment
+  }
+}

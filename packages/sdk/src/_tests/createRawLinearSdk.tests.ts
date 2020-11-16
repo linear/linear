@@ -1,5 +1,5 @@
 import { createRawLinearSdk, TeamDocument } from "../index";
-import { LinearSdkStatus } from "../_generated/schema-sdk";
+import { LinearStatus } from "../_generated/sdk-api";
 
 describe("createRawLinearSdk", () => {
   it("calls the requester", async () => {
@@ -31,7 +31,7 @@ describe("createRawLinearSdk", () => {
 
     const response = await sdk.team("asd");
 
-    expect(response.status).toEqual(LinearSdkStatus.success);
+    expect(response.status).toEqual(LinearStatus.success);
     expect(response.data).toEqual(data);
     expect(response.error).toBeUndefined();
   });
@@ -43,7 +43,7 @@ describe("createRawLinearSdk", () => {
 
     const response = await sdk.team("asd");
 
-    expect(response.status).toEqual(LinearSdkStatus.error);
+    expect(response.status).toEqual(LinearStatus.error);
     expect(response.data).toBeUndefined();
     expect(response.error).toBeDefined();
   });

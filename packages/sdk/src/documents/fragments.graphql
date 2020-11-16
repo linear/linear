@@ -1,0 +1,49 @@
+fragment IssueFragment on Issue {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  number
+  title
+  description
+  priority
+  estimate
+  boardOrder
+  startedAt
+  completedAt
+  canceledAt
+  autoClosedAt
+  autoArchivedAt
+  dueDate
+  previousIdentifiers
+  identifier
+  priorityLabel
+  url
+  team {
+    id
+  }
+  cycle {
+    id
+  }
+  state {
+    id
+  }
+  assignee {
+    id
+  }
+  parent {
+    id
+  }
+  project {
+    id
+  }
+  branchName
+  creator {
+    id
+  }
+}
+
+fragment TeamFragment on Team {
+  id
+  name
+}

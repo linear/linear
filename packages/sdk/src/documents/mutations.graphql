@@ -1,0 +1,9 @@
+# Create one issue
+mutation issueCreate($teamId: String!, $title: String!, $description: String!) {
+  issueCreate(input: { title: $title, description: $description, teamId: $teamId }) {
+    success
+    issue {
+      ...IssueFragment
+    }
+  }
+}

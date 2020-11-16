@@ -1,16 +1,28 @@
 overwrite: true
 schema: "https://api.linear.app/graphql"
 documents: "./src/documents/**"
+hooks:
+  afterOneFileWrite:
+    - prettier --write
 generates:
-  src/_generated/schema-sdk.ts:
-    hooks:
-      afterOneFileWrite:
-        - prettier --write
+  src/_generated/sdk-types.ts:
     plugins:
-      - "typescript"
-      - "typescript-operations"
+      - typescript
+      - typescript-operations
+  src/_generated/sdk-documents.ts:
+    plugins:
+      - typescript-document-nodes
+    config:
+      nameSuffix: "Document"
+  src/_generated/sdk-api.ts:
+    plugins:
       # - "@linear/sdk-plugin"
-      - "../sdk-plugin/dist/index.js"
+      - "../sdk-plugin/dist/index.js":
+    config:
+      typeFile: "./sdk-types"
+      documentFile: "./sdk-documents"
+      nestedApiKeys:
+        - team
   src/_generated/graphql.schema.json:
     plugins:
       - "introspection"

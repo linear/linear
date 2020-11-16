@@ -1,8 +1,0 @@
-# Get information about the user
-query viewer {
-  viewer {
-    id
-    name
-    email
-  }
-}

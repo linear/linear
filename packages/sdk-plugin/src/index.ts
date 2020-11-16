@@ -1,68 +1,107 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { LoadedFragment, RawClientSideBasePluginConfig } from "@graphql-codegen/visitor-plugin-common";
-import { concatAST, DocumentNode, FragmentDefinitionNode, GraphQLSchema, Kind, visit } from "graphql";
+import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
+import { concatAST, GraphQLSchema } from "graphql";
 import { extname } from "path";
-import { nonNullable } from "./utils";
-import { SdkVisitor } from "./visitor";
+import { RawSdkPluginConfig } from "./config";
+import c from "./constants";
+import { getApiDocuments, getRootDocuments } from "./documents";
+import { getFragmentsFromAst } from "./fragments";
+import { getSdkHandler } from "./handler";
+import { debug, filterJoin, upperFirst } from "./utils";
+import { createVisitor, SdkVisitor } from "./visitor";
+import { getSdkWrapper } from "./wrapper";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear sdk
  */
-export const plugin: PluginFunction<RawClientSideBasePluginConfig> = (
+export const plugin: PluginFunction<RawSdkPluginConfig> = async (
   schema: GraphQLSchema,
   documents: Types.DocumentFile[],
-  config: RawClientSideBasePluginConfig
+  config: RawSdkPluginConfig
 ) => {
-  /** Get list of all document notes */
-  const nodes = documents.reduce<DocumentNode[]>((prev, v) => {
-    return [...prev, v.document].filter(nonNullable);
-  }, []);
+  /** Get a list of documents that are not attached to a nested api key */
+  const rootDocuments = getRootDocuments(documents, config);
 
   /** Ensure the nodes validate as a single application */
-  const allAst = concatAST(nodes);
+  const rootAst = concatAST(rootDocuments);
 
   /** Get a list of all fragment definitions */
-  const allFragments: LoadedFragment[] = [
-    ...(allAst.definitions.filter(d => d.kind === Kind.FRAGMENT_DEFINITION) as FragmentDefinitionNode[]).map(
-      fragmentDef => ({
-        node: fragmentDef,
-        name: fragmentDef.name.value,
-        onType: fragmentDef.typeCondition.name.value,
-        isExternal: false,
-      })
-    ),
-    ...(config.externalFragments || []),
-  ];
+  const rootFragments = getFragmentsFromAst(rootAst, config);
 
-  /** Create an ast visitor configured with the plugin input */
-  const visitor = new SdkVisitor(schema, allFragments, config, documents);
+  /** Create and process a visitor for each node */
+  const rootVisitor = createVisitor(schema, documents, rootDocuments, rootFragments, config);
 
-  /** Process each node of the ast with the visitor */
-  const visitorResult = visit(allAst, { leave: visitor });
+  /** Create and process a visitor for each nested api */
+  const nestedVisitors = (config.nestedApiKeys ?? []).map(nestedApiKey => {
+    /** Get a list of documents that are attached to this nested api key */
+    const nestedDocuments = getApiDocuments(documents, nestedApiKey);
+    return createVisitor(schema, documents, nestedDocuments, rootFragments, config, upperFirst(nestedApiKey));
+  });
+
+  /** Determine the document type */
+  const docType = config.documentMode === DocumentMode.string ? "string" : "DocumentNode";
+  const importType = config.useTypeImports ? "import type" : "import";
 
   return {
     /** Add any initial imports */
-    prepend: visitor.getImports(),
-    content: [
-      /** Write the list of fragments */
-      visitor.fragments,
-      /** Write the list of string definitions */
-      ...visitorResult.definitions.filter((t: unknown) => typeof t === "string"),
-      /** Write the sdk function */
-      visitor.sdkContent,
-    ].join("\n"),
+    prepend: rootVisitor.visitor.getImports(),
+    content: filterJoin(
+      [
+        /** Import DocumentNode if required */
+        config.documentMode !== DocumentMode.string ? `${importType} { DocumentNode } from 'graphql'\n` : undefined,
+        /** Import and export types */
+        `import * as ${c.NAMESPACE_TYPE} from '${config.typeFile}'`,
+        `export * from '${config.typeFile}'\n`,
+        /** Import and export documents */
+        `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
+        `export * from '${config.documentFile}'\n`,
+        /** Export the requester function */
+        `export type ${c.REQUESTER_TYPE}<C = {}> = <R, V>(doc: ${docType}, ${c.VARIABLE_NAME}?: V, ${c.OPTIONS_NAME}?: C) => Promise<R>`,
+        /** Write the handler function */
+        getSdkHandler(),
+        /** Write the wrapper function */
+        getSdkWrapper(),
+        /** Write the nested api functions */
+        ...nestedVisitors.map(v => v.visitor.sdkContent),
+        /** Write the root function */
+        rootVisitor.visitor.sdkContent,
+      ],
+      "\n"
+    ),
   };
 };
 
-/** Validate use of the plugin */
+/**
+ * Validate use of the plugin
+ */
 export const validate: PluginValidateFn = async (
   schema: GraphQLSchema,
   documents: Types.DocumentFile[],
-  config: RawClientSideBasePluginConfig,
+  config: RawSdkPluginConfig,
   outputFile: string
 ) => {
+  const prefix = `Plugin "@linear/sdk-plugin" config requires`;
+
+  debug("config", config);
+
   if (extname(outputFile) !== ".ts") {
-    throw new Error(`Plugin "@linear/sdk-plugin" requires extension to be ".ts"!`);
+    throw new Error(`${prefix} output file extension to be ".ts"`);
+  }
+
+  if (!config.typeFile || typeof config.typeFile !== "string") {
+    throw new Error(
+      `${prefix} typeFile must be a string path to a type file generated by "typescript" and "typescript-operations" plugins`
+    );
+  }
+
+  if (!config.documentFile || typeof config.documentFile !== "string") {
+    throw new Error(
+      `${prefix} documentFile must be a string path to a document file generated by "typescript-document-nodes"`
+    );
+  }
+
+  if (config.nestedApiKeys && !Array.isArray(config.nestedApiKeys)) {
+    throw new Error(`${prefix} nestedApiKeys to be an array of strings denoting the available nested apis`);
   }
 };
 

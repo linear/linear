@@ -112,5 +112,26 @@
         "tsconfig": "tsconfig.json"
       }
     }
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "testMatch": [
+      "**/*.tests.ts?(x)"
+    ],
+    "transform": {
+      "^.*\\.tsx?$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "config/tsconfig.json"
+      }
+    }
   }
 }
