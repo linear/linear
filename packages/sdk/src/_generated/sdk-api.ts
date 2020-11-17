@@ -60,6 +60,24 @@ export function createRawLinearSdkTeam<C>(
 
 export type LinearSdkTeam = ReturnType<typeof createRawLinearSdkTeam>;
 
+export function createRawLinearSdkIssue<C>(
+  id: string,
+  requester: Requester<C>,
+  wrapper: LinearWrapper = defaultWrapper
+) {
+  return {
+    assignee(opts?: C): Promise<LinearResponse<T.IssueAssigneeQuery>> {
+      return wrapper(
+        linearHandler(() =>
+          requester<T.IssueAssigneeQuery, T.IssueAssigneeQueryVariables>(D.IssueAssigneeDocument, { id }, opts)
+        )
+      );
+    },
+  };
+}
+
+export type LinearSdkIssue = ReturnType<typeof createRawLinearSdkIssue>;
+
 export function createRawLinearSdk<C>(requester: Requester<C>, wrapper: LinearWrapper = defaultWrapper) {
   return {
     issueCreate(vars: T.IssueCreateMutationVariables, opts?: C): Promise<LinearResponse<T.IssueCreateMutation>> {
@@ -91,10 +109,14 @@ export function createRawLinearSdk<C>(requester: Requester<C>, wrapper: LinearWr
         linearHandler(() => requester<T.IssuesQuery, T.IssuesQueryVariables>(D.IssuesDocument, vars, opts))
       );
     },
-    issue(id: string, opts?: C): Promise<LinearResponse<T.IssueQuery>> {
-      return wrapper(
+    async issue(id: string, opts?: C): Promise<LinearResponse<T.IssueQuery> & LinearSdkIssue> {
+      const response = await wrapper(
         linearHandler(() => requester<T.IssueQuery, T.IssueQueryVariables>(D.IssueDocument, { id }, opts))
       );
+      return {
+        ...response,
+        ...createRawLinearSdkIssue(id, requester, wrapper),
+      };
     },
   };
 }

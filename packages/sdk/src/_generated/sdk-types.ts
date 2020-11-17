@@ -5003,7 +5003,7 @@ export type OrganizationDomainSimplePayload = {
   success: Scalars["Boolean"];
 };
 
-export type IssueFragmentFragment = { __typename?: "Issue" } & Pick<
+export type IssueBaseFragmentFragment = { __typename?: "Issue" } & Pick<
   Issue,
   | "id"
   | "createdAt"
@@ -5030,13 +5030,18 @@ export type IssueFragmentFragment = { __typename?: "Issue" } & Pick<
     team: { __typename?: "Team" } & Pick<Team, "id">;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
-    assignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    parent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    assignee?: Maybe<{ __typename?: "User" } & UserFragmentFragment>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    creator?: Maybe<{ __typename?: "User" } & UserFragmentFragment>;
   };
 
+export type IssueFragmentFragment = { __typename?: "Issue" } & {
+  parent?: Maybe<{ __typename?: "Issue" } & IssueBaseFragmentFragment>;
+} & IssueBaseFragmentFragment;
+
 export type TeamFragmentFragment = { __typename?: "Team" } & Pick<Team, "id" | "name">;
+
+export type UserFragmentFragment = { __typename?: "User" } & Pick<User, "id" | "name" | "displayName" | "email">;
 
 export type IssueCreateMutationVariables = Exact<{
   teamId: Scalars["String"];
@@ -5052,9 +5057,7 @@ export type IssueCreateMutation = { __typename?: "Mutation" } & {
 
 export type ViewerQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ViewerQuery = { __typename?: "Query" } & {
-  viewer: { __typename?: "User" } & Pick<User, "id" | "name" | "email">;
-};
+export type ViewerQuery = { __typename?: "Query" } & { viewer: { __typename?: "User" } & UserFragmentFragment };
 
 export type TeamsQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -5114,3 +5117,11 @@ export type IssueQueryVariables = Exact<{
 }>;
 
 export type IssueQuery = { __typename?: "Query" } & { issue: { __typename?: "Issue" } & IssueFragmentFragment };
+
+export type IssueAssigneeQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type IssueAssigneeQuery = { __typename?: "Query" } & {
+  issue: { __typename?: "Issue" } & { assignee?: Maybe<{ __typename?: "User" } & UserFragmentFragment> };
+};

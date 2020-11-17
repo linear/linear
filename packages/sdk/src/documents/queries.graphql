@@ -1,9 +1,7 @@
 # Get information about the user
 query viewer {
   viewer {
-    id
-    name
-    email
+    ...UserFragment
   }
 }
 
@@ -82,5 +80,14 @@ query teamIssues(
 query issue($id: String!) {
   issue(id: $id) {
     ...IssueFragment
+  }
+}
+
+# Get the assignee for an issue
+query issueAssignee($id: String!) {
+  issue(id: $id) {
+    assignee {
+      ...UserFragment
+    }
   }
 }
