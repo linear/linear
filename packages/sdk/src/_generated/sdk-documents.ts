@@ -1,6 +1,14 @@
 import gql from "graphql-tag";
-export const IssueFragment = gql`
-  fragment IssueFragment on Issue {
+export const UserFragment = gql`
+  fragment UserFragment on User {
+    id
+    name
+    displayName
+    email
+  }
+`;
+export const IssueBaseFragment = gql`
+  fragment IssueBaseFragment on Issue {
     id
     createdAt
     updatedAt
@@ -21,6 +29,7 @@ export const IssueFragment = gql`
     identifier
     priorityLabel
     url
+    branchName
     team {
       id
     }
@@ -31,19 +40,25 @@ export const IssueFragment = gql`
       id
     }
     assignee {
-      id
-    }
-    parent {
-      id
+      ...UserFragment
     }
     project {
       id
     }
-    branchName
     creator {
-      id
+      ...UserFragment
     }
   }
+  ${UserFragment}
+`;
+export const IssueFragment = gql`
+  fragment IssueFragment on Issue {
+    ...IssueBaseFragment
+    parent {
+      ...IssueBaseFragment
+    }
+  }
+  ${IssueBaseFragment}
 `;
 export const TeamFragment = gql`
   fragment TeamFragment on Team {
@@ -65,11 +80,10 @@ export const IssueCreateDocument = gql`
 export const ViewerDocument = gql`
   query viewer {
     viewer {
-      id
-      name
-      email
+      ...UserFragment
     }
   }
+  ${UserFragment}
 `;
 export const TeamsDocument = gql`
   query teams {
@@ -153,4 +167,14 @@ export const IssueDocument = gql`
     }
   }
   ${IssueFragment}
+`;
+export const IssueAssigneeDocument = gql`
+  query issueAssignee($id: String!) {
+    issue(id: $id) {
+      assignee {
+        ...UserFragment
+      }
+    }
+  }
+  ${UserFragment}
 `;

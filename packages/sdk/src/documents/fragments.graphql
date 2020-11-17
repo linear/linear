@@ -1,4 +1,4 @@
-fragment IssueFragment on Issue {
+fragment IssueBaseFragment on Issue {
   id
   createdAt
   updatedAt
@@ -19,6 +19,7 @@ fragment IssueFragment on Issue {
   identifier
   priorityLabel
   url
+  branchName
   team {
     id
   }
@@ -29,21 +30,31 @@ fragment IssueFragment on Issue {
     id
   }
   assignee {
-    id
-  }
-  parent {
-    id
+    ...UserFragment
   }
   project {
     id
   }
-  branchName
   creator {
-    id
+    ...UserFragment
+  }
+}
+
+fragment IssueFragment on Issue {
+  ...IssueBaseFragment
+  parent {
+    ...IssueBaseFragment
   }
 }
 
 fragment TeamFragment on Team {
   id
   name
+}
+
+fragment UserFragment on User {
+  id
+  name
+  displayName
+  email
 }
