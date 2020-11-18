@@ -21,9 +21,6 @@ generates:
     config:
       typeFile: "./sdk-types"
       documentFile: "./sdk-documents"
-      nestedApiKeys:
-        - team
-        - issue
   src/_generated/graphql.schema.json:
     plugins:
       - "introspection"

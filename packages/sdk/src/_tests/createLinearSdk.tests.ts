@@ -22,7 +22,7 @@ describe("createLinearSdk", () => {
     expect(response.error).toBeUndefined();
   });
 
-  it("has nested api", async () => {
+  it("has chained api", async () => {
     const { data } = ctx.res({
       body: {
         data: {
@@ -34,6 +34,8 @@ describe("createLinearSdk", () => {
     const sdk = createLinearSdk({ apiKey: MOCK_API_KEY, baseUrl: ctx.url });
     const team = await sdk.team("someTeamId");
     const issues = await team.issues();
+    const issue = await sdk.issue("someIssueId");
+    const assignee = await issue.assignee();
 
     expect(team.status).toEqual(LinearStatus.success);
     expect(team.data).toEqual(data);
@@ -41,6 +43,12 @@ describe("createLinearSdk", () => {
     expect(issues.status).toEqual(LinearStatus.success);
     expect(issues.data).toEqual(data);
     expect(issues.error).toBeUndefined();
+    expect(issue.status).toEqual(LinearStatus.success);
+    expect(issue.data).toEqual(data);
+    expect(issue.error).toBeUndefined();
+    expect(assignee.status).toEqual(LinearStatus.success);
+    expect(assignee.data).toEqual(data);
+    expect(assignee.error).toBeUndefined();
   });
 
   it("fails auth with incorrect api key", async () => {
