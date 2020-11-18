@@ -41,28 +41,9 @@ export interface RawSdkPluginConfig extends RawClientSideBasePluginConfig {
    * ```
    */
   documentFile: string;
-
-  /**
-   * @description An object mapping a field key to the graphql files used to create a nested api
-   *
-   * @exampleMarkdown
-   * ```yml
-   * documents: "./src/documents/**"
-   * generates:
-   *   output-file.ts:
-   *     plugins:
-   *       - @linear/sdk-plugin
-   *     config:
-   *       nestedApiKeys:
-   *         - team
-   *         - issue
-   * ```
-   */
-  nestedApiKeys?: string[];
 }
 
 export interface SdkPluginConfig extends ClientSideBasePluginConfig {
   typeFile: string;
   documentFile: string;
-  nestedApiKeys?: string[];
 }

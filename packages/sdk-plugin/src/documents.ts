@@ -1,10 +1,21 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
 import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { loadDocuments } from "@graphql-tools/load";
-import { DocumentNode, FieldNode } from "graphql";
-import { RawSdkPluginConfig } from "./config";
-import c from "./constants";
+import { DefinitionNode, DocumentNode, Kind } from "graphql";
+import { processSdkOperation, SdkChainType, SdkChildOperation, SdkOperationDefinition } from "./operation";
 import { nonNullable } from "./utils";
+
+/**
+ * A processed document containing operations with additional detail
+ */
+export interface SdkDocument extends DocumentNode {
+  definitions: (DefinitionNode | SdkOperationDefinition)[];
+}
+
+/**
+ * A list of documents that may have chained api detail
+ */
+export type SdkDocuments = (DocumentNode | SdkDocument)[];
 
 /**
  * Get a list of all non null document notes
@@ -29,62 +40,73 @@ export function loadDocumentFiles(fileGlob: string): Promise<Types.DocumentFile[
 }
 
 /**
- * Filter a list of documents to return only those that do not match a nested api key
+ * Add information for chaining to the operation definitions in each document
  */
-export function getRootDocuments(documents: Types.DocumentFile[], config: RawSdkPluginConfig): DocumentNode[] {
-  return getDocumentNodes(documents).map(doc => {
-    if (doc.kind === "Document") {
-      const nestedDefinitions = doc.definitions.filter(def => {
-        if (def.kind === "OperationDefinition" && !config.nestedApiKeys?.includes(def.name?.value ?? "")) {
-          /** Operation must not have an id variable */
-          const hasIdVariable = (def.variableDefinitions ?? []).find(
-            v => v.kind === "VariableDefinition" && v.variable.name.value === c.ID_NAME
-          );
-
-          /** Operation must not have the first field named one of the nested api keys */
-          const firstField = def.selectionSet.selections.find(s => s.kind === "Field") as FieldNode;
-          const firstFieldIsKey = config.nestedApiKeys?.includes(firstField?.name.value);
-
-          return !hasIdVariable || !firstFieldIsKey;
-        } else {
-          return true;
-        }
-      });
-
-      return { ...doc, definitions: nestedDefinitions };
+export function processSdkDocuments(documents: Types.DocumentFile[]): SdkDocuments {
+  const sdkDocuments: (DocumentNode | SdkDocument)[] = getDocumentNodes(documents).map(document => {
+    if (document.kind === Kind.DOCUMENT) {
+      return {
+        ...document,
+        definitions: document.definitions.map(operation => {
+          return operation.kind === Kind.OPERATION_DEFINITION ? processSdkOperation(operation) : operation;
+        }),
+      };
     } else {
-      return doc;
+      return document;
     }
   });
+
+  return sdkDocuments;
 }
 
 /**
- * Filter a list of documents to return only those relevant to the nestedApiKey
+ * Whether the operation is to be chained inside the chain key api
  */
-export function getApiDocuments(documents: Types.DocumentFile[], nestedApiKey: string): DocumentNode[] {
-  return getDocumentNodes(documents).map(doc => {
-    if (doc.kind === "Document") {
-      const nestedDefinitions = doc.definitions.filter(def => {
-        /** Only consider operations that are not a perfect match to the api key */
-        if (def.kind === "OperationDefinition" && def.name?.value !== nestedApiKey) {
-          /** Operation must have an id variable */
-          const hasIdVariable = (def.variableDefinitions ?? []).find(
-            v => v.kind === "VariableDefinition" && v.variable.name.value === c.ID_NAME
-          );
+function isChildDefinition(d: DefinitionNode): d is SdkChildOperation {
+  const o = d as SdkOperationDefinition;
+  return Boolean(o.chainType === SdkChainType.child && o.chainKey);
+}
 
-          /** Operation must have the first field named the same as the api key */
-          const firstField = def.selectionSet.selections.find(s => s.kind === "Field") as FieldNode;
-          const firstFieldIsKey = firstField?.name.value === nestedApiKey;
+/**
+ * Get all documents to be added to the root of the sdk
+ */
+export function getRootDocuments(documents: SdkDocuments): SdkDocuments {
+  return documents
+    .map(document => ({
+      ...document,
+      definitions: document.definitions.filter(definition => {
+        /** Get all operations that are not to be chained */
+        return !isChildDefinition(definition);
+      }),
+    }))
+    .filter(document => document.definitions.length);
+}
 
-          return hasIdVariable && firstFieldIsKey;
-        } else {
-          return def.kind !== "OperationDefinition";
-        }
-      });
-
-      return { ...doc, definitions: nestedDefinitions };
+/**
+ * Get all chain keys for creating chained apis
+ */
+export function getChainKeys(documents: SdkDocuments): string[] {
+  return documents.reduce<string[]>((acc, document) => {
+    if (document.kind === Kind.DOCUMENT && Array.isArray(document.definitions)) {
+      /** Get all chain keys from document definitions */
+      return [...acc, ...document.definitions.map(d => (d as SdkOperationDefinition).chainKey).filter(nonNullable)];
     } else {
-      return doc;
+      return acc;
     }
-  });
+  }, []);
+}
+
+/**
+ * Get all documents to be added to the chained api with matching chain key
+ */
+export function getChildDocuments(documents: SdkDocuments, chainKey: string): SdkDocuments {
+  return documents
+    .map(document => ({
+      ...document,
+      definitions: document.definitions.filter(definition => {
+        /** Get all chained operations with the chain key */
+        return isChildDefinition(definition) && definition.chainKey === chainKey;
+      }),
+    }))
+    .filter(document => document.definitions.length);
 }

@@ -1,54 +1,134 @@
-import { SdkPluginConfig } from "config";
-import { Kind } from "graphql";
+import { FieldNode, Kind, OperationDefinitionNode } from "graphql";
+import { SdkPluginConfig } from "./config";
 import c, { getApiFunctionName, getApiFunctionType } from "./constants";
 import { lowerFirst, printArgList, printNamespacedDocument, printNamespacedType } from "./utils";
+import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
 import { SdkOperation } from "./visitor";
 
 /**
- * Does the operation have optional variables
+ * Type to determine at which level of the sdk an operation is to be added
  */
-function isVariableOptional(o: SdkOperation): boolean {
-  return (
-    !o.node.variableDefinitions ||
-    o.node.variableDefinitions.length === 0 ||
-    o.node.variableDefinitions.every(
-      v => v.variable.name.value === c.ID_NAME || v.type.kind !== Kind.NON_NULL_TYPE || v.defaultValue
-    )
-  );
+export enum SdkChainType {
+  /** Add the operation to the root */
+  root = "root",
+  /** Add the operation to the root and return a chained api */
+  parent = "parent",
+  /** Add the operation to a chained api */
+  child = "child",
 }
 
 /**
- * Does the operation have a variable that matches the arg
+ * A processed operation definition to determine whether it is to chain or be chained
  */
-function hasVariable(o: SdkOperation, variableName: string): boolean {
-  return Boolean(o.node.variableDefinitions?.some(v => v.variable.name.value === variableName));
+export interface SdkOperationDefinition extends OperationDefinitionNode {
+  chainType: SdkChainType;
+  chainKey?: string;
 }
 
 /**
- * Does the operation have a variable other than the arg
+ * Operation should create a chained api using the chain key
  */
-function hasOtherVariable(o: SdkOperation, variableName: string): boolean {
-  return Boolean(o.node.variableDefinitions?.some(v => v.variable.name.value !== variableName));
+export interface SdkParentOperation extends SdkOperationDefinition {
+  chainType: SdkChainType.parent;
+  chainKey: string;
+}
+
+/**
+ * Operation should be nested within the chained api by the chain key
+ */
+export interface SdkChildOperation extends SdkOperationDefinition {
+  chainType: SdkChainType.child;
+  chainKey: string;
+}
+
+/**
+ * Operation is "normal" and should be added to the root level
+ */
+export interface SdkRootOperation extends SdkOperationDefinition {
+  chainType: SdkChainType.root;
+}
+
+/**
+ * The name of the first field of the operation definition
+ */
+function getFirstFieldName(operation: OperationDefinitionNode) {
+  const firstField = operation.selectionSet.selections.find(s => s.kind === Kind.FIELD) as FieldNode;
+  return firstField?.name?.value;
+}
+
+/**
+ * The operation has a required id variable
+ */
+function hasIdVariable(o: OperationDefinitionNode): boolean {
+  return (o.variableDefinitions ?? []).some(isIdVariable);
+}
+
+/**
+ * The name of the operation
+ */
+function getOperationName(o: OperationDefinitionNode) {
+  return o.name?.value;
+}
+
+/**
+ * Chained api if the query name is the same as the first field and has an id (team, issue)
+ * Return it with the chained key to link the chained sdk
+ */
+export function isParentOperation(o: OperationDefinitionNode): boolean {
+  return hasIdVariable(o) && getOperationName(o) === getFirstFieldName(o);
+}
+
+/**
+ * Chained api if the query name is the same as the first field and has an id (team, issue)
+ * Return it with the chained key to link the chained sdk
+ */
+export function isChildOperation(o: OperationDefinitionNode): boolean {
+  return Boolean(hasIdVariable(o) && getOperationName(o)?.startsWith(getFirstFieldName(o) ?? ""));
+}
+
+/**
+ * Add information for chaining to the operation definition
+ */
+export function processSdkOperation(operation: OperationDefinitionNode): SdkOperationDefinition {
+  if (isParentOperation(operation)) {
+    return {
+      ...operation,
+      chainType: SdkChainType.parent,
+      chainKey: getFirstFieldName(operation),
+    };
+  } else if (isChildOperation(operation)) {
+    return {
+      ...operation,
+      chainType: SdkChainType.child,
+      chainKey: getFirstFieldName(operation),
+    };
+  } else {
+    return {
+      ...operation,
+      chainType: SdkChainType.root,
+    };
+  }
 }
 
 /**
  * Get the operation args from the operation variables
  */
-function getVariableArgs(o: SdkOperation, config: SdkPluginConfig, nestedApiKey?: string): string {
+function getVariableArgs(o: SdkOperation, config: SdkPluginConfig): string {
   const variableType = printNamespacedType(config, o.operationVariablesTypes);
-  const optional = isVariableOptional(o) ? "?" : "";
+  const optional = hasOptionalVariable(o) ? "?" : "";
+  const chainChildKey = getChainChildKey(o);
 
   if (hasVariable(o, c.ID_NAME)) {
     /** Handle id variables separately by making them the first arg */
     if (hasOtherVariable(o, c.ID_NAME)) {
-      /** If we are nested do not add the id arg as it comes from the function scope */
-      if (nestedApiKey) {
+      /** If we are chained do not add the id arg as it comes from the function scope */
+      if (chainChildKey) {
         return `${c.VARIABLE_NAME}${optional}: Omit<${variableType}, '${c.ID_NAME}'>`;
       } else {
         return `${c.ID_NAME}: ${c.ID_TYPE}, ${c.VARIABLE_NAME}${optional}: Omit<${variableType}, '${c.ID_NAME}'>`;
       }
     } else {
-      if (nestedApiKey) {
+      if (chainChildKey) {
         return "";
       } else {
         return `${c.ID_NAME}: ${c.ID_TYPE}`;
@@ -76,9 +156,23 @@ function getRequesterArgs(o: SdkOperation): string {
 }
 
 /**
+ * Get the chain key if the operation should create an api
+ */
+export function getChainParentKey(o: SdkOperation): string | undefined {
+  return o.node.chainType === SdkChainType.parent ? o.node.chainKey : undefined;
+}
+
+/**
+ * Get the chain key if the operation is nested within an api
+ */
+export function getChainChildKey(o: SdkOperation): string | undefined {
+  return o.node.chainType === SdkChainType.child ? o.node.chainKey : undefined;
+}
+
+/**
  * Get the sdk action operation body
  */
-function getOperationBody(o: SdkOperation, config: SdkPluginConfig, apiKeyToNest?: string): string {
+function getOperationBody(o: SdkOperation, config: SdkPluginConfig): string {
   const variableType = printNamespacedType(config, o.operationVariablesTypes);
   const resultType = printNamespacedType(config, o.operationResultType);
   const documentName = printNamespacedDocument(config, o.documentVariableName);
@@ -86,13 +180,14 @@ function getOperationBody(o: SdkOperation, config: SdkPluginConfig, apiKeyToNest
     c.REQUESTER_NAME
   }<${resultType}, ${variableType}>(${documentName}, ${getRequesterArgs(o)}, ${c.OPTIONS_NAME})));`;
 
-  /** If this is a nested api create the api and return it with the response */
-  if (apiKeyToNest) {
+  /** If this is a chained api create the api and return it with the response */
+  const chainParentKey = getChainParentKey(o);
+  if (chainParentKey) {
     return `
       const response = await ${callRequester}
       return {
         ...response,
-        ...${getApiFunctionName(apiKeyToNest)}(${c.ID_NAME}, ${c.REQUESTER_NAME}, ${c.WRAPPER_NAME}),
+        ...${getApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}, ${c.WRAPPER_NAME}),
       }
     `;
   } else {
@@ -102,23 +197,24 @@ function getOperationBody(o: SdkOperation, config: SdkPluginConfig, apiKeyToNest
 
 /**
  * Get the name of the operation
- * Nested apis have the initial nesting key removed from the name
+ * Chained apis have the chain key removed from the name
  */
-export function getOperationName(o: SdkOperation, nestedApiKey?: string): string {
+export function getSdkOperationName(o: SdkOperation): string {
   const nodeName = o.node.name?.value ?? "UNKNOWN_NODE_NAME";
-
-  return nestedApiKey ? lowerFirst(nodeName.replace(new RegExp(`^${nestedApiKey}`, "i"), "")) : nodeName;
+  const chainChildKey = getChainChildKey(o);
+  return chainChildKey ? lowerFirst(nodeName.replace(new RegExp(`^${chainChildKey}`, "i"), "")) : nodeName;
 }
 
 /**
  * Get the result type of the operation
- * Nested apis have the relevant nested api return type added
+ * Chained apis have the relevant chain api return type added
  */
-function getOperationResultType(o: SdkOperation, config: SdkPluginConfig, apiKeyToNest?: string) {
+function getOperationResultType(o: SdkOperation, config: SdkPluginConfig) {
   const resultType = printNamespacedType(config, o.operationResultType);
 
-  if (apiKeyToNest) {
-    return `Promise<${c.RESPONSE_TYPE}<${resultType}> & ${getApiFunctionType(apiKeyToNest)}>`;
+  const chainParentKey = getChainParentKey(o);
+  if (chainParentKey) {
+    return `Promise<${c.RESPONSE_TYPE}<${resultType}> & ${getApiFunctionType(chainParentKey)}>`;
   } else {
     return `Promise<${c.RESPONSE_TYPE}<${resultType}>>`;
   }
@@ -127,16 +223,15 @@ function getOperationResultType(o: SdkOperation, config: SdkPluginConfig, apiKey
 /**
  * Process a graphql operation and return a generated operation string
  */
-export function getOperation(o: SdkOperation, config: SdkPluginConfig, nestedApiKey?: string): string {
-  const operationName = getOperationName(o, nestedApiKey);
-  const args = printArgList([getVariableArgs(o, config, nestedApiKey), `${c.OPTIONS_NAME}?: C`]);
-  const apiKeyToNest = config.nestedApiKeys?.find(apiKey => o.node.name?.value === apiKey);
-  const returnType = getOperationResultType(o, config, apiKeyToNest);
-  const content = getOperationBody(o, config, apiKeyToNest);
+export function getOperation(o: SdkOperation, config: SdkPluginConfig): string {
+  const operationName = getSdkOperationName(o);
+  const args = printArgList([getVariableArgs(o, config), `${c.OPTIONS_NAME}?: C`]);
+  const returnType = getOperationResultType(o, config);
+  const content = getOperationBody(o, config);
 
   /** Build a function for this graphql operation */
   return `
-    ${apiKeyToNest ? "async " : ""}${operationName}(${args}): ${returnType} {
+    ${getChainParentKey(o) ? "async " : ""}${operationName}(${args}): ${returnType} {
       ${content}
     }
   `;
