@@ -2,7 +2,8 @@ import { Types } from "@graphql-codegen/plugin-helpers";
 import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { loadDocuments } from "@graphql-tools/load";
 import { DefinitionNode, DocumentNode, Kind } from "graphql";
-import { processSdkOperation, SdkChainType, SdkChildOperation, SdkOperationDefinition } from "./operation";
+import { isChildDefinition } from "./definitions";
+import { processSdkOperation, SdkOperationDefinition } from "./operation";
 import { nonNullable } from "./utils";
 
 /**
@@ -57,14 +58,6 @@ export function processSdkDocuments(documents: Types.DocumentFile[]): SdkDocumen
   });
 
   return sdkDocuments;
-}
-
-/**
- * Whether the operation is to be chained inside the chain key api
- */
-function isChildDefinition(d: DefinitionNode): d is SdkChildOperation {
-  const o = d as SdkOperationDefinition;
-  return Boolean(o.chainType === SdkChainType.child && o.chainKey);
 }
 
 /**
