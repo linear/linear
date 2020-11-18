@@ -1,6 +1,4 @@
-import { upperFirst } from "./utils";
-
-const labels = {
+export default {
   HANDLER_NAME: "linearHandler",
   HANDLER_TYPE: "LinearHandler",
   ID_NAME: "id",
@@ -19,19 +17,3 @@ const labels = {
   WRAPPER_NAME: "wrapper",
   WRAPPER_TYPE: "LinearWrapper",
 };
-
-/**
- * Get the name of the sdk function scoped to the api key
- */
-export function getApiFunctionName(apiKey?: string): string {
-  return `${labels.SDK_NAME}${upperFirst(apiKey)}`;
-}
-
-/**
- * Get the type of the sdk function scoped to the api key
- */
-export function getApiFunctionType(apiKey?: string): string {
-  return `${labels.SDK_TYPE}${upperFirst(apiKey)}`;
-}
-
-export default labels;

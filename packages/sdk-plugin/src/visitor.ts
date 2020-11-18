@@ -3,9 +3,10 @@ import { ClientSideBaseVisitor, indentMultiline, LoadedFragment } from "@graphql
 import autoBind from "auto-bind";
 import { concatAST, DocumentNode, GraphQLSchema, OperationDefinitionNode, visit } from "graphql";
 import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
-import c, { getApiFunctionName, getApiFunctionType } from "./constants";
+import c from "./constants";
 import { getOperation, SdkOperationDefinition } from "./operation";
-import { filterJoin, printArgList } from "./utils";
+import { printApiFunctionName, printApiFunctionType, printArgList } from "./print";
+import { filterJoin } from "./utils";
 
 /**
  * Definition of an operation for outputting an sdk function
@@ -143,8 +144,8 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
       `${c.WRAPPER_NAME}: ${c.WRAPPER_TYPE} = ${c.WRAPPER_DEFAULT_NAME}`,
     ]);
 
-    const apiName = getApiFunctionName(this._chainKey);
-    const apiType = getApiFunctionType(this._chainKey);
+    const apiName = printApiFunctionName(this._chainKey);
+    const apiType = printApiFunctionType(this._chainKey);
     return `
       export function ${apiName}<C>(${args}) {
         return {

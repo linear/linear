@@ -1,5 +1,5 @@
 import c from "./constants";
-import { printArgList } from "./utils";
+import { printArgList } from "./print";
 
 /**
  * Return a function string taking at least a requester and sdk wrapper

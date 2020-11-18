@@ -1,7 +1,14 @@
 import { FieldNode, Kind, OperationDefinitionNode } from "graphql";
 import { SdkPluginConfig } from "./config";
-import c, { getApiFunctionName, getApiFunctionType } from "./constants";
-import { lowerFirst, printArgList, printNamespacedDocument, printNamespacedType } from "./utils";
+import c from "./constants";
+import {
+  printApiFunctionName,
+  printApiFunctionType,
+  printArgList,
+  printNamespacedDocument,
+  printNamespacedType,
+} from "./print";
+import { lowerFirst } from "./utils";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
 import { SdkOperation } from "./visitor";
 
@@ -187,7 +194,7 @@ function getOperationBody(o: SdkOperation, config: SdkPluginConfig): string {
       const response = await ${callRequester}
       return {
         ...response,
-        ...${getApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}, ${c.WRAPPER_NAME}),
+        ...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}, ${c.WRAPPER_NAME}),
       }
     `;
   } else {
@@ -214,7 +221,7 @@ function getOperationResultType(o: SdkOperation, config: SdkPluginConfig) {
 
   const chainParentKey = getChainParentKey(o);
   if (chainParentKey) {
-    return `Promise<${c.RESPONSE_TYPE}<${resultType}> & ${getApiFunctionType(chainParentKey)}>`;
+    return `Promise<${c.RESPONSE_TYPE}<${resultType}> & ${printApiFunctionType(chainParentKey)}>`;
   } else {
     return `Promise<${c.RESPONSE_TYPE}<${resultType}>>`;
   }
