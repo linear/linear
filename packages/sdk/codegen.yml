@@ -9,9 +9,6 @@ generates:
     plugins:
       - typescript
       - typescript-operations
-  src/_generated/sdk-doc.ts:
-    plugins:
-      - jsdoc
   src/_generated/sdk-documents.ts:
     plugins:
       - typescript-document-nodes
