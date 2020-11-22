@@ -1,6 +1,13 @@
 import { createRawLinearSdk, TeamDocument } from "../index";
 import { LinearStatus } from "../_generated/sdk-api";
 
+function resolveWithData(data: unknown) {
+  return () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Promise.resolve(data) as any;
+  };
+}
+
 describe("createRawLinearSdk", () => {
   it("calls the requester", async () => {
     const requester = jest.fn();
@@ -13,26 +20,13 @@ describe("createRawLinearSdk", () => {
     expect(requester).toHaveBeenCalledWith(TeamDocument, { id }, options);
   });
 
-  it("wraps the requester", async () => {
-    const wrapper = jest.fn();
-    const sdk = createRawLinearSdk(jest.fn(), wrapper);
-
-    await sdk.team("asd");
-
-    expect(wrapper).toHaveBeenCalledTimes(1);
-  });
-
   it("returns data", async () => {
-    const data = { some: "data" };
-    const sdk = createRawLinearSdk(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return Promise.resolve(data) as any;
-    });
+    const sdk = createRawLinearSdk(resolveWithData({ team: { id: "qwe" } }));
 
     const response = await sdk.team("asd");
 
     expect(response.status).toEqual(LinearStatus.success);
-    expect(response.data).toEqual(data);
+    expect(response.data).toEqual({ id: "qwe" });
     expect(response.error).toBeUndefined();
   });
 

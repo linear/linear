@@ -10,7 +10,7 @@ import {
   printNamespacedType,
   printOperationName,
 } from "./print";
-import { lowerFirst } from "./utils";
+import { filterJoin, lowerFirst } from "./utils";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
 import { SdkOperation } from "./visitor";
 
@@ -192,29 +192,42 @@ export function getChainChildKey(o: SdkOperation): string | undefined {
 }
 
 /**
+ * If the operation name is the same as the first field we can drill into the data to return a nicer api
+ */
+function getNestedDataKey(o: SdkOperation): string | undefined {
+  const operationName = printOperationName(o);
+  return operationName === getFirstFieldName(o.node) ? operationName : undefined;
+}
+
+/**
  * Get the sdk action operation body
  */
 function getOperationBody(o: SdkOperation, config: SdkPluginConfig): string {
-  const variableType = printNamespacedType(config, o.operationVariablesTypes);
-  const resultType = printNamespacedType(config, o.operationResultType);
-  const documentName = printNamespacedDocument(config, o.documentVariableName);
-  const callRequester = `${c.WRAPPER_NAME}(${c.HANDLER_NAME}(() => ${
-    c.REQUESTER_NAME
-  }<${resultType}, ${variableType}>(${documentName}, ${getRequesterArgs(o)}, ${c.OPTIONS_NAME})));`;
-
-  /** If this is a chained api create the api and return it with the response */
   const chainParentKey = getChainParentKey(o);
-  if (chainParentKey) {
-    return `
-      const ${c.RESPONSE_NAME} = await ${callRequester}
-      return {
-        ...${c.RESPONSE_NAME},
-        ...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}, ${c.WRAPPER_NAME}),
-      }
-    `;
-  } else {
-    return `return ${callRequester}`;
-  }
+  const variableType = printNamespacedType(config, o.operationVariablesTypes);
+  const documentName = printNamespacedDocument(config, o.documentVariableName);
+  const resultType = printNamespacedType(config, o.operationResultType);
+  const nestedDataKey = getNestedDataKey(o);
+
+  /** Requester function call */
+  const callRequester = `${c.HANDLER_NAME}(() => ${
+    c.REQUESTER_NAME
+  }<${resultType}, ${variableType}>(${documentName}, ${getRequesterArgs(o)}, ${c.OPTIONS_NAME}));`;
+
+  return filterJoin(
+    [
+      `const ${c.RESPONSE_NAME} = await ${callRequester}`,
+      `return {`,
+      /** Return the response */
+      `...${c.RESPONSE_NAME},`,
+      /** If the first field is the operation drill down for a nicer api */
+      nestedDataKey ? `data: ${c.RESPONSE_NAME}?.data?.${nestedDataKey},` : undefined,
+      /** If we are a parent add the child sdk to the response */
+      chainParentKey ? `...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}),` : undefined,
+      `}`,
+    ],
+    "\n"
+  );
 }
 
 /**
@@ -231,10 +244,15 @@ export function getSdkOperationName(o: SdkOperation): string {
  * Get the result type of the operation
  * Chained apis have the relevant chain api return type added
  */
-function getOperationResultType(o: SdkOperation, config: SdkPluginConfig) {
-  const resultType = printNamespacedType(config, o.operationResultType);
-
+function printOperationResultType(o: SdkOperation, config: SdkPluginConfig) {
+  const nestedDataKey = getNestedDataKey(o);
   const chainParentKey = getChainParentKey(o);
+  const resultType = printNamespacedType(
+    config,
+    /** Print the operation result type with nested data key if present */
+    nestedDataKey ? `${o.operationResultType}['${nestedDataKey}']` : o.operationResultType
+  );
+
   if (chainParentKey) {
     return `Promise<${c.RESPONSE_TYPE}<${resultType}> & ${printApiFunctionType(chainParentKey)}>`;
   } else {
@@ -247,6 +265,8 @@ function getOperationResultType(o: SdkOperation, config: SdkPluginConfig) {
  */
 export function getOperation(o: SdkOperation, config: SdkPluginConfig): string {
   const operationName = getSdkOperationName(o);
+  const returnType = printOperationResultType(o, config);
+  const content = getOperationBody(o, config);
   const args = getArgList([
     ...getOperationArgs(o, config),
     {
@@ -256,8 +276,6 @@ export function getOperation(o: SdkOperation, config: SdkPluginConfig): string {
       description: "options to pass to the graphql client",
     },
   ]);
-  const returnType = getOperationResultType(o, config);
-  const content = getOperationBody(o, config);
 
   /** Build a function for this graphql operation */
   return `
@@ -266,7 +284,7 @@ export function getOperation(o: SdkOperation, config: SdkPluginConfig): string {
       ...args.jsdoc,
       `@returns The wrapped result of the ${o.operationResultType}`,
     ])}
-    ${getChainParentKey(o) ? "async " : ""}${operationName}(${args.print}): ${returnType} {
+    async ${operationName}(${args.print}): ${returnType} {
       ${content}
     }
   `;

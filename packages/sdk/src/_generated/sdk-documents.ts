@@ -1,4 +1,12 @@
 import gql from "graphql-tag";
+export const PageInfoFragment = gql`
+  fragment PageInfoFragment on PageInfo {
+    hasNextPage
+    hasPreviousPage
+    startCursor
+    endCursor
+  }
+`;
 export const UserFragment = gql`
   fragment UserFragment on User {
     id
@@ -91,9 +99,19 @@ export const TeamsDocument = gql`
       nodes {
         ...TeamFragment
       }
+      pageInfo {
+        ...PageInfoFragment
+      }
+      edges {
+        cursor
+        node {
+          ...TeamFragment
+        }
+      }
     }
   }
   ${TeamFragment}
+  ${PageInfoFragment}
 `;
 export const TeamDocument = gql`
   query team($id: String!) {
@@ -120,6 +138,12 @@ export const IssuesDocument = gql`
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
+      nodes {
+        ...IssueFragment
+      }
+      pageInfo {
+        ...PageInfoFragment
+      }
       edges {
         cursor
         node {
@@ -129,6 +153,7 @@ export const IssuesDocument = gql`
     }
   }
   ${IssueFragment}
+  ${PageInfoFragment}
 `;
 export const TeamIssuesDocument = gql`
   query teamIssues(
@@ -149,6 +174,12 @@ export const TeamIssuesDocument = gql`
         includeArchived: $includeArchived
         orderBy: $orderBy
       ) {
+        nodes {
+          ...IssueFragment
+        }
+        pageInfo {
+          ...PageInfoFragment
+        }
         edges {
           cursor
           node {
@@ -159,6 +190,7 @@ export const TeamIssuesDocument = gql`
     }
   }
   ${IssueFragment}
+  ${PageInfoFragment}
 `;
 export const IssueDocument = gql`
   query issue($id: String!) {

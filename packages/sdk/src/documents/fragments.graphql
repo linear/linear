@@ -1,3 +1,10 @@
+fragment PageInfoFragment on PageInfo {
+  hasNextPage
+  hasPreviousPage
+  startCursor
+  endCursor
+}
+
 fragment IssueBaseFragment on Issue {
   id
   createdAt

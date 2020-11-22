@@ -5011,6 +5011,11 @@ export type OrganizationDomainSimplePayload = {
   success: Scalars["Boolean"];
 };
 
+export type PageInfoFragmentFragment = { __typename?: "PageInfo" } & Pick<
+  PageInfo,
+  "hasNextPage" | "hasPreviousPage" | "startCursor" | "endCursor"
+>;
+
 export type IssueBaseFragmentFragment = { __typename?: "Issue" } & Pick<
   Issue,
   | "id"
@@ -5070,7 +5075,13 @@ export type ViewerQuery = { __typename?: "Query" } & { viewer: { __typename?: "U
 export type TeamsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type TeamsQuery = { __typename?: "Query" } & {
-  teams: { __typename?: "TeamConnection" } & { nodes: Array<{ __typename?: "Team" } & TeamFragmentFragment> };
+  teams: { __typename?: "TeamConnection" } & {
+    nodes: Array<{ __typename?: "Team" } & TeamFragmentFragment>;
+    pageInfo: { __typename?: "PageInfo" } & PageInfoFragmentFragment;
+    edges: Array<
+      { __typename?: "TeamEdge" } & Pick<TeamEdge, "cursor"> & { node: { __typename?: "Team" } & TeamFragmentFragment }
+    >;
+  };
 };
 
 export type TeamQueryVariables = Exact<{
@@ -5090,6 +5101,8 @@ export type IssuesQueryVariables = Exact<{
 
 export type IssuesQuery = { __typename?: "Query" } & {
   issues: { __typename?: "IssueConnection" } & {
+    nodes: Array<{ __typename?: "Issue" } & IssueFragmentFragment>;
+    pageInfo: { __typename?: "PageInfo" } & PageInfoFragmentFragment;
     edges: Array<
       { __typename?: "IssueEdge" } & Pick<IssueEdge, "cursor"> & {
           node: { __typename?: "Issue" } & IssueFragmentFragment;
@@ -5111,6 +5124,8 @@ export type TeamIssuesQueryVariables = Exact<{
 export type TeamIssuesQuery = { __typename?: "Query" } & {
   team: { __typename?: "Team" } & {
     issues: { __typename?: "IssueConnection" } & {
+      nodes: Array<{ __typename?: "Issue" } & IssueFragmentFragment>;
+      pageInfo: { __typename?: "PageInfo" } & PageInfoFragmentFragment;
       edges: Array<
         { __typename?: "IssueEdge" } & Pick<IssueEdge, "cursor"> & {
             node: { __typename?: "Issue" } & IssueFragmentFragment;

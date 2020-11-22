@@ -22,5 +22,8 @@
     "@graphql-codegen/typescript-operations": "1.17.9",
     "graphql": "15.4.0",
     "graphql-request": "3.3.0"
+  },
+  "devDependencies": {
+    "dotenv": "8.2.0"
   }
 }

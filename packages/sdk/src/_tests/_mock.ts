@@ -30,11 +30,7 @@ interface MockSpec {
   /** The headers to return from the test request */
   headers?: Record<string, string>;
   /** The body data to return from the test request */
-  body?: {
-    data?: JsonObject;
-    extensions?: JsonObject;
-    errors?: JsonObject;
-  };
+  body?: JsonObject;
 }
 
 /**

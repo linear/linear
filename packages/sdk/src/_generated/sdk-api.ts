@@ -35,55 +35,32 @@ export interface LinearResponse<T> {
 }
 
 /**
- * The function type for wrapping an operation call in a LinearResponse
- */
-export type LinearHandler<T> = () => Promise<LinearResponse<T>>;
-
-/**
  * Runs the operation and wraps the result in a LinearResponse
  * Catches errors and attaches them to the response object
  */
-export function handler<T>(operation: () => Promise<T>): LinearHandler<T> {
-  return async function run() {
-    try {
-      const response = await operation();
-      return {
-        status: LinearStatus.success,
-        data: response,
-      };
-    } catch (error) {
-      return {
-        status: LinearStatus.error,
-        error,
-      };
-    }
-  };
+export async function handler<T>(operation: () => Promise<T>): Promise<LinearResponse<T>> {
+  try {
+    const response = await operation();
+    return {
+      status: LinearStatus.success,
+      data: response,
+    };
+  } catch (error) {
+    return {
+      status: LinearStatus.error,
+      error,
+    };
+  }
 }
-
-/**
- * The type of a Linear sdk wrapper function
- * Must call the operation and return the result
- */
-export type LinearWrapper = <T>(action: () => Promise<T>) => Promise<T>;
-
-/**
- * Default wrapper to call the operation and return the result
- */
-const defaultWrapper: LinearWrapper = operation => operation();
 
 /**
  * Initialise a set of operations, scoped to team, to run against the Linear api
  *
  * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
- * @param wrapper - wrapper function to process before or after the operation is called
  * @returns The set of available operations scoped to a single team
  */
-export function createRawLinearSdkTeam<O>(
-  id: string,
-  requester: LinearRequester<O>,
-  wrapper: LinearWrapper = defaultWrapper
-) {
+export function createRawLinearSdkTeam<O>(id: string, requester: LinearRequester<O>) {
   return {
     /**
      * Call the linear api with the TeamIssuesQuery
@@ -92,12 +69,13 @@ export function createRawLinearSdkTeam<O>(
      * @param opts - options to pass to the graphql client
      * @returns The wrapped result of the TeamIssuesQuery
      */
-    issues(vars?: Omit<T.TeamIssuesQueryVariables, "id">, opts?: O): Promise<LinearResponse<T.TeamIssuesQuery>> {
-      return wrapper(
-        handler(() =>
-          requester<T.TeamIssuesQuery, T.TeamIssuesQueryVariables>(D.TeamIssuesDocument, { id, ...vars }, opts)
-        )
+    async issues(vars?: Omit<T.TeamIssuesQueryVariables, "id">, opts?: O): Promise<LinearResponse<T.TeamIssuesQuery>> {
+      const response = await handler(() =>
+        requester<T.TeamIssuesQuery, T.TeamIssuesQueryVariables>(D.TeamIssuesDocument, { id, ...vars }, opts)
       );
+      return {
+        ...response,
+      };
     },
   };
 }
@@ -113,14 +91,9 @@ export type LinearSdkTeam = ReturnType<typeof createRawLinearSdkTeam>;
  *
  * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
- * @param wrapper - wrapper function to process before or after the operation is called
  * @returns The set of available operations scoped to a single issue
  */
-export function createRawLinearSdkIssue<O>(
-  id: string,
-  requester: LinearRequester<O>,
-  wrapper: LinearWrapper = defaultWrapper
-) {
+export function createRawLinearSdkIssue<O>(id: string, requester: LinearRequester<O>) {
   return {
     /**
      * Call the linear api with the IssueAssigneeQuery
@@ -128,12 +101,13 @@ export function createRawLinearSdkIssue<O>(
      * @param opts - options to pass to the graphql client
      * @returns The wrapped result of the IssueAssigneeQuery
      */
-    assignee(opts?: O): Promise<LinearResponse<T.IssueAssigneeQuery>> {
-      return wrapper(
-        handler(() =>
-          requester<T.IssueAssigneeQuery, T.IssueAssigneeQueryVariables>(D.IssueAssigneeDocument, { id }, opts)
-        )
+    async assignee(opts?: O): Promise<LinearResponse<T.IssueAssigneeQuery>> {
+      const response = await handler(() =>
+        requester<T.IssueAssigneeQuery, T.IssueAssigneeQueryVariables>(D.IssueAssigneeDocument, { id }, opts)
       );
+      return {
+        ...response,
+      };
     },
   };
 }
@@ -148,10 +122,9 @@ export type LinearSdkIssue = ReturnType<typeof createRawLinearSdkIssue>;
  * Initialise a set of operations to run against the Linear api
  *
  * @param requester - function to call the graphql client
- * @param wrapper - wrapper function to process before or after the operation is called
  * @returns The set of available operations
  */
-export function createRawLinearSdk<O>(requester: LinearRequester<O>, wrapper: LinearWrapper = defaultWrapper) {
+export function createRawLinearSdk<O>(requester: LinearRequester<O>) {
   return {
     /**
      * Call the linear api with the IssueCreateMutation
@@ -160,12 +133,17 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>, wrapper: Li
      * @param opts - options to pass to the graphql client
      * @returns The wrapped result of the IssueCreateMutation
      */
-    issueCreate(vars: T.IssueCreateMutationVariables, opts?: O): Promise<LinearResponse<T.IssueCreateMutation>> {
-      return wrapper(
-        handler(() =>
-          requester<T.IssueCreateMutation, T.IssueCreateMutationVariables>(D.IssueCreateDocument, vars, opts)
-        )
+    async issueCreate(
+      vars: T.IssueCreateMutationVariables,
+      opts?: O
+    ): Promise<LinearResponse<T.IssueCreateMutation["issueCreate"]>> {
+      const response = await handler(() =>
+        requester<T.IssueCreateMutation, T.IssueCreateMutationVariables>(D.IssueCreateDocument, vars, opts)
       );
+      return {
+        ...response,
+        data: response?.data?.issueCreate,
+      };
     },
     /**
      * Call the linear api with the ViewerQuery
@@ -174,8 +152,14 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>, wrapper: Li
      * @param opts - options to pass to the graphql client
      * @returns The wrapped result of the ViewerQuery
      */
-    viewer(vars?: T.ViewerQueryVariables, opts?: O): Promise<LinearResponse<T.ViewerQuery>> {
-      return wrapper(handler(() => requester<T.ViewerQuery, T.ViewerQueryVariables>(D.ViewerDocument, vars, opts)));
+    async viewer(vars?: T.ViewerQueryVariables, opts?: O): Promise<LinearResponse<T.ViewerQuery["viewer"]>> {
+      const response = await handler(() =>
+        requester<T.ViewerQuery, T.ViewerQueryVariables>(D.ViewerDocument, vars, opts)
+      );
+      return {
+        ...response,
+        data: response?.data?.viewer,
+      };
     },
     /**
      * Call the linear api with the TeamsQuery
@@ -184,8 +168,12 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>, wrapper: Li
      * @param opts - options to pass to the graphql client
      * @returns The wrapped result of the TeamsQuery
      */
-    teams(vars?: T.TeamsQueryVariables, opts?: O): Promise<LinearResponse<T.TeamsQuery>> {
-      return wrapper(handler(() => requester<T.TeamsQuery, T.TeamsQueryVariables>(D.TeamsDocument, vars, opts)));
+    async teams(vars?: T.TeamsQueryVariables, opts?: O): Promise<LinearResponse<T.TeamsQuery["teams"]>> {
+      const response = await handler(() => requester<T.TeamsQuery, T.TeamsQueryVariables>(D.TeamsDocument, vars, opts));
+      return {
+        ...response,
+        data: response?.data?.teams,
+      };
     },
     /**
      * Call the linear api with the TeamQuery
@@ -194,13 +182,12 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>, wrapper: Li
      * @param opts - options to pass to the graphql client
      * @returns The wrapped result of the TeamQuery
      */
-    async team(id: string, opts?: O): Promise<LinearResponse<T.TeamQuery> & LinearSdkTeam> {
-      const response = await wrapper(
-        handler(() => requester<T.TeamQuery, T.TeamQueryVariables>(D.TeamDocument, { id }, opts))
-      );
+    async team(id: string, opts?: O): Promise<LinearResponse<T.TeamQuery["team"]> & LinearSdkTeam> {
+      const response = await handler(() => requester<T.TeamQuery, T.TeamQueryVariables>(D.TeamDocument, { id }, opts));
       return {
         ...response,
-        ...createRawLinearSdkTeam(id, requester, wrapper),
+        data: response?.data?.team,
+        ...createRawLinearSdkTeam(id, requester),
       };
     },
     /**
@@ -210,8 +197,14 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>, wrapper: Li
      * @param opts - options to pass to the graphql client
      * @returns The wrapped result of the IssuesQuery
      */
-    issues(vars?: T.IssuesQueryVariables, opts?: O): Promise<LinearResponse<T.IssuesQuery>> {
-      return wrapper(handler(() => requester<T.IssuesQuery, T.IssuesQueryVariables>(D.IssuesDocument, vars, opts)));
+    async issues(vars?: T.IssuesQueryVariables, opts?: O): Promise<LinearResponse<T.IssuesQuery["issues"]>> {
+      const response = await handler(() =>
+        requester<T.IssuesQuery, T.IssuesQueryVariables>(D.IssuesDocument, vars, opts)
+      );
+      return {
+        ...response,
+        data: response?.data?.issues,
+      };
     },
     /**
      * Call the linear api with the IssueQuery
@@ -220,13 +213,14 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>, wrapper: Li
      * @param opts - options to pass to the graphql client
      * @returns The wrapped result of the IssueQuery
      */
-    async issue(id: string, opts?: O): Promise<LinearResponse<T.IssueQuery> & LinearSdkIssue> {
-      const response = await wrapper(
-        handler(() => requester<T.IssueQuery, T.IssueQueryVariables>(D.IssueDocument, { id }, opts))
+    async issue(id: string, opts?: O): Promise<LinearResponse<T.IssueQuery["issue"]> & LinearSdkIssue> {
+      const response = await handler(() =>
+        requester<T.IssueQuery, T.IssueQueryVariables>(D.IssueDocument, { id }, opts)
       );
       return {
         ...response,
-        ...createRawLinearSdkIssue(id, requester, wrapper),
+        data: response?.data?.issue,
+        ...createRawLinearSdkIssue(id, requester),
       };
     },
   };

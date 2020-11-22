@@ -10,7 +10,6 @@ import { getSdkHandler } from "./handler";
 import { printDocBlock } from "./print";
 import { debug, filterJoin, nonNullable } from "./utils";
 import { createVisitor, SdkVisitor } from "./visitor";
-import { getSdkWrapper } from "./wrapper";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear sdk
@@ -72,8 +71,6 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
         `export type ${c.REQUESTER_TYPE}<${c.OPTIONS_TYPE} = {}> = <R, V>(doc: ${docType}, ${c.VARIABLE_NAME}?: V, ${c.OPTIONS_NAME}?: ${c.OPTIONS_TYPE}) => Promise<R>`,
         /** Print the handler function */
         getSdkHandler(),
-        /** Print the wrapper function */
-        getSdkWrapper(),
         /** Print the chained api functions */
         ...chainVisitors.map(v => v.visitor.sdkContent),
         /** Print the root function */
@@ -93,7 +90,7 @@ export const validate: PluginValidateFn = async (
   config: RawSdkPluginConfig,
   outputFile: string
 ) => {
-  const prefix = `Plugin "@linear/sdk-plugin" config requires`;
+  const prefix = `Plugin "${process.env.npm_package_name}" config requires`;
 
   debug("config", config);
 
