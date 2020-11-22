@@ -55,7 +55,7 @@ function parseClientOptions({ apiKey, accessToken, baseUrl, ...opts }: LinearSdk
 /**
  * Create a Linear sdk client
  *
- * @param options initial sdk options to be passed to the graphql client
+ * @param options initial sdk options to pass to the graphql client
  * @returns an sdk for interacting with the Linear api
  */
 export function createLinearSdk(

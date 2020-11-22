@@ -1,12 +1,14 @@
 import { FieldNode, Kind, OperationDefinitionNode } from "graphql";
+import { ArgDefinition, getArgList } from "./args";
 import { SdkPluginConfig } from "./config";
 import c from "./constants";
 import {
   printApiFunctionName,
   printApiFunctionType,
-  printArgList,
+  printDocBlock,
   printNamespacedDocument,
   printNamespacedType,
+  printOperationName,
 } from "./print";
 import { lowerFirst } from "./utils";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
@@ -120,29 +122,42 @@ export function processSdkOperation(operation: OperationDefinitionNode): SdkOper
 /**
  * Get the operation args from the operation variables
  */
-function getVariableArgs(o: SdkOperation, config: SdkPluginConfig): string {
-  const variableType = printNamespacedType(config, o.operationVariablesTypes);
-  const optional = hasOptionalVariable(o) ? "?" : "";
-  const chainChildKey = getChainChildKey(o);
+function getOperationArgs(o: SdkOperation, config: SdkPluginConfig): ArgDefinition[] {
+  /** Operation id argument definition */
+  const idArg = {
+    name: c.ID_NAME,
+    optional: false,
+    type: c.ID_TYPE,
+    description: `${c.ID_NAME} to pass into the ${o.operationResultType}`,
+  };
 
+  /** Operation variables argument definition */
+  const variableType = printNamespacedType(config, o.operationVariablesTypes);
+  const variablesArg = {
+    name: c.VARIABLE_NAME,
+    optional: hasOptionalVariable(o),
+    type: variableType,
+    description: `variables to pass into the ${o.operationResultType}`,
+  };
+
+  /** Handle id variables separately by making them the first arg */
   if (hasVariable(o, c.ID_NAME)) {
-    /** Handle id variables separately by making them the first arg */
+    const chainChildKey = getChainChildKey(o);
+
     if (hasOtherVariable(o, c.ID_NAME)) {
       /** If we are chained do not add the id arg as it comes from the function scope */
-      if (chainChildKey) {
-        return `${c.VARIABLE_NAME}${optional}: Omit<${variableType}, '${c.ID_NAME}'>`;
-      } else {
-        return `${c.ID_NAME}: ${c.ID_TYPE}, ${c.VARIABLE_NAME}${optional}: Omit<${variableType}, '${c.ID_NAME}'>`;
-      }
+      const variablesWithoutIdArg = {
+        ...variablesArg,
+        type: `Omit<${variableType}, '${c.ID_NAME}'>`,
+        description: `variables without ${chainChildKey} ${c.ID_NAME} to pass into the ${o.operationResultType}`,
+      };
+
+      return chainChildKey ? [variablesWithoutIdArg] : [idArg, variablesWithoutIdArg];
     } else {
-      if (chainChildKey) {
-        return "";
-      } else {
-        return `${c.ID_NAME}: ${c.ID_TYPE}`;
-      }
+      return chainChildKey ? [] : [idArg];
     }
   } else {
-    return `${c.VARIABLE_NAME}${optional}: ${variableType}`;
+    return [variablesArg];
   }
 }
 
@@ -191,9 +206,9 @@ function getOperationBody(o: SdkOperation, config: SdkPluginConfig): string {
   const chainParentKey = getChainParentKey(o);
   if (chainParentKey) {
     return `
-      const response = await ${callRequester}
+      const ${c.RESPONSE_NAME} = await ${callRequester}
       return {
-        ...response,
+        ...${c.RESPONSE_NAME},
         ...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}, ${c.WRAPPER_NAME}),
       }
     `;
@@ -207,7 +222,7 @@ function getOperationBody(o: SdkOperation, config: SdkPluginConfig): string {
  * Chained apis have the chain key removed from the name
  */
 export function getSdkOperationName(o: SdkOperation): string {
-  const nodeName = o.node.name?.value ?? "UNKNOWN_NODE_NAME";
+  const nodeName = printOperationName(o);
   const chainChildKey = getChainChildKey(o);
   return chainChildKey ? lowerFirst(nodeName.replace(new RegExp(`^${chainChildKey}`, "i"), "")) : nodeName;
 }
@@ -232,13 +247,26 @@ function getOperationResultType(o: SdkOperation, config: SdkPluginConfig) {
  */
 export function getOperation(o: SdkOperation, config: SdkPluginConfig): string {
   const operationName = getSdkOperationName(o);
-  const args = printArgList([getVariableArgs(o, config), `${c.OPTIONS_NAME}?: C`]);
+  const args = getArgList([
+    ...getOperationArgs(o, config),
+    {
+      name: c.OPTIONS_NAME,
+      optional: true,
+      type: c.OPTIONS_TYPE,
+      description: "options to pass to the graphql client",
+    },
+  ]);
   const returnType = getOperationResultType(o, config);
   const content = getOperationBody(o, config);
 
   /** Build a function for this graphql operation */
   return `
-    ${getChainParentKey(o) ? "async " : ""}${operationName}(${args}): ${returnType} {
+    ${printDocBlock([
+      `Call the linear api with the ${o.operationResultType}`,
+      ...args.jsdoc,
+      `@returns The wrapped result of the ${o.operationResultType}`,
+    ])}
+    ${getChainParentKey(o) ? "async " : ""}${operationName}(${args.print}): ${returnType} {
       ${content}
     }
   `;

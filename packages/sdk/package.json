@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@graphql-codegen/introspection": "1.18.0",
+    "@graphql-codegen/jsdoc": "1.17.8",
     "@graphql-codegen/typescript": "1.17.11",
     "@graphql-codegen/typescript-document-nodes": "1.17.8",
     "@graphql-codegen/typescript-operations": "1.17.9",

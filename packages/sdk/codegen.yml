@@ -1,6 +1,6 @@
 overwrite: true
-schema: "https://api.linear.app/graphql"
-documents: "./src/documents/**"
+schema: https://api.linear.app/graphql
+documents: ./src/documents/**
 hooks:
   afterOneFileWrite:
     - prettier --write
@@ -9,6 +9,9 @@ generates:
     plugins:
       - typescript
       - typescript-operations
+  src/_generated/sdk-doc.ts:
+    plugins:
+      - jsdoc
   src/_generated/sdk-documents.ts:
     plugins:
       - typescript-document-nodes
@@ -17,10 +20,10 @@ generates:
   src/_generated/sdk-api.ts:
     plugins:
       # - "@linear/sdk-plugin"
-      - "../sdk-plugin/dist/index.js":
+      - ../sdk-plugin/dist/index.js
     config:
-      typeFile: "./sdk-types"
-      documentFile: "./sdk-documents"
+      typeFile: ./sdk-types
+      documentFile: ./sdk-documents
   src/_generated/graphql.schema.json:
     plugins:
-      - "introspection"
+      - introspection

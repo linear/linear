@@ -2,11 +2,12 @@ import { Types } from "@graphql-codegen/plugin-helpers";
 import { ClientSideBaseVisitor, indentMultiline, LoadedFragment } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
 import { concatAST, DocumentNode, GraphQLSchema, OperationDefinitionNode, visit } from "graphql";
+import { getArgList } from "./args";
 import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
 import c from "./constants";
 import { getOperation, SdkOperationDefinition } from "./operation";
-import { printApiFunctionName, printApiFunctionType, printArgList } from "./print";
-import { filterJoin } from "./utils";
+import { printApiFunctionName, printApiFunctionType, printDocBlock } from "./print";
+import { debug, filterJoin } from "./utils";
 
 /**
  * Definition of an operation for outputting an sdk function
@@ -71,6 +72,8 @@ export function createVisitor(
  */
 export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPluginConfig> {
   private _operationsToInclude: SdkOperation[] = [];
+  private _apiName: string;
+  private _apiType: string;
   private _chainKey: string | undefined;
 
   /**
@@ -93,15 +96,13 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
       },
       documents
     );
-
     autoBind(this);
 
     this._chainKey = chainKey;
-  }
-
-  public getImports(): string[] {
-    /** Do not add any additional imports */
-    return [];
+    this._apiName = printApiFunctionName(chainKey);
+    this._apiType = printApiFunctionType(chainKey);
+    debug(chainKey ?? "root", "apiName", this._apiName);
+    debug(chainKey ?? "root", "apiType", this._apiType);
   }
 
   /**
@@ -129,31 +130,61 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
    * Return the generated sdk string content
    */
   public get sdkContent(): string {
+    debug(this._chainKey ?? "root", "operations", this._operationsToInclude.length);
+
     /** For each operation get the function string content */
     const operations = filterJoin(
       this._operationsToInclude.map(o => getOperation(o, this.config)).map(s => indentMultiline(s, 2)),
       ",\n"
     );
 
-    const args = printArgList([
+    const args = getArgList([
       /** Add an initial id arg if in a nested api */
-      this._chainKey ? `${c.ID_NAME}: string` : "",
+      this._chainKey
+        ? {
+            name: c.ID_NAME,
+            optional: false,
+            type: c.ID_TYPE,
+            description: `${c.ID_NAME} to scope the returned operations by`,
+          }
+        : undefined,
       /** The requester function arg */
-      `${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}<C>`,
+      {
+        name: c.REQUESTER_NAME,
+        optional: false,
+        type: `${c.REQUESTER_TYPE}<${c.OPTIONS_TYPE}>`,
+        description: "function to call the graphql client",
+      },
       /** The wrapper function arg */
-      `${c.WRAPPER_NAME}: ${c.WRAPPER_TYPE} = ${c.WRAPPER_DEFAULT_NAME}`,
+      {
+        name: c.WRAPPER_NAME,
+        optional: false,
+        type: c.WRAPPER_TYPE,
+        defaultName: c.WRAPPER_DEFAULT_NAME,
+        description: "wrapper function to process before or after the operation is called",
+      },
     ]);
 
-    const apiName = printApiFunctionName(this._chainKey);
-    const apiType = printApiFunctionType(this._chainKey);
+    const apiDescription = this._chainKey
+      ? `Initialise a set of operations, scoped to ${this._chainKey}, to run against the Linear api`
+      : "Initialise a set of operations to run against the Linear api";
+
     return `
-      export function ${apiName}<C>(${args}) {
+      ${printDocBlock([
+        apiDescription,
+        ...args.jsdoc,
+        this._chainKey
+          ? `@returns The set of available operations scoped to a single ${this._chainKey}`
+          : "@returns The set of available operations",
+      ])}
+      export function ${this._apiName}<${c.OPTIONS_TYPE}>(${args.print}) {
         return {
           ${operations}
         };
       }
       
-      export type ${apiType} = ReturnType<typeof ${apiName}>;
+      ${printDocBlock([`The returned type from calling ${this._apiName}`, apiDescription])}
+      export type ${this._apiType} = ReturnType<typeof ${this._apiName}>;
     `;
   }
 }
