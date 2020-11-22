@@ -29,8 +29,17 @@ export enum LinearStatus {
  * The wrapped response type from calling a Linear sdk operation
  */
 export interface LinearResponse<T> {
+  /**
+   * The status of the graphql operation call
+   */
   status: LinearStatus;
+  /**
+   * The data returned from a successful call
+   */
   data?: T;
+  /**
+   * The error caught when executing the graphql operation
+   */
   error?: Error;
 }
 
@@ -186,8 +195,8 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>) {
       const response = await handler(() => requester<T.TeamQuery, T.TeamQueryVariables>(D.TeamDocument, { id }, opts));
       return {
         ...response,
-        data: response?.data?.team,
         ...createRawLinearSdkTeam(id, requester),
+        data: response?.data?.team,
       };
     },
     /**
@@ -219,8 +228,8 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>) {
       );
       return {
         ...response,
-        data: response?.data?.issue,
         ...createRawLinearSdkIssue(id, requester),
+        data: response?.data?.issue,
       };
     },
   };
