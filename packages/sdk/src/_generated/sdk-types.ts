@@ -43,6 +43,8 @@ export type Query = {
   apiKeys: ApiKeyConnection;
   /** Get information for an application. */
   application: Application;
+  /** Get all authorized applications for a user */
+  authorizedApplications: Array<Application>;
   /** Fetch users belonging to this user account. */
   availableUsers: AuthResolverResponse;
   /** Fetch SSO login URL for the email provided. */
@@ -2224,7 +2226,7 @@ export type Application = {
   /** Url of the developer (homepage or docs). */
   developerUrl: Scalars["String"];
   /** Image of the application. */
-  imageUrl: Scalars["String"];
+  imageUrl?: Maybe<Scalars["String"]>;
 };
 
 export type AuthResolverResponse = {
@@ -2717,6 +2719,8 @@ export type Mutation = {
   organizationDelete: OrganizationDeletePayload;
   /** Disable organization access. Superuser privileges required. */
   organizationToggleAccess: OrganizationAccessPayload;
+  /** Change email domain for all users and accounts in the organization. */
+  organizationChangeEmailDomain: OrganizationAccessPayload;
   /** Toggle SAML authentication on or off for an organization. Superuser privileges required. */
   organizationToggleSamlEnabled: OrganizationSamlConfigurePayload;
   /** Configure SAML authentication for an organization. Superuser privileges required. */
@@ -2847,8 +2851,8 @@ export type Mutation = {
   milestoneCreate: MilestonePayload;
   /** Updates a milestone. */
   milestoneUpdate: MilestonePayload;
-  /** Archives a milestone. */
-  milestoneArchive: ArchivePayload;
+  /** Deletes a milestone. */
+  milestoneDelete: ArchivePayload;
   /** Creates a notification. */
   notificationCreate: NotificationPayload;
   /** Updates a notification. */
@@ -2987,6 +2991,12 @@ export type MutationOrganizationDeleteArgs = {
 };
 
 export type MutationOrganizationToggleAccessArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationOrganizationChangeEmailDomainArgs = {
+  toDomain: Scalars["String"];
+  fromDomain: Scalars["String"];
   id: Scalars["String"];
 };
 
@@ -3268,7 +3278,7 @@ export type MutationMilestoneUpdateArgs = {
   id: Scalars["String"];
 };
 
-export type MutationMilestoneArchiveArgs = {
+export type MutationMilestoneDeleteArgs = {
   id: Scalars["String"];
 };
 
@@ -4172,8 +4182,6 @@ export type MilestoneCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The name of the milestone. */
   name: Scalars["String"];
-  /** The identifier of the team associated with the milestone. */
-  teamId: Scalars["String"];
   /** The sort order of the milestone. */
   sortOrder?: Maybe<Scalars["Float"]>;
 };

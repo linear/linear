@@ -528,6 +528,30 @@
             "deprecationReason": null
           },
           {
+            "name": "authorizedApplications",
+            "description": "Get all authorized applications for a user",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Application",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "availableUsers",
             "description": "Fetch users belonging to this user account.",
             "args": [],
@@ -15062,13 +15086,9 @@
             "description": "Image of the application.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -18411,6 +18431,65 @@
             "deprecationReason": null
           },
           {
+            "name": "organizationChangeEmailDomain",
+            "description": "Change email domain for all users and accounts in the organization.",
+            "args": [
+              {
+                "name": "toDomain",
+                "description": "The email domain to update to.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "fromDomain",
+                "description": "The email domain to update from.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the organization to update.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OrganizationAccessPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "organizationToggleSamlEnabled",
             "description": "Toggle SAML authentication on or off for an organization. Superuser privileges required.",
             "args": [
@@ -20789,12 +20868,12 @@
             "deprecationReason": null
           },
           {
-            "name": "milestoneArchive",
-            "description": "Archives a milestone.",
+            "name": "milestoneDelete",
+            "description": "Deletes a milestone.",
             "args": [
               {
                 "name": "id",
-                "description": "The identifier of the milestone to archive.",
+                "description": "The identifier of the milestone to delete. Only milestones without projects can be deleted.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -26282,20 +26361,6 @@
           {
             "name": "name",
             "description": "The name of the milestone.",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "teamId",
-            "description": "The identifier of the team associated with the milestone.",
             "type": {
               "kind": "NON_NULL",
               "name": null,

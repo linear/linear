@@ -79,7 +79,7 @@ export function getRootDocuments(documents: SdkDocuments): SdkDocuments {
  * Get all chain keys for creating chained apis
  */
 export function getChainKeys(documents: SdkDocuments): string[] {
-  return documents.reduce<string[]>((acc, document) => {
+  const chainKeys = documents.reduce<string[]>((acc, document) => {
     if (document.kind === Kind.DOCUMENT && Array.isArray(document.definitions)) {
       /** Get all chain keys from document definitions */
       return [...acc, ...document.definitions.map(d => (d as SdkOperationDefinition).chainKey).filter(nonNullable)];
@@ -87,6 +87,8 @@ export function getChainKeys(documents: SdkDocuments): string[] {
       return acc;
     }
   }, []);
+
+  return [...new Set(chainKeys)];
 }
 
 /**
