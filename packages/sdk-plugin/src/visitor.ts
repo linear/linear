@@ -155,14 +155,6 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
         type: `${c.REQUESTER_TYPE}<${c.OPTIONS_TYPE}>`,
         description: "function to call the graphql client",
       },
-      /** The wrapper function arg */
-      {
-        name: c.WRAPPER_NAME,
-        optional: false,
-        type: c.WRAPPER_TYPE,
-        defaultName: c.WRAPPER_DEFAULT_NAME,
-        description: "wrapper function to process before or after the operation is called",
-      },
     ]);
 
     const apiDescription = this._chainKey

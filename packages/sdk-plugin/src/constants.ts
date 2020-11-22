@@ -15,7 +15,4 @@ export default {
   SDK_TYPE: "LinearSdk",
   STATUS_TYPE: "LinearStatus",
   VARIABLE_NAME: "vars",
-  WRAPPER_DEFAULT_NAME: "defaultWrapper",
-  WRAPPER_NAME: "wrapper",
-  WRAPPER_TYPE: "LinearWrapper",
 };
