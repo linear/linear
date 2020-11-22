@@ -4,7 +4,7 @@ import { printDocBlock } from "./print";
 /**
  * Catch and handle any errors from the sdk function
  */
-export function getSdkHandler(): string {
+export function printSdkHandler(): string {
   return `
     ${printDocBlock(["The available Linear sdk statuses"])}
     export enum ${c.STATUS_TYPE} {
@@ -16,8 +16,11 @@ export function getSdkHandler(): string {
     
     ${printDocBlock(["The wrapped response type from calling a Linear sdk operation"])}
     export interface ${c.RESPONSE_TYPE}<T> {
+      ${printDocBlock(["The status of the graphql operation call"])}
       status: ${c.STATUS_TYPE}
+      ${printDocBlock(["The data returned from a successful call"])}
       data?: T
+      ${printDocBlock(["The error caught when executing the graphql operation"])}
       error?: Error
     }
 

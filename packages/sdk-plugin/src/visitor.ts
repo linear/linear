@@ -7,6 +7,7 @@ import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
 import c from "./constants";
 import { getOperation, SdkOperationDefinition } from "./operation";
 import { printApiFunctionName, printApiFunctionType, printDocBlock } from "./print";
+import { getRequesterArg } from "./requester";
 import { debug, filterJoin } from "./utils";
 
 /**
@@ -149,12 +150,7 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
           }
         : undefined,
       /** The requester function arg */
-      {
-        name: c.REQUESTER_NAME,
-        optional: false,
-        type: `${c.REQUESTER_TYPE}<${c.OPTIONS_TYPE}>`,
-        description: "function to call the graphql client",
-      },
+      getRequesterArg(),
     ]);
 
     const apiDescription = this._chainKey

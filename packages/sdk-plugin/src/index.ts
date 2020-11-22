@@ -6,8 +6,8 @@ import { RawSdkPluginConfig } from "./config";
 import c from "./constants";
 import { getChainKeys, getChildDocuments, getRootDocuments, processSdkDocuments } from "./documents";
 import { getFragmentsFromAst } from "./fragments";
-import { getSdkHandler } from "./handler";
-import { printDocBlock } from "./print";
+import { printSdkHandler } from "./handler";
+import { printRequesterType } from "./requester";
 import { debug, filterJoin, nonNullable } from "./utils";
 import { createVisitor, SdkVisitor } from "./visitor";
 
@@ -48,15 +48,13 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
     return createVisitor(schema, documents, chainDocuments, rootFragments, config, chainKey);
   });
 
-  /** Determine the document type */
-  const docType = config.documentMode === DocumentMode.string ? "string" : "DocumentNode";
-  const importType = config.useTypeImports ? "import type" : "import";
-
   return {
     /** Add any initial imports */
     prepend: [
       /** Import DocumentNode if required */
-      config.documentMode !== DocumentMode.string ? `${importType} { DocumentNode } from 'graphql'\n` : undefined,
+      config.documentMode !== DocumentMode.string
+        ? `${config.useTypeImports ? "import type" : "import"} { DocumentNode } from 'graphql'\n`
+        : undefined,
     ].filter(nonNullable),
     content: filterJoin(
       [
@@ -66,11 +64,10 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
         /** Import and export documents */
         `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
         `export * from '${config.documentFile}'\n`,
-        /** Export the requester function */
-        printDocBlock([`The function type for calling the graphql client`]),
-        `export type ${c.REQUESTER_TYPE}<${c.OPTIONS_TYPE} = {}> = <R, V>(doc: ${docType}, ${c.VARIABLE_NAME}?: V, ${c.OPTIONS_NAME}?: ${c.OPTIONS_TYPE}) => Promise<R>`,
+        /** Print the requester function */
+        ...printRequesterType(config),
         /** Print the handler function */
-        getSdkHandler(),
+        printSdkHandler(),
         /** Print the chained api functions */
         ...chainVisitors.map(v => v.visitor.sdkContent),
         /** Print the root function */

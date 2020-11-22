@@ -6,10 +6,10 @@ import {
   printApiFunctionName,
   printApiFunctionType,
   printDocBlock,
-  printNamespacedDocument,
   printNamespacedType,
   printOperationName,
 } from "./print";
+import { printRequesterCall } from "./requester";
 import { filterJoin, lowerFirst } from "./utils";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
 import { SdkOperation } from "./visitor";
@@ -162,22 +162,6 @@ function getOperationArgs(o: SdkOperation, config: SdkPluginConfig): ArgDefiniti
 }
 
 /**
- * Get the requester args from the operation variables
- */
-function getRequesterArgs(o: SdkOperation): string {
-  if (hasVariable(o, c.ID_NAME)) {
-    /** Merge id variable into requester variables */
-    if (hasOtherVariable(o, c.ID_NAME)) {
-      return `{${c.ID_NAME}, ...${c.VARIABLE_NAME}}`;
-    } else {
-      return `{${c.ID_NAME}}`;
-    }
-  } else {
-    return c.VARIABLE_NAME;
-  }
-}
-
-/**
  * Get the chain key if the operation should create an api
  */
 export function getChainParentKey(o: SdkOperation): string | undefined {
@@ -204,26 +188,18 @@ function getNestedDataKey(o: SdkOperation): string | undefined {
  */
 function getOperationBody(o: SdkOperation, config: SdkPluginConfig): string {
   const chainParentKey = getChainParentKey(o);
-  const variableType = printNamespacedType(config, o.operationVariablesTypes);
-  const documentName = printNamespacedDocument(config, o.documentVariableName);
-  const resultType = printNamespacedType(config, o.operationResultType);
   const nestedDataKey = getNestedDataKey(o);
-
-  /** Requester function call */
-  const callRequester = `${c.HANDLER_NAME}(() => ${
-    c.REQUESTER_NAME
-  }<${resultType}, ${variableType}>(${documentName}, ${getRequesterArgs(o)}, ${c.OPTIONS_NAME}));`;
 
   return filterJoin(
     [
-      `const ${c.RESPONSE_NAME} = await ${callRequester}`,
+      `const ${c.RESPONSE_NAME} = await ${printRequesterCall(o, config)}`,
       `return {`,
       /** Return the response */
       `...${c.RESPONSE_NAME},`,
-      /** If the first field is the operation drill down for a nicer api */
-      nestedDataKey ? `data: ${c.RESPONSE_NAME}?.data?.${nestedDataKey},` : undefined,
       /** If we are a parent add the child sdk to the response */
       chainParentKey ? `...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}),` : undefined,
+      /** If the first field is the operation drill down for a nicer api */
+      nestedDataKey ? `data: ${c.RESPONSE_NAME}?.data?.${nestedDataKey},` : undefined,
       `}`,
     ],
     "\n"
