@@ -6,9 +6,8 @@ import { RawSdkPluginConfig } from "./config";
 import c from "./constants";
 import { getChainKeys, getChildDocuments, getRootDocuments, processSdkDocuments } from "./documents";
 import { getFragmentsFromAst } from "./fragments";
-import { printSdkHandler } from "./handler";
 import { printRequesterType } from "./requester";
-import { debug, filterJoin } from "./utils";
+import { debug, filterJoin, nonNullable } from "./utils";
 import { createVisitor, SdkVisitor } from "./visitor";
 
 /**
@@ -53,11 +52,11 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
     prepend: [
       /** Ignore unused variables */
       "/* eslint-disable @typescript-eslint/no-unused-vars */",
-      /** Import GraphQLError and DocumentNode if required */
-      `import { GraphQLError, ${config.documentMode !== DocumentMode.string ? "DocumentNode" : ""} } from 'graphql'`,
+      /** Import DocumentNode if required */
+      config.documentMode !== DocumentMode.string ? `import { DocumentNode } from 'graphql'` : undefined,
       /** Import ResultOf util for document return types */
       `import { ResultOf } from '@graphql-typed-document-node/core'`,
-    ],
+    ].filter(nonNullable),
     content: filterJoin(
       [
         /** Import and export documents */
@@ -65,8 +64,6 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
         `export * from '${config.documentFile}'\n`,
         /** Print the requester function */
         ...printRequesterType(config),
-        /** Print the handler function */
-        printSdkHandler(),
         /** Print the chained api functions */
         ...chainVisitors.map(v => v.visitor.sdkContent),
         /** Print the root function */

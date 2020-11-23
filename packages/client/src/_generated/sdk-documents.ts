@@ -5085,14 +5085,6 @@ export type IssueQueryVariables = Exact<{
 
 export type IssueQuery = { __typename?: "Query" } & { issue: { __typename?: "Issue" } & IssueFragment };
 
-export type IssueAssigneeQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IssueAssigneeQuery = { __typename?: "Query" } & {
-  issue: { __typename?: "Issue" } & { assignee?: Maybe<{ __typename?: "User" } & UserFragment> };
-};
-
 export type IssueCreateMutationVariables = Exact<{
   teamId: Scalars["String"];
   title: Scalars["String"];
@@ -5635,58 +5627,6 @@ export const IssueDocument: DocumentNode<IssueQuery, IssueQueryVariables> = {
       },
     },
     ...IssueFragmentDoc.definitions,
-  ],
-};
-export const IssueAssigneeDocument: DocumentNode<IssueAssigneeQuery, IssueAssigneeQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "issueAssignee" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "assignee" },
-                  arguments: [],
-                  directives: [],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...UserFragmentDoc.definitions,
   ],
 };
 export const IssueCreateDocument: DocumentNode<IssueCreateMutation, IssueCreateMutationVariables> = {

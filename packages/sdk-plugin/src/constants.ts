@@ -1,6 +1,4 @@
 export default {
-  HANDLER_NAME: "handler",
-  HANDLER_TYPE: "LinearHandler",
   ID_NAME: "id",
   ID_TYPE: "string",
   NAMESPACE_DOCUMENT: "D",
@@ -9,8 +7,6 @@ export default {
   OPTIONS_TYPE: "O",
   REQUESTER_NAME: "requester",
   REQUESTER_TYPE: "LinearRequester",
-  RESPONSE_NAME: "response",
-  RESPONSE_TYPE: "LinearResponse",
   SDK_NAME: "createLinearSdk",
   SDK_TYPE: "LinearSdk",
   STATUS_TYPE: "LinearStatus",

@@ -31,15 +31,6 @@ query issue($id: String!) {
   }
 }
 
-# Get the assignee for an issue
-query issueAssignee($id: String!) {
-  issue(id: $id) {
-    assignee {
-      ...User
-    }
-  }
-}
-
 # Create one issue
 mutation issueCreate($teamId: String!, $title: String!, $description: String!) {
   issueCreate(input: { title: $title, description: $description, teamId: $teamId }) {
