@@ -41,7 +41,7 @@ export function printRequesterCall(o: SdkVisitorOperation, config: SdkPluginConf
   const documentName = printNamespacedDocument(config, o.documentVariableName);
   const resultType = printNamespacedType(config, o.operationResultType);
 
-  return `${c.HANDLER_NAME}(() => ${
+  return `${c.HANDLER_NAME}<${resultType}, ${variableType}>(() => ${
     c.REQUESTER_NAME
   }<${resultType}, ${variableType}>(${documentName}, ${printRequesterArgs(o)}, ${c.OPTIONS_NAME}));`;
 }

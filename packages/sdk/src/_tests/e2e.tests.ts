@@ -6,10 +6,16 @@ dotenv.config();
 
 it("allow no E2E_API_KEY env var", () => undefined);
 
+/**
+ * Return an sdk using the E2E_API_KEY environment variable
+ */
 function getSdk() {
   return createLinearSdk({ apiKey: process.env.E2E_API_KEY });
 }
 
+/**
+ * Return an sdk scoped to the first team found
+ */
 async function getTeamSdk() {
   const sdk = getSdk();
   const teams = await sdk.teams();
@@ -23,6 +29,9 @@ async function getTeamSdk() {
   return team;
 }
 
+/**
+ * Return an sdk scoped to the first issue found
+ */
 async function getIssueSdk() {
   const sdk = getSdk();
   const issues = await sdk.issues();
@@ -51,8 +60,8 @@ if (process.env.E2E_API_KEY) {
 
       expect(team.status).toBe(LinearStatus.error);
       expect(team.data).toBeUndefined();
-      expect((team.error as any)?.response?.status).toBe(200);
-      expect((team.error as any)?.response?.errors[0].message).toBe("Entity not found");
+      expect(team.statusCode).toBe(200);
+      expect(team.errors?.[0].message).toBe("Entity not found");
     });
 
     it("query for an issue", async () => {
@@ -60,6 +69,16 @@ if (process.env.E2E_API_KEY) {
       expect(issue.status).toBe(LinearStatus.success);
       expect(issue.data?.id).toBeDefined();
       expect(issue.error).toBeUndefined();
+    });
+
+    it("query for fake issue", async () => {
+      const sdk = getSdk();
+      const issue = await sdk.issue("not a real id");
+
+      expect(issue.status).toBe(LinearStatus.error);
+      expect(issue.data).toBeUndefined();
+      expect(issue.statusCode).toBe(200);
+      expect(issue.errors?.[0].message).toBe("Entity not found");
     });
   });
 }

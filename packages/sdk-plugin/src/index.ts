@@ -8,7 +8,7 @@ import { getChainKeys, getChildDocuments, getRootDocuments, processSdkDocuments 
 import { getFragmentsFromAst } from "./fragments";
 import { printSdkHandler } from "./handler";
 import { printRequesterType } from "./requester";
-import { debug, filterJoin, nonNullable } from "./utils";
+import { debug, filterJoin } from "./utils";
 import { createVisitor, SdkVisitor } from "./visitor";
 
 /**
@@ -51,11 +51,9 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
   return {
     /** Add any initial imports */
     prepend: [
-      /** Import DocumentNode if required */
-      config.documentMode !== DocumentMode.string
-        ? `${config.useTypeImports ? "import type" : "import"} { DocumentNode } from 'graphql'\n`
-        : undefined,
-    ].filter(nonNullable),
+      /** Import GraphQLError and DocumentNode if required */
+      `import { GraphQLError, ${config.documentMode !== DocumentMode.string ? "DocumentNode" : ""} } from 'graphql'`,
+    ],
     content: filterJoin(
       [
         /** Import and export types */
