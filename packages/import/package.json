@@ -14,8 +14,8 @@
     "linear-import": "bin/linear-import.js"
   },
   "scripts": {
-    "dev:import": "run-s dev:import:link build:import",
-    "dev:import:link": "yalc link @linear/client",
+    "dev:import": "run-s dev:import:update build:import",
+    "dev:import:update": "yalc update",
     "build:import": "yarn build:import:clean && npx tsc",
     "build:import:clean": "npx rimraf dist"
   },

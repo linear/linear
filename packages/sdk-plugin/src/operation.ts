@@ -1,11 +1,11 @@
-import { FieldNode, Kind, OperationDefinitionNode } from "graphql";
+import { FieldNode, Kind, OperationDefinitionNode, SelectionSetNode } from "graphql";
 import { printApiFunctionName, printApiFunctionType } from "./api";
 import { ArgDefinition, getArgList } from "./args";
 import { SdkPluginConfig } from "./config";
 import c from "./constants";
 import { printDocBlock, printNamespaced, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
-import { filterJoin, lowerFirst } from "./utils";
+import { filterJoin, lowerFirst, nonNullable } from "./utils";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
 import { SdkVisitorOperation } from "./visitor";
 
@@ -53,11 +53,17 @@ export interface SdkRootOperation extends SdkOperationDefinition {
 }
 
 /**
+ * The first field of the operation definition
+ */
+function getFirstField(selectionSet?: SelectionSetNode) {
+  return selectionSet?.selections.find(s => s.kind === Kind.FIELD) as FieldNode;
+}
+
+/**
  * The name of the first field of the operation definition
  */
-function getFirstFieldName(operation: OperationDefinitionNode) {
-  const firstField = operation.selectionSet.selections.find(s => s.kind === Kind.FIELD) as FieldNode;
-  return firstField?.name?.value;
+function getFirstFieldName(selectionSet?: SelectionSetNode) {
+  return getFirstField(selectionSet)?.name?.value;
 }
 
 /**
@@ -79,7 +85,7 @@ function getOperationName(o: OperationDefinitionNode) {
  * Return it with the chained key to link the chained sdk
  */
 export function isParentOperation(o: OperationDefinitionNode): boolean {
-  return hasIdVariable(o) && getOperationName(o) === getFirstFieldName(o);
+  return hasIdVariable(o) && getOperationName(o) === getFirstFieldName(o.selectionSet);
 }
 
 /**
@@ -87,28 +93,28 @@ export function isParentOperation(o: OperationDefinitionNode): boolean {
  * Return it with the chained key to link the chained sdk
  */
 export function isChildOperation(o: OperationDefinitionNode): boolean {
-  return Boolean(hasIdVariable(o) && getOperationName(o)?.startsWith(getFirstFieldName(o) ?? ""));
+  return Boolean(hasIdVariable(o) && getOperationName(o)?.startsWith(getFirstFieldName(o.selectionSet) ?? ""));
 }
 
 /**
  * Add information for chaining to the operation definition
  */
-export function processSdkOperation(operation: OperationDefinitionNode): SdkOperationDefinition {
-  if (isParentOperation(operation)) {
+export function processSdkOperation(o: OperationDefinitionNode): SdkOperationDefinition {
+  if (isParentOperation(o)) {
     return {
-      ...operation,
+      ...o,
       chainType: SdkChainType.parent,
-      chainKey: getFirstFieldName(operation),
+      chainKey: getFirstFieldName(o.selectionSet),
     };
-  } else if (isChildOperation(operation)) {
+  } else if (isChildOperation(o)) {
     return {
-      ...operation,
+      ...o,
       chainType: SdkChainType.child,
-      chainKey: getFirstFieldName(operation),
+      chainKey: getFirstFieldName(o.selectionSet),
     };
   } else {
     return {
-      ...operation,
+      ...o,
       chainType: SdkChainType.root,
     };
   }
@@ -171,11 +177,20 @@ export function getChainChildKey(o: SdkVisitorOperation): string | undefined {
 }
 
 /**
- * If the operation name is the same as the first field we can drill into the data to return a nicer api
+ * Get the set of keys by which to nest the data
  */
-function getNestedDataKey(o: SdkVisitorOperation): string | undefined {
-  const operationName = printOperationName(o);
-  return operationName === getFirstFieldName(o.node) ? operationName : undefined;
+function getNestedDataKeys(o: SdkVisitorOperation): string[] {
+  const operationName = printSdkOperationName(o);
+  const chainChildKey = getChainChildKey(o);
+  const firstField = getFirstField(o.node.selectionSet);
+
+  return [
+    chainChildKey,
+    /** If the operation name is the same as the first field we can drill into the data */
+    operationName === getFirstFieldName(o.node.selectionSet) ? operationName : undefined,
+    /** If the operation is a child and named the same as the first field inside the first field we can also drill */
+    chainChildKey && operationName === getFirstFieldName(firstField.selectionSet) ? operationName : undefined,
+  ].filter(nonNullable);
 }
 
 /**
@@ -183,15 +198,15 @@ function getNestedDataKey(o: SdkVisitorOperation): string | undefined {
  */
 function printOperationBody(o: SdkVisitorOperation, config: SdkPluginConfig): string {
   const chainParentKey = getChainParentKey(o);
-  const nestedDataKey = getNestedDataKey(o);
+  const nestedDataKeys = getNestedDataKeys(o);
 
-  return chainParentKey || nestedDataKey
+  return chainParentKey || nestedDataKeys.length
     ? filterJoin(
         [
           `const response = await ${printRequesterCall(o, config)}`,
           `return {`,
           /** If the first field is the operation drill down for a nicer api */
-          `...${filterJoin(["response", nestedDataKey], "?.")},`,
+          `...${filterJoin(["response", ...nestedDataKeys], "?.")},`,
           /** If we are a parent add the child sdk to the response */
           chainParentKey ? `...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}),` : undefined,
           `}`,
@@ -216,12 +231,12 @@ export function printSdkOperationName(o: SdkVisitorOperation): string {
  * Chained apis have the relevant chain api return type added
  */
 function printOperationResultType(o: SdkVisitorOperation, config: SdkPluginConfig) {
-  const nestedDataKey = getNestedDataKey(o);
+  const nestedDataKeys = getNestedDataKeys(o);
   const chainParentKey = getChainParentKey(o);
   const documentName = printNamespaced(config, o.documentVariableName);
   const documentResultType = `ResultOf<typeof ${documentName}>`;
 
-  const resultType = nestedDataKey ? `${documentResultType}['${nestedDataKey}']` : documentResultType;
+  const resultType = filterJoin([documentResultType, ...nestedDataKeys.map(key => `['${key}']`)], "");
 
   if (chainParentKey) {
     return `Promise<${resultType} & ${printApiFunctionType(chainParentKey)}>`;

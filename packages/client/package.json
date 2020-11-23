@@ -12,9 +12,9 @@
     "dist"
   ],
   "scripts": {
-    "dev:client": "run-s dev:client:link build:client dev:client:publish",
-    "dev:client:publish": "yalc publish --push",
-    "dev:client:link": "yalc link @linear/sdk-plugin",
+    "dev:client": "run-s dev:client:update build:client dev:client:push",
+    "dev:client:push": "yalc push",
+    "dev:client:update": "yalc update",
     "build:client": "yarn generate:sdk && yarn build:client:clean && npx tsc",
     "build:client:clean": "npx rimraf dist",
     "generate:sdk": "yarn generate:sdk:clean && npx graphql-codegen --config codegen.yml",

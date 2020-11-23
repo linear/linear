@@ -42,9 +42,9 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
   const viewerQuery = await client.viewer();
   const usersQuery = await client.users();
 
-  const teams = teamsQuery.data?.nodes ?? [];
-  const users = usersQuery.data?.nodes.filter(user => user.active) ?? [];
-  const viewer = viewerQuery.data?.id;
+  const teams = teamsQuery?.nodes ?? [];
+  const users = usersQuery?.nodes.filter(user => user.active) ?? [];
+  const viewer = viewerQuery?.id;
 
   // Prompt the user to either get or create a team
   const importAnswers = await inquirer.prompt<ImportAnswers>([
@@ -90,7 +90,7 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
         const team = await client.team(answers.targetTeamId);
         const teamProjects = await team.projects();
 
-        const projects = teamProjects.data?.team.projects.nodes ?? [];
+        const projects = teamProjects.nodes ?? [];
         return projects.length > 0;
       },
     },
@@ -107,7 +107,7 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
         const team = await client.team(answers.targetTeamId);
         const teamProjects = await team.projects();
 
-        const projects = teamProjects.data?.team.projects.nodes ?? [];
+        const projects = teamProjects.nodes ?? [];
         return projects.map((project: { id: string; name: string }) => ({
           name: project.name,
           value: project.id,
@@ -181,8 +181,8 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
   const teamLabelsQuery = await teamQuery.labels();
   const teamStatesQuery = await teamQuery.states();
 
-  const issueLabels = teamLabelsQuery.data?.team.labels.nodes ?? [];
-  const workflowStates = teamStatesQuery.data?.team.states.nodes ?? [];
+  const issueLabels = teamLabelsQuery.nodes ?? [];
+  const workflowStates = teamStatesQuery.nodes ?? [];
 
   const existingLabelMap = {} as { [name: string]: string };
   for (const label of issueLabels) {

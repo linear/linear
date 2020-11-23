@@ -79,8 +79,15 @@ export function createLinearSdkTeam<O>(id: string, requester: LinearRequester<O>
     async issues(
       vars?: Omit<D.TeamIssuesQueryVariables, "id">,
       opts?: O
-    ): Promise<ResultOf<typeof D.TeamIssuesDocument>> {
-      return requester<D.TeamIssuesQuery, D.TeamIssuesQueryVariables>(D.TeamIssuesDocument, { id, ...vars }, opts);
+    ): Promise<ResultOf<typeof D.TeamIssuesDocument>["team"]["issues"]> {
+      const response = await requester<D.TeamIssuesQuery, D.TeamIssuesQueryVariables>(
+        D.TeamIssuesDocument,
+        { id, ...vars },
+        opts
+      );
+      return {
+        ...response?.team?.issues,
+      };
     },
     /**
      * Call the Linear api with the TeamLabelsQuery
@@ -92,8 +99,15 @@ export function createLinearSdkTeam<O>(id: string, requester: LinearRequester<O>
     async labels(
       vars?: Omit<D.TeamLabelsQueryVariables, "id">,
       opts?: O
-    ): Promise<ResultOf<typeof D.TeamLabelsDocument>> {
-      return requester<D.TeamLabelsQuery, D.TeamLabelsQueryVariables>(D.TeamLabelsDocument, { id, ...vars }, opts);
+    ): Promise<ResultOf<typeof D.TeamLabelsDocument>["team"]["labels"]> {
+      const response = await requester<D.TeamLabelsQuery, D.TeamLabelsQueryVariables>(
+        D.TeamLabelsDocument,
+        { id, ...vars },
+        opts
+      );
+      return {
+        ...response?.team?.labels,
+      };
     },
     /**
      * Call the Linear api with the TeamProjectsQuery
@@ -105,12 +119,15 @@ export function createLinearSdkTeam<O>(id: string, requester: LinearRequester<O>
     async projects(
       vars?: Omit<D.TeamProjectsQueryVariables, "id">,
       opts?: O
-    ): Promise<ResultOf<typeof D.TeamProjectsDocument>> {
-      return requester<D.TeamProjectsQuery, D.TeamProjectsQueryVariables>(
+    ): Promise<ResultOf<typeof D.TeamProjectsDocument>["team"]["projects"]> {
+      const response = await requester<D.TeamProjectsQuery, D.TeamProjectsQueryVariables>(
         D.TeamProjectsDocument,
         { id, ...vars },
         opts
       );
+      return {
+        ...response?.team?.projects,
+      };
     },
     /**
      * Call the Linear api with the TeamStatesQuery
@@ -122,8 +139,15 @@ export function createLinearSdkTeam<O>(id: string, requester: LinearRequester<O>
     async states(
       vars?: Omit<D.TeamStatesQueryVariables, "id">,
       opts?: O
-    ): Promise<ResultOf<typeof D.TeamStatesDocument>> {
-      return requester<D.TeamStatesQuery, D.TeamStatesQueryVariables>(D.TeamStatesDocument, { id, ...vars }, opts);
+    ): Promise<ResultOf<typeof D.TeamStatesDocument>["team"]["states"]> {
+      const response = await requester<D.TeamStatesQuery, D.TeamStatesQueryVariables>(
+        D.TeamStatesDocument,
+        { id, ...vars },
+        opts
+      );
+      return {
+        ...response?.team?.states,
+      };
     },
   };
 }
