@@ -4,12 +4,12 @@ import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
 import c from "./constants";
 import { printDocBlock, printNamespacedDocument, printNamespacedType } from "./print";
 import { hasOtherVariable, hasVariable } from "./variable";
-import { SdkOperation } from "./visitor";
+import { SdkVisitorOperation } from "./visitor";
 
 /**
  * Get the requester args from the operation variables
  */
-export function printRequesterArgs(o: SdkOperation): string {
+export function printRequesterArgs(o: SdkVisitorOperation): string {
   if (hasVariable(o, c.ID_NAME)) {
     /** Merge id variable into requester variables */
     if (hasOtherVariable(o, c.ID_NAME)) {
@@ -36,7 +36,7 @@ export function printRequesterType(config: RawSdkPluginConfig): string[] {
 /**
  * Print the call to the requester
  */
-export function printRequesterCall(o: SdkOperation, config: SdkPluginConfig): string {
+export function printRequesterCall(o: SdkVisitorOperation, config: SdkPluginConfig): string {
   const variableType = printNamespacedType(config, o.operationVariablesTypes);
   const documentName = printNamespacedDocument(config, o.documentVariableName);
   const resultType = printNamespacedType(config, o.operationResultType);

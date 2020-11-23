@@ -1,18 +1,13 @@
 import { FieldNode, Kind, OperationDefinitionNode } from "graphql";
+import { printApiFunctionName, printApiFunctionType } from "./api";
 import { ArgDefinition, getArgList } from "./args";
 import { SdkPluginConfig } from "./config";
 import c from "./constants";
-import {
-  printApiFunctionName,
-  printApiFunctionType,
-  printDocBlock,
-  printNamespacedType,
-  printOperationName,
-} from "./print";
+import { printDocBlock, printNamespacedType, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
 import { filterJoin, lowerFirst } from "./utils";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
-import { SdkOperation } from "./visitor";
+import { SdkVisitorOperation } from "./visitor";
 
 /**
  * Type to determine at which level of the sdk an operation is to be added
@@ -122,7 +117,7 @@ export function processSdkOperation(operation: OperationDefinitionNode): SdkOper
 /**
  * Get the operation args from the operation variables
  */
-function getOperationArgs(o: SdkOperation, config: SdkPluginConfig): ArgDefinition[] {
+function getOperationArgs(o: SdkVisitorOperation, config: SdkPluginConfig): ArgDefinition[] {
   /** Operation id argument definition */
   const idArg = {
     name: c.ID_NAME,
@@ -164,21 +159,21 @@ function getOperationArgs(o: SdkOperation, config: SdkPluginConfig): ArgDefiniti
 /**
  * Get the chain key if the operation should create an api
  */
-export function getChainParentKey(o: SdkOperation): string | undefined {
+export function getChainParentKey(o: SdkVisitorOperation): string | undefined {
   return o.node.chainType === SdkChainType.parent ? o.node.chainKey : undefined;
 }
 
 /**
  * Get the chain key if the operation is nested within an api
  */
-export function getChainChildKey(o: SdkOperation): string | undefined {
+export function getChainChildKey(o: SdkVisitorOperation): string | undefined {
   return o.node.chainType === SdkChainType.child ? o.node.chainKey : undefined;
 }
 
 /**
  * If the operation name is the same as the first field we can drill into the data to return a nicer api
  */
-function getNestedDataKey(o: SdkOperation): string | undefined {
+function getNestedDataKey(o: SdkVisitorOperation): string | undefined {
   const operationName = printOperationName(o);
   return operationName === getFirstFieldName(o.node) ? operationName : undefined;
 }
@@ -186,7 +181,7 @@ function getNestedDataKey(o: SdkOperation): string | undefined {
 /**
  * Get the sdk action operation body
  */
-function getOperationBody(o: SdkOperation, config: SdkPluginConfig): string {
+function printOperationBody(o: SdkVisitorOperation, config: SdkPluginConfig): string {
   const chainParentKey = getChainParentKey(o);
   const nestedDataKey = getNestedDataKey(o);
 
@@ -210,7 +205,7 @@ function getOperationBody(o: SdkOperation, config: SdkPluginConfig): string {
  * Get the name of the operation
  * Chained apis have the chain key removed from the name
  */
-export function getSdkOperationName(o: SdkOperation): string {
+export function printSdkOperationName(o: SdkVisitorOperation): string {
   const nodeName = printOperationName(o);
   const chainChildKey = getChainChildKey(o);
   return chainChildKey ? lowerFirst(nodeName.replace(new RegExp(`^${chainChildKey}`, "i"), "")) : nodeName;
@@ -220,7 +215,7 @@ export function getSdkOperationName(o: SdkOperation): string {
  * Get the result type of the operation
  * Chained apis have the relevant chain api return type added
  */
-function printOperationResultType(o: SdkOperation, config: SdkPluginConfig) {
+function printOperationResultType(o: SdkVisitorOperation, config: SdkPluginConfig) {
   const nestedDataKey = getNestedDataKey(o);
   const chainParentKey = getChainParentKey(o);
   const resultType = printNamespacedType(
@@ -239,10 +234,10 @@ function printOperationResultType(o: SdkOperation, config: SdkPluginConfig) {
 /**
  * Process a graphql operation and return a generated operation string
  */
-export function getOperation(o: SdkOperation, config: SdkPluginConfig): string {
-  const operationName = getSdkOperationName(o);
+export function printOperation(o: SdkVisitorOperation, config: SdkPluginConfig): string {
+  const operationName = printSdkOperationName(o);
   const returnType = printOperationResultType(o, config);
-  const content = getOperationBody(o, config);
+  const content = printOperationBody(o, config);
   const args = getArgList([
     ...getOperationArgs(o, config),
     {
