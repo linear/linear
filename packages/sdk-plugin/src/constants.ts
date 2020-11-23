@@ -11,7 +11,7 @@ export default {
   REQUESTER_TYPE: "LinearRequester",
   RESPONSE_NAME: "response",
   RESPONSE_TYPE: "LinearResponse",
-  SDK_NAME: "createRawLinearSdk",
+  SDK_NAME: "createLinearSdk",
   SDK_TYPE: "LinearSdk",
   STATUS_TYPE: "LinearStatus",
   VARIABLE_NAME: "vars",

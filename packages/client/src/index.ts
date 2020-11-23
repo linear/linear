@@ -2,14 +2,14 @@ import { DocumentNode, print } from "graphql";
 import { GraphQLClient } from "graphql-request";
 import { RequestInit } from "graphql-request/dist/types.dom";
 import { serializeUserAgent } from "./utils";
-import { createRawLinearSdk } from "./_generated/sdk-api";
+import { createLinearSdk } from "./_generated/sdk-api";
 
 export * from "./_generated/sdk-api";
 
 /**
  * Input options for creating a Linear sdk with graphql-request
  */
-export interface LinearSdkOptions extends RequestInit {
+export interface LinearClientOptions extends RequestInit {
   /** Personal api token generated from https://linear.app/settings/api */
   apiKey?: string;
   /** The access token returned from oauth endpoints configured in https://linear.app/settings/api */
@@ -21,7 +21,7 @@ export interface LinearSdkOptions extends RequestInit {
 /**
  * Validated graphql-request client options
  */
-export interface LinearSdkParsedOptions extends RequestInit {
+export interface LinearClientParsedOptions extends RequestInit {
   /** The url to the Linear graphql api defaulted to production */
   baseUrl: string;
 }
@@ -32,7 +32,7 @@ export interface LinearSdkParsedOptions extends RequestInit {
  * @param options initial sdk options
  * @returns parsed graphql-request options
  */
-function parseClientOptions({ apiKey, accessToken, baseUrl, ...opts }: LinearSdkOptions): LinearSdkParsedOptions {
+function parseClientOptions({ apiKey, accessToken, baseUrl, ...opts }: LinearClientOptions): LinearClientParsedOptions {
   if (!accessToken && !apiKey) {
     throw new Error("No accessToken or apiKey provided");
   }
@@ -44,7 +44,7 @@ function parseClientOptions({ apiKey, accessToken, baseUrl, ...opts }: LinearSdk
       ...opts.headers,
       /** Override any user agent with the sdk name and version */
       "User-Agent": serializeUserAgent({
-        [process.env.npm_package_name ?? "@linear/sdk"]: process.env.npm_package_version ?? "unknown",
+        [process.env.npm_package_name ?? "@linear/client"]: process.env.npm_package_version ?? "unknown",
       }),
     },
     /** Default to production linear api */
@@ -59,16 +59,18 @@ function parseClientOptions({ apiKey, accessToken, baseUrl, ...opts }: LinearSdk
  * @param options initial sdk options to pass to the graphql client
  * @returns an sdk for interacting with the Linear api
  */
-export function createLinearSdk(
-  options: LinearSdkOptions
-): ReturnType<typeof createRawLinearSdk> & { client: GraphQLClient } {
+export function createLinearClient(
+  options: LinearClientOptions
+): ReturnType<typeof createLinearSdk> & { client: GraphQLClient } {
   const { baseUrl, ...opts } = parseClientOptions(options);
   const client = new GraphQLClient(baseUrl, opts);
 
-  const sdk = createRawLinearSdk(<R, V>(doc: DocumentNode, vars?: V) => {
+  const sdk = createLinearSdk(<R, V>(doc: DocumentNode, vars?: V) => {
     const query = print(doc);
     return client.request<R, V>(query, vars);
   });
 
   return { ...sdk, client };
 }
+
+export type LinearClient = ReturnType<typeof createLinearClient>;

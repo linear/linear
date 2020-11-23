@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { createLinearClient } from "@linear/client";
 import chalk from "chalk";
 import * as inquirer from "inquirer";
 import _ from "lodash";
 import linearClient from "./client";
 import { GraphQLClientRequest } from "./client/types";
 import { Comment, Importer, ImportResult } from "./types";
-import { getTeamProjects } from "./utils/getTeamProjects";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
 
 interface ImportAnswers {
@@ -19,50 +19,6 @@ interface ImportAnswers {
   targetProjectId?: boolean;
   targetTeamId?: string;
   teamName?: string;
-}
-
-interface QueryResponse {
-  teams: {
-    nodes: {
-      id: string;
-      name: string;
-      key: string;
-      projects: {
-        nodes: {
-          id: string;
-          name: string;
-          key: string;
-        }[];
-      };
-    }[];
-  };
-  users: {
-    nodes: {
-      id: string;
-      name: string;
-      active: boolean;
-    }[];
-  };
-  viewer: {
-    id: string;
-  };
-}
-
-interface TeamInfoResponse {
-  team: {
-    labels: {
-      nodes: {
-        id: string;
-        name: string;
-      }[];
-    };
-    states: {
-      nodes: {
-        id: string;
-        name: string;
-      }[];
-    };
-  };
 }
 
 interface LabelCreateResponse {
@@ -79,39 +35,16 @@ interface LabelCreateResponse {
  */
 export const importIssues = async (apiKey: string, importer: Importer) => {
   const linear = linearClient(apiKey);
+  const client = createLinearClient({ apiKey });
   const importData = await importer.import();
 
-  const queryInfo = (await linear(`
-    query {
-      teams {
-        nodes {
-          id
-          name
-          key
-          projects {
-            nodes {
-              id
-              name
-            }
-          }
-        }
-      }
-      viewer {
-        id
-      }
-      users {
-        nodes {
-          id
-          name
-          active
-        }
-      }
-    }
-  `)) as QueryResponse;
+  const teamsQuery = await client.teams();
+  const viewerQuery = await client.viewer();
+  const usersQuery = await client.users();
 
-  const teams = queryInfo.teams.nodes;
-  const users = queryInfo.users.nodes.filter(user => user.active);
-  const me = queryInfo.viewer.id;
+  const teams = teamsQuery.data?.nodes ?? [];
+  const users = usersQuery.data?.nodes.filter(user => user.active) ?? [];
+  const viewer = viewerQuery.data?.id;
 
   // Prompt the user to either get or create a team
   const importAnswers = await inquirer.prompt<ImportAnswers>([
@@ -148,13 +81,16 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
       type: "confirm",
       name: "includeProject",
       message: "Do you want to import to a specific project?",
-      when: (answers: ImportAnswers) => {
+      when: async (answers: ImportAnswers) => {
         // if no team is selected then don't show projects screen
         if (!answers.targetTeamId) {
           return false;
         }
 
-        const projects = getTeamProjects(answers.targetTeamId, teams);
+        const team = await client.team(answers.targetTeamId);
+        const teamProjects = await team.projects();
+
+        const projects = teamProjects.data?.team.projects.nodes ?? [];
         return projects.length > 0;
       },
     },
@@ -163,7 +99,15 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
       name: "targetProjectId",
       message: "Import into project:",
       choices: async (answers: ImportAnswers) => {
-        const projects = getTeamProjects(answers.targetTeamId as string, teams);
+        // if no team is selected then don't show projects screen
+        if (!answers.targetTeamId) {
+          return false;
+        }
+
+        const team = await client.team(answers.targetTeamId);
+        const teamProjects = await team.projects();
+
+        const projects = teamProjects.data?.team.projects.nodes ?? [];
         return projects.map((project: { id: string; name: string }) => ({
           name: project.name,
           value: project.id,
@@ -233,25 +177,12 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
     teamId = importAnswers.targetTeamId as string;
   }
 
-  const teamInfo = (await linear(`query {
-    team(id: "${teamId}") {
-      labels {
-        nodes {
-          id
-          name
-        }
-      }
-      states {
-        nodes {
-          id
-          name
-        }
-      }
-    }
-  }`)) as TeamInfoResponse;
+  const teamQuery = await client.team(teamId);
+  const teamLabelsQuery = await teamQuery.labels();
+  const teamStatesQuery = await teamQuery.states();
 
-  const issueLabels = teamInfo.team.labels.nodes;
-  const workflowStates = teamInfo.team.states.nodes;
+  const issueLabels = teamLabelsQuery.data?.team.labels.nodes ?? [];
+  const workflowStates = teamStatesQuery.data?.team.states.nodes ?? [];
 
   const existingLabelMap = {} as { [name: string]: string };
   for (const label of issueLabels) {
@@ -333,7 +264,7 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
 
     const assigneeId: string | undefined =
       existingAssigneeId || importAnswers.selfAssign
-        ? me
+        ? viewer
         : !!importAnswers.targetAssignee && importAnswers.targetAssignee.length > 0
         ? importAnswers.targetAssignee
         : undefined;

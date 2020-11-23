@@ -1,56 +1,55 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dotenv from "dotenv";
 import { v4 as uuid } from "uuid";
-import { createLinearSdk, LinearStatus } from "../index";
-import { LinearResponse } from "../_generated/sdk-api";
+import { createLinearClient, LinearResponse, LinearStatus } from "../index";
 
 dotenv.config();
 
 it("allow no E2E_API_KEY env var", () => undefined);
 
 /**
- * Return an sdk using the E2E_API_KEY environment variable
+ * Return a client using the E2E_API_KEY environment variable
  */
-function getSdk() {
-  return createLinearSdk({ apiKey: process.env.E2E_API_KEY });
+function getClient() {
+  return createLinearClient({ apiKey: process.env.E2E_API_KEY });
 }
 
 /**
- * Return an sdk scoped to the first team found
+ * Return a client scoped to the first team found
  */
 async function getSomeTeam() {
-  const sdk = getSdk();
-  const teams = await sdk.teams();
+  const client = getClient();
+  const teams = await client.teams();
   expect(teams.status).toEqual(LinearStatus.success);
 
   const first = teams.data?.nodes[0];
   expect(first).toBeDefined();
 
-  const team = await sdk.team(first?.id ?? "");
+  const team = await client.team(first?.id ?? "");
   expectSuccess(team, { id: expect.stringContaining("") });
 
   return team;
 }
 
 /**
- * Return an sdk scoped to the first issue found
+ * Return a client scoped to the first issue found
  */
 async function getSomeIssue() {
-  const sdk = getSdk();
-  const issues = await sdk.issues();
+  const client = getClient();
+  const issues = await client.issues();
   expect(issues.status).toEqual(LinearStatus.success);
 
   const first = issues.data?.nodes[0];
   expect(first).toBeDefined();
 
-  const issue = await sdk.issue(first?.id ?? "");
+  const issue = await client.issue(first?.id ?? "");
   expectSuccess(issue, { id: expect.stringContaining("") });
 
   return issue;
 }
 
 /**
- * Assert success of the sdk operation
+ * Assert success of the operation
  */
 function expectSuccess<T, V>(response: LinearResponse<T, V>, data?: Partial<T>) {
   expect(response.status).toEqual(LinearStatus.success);
@@ -64,7 +63,7 @@ function expectSuccess<T, V>(response: LinearResponse<T, V>, data?: Partial<T>) 
 }
 
 /**
- * Assert failure of the sdk operation
+ * Assert failure of the operation
  */
 function expectError<T, V>(
   response: LinearResponse<T, V>,
@@ -88,8 +87,8 @@ function expectError<T, V>(
 if (process.env.E2E_API_KEY) {
   describe("end-to-end", () => {
     it("throw auth error", async () => {
-      const sdk = createLinearSdk({ apiKey: "fake api key" });
-      const viewer = await sdk.viewer();
+      const client = createLinearClient({ apiKey: "fake api key" });
+      const viewer = await client.viewer();
 
       expectError(viewer, {
         errorMessage: "authentication failed",
@@ -99,8 +98,8 @@ if (process.env.E2E_API_KEY) {
 
     describe("queries", () => {
       it("query for the viewer", async () => {
-        const sdk = getSdk();
-        const viewer = await sdk.viewer();
+        const cleint = getClient();
+        const viewer = await cleint.viewer();
         expectSuccess(viewer, { id: expect.stringContaining("") });
       });
 
@@ -109,8 +108,8 @@ if (process.env.E2E_API_KEY) {
       });
 
       it("query for fake team", async () => {
-        const sdk = getSdk();
-        const team = await sdk.team("not a real team id");
+        const client = getClient();
+        const team = await client.team("not a real team id");
         expectError(team, {
           errorMessage: "Entity not found",
           queryName: "team",
@@ -123,8 +122,8 @@ if (process.env.E2E_API_KEY) {
       });
 
       it("query for fake issue", async () => {
-        const sdk = getSdk();
-        const issue = await sdk.issue("not a real issue id");
+        const client = getClient();
+        const issue = await client.issue("not a real issue id");
 
         expectError(issue, {
           errorMessage: "Entity not found",
@@ -142,30 +141,30 @@ if (process.env.E2E_API_KEY) {
 
     describe("mutations", () => {
       it("create an issue, update and archive it", async () => {
-        const sdk = getSdk();
+        const client = getClient();
         const team = await getSomeTeam();
 
         /** Create issue */
         const createdInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
-        const createdIssue = await sdk.issueCreate({ teamId: team.data?.id ?? "", ...createdInput });
+        const createdIssue = await client.issueCreate({ teamId: team.data?.id ?? "", ...createdInput });
         expectSuccess(createdIssue, { success: true, issue: expect.objectContaining(createdInput) });
 
         /** Query for issue */
         const createdId = createdIssue.data?.issue?.id ?? "";
-        const issue = await sdk.issue(createdId);
+        const issue = await client.issue(createdId);
         expectSuccess(issue, { id: createdId, ...createdInput, archivedAt: null });
 
         /** Update issue */
         const updatedInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
-        const updatedIssue = await sdk.issueUpdate(createdId, { input: updatedInput });
+        const updatedIssue = await client.issueUpdate(createdId, { input: updatedInput });
         expectSuccess(updatedIssue, { success: true, issue: expect.objectContaining(updatedInput) });
 
         /** Archive issue */
-        const archivedIssue = await sdk.issueArchive(createdId);
+        const archivedIssue = await client.issueArchive(createdId);
         expectSuccess(archivedIssue, { success: true });
 
         /** Confirm issue is archived */
-        const noIssue = await sdk.issue(createdId);
+        const noIssue = await client.issue(createdId);
         expectSuccess(noIssue, { id: createdId, ...updatedInput, archivedAt: expect.stringContaining("") });
       });
     });
