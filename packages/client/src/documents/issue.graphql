@@ -1,0 +1,70 @@
+# Query for many issues
+query issues(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  issues(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Issue
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# Get one issue by id
+query issue($id: String!) {
+  issue(id: $id) {
+    ...Issue
+  }
+}
+
+# Get the assignee for an issue
+query issueAssignee($id: String!) {
+  issue(id: $id) {
+    assignee {
+      ...User
+    }
+  }
+}
+
+# Create one issue
+mutation issueCreate($teamId: String!, $title: String!, $description: String!) {
+  issueCreate(input: { title: $title, description: $description, teamId: $teamId }) {
+    success
+    issue {
+      ...Issue
+    }
+  }
+}
+
+# Update one issue
+mutation issueUpdate($id: String!, $input: IssueUpdateInput!) {
+  issueUpdate(id: $id, input: $input) {
+    lastSyncId
+    issue {
+      ...Issue
+    }
+    success
+  }
+}
+
+# Delete one issue
+mutation issueArchive($id: String!) {
+  issueArchive(id: $id) {
+    lastSyncId
+    success
+  }
+}

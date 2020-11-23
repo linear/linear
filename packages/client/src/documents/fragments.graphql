@@ -1,11 +1,11 @@
-fragment PageInfoFragment on PageInfo {
+fragment PageInfo on PageInfo {
   hasNextPage
   hasPreviousPage
   startCursor
   endCursor
 }
 
-fragment IssueBaseFragment on Issue {
+fragment IssueBase on Issue {
   id
   createdAt
   updatedAt
@@ -28,40 +28,57 @@ fragment IssueBaseFragment on Issue {
   url
   branchName
   team {
-    id
+    ...Team
   }
   cycle {
     id
   }
   state {
-    id
+    ...WorkflowState
   }
   assignee {
-    ...UserFragment
+    ...User
   }
   project {
-    id
+    ...Project
   }
   creator {
-    ...UserFragment
+    ...User
   }
 }
 
-fragment IssueFragment on Issue {
-  ...IssueBaseFragment
+fragment Issue on Issue {
+  ...IssueBase
   parent {
-    ...IssueBaseFragment
+    ...IssueBase
   }
 }
 
-fragment TeamFragment on Team {
+fragment Project on Project {
   id
   name
 }
 
-fragment UserFragment on User {
+fragment Team on Team {
+  id
+  name
+  key
+}
+
+fragment IssueLabel on IssueLabel {
+  id
+  name
+}
+
+fragment WorkflowState on WorkflowState {
+  id
+  name
+}
+
+fragment User on User {
   id
   name
   displayName
   email
+  active
 }

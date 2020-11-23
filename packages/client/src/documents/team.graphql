@@ -1,0 +1,134 @@
+# Get all connected teams
+query teams {
+  teams {
+    nodes {
+      ...Team
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# Get one team by id
+query team($id: String!) {
+  team(id: $id) {
+    ...Team
+  }
+}
+
+# Query for many issues within a team
+query teamIssues(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+  $id: String!
+) {
+  team(id: $id) {
+    issues(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      nodes {
+        ...Issue
+      }
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+}
+
+# Query for many labels within a team
+query teamLabels(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+  $id: String!
+) {
+  team(id: $id) {
+    labels(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      nodes {
+        ...IssueLabel
+      }
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+}
+
+# Query for many projects within a team
+query teamProjects(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+  $id: String!
+) {
+  team(id: $id) {
+    projects(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      nodes {
+        ...Project
+      }
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+}
+
+# Query for many workflow states within a team
+query teamStates(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+  $id: String!
+) {
+  team(id: $id) {
+    states(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      nodes {
+        ...WorkflowState
+      }
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+}

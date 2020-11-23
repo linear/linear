@@ -2,26 +2,6 @@ import { ClientSideBasePluginConfig, RawClientSideBasePluginConfig } from "@grap
 
 export interface RawSdkPluginConfig extends RawClientSideBasePluginConfig {
   /**
-   * @description The relative filepath to generated types
-   *
-   * @exampleMarkdown
-   * ```yml
-   * documents: "./src/documents/**"
-   * generates:
-   *   sdk-types.ts:
-   *     plugins:
-   *       - typescript
-   *       - typescript-operations
-   *   output-file.ts:
-   *     plugins:
-   *       - @linear/sdk-plugin
-   *     config:
-   *       typeFile: "./sdk-types"
-   * ```
-   */
-  typeFile: string;
-
-  /**
    * @description The relative filepath to generated documents
    *
    * @exampleMarkdown
@@ -30,9 +10,9 @@ export interface RawSdkPluginConfig extends RawClientSideBasePluginConfig {
    * generates:
    *   sdk-documents.ts:
    *     plugins:
-   *       - typescript-document-nodes
-   *     config:
-   *       nameSuffix: "Document"
+   *       - typescript
+   *       - typescript-operations
+   *       - typed-document-node
    *   output-file.ts:
    *     plugins:
    *       - @linear/sdk-plugin
@@ -44,6 +24,5 @@ export interface RawSdkPluginConfig extends RawClientSideBasePluginConfig {
 }
 
 export interface SdkPluginConfig extends ClientSideBasePluginConfig {
-  typeFile: string;
   documentFile: string;
 }

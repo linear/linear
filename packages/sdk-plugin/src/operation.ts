@@ -3,7 +3,7 @@ import { printApiFunctionName, printApiFunctionType } from "./api";
 import { ArgDefinition, getArgList } from "./args";
 import { SdkPluginConfig } from "./config";
 import c from "./constants";
-import { printDocBlock, printNamespacedType, printOperationName } from "./print";
+import { printDocBlock, printNamespaced, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
 import { filterJoin, lowerFirst } from "./utils";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
@@ -127,7 +127,7 @@ function getOperationArgs(o: SdkVisitorOperation, config: SdkPluginConfig): ArgD
   };
 
   /** Operation variables argument definition */
-  const variableType = printNamespacedType(config, o.operationVariablesTypes);
+  const variableType = printNamespaced(config, o.operationVariablesTypes);
   const variablesArg = {
     name: c.VARIABLE_NAME,
     optional: hasOptionalVariable(o),
@@ -220,12 +220,11 @@ export function printSdkOperationName(o: SdkVisitorOperation): string {
 function printOperationResultType(o: SdkVisitorOperation, config: SdkPluginConfig) {
   const nestedDataKey = getNestedDataKey(o);
   const chainParentKey = getChainParentKey(o);
-  const variableType = printNamespacedType(config, o.operationVariablesTypes);
-  const resultType = printNamespacedType(
-    config,
-    /** Print the operation result type with nested data key if present */
-    nestedDataKey ? `${o.operationResultType}['${nestedDataKey}']` : o.operationResultType
-  );
+  const variableType = printNamespaced(config, o.operationVariablesTypes);
+  const documentName = printNamespaced(config, o.documentVariableName);
+  const documentResultType = `ResultOf<typeof ${documentName}>`;
+
+  const resultType = nestedDataKey ? `${documentResultType}['${nestedDataKey}']` : documentResultType;
 
   if (chainParentKey) {
     return `Promise<${c.RESPONSE_TYPE}<${resultType}, ${variableType}> & ${printApiFunctionType(chainParentKey)}>`;

@@ -4,17 +4,10 @@ import { filterJoin } from "./utils";
 import { SdkVisitorOperation } from "./visitor";
 
 /**
- * Prepend the type import namespace if required
+ * Prepend the import namespace if required
  */
-export function printNamespacedType(config: SdkPluginConfig, typeName: string): string {
-  return config.typeFile ? filterJoin([c.NAMESPACE_TYPE, typeName], ".") : typeName;
-}
-
-/**
- * Prepend the document import namespace if required
- */
-export function printNamespacedDocument(config: SdkPluginConfig, documentName: string): string {
-  return config.documentFile ? filterJoin([c.NAMESPACE_DOCUMENT, documentName], ".") : documentName;
+export function printNamespaced(config: SdkPluginConfig, name: string): string {
+  return config.documentFile ? filterJoin([c.NAMESPACE_DOCUMENT, name], ".") : name;
 }
 
 /**

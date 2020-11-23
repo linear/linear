@@ -2,7 +2,7 @@ import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
 import { ArgDefinition } from "./args";
 import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
 import c from "./constants";
-import { printDocBlock, printNamespacedDocument, printNamespacedType } from "./print";
+import { printDocBlock, printNamespaced } from "./print";
 import { hasOtherVariable, hasVariable } from "./variable";
 import { SdkVisitorOperation } from "./visitor";
 
@@ -37,9 +37,9 @@ export function printRequesterType(config: RawSdkPluginConfig): string[] {
  * Print the call to the requester
  */
 export function printRequesterCall(o: SdkVisitorOperation, config: SdkPluginConfig): string {
-  const variableType = printNamespacedType(config, o.operationVariablesTypes);
-  const documentName = printNamespacedDocument(config, o.documentVariableName);
-  const resultType = printNamespacedType(config, o.operationResultType);
+  const variableType = printNamespaced(config, o.operationVariablesTypes);
+  const documentName = printNamespaced(config, o.documentVariableName);
+  const resultType = printNamespaced(config, o.operationResultType);
 
   return `${c.HANDLER_NAME}<${resultType}, ${variableType}>(() => ${
     c.REQUESTER_NAME

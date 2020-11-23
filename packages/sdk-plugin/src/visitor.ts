@@ -89,7 +89,6 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
       fragments,
       rawConfig,
       {
-        typeFile: rawConfig.typeFile,
         documentFile: rawConfig.documentFile,
       },
       documents

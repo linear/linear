@@ -5,20 +5,15 @@ hooks:
   afterOneFileWrite:
     - prettier --write
 generates:
-  src/_generated/sdk-types.ts:
+  src/_generated/sdk-documents.ts:
     plugins:
       - typescript
       - typescript-operations
-  src/_generated/sdk-documents.ts:
-    plugins:
-      - typescript-document-nodes
-    config:
-      nameSuffix: "Document"
+      - typed-document-node
   src/_generated/sdk-api.ts:
     plugins:
       - "@linear/sdk-plugin"
     config:
-      typeFile: ./sdk-types
       documentFile: ./sdk-documents
   src/_generated/graphql.schema.json:
     plugins:

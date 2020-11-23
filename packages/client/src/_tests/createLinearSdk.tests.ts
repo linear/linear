@@ -1,4 +1,4 @@
-import { createRawLinearSdk, TeamDocument } from "../index";
+import { createLinearSdk, TeamDocument } from "../index";
 import { LinearStatus } from "../_generated/sdk-api";
 
 function resolveWithData(data: unknown) {
@@ -8,10 +8,10 @@ function resolveWithData(data: unknown) {
   };
 }
 
-describe("createRawLinearSdk", () => {
+describe("createLinearSdk", () => {
   it("calls the requester", async () => {
     const requester = jest.fn();
-    const sdk = createRawLinearSdk(requester);
+    const sdk = createLinearSdk(requester);
     const id = "asd";
     const options = { asd: "qwe" };
 
@@ -21,7 +21,7 @@ describe("createRawLinearSdk", () => {
   });
 
   it("returns data", async () => {
-    const sdk = createRawLinearSdk(resolveWithData({ team: { id: "qwe" } }));
+    const sdk = createLinearSdk(resolveWithData({ team: { id: "qwe" } }));
 
     const response = await sdk.team("asd");
 
@@ -31,7 +31,7 @@ describe("createRawLinearSdk", () => {
   });
 
   it("catches errors", async () => {
-    const sdk = createRawLinearSdk(() => {
+    const sdk = createLinearSdk(() => {
       throw new Error("test error");
     });
 
