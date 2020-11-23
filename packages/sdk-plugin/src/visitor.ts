@@ -2,18 +2,15 @@ import { Types } from "@graphql-codegen/plugin-helpers";
 import { ClientSideBaseVisitor, indentMultiline, LoadedFragment } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
 import { concatAST, DocumentNode, GraphQLSchema, OperationDefinitionNode, visit } from "graphql";
-import { getArgList } from "./args";
+import { printApiFunction, printApiFunctionName, printApiFunctionType } from "./api";
 import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
-import c from "./constants";
-import { getOperation, SdkOperationDefinition } from "./operation";
-import { printApiFunctionName, printApiFunctionType, printDocBlock } from "./print";
-import { getRequesterArg } from "./requester";
+import { printOperation, SdkOperationDefinition } from "./operation";
 import { debug, filterJoin } from "./utils";
 
 /**
  * Definition of an operation for outputting an sdk function
  */
-export interface SdkOperation {
+export interface SdkVisitorOperation {
   /** The graphql node being processed with chain info added */
   node: SdkOperationDefinition;
   /** The name of the generated graphql document */
@@ -72,7 +69,7 @@ export function createVisitor(
  * @param documents the list of graphql operations
  */
 export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPluginConfig> {
-  private _operationsToInclude: SdkOperation[] = [];
+  private _operationsToInclude: SdkVisitorOperation[] = [];
   private _apiName: string;
   private _apiType: string;
   private _chainKey: string | undefined;
@@ -134,45 +131,12 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
     debug(this._chainKey ?? "root", "operations", this._operationsToInclude.length);
 
     /** For each operation get the function string content */
-    const operations = filterJoin(
-      this._operationsToInclude.map(o => getOperation(o, this.config)).map(s => indentMultiline(s, 2)),
+    const content = filterJoin(
+      this._operationsToInclude.map(o => printOperation(o, this.config)).map(s => indentMultiline(s, 2)),
       ",\n"
     );
 
-    const args = getArgList([
-      /** Add an initial id arg if in a nested api */
-      this._chainKey
-        ? {
-            name: c.ID_NAME,
-            optional: false,
-            type: c.ID_TYPE,
-            description: `${c.ID_NAME} to scope the returned operations by`,
-          }
-        : undefined,
-      /** The requester function arg */
-      getRequesterArg(),
-    ]);
-
-    const apiDescription = this._chainKey
-      ? `Initialise a set of operations, scoped to ${this._chainKey}, to run against the Linear api`
-      : "Initialise a set of operations to run against the Linear api";
-
-    return `
-      ${printDocBlock([
-        apiDescription,
-        ...args.jsdoc,
-        this._chainKey
-          ? `@returns The set of available operations scoped to a single ${this._chainKey}`
-          : "@returns The set of available operations",
-      ])}
-      export function ${this._apiName}<${c.OPTIONS_TYPE}>(${args.print}) {
-        return {
-          ${operations}
-        };
-      }
-      
-      ${printDocBlock([`The returned type from calling ${this._apiName}`, apiDescription])}
-      export type ${this._apiType} = ReturnType<typeof ${this._apiName}>;
-    `;
+    /** Return the api  */
+    return printApiFunction(content, this._chainKey);
   }
 }

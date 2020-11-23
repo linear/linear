@@ -1,12 +1,12 @@
 import { Kind, VariableDefinitionNode } from "graphql";
 import c from "./constants";
 import { getChainChildKey } from "./operation";
-import { SdkOperation } from "./visitor";
+import { SdkVisitorOperation } from "./visitor";
 
 /**
  * Does the operation have optional variables
  */
-export function hasOptionalVariable(o: SdkOperation): boolean {
+export function hasOptionalVariable(o: SdkVisitorOperation): boolean {
   const isChainChild = getChainChildKey(o);
   return (
     !o.node.variableDefinitions ||
@@ -20,14 +20,14 @@ export function hasOptionalVariable(o: SdkOperation): boolean {
 /**
  * Does the operation have a variable that matches the arg
  */
-export function hasVariable(o: SdkOperation, variableName: string): boolean {
+export function hasVariable(o: SdkVisitorOperation, variableName: string): boolean {
   return Boolean(o.node.variableDefinitions?.some(v => v.variable.name.value === variableName));
 }
 
 /**
  * Does the operation have a variable other than the arg
  */
-export function hasOtherVariable(o: SdkOperation, variableName: string): boolean {
+export function hasOtherVariable(o: SdkVisitorOperation, variableName: string): boolean {
   return Boolean(o.node.variableDefinitions?.some(v => v.variable.name.value !== variableName));
 }
 
