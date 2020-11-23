@@ -130,5 +130,11 @@ if (process.env.E2E_API_KEY) {
         variables: { id: "not a real issue id" },
       });
     });
+
+    it("query for an issue assignee", async () => {
+      const issue = await getIssueSdk();
+      const assignee = await issue.assignee();
+      expectSuccess(assignee);
+    });
   });
 }
