@@ -1,7 +1,6 @@
 import { DocumentNode, print } from "graphql";
 import { GraphQLClient } from "graphql-request";
 import { RequestInit } from "graphql-request/dist/types.dom";
-import packageInfo from "../package.json";
 import { serializeUserAgent } from "./utils";
 import { createRawLinearSdk } from "./_generated/sdk-api";
 
@@ -44,7 +43,9 @@ function parseClientOptions({ apiKey, accessToken, baseUrl, ...opts }: LinearSdk
       Authorization: accessToken ? `Bearer ${accessToken}` : apiKey ?? "",
       ...opts.headers,
       /** Override any user agent with the sdk name and version */
-      "User-Agent": serializeUserAgent({ [packageInfo.name]: packageInfo.version }),
+      "User-Agent": serializeUserAgent({
+        [process.env.npm_package_name ?? "@linear/sdk"]: process.env.npm_package_version ?? "unknown",
+      }),
     },
     /** Default to production linear api */
     baseUrl: baseUrl ?? "https://api.linear.app/graphql",

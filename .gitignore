@@ -71,3 +71,7 @@ webpack-stats.json
 tsconfig.tsbuildinfo
 
 *.provisionprofile
+
+# yalc
+.yalc
+yalc.*

@@ -8,8 +8,12 @@
     "node": ">=12.x",
     "yarn": "1.x"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "tsc": "npx tsc --noEmit",
+    "dev:plugin": "run-s build:plugin dev:plugin:publish",
+    "dev:plugin:publish": "yalc publish --push",
     "build:plugin": "yarn build:plugin:clean && npx tsc",
     "build:plugin:watch": "yarn build:plugin --watch",
     "build:plugin:clean": "npx rimraf dist"

@@ -1,0 +1,32 @@
+{
+  "name": "@linear/import",
+  "version": "1.0.0",
+  "author": "Linear Orbit, Inc",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.x",
+    "yarn": "1.x"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "linear-import": "bin/linear-import.js"
+  },
+  "scripts": {
+    "dev:import": "run-s dev:import:link build:import",
+    "dev:import:link": "yalc link @linear/sdk",
+    "build:import": "yarn build:import:clean && npx tsc",
+    "build:import:clean": "npx rimraf dist"
+  },
+  "dependencies": {
+    "@linear/sdk": "^1.0.0",
+    "chalk": "4.1.0",
+    "csvtojson": "2.0.10",
+    "inquirer": "7.3.3",
+    "inquirer-file-path": "1.0.1",
+    "jira2md": "2.0.4",
+    "lodash": "4.17.20",
+    "node-fetch": "2.6.1"
+  }
+}

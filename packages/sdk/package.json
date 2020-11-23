@@ -3,23 +3,30 @@
   "version": "1.0.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
+  "main": "dist/index.js",
   "engines": {
     "node": ">=12.x",
     "yarn": "1.x"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "tsc": "npx tsc --noEmit",
-    "build": "yarn build:generate && yarn build:clean && npx tsc",
-    "build:clean": "npx rimraf dist",
-    "build:generate": "yarn build:generate:clean && npx graphql-codegen --config codegen.yml",
-    "build:generate:watch": "yarn build:generate --watch",
-    "build:generate:clean": "npx rimraf src/_generated"
+    "dev:sdk": "run-s dev:sdk:link build:sdk dev:sdk:publish",
+    "dev:sdk:publish": "yalc publish --push",
+    "dev:sdk:link": "yalc link @linear/sdk",
+    "build:sdk": "yarn generate:sdk && yarn build:sdk:clean && npx tsc",
+    "build:sdk:clean": "npx rimraf dist",
+    "generate:sdk": "yarn generate:sdk:clean && npx graphql-codegen --config codegen.yml",
+    "generate:sdk:watch": "yarn generate:sdk --watch",
+    "generate:sdk:clean": "npx rimraf src/_generated"
   },
   "dependencies": {
     "@graphql-codegen/introspection": "1.18.0",
     "@graphql-codegen/typescript": "1.17.11",
     "@graphql-codegen/typescript-document-nodes": "1.17.8",
     "@graphql-codegen/typescript-operations": "1.17.9",
+    "@linear/sdk-plugin": "file:.yalc/@linear/sdk-plugin",
     "graphql": "15.4.0",
     "graphql-request": "3.3.0",
     "uuid": "8.3.1"
