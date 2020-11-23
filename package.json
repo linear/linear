@@ -90,7 +90,7 @@
     "transform": {
       "^.*\\.tsx?$": "ts-jest"
     },
-    "testTimeout": 15000,
+    "testTimeout": 20000,
     "globals": {
       "ts-jest": {
         "tsconfig": "config/tsconfig.json"

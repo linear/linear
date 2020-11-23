@@ -85,6 +85,26 @@ export const IssueCreateDocument = gql`
   }
   ${IssueFragment}
 `;
+export const IssueUpdateDocument = gql`
+  mutation issueUpdate($id: String!, $input: IssueUpdateInput!) {
+    issueUpdate(id: $id, input: $input) {
+      lastSyncId
+      issue {
+        ...IssueFragment
+      }
+      success
+    }
+  }
+  ${IssueFragment}
+`;
+export const IssueArchiveDocument = gql`
+  mutation issueArchive($id: String!) {
+    issueArchive(id: $id) {
+      lastSyncId
+      success
+    }
+  }
+`;
 export const ViewerDocument = gql`
   query viewer {
     viewer {

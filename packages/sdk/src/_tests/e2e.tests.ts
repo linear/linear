@@ -141,17 +141,32 @@ if (process.env.E2E_API_KEY) {
     });
 
     describe("mutations", () => {
-      it("create an issue and query for it", async () => {
+      it("create an issue, update and archive it", async () => {
         const sdk = getSdk();
         const team = await getSomeTeam();
-        const input = { title: `title ${uuid()}`, description: `description ${uuid()}` };
 
-        const createdIssue = await sdk.issueCreate({ teamId: team.data?.id ?? "", ...input });
-        expectSuccess(createdIssue, { issue: expect.objectContaining(input) });
+        /** Create issue */
+        const createdInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
+        const createdIssue = await sdk.issueCreate({ teamId: team.data?.id ?? "", ...createdInput });
+        expectSuccess(createdIssue, { success: true, issue: expect.objectContaining(createdInput) });
 
+        /** Query for issue */
         const createdId = createdIssue.data?.issue?.id ?? "";
         const issue = await sdk.issue(createdId);
-        expectSuccess(issue, { id: createdId, ...input });
+        expectSuccess(issue, { id: createdId, ...createdInput, archivedAt: null });
+
+        /** Update issue */
+        const updatedInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
+        const updatedIssue = await sdk.issueUpdate(createdId, { input: updatedInput });
+        expectSuccess(updatedIssue, { success: true, issue: expect.objectContaining(updatedInput) });
+
+        /** Archive issue */
+        const archivedIssue = await sdk.issueArchive(createdId);
+        expectSuccess(archivedIssue, { success: true });
+
+        /** Confirm issue is archived */
+        const noIssue = await sdk.issue(createdId);
+        expectSuccess(noIssue, { id: createdId, ...updatedInput, archivedAt: expect.stringContaining("") });
       });
     });
   });

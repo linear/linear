@@ -7,3 +7,22 @@ mutation issueCreate($teamId: String!, $title: String!, $description: String!) {
     }
   }
 }
+
+# Update one issue
+mutation issueUpdate($id: String!, $input: IssueUpdateInput!) {
+  issueUpdate(id: $id, input: $input) {
+    lastSyncId
+    issue {
+      ...IssueFragment
+    }
+    success
+  }
+}
+
+# Delete one issue
+mutation issueArchive($id: String!) {
+  issueArchive(id: $id) {
+    lastSyncId
+    success
+  }
+}

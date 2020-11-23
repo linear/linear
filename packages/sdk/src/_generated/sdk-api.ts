@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GraphQLError, DocumentNode } from "graphql";
 import * as T from "./sdk-types";
 export * from "./sdk-types";
@@ -89,6 +90,40 @@ export async function handler<T, V>(operation: () => Promise<T>): Promise<Linear
 }
 
 /**
+ * Initialise a set of operations, scoped to issueUpdate, to run against the Linear api
+ *
+ * @param id - id to scope the returned operations by
+ * @param requester - function to call the graphql client
+ * @returns The set of available operations scoped to a single issueUpdate
+ */
+export function createRawLinearSdkIssueUpdate<O>(id: string, requester: LinearRequester<O>) {
+  return {};
+}
+
+/**
+ * The returned type from calling createRawLinearSdkIssueUpdate
+ * Initialise a set of operations, scoped to issueUpdate, to run against the Linear api
+ */
+export type LinearSdkIssueUpdate = ReturnType<typeof createRawLinearSdkIssueUpdate>;
+
+/**
+ * Initialise a set of operations, scoped to issueArchive, to run against the Linear api
+ *
+ * @param id - id to scope the returned operations by
+ * @param requester - function to call the graphql client
+ * @returns The set of available operations scoped to a single issueArchive
+ */
+export function createRawLinearSdkIssueArchive<O>(id: string, requester: LinearRequester<O>) {
+  return {};
+}
+
+/**
+ * The returned type from calling createRawLinearSdkIssueArchive
+ * Initialise a set of operations, scoped to issueArchive, to run against the Linear api
+ */
+export type LinearSdkIssueArchive = ReturnType<typeof createRawLinearSdkIssueArchive>;
+
+/**
  * Initialise a set of operations, scoped to team, to run against the Linear api
  *
  * @param id - id to scope the returned operations by
@@ -175,6 +210,52 @@ export function createRawLinearSdk<O>(requester: LinearRequester<O>) {
       return {
         ...response,
         data: response?.data?.issueCreate,
+      };
+    },
+    /**
+     * Call the Linear api with the IssueUpdateMutation
+     *
+     * @param id - id to pass into the IssueUpdateMutation
+     * @param vars - variables without undefined id to pass into the IssueUpdateMutation
+     * @param opts - options to pass to the graphql client
+     * @returns The wrapped result of the IssueUpdateMutation
+     */
+    async issueUpdate(
+      id: string,
+      vars: Omit<T.IssueUpdateMutationVariables, "id">,
+      opts?: O
+    ): Promise<
+      LinearResponse<T.IssueUpdateMutation["issueUpdate"], T.IssueUpdateMutationVariables> & LinearSdkIssueUpdate
+    > {
+      const response = await handler<T.IssueUpdateMutation, T.IssueUpdateMutationVariables>(() =>
+        requester<T.IssueUpdateMutation, T.IssueUpdateMutationVariables>(D.IssueUpdateDocument, { id, ...vars }, opts)
+      );
+      return {
+        ...response,
+        ...createRawLinearSdkIssueUpdate(id, requester),
+        data: response?.data?.issueUpdate,
+      };
+    },
+    /**
+     * Call the Linear api with the IssueArchiveMutation
+     *
+     * @param id - id to pass into the IssueArchiveMutation
+     * @param opts - options to pass to the graphql client
+     * @returns The wrapped result of the IssueArchiveMutation
+     */
+    async issueArchive(
+      id: string,
+      opts?: O
+    ): Promise<
+      LinearResponse<T.IssueArchiveMutation["issueArchive"], T.IssueArchiveMutationVariables> & LinearSdkIssueArchive
+    > {
+      const response = await handler<T.IssueArchiveMutation, T.IssueArchiveMutationVariables>(() =>
+        requester<T.IssueArchiveMutation, T.IssueArchiveMutationVariables>(D.IssueArchiveDocument, { id }, opts)
+      );
+      return {
+        ...response,
+        ...createRawLinearSdkIssueArchive(id, requester),
+        data: response?.data?.issueArchive,
       };
     },
     /**
