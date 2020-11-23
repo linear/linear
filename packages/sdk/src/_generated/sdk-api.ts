@@ -76,6 +76,7 @@ export async function handler<T, V>(operation: () => Promise<T>): Promise<Linear
     };
   } catch (error) {
     return {
+      ...error,
       status: LinearStatus.error,
       statusCode: error?.response?.status ?? undefined,
       extensions: error?.response?.extensions ?? undefined,
