@@ -56,6 +56,7 @@ export function printSdkHandler(): string {
         }
       } catch (error) {
         return {
+          ...error,
           status: ${c.STATUS_TYPE}.error,
           statusCode: error?.response?.status ?? undefined,
           extensions: error?.response?.extensions ?? undefined,

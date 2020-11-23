@@ -49,11 +49,11 @@ async function getIssueSdk() {
 /**
  * Assert success of the sdk operation
  */
-function expectSuccess<T, V>(response: LinearResponse<T, V>) {
+function expectSuccess<T, V>(response: LinearResponse<T, V>, data?: Partial<T>) {
   expect(response.status).toEqual(LinearStatus.success);
-  expect(response.data).toBeDefined();
-  expect(response.error).toBeUndefined();
   expect(response.statusCode).toEqual(200);
+  expect(response.data).toEqual(expect.objectContaining(data ?? {}));
+  expect(response.error).toBeUndefined();
   expect(response.errors).toBeUndefined();
   expect(response.extensions).toBeUndefined();
   expect(response.query).toBeUndefined();
@@ -65,27 +65,44 @@ function expectSuccess<T, V>(response: LinearResponse<T, V>) {
  */
 function expectError<T, V>(
   response: LinearResponse<T, V>,
-  { errorMessage, queryName, variables }: { errorMessage: string; queryName: string; variables: V }
+  {
+    errorMessage,
+    queryName,
+    variables,
+    extensions,
+  }: { errorMessage: string; queryName: string; variables?: V; extensions?: any }
 ) {
   expect(response.status).toEqual(LinearStatus.error);
-  expect(response.data).toBeUndefined();
   expect(response.statusCode).toEqual(200);
+  expect(response.data).toBeUndefined();
+  expect(response.error?.message).toEqual(expect.stringContaining(errorMessage));
   expect(response.errors?.[0].message).toEqual(expect.stringContaining(errorMessage));
   expect(response.query).toEqual(expect.stringContaining(`query ${queryName}`));
-  expect(response.variables).toEqual(expect.objectContaining(variables));
+  expect(response.extensions).toEqual(expect.objectContaining(extensions ?? {}));
+  expect(response.variables).toEqual(expect.objectContaining(variables ?? {}));
 }
 
 if (process.env.E2E_API_KEY) {
   describe("end-to-end", () => {
+    it("throw auth error", async () => {
+      const sdk = createLinearSdk({ apiKey: "fake api key" });
+      const viewer = await sdk.viewer();
+
+      expectError(viewer, {
+        errorMessage: "authentication failed",
+        queryName: "viewer",
+      });
+    });
+
     it("query for the viewer", async () => {
       const sdk = getSdk();
       const viewer = await sdk.viewer();
-      expectSuccess(viewer);
+      expectSuccess(viewer, { id: expect.stringContaining("") });
     });
 
     it("query for a team", async () => {
       const team = await getTeamSdk();
-      expectSuccess(team);
+      expectSuccess(team, { id: expect.stringContaining("") });
     });
 
     it("query for fake team", async () => {
@@ -100,7 +117,7 @@ if (process.env.E2E_API_KEY) {
 
     it("query for an issue", async () => {
       const issue = await getIssueSdk();
-      expectSuccess(issue);
+      expectSuccess(issue, { id: expect.stringContaining("") });
     });
 
     it("query for fake issue", async () => {
