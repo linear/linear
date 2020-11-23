@@ -5068,6 +5068,25 @@ export type IssueCreateMutation = { __typename?: "Mutation" } & {
     };
 };
 
+export type IssueUpdateMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: IssueUpdateInput;
+}>;
+
+export type IssueUpdateMutation = { __typename?: "Mutation" } & {
+  issueUpdate: { __typename?: "IssuePayload" } & Pick<IssuePayload, "lastSyncId" | "success"> & {
+      issue?: Maybe<{ __typename?: "Issue" } & IssueFragmentFragment>;
+    };
+};
+
+export type IssueArchiveMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type IssueArchiveMutation = { __typename?: "Mutation" } & {
+  issueArchive: { __typename?: "ArchivePayload" } & Pick<ArchivePayload, "lastSyncId" | "success">;
+};
+
 export type ViewerQueryVariables = Exact<{ [key: string]: never }>;
 
 export type ViewerQuery = { __typename?: "Query" } & { viewer: { __typename?: "User" } & UserFragmentFragment };

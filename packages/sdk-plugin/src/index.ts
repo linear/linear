@@ -51,6 +51,8 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
   return {
     /** Add any initial imports */
     prepend: [
+      /** Ignore unused variables */
+      "/* eslint-disable @typescript-eslint/no-unused-vars */",
       /** Import GraphQLError and DocumentNode if required */
       `import { GraphQLError, ${config.documentMode !== DocumentMode.string ? "DocumentNode" : ""} } from 'graphql'`,
     ],
