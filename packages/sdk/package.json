@@ -21,7 +21,8 @@
     "@graphql-codegen/typescript-document-nodes": "1.17.8",
     "@graphql-codegen/typescript-operations": "1.17.9",
     "graphql": "15.4.0",
-    "graphql-request": "3.3.0"
+    "graphql-request": "3.3.0",
+    "uuid": "8.3.1"
   },
   "devDependencies": {
     "dotenv": "8.2.0"

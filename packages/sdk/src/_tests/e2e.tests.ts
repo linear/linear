@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dotenv from "dotenv";
+import { v4 as uuid } from "uuid";
 import { createLinearSdk, LinearStatus } from "../index";
 import { LinearResponse } from "../_generated/sdk-api";
 
@@ -17,7 +18,7 @@ function getSdk() {
 /**
  * Return an sdk scoped to the first team found
  */
-async function getTeamSdk() {
+async function getSomeTeam() {
   const sdk = getSdk();
   const teams = await sdk.teams();
   expect(teams.status).toEqual(LinearStatus.success);
@@ -26,6 +27,7 @@ async function getTeamSdk() {
   expect(first).toBeDefined();
 
   const team = await sdk.team(first?.id ?? "");
+  expectSuccess(team, { id: expect.stringContaining("") });
 
   return team;
 }
@@ -33,7 +35,7 @@ async function getTeamSdk() {
 /**
  * Return an sdk scoped to the first issue found
  */
-async function getIssueSdk() {
+async function getSomeIssue() {
   const sdk = getSdk();
   const issues = await sdk.issues();
   expect(issues.status).toEqual(LinearStatus.success);
@@ -42,6 +44,7 @@ async function getIssueSdk() {
   expect(first).toBeDefined();
 
   const issue = await sdk.issue(first?.id ?? "");
+  expectSuccess(issue, { id: expect.stringContaining("") });
 
   return issue;
 }
@@ -94,47 +97,62 @@ if (process.env.E2E_API_KEY) {
       });
     });
 
-    it("query for the viewer", async () => {
-      const sdk = getSdk();
-      const viewer = await sdk.viewer();
-      expectSuccess(viewer, { id: expect.stringContaining("") });
-    });
+    describe("queries", () => {
+      it("query for the viewer", async () => {
+        const sdk = getSdk();
+        const viewer = await sdk.viewer();
+        expectSuccess(viewer, { id: expect.stringContaining("") });
+      });
 
-    it("query for a team", async () => {
-      const team = await getTeamSdk();
-      expectSuccess(team, { id: expect.stringContaining("") });
-    });
+      it("query for a team", async () => {
+        await getSomeTeam();
+      });
 
-    it("query for fake team", async () => {
-      const sdk = getSdk();
-      const team = await sdk.team("not a real team id");
-      expectError(team, {
-        errorMessage: "Entity not found",
-        queryName: "team",
-        variables: { id: "not a real team id" },
+      it("query for fake team", async () => {
+        const sdk = getSdk();
+        const team = await sdk.team("not a real team id");
+        expectError(team, {
+          errorMessage: "Entity not found",
+          queryName: "team",
+          variables: { id: "not a real team id" },
+        });
+      });
+
+      it("query for an issue", async () => {
+        await getSomeIssue();
+      });
+
+      it("query for fake issue", async () => {
+        const sdk = getSdk();
+        const issue = await sdk.issue("not a real issue id");
+
+        expectError(issue, {
+          errorMessage: "Entity not found",
+          queryName: "issue",
+          variables: { id: "not a real issue id" },
+        });
+      });
+
+      it("query for an issue assignee", async () => {
+        const issue = await getSomeIssue();
+        const assignee = await issue.assignee();
+        expectSuccess(assignee);
       });
     });
 
-    it("query for an issue", async () => {
-      const issue = await getIssueSdk();
-      expectSuccess(issue, { id: expect.stringContaining("") });
-    });
+    describe("mutations", () => {
+      it("create an issue and query for it", async () => {
+        const sdk = getSdk();
+        const team = await getSomeTeam();
+        const input = { title: `title ${uuid()}`, description: `description ${uuid()}` };
 
-    it("query for fake issue", async () => {
-      const sdk = getSdk();
-      const issue = await sdk.issue("not a real issue id");
+        const createdIssue = await sdk.issueCreate({ teamId: team.data?.id ?? "", ...input });
+        expectSuccess(createdIssue, { issue: expect.objectContaining(input) });
 
-      expectError(issue, {
-        errorMessage: "Entity not found",
-        queryName: "issue",
-        variables: { id: "not a real issue id" },
+        const createdId = createdIssue.data?.issue?.id ?? "";
+        const issue = await sdk.issue(createdId);
+        expectSuccess(issue, { id: createdId, ...input });
       });
-    });
-
-    it("query for an issue assignee", async () => {
-      const issue = await getIssueSdk();
-      const assignee = await issue.assignee();
-      expectSuccess(assignee);
     });
   });
 }

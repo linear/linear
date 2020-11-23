@@ -36,6 +36,7 @@
     "@graphql-codegen/cli": "1.19.1",
     "@octokit/core": "3.2.1",
     "@types/express": "4.17.8",
+    "@types/uuid": "8.3.0",
     "@typescript-eslint/eslint-plugin": "4.8.0",
     "@typescript-eslint/parser": "4.8.0",
     "auto-bind": "4.0.0",
