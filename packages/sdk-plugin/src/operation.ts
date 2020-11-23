@@ -185,20 +185,22 @@ function printOperationBody(o: SdkVisitorOperation, config: SdkPluginConfig): st
   const chainParentKey = getChainParentKey(o);
   const nestedDataKey = getNestedDataKey(o);
 
-  return filterJoin(
-    [
-      `const ${c.RESPONSE_NAME} = await ${printRequesterCall(o, config)}`,
-      `return {`,
-      /** Return the response */
-      `...${c.RESPONSE_NAME},`,
-      /** If we are a parent add the child sdk to the response */
-      chainParentKey ? `...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}),` : undefined,
-      /** If the first field is the operation drill down for a nicer api */
-      nestedDataKey ? `data: ${c.RESPONSE_NAME}?.data?.${nestedDataKey},` : undefined,
-      `}`,
-    ],
-    "\n"
-  );
+  return chainParentKey || nestedDataKey
+    ? filterJoin(
+        [
+          `const ${c.RESPONSE_NAME} = await ${printRequesterCall(o, config)}`,
+          `return {`,
+          /** Return the response */
+          `...${c.RESPONSE_NAME},`,
+          /** If we are a parent add the child sdk to the response */
+          chainParentKey ? `...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}),` : undefined,
+          /** If the first field is the operation drill down for a nicer api */
+          nestedDataKey ? `data: ${c.RESPONSE_NAME}?.data?.${nestedDataKey},` : undefined,
+          `}`,
+        ],
+        "\n"
+      )
+    : `return ${printRequesterCall(o, config)}`;
 }
 
 /**
@@ -218,6 +220,7 @@ export function printSdkOperationName(o: SdkVisitorOperation): string {
 function printOperationResultType(o: SdkVisitorOperation, config: SdkPluginConfig) {
   const nestedDataKey = getNestedDataKey(o);
   const chainParentKey = getChainParentKey(o);
+  const variableType = printNamespacedType(config, o.operationVariablesTypes);
   const resultType = printNamespacedType(
     config,
     /** Print the operation result type with nested data key if present */
@@ -225,9 +228,9 @@ function printOperationResultType(o: SdkVisitorOperation, config: SdkPluginConfi
   );
 
   if (chainParentKey) {
-    return `Promise<${c.RESPONSE_TYPE}<${resultType}> & ${printApiFunctionType(chainParentKey)}>`;
+    return `Promise<${c.RESPONSE_TYPE}<${resultType}, ${variableType}> & ${printApiFunctionType(chainParentKey)}>`;
   } else {
-    return `Promise<${c.RESPONSE_TYPE}<${resultType}>>`;
+    return `Promise<${c.RESPONSE_TYPE}<${resultType}, ${variableType}>>`;
   }
 }
 
@@ -251,7 +254,7 @@ export function printOperation(o: SdkVisitorOperation, config: SdkPluginConfig):
   /** Build a function for this graphql operation */
   return `
     ${printDocBlock([
-      `Call the linear api with the ${o.operationResultType}`,
+      `Call the Linear api with the ${o.operationResultType}`,
       ...args.jsdoc,
       `@returns The wrapped result of the ${o.operationResultType}`,
     ])}
