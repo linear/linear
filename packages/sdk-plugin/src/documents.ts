@@ -1,10 +1,10 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
 import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { loadDocuments } from "@graphql-tools/load";
+import { nonNullable } from "@linear/common";
 import { DefinitionNode, DocumentNode, Kind } from "graphql";
 import { isChildDefinition } from "./definitions";
 import { processSdkOperation, SdkOperationDefinition } from "./operation";
-import { nonNullable } from "./utils";
 
 /**
  * A processed document containing operations with additional detail

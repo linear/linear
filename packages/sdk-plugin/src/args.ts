@@ -1,4 +1,4 @@
-import { filterJoin, nonNullable } from "./utils";
+import { filterJoin, nonNullable } from "@linear/common";
 
 /**
  * A description of an arg

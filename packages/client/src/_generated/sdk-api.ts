@@ -74,7 +74,7 @@ export function createLinearSdkTeam<O>(id: string, requester: LinearRequester<O>
      *
      * @param vars - variables without team id to pass into the TeamIssuesQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the TeamIssuesQuery
+     * @returns The result of the TeamIssuesQuery
      */
     async issues(
       vars?: Omit<D.TeamIssuesQueryVariables, "id">,
@@ -94,7 +94,7 @@ export function createLinearSdkTeam<O>(id: string, requester: LinearRequester<O>
      *
      * @param vars - variables without team id to pass into the TeamLabelsQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the TeamLabelsQuery
+     * @returns The result of the TeamLabelsQuery
      */
     async labels(
       vars?: Omit<D.TeamLabelsQueryVariables, "id">,
@@ -114,7 +114,7 @@ export function createLinearSdkTeam<O>(id: string, requester: LinearRequester<O>
      *
      * @param vars - variables without team id to pass into the TeamProjectsQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the TeamProjectsQuery
+     * @returns The result of the TeamProjectsQuery
      */
     async projects(
       vars?: Omit<D.TeamProjectsQueryVariables, "id">,
@@ -134,7 +134,7 @@ export function createLinearSdkTeam<O>(id: string, requester: LinearRequester<O>
      *
      * @param vars - variables without team id to pass into the TeamStatesQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the TeamStatesQuery
+     * @returns The result of the TeamStatesQuery
      */
     async states(
       vars?: Omit<D.TeamStatesQueryVariables, "id">,
@@ -171,7 +171,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      *
      * @param vars - variables to pass into the IssuesQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the IssuesQuery
+     * @returns The result of the IssuesQuery
      */
     async issues(vars?: D.IssuesQueryVariables, opts?: O): Promise<ResultOf<typeof D.IssuesDocument>["issues"]> {
       const response = await requester<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, vars, opts);
@@ -184,7 +184,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      *
      * @param id - id to pass into the IssueQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the IssueQuery
+     * @returns The result of the IssueQuery
      */
     async issue(id: string, opts?: O): Promise<ResultOf<typeof D.IssueDocument>["issue"] & LinearSdkIssue> {
       const response = await requester<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, { id }, opts);
@@ -198,7 +198,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      *
      * @param vars - variables to pass into the IssueCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the IssueCreateMutation
+     * @returns The result of the IssueCreateMutation
      */
     async issueCreate(
       vars: D.IssueCreateMutationVariables,
@@ -219,7 +219,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * @param id - id to pass into the IssueUpdateMutation
      * @param vars - variables without undefined id to pass into the IssueUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the IssueUpdateMutation
+     * @returns The result of the IssueUpdateMutation
      */
     async issueUpdate(
       id: string,
@@ -241,7 +241,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      *
      * @param id - id to pass into the IssueArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the IssueArchiveMutation
+     * @returns The result of the IssueArchiveMutation
      */
     async issueArchive(
       id: string,
@@ -262,7 +262,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      *
      * @param vars - variables to pass into the TeamsQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the TeamsQuery
+     * @returns The result of the TeamsQuery
      */
     async teams(vars?: D.TeamsQueryVariables, opts?: O): Promise<ResultOf<typeof D.TeamsDocument>["teams"]> {
       const response = await requester<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars, opts);
@@ -275,7 +275,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      *
      * @param id - id to pass into the TeamQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the TeamQuery
+     * @returns The result of the TeamQuery
      */
     async team(id: string, opts?: O): Promise<ResultOf<typeof D.TeamDocument>["team"] & LinearSdkTeam> {
       const response = await requester<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, { id }, opts);
@@ -289,7 +289,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      *
      * @param vars - variables to pass into the UsersQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the UsersQuery
+     * @returns The result of the UsersQuery
      */
     async users(vars?: D.UsersQueryVariables, opts?: O): Promise<ResultOf<typeof D.UsersDocument>["users"]> {
       const response = await requester<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, vars, opts);
@@ -302,7 +302,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      *
      * @param vars - variables to pass into the ViewerQuery
      * @param opts - options to pass to the graphql client
-     * @returns The wrapped result of the ViewerQuery
+     * @returns The result of the ViewerQuery
      */
     async viewer(vars?: D.ViewerQueryVariables, opts?: O): Promise<ResultOf<typeof D.ViewerDocument>["viewer"]> {
       const response = await requester<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, vars, opts);

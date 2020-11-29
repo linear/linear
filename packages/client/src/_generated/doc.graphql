@@ -1,0 +1,1490 @@
+fragment User on User {
+  id
+  name
+  displayName
+  email
+  avatarUrl
+  disableReason
+  inviteHash
+  userAccountId
+  admin
+  active
+  createdIssueCount
+}
+
+fragment UserSettings on UserSettings {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+}
+
+fragment IssueEdge on IssueEdge {
+  cursor
+}
+
+fragment Issue on Issue {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  number
+  title
+  description
+  priority
+  estimate
+  boardOrder
+  startedAt
+  completedAt
+  canceledAt
+  autoClosedAt
+  autoArchivedAt
+  subIssueSortOrder
+  identifier
+  priorityLabel
+  url
+  branchName
+}
+
+fragment Team on Team {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  key
+  description
+  cyclesEnabled
+  cycleStartDay
+  cycleDuration
+  cycleCooldownTime
+  cycleIssueAutoAssignStarted
+  cycleIssueAutoAssignCompleted
+  cycleLockToActive
+  upcomingCycleCount
+  timezone
+  inviteHash
+  issueEstimationType
+  issueEstimationAllowZero
+  issueEstimationExtended
+  defaultIssueEstimate
+  defaultTemplateForMembersId
+  defaultTemplateForNonMembersId
+  groupIssueHistory
+  slackNewIssue
+  slackIssueComments
+  slackIssueStatuses
+  autoClosePeriod
+  autoCloseStateId
+  autoArchivePeriod
+  cycleCalenderUrl
+}
+
+fragment WorkflowState on WorkflowState {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  color
+  description
+  position
+  type
+}
+
+fragment CycleEdge on CycleEdge {
+  cursor
+}
+
+fragment Cycle on Cycle {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  number
+  name
+  startsAt
+  endsAt
+  completedAt
+}
+
+fragment PageInfo on PageInfo {
+  hasPreviousPage
+  hasNextPage
+  startCursor
+  endCursor
+}
+
+fragment TeamMembershipEdge on TeamMembershipEdge {
+  cursor
+}
+
+fragment TeamMembership on TeamMembership {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+}
+
+fragment ProjectEdge on ProjectEdge {
+  cursor
+}
+
+fragment Project on Project {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  description
+  slugId
+  icon
+  color
+  state
+  targetDate
+  startedAt
+  completedAt
+  canceledAt
+  sortOrder
+  slackNewIssue
+  slackIssueComments
+  slackIssueStatuses
+}
+
+fragment Milestone on Milestone {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  sortOrder
+}
+
+fragment Organization on Organization {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  urlKey
+  logoUrl
+  upgradeThresholdExceeded
+  periodUploadVolume
+  gitBranchFormat
+  gitLinkbackMessagesEnabled
+  gitPublicLinkbackMessagesEnabled
+  projectMilestonesEnabled
+  samlEnabled
+  userCount
+  createdIssueCount
+}
+
+fragment UserEdge on UserEdge {
+  cursor
+}
+
+fragment TeamEdge on TeamEdge {
+  cursor
+}
+
+fragment MilestoneEdge on MilestoneEdge {
+  cursor
+}
+
+fragment IntegrationEdge on IntegrationEdge {
+  cursor
+}
+
+fragment Integration on Integration {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  service
+  serviceId
+}
+
+fragment SlackPostSettings on SlackPostSettings {
+  channel
+  channelId
+  configurationUrl
+}
+
+fragment GoogleSheetsSettings on GoogleSheetsSettings {
+  spreadsheetId
+  spreadsheetUrl
+  sheetId
+  updatedIssuesAt
+}
+
+fragment SentrySettings on SentrySettings {
+  organizationSlug
+}
+
+fragment Subscription on Subscription {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  type
+  seats
+  canceledAt
+  pendingChangeType
+}
+
+fragment ProjectLinkEdge on ProjectLinkEdge {
+  cursor
+}
+
+fragment ProjectLink on ProjectLink {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  url
+  label
+}
+
+fragment WorkflowStateEdge on WorkflowStateEdge {
+  cursor
+}
+
+fragment TemplateEdge on TemplateEdge {
+  cursor
+}
+
+fragment Template on Template {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  type
+  name
+  description
+  templateData
+}
+
+fragment IssueLabelEdge on IssueLabelEdge {
+  cursor
+}
+
+fragment IssueLabel on IssueLabel {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  description
+  color
+}
+
+fragment WebhookEdge on WebhookEdge {
+  cursor
+}
+
+fragment Webhook on Webhook {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  url
+  enabled
+  secret
+}
+
+fragment CommentEdge on CommentEdge {
+  cursor
+}
+
+fragment Comment on Comment {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  body
+  bodyData
+  editedAt
+}
+
+fragment IssueHistoryEdge on IssueHistoryEdge {
+  cursor
+}
+
+fragment IssueHistory on IssueHistory {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  updatedDescription
+  fromTitle
+  toTitle
+  fromPriority
+  toPriority
+  fromEstimate
+  toEstimate
+  archived
+  autoClosed
+  autoArchived
+  fromDueDate
+  toDueDate
+}
+
+fragment IntegrationResourceEdge on IntegrationResourceEdge {
+  cursor
+}
+
+fragment IntegrationResource on IntegrationResource {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  resourceType
+  resourceId
+}
+
+fragment PullRequestPayload on PullRequestPayload {
+  status
+  number
+  url
+  draft
+  id
+  title
+  branch
+  userId
+  userLogin
+  repoLogin
+  repoName
+  createdAt
+  updatedAt
+  closedAt
+  mergedAt
+}
+
+fragment CommitPayload on CommitPayload {
+  id
+  message
+  timestamp
+  url
+}
+
+fragment SentryIssuePayload on SentryIssuePayload {
+  issueId
+  webUrl
+  actorType
+  actorId
+  actorName
+  projectId
+  projectSlug
+  issueTitle
+  shortId
+  firstSeen
+  firstVersion
+}
+
+fragment IssueRelationEdge on IssueRelationEdge {
+  cursor
+}
+
+fragment IssueRelation on IssueRelation {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  type
+}
+
+fragment OrganizationExistsPayload on OrganizationExistsPayload {
+  success
+  exists
+}
+
+fragment SyncResponse on SyncResponse {
+  state
+  delta
+  archive
+  lastSyncId
+  databaseVersion
+}
+
+fragment ArchiveResponse on ArchiveResponse {
+  archive
+  totalCount
+  databaseVersion
+}
+
+fragment UserAccountAdminPrivileged on UserAccountAdminPrivileged {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  email
+  service
+}
+
+fragment UserAdminPrivileged on UserAdminPrivileged {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  displayName
+  email
+  avatarUrl
+  disableReason
+  inviteHash
+  userAccountId
+  lastSeen
+  admin
+  active
+  createdIssueCount
+}
+
+fragment OrganizationAdminPrivileged on OrganizationAdminPrivileged {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  urlKey
+  logoUrl
+  upgradeThresholdExceeded
+  periodUploadVolume
+  gitBranchFormat
+  gitLinkbackMessagesEnabled
+  gitPublicLinkbackMessagesEnabled
+  projectMilestonesEnabled
+  samlEnabled
+  userCount
+  createdIssueCount
+  stripeCustomerId
+}
+
+fragment SubscriptionAdminPrivileged on SubscriptionAdminPrivileged {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  type
+  seats
+  canceledAt
+  pendingChangeType
+  stripeSubscriptionId
+  stripeStatus
+}
+
+fragment ApiKeyEdge on ApiKeyEdge {
+  cursor
+}
+
+fragment ApiKey on ApiKey {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  label
+}
+
+fragment Application on Application {
+  clientId
+  name
+  description
+  developer
+  developerUrl
+  imageUrl
+}
+
+fragment AuthResolverResponse on AuthResolverResponse {
+  id
+  token
+  email
+  allowDomainAccess
+}
+
+fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
+  success
+  samlSsoUrl
+}
+
+fragment BillingDetailsPayload on BillingDetailsPayload {
+  success
+  email
+}
+
+fragment Invoice on Invoice {
+  url
+  created
+  dueDate
+  status
+  total
+}
+
+fragment Card on Card {
+  brand
+  last4
+}
+
+fragment CollaborationDocumentUpdatePayload on CollaborationDocumentUpdatePayload {
+  success
+}
+
+fragment StepsResponse on StepsResponse {
+  version
+}
+
+fragment CustomView on CustomView {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  description
+  icon
+  color
+  filters
+  shared
+}
+
+fragment CustomViewEdge on CustomViewEdge {
+  cursor
+}
+
+fragment Emoji on Emoji {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  url
+  source
+}
+
+fragment EmojiEdge on EmojiEdge {
+  cursor
+}
+
+fragment Favorite on Favorite {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  type
+  sortOrder
+}
+
+fragment FavoriteEdge on FavoriteEdge {
+  cursor
+}
+
+fragment FigmaEmbedPayload on FigmaEmbedPayload {
+  lastSyncId
+  success
+}
+
+fragment FigmaEmbed on FigmaEmbed {
+  name
+  lastModified
+  nodeName
+  url
+}
+
+fragment InvitePagePayload on InvitePagePayload {
+  success
+}
+
+fragment InviteData on InviteData {
+  inviterName
+  organizationName
+  organizationDomain
+  organizationLogoUrl
+  userCount
+}
+
+fragment NotificationEdge on NotificationEdge {
+  cursor
+}
+
+fragment Notification on Notification {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  type
+  reactionEmoji
+  readAt
+  emailedAt
+}
+
+fragment NotificationSubscriptionEdge on NotificationSubscriptionEdge {
+  cursor
+}
+
+fragment NotificationSubscription on NotificationSubscription {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  type
+}
+
+fragment OrganizationInviteEdge on OrganizationInviteEdge {
+  cursor
+}
+
+fragment OrganizationInvite on OrganizationInvite {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  email
+  external
+  acceptedAt
+  expiresAt
+}
+
+fragment PushSubscriptionPayload on PushSubscriptionPayload {
+  lastSyncId
+  success
+}
+
+fragment Reaction on Reaction {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  emoji
+}
+
+fragment ReactionEdge on ReactionEdge {
+  cursor
+}
+
+fragment ViewPreferencesEdge on ViewPreferencesEdge {
+  cursor
+}
+
+fragment ViewPreferences on ViewPreferences {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  type
+  viewType
+}
+
+fragment UpdateUserInput on UpdateUserInput {
+  name
+  displayName
+  avatarUrl
+  active
+  disableReason
+  admin
+}
+
+fragment UserPayload on UserPayload {
+  lastSyncId
+  success
+}
+
+fragment UserAdminPayload on UserAdminPayload {
+  success
+}
+
+fragment UpdateOrganizationInput on UpdateOrganizationInput {
+  name
+  logoUrl
+  urlKey
+  gitBranchFormat
+  gitLinkbackMessagesEnabled
+  gitPublicLinkbackMessagesEnabled
+  projectMilestonesEnabled
+  linearPreviewFlags
+}
+
+fragment OrganizationPayload on OrganizationPayload {
+  lastSyncId
+  success
+}
+
+fragment OrganizationDeletePayload on OrganizationDeletePayload {
+  success
+}
+
+fragment DeleteOrganizationInput on DeleteOrganizationInput {
+  deletionCode
+}
+
+fragment OrganizationAccessPayload on OrganizationAccessPayload {
+  success
+}
+
+fragment OrganizationSamlConfigurePayload on OrganizationSamlConfigurePayload {
+  success
+  samlEnabled
+}
+
+fragment SamlConfiguration on SamlConfiguration {
+  ssoSigningCert
+  ssoEndpoint
+  ssoBinding
+  ssoSignAlgo
+}
+
+fragment SamlConfigurationInput on SamlConfigurationInput {
+  ssoSigningCert
+  ssoEndpoint
+  ssoBinding
+  ssoSignAlgo
+}
+
+fragment AdminCommandInput on AdminCommandInput {
+  cmd
+  value
+}
+
+fragment AdminCommandPayload on AdminCommandPayload {
+  success
+}
+
+fragment EventCreateInput on EventCreateInput {
+  category
+  subject
+  targetId
+  value
+  data
+}
+
+fragment EventPayload on EventPayload {
+  success
+}
+
+fragment ApiKeyCreateInput on ApiKeyCreateInput {
+  id
+  label
+  key
+}
+
+fragment ApiKeyPayload on ApiKeyPayload {
+  lastSyncId
+  success
+}
+
+fragment ArchivePayload on ArchivePayload {
+  lastSyncId
+  success
+}
+
+fragment EmailUserAccountAuthChallengeInput on EmailUserAccountAuthChallengeInput {
+  email
+  isDesktop
+  signupCode
+}
+
+fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeResponse {
+  success
+  authType
+}
+
+fragment EmailUserAccountAuthInput on EmailUserAccountAuthInput {
+  email
+  token
+  timezone
+}
+
+fragment GoogleUserAccountAuthInput on GoogleUserAccountAuthInput {
+  code
+  redirectUri
+  timezone
+  signupCode
+}
+
+fragment OnboardingCustomerSurvey on OnboardingCustomerSurvey {
+  companyRole
+  companySize
+}
+
+fragment CreateOrganizationInput on CreateOrganizationInput {
+  name
+  urlKey
+  domainAccess
+  timezone
+}
+
+fragment JoinOrganizationInput on JoinOrganizationInput {
+  organizationId
+}
+
+fragment BillingEmailUpdateInput on BillingEmailUpdateInput {
+  email
+}
+
+fragment BillingEmailPayload on BillingEmailPayload {
+  success
+  email
+}
+
+fragment CollaborationDocumentUpdateInput on CollaborationDocumentUpdateInput {
+  issueId
+  version
+  clientId
+}
+
+fragment CommentCreateInput on CommentCreateInput {
+  id
+  body
+  bodyData
+  issueId
+}
+
+fragment CommentPayload on CommentPayload {
+  lastSyncId
+  success
+}
+
+fragment CommentUpdateInput on CommentUpdateInput {
+  body
+  bodyData
+}
+
+fragment ContactCreateInput on ContactCreateInput {
+  type
+  message
+  operatingSystem
+  browser
+  device
+  disappointmentRating
+}
+
+fragment ContactPayload on ContactPayload {
+  success
+}
+
+fragment CustomViewCreateInput on CustomViewCreateInput {
+  id
+  name
+  description
+  icon
+  color
+  teamId
+  filters
+  shared
+}
+
+fragment CustomViewPayload on CustomViewPayload {
+  lastSyncId
+  success
+}
+
+fragment CustomViewUpdateInput on CustomViewUpdateInput {
+  name
+  description
+  icon
+  color
+  teamId
+  filters
+  shared
+}
+
+fragment CycleCreateInput on CycleCreateInput {
+  id
+  name
+  teamId
+  startsAt
+  endsAt
+  completedAt
+}
+
+fragment CyclePayload on CyclePayload {
+  lastSyncId
+  success
+}
+
+fragment CycleUpdateInput on CycleUpdateInput {
+  name
+  startsAt
+  endsAt
+  completedAt
+}
+
+fragment DebugPayload on DebugPayload {
+  success
+}
+
+fragment EmailUnsubscribeInput on EmailUnsubscribeInput {
+  type
+  token
+  userId
+}
+
+fragment EmailUnsubscribePayload on EmailUnsubscribePayload {
+  success
+}
+
+fragment EmojiCreateInput on EmojiCreateInput {
+  id
+  name
+  url
+}
+
+fragment EmojiPayload on EmojiPayload {
+  lastSyncId
+  success
+}
+
+fragment FavoriteCreateInput on FavoriteCreateInput {
+  id
+  issueId
+  projectId
+  projectTeamId
+  cycleId
+  customViewId
+  labelId
+  sortOrder
+}
+
+fragment FavoritePayload on FavoritePayload {
+  lastSyncId
+  success
+}
+
+fragment FavoriteUpdateInput on FavoriteUpdateInput {
+  sortOrder
+}
+
+fragment FeedbackCreateInput on FeedbackCreateInput {
+  feedback
+  disappointmentRating
+}
+
+fragment FeedbackPayload on FeedbackPayload {
+  success
+}
+
+fragment UploadPayload on UploadPayload {
+  lastSyncId
+  success
+}
+
+fragment UploadFile on UploadFile {
+  filename
+  contentType
+  size
+  uploadUrl
+  assetUrl
+  metaData
+}
+
+fragment UploadFileHeader on UploadFileHeader {
+  key
+  value
+}
+
+fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
+  lastSyncId
+  url
+  success
+}
+
+fragment IntegrationPayload on IntegrationPayload {
+  lastSyncId
+  success
+}
+
+fragment IssueLabelCreateInput on IssueLabelCreateInput {
+  id
+  name
+  description
+  color
+  teamId
+}
+
+fragment IssueLabelPayload on IssueLabelPayload {
+  lastSyncId
+  success
+}
+
+fragment IssueLabelUpdateInput on IssueLabelUpdateInput {
+  name
+  description
+  color
+}
+
+fragment IssueRelationCreateInput on IssueRelationCreateInput {
+  id
+  issueId
+  relatedIssueId
+}
+
+fragment IssueRelationPayload on IssueRelationPayload {
+  lastSyncId
+  success
+}
+
+fragment IssueRelationUpdateInput on IssueRelationUpdateInput {
+  type
+  issueId
+  relatedIssueId
+}
+
+fragment IssueCreateInput on IssueCreateInput {
+  id
+  title
+  description
+  descriptionData
+  assigneeId
+  parentId
+  priority
+  estimate
+  teamId
+  cycleId
+  projectId
+  stateId
+  boardOrder
+  subIssueSortOrder
+  dueDate
+}
+
+fragment IssuePayload on IssuePayload {
+  lastSyncId
+  success
+}
+
+fragment IssueUpdateInput on IssueUpdateInput {
+  title
+  description
+  descriptionData
+  assigneeId
+  parentId
+  priority
+  estimate
+  teamId
+  cycleId
+  projectId
+  stateId
+  boardOrder
+  subIssueSortOrder
+  documentVersion
+  dueDate
+}
+
+fragment MilestoneCreateInput on MilestoneCreateInput {
+  id
+  name
+  sortOrder
+}
+
+fragment MilestonePayload on MilestonePayload {
+  lastSyncId
+  success
+}
+
+fragment MilestoneUpdateInput on MilestoneUpdateInput {
+  name
+  sortOrder
+}
+
+fragment NotificationUpdateInput on NotificationUpdateInput {
+  readAt
+}
+
+fragment NotificationPayload on NotificationPayload {
+  lastSyncId
+  success
+}
+
+fragment NotificationSubscriptionCreateInput on NotificationSubscriptionCreateInput {
+  id
+  teamId
+  projectId
+}
+
+fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
+  lastSyncId
+  success
+}
+
+fragment OauthClientCreateInput on OauthClientCreateInput {
+  id
+  name
+  description
+  developer
+  developerUrl
+  imageUrl
+}
+
+fragment OauthClientPayload on OauthClientPayload {
+  lastSyncId
+  success
+}
+
+fragment OauthClient on OauthClient {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  clientId
+  name
+  description
+  developer
+  developerUrl
+  imageUrl
+  clientSecret
+}
+
+fragment OauthClientUpdateInput on OauthClientUpdateInput {
+  name
+  description
+  developer
+  developerUrl
+  imageUrl
+}
+
+fragment OrganizationDomainVerificationInput on OrganizationDomainVerificationInput {
+  organizationDomainId
+  verificationCode
+}
+
+fragment OrganizationDomainPayload on OrganizationDomainPayload {
+  lastSyncId
+  success
+}
+
+fragment OrganizationDomain on OrganizationDomain {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  verified
+  verificationEmail
+}
+
+fragment OrganizationDomainCreateInput on OrganizationDomainCreateInput {
+  id
+  name
+  verificationEmail
+  verified
+}
+
+fragment OrganizationInviteCreateInput on OrganizationInviteCreateInput {
+  id
+  email
+  message
+}
+
+fragment OrganizationInvitePayload on OrganizationInvitePayload {
+  lastSyncId
+  success
+}
+
+fragment ProjectLinkCreateInput on ProjectLinkCreateInput {
+  id
+  url
+  label
+  projectId
+}
+
+fragment ProjectLinkPayload on ProjectLinkPayload {
+  lastSyncId
+  success
+}
+
+fragment ProjectCreateInput on ProjectCreateInput {
+  id
+  name
+  icon
+  color
+  state
+  description
+  milestoneId
+  leadId
+  targetDate
+  sortOrder
+}
+
+fragment ProjectPayload on ProjectPayload {
+  lastSyncId
+  success
+}
+
+fragment ProjectUpdateInput on ProjectUpdateInput {
+  state
+  name
+  description
+  milestoneId
+  icon
+  color
+  leadId
+  targetDate
+  slackNewIssue
+  slackIssueComments
+  slackIssueStatuses
+  sortOrder
+}
+
+fragment PushSubscriptionCreateInput on PushSubscriptionCreateInput {
+  id
+  userId
+  data
+}
+
+fragment ReactionCreateInput on ReactionCreateInput {
+  id
+  emoji
+  commentId
+}
+
+fragment ReactionPayload on ReactionPayload {
+  lastSyncId
+  success
+}
+
+fragment CreateCsvExportReportPayload on CreateCsvExportReportPayload {
+  success
+}
+
+fragment SubscriptionSessionPayload on SubscriptionSessionPayload {
+  session
+}
+
+fragment SubscriptionUpdateInput on SubscriptionUpdateInput {
+  canceledAt
+  pendingChangeType
+}
+
+fragment SubscriptionPayload on SubscriptionPayload {
+  lastSyncId
+  canceledAt
+  success
+}
+
+fragment TeamMembershipCreateInput on TeamMembershipCreateInput {
+  id
+  userId
+  teamId
+}
+
+fragment TeamMembershipPayload on TeamMembershipPayload {
+  lastSyncId
+  success
+}
+
+fragment TeamCreateInput on TeamCreateInput {
+  id
+  name
+  description
+  key
+  organizationId
+  cyclesEnabled
+  cycleStartDay
+  cycleDuration
+  cycleCooldownTime
+  cycleIssueAutoAssignStarted
+  cycleIssueAutoAssignCompleted
+  cycleLockToActive
+  upcomingCycleCount
+  timezone
+  issueEstimationType
+  issueEstimationAllowZero
+  issueEstimationExtended
+  defaultIssueEstimate
+  groupIssueHistory
+  defaultTemplateForMembersId
+  defaultTemplateForNonMembersId
+  autoClosePeriod
+  autoCloseStateId
+  autoArchivePeriod
+  markedAsDuplicateWorkflowStateId
+}
+
+fragment TeamPayload on TeamPayload {
+  lastSyncId
+  success
+}
+
+fragment TeamUpdateInput on TeamUpdateInput {
+  name
+  description
+  key
+  cyclesEnabled
+  cycleStartDay
+  cycleDuration
+  cycleCooldownTime
+  cycleIssueAutoAssignStarted
+  cycleIssueAutoAssignCompleted
+  cycleLockToActive
+  upcomingCycleCount
+  timezone
+  issueEstimationType
+  issueEstimationAllowZero
+  issueEstimationExtended
+  defaultIssueEstimate
+  draftWorkflowStateId
+  startWorkflowStateId
+  reviewWorkflowStateId
+  mergeWorkflowStateId
+  slackNewIssue
+  slackIssueComments
+  slackIssueStatuses
+  groupIssueHistory
+  defaultTemplateForMembersId
+  defaultTemplateForNonMembersId
+  autoClosePeriod
+  autoCloseStateId
+  autoArchivePeriod
+  markedAsDuplicateWorkflowStateId
+}
+
+fragment TemplateCreateInput on TemplateCreateInput {
+  id
+  type
+  teamId
+  name
+  description
+  templateData
+}
+
+fragment TemplatePayload on TemplatePayload {
+  lastSyncId
+  success
+}
+
+fragment TemplateUpdateInput on TemplateUpdateInput {
+  name
+  description
+  templateData
+}
+
+fragment UserSettingsUpdateInput on UserSettingsUpdateInput {
+  settings
+  notificationPreferences
+}
+
+fragment UserSettingsPayload on UserSettingsPayload {
+  lastSyncId
+  success
+}
+
+fragment UserSettingsFlagPayload on UserSettingsFlagPayload {
+  lastSyncId
+  flag
+  value
+  success
+}
+
+fragment UserSettingsFlagsResetPayload on UserSettingsFlagsResetPayload {
+  lastSyncId
+  success
+}
+
+fragment UserSubscribeToNewsletterPayload on UserSubscribeToNewsletterPayload {
+  success
+}
+
+fragment ViewPreferencesCreateInput on ViewPreferencesCreateInput {
+  id
+  preferences
+  teamId
+  projectId
+  labelId
+  cycleId
+  customViewId
+}
+
+fragment ViewPreferencesPayload on ViewPreferencesPayload {
+  lastSyncId
+  success
+}
+
+fragment ViewPreferencesUpdateInput on ViewPreferencesUpdateInput {
+  preferences
+}
+
+fragment WebhookCreateInput on WebhookCreateInput {
+  id
+  enabled
+  secret
+  url
+  teamId
+}
+
+fragment WebhookPayload on WebhookPayload {
+  lastSyncId
+  success
+}
+
+fragment WebhookUpdateInput on WebhookUpdateInput {
+  secret
+  enabled
+  url
+}
+
+fragment WorkflowStateCreateInput on WorkflowStateCreateInput {
+  id
+  type
+  name
+  color
+  description
+  position
+  teamId
+}
+
+fragment WorkflowStatePayload on WorkflowStatePayload {
+  lastSyncId
+  success
+}
+
+fragment WorkflowStateUpdateInput on WorkflowStateUpdateInput {
+  name
+  color
+  description
+  position
+}
+
+fragment DocumentStep on DocumentStep {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  step
+  version
+  clientId
+}
+
+fragment PushSubscription on PushSubscription {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+}
+
+fragment PushSubscriptionEdge on PushSubscriptionEdge {
+  cursor
+}
+
+fragment UserAccount on UserAccount {
+  id
+  createdAt
+  updatedAt
+  archivedAt
+  name
+  email
+  service
+}
+
+fragment FileUpload on FileUpload {
+  id
+  assetUrl
+  contentType
+  filename
+  metaData
+  size
+}
+
+fragment SynchronizedPayload on SynchronizedPayload {
+  lastSyncId
+}
+
+fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
+  success
+}

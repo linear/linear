@@ -1,7 +1,7 @@
 import { Kind, VariableDefinitionNode } from "graphql";
 import c from "./constants";
 import { getChainChildKey } from "./operation";
-import { SdkVisitorOperation } from "./visitor";
+import { SdkVisitorOperation } from "./sdk-visitor";
 
 /**
  * Does the operation have optional variables

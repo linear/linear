@@ -1,8 +1,8 @@
+import { upperFirst } from "@linear/common";
 import { getArgList } from "./args";
 import c from "./constants";
 import { printDocBlock } from "./print";
 import { getRequesterArg } from "./requester";
-import { upperFirst } from "./utils";
 
 /**
  * Return the name of the sdk function scoped to the api key

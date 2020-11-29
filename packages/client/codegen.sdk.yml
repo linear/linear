@@ -5,12 +5,6 @@ hooks:
   afterOneFileWrite:
     - prettier --write
 generates:
-  src/_generated/doc.graphql:
-    plugins:
-      - "@linear/doc-plugin"
-  src/_generated/sdk-jsdoc.ts:
-    plugins:
-      - jsdoc
   src/_generated/sdk-documents.ts:
     plugins:
       - typescript

@@ -3,8 +3,8 @@ import { ArgDefinition } from "./args";
 import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
 import c from "./constants";
 import { printDocBlock, printNamespaced } from "./print";
+import { SdkVisitorOperation } from "./sdk-visitor";
 import { hasOtherVariable, hasVariable } from "./variable";
-import { SdkVisitorOperation } from "./visitor";
 
 /**
  * Get the requester args from the operation variables

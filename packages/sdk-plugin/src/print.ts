@@ -1,7 +1,7 @@
+import { filterJoin } from "@linear/common";
 import { SdkPluginConfig } from "./config";
 import c from "./constants";
-import { filterJoin } from "./utils";
-import { SdkVisitorOperation } from "./visitor";
+import { SdkVisitorOperation } from "./sdk-visitor";
 
 /**
  * Prepend the import namespace if required

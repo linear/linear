@@ -680,6 +680,8 @@ export type Issue = Node & {
   dueDate?: Maybe<Scalars["TimelessDateScalar"]>;
   /** Previous identifiers of the issue if it has been moved between teams. */
   previousIdentifiers: Array<Scalars["String"]>;
+  /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
+  subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** Issue's human readable identifier (e.g. ENG-123). */
   identifier: Scalars["String"];
   /** Label for the priority. */
@@ -1317,8 +1319,10 @@ export type Organization = Node & {
   periodUploadVolume: Scalars["Float"];
   /** How git branches are formatted. If null, default formatting will be used. */
   gitBranchFormat: Scalars["String"];
-  /** Whether the Git integration linkback messages should be sent. */
+  /** Whether the Git integration linkback messages should be sent to private repositories. */
   gitLinkbackMessagesEnabled: Scalars["Boolean"];
+  /** Whether the Git integration linkback messages should be sent to public repositories. */
+  gitPublicLinkbackMessagesEnabled: Scalars["Boolean"];
   /** Whether the organization is using project milestones. */
   projectMilestonesEnabled: Scalars["Boolean"];
   /** Whether SAML authentication is enabled for organization. */
@@ -1522,6 +1526,8 @@ export type Subscription = Node & {
   organization: Organization;
   /** The date the subscription was canceled, if any. */
   canceledAt?: Maybe<Scalars["DateTime"]>;
+  /** The subscription type of a pending change. Null if no change pending. */
+  pendingChangeType?: Maybe<Scalars["String"]>;
 };
 
 export type ProjectLinkConnection = {
@@ -2125,8 +2131,10 @@ export type OrganizationAdminPrivileged = Node & {
   periodUploadVolume: Scalars["Float"];
   /** How git branches are formatted. If null, default formatting will be used. */
   gitBranchFormat: Scalars["String"];
-  /** Whether the Git integration linkback messages should be sent. */
+  /** Whether the Git integration linkback messages should be sent to private repositories. */
   gitLinkbackMessagesEnabled: Scalars["Boolean"];
+  /** Whether the Git integration linkback messages should be sent to public repositories. */
+  gitPublicLinkbackMessagesEnabled: Scalars["Boolean"];
   /** Whether the organization is using project milestones. */
   projectMilestonesEnabled: Scalars["Boolean"];
   /** Whether SAML authentication is enabled for organization. */
@@ -2175,6 +2183,8 @@ export type SubscriptionAdminPrivileged = Node & {
   organization: Organization;
   /** The date the subscription was canceled, if any. */
   canceledAt?: Maybe<Scalars["DateTime"]>;
+  /** The subscription type of a pending change. Null if no change pending. */
+  pendingChangeType?: Maybe<Scalars["String"]>;
   /** The Stripe identifier for the subscription. */
   stripeSubscriptionId: Scalars["String"];
   /** The Stripe status for the subscription. */
@@ -2912,6 +2922,8 @@ export type Mutation = {
   subscriptionUpdateSessionCreate: SubscriptionSessionPayload;
   /** Updates a subscription. */
   subscriptionUpdate: SubscriptionPayload;
+  /** Upgrades a subscription plan. */
+  subscriptionUpgrade: SubscriptionPayload;
   /** Archives a subscription. */
   subscriptionArchive: ArchivePayload;
   /** Creates a new team membership. */
@@ -3396,6 +3408,11 @@ export type MutationSubscriptionUpdateArgs = {
   id: Scalars["String"];
 };
 
+export type MutationSubscriptionUpgradeArgs = {
+  type: Scalars["String"];
+  id: Scalars["String"];
+};
+
 export type MutationSubscriptionArchiveArgs = {
   id: Scalars["String"];
 };
@@ -3532,8 +3549,10 @@ export type UpdateOrganizationInput = {
   urlKey?: Maybe<Scalars["String"]>;
   /** How git branches are formatted. If null, default formatting will be used. */
   gitBranchFormat?: Maybe<Scalars["String"]>;
-  /** Whether the Git integration linkback messages should be sent. */
+  /** Whether the Git integration linkback messages should be sent for private repositories. */
   gitLinkbackMessagesEnabled?: Maybe<Scalars["Boolean"]>;
+  /** Whether the Git integration linkback messages should be sent for public repositories. */
+  gitPublicLinkbackMessagesEnabled?: Maybe<Scalars["Boolean"]>;
   /** Whether the organization is using project milestones. */
   projectMilestonesEnabled?: Maybe<Scalars["Boolean"]>;
   /** Linear Preview feature flags */
@@ -4127,8 +4146,10 @@ export type IssueCreateInput = {
   projectId?: Maybe<Scalars["String"]>;
   /** The team state of the issue. */
   stateId?: Maybe<Scalars["String"]>;
-  /** The position of the item in its column on the kanban board. */
+  /** The position of the issue in its column on the board view. */
   boardOrder?: Maybe<Scalars["Float"]>;
+  /** The position of the issue in parent's sub-issue list. */
+  subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** The date at which the issue is due. */
   dueDate?: Maybe<Scalars["TimelessDateScalar"]>;
 };
@@ -4170,8 +4191,10 @@ export type IssueUpdateInput = {
   projectId?: Maybe<Scalars["String"]>;
   /** The team state of the issue. */
   stateId?: Maybe<Scalars["String"]>;
-  /** The position of the item in its column on the board. */
+  /** The position of the issue in its column on the board view. */
   boardOrder?: Maybe<Scalars["Float"]>;
+  /** The position of the issue in parent's sub-issue list. */
+  subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** [DEPRECATED] Document version for backwards compatibility. */
   documentVersion?: Maybe<Scalars["Int"]>;
   /** The date at which the issue is due. */
@@ -4515,6 +4538,8 @@ export type SubscriptionSessionPayload = {
 export type SubscriptionUpdateInput = {
   /** The date the subscription was set to cancel, if any. */
   canceledAt?: Maybe<Scalars["DateTime"]>;
+  /** The subscription type of a pending change. Null if no change pending. */
+  pendingChangeType?: Maybe<Scalars["String"]>;
 };
 
 export type SubscriptionPayload = {

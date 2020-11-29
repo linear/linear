@@ -1,0 +1,24 @@
+{
+  "name": "@linear/common",
+  "version": "1.0.0",
+  "author": "Linear Orbit, Inc",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=12.x",
+    "yarn": "1.x"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev:common": "run-s build:common dev:common:push",
+    "dev:common:push": "yalc push",
+    "build:common": "yarn build:common:clean && npx tsc",
+    "build:common:watch": "yarn build:common --watch",
+    "build:common:clean": "npx rimraf dist"
+  },
+  "dependencies": {
+    "typescript": "4.0.5"
+  }
+}

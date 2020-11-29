@@ -1,0 +1,14 @@
+overwrite: true
+schema: https://api.linear.app/graphql
+hooks:
+  afterOneFileWrite:
+    - prettier --write
+generates:
+  src/schema.json:
+    plugins:
+      - introspection
+  src/schema.graphql:
+    plugins:
+      - schema-ast
+    config:
+      includeDirectives: true
