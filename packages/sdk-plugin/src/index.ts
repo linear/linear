@@ -1,5 +1,6 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
+import { debug, filterJoin, nonNullable } from "@linear/common";
 import { concatAST, GraphQLSchema } from "graphql";
 import { extname } from "path";
 import { RawSdkPluginConfig } from "./config";
@@ -7,8 +8,7 @@ import c from "./constants";
 import { getChainKeys, getChildDocuments, getRootDocuments, processSdkDocuments } from "./documents";
 import { getFragmentsFromAst } from "./fragments";
 import { printRequesterType } from "./requester";
-import { debug, filterJoin, nonNullable } from "./utils";
-import { createVisitor, SdkVisitor } from "./visitor";
+import { createVisitor, SdkVisitor } from "./sdk-visitor";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear sdk

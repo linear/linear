@@ -1,11 +1,11 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
 import { ClientSideBaseVisitor, indentMultiline, LoadedFragment } from "@graphql-codegen/visitor-plugin-common";
+import { debug, filterJoin } from "@linear/common";
 import autoBind from "auto-bind";
 import { concatAST, DocumentNode, GraphQLSchema, OperationDefinitionNode, visit } from "graphql";
 import { printApiFunction, printApiFunctionName, printApiFunctionType } from "./api";
 import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
 import { printOperation, SdkOperationDefinition } from "./operation";
-import { debug, filterJoin } from "./utils";
 
 /**
  * Definition of an operation for outputting an sdk function

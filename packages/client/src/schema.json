@@ -4570,6 +4570,18 @@
             "deprecationReason": null
           },
           {
+            "name": "subIssueSortOrder",
+            "description": "The order of the item in the sub-issue list. Only set if the issue has a parent.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "identifier",
             "description": "Issue's human readable identifier (e.g. ENG-123).",
             "args": [],
@@ -8843,7 +8855,23 @@
           },
           {
             "name": "gitLinkbackMessagesEnabled",
-            "description": "Whether the Git integration linkback messages should be sent.",
+            "description": "Whether the Git integration linkback messages should be sent to private repositories.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gitPublicLinkbackMessagesEnabled",
+            "description": "Whether the Git integration linkback messages should be sent to public repositories.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -10266,6 +10294,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pendingChangeType",
+            "description": "The subscription type of a pending change. Null if no change pending.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -14406,7 +14446,23 @@
           },
           {
             "name": "gitLinkbackMessagesEnabled",
-            "description": "Whether the Git integration linkback messages should be sent.",
+            "description": "Whether the Git integration linkback messages should be sent to private repositories.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gitPublicLinkbackMessagesEnabled",
+            "description": "Whether the Git integration linkback messages should be sent to public repositories.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -14740,6 +14796,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pendingChangeType",
+            "description": "The subscription type of a pending change. Null if no change pending.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -21838,6 +21906,51 @@
             "deprecationReason": null
           },
           {
+            "name": "subscriptionUpgrade",
+            "description": "Upgrades a subscription plan.",
+            "args": [
+              {
+                "name": "type",
+                "description": "The subscription type to upgrade to.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the subscription.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SubscriptionPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "subscriptionArchive",
             "description": "Archives a subscription.",
             "args": [
@@ -22866,7 +22979,17 @@
           },
           {
             "name": "gitLinkbackMessagesEnabled",
-            "description": "Whether the Git integration linkback messages should be sent.",
+            "description": "Whether the Git integration linkback messages should be sent for private repositories.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "gitPublicLinkbackMessagesEnabled",
+            "description": "Whether the Git integration linkback messages should be sent for public repositories.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -26077,7 +26200,17 @@
           },
           {
             "name": "boardOrder",
-            "description": "The position of the item in its column on the kanban board.",
+            "description": "The position of the issue in its column on the board view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "subIssueSortOrder",
+            "description": "The position of the issue in parent's sub-issue list.",
             "type": {
               "kind": "SCALAR",
               "name": "Float",
@@ -26309,7 +26442,17 @@
           },
           {
             "name": "boardOrder",
-            "description": "The position of the item in its column on the board.",
+            "description": "The position of the issue in its column on the board view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "subIssueSortOrder",
+            "description": "The position of the issue in parent's sub-issue list.",
             "type": {
               "kind": "SCALAR",
               "name": "Float",
@@ -28239,6 +28382,16 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "pendingChangeType",
+            "description": "The subscription type of a pending change. Null if no change pending.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null
