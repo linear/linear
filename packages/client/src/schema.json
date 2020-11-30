@@ -542,7 +542,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "Application",
+                    "name": "AuthorizedApplication",
                     "ofType": null
                   }
                 }
@@ -8886,8 +8886,8 @@
             "deprecationReason": null
           },
           {
-            "name": "projectMilestonesEnabled",
-            "description": "Whether the organization is using project milestones.",
+            "name": "roadmapEnabled",
+            "description": "Whether the organization is using a roadmap.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -14477,8 +14477,8 @@
             "deprecationReason": null
           },
           {
-            "name": "projectMilestonesEnabled",
-            "description": "Whether the organization is using project milestones.",
+            "name": "roadmapEnabled",
+            "description": "Whether the organization is using a roadmap.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -15157,6 +15157,129 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AuthorizedApplication",
+        "description": "Public information of the OAuth application, plus the authorized scopes for a given user.",
+        "fields": [
+          {
+            "name": "clientId",
+            "description": "OAuth application's client ID.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Application name.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "Information about the application.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "developer",
+            "description": "Name of the developer.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "developerUrl",
+            "description": "Url of the developer (homepage or docs).",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "imageUrl",
+            "description": "Image of the application.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "scope",
+            "description": "Scopes that are authorized for this application for a given user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -22998,7 +23121,7 @@
             "defaultValue": null
           },
           {
-            "name": "projectMilestonesEnabled",
+            "name": "roadmapEnabled",
             "description": "Whether the organization is using project milestones.",
             "type": {
               "kind": "SCALAR",
@@ -29737,12 +29860,6 @@
           },
           {
             "name": "listSelectionTip",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "clearedAllNotifications",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

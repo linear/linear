@@ -1,9 +1,10 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { debug } from "@linear/common";
-import { RawDocPluginConfig } from "config";
+import { logDebug, logError } from "@linear/common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
-import { DocVisitor } from "./doc-visitor";
+import { RawDocPluginConfig } from "./config";
+import { FragmentVisitor } from "./fragment-visitor";
+import { OperationVisitor } from "./operation-visitor";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear documents
@@ -13,17 +14,21 @@ export const plugin: PluginFunction<RawDocPluginConfig> = async (schema: GraphQL
     /** Get ast from schema */
     const ast = parse(printSchema(schema));
 
-    /** Create the document visitor */
-    const visitor = new DocVisitor();
+    /** Generate fragments */
+    const fragmentVisitor = new FragmentVisitor();
+    const fragments = visit(ast, fragmentVisitor);
 
-    /** Visit each node in the ast */
-    const result = visit(ast, visitor);
-    console.log("-------------------- index --> ", require("util").inspect(result, false, null));
+    /** Generate queries */
+    const operations = visit(
+      parse(printSchema(schema)),
+      new OperationVisitor(schema, fragmentVisitor.scalars, fragmentVisitor.fragments, fragmentVisitor.objects)
+    );
+
     /** Print the result */
-    return result;
-  } catch (error) {
-    console.error(error);
-    throw error;
+    return [fragments, operations].join("\n\n");
+  } catch (e) {
+    logError(e);
+    throw e;
   }
 };
 
@@ -38,11 +43,11 @@ export const validate: PluginValidateFn = async (
 ) => {
   const prefix = `Plugin "${process.env.npm_package_name}" config requires`;
 
-  debug("config", config);
+  logDebug("config", config);
 
   if (extname(outputFile) !== ".graphql") {
     throw new Error(`${prefix} output file extension to be ".graphql" but is "${outputFile}"`);
   }
 };
 
-export { DocVisitor };
+export { FragmentVisitor, OperationVisitor };

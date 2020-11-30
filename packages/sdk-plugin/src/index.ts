@@ -1,6 +1,6 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
-import { debug, filterJoin, nonNullable } from "@linear/common";
+import { filterJoin, logDebug, logError, nonNullable } from "@linear/common";
 import { concatAST, GraphQLSchema } from "graphql";
 import { extname } from "path";
 import { RawSdkPluginConfig } from "./config";
@@ -18,60 +18,65 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
   documents: Types.DocumentFile[],
   config: RawSdkPluginConfig
 ) => {
-  /** Process a list of documents to add information for chaining the api operations */
-  const sdkDocuments = processSdkDocuments(documents);
-  debug("documents", sdkDocuments.length);
+  try {
+    /** Process a list of documents to add information for chaining the api operations */
+    const sdkDocuments = processSdkDocuments(documents);
+    logDebug("documents", sdkDocuments.length);
 
-  /** Get all documents to be added to the root of the sdk */
-  const rootDocuments = getRootDocuments(sdkDocuments);
+    /** Get all documents to be added to the root of the sdk */
+    const rootDocuments = getRootDocuments(sdkDocuments);
 
-  /** Ensure the nodes validate as a single application */
-  const rootAst = concatAST(rootDocuments);
+    /** Ensure the nodes validate as a single application */
+    const rootAst = concatAST(rootDocuments);
 
-  /** Get a list of all fragment definitions */
-  const rootFragments = getFragmentsFromAst(rootAst, config);
-  debug("fragments", rootFragments.length);
+    /** Get a list of all fragment definitions */
+    const rootFragments = getFragmentsFromAst(rootAst, config);
+    logDebug("fragments", rootFragments.length);
 
-  /** Create and process a visitor for each node */
-  const rootVisitor = createVisitor(schema, documents, rootDocuments, rootFragments, config);
+    /** Create and process a visitor for each node */
+    const rootVisitor = createVisitor(schema, documents, rootDocuments, rootFragments, config);
 
-  /** Get all chain keys to create chain apis */
-  const chainKeys = getChainKeys(sdkDocuments);
+    /** Get all chain keys to create chain apis */
+    const chainKeys = getChainKeys(sdkDocuments);
 
-  const chainVisitors = chainKeys.map(chainKey => {
-    /** Get a list of documents that are attached to this chain api key */
-    const chainDocuments = getChildDocuments(sdkDocuments, chainKey);
-    debug(chainKey, "chainDocuments", chainDocuments.length);
+    const chainVisitors = chainKeys.map(chainKey => {
+      /** Get a list of documents that are attached to this chain api key */
+      const chainDocuments = getChildDocuments(sdkDocuments, chainKey);
+      logDebug(chainKey, "chainDocuments", chainDocuments.length);
 
-    /** Create and process a visitor for each chained api */
-    return createVisitor(schema, documents, chainDocuments, rootFragments, config, chainKey);
-  });
+      /** Create and process a visitor for each chained api */
+      return createVisitor(schema, documents, chainDocuments, rootFragments, config, chainKey);
+    });
 
-  return {
-    /** Add any initial imports */
-    prepend: [
-      /** Ignore unused variables */
-      "/* eslint-disable @typescript-eslint/no-unused-vars */",
-      /** Import DocumentNode if required */
-      config.documentMode !== DocumentMode.string ? `import { DocumentNode } from 'graphql'` : undefined,
-      /** Import ResultOf util for document return types */
-      `import { ResultOf } from '@graphql-typed-document-node/core'`,
-    ].filter(nonNullable),
-    content: filterJoin(
-      [
-        /** Import and export documents */
-        `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
-        `export * from '${config.documentFile}'\n`,
-        /** Print the requester function */
-        ...printRequesterType(config),
-        /** Print the chained api functions */
-        ...chainVisitors.map(v => v.visitor.sdkContent),
-        /** Print the root function */
-        rootVisitor.visitor.sdkContent,
-      ],
-      "\n"
-    ),
-  };
+    return {
+      /** Add any initial imports */
+      prepend: [
+        /** Ignore unused variables */
+        "/* eslint-disable @typescript-eslint/no-unused-vars */",
+        /** Import DocumentNode if required */
+        config.documentMode !== DocumentMode.string ? `import { DocumentNode } from 'graphql'` : undefined,
+        /** Import ResultOf util for document return types */
+        `import { ResultOf } from '@graphql-typed-document-node/core'`,
+      ].filter(nonNullable),
+      content: filterJoin(
+        [
+          /** Import and export documents */
+          `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
+          `export * from '${config.documentFile}'\n`,
+          /** Print the requester function */
+          ...printRequesterType(config),
+          /** Print the chained api functions */
+          ...chainVisitors.map(v => v.visitor.sdkContent),
+          /** Print the root function */
+          rootVisitor.visitor.sdkContent,
+        ],
+        "\n"
+      ),
+    };
+  } catch (e) {
+    logError(e);
+    throw e;
+  }
 };
 
 /**
@@ -85,7 +90,7 @@ export const validate: PluginValidateFn = async (
 ) => {
   const prefix = `Plugin "${process.env.npm_package_name}" config requires`;
 
-  debug("config", config);
+  logDebug("config", config);
 
   if (extname(outputFile) !== ".ts") {
     throw new Error(`${prefix} output file extension to be ".ts" but is "${outputFile}"`);
