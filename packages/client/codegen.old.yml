@@ -1,6 +1,6 @@
 overwrite: true
 schema: ./src/schema.graphql
-documents: ./src/_generated/**
+documents: ./src/documents/**
 hooks:
   afterOneFileWrite:
     - prettier --write
