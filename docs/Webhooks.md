@@ -160,11 +160,11 @@ query {
 
 #### Deleting a webhook
 
-Deleting a webhook is done with the `webhookArchive` mutation, by supplying the `id` of the webhook in question. Despite its name, the webhook will be deleted for good:
+Deleting a webhook is done with the `webhookDelete` mutation, by supplying the `id` of the webhook in question. The webhook will be deleted for good:
 
 ```
 mutation {
-  webhookArchive(
+  webhookDelete(
     id: "1087f03a-180a-4c31-b7dc-03dbe761ff59"
   ) {
     success
