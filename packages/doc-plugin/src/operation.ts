@@ -13,22 +13,22 @@ import {
 } from "graphql";
 import { ArgumentVisitor } from "./argument-visitor";
 import c from "./constants";
-import { NamedArgs, NamedFields, WithNullable } from "./types";
+import { NamedFields } from "./types";
 
 const argVisitor = new ArgumentVisitor();
 
 /**
  * Print the arg for passing into the operation input
  */
-function printInputArg(node: WithNullable<InputValueDefinitionNode>): string {
-  const arg = typeof node.type === "string" ? node.type : visit(node.type, argVisitor);
-  return `$${node.name}: ${arg}`;
+function printInputArg(node: InputValueDefinitionNode): string {
+  const arg = visit(node.type, argVisitor);
+  return `$${node.name.value}: ${arg}`;
 }
 
 /**
  * Print the args list for passing into the operation input
  */
-function printInputArgs(node: NamedArgs<FieldDefinitionNode>): string {
+function printInputArgs(node: FieldDefinitionNode): string {
   return node.arguments?.length ? filterJoin(["(", ...node.arguments.map(printInputArg), ")"], "\n") : "";
 }
 
@@ -36,13 +36,13 @@ function printInputArgs(node: NamedArgs<FieldDefinitionNode>): string {
  * Print the arg for passing into the operation response
  */
 function printResponseArg(node: InputValueDefinitionNode): string {
-  return `${node.name}: $${node.name}`;
+  return `${node.name.value}: $${node.name.value}`;
 }
 
 /**
  * Print the args list for passing into the operation response
  */
-function printResponseArgs(node: NamedArgs<FieldDefinitionNode>): string {
+function printResponseArgs(node: FieldDefinitionNode): string {
   return node.arguments?.length ? filterJoin(["(", ...node.arguments.map(printResponseArg), ")"], "\n") : "";
 }
 
@@ -57,15 +57,15 @@ export function printDescription<T extends { description?: StringValueNode }>(no
  * Print the operation wrapper
  */
 export function printOperationWrapper(
-  node: NamedArgs<FieldDefinitionNode>,
+  node: FieldDefinitionNode,
   operationName?: string,
   operationBody?: string
 ): string {
   return filterJoin(
     [
       printDescription(node),
-      `${operationName} ${node.name}${printInputArgs(node)} {
-        ${node.name}${printResponseArgs(node)} {
+      `${operationName} ${node.name.value}${printInputArgs(node)} {
+        ${node.name.value}${printResponseArgs(node)} {
           ${operationBody}
         }
       }`,

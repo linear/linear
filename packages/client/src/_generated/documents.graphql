@@ -788,7 +788,7 @@ fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
 }
 
 # One specific user.
-query user($id: String) {
+query user($id: String!) {
   user(id: $id) {
     ...User
   }
@@ -809,35 +809,35 @@ query organization {
 }
 
 # Does the organization exist.
-query organizationExists($urlKey: String) {
+query organizationExists($urlKey: String!) {
   organizationExists(urlKey: $urlKey) {
     ...OrganizationExistsPayload
   }
 }
 
 # Fetch data to catch up the client to the state of the world.
-query syncBootstrap($databaseVersion: Int, $sinceSyncId: Int) {
+query syncBootstrap($databaseVersion: Int!, $sinceSyncId: Int!) {
   syncBootstrap(databaseVersion: $databaseVersion, sinceSyncId: $sinceSyncId) {
     ...SyncResponse
   }
 }
 
 # Fetches delta packets to catch up the user to the current state of the world.
-query syncUpdates($sinceSyncId: Float) {
+query syncUpdates($sinceSyncId: Float!) {
   syncUpdates(sinceSyncId: $sinceSyncId) {
     ...SyncResponse
   }
 }
 
 # Fetches an archived model.
-query archivedModelSync($identifier: String, $modelClass: String) {
+query archivedModelSync($identifier: String!, $modelClass: String!) {
   archivedModelSync(identifier: $identifier, modelClass: $modelClass) {
     ...ArchiveResponse
   }
 }
 
 # Fetches archived models.
-query archivedModelsSync($modelClass: String, $teamId: String, $before: DateTime, $last: Int) {
+query archivedModelsSync($modelClass: String!, $teamId: String!, $before: DateTime, $last: Int) {
   archivedModelsSync(modelClass: $modelClass, teamId: $teamId, before: $before, last: $last) {
     ...ArchiveResponse
   }
@@ -903,7 +903,7 @@ query apiKeys(
 }
 
 # Get information for an application.
-query application($redirectUri: String, $clientId: String) {
+query application($redirectUri: String, $clientId: String!) {
   application(redirectUri: $redirectUri, clientId: $clientId) {
     ...Application
   }
@@ -924,7 +924,7 @@ query availableUsers {
 }
 
 # Fetch SSO login URL for the email provided.
-query ssoUrlFromEmail($isDesktop: Boolean, $email: String) {
+query ssoUrlFromEmail($isDesktop: Boolean, $email: String!) {
   ssoUrlFromEmail(isDesktop: $isDesktop, email: $email) {
     ...SsoUrlFromEmailResponse
   }
@@ -938,14 +938,14 @@ query billingDetails {
 }
 
 # Join collaborative document and get missing steps.
-query collaborativeDocumentJoin($clientId: String, $issueId: String, $version: Int) {
+query collaborativeDocumentJoin($clientId: String!, $issueId: String!, $version: Int!) {
   collaborativeDocumentJoin(clientId: $clientId, issueId: $issueId, version: $version) {
     ...CollaborationDocumentUpdatePayload
   }
 }
 
 # A specific comment.
-query comment($id: String) {
+query comment($id: String!) {
   comment(id: $id) {
     ...Comment
   }
@@ -977,7 +977,7 @@ query comments(
 }
 
 # One specific custom view.
-query customView($id: String) {
+query customView($id: String!) {
   customView(id: $id) {
     ...CustomView
   }
@@ -1009,7 +1009,7 @@ query customViews(
 }
 
 # One specific cycle.
-query cycle($id: String) {
+query cycle($id: String!) {
   cycle(id: $id) {
     ...Cycle
   }
@@ -1042,7 +1042,7 @@ query cycles(
 }
 
 # A specific emoji.
-query emoji($id: String) {
+query emoji($id: String!) {
   emoji(id: $id) {
     ...Emoji
   }
@@ -1074,7 +1074,7 @@ query emojis(
 }
 
 # One specific favorite.
-query favorite($id: String) {
+query favorite($id: String!) {
   favorite(id: $id) {
     ...Favorite
   }
@@ -1107,14 +1107,14 @@ query favorites(
 }
 
 # Fetch Figma screenshot and other information with file and node identifiers.
-query figmaEmbedInfo($nodeId: String, $fileId: String) {
+query figmaEmbedInfo($nodeId: String, $fileId: String!) {
   figmaEmbedInfo(nodeId: $nodeId, fileId: $fileId) {
     ...FigmaEmbedPayload
   }
 }
 
 # One specific integration.
-query integration($id: String) {
+query integration($id: String!) {
   integration(id: $id) {
     ...Integration
   }
@@ -1147,7 +1147,7 @@ query integrations(
 }
 
 # One specific integration resource. (e.g. linked GitHub pull requests for an issue)
-query integrationResource($id: String) {
+query integrationResource($id: String!) {
   integrationResource(id: $id) {
     ...IntegrationResource
   }
@@ -1180,14 +1180,14 @@ query integrationResources(
 }
 
 # Retrieves information for the public invite page.
-query inviteInfo($teamHash: String, $userHash: String) {
+query inviteInfo($teamHash: String, $userHash: String!) {
   inviteInfo(teamHash: $teamHash, userHash: $userHash) {
     ...InvitePagePayload
   }
 }
 
 # One specific label.
-query issueLabel($id: String) {
+query issueLabel($id: String!) {
   issueLabel(id: $id) {
     ...IssueLabel
   }
@@ -1220,7 +1220,7 @@ query issueLabels(
 }
 
 # One specific issue relation.
-query issueRelation($id: String) {
+query issueRelation($id: String!) {
   issueRelation(id: $id) {
     ...IssueRelation
   }
@@ -1252,7 +1252,7 @@ query issueRelations(
 }
 
 # One specific issue.
-query issue($id: String) {
+query issue($id: String!) {
   issue(id: $id) {
     ...Issue
   }
@@ -1266,7 +1266,7 @@ query issueSearch(
   $last: Int
   $includeArchived: Boolean
   $orderBy: PaginationOrderBy
-  $query: String
+  $query: String!
 ) {
   issueSearch(
     before: $before
@@ -1312,7 +1312,7 @@ query issues(
 }
 
 # One specific milestone.
-query milestone($id: String) {
+query milestone($id: String!) {
   milestone(id: $id) {
     ...Milestone
   }
@@ -1404,7 +1404,7 @@ query notificationSubscription(
 }
 
 # One specific organization invite.
-query organizationInvite($id: String) {
+query organizationInvite($id: String!) {
   organizationInvite(id: $id) {
     ...IssueLabel
   }
@@ -1437,7 +1437,7 @@ query organizationInvites(
 }
 
 # One specific project link.
-query projectLink($id: String) {
+query projectLink($id: String!) {
   projectLink(id: $id) {
     ...ProjectLink
   }
@@ -1470,7 +1470,7 @@ query ProjectLinks(
 }
 
 # One specific project.
-query project($id: String) {
+query project($id: String!) {
   project(id: $id) {
     ...Project
   }
@@ -1510,7 +1510,7 @@ query pushSubscriptionTest {
 }
 
 # A specific reaction.
-query reaction($id: String) {
+query reaction($id: String!) {
   reaction(id: $id) {
     ...Reaction
   }
@@ -1549,7 +1549,7 @@ query subscription {
 }
 
 # One specific team membership.
-query teamMembership($id: String) {
+query teamMembership($id: String!) {
   teamMembership(id: $id) {
     ...TeamMembership
   }
@@ -1582,7 +1582,7 @@ query teamMemberships(
 }
 
 # One specific team.
-query team($id: String) {
+query team($id: String!) {
   team(id: $id) {
     ...Team
   }
@@ -1622,7 +1622,7 @@ query templates {
 }
 
 # A specific template.
-query template($id: String) {
+query template($id: String!) {
   template(id: $id) {
     ...Template
   }
@@ -1655,7 +1655,7 @@ query viewPreferences(
 }
 
 # A specific webhook.
-query webhook($id: String) {
+query webhook($id: String!) {
   webhook(id: $id) {
     ...Webhook
   }
@@ -1688,7 +1688,7 @@ query webhooks(
 }
 
 # One specific state.
-query workflowState($id: String) {
+query workflowState($id: String!) {
   workflowState(id: $id) {
     ...WorkflowState
   }
@@ -1720,42 +1720,42 @@ query workflowStates(
   }
 }
 # Updates a user. Only available to organization admins and the user themselves.
-mutation userUpdate($input: UpdateUserInput, $id: String) {
+mutation userUpdate($input: UpdateUserInput!, $id: String!) {
   userUpdate(input: $input, id: $id) {
     ...UserPayload
   }
 }
 
 # Makes user an admin. Can only be called by an admin.
-mutation userPromoteAdmin($id: String) {
+mutation userPromoteAdmin($id: String!) {
   userPromoteAdmin(id: $id) {
     ...UserAdminPayload
   }
 }
 
 # Makes user a regular user. Can only be called by an admin.
-mutation userDemoteAdmin($id: String) {
+mutation userDemoteAdmin($id: String!) {
   userDemoteAdmin(id: $id) {
     ...UserAdminPayload
   }
 }
 
 # Suspends a user. Can only be called by an admin.
-mutation userSuspend($id: String) {
+mutation userSuspend($id: String!) {
   userSuspend(id: $id) {
     ...UserAdminPayload
   }
 }
 
 # Un-suspends a user. Can only be called by an admin.
-mutation userUnsuspend($id: String) {
+mutation userUnsuspend($id: String!) {
   userUnsuspend(id: $id) {
     ...UserAdminPayload
   }
 }
 
 # Updates the user's organization.
-mutation organizationUpdate($input: UpdateOrganizationInput) {
+mutation organizationUpdate($input: UpdateOrganizationInput!) {
   organizationUpdate(input: $input) {
     ...OrganizationPayload
   }
@@ -1769,119 +1769,119 @@ mutation organizationDeleteChallenge {
 }
 
 # Delete's an organization. Administrator privileges required.
-mutation organizationDelete($input: DeleteOrganizationInput) {
+mutation organizationDelete($input: DeleteOrganizationInput!) {
   organizationDelete(input: $input) {
     ...OrganizationDeletePayload
   }
 }
 
 # Disable organization access. Superuser privileges required.
-mutation organizationToggleAccess($id: String) {
+mutation organizationToggleAccess($id: String!) {
   organizationToggleAccess(id: $id) {
     ...OrganizationAccessPayload
   }
 }
 
 # Change email domain for all users and accounts in the organization.
-mutation organizationChangeEmailDomain($toDomain: String, $fromDomain: String, $id: String) {
+mutation organizationChangeEmailDomain($toDomain: String!, $fromDomain: String!, $id: String!) {
   organizationChangeEmailDomain(toDomain: $toDomain, fromDomain: $fromDomain, id: $id) {
     ...OrganizationAccessPayload
   }
 }
 
 # Toggle SAML authentication on or off for an organization. Superuser privileges required.
-mutation organizationToggleSamlEnabled($id: String) {
+mutation organizationToggleSamlEnabled($id: String!) {
   organizationToggleSamlEnabled(id: $id) {
     ...OrganizationSamlConfigurePayload
   }
 }
 
 # Configure SAML authentication for an organization. Superuser privileges required.
-mutation organizationConfigureSaml($samlConfiguration: SamlConfigurationInput, $id: String) {
+mutation organizationConfigureSaml($samlConfiguration: SamlConfigurationInput!, $id: String!) {
   organizationConfigureSaml(samlConfiguration: $samlConfiguration, id: $id) {
     ...OrganizationSamlConfigurePayload
   }
 }
 
 # Executes admin command.
-mutation adminCommand($input: AdminCommandInput) {
+mutation adminCommand($input: AdminCommandInput!) {
   adminCommand(input: $input) {
     ...AdminCommandPayload
   }
 }
 
 # Sends out emails in bulk to our users.
-mutation adminBulkEmail($randomDelay: Int, $emails: String, $markdownContent: String, $subject: String) {
+mutation adminBulkEmail($randomDelay: Int, $emails: [String!]!, $markdownContent: String!, $subject: String!) {
   adminBulkEmail(randomDelay: $randomDelay, emails: $emails, markdownContent: $markdownContent, subject: $subject) {
     ...AdminCommandPayload
   }
 }
 
 # Creates a stripe customer for an organization.
-mutation adminCreateStripeCustomer($organizationId: String) {
+mutation adminCreateStripeCustomer($organizationId: String!) {
   adminCreateStripeCustomer(organizationId: $organizationId) {
     ...AdminCommandPayload
   }
 }
 
 # Schedules a task. Currently only anonymous tasks without any parameters can be scheduled.
-mutation adminScheduleAnonymousTask($taskName: String) {
+mutation adminScheduleAnonymousTask($taskName: String!) {
   adminScheduleAnonymousTask(taskName: $taskName) {
     ...AdminCommandPayload
   }
 }
 
 # Changes the email address for the user account and all of its users.
-mutation adminUserAccountChangeEmail($newEmail: String, $id: String) {
+mutation adminUserAccountChangeEmail($newEmail: String!, $id: String!) {
   adminUserAccountChangeEmail(newEmail: $newEmail, id: $id) {
     ...UserAccountAdminPrivileged
   }
 }
 
 # [Deprecated] Creates a new event.
-mutation eventCreate($input: EventCreateInput) {
+mutation eventCreate($input: EventCreateInput!) {
   eventCreate(input: $input) {
     ...EventPayload
   }
 }
 
 # Creates a new API key.
-mutation apiKeyCreate($input: ApiKeyCreateInput) {
+mutation apiKeyCreate($input: ApiKeyCreateInput!) {
   apiKeyCreate(input: $input) {
     ...ApiKeyPayload
   }
 }
 
 # Deletes an API key.
-mutation apiKeyDelete($id: String) {
+mutation apiKeyDelete($id: String!) {
   apiKeyDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Finds or creates a new user account by email and sends an email with token.
-mutation emailUserAccountAuthChallenge($input: EmailUserAccountAuthChallengeInput) {
+mutation emailUserAccountAuthChallenge($input: EmailUserAccountAuthChallengeInput!) {
   emailUserAccountAuthChallenge(input: $input) {
     ...EmailUserAccountAuthChallengeResponse
   }
 }
 
 # Authenticates a user account via email and authentication token.
-mutation emailTokenUserAccountAuth($input: EmailUserAccountAuthInput) {
+mutation emailTokenUserAccountAuth($input: EmailUserAccountAuthInput!) {
   emailTokenUserAccountAuth(input: $input) {
     ...AuthResolverResponse
   }
 }
 
 # Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
-mutation googleUserAccountAuth($input: GoogleUserAccountAuthInput) {
+mutation googleUserAccountAuth($input: GoogleUserAccountAuthInput!) {
   googleUserAccountAuth(input: $input) {
     ...AuthResolverResponse
   }
 }
 
 # Creates an organization from onboarding.
-mutation createOrganizationFromOnboarding($survey: OnboardingCustomerSurvey, $input: CreateOrganizationInput) {
+mutation createOrganizationFromOnboarding($survey: OnboardingCustomerSurvey, $input: CreateOrganizationInput!) {
   createOrganizationFromOnboarding(survey: $survey, input: $input) {
     organization {
       ...Organization
@@ -1893,7 +1893,7 @@ mutation createOrganizationFromOnboarding($survey: OnboardingCustomerSurvey, $in
 }
 
 # Join an organization from onboarding.
-mutation joinOrganizationFromOnboarding($input: JoinOrganizationInput) {
+mutation joinOrganizationFromOnboarding($input: JoinOrganizationInput!) {
   joinOrganizationFromOnboarding(input: $input) {
     organization {
       ...Organization
@@ -1905,7 +1905,7 @@ mutation joinOrganizationFromOnboarding($input: JoinOrganizationInput) {
 }
 
 # Leave an organization.
-mutation leaveOrganization($organizationId: String) {
+mutation leaveOrganization($organizationId: String!) {
   leaveOrganization(organizationId: $organizationId) {
     organization {
       ...Organization
@@ -1917,84 +1917,84 @@ mutation leaveOrganization($organizationId: String) {
 }
 
 # Updates the billing email address for the customer.
-mutation billingEmailUpdate($input: BillingEmailUpdateInput) {
+mutation billingEmailUpdate($input: BillingEmailUpdateInput!) {
   billingEmailUpdate(input: $input) {
     ...BillingEmailPayload
   }
 }
 
 # Update collaborative document with client steps.
-mutation collaborativeDocumentUpdate($input: CollaborationDocumentUpdateInput) {
+mutation collaborativeDocumentUpdate($input: CollaborationDocumentUpdateInput!) {
   collaborativeDocumentUpdate(input: $input) {
     ...CollaborationDocumentUpdatePayload
   }
 }
 
 # Creates a new comment.
-mutation commentCreate($input: CommentCreateInput) {
+mutation commentCreate($input: CommentCreateInput!) {
   commentCreate(input: $input) {
     ...CommentPayload
   }
 }
 
 # Updates a comment.
-mutation commentUpdate($input: CommentUpdateInput, $id: String) {
+mutation commentUpdate($input: CommentUpdateInput!, $id: String!) {
   commentUpdate(input: $input, id: $id) {
     ...CommentPayload
   }
 }
 
 # Deletes a comment.
-mutation commentDelete($id: String) {
+mutation commentDelete($id: String!) {
   commentDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Saves user message.
-mutation contactCreate($input: ContactCreateInput) {
+mutation contactCreate($input: ContactCreateInput!) {
   contactCreate(input: $input) {
     ...ContactPayload
   }
 }
 
 # Creates a new custom view.
-mutation customViewCreate($input: CustomViewCreateInput) {
+mutation customViewCreate($input: CustomViewCreateInput!) {
   customViewCreate(input: $input) {
     ...CustomViewPayload
   }
 }
 
 # Updates a custom view.
-mutation customViewUpdate($input: CustomViewUpdateInput, $id: String) {
+mutation customViewUpdate($input: CustomViewUpdateInput!, $id: String!) {
   customViewUpdate(input: $input, id: $id) {
     ...CustomViewPayload
   }
 }
 
 # Deletes a custom view.
-mutation customViewDelete($id: String) {
+mutation customViewDelete($id: String!) {
   customViewDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new cycle.
-mutation cycleCreate($input: CycleCreateInput) {
+mutation cycleCreate($input: CycleCreateInput!) {
   cycleCreate(input: $input) {
     ...CyclePayload
   }
 }
 
 # Updates a cycle.
-mutation cycleUpdate($input: CycleUpdateInput, $id: String) {
+mutation cycleUpdate($input: CycleUpdateInput!, $id: String!) {
   cycleUpdate(input: $input, id: $id) {
     ...CyclePayload
   }
 }
 
 # Archives a cycle.
-mutation cycleArchive($id: String) {
+mutation cycleArchive($id: String!) {
   cycleArchive(id: $id) {
     ...ArchivePayload
   }
@@ -2022,420 +2022,420 @@ mutation debugCreateSAMLOrg {
 }
 
 # Unsubscribes the user from one type of emails.
-mutation emailUnsubscribe($input: EmailUnsubscribeInput) {
+mutation emailUnsubscribe($input: EmailUnsubscribeInput!) {
   emailUnsubscribe(input: $input) {
     ...EmailUnsubscribePayload
   }
 }
 
 # Creates a custom emoji.
-mutation emojiCreate($input: EmojiCreateInput) {
+mutation emojiCreate($input: EmojiCreateInput!) {
   emojiCreate(input: $input) {
     ...EmojiPayload
   }
 }
 
 # Deletes an emoji.
-mutation emojiDelete($id: String) {
+mutation emojiDelete($id: String!) {
   emojiDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new favorite (project, cycle etc).
-mutation favoriteCreate($input: FavoriteCreateInput) {
+mutation favoriteCreate($input: FavoriteCreateInput!) {
   favoriteCreate(input: $input) {
     ...FavoritePayload
   }
 }
 
 # Updates a favorite.
-mutation favoriteUpdate($input: FavoriteUpdateInput, $id: String) {
+mutation favoriteUpdate($input: FavoriteUpdateInput!, $id: String!) {
   favoriteUpdate(input: $input, id: $id) {
     ...FavoritePayload
   }
 }
 
 # Deletes a favorite reference.
-mutation favoriteDelete($id: String) {
+mutation favoriteDelete($id: String!) {
   favoriteDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Saves user feedback.
-mutation feedbackCreate($input: FeedbackCreateInput) {
+mutation feedbackCreate($input: FeedbackCreateInput!) {
   feedbackCreate(input: $input) {
     ...FeedbackPayload
   }
 }
 
 # XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage.
-mutation fileUpload($metaData: JSON, $size: Int, $contentType: String, $filename: String) {
+mutation fileUpload($metaData: JSON, $size: Int!, $contentType: String!, $filename: String!) {
   fileUpload(metaData: $metaData, size: $size, contentType: $contentType, filename: $filename) {
     ...UploadPayload
   }
 }
 
 # Upload an image from an URL to Linear.
-mutation imageUploadFromUrl($url: String) {
+mutation imageUploadFromUrl($url: String!) {
   imageUploadFromUrl(url: $url) {
     ...ImageUploadFromUrlPayload
   }
 }
 
 # Connects the organization with the GitHub App.
-mutation integrationGithubConnect($installationId: String) {
+mutation integrationGithubConnect($installationId: String!) {
   integrationGithubConnect(installationId: $installationId) {
     ...IntegrationPayload
   }
 }
 
 # Connects the organization with a GitLab Access Token.
-mutation integrationGitlabConnect($gitlabUrl: String, $accessToken: String) {
+mutation integrationGitlabConnect($gitlabUrl: String!, $accessToken: String!) {
   integrationGitlabConnect(gitlabUrl: $gitlabUrl, accessToken: $accessToken) {
     ...IntegrationPayload
   }
 }
 
 # Integrates the organization with Slack.
-mutation integrationSlack($shouldUseV2Auth: Boolean, $redirectUri: String, $code: String) {
+mutation integrationSlack($shouldUseV2Auth: Boolean, $redirectUri: String!, $code: String!) {
   integrationSlack(shouldUseV2Auth: $shouldUseV2Auth, redirectUri: $redirectUri, code: $code) {
     ...IntegrationPayload
   }
 }
 
 # Integrates your personal notifications with Slack.
-mutation integrationSlackPersonal($redirectUri: String, $code: String) {
+mutation integrationSlackPersonal($redirectUri: String!, $code: String!) {
   integrationSlackPersonal(redirectUri: $redirectUri, code: $code) {
     ...IntegrationPayload
   }
 }
 
 # Slack webhook integration.
-mutation integrationSlackPost($shouldUseV2Auth: Boolean, $redirectUri: String, $teamId: String, $code: String) {
+mutation integrationSlackPost($shouldUseV2Auth: Boolean, $redirectUri: String!, $teamId: String!, $code: String!) {
   integrationSlackPost(shouldUseV2Auth: $shouldUseV2Auth, redirectUri: $redirectUri, teamId: $teamId, code: $code) {
     ...IntegrationPayload
   }
 }
 
 # Slack integration for project notifications.
-mutation integrationSlackProjectPost($redirectUri: String, $projectId: String, $code: String) {
+mutation integrationSlackProjectPost($redirectUri: String!, $projectId: String!, $code: String!) {
   integrationSlackProjectPost(redirectUri: $redirectUri, projectId: $projectId, code: $code) {
     ...IntegrationPayload
   }
 }
 
 # Imports custom emojis from your Slack workspace.
-mutation integrationSlackImportEmojis($redirectUri: String, $code: String) {
+mutation integrationSlackImportEmojis($redirectUri: String!, $code: String!) {
   integrationSlackImportEmojis(redirectUri: $redirectUri, code: $code) {
     ...IntegrationPayload
   }
 }
 
 # Integrates the organization with Figma.
-mutation integrationFigma($redirectUri: String, $code: String) {
+mutation integrationFigma($redirectUri: String!, $code: String!) {
   integrationFigma(redirectUri: $redirectUri, code: $code) {
     ...IntegrationPayload
   }
 }
 
 # Integrates the organization with Google Sheets.
-mutation integrationGoogleSheets($code: String) {
+mutation integrationGoogleSheets($code: String!) {
   integrationGoogleSheets(code: $code) {
     ...IntegrationPayload
   }
 }
 
 # Manually update Google Sheets data.
-mutation refreshGoogleSheetsData($id: String) {
+mutation refreshGoogleSheetsData($id: String!) {
   refreshGoogleSheetsData(id: $id) {
     ...IntegrationPayload
   }
 }
 
 # Integrates the organization with Sentry.
-mutation integrationSentryConnect($organizationSlug: String, $code: String, $installationId: String) {
+mutation integrationSentryConnect($organizationSlug: String!, $code: String!, $installationId: String!) {
   integrationSentryConnect(organizationSlug: $organizationSlug, code: $code, installationId: $installationId) {
     ...IntegrationPayload
   }
 }
 
 # Deletes an integration.
-mutation integrationDelete($id: String) {
+mutation integrationDelete($id: String!) {
   integrationDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Archives an integration resource.
-mutation integrationResourceArchive($id: String) {
+mutation integrationResourceArchive($id: String!) {
   integrationResourceArchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new label.
-mutation issueLabelCreate($input: IssueLabelCreateInput) {
+mutation issueLabelCreate($input: IssueLabelCreateInput!) {
   issueLabelCreate(input: $input) {
     ...IssueLabelPayload
   }
 }
 
 # Updates an label.
-mutation issueLabelUpdate($input: IssueLabelUpdateInput, $id: String) {
+mutation issueLabelUpdate($input: IssueLabelUpdateInput!, $id: String!) {
   issueLabelUpdate(input: $input, id: $id) {
     ...IssueLabelPayload
   }
 }
 
 # Archives an issue label.
-mutation issueLabelArchive($id: String) {
+mutation issueLabelArchive($id: String!) {
   issueLabelArchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new issue relation.
-mutation issueRelationCreate($input: IssueRelationCreateInput) {
+mutation issueRelationCreate($input: IssueRelationCreateInput!) {
   issueRelationCreate(input: $input) {
     ...IssueRelationPayload
   }
 }
 
 # Updates an issue relation.
-mutation issueRelationUpdate($input: IssueRelationUpdateInput, $id: String) {
+mutation issueRelationUpdate($input: IssueRelationUpdateInput!, $id: String!) {
   issueRelationUpdate(input: $input, id: $id) {
     ...IssueRelationPayload
   }
 }
 
 # Deletes an issue relation.
-mutation issueRelationDelete($id: String) {
+mutation issueRelationDelete($id: String!) {
   issueRelationDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new issue.
-mutation issueCreate($input: IssueCreateInput) {
+mutation issueCreate($input: IssueCreateInput!) {
   issueCreate(input: $input) {
     ...IssuePayload
   }
 }
 
 # Updates an issue.
-mutation issueUpdate($input: IssueUpdateInput, $id: String) {
+mutation issueUpdate($input: IssueUpdateInput!, $id: String!) {
   issueUpdate(input: $input, id: $id) {
     ...IssuePayload
   }
 }
 
 # Archives an issue.
-mutation issueArchive($id: String) {
+mutation issueArchive($id: String!) {
   issueArchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Unarchives an issue.
-mutation issueUnarchive($id: String) {
+mutation issueUnarchive($id: String!) {
   issueUnarchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new milestone.
-mutation milestoneCreate($input: MilestoneCreateInput) {
+mutation milestoneCreate($input: MilestoneCreateInput!) {
   milestoneCreate(input: $input) {
     ...MilestonePayload
   }
 }
 
 # Updates a milestone.
-mutation milestoneUpdate($input: MilestoneUpdateInput, $id: String) {
+mutation milestoneUpdate($input: MilestoneUpdateInput!, $id: String!) {
   milestoneUpdate(input: $input, id: $id) {
     ...MilestonePayload
   }
 }
 
 # Deletes a milestone.
-mutation milestoneDelete($id: String) {
+mutation milestoneDelete($id: String!) {
   milestoneDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a notification.
-mutation notificationCreate($input: NotificationUpdateInput, $id: String) {
+mutation notificationCreate($input: NotificationUpdateInput!, $id: String!) {
   notificationCreate(input: $input, id: $id) {
     ...NotificationPayload
   }
 }
 
 # Updates a notification.
-mutation notificationUpdate($input: NotificationUpdateInput, $id: String) {
+mutation notificationUpdate($input: NotificationUpdateInput!, $id: String!) {
   notificationUpdate(input: $input, id: $id) {
     ...NotificationPayload
   }
 }
 
 # [Deprecated] Deletes a notification.
-mutation notificationDelete($id: String) {
+mutation notificationDelete($id: String!) {
   notificationDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Archives a notification.
-mutation notificationArchive($id: String) {
+mutation notificationArchive($id: String!) {
   notificationArchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Unarchives a notification.
-mutation notificationUnarchive($id: String) {
+mutation notificationUnarchive($id: String!) {
   notificationUnarchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new notification subscription for a team or a project.
-mutation notificationSubscriptionCreate($input: NotificationSubscriptionCreateInput) {
+mutation notificationSubscriptionCreate($input: NotificationSubscriptionCreateInput!) {
   notificationSubscriptionCreate(input: $input) {
     ...NotificationSubscriptionPayload
   }
 }
 
 # Deletes a notification subscription reference.
-mutation notificationSubscriptionDelete($id: String) {
+mutation notificationSubscriptionDelete($id: String!) {
   notificationSubscriptionDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new OAuth client.
-mutation oauthClientCreate($input: OauthClientCreateInput) {
+mutation oauthClientCreate($input: OauthClientCreateInput!) {
   oauthClientCreate(input: $input) {
     ...OauthClientPayload
   }
 }
 
 # Updates an OAuth client.
-mutation oauthClientUpdate($input: OauthClientUpdateInput, $id: String) {
+mutation oauthClientUpdate($input: OauthClientUpdateInput!, $id: String!) {
   oauthClientUpdate(input: $input, id: $id) {
     ...OauthClientPayload
   }
 }
 
 # Archives an OAuth client.
-mutation oauthClientArchive($id: String) {
+mutation oauthClientArchive($id: String!) {
   oauthClientArchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Verifies a domain to be added to an organization.
-mutation organizationDomainVerify($input: OrganizationDomainVerificationInput) {
+mutation organizationDomainVerify($input: OrganizationDomainVerificationInput!) {
   organizationDomainVerify(input: $input) {
     ...OrganizationDomainPayload
   }
 }
 
 # Adds a domain to be allowed for an organization.
-mutation organizationDomainCreate($input: OrganizationDomainCreateInput) {
+mutation organizationDomainCreate($input: OrganizationDomainCreateInput!) {
   organizationDomainCreate(input: $input) {
     ...OrganizationDomainPayload
   }
 }
 
 # Deletes a domain.
-mutation organizationDomainDelete($id: String) {
+mutation organizationDomainDelete($id: String!) {
   organizationDomainDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new organization invite.
-mutation organizationInviteCreate($input: OrganizationInviteCreateInput) {
+mutation organizationInviteCreate($input: OrganizationInviteCreateInput!) {
   organizationInviteCreate(input: $input) {
     ...OrganizationInvitePayload
   }
 }
 
 # Re-send an organization invite.
-mutation resentOrganizationInvite($id: String) {
+mutation resentOrganizationInvite($id: String!) {
   resentOrganizationInvite(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Deletes an organization invite.
-mutation organizationInviteDelete($id: String) {
+mutation organizationInviteDelete($id: String!) {
   organizationInviteDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new project link.
-mutation projectLinkCreate($input: ProjectLinkCreateInput) {
+mutation projectLinkCreate($input: ProjectLinkCreateInput!) {
   projectLinkCreate(input: $input) {
     ...ProjectLinkPayload
   }
 }
 
 # Deletes a project link.
-mutation projectLinkDelete($id: String) {
+mutation projectLinkDelete($id: String!) {
   projectLinkDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new project.
-mutation projectCreate($input: ProjectCreateInput) {
+mutation projectCreate($input: ProjectCreateInput!) {
   projectCreate(input: $input) {
     ...ProjectPayload
   }
 }
 
 # Updates a project.
-mutation projectUpdate($input: ProjectUpdateInput, $id: String) {
+mutation projectUpdate($input: ProjectUpdateInput!, $id: String!) {
   projectUpdate(input: $input, id: $id) {
     ...ProjectPayload
   }
 }
 
 # Archives a project.
-mutation projectArchive($id: String) {
+mutation projectArchive($id: String!) {
   projectArchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a push subscription.
-mutation pushSubscriptionCreate($input: PushSubscriptionCreateInput) {
+mutation pushSubscriptionCreate($input: PushSubscriptionCreateInput!) {
   pushSubscriptionCreate(input: $input) {
     ...PushSubscriptionPayload
   }
 }
 
 # Deletes a push subscription.
-mutation pushSubscriptionDelete($id: String) {
+mutation pushSubscriptionDelete($id: String!) {
   pushSubscriptionDelete(id: $id) {
     ...PushSubscriptionPayload
   }
 }
 
 # Creates a new reaction.
-mutation reactionCreate($input: ReactionCreateInput) {
+mutation reactionCreate($input: ReactionCreateInput!) {
   reactionCreate(input: $input) {
     ...ReactionPayload
   }
 }
 
 # Deletes a reaction.
-mutation reactionDelete($id: String) {
+mutation reactionDelete($id: String!) {
   reactionDelete(id: $id) {
     ...ArchivePayload
   }
@@ -2449,7 +2449,7 @@ mutation createCsvExportReport {
 }
 
 # Creates a subscription session. Used internally to integrate with Stripe.
-mutation subscriptionSessionCreate($plan: String) {
+mutation subscriptionSessionCreate($plan: String!) {
   subscriptionSessionCreate(plan: $plan) {
     ...SubscriptionSessionPayload
   }
@@ -2463,98 +2463,98 @@ mutation subscriptionUpdateSessionCreate {
 }
 
 # Updates a subscription.
-mutation subscriptionUpdate($input: SubscriptionUpdateInput, $id: String) {
+mutation subscriptionUpdate($input: SubscriptionUpdateInput!, $id: String!) {
   subscriptionUpdate(input: $input, id: $id) {
     ...SubscriptionPayload
   }
 }
 
 # Upgrades a subscription plan.
-mutation subscriptionUpgrade($type: String, $id: String) {
+mutation subscriptionUpgrade($type: String!, $id: String!) {
   subscriptionUpgrade(type: $type, id: $id) {
     ...SubscriptionPayload
   }
 }
 
 # Archives a subscription.
-mutation subscriptionArchive($id: String) {
+mutation subscriptionArchive($id: String!) {
   subscriptionArchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new team membership.
-mutation teamMembershipCreate($input: TeamMembershipCreateInput) {
+mutation teamMembershipCreate($input: TeamMembershipCreateInput!) {
   teamMembershipCreate(input: $input) {
     ...TeamMembershipPayload
   }
 }
 
 # Deletes a team membership.
-mutation teamMembershipDelete($id: String) {
+mutation teamMembershipDelete($id: String!) {
   teamMembershipDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new team. The user who creates the team will automatically be added as a member to the newly created team.
-mutation teamCreate($copySettingsFromTeamId: String, $input: TeamCreateInput) {
+mutation teamCreate($copySettingsFromTeamId: String, $input: TeamCreateInput!) {
   teamCreate(copySettingsFromTeamId: $copySettingsFromTeamId, input: $input) {
     ...TeamPayload
   }
 }
 
 # Updates a team.
-mutation teamUpdate($input: TeamUpdateInput, $id: String) {
+mutation teamUpdate($input: TeamUpdateInput!, $id: String!) {
   teamUpdate(input: $input, id: $id) {
     ...TeamPayload
   }
 }
 
 # Archives a team.
-mutation teamArchive($id: String) {
+mutation teamArchive($id: String!) {
   teamArchive(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Deletes a team.
-mutation teamDelete($id: String) {
+mutation teamDelete($id: String!) {
   teamDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new template.
-mutation templateCreate($input: TemplateCreateInput) {
+mutation templateCreate($input: TemplateCreateInput!) {
   templateCreate(input: $input) {
     ...TemplatePayload
   }
 }
 
 # Updates an existing template.
-mutation templateUpdate($input: TemplateUpdateInput, $id: String) {
+mutation templateUpdate($input: TemplateUpdateInput!, $id: String!) {
   templateUpdate(input: $input, id: $id) {
     ...TemplatePayload
   }
 }
 
 # Deletes a template.
-mutation templateDelete($id: String) {
+mutation templateDelete($id: String!) {
   templateDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Updates the user's settings.
-mutation userSettingsUpdate($input: UserSettingsUpdateInput, $id: String) {
+mutation userSettingsUpdate($input: UserSettingsUpdateInput!, $id: String!) {
   userSettingsUpdate(input: $input, id: $id) {
     ...UserSettingsPayload
   }
 }
 
 # [Deprecated] Updates a user's settings flag.
-mutation userSettingsFlagIncrement($flag: String) {
+mutation userSettingsFlagIncrement($flag: String!) {
   userSettingsFlagIncrement(flag: $flag) {
     ...UserSettingsFlagPayload
   }
@@ -2568,7 +2568,7 @@ mutation userSettingsFlagsReset {
 }
 
 # Updates a user's settings flag.
-mutation userFlagUpdate($operation: UserFlagUpdateOperation, $flag: UserFlagType) {
+mutation userFlagUpdate($operation: UserFlagUpdateOperation!, $flag: UserFlagType!) {
   userFlagUpdate(operation: $operation, flag: $flag) {
     ...UserSettingsFlagPayload
   }
@@ -2582,63 +2582,63 @@ mutation userSubscribeToNewsletter {
 }
 
 # Creates a new ViewPreferences object.
-mutation viewPreferencesCreate($input: ViewPreferencesCreateInput) {
+mutation viewPreferencesCreate($input: ViewPreferencesCreateInput!) {
   viewPreferencesCreate(input: $input) {
     ...ViewPreferencesPayload
   }
 }
 
 # Updates an existing ViewPreferences object.
-mutation viewPreferencesUpdate($input: ViewPreferencesUpdateInput, $id: String) {
+mutation viewPreferencesUpdate($input: ViewPreferencesUpdateInput!, $id: String!) {
   viewPreferencesUpdate(input: $input, id: $id) {
     ...ViewPreferencesPayload
   }
 }
 
 # Deletes a ViewPreferences.
-mutation viewPreferencesDelete($id: String) {
+mutation viewPreferencesDelete($id: String!) {
   viewPreferencesDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new webhook.
-mutation webhookCreate($input: WebhookCreateInput) {
+mutation webhookCreate($input: WebhookCreateInput!) {
   webhookCreate(input: $input) {
     ...WebhookPayload
   }
 }
 
 # Updates an existing Webhook.
-mutation webhookUpdate($input: WebhookUpdateInput, $id: String) {
+mutation webhookUpdate($input: WebhookUpdateInput!, $id: String!) {
   webhookUpdate(input: $input, id: $id) {
     ...WebhookPayload
   }
 }
 
 # Deletes a Webhook.
-mutation webhookDelete($id: String) {
+mutation webhookDelete($id: String!) {
   webhookDelete(id: $id) {
     ...ArchivePayload
   }
 }
 
 # Creates a new state, adding it to the workflow of a team.
-mutation workflowStateCreate($input: WorkflowStateCreateInput) {
+mutation workflowStateCreate($input: WorkflowStateCreateInput!) {
   workflowStateCreate(input: $input) {
     ...WorkflowStatePayload
   }
 }
 
 # Updates a state.
-mutation workflowStateUpdate($input: WorkflowStateUpdateInput, $id: String) {
+mutation workflowStateUpdate($input: WorkflowStateUpdateInput!, $id: String!) {
   workflowStateUpdate(input: $input, id: $id) {
     ...WorkflowStatePayload
   }
 }
 
 # Archives a state. Only states with issues that have all been archived can be archived.
-mutation workflowStateArchive($id: String) {
+mutation workflowStateArchive($id: String!) {
   workflowStateArchive(id: $id) {
     ...ArchivePayload
   }

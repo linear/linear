@@ -1,21 +1,9 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import { filterJoin } from "@linear/common";
 import autoBind from "auto-bind";
-import {
-  ASTNode,
-  DocumentNode,
-  FieldDefinitionNode,
-  GraphQLSchema,
-  InputValueDefinitionNode,
-  Kind,
-  ListTypeNode,
-  NamedTypeNode,
-  NameNode,
-  NonNullTypeNode,
-  ObjectTypeDefinitionNode,
-} from "graphql";
+import { ASTNode, DocumentNode, FieldDefinitionNode, GraphQLSchema, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { printOperationBody, printOperationWrapper } from "./operation";
-import { Named, NamedArgs, NamedFields, Scalars, WithNullable } from "./types";
+import { NamedFields, Scalars } from "./types";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating operations
@@ -89,7 +77,7 @@ export class OperationVisitor {
     /** Print an operation for each operation type field */
     leave(
       /** The current node being visiting. */
-      _node: FieldDefinitionNode,
+      node: FieldDefinitionNode,
       /** The index or key to this node from the parent node or Array. */
       key: string | number | undefined,
       /** The parent immediately above this node, which may be an Array. */
@@ -103,8 +91,6 @@ export class OperationVisitor {
        */
       ancestors: readonly (ASTNode | readonly ASTNode[])[]
     ): string | null {
-      const node = (_node as unknown) as NamedArgs<FieldDefinitionNode>;
-
       const operationBody = printOperationBody(node.type, this._fragments, this._objects);
 
       if (operationBody) {
@@ -118,44 +104,6 @@ export class OperationVisitor {
       }
 
       return null;
-    },
-  };
-
-  public Name = {
-    /** Print name value */
-    leave(node: NameNode): string {
-      return node.value;
-    },
-  };
-
-  public NamedType = {
-    /** Print type value */
-    leave(_node: NamedTypeNode): string {
-      const node = (_node as unknown) as Named<NamedTypeNode>;
-      return node.name;
-    },
-  };
-
-  public NonNullType = {
-    /** Print non null type */
-    leave(_node: NonNullTypeNode): string {
-      const node = (_node as unknown) as Named<NonNullTypeNode>;
-      return node.type;
-    },
-  };
-
-  public ListType = {
-    /** Print the list type */
-    leave(_node: ListTypeNode): string {
-      const node = (_node as unknown) as Named<ListTypeNode>;
-      return node.type;
-    },
-  };
-
-  public InputValueDefinition = {
-    /** Mark the input as nullable or not */
-    enter(node: InputValueDefinitionNode): WithNullable<InputValueDefinitionNode> {
-      return { ...node, nullable: node.type.kind !== Kind.NON_NULL_TYPE };
     },
   };
 }
