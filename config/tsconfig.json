@@ -7,7 +7,12 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es6", "dom", "esnext.asynciterable", "es2019"],
+    "lib": [
+      "es6",
+      "dom",
+      "esnext.asynciterable",
+      "es2019"
+    ],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
@@ -20,7 +25,18 @@
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es6",
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@linear/common": [
+        "../packages/common/src"
+      ]
+    }
   },
-  "exclude": ["../**/node_modules", "../**/build", "../**/dist", "./**/scripts", "./**/jest"]
+  "exclude": [
+    "../**/node_modules",
+    "../**/build",
+    "../**/dist",
+    "./**/scripts",
+    "./**/jest"
+  ],
 }

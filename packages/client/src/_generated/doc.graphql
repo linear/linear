@@ -11,18 +11,12 @@ fragment User on User {
   active
   createdIssueCount
 }
-
 fragment UserSettings on UserSettings {
   id
   createdAt
   updatedAt
   archivedAt
 }
-
-fragment IssueEdge on IssueEdge {
-  cursor
-}
-
 fragment Issue on Issue {
   id
   createdAt
@@ -45,7 +39,6 @@ fragment Issue on Issue {
   url
   branchName
 }
-
 fragment Team on Team {
   id
   createdAt
@@ -79,7 +72,6 @@ fragment Team on Team {
   autoArchivePeriod
   cycleCalenderUrl
 }
-
 fragment WorkflowState on WorkflowState {
   id
   createdAt
@@ -91,11 +83,6 @@ fragment WorkflowState on WorkflowState {
   position
   type
 }
-
-fragment CycleEdge on CycleEdge {
-  cursor
-}
-
 fragment Cycle on Cycle {
   id
   createdAt
@@ -107,29 +94,18 @@ fragment Cycle on Cycle {
   endsAt
   completedAt
 }
-
 fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
   startCursor
   endCursor
 }
-
-fragment TeamMembershipEdge on TeamMembershipEdge {
-  cursor
-}
-
 fragment TeamMembership on TeamMembership {
   id
   createdAt
   updatedAt
   archivedAt
 }
-
-fragment ProjectEdge on ProjectEdge {
-  cursor
-}
-
 fragment Project on Project {
   id
   createdAt
@@ -150,7 +126,6 @@ fragment Project on Project {
   slackIssueComments
   slackIssueStatuses
 }
-
 fragment Milestone on Milestone {
   id
   createdAt
@@ -159,7 +134,6 @@ fragment Milestone on Milestone {
   name
   sortOrder
 }
-
 fragment Organization on Organization {
   id
   createdAt
@@ -173,28 +147,11 @@ fragment Organization on Organization {
   gitBranchFormat
   gitLinkbackMessagesEnabled
   gitPublicLinkbackMessagesEnabled
-  projectMilestonesEnabled
+  roadmapEnabled
   samlEnabled
   userCount
   createdIssueCount
 }
-
-fragment UserEdge on UserEdge {
-  cursor
-}
-
-fragment TeamEdge on TeamEdge {
-  cursor
-}
-
-fragment MilestoneEdge on MilestoneEdge {
-  cursor
-}
-
-fragment IntegrationEdge on IntegrationEdge {
-  cursor
-}
-
 fragment Integration on Integration {
   id
   createdAt
@@ -203,24 +160,20 @@ fragment Integration on Integration {
   service
   serviceId
 }
-
 fragment SlackPostSettings on SlackPostSettings {
   channel
   channelId
   configurationUrl
 }
-
 fragment GoogleSheetsSettings on GoogleSheetsSettings {
   spreadsheetId
   spreadsheetUrl
   sheetId
   updatedIssuesAt
 }
-
 fragment SentrySettings on SentrySettings {
   organizationSlug
 }
-
 fragment Subscription on Subscription {
   id
   createdAt
@@ -231,11 +184,6 @@ fragment Subscription on Subscription {
   canceledAt
   pendingChangeType
 }
-
-fragment ProjectLinkEdge on ProjectLinkEdge {
-  cursor
-}
-
 fragment ProjectLink on ProjectLink {
   id
   createdAt
@@ -244,15 +192,6 @@ fragment ProjectLink on ProjectLink {
   url
   label
 }
-
-fragment WorkflowStateEdge on WorkflowStateEdge {
-  cursor
-}
-
-fragment TemplateEdge on TemplateEdge {
-  cursor
-}
-
 fragment Template on Template {
   id
   createdAt
@@ -263,11 +202,6 @@ fragment Template on Template {
   description
   templateData
 }
-
-fragment IssueLabelEdge on IssueLabelEdge {
-  cursor
-}
-
 fragment IssueLabel on IssueLabel {
   id
   createdAt
@@ -277,11 +211,6 @@ fragment IssueLabel on IssueLabel {
   description
   color
 }
-
-fragment WebhookEdge on WebhookEdge {
-  cursor
-}
-
 fragment Webhook on Webhook {
   id
   createdAt
@@ -291,11 +220,6 @@ fragment Webhook on Webhook {
   enabled
   secret
 }
-
-fragment CommentEdge on CommentEdge {
-  cursor
-}
-
 fragment Comment on Comment {
   id
   createdAt
@@ -305,11 +229,6 @@ fragment Comment on Comment {
   bodyData
   editedAt
 }
-
-fragment IssueHistoryEdge on IssueHistoryEdge {
-  cursor
-}
-
 fragment IssueHistory on IssueHistory {
   id
   createdAt
@@ -328,11 +247,6 @@ fragment IssueHistory on IssueHistory {
   fromDueDate
   toDueDate
 }
-
-fragment IntegrationResourceEdge on IntegrationResourceEdge {
-  cursor
-}
-
 fragment IntegrationResource on IntegrationResource {
   id
   createdAt
@@ -341,7 +255,6 @@ fragment IntegrationResource on IntegrationResource {
   resourceType
   resourceId
 }
-
 fragment PullRequestPayload on PullRequestPayload {
   status
   number
@@ -359,14 +272,12 @@ fragment PullRequestPayload on PullRequestPayload {
   closedAt
   mergedAt
 }
-
 fragment CommitPayload on CommitPayload {
   id
   message
   timestamp
   url
 }
-
 fragment SentryIssuePayload on SentryIssuePayload {
   issueId
   webUrl
@@ -380,11 +291,6 @@ fragment SentryIssuePayload on SentryIssuePayload {
   firstSeen
   firstVersion
 }
-
-fragment IssueRelationEdge on IssueRelationEdge {
-  cursor
-}
-
 fragment IssueRelation on IssueRelation {
   id
   createdAt
@@ -392,12 +298,10 @@ fragment IssueRelation on IssueRelation {
   archivedAt
   type
 }
-
 fragment OrganizationExistsPayload on OrganizationExistsPayload {
   success
   exists
 }
-
 fragment SyncResponse on SyncResponse {
   state
   delta
@@ -405,13 +309,11 @@ fragment SyncResponse on SyncResponse {
   lastSyncId
   databaseVersion
 }
-
 fragment ArchiveResponse on ArchiveResponse {
   archive
   totalCount
   databaseVersion
 }
-
 fragment UserAccountAdminPrivileged on UserAccountAdminPrivileged {
   id
   createdAt
@@ -421,7 +323,6 @@ fragment UserAccountAdminPrivileged on UserAccountAdminPrivileged {
   email
   service
 }
-
 fragment UserAdminPrivileged on UserAdminPrivileged {
   id
   createdAt
@@ -439,7 +340,6 @@ fragment UserAdminPrivileged on UserAdminPrivileged {
   active
   createdIssueCount
 }
-
 fragment OrganizationAdminPrivileged on OrganizationAdminPrivileged {
   id
   createdAt
@@ -453,13 +353,12 @@ fragment OrganizationAdminPrivileged on OrganizationAdminPrivileged {
   gitBranchFormat
   gitLinkbackMessagesEnabled
   gitPublicLinkbackMessagesEnabled
-  projectMilestonesEnabled
+  roadmapEnabled
   samlEnabled
   userCount
   createdIssueCount
   stripeCustomerId
 }
-
 fragment SubscriptionAdminPrivileged on SubscriptionAdminPrivileged {
   id
   createdAt
@@ -472,11 +371,6 @@ fragment SubscriptionAdminPrivileged on SubscriptionAdminPrivileged {
   stripeSubscriptionId
   stripeStatus
 }
-
-fragment ApiKeyEdge on ApiKeyEdge {
-  cursor
-}
-
 fragment ApiKey on ApiKey {
   id
   createdAt
@@ -484,7 +378,6 @@ fragment ApiKey on ApiKey {
   archivedAt
   label
 }
-
 fragment Application on Application {
   clientId
   name
@@ -493,24 +386,28 @@ fragment Application on Application {
   developerUrl
   imageUrl
 }
-
+fragment AuthorizedApplication on AuthorizedApplication {
+  clientId
+  name
+  description
+  developer
+  developerUrl
+  imageUrl
+}
 fragment AuthResolverResponse on AuthResolverResponse {
   id
   token
   email
   allowDomainAccess
 }
-
 fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
   success
   samlSsoUrl
 }
-
 fragment BillingDetailsPayload on BillingDetailsPayload {
   success
   email
 }
-
 fragment Invoice on Invoice {
   url
   created
@@ -518,20 +415,16 @@ fragment Invoice on Invoice {
   status
   total
 }
-
 fragment Card on Card {
   brand
   last4
 }
-
 fragment CollaborationDocumentUpdatePayload on CollaborationDocumentUpdatePayload {
   success
 }
-
 fragment StepsResponse on StepsResponse {
   version
 }
-
 fragment CustomView on CustomView {
   id
   createdAt
@@ -544,11 +437,6 @@ fragment CustomView on CustomView {
   filters
   shared
 }
-
-fragment CustomViewEdge on CustomViewEdge {
-  cursor
-}
-
 fragment Emoji on Emoji {
   id
   createdAt
@@ -558,11 +446,6 @@ fragment Emoji on Emoji {
   url
   source
 }
-
-fragment EmojiEdge on EmojiEdge {
-  cursor
-}
-
 fragment Favorite on Favorite {
   id
   createdAt
@@ -571,27 +454,19 @@ fragment Favorite on Favorite {
   type
   sortOrder
 }
-
-fragment FavoriteEdge on FavoriteEdge {
-  cursor
-}
-
 fragment FigmaEmbedPayload on FigmaEmbedPayload {
   lastSyncId
   success
 }
-
 fragment FigmaEmbed on FigmaEmbed {
   name
   lastModified
   nodeName
   url
 }
-
 fragment InvitePagePayload on InvitePagePayload {
   success
 }
-
 fragment InviteData on InviteData {
   inviterName
   organizationName
@@ -599,11 +474,6 @@ fragment InviteData on InviteData {
   organizationLogoUrl
   userCount
 }
-
-fragment NotificationEdge on NotificationEdge {
-  cursor
-}
-
 fragment Notification on Notification {
   id
   createdAt
@@ -614,11 +484,6 @@ fragment Notification on Notification {
   readAt
   emailedAt
 }
-
-fragment NotificationSubscriptionEdge on NotificationSubscriptionEdge {
-  cursor
-}
-
 fragment NotificationSubscription on NotificationSubscription {
   id
   createdAt
@@ -626,11 +491,6 @@ fragment NotificationSubscription on NotificationSubscription {
   archivedAt
   type
 }
-
-fragment OrganizationInviteEdge on OrganizationInviteEdge {
-  cursor
-}
-
 fragment OrganizationInvite on OrganizationInvite {
   id
   createdAt
@@ -641,12 +501,10 @@ fragment OrganizationInvite on OrganizationInvite {
   acceptedAt
   expiresAt
 }
-
 fragment PushSubscriptionPayload on PushSubscriptionPayload {
   lastSyncId
   success
 }
-
 fragment Reaction on Reaction {
   id
   createdAt
@@ -654,15 +512,6 @@ fragment Reaction on Reaction {
   archivedAt
   emoji
 }
-
-fragment ReactionEdge on ReactionEdge {
-  cursor
-}
-
-fragment ViewPreferencesEdge on ViewPreferencesEdge {
-  cursor
-}
-
 fragment ViewPreferences on ViewPreferences {
   id
   createdAt
@@ -671,300 +520,91 @@ fragment ViewPreferences on ViewPreferences {
   type
   viewType
 }
-
-fragment UpdateUserInput on UpdateUserInput {
-  name
-  displayName
-  avatarUrl
-  active
-  disableReason
-  admin
-}
-
 fragment UserPayload on UserPayload {
   lastSyncId
   success
 }
-
 fragment UserAdminPayload on UserAdminPayload {
   success
 }
-
-fragment UpdateOrganizationInput on UpdateOrganizationInput {
-  name
-  logoUrl
-  urlKey
-  gitBranchFormat
-  gitLinkbackMessagesEnabled
-  gitPublicLinkbackMessagesEnabled
-  projectMilestonesEnabled
-  linearPreviewFlags
-}
-
 fragment OrganizationPayload on OrganizationPayload {
   lastSyncId
   success
 }
-
 fragment OrganizationDeletePayload on OrganizationDeletePayload {
   success
 }
-
-fragment DeleteOrganizationInput on DeleteOrganizationInput {
-  deletionCode
-}
-
 fragment OrganizationAccessPayload on OrganizationAccessPayload {
   success
 }
-
 fragment OrganizationSamlConfigurePayload on OrganizationSamlConfigurePayload {
   success
   samlEnabled
 }
-
 fragment SamlConfiguration on SamlConfiguration {
   ssoSigningCert
   ssoEndpoint
   ssoBinding
   ssoSignAlgo
 }
-
-fragment SamlConfigurationInput on SamlConfigurationInput {
-  ssoSigningCert
-  ssoEndpoint
-  ssoBinding
-  ssoSignAlgo
-}
-
-fragment AdminCommandInput on AdminCommandInput {
-  cmd
-  value
-}
-
 fragment AdminCommandPayload on AdminCommandPayload {
   success
 }
-
-fragment EventCreateInput on EventCreateInput {
-  category
-  subject
-  targetId
-  value
-  data
-}
-
 fragment EventPayload on EventPayload {
   success
 }
-
-fragment ApiKeyCreateInput on ApiKeyCreateInput {
-  id
-  label
-  key
-}
-
 fragment ApiKeyPayload on ApiKeyPayload {
   lastSyncId
   success
 }
-
 fragment ArchivePayload on ArchivePayload {
   lastSyncId
   success
 }
-
-fragment EmailUserAccountAuthChallengeInput on EmailUserAccountAuthChallengeInput {
-  email
-  isDesktop
-  signupCode
-}
-
 fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeResponse {
   success
   authType
 }
-
-fragment EmailUserAccountAuthInput on EmailUserAccountAuthInput {
-  email
-  token
-  timezone
-}
-
-fragment GoogleUserAccountAuthInput on GoogleUserAccountAuthInput {
-  code
-  redirectUri
-  timezone
-  signupCode
-}
-
-fragment OnboardingCustomerSurvey on OnboardingCustomerSurvey {
-  companyRole
-  companySize
-}
-
-fragment CreateOrganizationInput on CreateOrganizationInput {
-  name
-  urlKey
-  domainAccess
-  timezone
-}
-
-fragment JoinOrganizationInput on JoinOrganizationInput {
-  organizationId
-}
-
-fragment BillingEmailUpdateInput on BillingEmailUpdateInput {
-  email
-}
-
 fragment BillingEmailPayload on BillingEmailPayload {
   success
   email
 }
-
-fragment CollaborationDocumentUpdateInput on CollaborationDocumentUpdateInput {
-  issueId
-  version
-  clientId
-}
-
-fragment CommentCreateInput on CommentCreateInput {
-  id
-  body
-  bodyData
-  issueId
-}
-
 fragment CommentPayload on CommentPayload {
   lastSyncId
   success
 }
-
-fragment CommentUpdateInput on CommentUpdateInput {
-  body
-  bodyData
-}
-
-fragment ContactCreateInput on ContactCreateInput {
-  type
-  message
-  operatingSystem
-  browser
-  device
-  disappointmentRating
-}
-
 fragment ContactPayload on ContactPayload {
   success
 }
-
-fragment CustomViewCreateInput on CustomViewCreateInput {
-  id
-  name
-  description
-  icon
-  color
-  teamId
-  filters
-  shared
-}
-
 fragment CustomViewPayload on CustomViewPayload {
   lastSyncId
   success
 }
-
-fragment CustomViewUpdateInput on CustomViewUpdateInput {
-  name
-  description
-  icon
-  color
-  teamId
-  filters
-  shared
-}
-
-fragment CycleCreateInput on CycleCreateInput {
-  id
-  name
-  teamId
-  startsAt
-  endsAt
-  completedAt
-}
-
 fragment CyclePayload on CyclePayload {
   lastSyncId
   success
 }
-
-fragment CycleUpdateInput on CycleUpdateInput {
-  name
-  startsAt
-  endsAt
-  completedAt
-}
-
 fragment DebugPayload on DebugPayload {
   success
 }
-
-fragment EmailUnsubscribeInput on EmailUnsubscribeInput {
-  type
-  token
-  userId
-}
-
 fragment EmailUnsubscribePayload on EmailUnsubscribePayload {
   success
 }
-
-fragment EmojiCreateInput on EmojiCreateInput {
-  id
-  name
-  url
-}
-
 fragment EmojiPayload on EmojiPayload {
   lastSyncId
   success
 }
-
-fragment FavoriteCreateInput on FavoriteCreateInput {
-  id
-  issueId
-  projectId
-  projectTeamId
-  cycleId
-  customViewId
-  labelId
-  sortOrder
-}
-
 fragment FavoritePayload on FavoritePayload {
   lastSyncId
   success
 }
-
-fragment FavoriteUpdateInput on FavoriteUpdateInput {
-  sortOrder
-}
-
-fragment FeedbackCreateInput on FeedbackCreateInput {
-  feedback
-  disappointmentRating
-}
-
 fragment FeedbackPayload on FeedbackPayload {
   success
 }
-
 fragment UploadPayload on UploadPayload {
   lastSyncId
   success
 }
-
 fragment UploadFile on UploadFile {
   filename
   contentType
@@ -973,150 +613,47 @@ fragment UploadFile on UploadFile {
   assetUrl
   metaData
 }
-
 fragment UploadFileHeader on UploadFileHeader {
   key
   value
 }
-
 fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
   lastSyncId
   url
   success
 }
-
 fragment IntegrationPayload on IntegrationPayload {
   lastSyncId
   success
 }
-
-fragment IssueLabelCreateInput on IssueLabelCreateInput {
-  id
-  name
-  description
-  color
-  teamId
-}
-
 fragment IssueLabelPayload on IssueLabelPayload {
   lastSyncId
   success
 }
-
-fragment IssueLabelUpdateInput on IssueLabelUpdateInput {
-  name
-  description
-  color
-}
-
-fragment IssueRelationCreateInput on IssueRelationCreateInput {
-  id
-  issueId
-  relatedIssueId
-}
-
 fragment IssueRelationPayload on IssueRelationPayload {
   lastSyncId
   success
 }
-
-fragment IssueRelationUpdateInput on IssueRelationUpdateInput {
-  type
-  issueId
-  relatedIssueId
-}
-
-fragment IssueCreateInput on IssueCreateInput {
-  id
-  title
-  description
-  descriptionData
-  assigneeId
-  parentId
-  priority
-  estimate
-  teamId
-  cycleId
-  projectId
-  stateId
-  boardOrder
-  subIssueSortOrder
-  dueDate
-}
-
 fragment IssuePayload on IssuePayload {
   lastSyncId
   success
 }
-
-fragment IssueUpdateInput on IssueUpdateInput {
-  title
-  description
-  descriptionData
-  assigneeId
-  parentId
-  priority
-  estimate
-  teamId
-  cycleId
-  projectId
-  stateId
-  boardOrder
-  subIssueSortOrder
-  documentVersion
-  dueDate
-}
-
-fragment MilestoneCreateInput on MilestoneCreateInput {
-  id
-  name
-  sortOrder
-}
-
 fragment MilestonePayload on MilestonePayload {
   lastSyncId
   success
 }
-
-fragment MilestoneUpdateInput on MilestoneUpdateInput {
-  name
-  sortOrder
-}
-
-fragment NotificationUpdateInput on NotificationUpdateInput {
-  readAt
-}
-
 fragment NotificationPayload on NotificationPayload {
   lastSyncId
   success
 }
-
-fragment NotificationSubscriptionCreateInput on NotificationSubscriptionCreateInput {
-  id
-  teamId
-  projectId
-}
-
 fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
   lastSyncId
   success
 }
-
-fragment OauthClientCreateInput on OauthClientCreateInput {
-  id
-  name
-  description
-  developer
-  developerUrl
-  imageUrl
-}
-
 fragment OauthClientPayload on OauthClientPayload {
   lastSyncId
   success
 }
-
 fragment OauthClient on OauthClient {
   id
   createdAt
@@ -1130,25 +667,10 @@ fragment OauthClient on OauthClient {
   imageUrl
   clientSecret
 }
-
-fragment OauthClientUpdateInput on OauthClientUpdateInput {
-  name
-  description
-  developer
-  developerUrl
-  imageUrl
-}
-
-fragment OrganizationDomainVerificationInput on OrganizationDomainVerificationInput {
-  organizationDomainId
-  verificationCode
-}
-
 fragment OrganizationDomainPayload on OrganizationDomainPayload {
   lastSyncId
   success
 }
-
 fragment OrganizationDomain on OrganizationDomain {
   id
   createdAt
@@ -1158,289 +680,74 @@ fragment OrganizationDomain on OrganizationDomain {
   verified
   verificationEmail
 }
-
-fragment OrganizationDomainCreateInput on OrganizationDomainCreateInput {
-  id
-  name
-  verificationEmail
-  verified
-}
-
-fragment OrganizationInviteCreateInput on OrganizationInviteCreateInput {
-  id
-  email
-  message
-}
-
 fragment OrganizationInvitePayload on OrganizationInvitePayload {
   lastSyncId
   success
 }
-
-fragment ProjectLinkCreateInput on ProjectLinkCreateInput {
-  id
-  url
-  label
-  projectId
-}
-
 fragment ProjectLinkPayload on ProjectLinkPayload {
   lastSyncId
   success
 }
-
-fragment ProjectCreateInput on ProjectCreateInput {
-  id
-  name
-  icon
-  color
-  state
-  description
-  milestoneId
-  leadId
-  targetDate
-  sortOrder
-}
-
 fragment ProjectPayload on ProjectPayload {
   lastSyncId
   success
 }
-
-fragment ProjectUpdateInput on ProjectUpdateInput {
-  state
-  name
-  description
-  milestoneId
-  icon
-  color
-  leadId
-  targetDate
-  slackNewIssue
-  slackIssueComments
-  slackIssueStatuses
-  sortOrder
-}
-
-fragment PushSubscriptionCreateInput on PushSubscriptionCreateInput {
-  id
-  userId
-  data
-}
-
-fragment ReactionCreateInput on ReactionCreateInput {
-  id
-  emoji
-  commentId
-}
-
 fragment ReactionPayload on ReactionPayload {
   lastSyncId
   success
 }
-
 fragment CreateCsvExportReportPayload on CreateCsvExportReportPayload {
   success
 }
-
 fragment SubscriptionSessionPayload on SubscriptionSessionPayload {
   session
 }
-
-fragment SubscriptionUpdateInput on SubscriptionUpdateInput {
-  canceledAt
-  pendingChangeType
-}
-
 fragment SubscriptionPayload on SubscriptionPayload {
   lastSyncId
   canceledAt
   success
 }
-
-fragment TeamMembershipCreateInput on TeamMembershipCreateInput {
-  id
-  userId
-  teamId
-}
-
 fragment TeamMembershipPayload on TeamMembershipPayload {
   lastSyncId
   success
 }
-
-fragment TeamCreateInput on TeamCreateInput {
-  id
-  name
-  description
-  key
-  organizationId
-  cyclesEnabled
-  cycleStartDay
-  cycleDuration
-  cycleCooldownTime
-  cycleIssueAutoAssignStarted
-  cycleIssueAutoAssignCompleted
-  cycleLockToActive
-  upcomingCycleCount
-  timezone
-  issueEstimationType
-  issueEstimationAllowZero
-  issueEstimationExtended
-  defaultIssueEstimate
-  groupIssueHistory
-  defaultTemplateForMembersId
-  defaultTemplateForNonMembersId
-  autoClosePeriod
-  autoCloseStateId
-  autoArchivePeriod
-  markedAsDuplicateWorkflowStateId
-}
-
 fragment TeamPayload on TeamPayload {
   lastSyncId
   success
 }
-
-fragment TeamUpdateInput on TeamUpdateInput {
-  name
-  description
-  key
-  cyclesEnabled
-  cycleStartDay
-  cycleDuration
-  cycleCooldownTime
-  cycleIssueAutoAssignStarted
-  cycleIssueAutoAssignCompleted
-  cycleLockToActive
-  upcomingCycleCount
-  timezone
-  issueEstimationType
-  issueEstimationAllowZero
-  issueEstimationExtended
-  defaultIssueEstimate
-  draftWorkflowStateId
-  startWorkflowStateId
-  reviewWorkflowStateId
-  mergeWorkflowStateId
-  slackNewIssue
-  slackIssueComments
-  slackIssueStatuses
-  groupIssueHistory
-  defaultTemplateForMembersId
-  defaultTemplateForNonMembersId
-  autoClosePeriod
-  autoCloseStateId
-  autoArchivePeriod
-  markedAsDuplicateWorkflowStateId
-}
-
-fragment TemplateCreateInput on TemplateCreateInput {
-  id
-  type
-  teamId
-  name
-  description
-  templateData
-}
-
 fragment TemplatePayload on TemplatePayload {
   lastSyncId
   success
 }
-
-fragment TemplateUpdateInput on TemplateUpdateInput {
-  name
-  description
-  templateData
-}
-
-fragment UserSettingsUpdateInput on UserSettingsUpdateInput {
-  settings
-  notificationPreferences
-}
-
 fragment UserSettingsPayload on UserSettingsPayload {
   lastSyncId
   success
 }
-
 fragment UserSettingsFlagPayload on UserSettingsFlagPayload {
   lastSyncId
   flag
   value
   success
 }
-
 fragment UserSettingsFlagsResetPayload on UserSettingsFlagsResetPayload {
   lastSyncId
   success
 }
-
 fragment UserSubscribeToNewsletterPayload on UserSubscribeToNewsletterPayload {
   success
 }
-
-fragment ViewPreferencesCreateInput on ViewPreferencesCreateInput {
-  id
-  preferences
-  teamId
-  projectId
-  labelId
-  cycleId
-  customViewId
-}
-
 fragment ViewPreferencesPayload on ViewPreferencesPayload {
   lastSyncId
   success
 }
-
-fragment ViewPreferencesUpdateInput on ViewPreferencesUpdateInput {
-  preferences
-}
-
-fragment WebhookCreateInput on WebhookCreateInput {
-  id
-  enabled
-  secret
-  url
-  teamId
-}
-
 fragment WebhookPayload on WebhookPayload {
   lastSyncId
   success
 }
-
-fragment WebhookUpdateInput on WebhookUpdateInput {
-  secret
-  enabled
-  url
-}
-
-fragment WorkflowStateCreateInput on WorkflowStateCreateInput {
-  id
-  type
-  name
-  color
-  description
-  position
-  teamId
-}
-
 fragment WorkflowStatePayload on WorkflowStatePayload {
   lastSyncId
   success
 }
-
-fragment WorkflowStateUpdateInput on WorkflowStateUpdateInput {
-  name
-  color
-  description
-  position
-}
-
 fragment DocumentStep on DocumentStep {
   id
   createdAt
@@ -1450,18 +757,12 @@ fragment DocumentStep on DocumentStep {
   version
   clientId
 }
-
 fragment PushSubscription on PushSubscription {
   id
   createdAt
   updatedAt
   archivedAt
 }
-
-fragment PushSubscriptionEdge on PushSubscriptionEdge {
-  cursor
-}
-
 fragment UserAccount on UserAccount {
   id
   createdAt
@@ -1471,7 +772,6 @@ fragment UserAccount on UserAccount {
   email
   service
 }
-
 fragment FileUpload on FileUpload {
   id
   assetUrl
@@ -1480,11 +780,1866 @@ fragment FileUpload on FileUpload {
   metaData
   size
 }
-
 fragment SynchronizedPayload on SynchronizedPayload {
   lastSyncId
 }
-
 fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
   success
+}
+
+# One specific user.
+query user($id: String) {
+  user(id: $id) {
+    ...User
+  }
+}
+
+# The currently authenticated user.
+query viewer {
+  viewer {
+    ...User
+  }
+}
+
+# The user's organization.
+query organization {
+  organization {
+    ...Organization
+  }
+}
+
+# Does the organization exist.
+query organizationExists($urlKey: String) {
+  organizationExists(urlKey: $urlKey) {
+    ...OrganizationExistsPayload
+  }
+}
+
+# Fetch data to catch up the client to the state of the world.
+query syncBootstrap($databaseVersion: Int, $sinceSyncId: Int) {
+  syncBootstrap(databaseVersion: $databaseVersion, sinceSyncId: $sinceSyncId) {
+    ...SyncResponse
+  }
+}
+
+# Fetches delta packets to catch up the user to the current state of the world.
+query syncUpdates($sinceSyncId: Float) {
+  syncUpdates(sinceSyncId: $sinceSyncId) {
+    ...SyncResponse
+  }
+}
+
+# Fetches an archived model.
+query archivedModelSync($identifier: String, $modelClass: String) {
+  archivedModelSync(identifier: $identifier, modelClass: $modelClass) {
+    ...ArchiveResponse
+  }
+}
+
+# Fetches archived models.
+query archivedModelsSync($modelClass: String, $teamId: String, $before: DateTime, $last: Int) {
+  archivedModelsSync(modelClass: $modelClass, teamId: $teamId, before: $before, last: $last) {
+    ...ArchiveResponse
+  }
+}
+
+# Finds a user account by email or identifier. Super user required.
+query adminUserAccountLookup($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    ...UserAccountAdminPrivileged
+  }
+}
+
+# All users of the organization.
+query users(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  users(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...User
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# All API keys for the user.
+query apiKeys(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  apiKeys(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...ApiKey
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# Get information for an application.
+query application($redirectUri: String, $clientId: String) {
+  application(redirectUri: $redirectUri, clientId: $clientId) {
+    ...Application
+  }
+}
+
+# Get all authorized applications for a user
+query authorizedApplications {
+  authorizedApplications {
+    ...AuthorizedApplication
+  }
+}
+
+# Fetch users belonging to this user account.
+query availableUsers {
+  availableUsers {
+    ...AuthResolverResponse
+  }
+}
+
+# Fetch SSO login URL for the email provided.
+query ssoUrlFromEmail($isDesktop: Boolean, $email: String) {
+  ssoUrlFromEmail(isDesktop: $isDesktop, email: $email) {
+    ...SsoUrlFromEmailResponse
+  }
+}
+
+# Billing details for the customer.
+query billingDetails {
+  billingDetails {
+    ...BillingDetailsPayload
+  }
+}
+
+# Join collaborative document and get missing steps.
+query collaborativeDocumentJoin($clientId: String, $issueId: String, $version: Int) {
+  collaborativeDocumentJoin(clientId: $clientId, issueId: $issueId, version: $version) {
+    ...CollaborationDocumentUpdatePayload
+  }
+}
+
+# A specific comment.
+query comment($id: String) {
+  comment(id: $id) {
+    ...Comment
+  }
+}
+
+query comments(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  comments(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Comment
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific custom view.
+query customView($id: String) {
+  customView(id: $id) {
+    ...CustomView
+  }
+}
+
+query customViews(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  customViews(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...CustomView
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific cycle.
+query cycle($id: String) {
+  cycle(id: $id) {
+    ...Cycle
+  }
+}
+
+# All cycles.
+query cycles(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  cycles(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Cycle
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# A specific emoji.
+query emoji($id: String) {
+  emoji(id: $id) {
+    ...Emoji
+  }
+}
+
+query emojis(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  emojis(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Emoji
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific favorite.
+query favorite($id: String) {
+  favorite(id: $id) {
+    ...Favorite
+  }
+}
+
+# The user's favorites.
+query favorites(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  favorites(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Favorite
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# Fetch Figma screenshot and other information with file and node identifiers.
+query figmaEmbedInfo($nodeId: String, $fileId: String) {
+  figmaEmbedInfo(nodeId: $nodeId, fileId: $fileId) {
+    ...FigmaEmbedPayload
+  }
+}
+
+# One specific integration.
+query integration($id: String) {
+  integration(id: $id) {
+    ...Integration
+  }
+}
+
+# All integrations.
+query integrations(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  integrations(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Integration
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific integration resource. (e.g. linked GitHub pull requests for an issue)
+query integrationResource($id: String) {
+  integrationResource(id: $id) {
+    ...IntegrationResource
+  }
+}
+
+# All integrations resources (e.g. linked GitHub pull requests for issues).
+query integrationResources(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  integrationResources(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...IntegrationResource
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# Retrieves information for the public invite page.
+query inviteInfo($teamHash: String, $userHash: String) {
+  inviteInfo(teamHash: $teamHash, userHash: $userHash) {
+    ...InvitePagePayload
+  }
+}
+
+# One specific label.
+query issueLabel($id: String) {
+  issueLabel(id: $id) {
+    ...IssueLabel
+  }
+}
+
+# All labels.
+query issueLabels(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  issueLabels(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...IssueLabel
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific issue relation.
+query issueRelation($id: String) {
+  issueRelation(id: $id) {
+    ...IssueRelation
+  }
+}
+
+query issueRelations(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  issueRelations(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...IssueRelation
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific issue.
+query issue($id: String) {
+  issue(id: $id) {
+    ...Issue
+  }
+}
+
+# [ALPHA] Search issues. This query is experimental and is subject to change without notice.
+query issueSearch(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+  $query: String
+) {
+  issueSearch(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+    query: $query
+  ) {
+    nodes {
+      ...Issue
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+query issues(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  issues(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Issue
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific milestone.
+query milestone($id: String) {
+  milestone(id: $id) {
+    ...Milestone
+  }
+}
+
+# All milestones.
+query milestones(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  milestones(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Milestone
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# The user's settings.
+query notification {
+  notification {
+    ...UserSettings
+  }
+}
+
+# All notifications.
+query notifications(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  notifications(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Notification
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# The user's notification subscriptions.
+query notificationSubscription(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  notificationSubscription(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...NotificationSubscription
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific organization invite.
+query organizationInvite($id: String) {
+  organizationInvite(id: $id) {
+    ...IssueLabel
+  }
+}
+
+# All invites for the organization.
+query organizationInvites(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  organizationInvites(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...OrganizationInvite
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific project link.
+query projectLink($id: String) {
+  projectLink(id: $id) {
+    ...ProjectLink
+  }
+}
+
+# All links for the project.
+query ProjectLinks(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  ProjectLinks(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...ProjectLink
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific project.
+query project($id: String) {
+  project(id: $id) {
+    ...Project
+  }
+}
+
+# All projects.
+query projects(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  projects(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Project
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# Sends a test push message.
+query pushSubscriptionTest {
+  pushSubscriptionTest {
+    ...PushSubscriptionPayload
+  }
+}
+
+# A specific reaction.
+query reaction($id: String) {
+  reaction(id: $id) {
+    ...Reaction
+  }
+}
+
+query reactions(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  reactions(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Reaction
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# The organization's subscription.
+query subscription {
+  subscription {
+    ...Subscription
+  }
+}
+
+# One specific team membership.
+query teamMembership($id: String) {
+  teamMembership(id: $id) {
+    ...TeamMembership
+  }
+}
+
+# All team memberships.
+query teamMemberships(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  teamMemberships(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...TeamMembership
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific team.
+query team($id: String) {
+  team(id: $id) {
+    ...Team
+  }
+}
+
+# All teams.
+query teams(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  teams(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Team
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# All templates from all users.
+query templates {
+  templates {
+    ...Template
+  }
+}
+
+# A specific template.
+query template($id: String) {
+  template(id: $id) {
+    ...Template
+  }
+}
+
+# All view preferences.
+query viewPreferences(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  viewPreferences(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...ViewPreferences
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# A specific webhook.
+query webhook($id: String) {
+  webhook(id: $id) {
+    ...Webhook
+  }
+}
+
+# All webhooks.
+query webhooks(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  webhooks(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...Webhook
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+# One specific state.
+query workflowState($id: String) {
+  workflowState(id: $id) {
+    ...WorkflowState
+  }
+}
+
+# All states.
+query workflowStates(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  workflowStates(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    nodes {
+      ...WorkflowState
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+# Updates a user. Only available to organization admins and the user themselves.
+mutation userUpdate($input: UpdateUserInput, $id: String) {
+  userUpdate(input: $input, id: $id) {
+    ...UserPayload
+  }
+}
+
+# Makes user an admin. Can only be called by an admin.
+mutation userPromoteAdmin($id: String) {
+  userPromoteAdmin(id: $id) {
+    ...UserAdminPayload
+  }
+}
+
+# Makes user a regular user. Can only be called by an admin.
+mutation userDemoteAdmin($id: String) {
+  userDemoteAdmin(id: $id) {
+    ...UserAdminPayload
+  }
+}
+
+# Suspends a user. Can only be called by an admin.
+mutation userSuspend($id: String) {
+  userSuspend(id: $id) {
+    ...UserAdminPayload
+  }
+}
+
+# Un-suspends a user. Can only be called by an admin.
+mutation userUnsuspend($id: String) {
+  userUnsuspend(id: $id) {
+    ...UserAdminPayload
+  }
+}
+
+# Updates the user's organization.
+mutation organizationUpdate($input: UpdateOrganizationInput) {
+  organizationUpdate(input: $input) {
+    ...OrganizationPayload
+  }
+}
+
+# Get an organization's delete confirmation token. Administrator privileges required.
+mutation organizationDeleteChallenge {
+  organizationDeleteChallenge {
+    ...OrganizationDeletePayload
+  }
+}
+
+# Delete's an organization. Administrator privileges required.
+mutation organizationDelete($input: DeleteOrganizationInput) {
+  organizationDelete(input: $input) {
+    ...OrganizationDeletePayload
+  }
+}
+
+# Disable organization access. Superuser privileges required.
+mutation organizationToggleAccess($id: String) {
+  organizationToggleAccess(id: $id) {
+    ...OrganizationAccessPayload
+  }
+}
+
+# Change email domain for all users and accounts in the organization.
+mutation organizationChangeEmailDomain($toDomain: String, $fromDomain: String, $id: String) {
+  organizationChangeEmailDomain(toDomain: $toDomain, fromDomain: $fromDomain, id: $id) {
+    ...OrganizationAccessPayload
+  }
+}
+
+# Toggle SAML authentication on or off for an organization. Superuser privileges required.
+mutation organizationToggleSamlEnabled($id: String) {
+  organizationToggleSamlEnabled(id: $id) {
+    ...OrganizationSamlConfigurePayload
+  }
+}
+
+# Configure SAML authentication for an organization. Superuser privileges required.
+mutation organizationConfigureSaml($samlConfiguration: SamlConfigurationInput, $id: String) {
+  organizationConfigureSaml(samlConfiguration: $samlConfiguration, id: $id) {
+    ...OrganizationSamlConfigurePayload
+  }
+}
+
+# Executes admin command.
+mutation adminCommand($input: AdminCommandInput) {
+  adminCommand(input: $input) {
+    ...AdminCommandPayload
+  }
+}
+
+# Sends out emails in bulk to our users.
+mutation adminBulkEmail($randomDelay: Int, $emails: String, $markdownContent: String, $subject: String) {
+  adminBulkEmail(randomDelay: $randomDelay, emails: $emails, markdownContent: $markdownContent, subject: $subject) {
+    ...AdminCommandPayload
+  }
+}
+
+# Creates a stripe customer for an organization.
+mutation adminCreateStripeCustomer($organizationId: String) {
+  adminCreateStripeCustomer(organizationId: $organizationId) {
+    ...AdminCommandPayload
+  }
+}
+
+# Schedules a task. Currently only anonymous tasks without any parameters can be scheduled.
+mutation adminScheduleAnonymousTask($taskName: String) {
+  adminScheduleAnonymousTask(taskName: $taskName) {
+    ...AdminCommandPayload
+  }
+}
+
+# Changes the email address for the user account and all of its users.
+mutation adminUserAccountChangeEmail($newEmail: String, $id: String) {
+  adminUserAccountChangeEmail(newEmail: $newEmail, id: $id) {
+    ...UserAccountAdminPrivileged
+  }
+}
+
+# [Deprecated] Creates a new event.
+mutation eventCreate($input: EventCreateInput) {
+  eventCreate(input: $input) {
+    ...EventPayload
+  }
+}
+
+# Creates a new API key.
+mutation apiKeyCreate($input: ApiKeyCreateInput) {
+  apiKeyCreate(input: $input) {
+    ...ApiKeyPayload
+  }
+}
+
+# Deletes an API key.
+mutation apiKeyDelete($id: String) {
+  apiKeyDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Finds or creates a new user account by email and sends an email with token.
+mutation emailUserAccountAuthChallenge($input: EmailUserAccountAuthChallengeInput) {
+  emailUserAccountAuthChallenge(input: $input) {
+    ...EmailUserAccountAuthChallengeResponse
+  }
+}
+
+# Authenticates a user account via email and authentication token.
+mutation emailTokenUserAccountAuth($input: EmailUserAccountAuthInput) {
+  emailTokenUserAccountAuth(input: $input) {
+    ...AuthResolverResponse
+  }
+}
+
+# Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
+mutation googleUserAccountAuth($input: GoogleUserAccountAuthInput) {
+  googleUserAccountAuth(input: $input) {
+    ...AuthResolverResponse
+  }
+}
+
+# Creates an organization from onboarding.
+mutation createOrganizationFromOnboarding($survey: OnboardingCustomerSurvey, $input: CreateOrganizationInput) {
+  createOrganizationFromOnboarding(survey: $survey, input: $input) {
+    organization {
+      ...Organization
+    }
+    user {
+      ...User
+    }
+  }
+}
+
+# Join an organization from onboarding.
+mutation joinOrganizationFromOnboarding($input: JoinOrganizationInput) {
+  joinOrganizationFromOnboarding(input: $input) {
+    organization {
+      ...Organization
+    }
+    user {
+      ...User
+    }
+  }
+}
+
+# Leave an organization.
+mutation leaveOrganization($organizationId: String) {
+  leaveOrganization(organizationId: $organizationId) {
+    organization {
+      ...Organization
+    }
+    user {
+      ...User
+    }
+  }
+}
+
+# Updates the billing email address for the customer.
+mutation billingEmailUpdate($input: BillingEmailUpdateInput) {
+  billingEmailUpdate(input: $input) {
+    ...BillingEmailPayload
+  }
+}
+
+# Update collaborative document with client steps.
+mutation collaborativeDocumentUpdate($input: CollaborationDocumentUpdateInput) {
+  collaborativeDocumentUpdate(input: $input) {
+    ...CollaborationDocumentUpdatePayload
+  }
+}
+
+# Creates a new comment.
+mutation commentCreate($input: CommentCreateInput) {
+  commentCreate(input: $input) {
+    ...CommentPayload
+  }
+}
+
+# Updates a comment.
+mutation commentUpdate($input: CommentUpdateInput, $id: String) {
+  commentUpdate(input: $input, id: $id) {
+    ...CommentPayload
+  }
+}
+
+# Deletes a comment.
+mutation commentDelete($id: String) {
+  commentDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Saves user message.
+mutation contactCreate($input: ContactCreateInput) {
+  contactCreate(input: $input) {
+    ...ContactPayload
+  }
+}
+
+# Creates a new custom view.
+mutation customViewCreate($input: CustomViewCreateInput) {
+  customViewCreate(input: $input) {
+    ...CustomViewPayload
+  }
+}
+
+# Updates a custom view.
+mutation customViewUpdate($input: CustomViewUpdateInput, $id: String) {
+  customViewUpdate(input: $input, id: $id) {
+    ...CustomViewPayload
+  }
+}
+
+# Deletes a custom view.
+mutation customViewDelete($id: String) {
+  customViewDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new cycle.
+mutation cycleCreate($input: CycleCreateInput) {
+  cycleCreate(input: $input) {
+    ...CyclePayload
+  }
+}
+
+# Updates a cycle.
+mutation cycleUpdate($input: CycleUpdateInput, $id: String) {
+  cycleUpdate(input: $input, id: $id) {
+    ...CyclePayload
+  }
+}
+
+# Archives a cycle.
+mutation cycleArchive($id: String) {
+  cycleArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Always fails with internal error. Used to debug logging.
+mutation debugFailWithInternalError {
+  debugFailWithInternalError {
+    ...DebugPayload
+  }
+}
+
+# Always logs an error to Sentry as warning. Used to debug logging.
+mutation debugFailWithWarning {
+  debugFailWithWarning {
+    ...DebugPayload
+  }
+}
+
+# Create the SAML test organization in development.
+mutation debugCreateSAMLOrg {
+  debugCreateSAMLOrg {
+    ...DebugPayload
+  }
+}
+
+# Unsubscribes the user from one type of emails.
+mutation emailUnsubscribe($input: EmailUnsubscribeInput) {
+  emailUnsubscribe(input: $input) {
+    ...EmailUnsubscribePayload
+  }
+}
+
+# Creates a custom emoji.
+mutation emojiCreate($input: EmojiCreateInput) {
+  emojiCreate(input: $input) {
+    ...EmojiPayload
+  }
+}
+
+# Deletes an emoji.
+mutation emojiDelete($id: String) {
+  emojiDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new favorite (project, cycle etc).
+mutation favoriteCreate($input: FavoriteCreateInput) {
+  favoriteCreate(input: $input) {
+    ...FavoritePayload
+  }
+}
+
+# Updates a favorite.
+mutation favoriteUpdate($input: FavoriteUpdateInput, $id: String) {
+  favoriteUpdate(input: $input, id: $id) {
+    ...FavoritePayload
+  }
+}
+
+# Deletes a favorite reference.
+mutation favoriteDelete($id: String) {
+  favoriteDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Saves user feedback.
+mutation feedbackCreate($input: FeedbackCreateInput) {
+  feedbackCreate(input: $input) {
+    ...FeedbackPayload
+  }
+}
+
+# XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage.
+mutation fileUpload($metaData: JSON, $size: Int, $contentType: String, $filename: String) {
+  fileUpload(metaData: $metaData, size: $size, contentType: $contentType, filename: $filename) {
+    ...UploadPayload
+  }
+}
+
+# Upload an image from an URL to Linear.
+mutation imageUploadFromUrl($url: String) {
+  imageUploadFromUrl(url: $url) {
+    ...ImageUploadFromUrlPayload
+  }
+}
+
+# Connects the organization with the GitHub App.
+mutation integrationGithubConnect($installationId: String) {
+  integrationGithubConnect(installationId: $installationId) {
+    ...IntegrationPayload
+  }
+}
+
+# Connects the organization with a GitLab Access Token.
+mutation integrationGitlabConnect($gitlabUrl: String, $accessToken: String) {
+  integrationGitlabConnect(gitlabUrl: $gitlabUrl, accessToken: $accessToken) {
+    ...IntegrationPayload
+  }
+}
+
+# Integrates the organization with Slack.
+mutation integrationSlack($shouldUseV2Auth: Boolean, $redirectUri: String, $code: String) {
+  integrationSlack(shouldUseV2Auth: $shouldUseV2Auth, redirectUri: $redirectUri, code: $code) {
+    ...IntegrationPayload
+  }
+}
+
+# Integrates your personal notifications with Slack.
+mutation integrationSlackPersonal($redirectUri: String, $code: String) {
+  integrationSlackPersonal(redirectUri: $redirectUri, code: $code) {
+    ...IntegrationPayload
+  }
+}
+
+# Slack webhook integration.
+mutation integrationSlackPost($shouldUseV2Auth: Boolean, $redirectUri: String, $teamId: String, $code: String) {
+  integrationSlackPost(shouldUseV2Auth: $shouldUseV2Auth, redirectUri: $redirectUri, teamId: $teamId, code: $code) {
+    ...IntegrationPayload
+  }
+}
+
+# Slack integration for project notifications.
+mutation integrationSlackProjectPost($redirectUri: String, $projectId: String, $code: String) {
+  integrationSlackProjectPost(redirectUri: $redirectUri, projectId: $projectId, code: $code) {
+    ...IntegrationPayload
+  }
+}
+
+# Imports custom emojis from your Slack workspace.
+mutation integrationSlackImportEmojis($redirectUri: String, $code: String) {
+  integrationSlackImportEmojis(redirectUri: $redirectUri, code: $code) {
+    ...IntegrationPayload
+  }
+}
+
+# Integrates the organization with Figma.
+mutation integrationFigma($redirectUri: String, $code: String) {
+  integrationFigma(redirectUri: $redirectUri, code: $code) {
+    ...IntegrationPayload
+  }
+}
+
+# Integrates the organization with Google Sheets.
+mutation integrationGoogleSheets($code: String) {
+  integrationGoogleSheets(code: $code) {
+    ...IntegrationPayload
+  }
+}
+
+# Manually update Google Sheets data.
+mutation refreshGoogleSheetsData($id: String) {
+  refreshGoogleSheetsData(id: $id) {
+    ...IntegrationPayload
+  }
+}
+
+# Integrates the organization with Sentry.
+mutation integrationSentryConnect($organizationSlug: String, $code: String, $installationId: String) {
+  integrationSentryConnect(organizationSlug: $organizationSlug, code: $code, installationId: $installationId) {
+    ...IntegrationPayload
+  }
+}
+
+# Deletes an integration.
+mutation integrationDelete($id: String) {
+  integrationDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Archives an integration resource.
+mutation integrationResourceArchive($id: String) {
+  integrationResourceArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new label.
+mutation issueLabelCreate($input: IssueLabelCreateInput) {
+  issueLabelCreate(input: $input) {
+    ...IssueLabelPayload
+  }
+}
+
+# Updates an label.
+mutation issueLabelUpdate($input: IssueLabelUpdateInput, $id: String) {
+  issueLabelUpdate(input: $input, id: $id) {
+    ...IssueLabelPayload
+  }
+}
+
+# Archives an issue label.
+mutation issueLabelArchive($id: String) {
+  issueLabelArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new issue relation.
+mutation issueRelationCreate($input: IssueRelationCreateInput) {
+  issueRelationCreate(input: $input) {
+    ...IssueRelationPayload
+  }
+}
+
+# Updates an issue relation.
+mutation issueRelationUpdate($input: IssueRelationUpdateInput, $id: String) {
+  issueRelationUpdate(input: $input, id: $id) {
+    ...IssueRelationPayload
+  }
+}
+
+# Deletes an issue relation.
+mutation issueRelationDelete($id: String) {
+  issueRelationDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new issue.
+mutation issueCreate($input: IssueCreateInput) {
+  issueCreate(input: $input) {
+    ...IssuePayload
+  }
+}
+
+# Updates an issue.
+mutation issueUpdate($input: IssueUpdateInput, $id: String) {
+  issueUpdate(input: $input, id: $id) {
+    ...IssuePayload
+  }
+}
+
+# Archives an issue.
+mutation issueArchive($id: String) {
+  issueArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Unarchives an issue.
+mutation issueUnarchive($id: String) {
+  issueUnarchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new milestone.
+mutation milestoneCreate($input: MilestoneCreateInput) {
+  milestoneCreate(input: $input) {
+    ...MilestonePayload
+  }
+}
+
+# Updates a milestone.
+mutation milestoneUpdate($input: MilestoneUpdateInput, $id: String) {
+  milestoneUpdate(input: $input, id: $id) {
+    ...MilestonePayload
+  }
+}
+
+# Deletes a milestone.
+mutation milestoneDelete($id: String) {
+  milestoneDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a notification.
+mutation notificationCreate($input: NotificationUpdateInput, $id: String) {
+  notificationCreate(input: $input, id: $id) {
+    ...NotificationPayload
+  }
+}
+
+# Updates a notification.
+mutation notificationUpdate($input: NotificationUpdateInput, $id: String) {
+  notificationUpdate(input: $input, id: $id) {
+    ...NotificationPayload
+  }
+}
+
+# [Deprecated] Deletes a notification.
+mutation notificationDelete($id: String) {
+  notificationDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Archives a notification.
+mutation notificationArchive($id: String) {
+  notificationArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Unarchives a notification.
+mutation notificationUnarchive($id: String) {
+  notificationUnarchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new notification subscription for a team or a project.
+mutation notificationSubscriptionCreate($input: NotificationSubscriptionCreateInput) {
+  notificationSubscriptionCreate(input: $input) {
+    ...NotificationSubscriptionPayload
+  }
+}
+
+# Deletes a notification subscription reference.
+mutation notificationSubscriptionDelete($id: String) {
+  notificationSubscriptionDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new OAuth client.
+mutation oauthClientCreate($input: OauthClientCreateInput) {
+  oauthClientCreate(input: $input) {
+    ...OauthClientPayload
+  }
+}
+
+# Updates an OAuth client.
+mutation oauthClientUpdate($input: OauthClientUpdateInput, $id: String) {
+  oauthClientUpdate(input: $input, id: $id) {
+    ...OauthClientPayload
+  }
+}
+
+# Archives an OAuth client.
+mutation oauthClientArchive($id: String) {
+  oauthClientArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Verifies a domain to be added to an organization.
+mutation organizationDomainVerify($input: OrganizationDomainVerificationInput) {
+  organizationDomainVerify(input: $input) {
+    ...OrganizationDomainPayload
+  }
+}
+
+# Adds a domain to be allowed for an organization.
+mutation organizationDomainCreate($input: OrganizationDomainCreateInput) {
+  organizationDomainCreate(input: $input) {
+    ...OrganizationDomainPayload
+  }
+}
+
+# Deletes a domain.
+mutation organizationDomainDelete($id: String) {
+  organizationDomainDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new organization invite.
+mutation organizationInviteCreate($input: OrganizationInviteCreateInput) {
+  organizationInviteCreate(input: $input) {
+    ...OrganizationInvitePayload
+  }
+}
+
+# Re-send an organization invite.
+mutation resentOrganizationInvite($id: String) {
+  resentOrganizationInvite(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Deletes an organization invite.
+mutation organizationInviteDelete($id: String) {
+  organizationInviteDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new project link.
+mutation projectLinkCreate($input: ProjectLinkCreateInput) {
+  projectLinkCreate(input: $input) {
+    ...ProjectLinkPayload
+  }
+}
+
+# Deletes a project link.
+mutation projectLinkDelete($id: String) {
+  projectLinkDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new project.
+mutation projectCreate($input: ProjectCreateInput) {
+  projectCreate(input: $input) {
+    ...ProjectPayload
+  }
+}
+
+# Updates a project.
+mutation projectUpdate($input: ProjectUpdateInput, $id: String) {
+  projectUpdate(input: $input, id: $id) {
+    ...ProjectPayload
+  }
+}
+
+# Archives a project.
+mutation projectArchive($id: String) {
+  projectArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a push subscription.
+mutation pushSubscriptionCreate($input: PushSubscriptionCreateInput) {
+  pushSubscriptionCreate(input: $input) {
+    ...PushSubscriptionPayload
+  }
+}
+
+# Deletes a push subscription.
+mutation pushSubscriptionDelete($id: String) {
+  pushSubscriptionDelete(id: $id) {
+    ...PushSubscriptionPayload
+  }
+}
+
+# Creates a new reaction.
+mutation reactionCreate($input: ReactionCreateInput) {
+  reactionCreate(input: $input) {
+    ...ReactionPayload
+  }
+}
+
+# Deletes a reaction.
+mutation reactionDelete($id: String) {
+  reactionDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Create CSV export report for the organization.
+mutation createCsvExportReport {
+  createCsvExportReport {
+    ...CreateCsvExportReportPayload
+  }
+}
+
+# Creates a subscription session. Used internally to integrate with Stripe.
+mutation subscriptionSessionCreate($plan: String) {
+  subscriptionSessionCreate(plan: $plan) {
+    ...SubscriptionSessionPayload
+  }
+}
+
+# Creates a subscription update session. Used internally to integrate with Stripe.
+mutation subscriptionUpdateSessionCreate {
+  subscriptionUpdateSessionCreate {
+    ...SubscriptionSessionPayload
+  }
+}
+
+# Updates a subscription.
+mutation subscriptionUpdate($input: SubscriptionUpdateInput, $id: String) {
+  subscriptionUpdate(input: $input, id: $id) {
+    ...SubscriptionPayload
+  }
+}
+
+# Upgrades a subscription plan.
+mutation subscriptionUpgrade($type: String, $id: String) {
+  subscriptionUpgrade(type: $type, id: $id) {
+    ...SubscriptionPayload
+  }
+}
+
+# Archives a subscription.
+mutation subscriptionArchive($id: String) {
+  subscriptionArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new team membership.
+mutation teamMembershipCreate($input: TeamMembershipCreateInput) {
+  teamMembershipCreate(input: $input) {
+    ...TeamMembershipPayload
+  }
+}
+
+# Deletes a team membership.
+mutation teamMembershipDelete($id: String) {
+  teamMembershipDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new team. The user who creates the team will automatically be added as a member to the newly created team.
+mutation teamCreate($copySettingsFromTeamId: String, $input: TeamCreateInput) {
+  teamCreate(copySettingsFromTeamId: $copySettingsFromTeamId, input: $input) {
+    ...TeamPayload
+  }
+}
+
+# Updates a team.
+mutation teamUpdate($input: TeamUpdateInput, $id: String) {
+  teamUpdate(input: $input, id: $id) {
+    ...TeamPayload
+  }
+}
+
+# Archives a team.
+mutation teamArchive($id: String) {
+  teamArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Deletes a team.
+mutation teamDelete($id: String) {
+  teamDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new template.
+mutation templateCreate($input: TemplateCreateInput) {
+  templateCreate(input: $input) {
+    ...TemplatePayload
+  }
+}
+
+# Updates an existing template.
+mutation templateUpdate($input: TemplateUpdateInput, $id: String) {
+  templateUpdate(input: $input, id: $id) {
+    ...TemplatePayload
+  }
+}
+
+# Deletes a template.
+mutation templateDelete($id: String) {
+  templateDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Updates the user's settings.
+mutation userSettingsUpdate($input: UserSettingsUpdateInput, $id: String) {
+  userSettingsUpdate(input: $input, id: $id) {
+    ...UserSettingsPayload
+  }
+}
+
+# [Deprecated] Updates a user's settings flag.
+mutation userSettingsFlagIncrement($flag: String) {
+  userSettingsFlagIncrement(flag: $flag) {
+    ...UserSettingsFlagPayload
+  }
+}
+
+# Resets user's setting flags.
+mutation userSettingsFlagsReset {
+  userSettingsFlagsReset {
+    ...UserSettingsFlagsResetPayload
+  }
+}
+
+# Updates a user's settings flag.
+mutation userFlagUpdate($operation: UserFlagUpdateOperation, $flag: UserFlagType) {
+  userFlagUpdate(operation: $operation, flag: $flag) {
+    ...UserSettingsFlagPayload
+  }
+}
+
+# Subscribes user to changelog newsletter.
+mutation userSubscribeToNewsletter {
+  userSubscribeToNewsletter {
+    ...UserSubscribeToNewsletterPayload
+  }
+}
+
+# Creates a new ViewPreferences object.
+mutation viewPreferencesCreate($input: ViewPreferencesCreateInput) {
+  viewPreferencesCreate(input: $input) {
+    ...ViewPreferencesPayload
+  }
+}
+
+# Updates an existing ViewPreferences object.
+mutation viewPreferencesUpdate($input: ViewPreferencesUpdateInput, $id: String) {
+  viewPreferencesUpdate(input: $input, id: $id) {
+    ...ViewPreferencesPayload
+  }
+}
+
+# Deletes a ViewPreferences.
+mutation viewPreferencesDelete($id: String) {
+  viewPreferencesDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new webhook.
+mutation webhookCreate($input: WebhookCreateInput) {
+  webhookCreate(input: $input) {
+    ...WebhookPayload
+  }
+}
+
+# Updates an existing Webhook.
+mutation webhookUpdate($input: WebhookUpdateInput, $id: String) {
+  webhookUpdate(input: $input, id: $id) {
+    ...WebhookPayload
+  }
+}
+
+# Deletes a Webhook.
+mutation webhookDelete($id: String) {
+  webhookDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+
+# Creates a new state, adding it to the workflow of a team.
+mutation workflowStateCreate($input: WorkflowStateCreateInput) {
+  workflowStateCreate(input: $input) {
+    ...WorkflowStatePayload
+  }
+}
+
+# Updates a state.
+mutation workflowStateUpdate($input: WorkflowStateUpdateInput, $id: String) {
+  workflowStateUpdate(input: $input, id: $id) {
+    ...WorkflowStatePayload
+  }
+}
+
+# Archives a state. Only states with issues that have all been archived can be archived.
+mutation workflowStateArchive($id: String) {
+  workflowStateArchive(id: $id) {
+    ...ArchivePayload
+  }
 }

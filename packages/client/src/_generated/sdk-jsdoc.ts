@@ -12,7 +12,7 @@
  * @property {UserConnection} users - All users of the organization.
  * @property {ApiKeyConnection} apiKeys - All API keys for the user.
  * @property {Application} application - Get information for an application.
- * @property {Array<Application>} authorizedApplications - Get all authorized applications for a user
+ * @property {Array<AuthorizedApplication>} authorizedApplications - Get all authorized applications for a user
  * @property {AuthResolverResponse} availableUsers - Fetch users belonging to this user account.
  * @property {SsoUrlFromEmailResponse} ssoUrlFromEmail - Fetch SSO login URL for the email provided.
  * @property {BillingDetailsPayload} billingDetails - Billing details for the customer.
@@ -408,7 +408,7 @@
  * @property {string} gitBranchFormat - How git branches are formatted. If null, default formatting will be used.
  * @property {boolean} gitLinkbackMessagesEnabled - Whether the Git integration linkback messages should be sent to private repositories.
  * @property {boolean} gitPublicLinkbackMessagesEnabled - Whether the Git integration linkback messages should be sent to public repositories.
- * @property {boolean} projectMilestonesEnabled - Whether the organization is using project milestones.
+ * @property {boolean} roadmapEnabled - Whether the organization is using a roadmap.
  * @property {boolean} samlEnabled - Whether SAML authentication is enabled for organization.
  * @property {Array<string>} allowedAuthServices - Allowed authentication providers, empty array means all are allowed
  * @property {UserConnection} users - Users associated with the organization.
@@ -938,7 +938,7 @@
  * @property {string} gitBranchFormat - How git branches are formatted. If null, default formatting will be used.
  * @property {boolean} gitLinkbackMessagesEnabled - Whether the Git integration linkback messages should be sent to private repositories.
  * @property {boolean} gitPublicLinkbackMessagesEnabled - Whether the Git integration linkback messages should be sent to public repositories.
- * @property {boolean} projectMilestonesEnabled - Whether the organization is using project milestones.
+ * @property {boolean} roadmapEnabled - Whether the organization is using a roadmap.
  * @property {boolean} samlEnabled - Whether SAML authentication is enabled for organization.
  * @property {Array<string>} allowedAuthServices - Allowed authentication providers, empty array means all are allowed
  * @property {UserConnection} users - Users associated with the organization.
@@ -1002,6 +1002,18 @@
  * @property {string} developer - Name of the developer.
  * @property {string} developerUrl - Url of the developer (homepage or docs).
  * @property {string} [imageUrl] - Image of the application.
+ */
+
+/**
+ * Public information of the OAuth application, plus the authorized scopes for a given user.
+ * @typedef {Object} AuthorizedApplication
+ * @property {string} clientId - OAuth application's client ID.
+ * @property {string} name - Application name.
+ * @property {string} [description] - Information about the application.
+ * @property {string} developer - Name of the developer.
+ * @property {string} developerUrl - Url of the developer (homepage or docs).
+ * @property {string} [imageUrl] - Image of the application.
+ * @property {Array<string>} scope - Scopes that are authorized for this application for a given user.
  */
 
 /**
@@ -1491,7 +1503,7 @@
  * @property {string} [gitBranchFormat] - How git branches are formatted. If null, default formatting will be used.
  * @property {boolean} [gitLinkbackMessagesEnabled] - Whether the Git integration linkback messages should be sent for private repositories.
  * @property {boolean} [gitPublicLinkbackMessagesEnabled] - Whether the Git integration linkback messages should be sent for public repositories.
- * @property {boolean} [projectMilestonesEnabled] - Whether the organization is using project milestones.
+ * @property {boolean} [roadmapEnabled] - Whether the organization is using project milestones.
  * @property {JSONObject} [linearPreviewFlags] - Linear Preview feature flags
  */
 
@@ -2343,7 +2355,7 @@
 
 /**
  * The types of flags that the user can have.
- * @typedef {("completedOnboarding"|"desktopInstalled"|"desktopDownloadToastDismissed"|"emptyBacklogDismissed"|"emptyCustomViewsDismissed"|"emptyActiveIssuesDismissed"|"emptyMyIssuesDismissed"|"cycleWelcomeDismissed"|"projectWelcomeDismissed"|"analyticsWelcomeDismissed"|"figmaPromptDismissed"|"migrateThemePreference"|"listSelectionTip"|"clearedAllNotifications")} UserFlagType
+ * @typedef {("completedOnboarding"|"desktopInstalled"|"desktopDownloadToastDismissed"|"emptyBacklogDismissed"|"emptyCustomViewsDismissed"|"emptyActiveIssuesDismissed"|"emptyMyIssuesDismissed"|"cycleWelcomeDismissed"|"projectWelcomeDismissed"|"analyticsWelcomeDismissed"|"figmaPromptDismissed"|"migrateThemePreference"|"listSelectionTip")} UserFlagType
  */
 
 /**

@@ -23,3 +23,10 @@ query users(
     }
   }
 }
+
+# Query for one user
+query user($id: String!) {
+  user(id: $id) {
+    ...User
+  }
+}

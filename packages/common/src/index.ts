@@ -8,11 +8,19 @@ export function nonNullable<T>(value: T): value is NonNullable<T> {
 /**
  * Print debug information if in development environment
  */
-export function debug(namespace: string, ...args: unknown[]): void {
+export function logDebug(namespace: string, ...args: unknown[]): void {
   if (process.env.NODE_ENV === "development") {
     // eslint-disable-next-line no-console
     console.log(namespace, ...args.map(a => (typeof a === "object" ? JSON.stringify(a, null, 2) : a)));
   }
+}
+
+/**
+ * Print error information
+ */
+export function logError(error: unknown): void {
+  // eslint-disable-next-line no-console
+  console.error(error);
 }
 
 /**

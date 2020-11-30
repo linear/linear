@@ -1,5 +1,5 @@
 overwrite: true
-schema: ./src/schema.json
+schema: ./src/schema.graphql
 hooks:
   afterOneFileWrite:
     - prettier --write

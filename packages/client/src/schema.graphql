@@ -168,7 +168,7 @@ type Query {
   """
   Get all authorized applications for a user
   """
-  authorizedApplications: [Application!]!
+  authorizedApplications: [AuthorizedApplication!]!
   """
   Fetch users belonging to this user account.
   """
@@ -2600,9 +2600,9 @@ type Organization implements Node {
   """
   gitPublicLinkbackMessagesEnabled: Boolean!
   """
-  Whether the organization is using project milestones.
+  Whether the organization is using a roadmap.
   """
-  projectMilestonesEnabled: Boolean!
+  roadmapEnabled: Boolean!
   """
   Whether SAML authentication is enabled for organization.
   """
@@ -3807,9 +3807,9 @@ type OrganizationAdminPrivileged implements Node {
   """
   gitPublicLinkbackMessagesEnabled: Boolean!
   """
-  Whether the organization is using project milestones.
+  Whether the organization is using a roadmap.
   """
-  projectMilestonesEnabled: Boolean!
+  roadmapEnabled: Boolean!
   """
   Whether SAML authentication is enabled for organization.
   """
@@ -3971,6 +3971,39 @@ type Application {
   Image of the application.
   """
   imageUrl: String
+}
+"""
+Public information of the OAuth application, plus the authorized scopes for a given user.
+"""
+type AuthorizedApplication {
+  """
+  OAuth application's client ID.
+  """
+  clientId: String!
+  """
+  Application name.
+  """
+  name: String!
+  """
+  Information about the application.
+  """
+  description: String
+  """
+  Name of the developer.
+  """
+  developer: String!
+  """
+  Url of the developer (homepage or docs).
+  """
+  developerUrl: String!
+  """
+  Image of the application.
+  """
+  imageUrl: String
+  """
+  Scopes that are authorized for this application for a given user.
+  """
+  scope: [String!]!
 }
 type AuthResolverResponse {
   """
@@ -6008,7 +6041,7 @@ input UpdateOrganizationInput {
   """
   Whether the organization is using project milestones.
   """
-  projectMilestonesEnabled: Boolean
+  roadmapEnabled: Boolean
   """
   Linear Preview feature flags
   """
@@ -7944,7 +7977,6 @@ enum UserFlagType {
   figmaPromptDismissed
   migrateThemePreference
   listSelectionTip
-  clearedAllNotifications
 }
 type UserSubscribeToNewsletterPayload {
   """
