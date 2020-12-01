@@ -20,7 +20,7 @@ Right now we support personal API keys and OAuth2 authentication.
 
 ### OAuth2
 
-If you're building an application for others to use, we recommend you use [OAuth2 authentication](GraphQL.md).
+If you're building an application for others to use, we recommend you use [OAuth2 authentication](OAuth2.md).
 
 ### Personal API keys
 
