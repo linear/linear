@@ -7,4 +7,5 @@ This monorepo contains tools and documentation for Linear's API.
 ## Documentation
 
 - [Linear GraphQL API](https://github.com/linearapp/linear/blob/master/docs/API.md)
-- [Linear Webhooks](https://github.com/linearapp/linear/blob/master/docs/Webhooks.md)
+- [OAuth2 authentication](https://github.com/linearapp/linear/blob/master/docs/OAuth2.md)
+- [Webhooks](https://github.com/linearapp/linear/blob/master/docs/Webhooks.md)
