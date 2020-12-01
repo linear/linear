@@ -16,7 +16,15 @@ It supports introspection so you can query the whole schema.
 
 ## Authentication
 
-Right now we support personal API keys, which can be created in the [API settings](https://linear.app/settings/api). To authenticate your requests, you need to pass the newly created key as an `Authorization` header:
+Right now we support personal API keys and OAuth2 authentication.
+
+### OAuth2
+
+If you're building an application for others to use, we recommend you use [OAuth2 authentication](GraphQL.md).
+
+### Personal API keys
+
+For personal scripts API keys are the easiest way to access the API. They can be created in the [API settings](https://linear.app/settings/api). To authenticate your requests, you need to pass the newly created key as an `Authorization` header:
 
 ```bash
 curl \
