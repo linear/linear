@@ -1,8 +1,8 @@
 /**
  * Type safe check for non defined values
  */
-export function nonNullable<T>(value: T): value is NonNullable<T> {
-  return value !== null && value !== undefined;
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v !== null && v !== undefined;
 }
 
 /**
@@ -31,4 +31,12 @@ export function filterJoin(a: (string | undefined)[] = [], joinString?: string):
  */
 export function getLast<T>(a: T[] = []): T | undefined {
   return a[a.length - 1];
+}
+
+/**
+ * Return the key matching the value of an object
+ */
+export function getKeyByValue<K extends string, V>(o: Record<K, V>, v: V): K | undefined {
+  const keys = Object.keys(o) as K[];
+  return keys.find(key => o[key] === v);
 }

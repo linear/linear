@@ -1,9 +1,11 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import { filterJoin, nonNullable } from "@linear/common";
+import { requiredArgs } from "args";
 import autoBind from "auto-bind";
 import {
   DocumentNode,
   FieldDefinitionNode,
+  GraphQLSchema,
   ListTypeNode,
   NamedTypeNode,
   NameNode,
@@ -11,32 +13,64 @@ import {
   ObjectTypeDefinitionNode,
   ScalarTypeDefinitionNode,
 } from "graphql";
+import c from "./constants";
 import { getTypeName } from "./field";
-import { Named, NamedFields, Scalars } from "./types";
+import { findFragment } from "./fragment";
+import { Named, NamedFields, OperationType, Scalars } from "./types";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
 export class FragmentVisitor {
+  private _schema: GraphQLSchema;
   private _scalars: Scalars = DEFAULT_SCALARS;
   private _fragments: NamedFields<ObjectTypeDefinitionNode>[] = [];
   private _objects: ObjectTypeDefinitionNode[] = [];
+  private _queries: readonly FieldDefinitionNode[] = [];
 
   /** Initialise the visitor */
-  public constructor() {
+  public constructor(schema: GraphQLSchema) {
     autoBind(this);
+
+    this._schema = schema;
   }
 
+  /**
+   * Return all scalar definitions
+   */
   public get scalars(): Scalars {
     return this._scalars;
   }
 
+  /**
+   * Return all fragment definitions
+   */
   public get fragments(): NamedFields<ObjectTypeDefinitionNode>[] {
     return this._fragments;
   }
 
+  /**
+   * Return all object definitions
+   */
   public get objects(): ObjectTypeDefinitionNode[] {
     return this._objects;
+  }
+
+  /**
+   * Return all query definitions
+   */
+  public get queries(): readonly FieldDefinitionNode[] {
+    return this._queries;
+  }
+
+  /**
+   * Return a map between operation types and the schema name
+   */
+  public get operationMap(): Record<OperationType, string> {
+    return {
+      [OperationType.query]: this._schema.getQueryType()?.name ?? "Query",
+      [OperationType.mutation]: this._schema.getMutationType()?.name ?? "Mutation",
+    };
   }
 
   public ScalarTypeDefinition = {
@@ -61,14 +95,25 @@ export class FragmentVisitor {
     /** Record all object types */
     enter: (node: ObjectTypeDefinitionNode): ObjectTypeDefinitionNode => {
       this._objects = [...this._objects, node];
+
+      if (node.name.value === this.operationMap[OperationType.query]) {
+        /** Record all queries */
+        this._queries = node.fields ?? [];
+      }
+
       return node;
     },
+
     /** Print a fragment if there are fields */
     leave: (_node: ObjectTypeDefinitionNode): string | null => {
       const node = (_node as unknown) as NamedFields<ObjectTypeDefinitionNode>;
       const hasFields = (node.fields ?? []).filter(x => Boolean(x && x !== "cursor")).length;
+      const isConnection = node.name.endsWith(c.CONNECTION_TYPE);
+      const isEdge = node.name.endsWith(c.EDGE_TYPE);
+      const isOperationRoot = Object.values(this.operationMap).includes(node.name);
 
-      if (hasFields) {
+      /** Print non empty object definitions */
+      if (hasFields && !isConnection && !isEdge && !isOperationRoot) {
         this._fragments = [...this._fragments, node];
         return filterJoin(
           [
@@ -85,10 +130,44 @@ export class FragmentVisitor {
   };
 
   public FieldDefinition = {
-    /** Print field name if it is a scalar or has a fragment */
     leave: (_node: FieldDefinitionNode): string | null => {
       const node = (_node as unknown) as Named<FieldDefinitionNode>;
-      return Object.values(this._scalars).includes(getTypeName(node.type)) ? node.name : null;
+
+      /** Print field name if it is a scalar */
+      if (Object.values(this._scalars).includes(getTypeName(node.type))) {
+        return node.name;
+      }
+
+      /** Find a query that can return this field */
+      const fragment = findFragment(this.fragments, _node);
+      const query = this.queries.find(q => {
+        const matchesType = getTypeName(q.type) === getTypeName(node.type);
+
+        return (
+          matchesType &&
+          requiredArgs(q.arguments).every(a => {
+            fragment?.fields.includes(a.name.value);
+          })
+        );
+      });
+
+      /** Get all data required for query arguments */
+      if (query) {
+        return `${node.name} {
+          ${filterJoin(
+            requiredArgs(query.arguments).map(a => a.name.value),
+            "\n"
+          )}
+        }`;
+      }
+
+      // if (fragment && ((node.type as unknown) as any).kind === Kind.LIST_TYPE) {
+      //   return `${node.name} {
+      //     ${printOperationFragment(fragment)}
+      //   }`;
+      // }
+
+      return null;
     },
   };
 
