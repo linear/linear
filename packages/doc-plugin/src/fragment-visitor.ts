@@ -1,6 +1,5 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import { filterJoin, nonNullable } from "@linear/common";
-import { requiredArgs } from "args";
 import autoBind from "auto-bind";
 import {
   DocumentNode,
@@ -13,9 +12,10 @@ import {
   ObjectTypeDefinitionNode,
   ScalarTypeDefinitionNode,
 } from "graphql";
+import { requiredArgs } from "./args";
 import c from "./constants";
 import { getTypeName } from "./field";
-import { findFragment } from "./fragment";
+import { findQuery } from "./query";
 import { Named, NamedFields, OperationType, Scalars } from "./types";
 
 /**
@@ -139,19 +139,9 @@ export class FragmentVisitor {
       }
 
       /** Find a query that can return this field */
-      const fragment = findFragment(this.fragments, _node);
-      const query = this.queries.find(q => {
-        const matchesType = getTypeName(q.type) === getTypeName(node.type);
+      const query = findQuery(this.queries, node);
 
-        return (
-          matchesType &&
-          requiredArgs(q.arguments).every(a => {
-            fragment?.fields.includes(a.name.value);
-          })
-        );
-      });
-
-      /** Get all data required for query arguments */
+      /** Get all fields required for query arguments */
       if (query) {
         return `${node.name} {
           ${filterJoin(
@@ -160,12 +150,6 @@ export class FragmentVisitor {
           )}
         }`;
       }
-
-      // if (fragment && ((node.type as unknown) as any).kind === Kind.LIST_TYPE) {
-      //   return `${node.name} {
-      //     ${printOperationFragment(fragment)}
-      //   }`;
-      // }
 
       return null;
     },

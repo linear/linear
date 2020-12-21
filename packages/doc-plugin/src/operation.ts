@@ -1,9 +1,9 @@
 import { filterJoin, getLast } from "@linear/common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode, StringValueNode } from "graphql";
-import c from "./constants";
 import { getTypeName, isScalarField, isValidField, printInputArgs, printResponseArgs } from "./field";
 import { findFragment, printOperationFragment } from "./fragment";
 import { findObject } from "./object";
+import { findQuery } from "./query";
 import { OperationType, OperationVisitorContext } from "./types";
 
 /**
@@ -92,14 +92,6 @@ export function printOperationBody(
   const lastField = getLast(fields);
 
   if (isValidField(lastField)) {
-    // /** Return id if we already have a query */
-    // const fieldType = getTypeName(lastField.type);
-    // const query = context.queries.find(q => getTypeName(q.type) === fieldType);
-    // if (query && fields.length > 1 && query.arguments?.find(a => a.name.value === c.ID_NAME)) {
-    //   console.log("-------------------- operation --> ", { lastField, query, fieldType });
-    //   return "id";
-    // }
-
     /** Spread the fragment if found */
     const fragment = findFragment(context.fragments, lastField);
     if (fragment) {
@@ -136,12 +128,11 @@ export function printFieldOperation(
 export function printOperations(
   context: OperationVisitorContext,
   type: OperationType,
-  fields: FieldDefinitionNode[],
-  index = 0
+  fields: FieldDefinitionNode[]
 ): string | undefined {
   const lastField = getLast(fields);
 
-  if (index < c.RECURSION_LIMIT && isValidField(lastField)) {
+  if (isValidField(lastField)) {
     /** Print the operation for the latest field */
     const nodeOperation = printFieldOperation(context, type, fields);
 
@@ -150,19 +141,20 @@ export function printOperations(
       const object = findObject(context.objects, lastField);
 
       const fieldOperations = (object?.fields ?? [])?.map(childField => {
-        if (isScalarField(context.scalars, childField)) {
+        if (
           /** No need to go further than scalar fields */
-          return undefined;
-        } else if (fields.map(f => getTypeName(f.type)).includes(getTypeName(childField.type))) {
+          isScalarField(context.scalars, childField) ||
           /** No need to go further if the field returns one of the parent fields */
-          return undefined;
-        } else if (["pageInfo", "nodes"].includes(childField.name.value)) {
+          fields.map(f => getTypeName(f.type)).includes(getTypeName(childField.type)) ||
           /** No need to go further if the field is a connection */
+          ["pageInfo", "nodes"].includes(childField.name.value) ||
+          /** No need to go further if we can get this field from a root query */
+          findQuery(context.queries, childField)
+        ) {
           return undefined;
         } else {
           /** For any objects create a new query for each nested field */
-          // console.log("-------------------- operation --> ", [...fields, childField]);
-          return printOperations(context, type, [...fields, childField], index + 1);
+          return printOperations(context, type, [...fields, childField]);
         }
       });
 

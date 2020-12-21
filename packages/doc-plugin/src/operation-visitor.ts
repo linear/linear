@@ -44,46 +44,8 @@ export class OperationVisitor {
     },
 
     /** Join all field operations */
-    leave: (
-      _node: ObjectTypeDefinitionNode
-      // /** The index or key to this node from the parent node or Array. */
-      // _key: string | number | undefined,
-      // /** The parent immediately above this node, which may be an Array. */
-      // _parents: ASTNode | readonly ASTNode[] | undefined,
-      // /** The key path to get to this node from the root node. */
-      // _path: readonly (string | number)[],
-      // /**
-      //  * All nodes and Arrays visited before reaching parent of this node.
-      //  * These correspond to array indices in `path`.
-      //  * Note: ancestors includes arrays which contain the parent of visited node.
-      //  */
-      // _ancestors: readonly (ASTNode | readonly ASTNode[])[]
-    ): string | null => {
+    leave: (_node: ObjectTypeDefinitionNode): string | null => {
       const node = (_node as unknown) as ObjectTypeDefinitionNode & { operationType: OperationType };
-
-      // console.log(
-      //   "-------------------- operation-visitor --> ObjectTypeDefinition",
-      //   node.name.value,
-      //   require("util").inspect(
-      //     {
-      //       parents: Array.isArray(parents)
-      //         ? parents?.map(x =>
-      //             Array.isArray(x) ? x.map(y => y?.name?.value ?? y?.type?.value) : x?.name?.value ?? x?.type?.value
-      //           )
-      //         : ((parents as unknown) as any)?.name?.value,
-      //       ancestors: Array.isArray(ancestors)
-      //         ? ancestors?.map(x =>
-      //             Array.isArray(x) ? x.map(y => y?.name?.value ?? y?.type?.value) : x?.name?.value ?? x?.type?.value
-      //           )
-      //         : ((ancestors as unknown) as any)?.name?.value,
-      //       key,
-      //       path,
-      //       node,
-      //     },
-      //     false,
-      //     null
-      //   )
-      // );
       return filterJoin(
         node.fields?.map(field => {
           return field ? printOperations(this._context, node.operationType, [field]) : undefined;
@@ -96,39 +58,11 @@ export class OperationVisitor {
   public FieldDefinition = {
     /** Filter for non scalar fields only */
     enter: (node: FieldDefinitionNode): (FieldDefinitionNode & { nullable: boolean }) | null => {
-      // console.log(
-      //   "-------------------- operation-visitor --> fielddefinition",
-      //   require("util").inspect(
-      //     { node, isSclar: Object.keys(this._context.scalars).includes(getTypeName(node.type)) },
-      //     false,
-      //     null
-      //   )
-      // );
       if (isScalarField(this._context.scalars, node)) {
         return null;
       } else {
         return { ...node, nullable: node.type.kind !== Kind.NON_NULL_TYPE };
       }
     },
-
-    // /** Print an operation for each operation type field */
-    // leave:(
-    //   /** The current node being visiting. */
-    //   node: FieldDefinitionNode,
-    //   /** The index or key to this node from the parent node or Array. */
-    //   key: string | number | undefined,
-    //   /** The parent immediately above this node, which may be an Array. */
-    //   parents: ASTNode | readonly ASTNode[] | undefined,
-    //   /** The key path to get to this node from the root node. */
-    //   path: readonly (string | number)[],
-    //   /**
-    //    * All nodes and Arrays visited before reaching parent of this node.
-    //    * These correspond to array indices in `path`.
-    //    * Note: ancestors includes arrays which contain the parent of visited node.
-    //    */
-    //   ancestors: readonly (ASTNode | readonly ASTNode[])[]
-    // ): string | null => {
-    //   return printFieldOperation(this._context, node, key, parents, path, ancestors);
-    // },
   };
 }
