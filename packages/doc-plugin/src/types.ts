@@ -1,5 +1,5 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
-import { ASTNode } from "graphql";
+import { ASTNode, FieldDefinitionNode, GraphQLSchema, ObjectTypeDefinitionNode } from "graphql";
 
 export type Scalars = typeof DEFAULT_SCALARS;
 
@@ -17,3 +17,28 @@ export type Named<T extends ASTNode> = Omit<T, "name" | "type"> & {
 export type NamedFields<T extends ASTNode> = Omit<Named<T>, "fields"> & {
   fields: string[];
 };
+
+/**
+ * Types of operation handled by the plugin
+ */
+export enum OperationType {
+  "query" = "query",
+  "mutation" = "mutation",
+}
+
+/**
+ * The processed fragment object definition
+ */
+export type Fragment = NamedFields<ObjectTypeDefinitionNode>;
+
+/**
+ * Stateful context for operation building information
+ */
+export interface OperationVisitorContext {
+  schema: GraphQLSchema;
+  scalars: Scalars;
+  fragments: Fragment[];
+  objects: ObjectTypeDefinitionNode[];
+  queries: readonly FieldDefinitionNode[];
+  operationMap: Record<string, OperationType>;
+}

@@ -1,3 +1,5 @@
 export default {
-  EDGES_NAME: "edges",
+  ID_NAME: "id",
+  SKIP_FIELDS: ["edges"],
+  RECURSION_LIMIT: 3,
 };

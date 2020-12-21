@@ -123,7 +123,7 @@
       "json"
     ],
     "testMatch": [
-      "**/*.tests.ts?(x)"
+      "**/*.test.ts?(x)"
     ],
     "transform": {
       "^.*\\.tsx?$": "ts-jest"

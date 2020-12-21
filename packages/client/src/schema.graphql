@@ -2672,7 +2672,7 @@ type Organization implements Node {
   """
   Milestones associated with the organization.
   """
-  mildestones(
+  milestones(
     """
     A cursor to be used with last for backward pagination.
     """
@@ -3829,7 +3829,7 @@ type OrganizationAdminPrivileged implements Node {
   """
   Milestones associated with the organization.
   """
-  mildestones: MilestoneConnection!
+  milestones: MilestoneConnection!
   """
   Integrations associated with the organization.
   """
@@ -4004,6 +4004,10 @@ type AuthorizedApplication {
   Scopes that are authorized for this application for a given user.
   """
   scope: [String!]!
+  """
+  OAuth application's ID.
+  """
+  appId: String!
 }
 type AuthResolverResponse {
   """
@@ -4734,6 +4738,15 @@ type Mutation {
     input: DeleteOrganizationInput!
   ): OrganizationDeletePayload!
   """
+  Deletes an integration. Superuser privileges required.
+  """
+  adminDeleteIntegration(
+    """
+    The identifier of the integration to delete.
+    """
+    id: String!
+  ): AdminIntegrationPayload!
+  """
   Disable organization access. Superuser privileges required.
   """
   organizationToggleAccess(
@@ -4874,9 +4887,18 @@ type Mutation {
   """
   emailTokenUserAccountAuth(
     """
-    The data used for email authentication.
+    The data used for token authentication.
     """
-    input: EmailUserAccountAuthInput!
+    input: TokenUserAccountAuthInput!
+  ): AuthResolverResponse!
+  """
+  Authenticates a user account via email and authentication token for SAML.
+  """
+  samlTokenUserAccountAuth(
+    """
+    The data used for token authentication.
+    """
+    input: TokenUserAccountAuthInput!
   ): AuthResolverResponse!
   """
   Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
@@ -5547,6 +5569,28 @@ type Mutation {
     id: String!
   ): ArchivePayload!
   """
+  Updates an OAuth client.
+  """
+  oauthClientRotateSecret(
+    """
+    The identifier of the OAuth client for which we want to rotate the secret.
+    """
+    id: String!
+  ): RotateSecretPayload!
+  """
+  Revokes an OAuth token.
+  """
+  oauthTokenRevoke(
+    """
+    The group of scopes for the tokens to be revoked.
+    """
+    scope: [String!]!
+    """
+    The identifier of the OAuth client for the tokens to be revoked.
+    """
+    appId: String!
+  ): OauthTokenRevokePayload!
+  """
   Verifies a domain to be added to an organization.
   """
   organizationDomainVerify(
@@ -6073,6 +6117,12 @@ input DeleteOrganizationInput {
   """
   deletionCode: String!
 }
+type AdminIntegrationPayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
 type OrganizationAccessPayload {
   """
   Whether the operation was successful.
@@ -6246,7 +6296,7 @@ type EmailUserAccountAuthChallengeResponse {
   """
   authType: String!
 }
-input EmailUserAccountAuthInput {
+input TokenUserAccountAuthInput {
   """
   The email which to login via the magic login code.
   """
@@ -7233,6 +7283,22 @@ input OauthClientUpdateInput {
   """
   imageUrl: String
 }
+type RotateSecretPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+type OauthTokenRevokePayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
 input OrganizationDomainVerificationInput {
   """
   The identifier of the domain being verified.
@@ -7977,6 +8043,7 @@ enum UserFlagType {
   figmaPromptDismissed
   migrateThemePreference
   listSelectionTip
+  canPlaySnake
 }
 type UserSubscribeToNewsletterPayload {
   """
@@ -8044,6 +8111,8 @@ enum ViewType {
   backlog
   allIssues
   customView
+  roadmap
+  projects
 }
 type ViewPreferencesPayload {
   """

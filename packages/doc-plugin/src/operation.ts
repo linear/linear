@@ -1,50 +1,10 @@
-import { filterJoin } from "@linear/common";
-import {
-  FieldDefinitionNode,
-  InputValueDefinitionNode,
-  Kind,
-  ListTypeNode,
-  NamedTypeNode,
-  NameNode,
-  NonNullTypeNode,
-  ObjectTypeDefinitionNode,
-  StringValueNode,
-  visit,
-} from "graphql";
-import { ArgumentVisitor } from "./argument-visitor";
+import { filterJoin, getLast } from "@linear/common";
+import { FieldDefinitionNode, ObjectTypeDefinitionNode, StringValueNode } from "graphql";
 import c from "./constants";
-import { NamedFields } from "./types";
-
-const argVisitor = new ArgumentVisitor();
-
-/**
- * Print the arg for passing into the operation input
- */
-function printInputArg(node: InputValueDefinitionNode): string {
-  const arg = visit(node.type, argVisitor);
-  return `$${node.name.value}: ${arg}`;
-}
-
-/**
- * Print the args list for passing into the operation input
- */
-function printInputArgs(node: FieldDefinitionNode): string {
-  return node.arguments?.length ? filterJoin(["(", ...node.arguments.map(printInputArg), ")"], "\n") : "";
-}
-
-/**
- * Print the arg for passing into the operation response
- */
-function printResponseArg(node: InputValueDefinitionNode): string {
-  return `${node.name.value}: $${node.name.value}`;
-}
-
-/**
- * Print the args list for passing into the operation response
- */
-function printResponseArgs(node: FieldDefinitionNode): string {
-  return node.arguments?.length ? filterJoin(["(", ...node.arguments.map(printResponseArg), ")"], "\n") : "";
-}
+import { getTypeName, isScalarField, isValidField, printInputArgs, printResponseArgs } from "./field";
+import { findFragment, printOperationFragment } from "./fragment";
+import { findObject } from "./object";
+import { OperationType, OperationVisitorContext } from "./types";
 
 /**
  * Print the description as a graphql file comment
@@ -56,117 +16,163 @@ export function printDescription<T extends { description?: StringValueNode }>(no
 /**
  * Print the operation wrapper
  */
-export function printOperationWrapper(
-  node: FieldDefinitionNode,
-  operationName?: string,
-  operationBody?: string
-): string {
-  return filterJoin(
-    [
-      printDescription(node),
-      `${operationName} ${node.name.value}${printInputArgs(node)} {
-        ${node.name.value}${printResponseArgs(node)} {
-          ${operationBody}
-        }
-      }`,
-    ],
-    "\n"
-  );
-}
+export function printOperationWrapper(type: OperationType, fields: FieldDefinitionNode[], body: string): string {
+  const lastField = getLast(fields);
 
-/**
- * Get the object type matching the name arg
- */
-function findObject(objects: ObjectTypeDefinitionNode[], name: string): ObjectTypeDefinitionNode | undefined {
-  return objects.find(o => o.name.value === name);
-}
+  if (isValidField(lastField)) {
+    const operationName = filterJoin(
+      fields.map(field => field.name.value),
+      "_"
+    );
 
-/**
- * Get the fragment object type matching the name arg
- */
-function findFragment(
-  fragments: NamedFields<ObjectTypeDefinitionNode>[],
-  name: string
-): NamedFields<ObjectTypeDefinitionNode> | undefined {
-  return fragments.find(o => o.name === name);
-}
-
-/**
- * Print spreading of the fragment
- */
-function printOperationFragment(fragment: NamedFields<ObjectTypeDefinitionNode>): string {
-  return `...${fragment.name}`;
+    return filterJoin(
+      [
+        printDescription(lastField),
+        `${type} ${operationName}${printInputArgs(fields)} {`,
+        fields
+          .slice()
+          .reverse()
+          .reduce((acc, field) => {
+            return `${field.name.value}${printResponseArgs(field)} {
+          ${acc === "" ? body : acc}
+        }`;
+          }, ""),
+        `}`,
+      ],
+      "\n"
+    );
+  } else {
+    return "";
+  }
 }
 
 /**
  * Nest the objects until a fragment or scalar is found
  */
 function printOperationFields(
-  object: ObjectTypeDefinitionNode,
-  fragments: NamedFields<ObjectTypeDefinitionNode>[],
-  objects: ObjectTypeDefinitionNode[]
+  context: OperationVisitorContext,
+  fields: FieldDefinitionNode[],
+  object: ObjectTypeDefinitionNode
 ): string {
-  return filterJoin(
-    object.fields?.map(field => {
-      if (field.name.value === c.EDGES_NAME) {
-        /** Skip edges as nodes are exposed */
-        return undefined;
-      } else {
-        const operation = printOperationBody(field.type, fragments, objects);
-        return operation
-          ? filterJoin(
-              [
-                printDescription(field),
-                `${field.name.value} {
-                ${operation}
-              }`,
-              ],
-              "\n"
-            )
-          : field.name.value;
-      }
-    }),
-    "\n"
-  );
-}
+  const lastField = getLast(fields);
+  return isValidField(lastField)
+    ? filterJoin(
+        object.fields?.map(field => {
+          if (isValidField(field)) {
+            const operation = printOperationBody(context, [field]);
 
-/**
- * Get the string type name from any type node
- */
-function getTypeName(type: string | NameNode | NonNullTypeNode | NamedTypeNode | ListTypeNode): string {
-  return typeof type === "string"
-    ? type
-    : type.kind === Kind.NON_NULL_TYPE
-    ? getTypeName(type.type)
-    : type.kind === Kind.NAMED_TYPE
-    ? getTypeName(type.name)
-    : type.kind === Kind.NAME
-    ? getTypeName(type.value)
-    : type.kind === Kind.LIST_TYPE
-    ? getTypeName(type.type)
-    : "UNKNOW_OPERATION_TYPE";
+            return operation
+              ? filterJoin(
+                  [
+                    printDescription(field),
+                    `${field.name.value} {
+                      ${operation}
+                    }`,
+                  ],
+                  "\n"
+                )
+              : field.name.value;
+          } else {
+            /** Skip fields that should not be exposed */
+            return undefined;
+          }
+        }),
+        "\n"
+      )
+    : "";
 }
 
 /**
  * Print the body of the operation
  */
 export function printOperationBody(
-  type: string | NonNullTypeNode | NamedTypeNode | ListTypeNode,
-  fragments: NamedFields<ObjectTypeDefinitionNode>[],
-  objects: ObjectTypeDefinitionNode[]
+  context: OperationVisitorContext,
+  fields: FieldDefinitionNode[]
 ): string | undefined {
-  const typeName = getTypeName(type);
+  const lastField = getLast(fields);
 
-  const fragment = findFragment(fragments, typeName);
-  if (fragment) {
-    return printOperationFragment(fragment);
-  } else {
-    const object = findObject(objects, typeName);
+  if (isValidField(lastField)) {
+    // /** Return id if we already have a query */
+    // const fieldType = getTypeName(lastField.type);
+    // const query = context.queries.find(q => getTypeName(q.type) === fieldType);
+    // if (query && fields.length > 1 && query.arguments?.find(a => a.name.value === c.ID_NAME)) {
+    //   console.log("-------------------- operation --> ", { lastField, query, fieldType });
+    //   return "id";
+    // }
 
+    /** Spread the fragment if found */
+    const fragment = findFragment(context.fragments, lastField);
+    if (fragment) {
+      return printOperationFragment(fragment);
+    }
+
+    /** Print each field if a matching object exists */
+    const object = findObject(context.objects, lastField);
     if (object) {
-      return printOperationFields(object, fragments, objects);
+      return printOperationFields(context, fields, object);
     }
   }
 
   return undefined;
+}
+
+export function printFieldOperation(
+  context: OperationVisitorContext,
+  type: OperationType,
+  fields: FieldDefinitionNode[]
+): string | undefined {
+  const body = printOperationBody(context, fields);
+  return body ? printOperationWrapper(type, fields, body) : undefined;
+}
+
+/**
+ * Print an operation for the node as well as a query for any nested fields
+ *
+ * @param context the operation visitor context
+ * @param type either a query or a mutation
+ * @param fields a list of fields by which to nest the query
+ * @param index the recursion index
+ */
+export function printOperations(
+  context: OperationVisitorContext,
+  type: OperationType,
+  fields: FieldDefinitionNode[],
+  index = 0
+): string | undefined {
+  const lastField = getLast(fields);
+
+  if (index < c.RECURSION_LIMIT && isValidField(lastField)) {
+    /** Print the operation for the latest field */
+    const nodeOperation = printFieldOperation(context, type, fields);
+
+    if (type === OperationType.query) {
+      /** Find an object matching the type of this query */
+      const object = findObject(context.objects, lastField);
+
+      const fieldOperations = (object?.fields ?? [])?.map(childField => {
+        if (isScalarField(context.scalars, childField)) {
+          /** No need to go further than scalar fields */
+          return undefined;
+        } else if (fields.map(f => getTypeName(f.type)).includes(getTypeName(childField.type))) {
+          /** No need to go further if the field returns one of the parent fields */
+          return undefined;
+        } else if (["pageInfo", "nodes"].includes(childField.name.value)) {
+          /** No need to go further if the field is a connection */
+          return undefined;
+        } else {
+          /** For any objects create a new query for each nested field */
+          // console.log("-------------------- operation --> ", [...fields, childField]);
+          return printOperations(context, type, [...fields, childField], index + 1);
+        }
+      });
+
+      /** Return operation for this node as well as any nested field operations */
+      return filterJoin([nodeOperation, ...fieldOperations], "\n");
+    } else {
+      /** Do not nest mutations */
+      return nodeOperation;
+    }
+  } else {
+    return undefined;
+  }
 }
