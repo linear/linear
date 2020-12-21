@@ -1,4 +1,4 @@
-import { filterJoin, lowerFirst, nonNullable } from "@linear/common";
+import { filterJoin, getLast, nonNullable } from "@linear/common";
 import { FieldNode, Kind, OperationDefinitionNode, SelectionSetNode } from "graphql";
 import { printApiFunctionName, printApiFunctionType } from "./api";
 import { ArgDefinition, getArgList } from "./args";
@@ -221,9 +221,7 @@ function printOperationBody(o: SdkVisitorOperation, config: SdkPluginConfig): st
  * Chained apis have the chain key removed from the name
  */
 export function printSdkOperationName(o: SdkVisitorOperation): string {
-  const nodeName = printOperationName(o);
-  const chainChildKey = getChainChildKey(o);
-  return chainChildKey ? lowerFirst(nodeName.replace(new RegExp(`^${chainChildKey}`, "i"), "")) : nodeName;
+  return getLast(printOperationName(o).split("_")) ?? "NO_OPERATION_NAME";
 }
 
 /**
