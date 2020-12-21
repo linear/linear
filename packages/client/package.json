@@ -22,7 +22,6 @@
     "generate": "run-s generate:clean generate:doc generate:api",
     "generate:api": "npx graphql-codegen --config codegen.api.yml",
     "generate:doc": "npx graphql-codegen --config codegen.documents.yml",
-    "generate:old": "npx graphql-codegen --config codegen.old.yml",
     "generate:clean": "npx rimraf src/_generated"
   },
   "dependencies": {
