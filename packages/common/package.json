@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "engines": {
     "node": ">=12.x",
     "yarn": "1.x"
@@ -19,6 +20,7 @@
     "build:common:clean": "npx rimraf dist"
   },
   "dependencies": {
+    "tracer": "1.1.4",
     "typescript": "4.0.5"
   }
 }

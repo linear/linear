@@ -1,6 +1,6 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, logDebug, logError, nonNullable } from "@linear/common";
+import { filterJoin, logger, nonNullable } from "@linear/common";
 import { concatAST, GraphQLSchema } from "graphql";
 import { extname } from "path";
 import { RawSdkPluginConfig } from "./config";
@@ -20,8 +20,8 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
 ) => {
   try {
     /** Process a list of documents to add information for chaining the api operations */
+    logger.info("Processing documents");
     const sdkDocuments = processSdkDocuments(documents);
-    logDebug("documents", sdkDocuments.length);
 
     /** Get all documents to be added to the root of the sdk */
     const rootDocuments = getRootDocuments(sdkDocuments);
@@ -31,23 +31,31 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
 
     /** Get a list of all fragment definitions */
     const rootFragments = getFragmentsFromAst(rootAst, config);
-    logDebug("fragments", rootFragments.length);
 
     /** Create and process a visitor for each node */
+    logger.info("Generating root sdk");
+    logger.debug({
+      sdkDocuments: sdkDocuments.length,
+      rootDocuments: rootDocuments.length,
+      rootFragments: rootFragments.length,
+    });
     const rootVisitor = createVisitor(schema, documents, rootDocuments, rootFragments, config);
 
     /** Get all chain keys to create chain apis */
     const chainKeys = getChainKeys(sdkDocuments);
 
     const chainVisitors = chainKeys.map(chainKey => {
+      logger.info(`Generating ${chainKey} sdk`);
+
       /** Get a list of documents that are attached to this chain api key */
       const chainDocuments = getChildDocuments(sdkDocuments, chainKey);
-      logDebug(chainKey, "chainDocuments", chainDocuments.length);
+      logger.debug({ [`${chainKey}Documents`]: chainDocuments.length });
 
       /** Create and process a visitor for each chained api */
       return createVisitor(schema, documents, chainDocuments, rootFragments, config, chainKey);
     });
 
+    logger.info("Printing sdk");
     return {
       /** Add any initial imports */
       prepend: [
@@ -74,7 +82,7 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
       ),
     };
   } catch (e) {
-    logError(e);
+    logger.fatal(e);
     throw e;
   }
 };
@@ -88,9 +96,11 @@ export const validate: PluginValidateFn = async (
   config: RawSdkPluginConfig,
   outputFile: string
 ) => {
-  const prefix = `Plugin "${process.env.npm_package_name}" config requires`;
+  const packageName = "@linear/sdk-plugin";
+  logger.info(`Validating ${packageName}`);
+  logger.debug({ config });
 
-  logDebug("config", config);
+  const prefix = `Plugin "${packageName}" config requires`;
 
   if (extname(outputFile) !== ".ts") {
     throw new Error(`${prefix} output file extension to be ".ts" but is "${outputFile}"`);

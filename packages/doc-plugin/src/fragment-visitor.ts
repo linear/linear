@@ -11,6 +11,7 @@ import {
   ObjectTypeDefinitionNode,
   ScalarTypeDefinitionNode,
 } from "graphql";
+import { getTypeName } from "./field";
 import { Named, NamedFields, Scalars } from "./types";
 
 /**
@@ -39,9 +40,8 @@ export class FragmentVisitor {
   }
 
   public ScalarTypeDefinition = {
-    _scalars: this._scalars,
     /** Record all scalars */
-    enter(node: ScalarTypeDefinitionNode): ScalarTypeDefinitionNode {
+    enter: (node: ScalarTypeDefinitionNode): ScalarTypeDefinitionNode => {
       this._scalars = { ...this._scalars, [node.name.value]: node.name.value };
       return node;
     },
@@ -49,7 +49,7 @@ export class FragmentVisitor {
 
   public Document = {
     /** Join all string definitions */
-    leave(node: DocumentNode): string {
+    leave: (node: DocumentNode): string => {
       return filterJoin(
         (node.definitions ?? []).map(x => (typeof x === "string" ? x : ``)),
         "\n"
@@ -58,15 +58,13 @@ export class FragmentVisitor {
   };
 
   public ObjectTypeDefinition = {
-    _fragments: this._fragments,
-    _objects: this._objects,
     /** Record all object types */
-    enter(node: ObjectTypeDefinitionNode): ObjectTypeDefinitionNode {
+    enter: (node: ObjectTypeDefinitionNode): ObjectTypeDefinitionNode => {
       this._objects = [...this._objects, node];
       return node;
     },
     /** Print a fragment if there are fields */
-    leave(_node: ObjectTypeDefinitionNode): string | null {
+    leave: (_node: ObjectTypeDefinitionNode): string | null => {
       const node = (_node as unknown) as NamedFields<ObjectTypeDefinitionNode>;
       const hasFields = (node.fields ?? []).filter(x => Boolean(x && x !== "cursor")).length;
 
@@ -87,32 +85,30 @@ export class FragmentVisitor {
   };
 
   public FieldDefinition = {
-    _scalars: this._scalars,
-    /** Print field name if it is a scalar */
-    leave(_node: FieldDefinitionNode): string | null {
+    /** Print field name if it is a scalar or has a fragment */
+    leave: (_node: FieldDefinitionNode): string | null => {
       const node = (_node as unknown) as Named<FieldDefinitionNode>;
-      return Object.values(this._scalars).includes(node.type) ? node.name : null;
+      return Object.values(this._scalars).includes(getTypeName(node.type)) ? node.name : null;
     },
   };
 
   public Name = {
     /** Print name value */
-    leave(node: NameNode): string {
+    leave: (node: NameNode): string => {
       return node.value;
     },
   };
 
   public NamedType = {
     /** Print type value using scalar map */
-    _scalars: this._scalars,
-    leave(_node: NamedTypeNode): string {
+    leave: (_node: NamedTypeNode): string => {
       const node = (_node as unknown) as Named<NamedTypeNode>;
       return this._scalars[node.name] ?? node.name;
     },
   };
 
   public NonNullType = {
-    leave(node: NonNullTypeNode, _: unknown, parent?: unknown): NamedTypeNode | NonNullTypeNode | ListTypeNode {
+    leave: (node: NonNullTypeNode, _: unknown, parent?: unknown): NamedTypeNode | NonNullTypeNode | ListTypeNode => {
       return nonNullable(parent) ? node.type : node;
     },
   };

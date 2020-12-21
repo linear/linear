@@ -1,6 +1,6 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
 import { ClientSideBaseVisitor, indentMultiline, LoadedFragment } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, logDebug } from "@linear/common";
+import { filterJoin, logger } from "@linear/common";
 import autoBind from "auto-bind";
 import { concatAST, DocumentNode, GraphQLSchema, OperationDefinitionNode, visit } from "graphql";
 import { printApiFunction, printApiFunctionName, printApiFunctionType } from "./api";
@@ -98,8 +98,10 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
     this._chainKey = chainKey;
     this._apiName = printApiFunctionName(chainKey);
     this._apiType = printApiFunctionType(chainKey);
-    logDebug(chainKey ?? "root", "apiName", this._apiName);
-    logDebug(chainKey ?? "root", "apiType", this._apiType);
+    logger.debug({
+      [`${chainKey ?? "root"}:apiName`]: this._apiName,
+      [`${chainKey ?? "root"}:apiType`]: this._apiType,
+    });
   }
 
   /**
@@ -127,7 +129,7 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
    * Return the generated sdk string content
    */
   public get sdkContent(): string {
-    logDebug(this._chainKey ?? "root", "operations", this._operationsToInclude.length);
+    logger.debug({ [`${this._chainKey ?? "root"}:operations`]: this._operationsToInclude.length });
 
     /** For each operation get the function string content */
     const content = filterJoin(

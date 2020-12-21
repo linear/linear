@@ -7,6 +7,3 @@ generates:
   src/_generated/documents.graphql:
     plugins:
       - "@linear/doc-plugin"
-  src/_generated/sdk-jsdoc.ts:
-    plugins:
-      - jsdoc

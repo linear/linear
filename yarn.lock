@@ -695,15 +695,6 @@
     "@graphql-codegen/plugin-helpers" "^1.17.9"
     tslib "~2.0.1"
 
-"@graphql-codegen/jsdoc@^1.17.9":
-  version "1.17.9"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/jsdoc/-/jsdoc-1.17.9.tgz#9fc7365bf5f8ce2f6be0c21c53956fdb43e5921f"
-  integrity sha512-8wxQ/2E12PoKuP+CC/Aol1Sso+oRccresRP6pIFrFAak9J04f+cxmGnUz+ThodeWP/u87Fs09lEioYkH7pKy4A==
-  dependencies:
-    "@graphql-codegen/plugin-helpers" "^1.18.2"
-    "@graphql-codegen/visitor-plugin-common" "^1.17.20"
-    tslib "~2.0.1"
-
 "@graphql-codegen/plugin-helpers@1.18.1", "@graphql-codegen/plugin-helpers@^1.18.1":
   version "1.18.1"
   resolved "https://registry.yarnpkg.com/@graphql-codegen/plugin-helpers/-/plugin-helpers-1.18.1.tgz#e89833cfc4b3359ed3616626e590a89077ed0da6"
@@ -819,22 +810,6 @@
     "@graphql-codegen/plugin-helpers" "^1.17.9"
     "@graphql-tools/relay-operation-optimizer" "^6"
     array.prototype.flatmap "^1.2.3"
-    auto-bind "~4.0.0"
-    dependency-graph "^0.9.0"
-    graphql-tag "^2.11.0"
-    parse-filepath "^1.0.2"
-    pascal-case "^3.1.1"
-    tslib "~2.0.1"
-
-"@graphql-codegen/visitor-plugin-common@^1.17.20":
-  version "1.17.20"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/visitor-plugin-common/-/visitor-plugin-common-1.17.20.tgz#cff95cdd49cef270b3811fdb141a412ffe2bdfd7"
-  integrity sha512-buIpcNNyTqVubknancX8m9jARCZsUA5eKuskg+CylWKL/8CSaD2Tiq7CfbbNO10o7XIgRrPtJMl1c9hQ6N4ytw==
-  dependencies:
-    "@graphql-codegen/plugin-helpers" "^1.18.2"
-    "@graphql-tools/optimize" "^1.0.1"
-    "@graphql-tools/relay-operation-optimizer" "^6"
-    array.prototype.flatmap "^1.2.4"
     auto-bind "~4.0.0"
     dependency-graph "^0.9.0"
     graphql-tag "^2.11.0"
@@ -966,13 +941,6 @@
   dependencies:
     "@graphql-tools/schema" "^7.0.0"
     "@graphql-tools/utils" "^7.0.0"
-    tslib "~2.0.1"
-
-"@graphql-tools/optimize@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@graphql-tools/optimize/-/optimize-1.0.1.tgz#9933fffc5a3c63f95102b1cb6076fb16ac7bb22d"
-  integrity sha512-cRlUNsbErYoBtzzS6zXahXeTBZGPVlPHXCpnEZ0XiK/KY/sQL96cyzak0fM/Gk6qEI9/l32MYEICjasiBQrl5w==
-  dependencies:
     tslib "~2.0.1"
 
 "@graphql-tools/prisma-loader@^6":
@@ -2767,16 +2735,6 @@ array.prototype.flatmap@^1.2.3:
     es-abstract "^1.17.0-next.1"
     function-bind "^1.1.1"
 
-array.prototype.flatmap@^1.2.4:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/array.prototype.flatmap/-/array.prototype.flatmap-1.2.4.tgz#94cfd47cc1556ec0747d97f7c7738c58122004c9"
-  integrity sha512-r9Z0zYoxqHz60vvQbWEdXIEtCwHF0yxaWfno9qzXeNHvfyl3BZqygmGzb84dsubyaXLH4husF+NFgMSdpZhk2Q==
-  dependencies:
-    call-bind "^1.0.0"
-    define-properties "^1.1.3"
-    es-abstract "^1.18.0-next.1"
-    function-bind "^1.1.1"
-
 arrify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
@@ -3517,6 +3475,11 @@ color-name@~1.1.4:
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.4.tgz#c2a09a87acbde69543de6f63fa3995c826c536a2"
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
 
+colors@1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/colors/-/colors-1.4.0.tgz#c50491479d4c1bdaed2c9ced32cf7c7dc2360f78"
+  integrity sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==
+
 columnify@^1.5.4:
   version "1.5.4"
   resolved "https://registry.yarnpkg.com/columnify/-/columnify-1.5.4.tgz#4737ddf1c7b69a8a7c340570782e947eec8e78bb"
@@ -3894,7 +3857,7 @@ date-fns@^1.27.2:
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
   integrity sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
 
-dateformat@^3.0.0:
+dateformat@3.0.3, dateformat@^3.0.0:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-3.0.3.tgz#a6e37499a4d9a9cf85ef5872044d62901c9889ae"
   integrity sha512-jyCETtSl3VMZMWeRo7iY1FL19ges1t55hMo5yaam4Jrsm5EPL89UQkoQRyiI+Yf4k8r2ZpdngkV8hr1lIdjb3Q==
@@ -9870,6 +9833,11 @@ through@2, "through@>=2.2.7 <3", through@^2.3.4, through@^2.3.6, through@^2.3.8:
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
   integrity sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=
 
+tinytim@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/tinytim/-/tinytim-0.1.1.tgz#c968a1e5559ad9553224ef7627bab34e3caef8a8"
+  integrity sha1-yWih5VWa2VUyJO92J7qzTjyu+Kg=
+
 tmp@^0.0.29:
   version "0.0.29"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.29.tgz#f25125ff0dd9da3ccb0c2dd371ee1288bb9128c0"
@@ -9966,6 +9934,16 @@ tr46@^2.0.2:
   integrity sha512-3n1qG+/5kg+jrbTzwAykB5yRYtQCTqOGKq5U5PE3b0a1/mzo6snDhjGS0zJVJunO0NrT3Dg1MLy5TjWP/UJppg==
   dependencies:
     punycode "^2.1.1"
+
+tracer@1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/tracer/-/tracer-1.1.4.tgz#6c01904be4b13b4df6a42d8850908fac2299bdd4"
+  integrity sha512-43Ws4c/V6VK9i2MLjmeYVtXZ+YUHU/qFXznJqYgI8F5nNrIQ4v9ImBAk+JjfPHS4StlpmaHzgR5qpBydbD9TkA==
+  dependencies:
+    colors "1.4.0"
+    dateformat "3.0.3"
+    mkdirp "^1.0.4"
+    tinytim "0.1.1"
 
 trim-newlines@^1.0.0:
   version "1.0.0"

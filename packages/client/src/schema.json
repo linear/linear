@@ -9096,7 +9096,7 @@
             "deprecationReason": null
           },
           {
-            "name": "mildestones",
+            "name": "milestones",
             "description": "Milestones associated with the organization.",
             "args": [
               {
@@ -14565,7 +14565,7 @@
             "deprecationReason": null
           },
           {
-            "name": "mildestones",
+            "name": "milestones",
             "description": "Milestones associated with the organization.",
             "args": [],
             "type": {
@@ -15279,6 +15279,22 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "appId",
+            "description": "OAuth application's ID.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -18591,6 +18607,37 @@
             "deprecationReason": null
           },
           {
+            "name": "adminDeleteIntegration",
+            "description": "Deletes an integration. Superuser privileges required.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the integration to delete.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AdminIntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "organizationToggleAccess",
             "description": "Disable organization access. Superuser privileges required.",
             "args": [
@@ -19101,13 +19148,44 @@
             "args": [
               {
                 "name": "input",
-                "description": "The data used for email authentication.",
+                "description": "The data used for token authentication.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "EmailUserAccountAuthInput",
+                    "name": "TokenUserAccountAuthInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AuthResolverResponse",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "samlTokenUserAccountAuth",
+            "description": "Authenticates a user account via email and authentication token for SAML.",
+            "args": [
+              {
+                "name": "input",
+                "description": "The data used for token authentication.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "TokenUserAccountAuthInput",
                     "ofType": null
                   }
                 },
@@ -21442,6 +21520,90 @@
             "deprecationReason": null
           },
           {
+            "name": "oauthClientRotateSecret",
+            "description": "Updates an OAuth client.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the OAuth client for which we want to rotate the secret.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "RotateSecretPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "oauthTokenRevoke",
+            "description": "Revokes an OAuth token.",
+            "args": [
+              {
+                "name": "scope",
+                "description": "The group of scopes for the tokens to be revoked.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "appId",
+                "description": "The identifier of the OAuth client for the tokens to be revoked.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OauthTokenRevokePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "organizationDomainVerify",
             "description": "Verifies a domain to be added to an organization.",
             "args": [
@@ -23254,6 +23416,33 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AdminIntegrationPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "OrganizationAccessPayload",
         "description": null,
         "fields": [
@@ -23885,7 +24074,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "EmailUserAccountAuthInput",
+        "name": "TokenUserAccountAuthInput",
         "description": null,
         "fields": null,
         "inputFields": [
@@ -27376,6 +27565,76 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "RotateSecretPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "lastSyncId",
+            "description": "The identifier of the last sync operation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OauthTokenRevokePayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "OrganizationDomainVerificationInput",
         "description": null,
@@ -29863,6 +30122,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "canPlaySnake",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -30100,6 +30365,18 @@
           },
           {
             "name": "customView",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "roadmap",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projects",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
