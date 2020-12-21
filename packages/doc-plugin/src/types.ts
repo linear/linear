@@ -40,5 +40,5 @@ export interface OperationVisitorContext {
   fragments: Fragment[];
   objects: ObjectTypeDefinitionNode[];
   queries: readonly FieldDefinitionNode[];
-  operationMap: Record<string, OperationType>;
+  operationMap: Record<OperationType, string>;
 }

@@ -1,10 +1,10 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin } from "@linear/common";
+import { filterJoin, getKeyByValue } from "@linear/common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, GraphQLSchema, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { isScalarField } from "./field";
 import { printOperations } from "./operation";
-import { NamedFields, OperationType, OperationVisitorContext, Scalars } from "./types";
+import { OperationType, OperationVisitorContext } from "./types";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating operations
@@ -15,32 +15,15 @@ export class OperationVisitor {
     scalars: DEFAULT_SCALARS,
     fragments: [],
     objects: [],
-    operationMap: {},
+    operationMap: { [OperationType.query]: "Query", [OperationType.mutation]: "Mutation" },
     queries: [],
   };
 
   /** Initialise the visitor */
-  public constructor(
-    schema: GraphQLSchema,
-    scalars: Scalars,
-    fragments: NamedFields<ObjectTypeDefinitionNode>[],
-    objects: ObjectTypeDefinitionNode[]
-  ) {
+  public constructor(context: OperationVisitorContext) {
     autoBind(this);
-    const queryType = schema.getQueryType()?.name ?? "Query";
-    const operationMap = {
-      [queryType]: OperationType.query,
-      [schema.getMutationType()?.name ?? "Mutation"]: OperationType.mutation,
-    };
 
-    this._context = {
-      schema,
-      scalars,
-      fragments,
-      objects,
-      operationMap,
-      queries: objects.find(o => o.name.value === queryType)?.fields ?? [],
-    };
+    this._context = context;
   }
 
   public Document = {
@@ -56,7 +39,7 @@ export class OperationVisitor {
   public ObjectTypeDefinition = {
     /** Filter for operation types only */
     enter: (node: ObjectTypeDefinitionNode): (ObjectTypeDefinitionNode & { operationType: OperationType }) | null => {
-      const operationType = this._context.operationMap[node.name.value];
+      const operationType = getKeyByValue(this._context.operationMap, node.name.value);
       return operationType ? { ...node, operationType } : null;
     },
 

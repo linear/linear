@@ -3,6 +3,7 @@ import { logger } from "@linear/common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
 import { RawDocPluginConfig } from "./config";
+import { getTypeName } from "./field";
 import { FragmentVisitor } from "./fragment-visitor";
 import { OperationVisitor } from "./operation-visitor";
 
@@ -16,19 +17,28 @@ export const plugin: PluginFunction<RawDocPluginConfig> = async (schema: GraphQL
 
     /** Generate fragments */
     logger.info("Generating fragments");
-    const fragmentVisitor = new FragmentVisitor();
+    const fragmentVisitor = new FragmentVisitor(schema);
     const fragments = visit(ast, fragmentVisitor);
     logger.debug({
       scalars: fragmentVisitor.scalars,
       fragments: fragmentVisitor.fragments.map(x => x.name),
       objects: fragmentVisitor.objects.map(x => x.name.value),
+      queries: fragmentVisitor.queries.map(x => getTypeName(x.type)),
+      operationMap: fragmentVisitor.operationMap,
     });
 
     /** Generate queries */
     logger.info("Generating operations");
     const operations = visit(
       ast,
-      new OperationVisitor(schema, fragmentVisitor.scalars, fragmentVisitor.fragments, fragmentVisitor.objects)
+      new OperationVisitor({
+        schema,
+        scalars: fragmentVisitor.scalars,
+        fragments: fragmentVisitor.fragments,
+        objects: fragmentVisitor.objects,
+        queries: fragmentVisitor.queries,
+        operationMap: fragmentVisitor.operationMap,
+      })
     );
 
     /** Print the result */
