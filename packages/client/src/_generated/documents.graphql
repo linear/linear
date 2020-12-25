@@ -111,6 +111,9 @@ fragment Team on Team {
   markedAsDuplicateWorkflowState {
     id
   }
+  activeCycle {
+    id
+  }
   cycleCalenderUrl
 }
 fragment WorkflowState on WorkflowState {

@@ -15,6 +15,7 @@
     "dev": "run-s dev:plugin:client dev:import",
     "dev:plugin:client": "run-s dev:common dev:plugin dev:client",
     "dev:doc:client": "run-s dev:common dev:plugin:doc dev:client",
+    "dev:sdk:client": "run-s dev:common dev:plugin:sdk dev:client",
     "dev:common": "lerna run dev:common",
     "dev:plugin": "lerna run dev:plugin",
     "dev:plugin:doc": "lerna run dev:plugin:doc && lerna run generate:doc",

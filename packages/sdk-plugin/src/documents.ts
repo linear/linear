@@ -2,9 +2,9 @@ import { Types } from "@graphql-codegen/plugin-helpers";
 import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { loadDocuments } from "@graphql-tools/load";
 import { nonNullable } from "@linear/common";
-import { DefinitionNode, DocumentNode, Kind } from "graphql";
+import { DefinitionNode, DocumentNode, Kind, OperationDefinitionNode } from "graphql";
 import { isChildDefinition } from "./definitions";
-import { processSdkOperation, SdkOperationDefinition } from "./operation";
+import { SdkOperationDefinition } from "./operation";
 
 /**
  * A processed document containing operations with additional detail
@@ -41,23 +41,23 @@ export function loadDocumentFiles(fileGlob: string): Promise<Types.DocumentFile[
 }
 
 /**
- * Add information for chaining to the operation definitions in each document
+ * Return all operation definitions keyed by the chain key
  */
-export function processSdkDocuments(documents: Types.DocumentFile[]): SdkDocuments {
-  const sdkDocuments: (DocumentNode | SdkDocument)[] = getDocumentNodes(documents).map(document => {
-    if (document.kind === Kind.DOCUMENT) {
-      return {
-        ...document,
-        definitions: document.definitions.map(operation => {
-          return operation.kind === Kind.OPERATION_DEFINITION ? processSdkOperation(operation) : operation;
-        }),
-      };
-    } else {
-      return document;
-    }
-  });
+export function getDocumentOperations(documents: Types.DocumentFile[]): Record<string, OperationDefinitionNode[]> {
+  const operations = getDocumentNodes(documents).reduce<OperationDefinitionNode[]>((acc, document) => {
+    return document.kind === Kind.DOCUMENT
+      ? [
+          ...acc,
+          ...(document?.definitions.filter(d => d.kind === Kind.OPERATION_DEFINITION) as OperationDefinitionNode[]),
+        ]
+      : acc;
+  }, []);
 
-  return sdkDocuments;
+  return operations.reduce<Record<string, OperationDefinitionNode[]>>((acc, definition) => {
+    const chainKey = definition.name?.value.split("_").slice(0, -1).join("_") ?? "";
+    const existing = acc[chainKey] ?? [];
+    return { ...acc, [chainKey]: [...existing, definition] };
+  }, {});
 }
 
 /**

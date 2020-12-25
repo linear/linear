@@ -882,6 +882,8 @@ export type Team = Node & {
   issues: IssueConnection;
   /** Cycles associated with the team. */
   cycles: CycleConnection;
+  /** Team's currently active cycle. */
+  activeCycle?: Maybe<Cycle>;
   /** Memberships associated with the team. */
   memberships: TeamMembershipConnection;
   /** Projects associated with the team. */
@@ -5197,6 +5199,7 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
     reviewWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     mergeWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     markedAsDuplicateWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    activeCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
   };
 
 export type WorkflowStateFragment = { __typename?: "WorkflowState" } & Pick<
@@ -10202,6 +10205,16 @@ export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
           {
             kind: "Field",
             name: { kind: "Name", value: "markedAsDuplicateWorkflowState" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "activeCycle" },
             arguments: [],
             directives: [],
             selectionSet: {
