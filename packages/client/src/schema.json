@@ -6073,6 +6073,18 @@
             "deprecationReason": null
           },
           {
+            "name": "activeCycle",
+            "description": "Team's currently active cycle.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Cycle",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "memberships",
             "description": "Memberships associated with the team.",
             "args": [

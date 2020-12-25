@@ -1803,6 +1803,10 @@ type Team implements Node {
     orderBy: PaginationOrderBy
   ): CycleConnection!
   """
+  Team's currently active cycle.
+  """
+  activeCycle: Cycle
+  """
   Memberships associated with the team.
   """
   memberships(
