@@ -125,6 +125,7 @@ export class FragmentVisitor {
         );
       }
 
+      /** Ignore this object */
       return null;
     },
   };
@@ -141,16 +142,18 @@ export class FragmentVisitor {
       /** Find a query that can return this field */
       const query = findQuery(this.queries, node);
 
-      /** Get all fields required for query arguments */
       if (query) {
-        return `${node.name} {
-          ${filterJoin(
-            requiredArgs(query.arguments).map(a => a.name.value),
-            "\n"
-          )}
-        }`;
+        /** Get all fields required for query arguments */
+        const queryRequiredArgs = requiredArgs(query.arguments).map(a => a.name.value);
+
+        return queryRequiredArgs.length
+          ? `${node.name} {
+            ${filterJoin(queryRequiredArgs, "\n")}
+          }`
+          : "";
       }
 
+      /** Ignore this field */
       return null;
     },
   };
@@ -171,6 +174,7 @@ export class FragmentVisitor {
   };
 
   public NonNullType = {
+    /** Return the non nullable type */
     leave: (node: NonNullTypeNode, _: unknown, parent?: unknown): NamedTypeNode | NonNullTypeNode | ListTypeNode => {
       return nonNullable(parent) ? node.type : node;
     },

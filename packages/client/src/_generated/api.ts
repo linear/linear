@@ -25,7 +25,6 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /** syncUpdates */
     /** archivedModelSync */
     /** archivedModelsSync */
-    /** adminUserAccountLookup */
     /** users */
     /** apiKeys */
     /** application */
@@ -84,23 +83,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /** workflowState */
     /** workflowStates */
     /** userUpdate */
-    /** userPromoteAdmin */
-    /** userDemoteAdmin */
     /** userSuspend */
     /** userUnsuspend */
     /** organizationUpdate */
     /** organizationDeleteChallenge */
     /** organizationDelete */
-    /** adminDeleteIntegration */
     /** organizationToggleAccess */
     /** organizationChangeEmailDomain */
     /** organizationToggleSamlEnabled */
     /** organizationConfigureSaml */
-    /** adminCommand */
-    /** adminBulkEmail */
-    /** adminCreateStripeCustomer */
-    /** adminScheduleAnonymousTask */
-    /** adminUserAccountChangeEmail */
     /** eventCreate */
     /** apiKeyCreate */
     /** apiKeyDelete */
@@ -251,11 +242,11 @@ export type LinearSdkUser = ReturnType<typeof createLinearSdkUser>;
 /**
  * Initialise a set of operations, scoped to user_organization, to run against the Linear api
  *
- * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
+ * @param id - id to scope the returned operations by
  * @returns The set of available operations scoped to a single user_organization
  */
-export function createLinearSdkUserOrganization<O>(id: String, requester: LinearRequester<O>) {
+export function createLinearSdkUserOrganization<O>(requester: LinearRequester<O>, id: String) {
   return {
     /** user-organization-users */
     /** user-organization-teams */
@@ -336,116 +327,6 @@ export function createLinearSdkOrganization<O>(requester: LinearRequester<O>) {
  * Initialise a set of operations, scoped to organization, to run against the Linear api
  */
 export type LinearSdkOrganization = ReturnType<typeof createLinearSdkOrganization>;
-
-/**
- * Initialise a set of operations, scoped to adminUserAccountLookup, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @returns The set of available operations scoped to a single adminUserAccountLookup
- */
-export function createLinearSdkAdminUserAccountLookup<O>(requester: LinearRequester<O>) {
-  return {
-    /** adminUserAccountLookup-users */
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkAdminUserAccountLookup
- * Initialise a set of operations, scoped to adminUserAccountLookup, to run against the Linear api
- */
-export type LinearSdkAdminUserAccountLookup = ReturnType<typeof createLinearSdkAdminUserAccountLookup>;
-
-/**
- * Initialise a set of operations, scoped to adminUserAccountLookup_users, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @returns The set of available operations scoped to a single adminUserAccountLookup_users
- */
-export function createLinearSdkAdminUserAccountLookupUsers<O>(requester: LinearRequester<O>) {
-  return {
-    /** adminUserAccountLookup-users-settings */
-    /** adminUserAccountLookup-users-assignedIssues */
-    /** adminUserAccountLookup-users-createdIssues */
-    /** adminUserAccountLookup-users-organization */
-    /** adminUserAccountLookup-users-teamMemberships */
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkAdminUserAccountLookupUsers
- * Initialise a set of operations, scoped to adminUserAccountLookup_users, to run against the Linear api
- */
-export type LinearSdkAdminUserAccountLookupUsers = ReturnType<typeof createLinearSdkAdminUserAccountLookupUsers>;
-
-/**
- * Initialise a set of operations, scoped to adminUserAccountLookup_users_organization, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @returns The set of available operations scoped to a single adminUserAccountLookup_users_organization
- */
-export function createLinearSdkAdminUserAccountLookupUsersOrganization<O>(requester: LinearRequester<O>) {
-  return {
-    /** adminUserAccountLookup-users-organization-users */
-    /** adminUserAccountLookup-users-organization-teams */
-    /** adminUserAccountLookup-users-organization-milestones */
-    /** adminUserAccountLookup-users-organization-integrations */
-    /** adminUserAccountLookup-users-organization-subscription */
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkAdminUserAccountLookupUsersOrganization
- * Initialise a set of operations, scoped to adminUserAccountLookup_users_organization, to run against the Linear api
- */
-export type LinearSdkAdminUserAccountLookupUsersOrganization = ReturnType<
-  typeof createLinearSdkAdminUserAccountLookupUsersOrganization
->;
-
-/**
- * Initialise a set of operations, scoped to adminUserAccountLookup_users_organization_subscription, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @returns The set of available operations scoped to a single adminUserAccountLookup_users_organization_subscription
- */
-export function createLinearSdkAdminUserAccountLookupUsersOrganizationSubscription<O>(requester: LinearRequester<O>) {
-  return {
-    /** adminUserAccountLookup-users-organization-subscription-organization */
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkAdminUserAccountLookupUsersOrganizationSubscription
- * Initialise a set of operations, scoped to adminUserAccountLookup_users_organization_subscription, to run against the Linear api
- */
-export type LinearSdkAdminUserAccountLookupUsersOrganizationSubscription = ReturnType<
-  typeof createLinearSdkAdminUserAccountLookupUsersOrganizationSubscription
->;
-
-/**
- * Initialise a set of operations, scoped to adminUserAccountLookup_users_organization_subscription_organization, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @returns The set of available operations scoped to a single adminUserAccountLookup_users_organization_subscription_organization
- */
-export function createLinearSdkAdminUserAccountLookupUsersOrganizationSubscriptionOrganization<O>(
-  requester: LinearRequester<O>
-) {
-  return {
-    /** adminUserAccountLookup-users-organization-subscription-organization-users */
-    /** adminUserAccountLookup-users-organization-subscription-organization-teams */
-    /** adminUserAccountLookup-users-organization-subscription-organization-milestones */
-    /** adminUserAccountLookup-users-organization-subscription-organization-integrations */
-    /** adminUserAccountLookup-users-organization-subscription-organization-subscription */
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkAdminUserAccountLookupUsersOrganizationSubscriptionOrganization
- * Initialise a set of operations, scoped to adminUserAccountLookup_users_organization_subscription_organization, to run against the Linear api
- */
-export type LinearSdkAdminUserAccountLookupUsersOrganizationSubscriptionOrganization = ReturnType<
-  typeof createLinearSdkAdminUserAccountLookupUsersOrganizationSubscriptionOrganization
->;
 
 /**
  * Initialise a set of operations, scoped to availableUsers, to run against the Linear api
@@ -547,11 +428,11 @@ export type LinearSdkCustomView = ReturnType<typeof createLinearSdkCustomView>;
 /**
  * Initialise a set of operations, scoped to customView_organization, to run against the Linear api
  *
- * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
+ * @param id - id to scope the returned operations by
  * @returns The set of available operations scoped to a single customView_organization
  */
-export function createLinearSdkCustomViewOrganization<O>(id: String, requester: LinearRequester<O>) {
+export function createLinearSdkCustomViewOrganization<O>(requester: LinearRequester<O>, id: String) {
   return {
     /** customView-organization-users */
     /** customView-organization-teams */
@@ -607,11 +488,11 @@ export type LinearSdkEmoji = ReturnType<typeof createLinearSdkEmoji>;
 /**
  * Initialise a set of operations, scoped to emoji_organization, to run against the Linear api
  *
- * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
+ * @param id - id to scope the returned operations by
  * @returns The set of available operations scoped to a single emoji_organization
  */
-export function createLinearSdkEmojiOrganization<O>(id: String, requester: LinearRequester<O>) {
+export function createLinearSdkEmojiOrganization<O>(requester: LinearRequester<O>, id: String) {
   return {
     /** emoji-organization-users */
     /** emoji-organization-teams */
@@ -667,11 +548,11 @@ export type LinearSdkIntegration = ReturnType<typeof createLinearSdkIntegration>
 /**
  * Initialise a set of operations, scoped to integration_settings, to run against the Linear api
  *
- * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
+ * @param id - id to scope the returned operations by
  * @returns The set of available operations scoped to a single integration_settings
  */
-export function createLinearSdkIntegrationSettings<O>(id: String, requester: LinearRequester<O>) {
+export function createLinearSdkIntegrationSettings<O>(requester: LinearRequester<O>, id: String) {
   return {
     /** integration-settings-slackPost */
     /** integration-settings-slackProjectPost */
@@ -689,11 +570,11 @@ export type LinearSdkIntegrationSettings = ReturnType<typeof createLinearSdkInte
 /**
  * Initialise a set of operations, scoped to integration_organization, to run against the Linear api
  *
- * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
+ * @param id - id to scope the returned operations by
  * @returns The set of available operations scoped to a single integration_organization
  */
-export function createLinearSdkIntegrationOrganization<O>(id: String, requester: LinearRequester<O>) {
+export function createLinearSdkIntegrationOrganization<O>(requester: LinearRequester<O>, id: String) {
   return {
     /** integration-organization-users */
     /** integration-organization-teams */
@@ -731,11 +612,11 @@ export type LinearSdkIntegrationResource = ReturnType<typeof createLinearSdkInte
 /**
  * Initialise a set of operations, scoped to integrationResource_data, to run against the Linear api
  *
- * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
+ * @param id - id to scope the returned operations by
  * @returns The set of available operations scoped to a single integrationResource_data
  */
-export function createLinearSdkIntegrationResourceData<O>(id: String, requester: LinearRequester<O>) {
+export function createLinearSdkIntegrationResourceData<O>(requester: LinearRequester<O>, id: String) {
   return {
     /** integrationResource-data-githubPullRequest */
     /** integrationResource-data-gitlabMergeRequest */
@@ -833,11 +714,11 @@ export type LinearSdkMilestone = ReturnType<typeof createLinearSdkMilestone>;
 /**
  * Initialise a set of operations, scoped to milestone_organization, to run against the Linear api
  *
- * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
+ * @param id - id to scope the returned operations by
  * @returns The set of available operations scoped to a single milestone_organization
  */
-export function createLinearSdkMilestoneOrganization<O>(id: String, requester: LinearRequester<O>) {
+export function createLinearSdkMilestoneOrganization<O>(requester: LinearRequester<O>, id: String) {
   return {
     /** milestone-organization-users */
     /** milestone-organization-teams */
@@ -960,11 +841,11 @@ export type LinearSdkTeam = ReturnType<typeof createLinearSdkTeam>;
 /**
  * Initialise a set of operations, scoped to team_organization, to run against the Linear api
  *
- * @param id - id to scope the returned operations by
  * @param requester - function to call the graphql client
+ * @param id - id to scope the returned operations by
  * @returns The set of available operations scoped to a single team_organization
  */
-export function createLinearSdkTeamOrganization<O>(id: String, requester: LinearRequester<O>) {
+export function createLinearSdkTeamOrganization<O>(requester: LinearRequester<O>, id: String) {
   return {
     /** team-organization-users */
     /** team-organization-teams */
