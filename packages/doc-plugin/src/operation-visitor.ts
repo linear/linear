@@ -43,7 +43,7 @@ export class OperationVisitor {
       return operationType ? { ...node, operationType } : null;
     },
 
-    /** Join all field operations */
+    /** Print all field operations */
     leave: (_node: ObjectTypeDefinitionNode): string | null => {
       const node = (_node as unknown) as ObjectTypeDefinitionNode & { operationType: OperationType };
       return filterJoin(

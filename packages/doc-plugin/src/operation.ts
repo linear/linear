@@ -123,7 +123,6 @@ export function printFieldOperation(
  * @param context the operation visitor context
  * @param type either a query or a mutation
  * @param fields a list of fields by which to nest the query
- * @param index the recursion index
  */
 export function printOperations(
   context: OperationVisitorContext,
@@ -140,21 +139,21 @@ export function printOperations(
       /** Find an object matching the type of this query */
       const object = findObject(context.objects, lastField);
 
-      const fieldOperations = (object?.fields ?? [])?.map(childField => {
+      const fieldOperations = (object?.fields ?? [])?.map(field => {
         if (
           /** No need to go further than scalar fields */
-          isScalarField(context.scalars, childField) ||
+          isScalarField(context.scalars, field) ||
           /** No need to go further if the field returns one of the parent fields */
-          fields.map(f => getTypeName(f.type)).includes(getTypeName(childField.type)) ||
+          fields.map(f => getTypeName(f.type)).includes(getTypeName(field.type)) ||
           /** No need to go further if the field is a connection */
-          ["pageInfo", "nodes"].includes(childField.name.value) ||
+          ["pageInfo", "nodes"].includes(field.name.value) ||
           /** No need to go further if we can get this field from a root query */
-          findQuery(context.queries, childField)
+          findQuery(context.queries, field)
         ) {
           return undefined;
         } else {
           /** For any objects create a new query for each nested field */
-          return printOperations(context, type, [...fields, childField]);
+          return printOperations(context, type, [...fields, field]);
         }
       });
 

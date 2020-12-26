@@ -17,6 +17,8 @@ export function findQuery(
       getTypeName(q.type) === getTypeName(field.type) &&
       /** Takes an id argument */
       requiredArgs(q.arguments)?.find(a => a.name.value === c.ID_NAME)
+      // /** Matches required arguments */
+      // JSON.stringify(requiredArgs(q.arguments)) === JSON.stringify(requiredArgs(field.arguments))
     );
   });
 }

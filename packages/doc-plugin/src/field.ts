@@ -75,7 +75,12 @@ export function isScalarField(scalars: Scalars, node: FieldDefinitionNode): bool
 
 /**
  * Determine whether to the field is valid to be output
+ *
+ * Use constant SKIP_FIELDS to skip fields with specific names
+ * Use constant SKIP_DIRECTIVES to skip fields with specific directives
  */
 export function isValidField(field?: FieldDefinitionNode): field is FieldDefinitionNode {
-  return field ? !c.SKIP_FIELDS.includes(field.name.value) : false;
+  const skipFieldName = c.SKIP_FIELDS.includes(field?.name.value ?? "");
+  const skipDirective = field?.directives?.find(d => c.SKIP_DIRECTIVES.includes(d.name.value));
+  return Boolean(field && !skipDirective && !skipFieldName);
 }
