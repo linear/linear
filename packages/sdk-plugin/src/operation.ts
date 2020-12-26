@@ -221,7 +221,7 @@ function printOperationBody(o: SdkVisitorOperation, config: SdkPluginConfig): st
  * Chained apis have the chain key removed from the name
  */
 export function printSdkOperationName(o: SdkVisitorOperation): string {
-  return getLast(printOperationName(o).split("_")) ?? "NO_OPERATION_NAME";
+  return getLast(printOperationName(o.node).split("_")) ?? "NO_OPERATION_NAME";
 }
 
 /**
