@@ -1,11 +1,11 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
-import { ClientSideBaseVisitor, indentMultiline, LoadedFragment } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, logger } from "@linear/common";
+import { ClientSideBaseVisitor, LoadedFragment } from "@graphql-codegen/visitor-plugin-common";
+import { logger } from "@linear/common";
 import autoBind from "auto-bind";
 import { concatAST, DocumentNode, GraphQLSchema, OperationDefinitionNode, visit } from "graphql";
-import { printApiFunction, printApiFunctionName, printApiFunctionType } from "./api";
+import { printApiFunctionName, printApiFunctionType } from "./api";
 import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
-import { printOperation, SdkOperationDefinition } from "./operation";
+import { SdkOperationDefinition } from "./operation";
 
 /**
  * Definition of an operation for outputting an sdk function
@@ -132,12 +132,12 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
     logger.debug({ [`${this._chainKey ?? "root"}:operations`]: this._operationsToInclude.length });
 
     /** For each operation get the function string content */
-    const content = filterJoin(
-      this._operationsToInclude.map(o => printOperation(o, this.config)).map(s => indentMultiline(s, 2)),
-      ",\n"
-    );
+    // const content = filterJoin(
+    //   this._operationsToInclude.map(o => printOperation(o, this.config)).map(s => indentMultiline(s, 2)),
+    //   ",\n"
+    // );
 
     /** Return the api  */
-    return printApiFunction(content, this._chainKey ?? "");
+    return ""; // printApiFunction(content, this._chainKey ?? "");
   }
 }
