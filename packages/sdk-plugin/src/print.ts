@@ -1,7 +1,7 @@
 import { filterJoin } from "@linear/common";
+import { OperationDefinitionNode } from "graphql";
 import { SdkPluginConfig } from "./config";
 import c from "./constants";
-import { SdkVisitorOperation } from "./sdk-visitor";
 
 /**
  * Prepend the import namespace if required
@@ -27,13 +27,13 @@ export function printDocBlock(lines: string[]): string {
 /**
  * Return the name of the operation
  */
-export function printOperationName(o: SdkVisitorOperation): string {
-  return o.node.name?.value ?? "UNKNOWN_OPERATION_NAME";
+export function printOperationName(o: OperationDefinitionNode): string {
+  return o.name?.value ?? "UNKNOWN_OPERATION_NAME";
 }
 
 /**
  * Return the type of the operation
  */
-export function printOperationType(o: SdkVisitorOperation): string {
-  return o.node.operation;
+export function printOperationType(o: OperationDefinitionNode): string {
+  return o.operation;
 }

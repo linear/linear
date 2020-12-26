@@ -96,8 +96,8 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
     autoBind(this);
 
     this._chainKey = chainKey;
-    this._apiName = printApiFunctionName(chainKey);
-    this._apiType = printApiFunctionType(chainKey);
+    this._apiName = printApiFunctionName(chainKey ?? "");
+    this._apiType = printApiFunctionType(chainKey ?? "");
     logger.debug({
       [`${chainKey ?? "root"}:apiName`]: this._apiName,
       [`${chainKey ?? "root"}:apiType`]: this._apiType,
@@ -138,6 +138,6 @@ export class SdkVisitor extends ClientSideBaseVisitor<RawSdkPluginConfig, SdkPlu
     );
 
     /** Return the api  */
-    return printApiFunction(content, this._chainKey);
+    return printApiFunction(content, this._chainKey ?? "");
   }
 }
