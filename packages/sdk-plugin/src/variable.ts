@@ -1,4 +1,4 @@
-import { Kind, VariableDefinitionNode } from "graphql";
+import { Kind, ListTypeNode, NamedTypeNode, NameNode, NonNullTypeNode, VariableDefinitionNode } from "graphql";
 import c from "./constants";
 import { getChainChildKey } from "./operation";
 import { SdkVisitorOperation } from "./sdk-visitor";
@@ -43,4 +43,21 @@ export function isIdVariable(v: VariableDefinitionNode): boolean {
  */
 export function isRequiredVariable(v: VariableDefinitionNode): boolean {
   return v.type.kind === Kind.NON_NULL_TYPE;
+}
+
+/**
+ * Get the string type name from any type node
+ */
+export function getTypeName(type: string | NameNode | NonNullTypeNode | NamedTypeNode | ListTypeNode): string {
+  return typeof type === "string"
+    ? type
+    : type.kind === Kind.NON_NULL_TYPE
+    ? getTypeName(type.type)
+    : type.kind === Kind.NAMED_TYPE
+    ? getTypeName(type.name)
+    : type.kind === Kind.NAME
+    ? getTypeName(type.value)
+    : type.kind === Kind.LIST_TYPE
+    ? getTypeName(type.type)
+    : "UNKNOWN_OPERATION_TYPE";
 }

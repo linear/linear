@@ -1,13 +1,15 @@
 import { indentMultiline } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, upperFirst } from "@linear/common";
+import { filterJoin, logger, upperFirst } from "@linear/common";
+import { VariableDefinitionNode } from "graphql";
 import { getArgList } from "./args";
 import c from "./constants";
-import { ApiDefinition, ApiDefinitions } from "./documents";
 import { printDocBlock } from "./print";
 import { getRequesterArg } from "./requester";
+import { ApiDefinition, ApiDefinitions } from "./types";
+import { getTypeName, isRequiredVariable } from "./variable";
 
 export function printOperation(apiDefinition: ApiDefinition): string {
-  return apiDefinition.path.join("-");
+  return `/** ${apiDefinition.path.join("-")} */`;
 }
 
 export function printApiDefinition(
@@ -18,10 +20,10 @@ export function printApiDefinition(
   /** For each operation get the function string content */
   const content = filterJoin(
     definitions.map(o => printOperation(o)).map(s => indentMultiline(s, 2)),
-    ",\n"
+    "\n"
   );
 
-  return printApiFunction(content, apiKey);
+  return printApiFunction(apiDefinitions, apiKey, definitions, content);
 }
 
 /**
@@ -41,25 +43,42 @@ export function printApiFunctionType(apiKey: string): string {
 /**
  * Print the api function with content
  */
-export function printApiFunction(content: string, apiKey: string): string {
+export function printApiFunction(
+  apiDefinitions: ApiDefinitions,
+  apiKey: string,
+  definitions: ApiDefinition[],
+  content: string
+): string {
   const name = printApiFunctionName(apiKey);
   const type = printApiFunctionType(apiKey);
 
+  const keys = apiKey.split("_");
+  const parentDefinitions = keys.slice(0, -1).map((key, index) => {
+    const parentKey = keys.slice(0, index).join("_");
+    return apiDefinitions[parentKey].find(
+      definition => definition.path.join("_") === keys.slice(0, index + 1).join("_")
+    );
+  });
+
+  const requiredVariables = parentDefinitions.reduce<VariableDefinitionNode[]>((acc, definition) => {
+    return [...acc, ...(definition?.operation.variableDefinitions?.filter(isRequiredVariable) ?? [])];
+  }, []);
+
+  logger.trace(apiKey, JSON.stringify(requiredVariables, null, 2));
+
   const args = getArgList([
-    /** Add an initial id arg if in a nested api */
-    // chainKey
-    //   ? {
-    //       name: c.ID_NAME,
-    //       optional: false,
-    //       type: c.ID_TYPE,
-    //       description: `${c.ID_NAME} to scope the returned operations by`,
-    //     }
-    //   : undefined,
     /** The requester function arg */
     getRequesterArg(),
+    /** Args required by the parent operations */
+    ...requiredVariables.map(v => ({
+      name: v.variable.name.value,
+      optional: false,
+      type: getTypeName(v.type),
+      description: `${v.variable.name.value} to scope the returned operations by`,
+    })),
   ]);
 
-  const apiDescription = apiKey.length
+  const apiDescription = apiKey
     ? `Initialise a set of operations, scoped to ${apiKey}, to run against the Linear api`
     : "Initialise a set of operations to run against the Linear api";
 
