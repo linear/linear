@@ -1184,17 +1184,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the userUpdate
      *
-     * @param input - input to pass into the UserUpdateQuery
-     * @param id - id to pass into the UserUpdateQuery
+     * @param input - input to pass into the UserUpdateMutation
+     * @param id - id to pass into the UserUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the UserUpdateQuery
+     * @returns The result of the UserUpdateMutation
      */
     async userUpdate(
-      input: D.Scalars["UpdateUserInput"],
+      input: D.UpdateUserInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.UserUpdateDocument>["userUpdate"]> {
-      const response = await requester<D.UserUpdateQuery, D.UserUpdateQueryVariables>(
+      const response = await requester<D.UserUpdateMutation, D.UserUpdateMutationVariables>(
         D.UserUpdateDocument,
         { input, id },
         opts
@@ -1206,15 +1206,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the userSuspend
      *
-     * @param id - id to pass into the UserSuspendQuery
+     * @param id - id to pass into the UserSuspendMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the UserSuspendQuery
+     * @returns The result of the UserSuspendMutation
      */
     async userSuspend(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.UserSuspendDocument>["userSuspend"]> {
-      const response = await requester<D.UserSuspendQuery, D.UserSuspendQueryVariables>(
+      const response = await requester<D.UserSuspendMutation, D.UserSuspendMutationVariables>(
         D.UserSuspendDocument,
         { id },
         opts
@@ -1226,15 +1226,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the userUnsuspend
      *
-     * @param id - id to pass into the UserUnsuspendQuery
+     * @param id - id to pass into the UserUnsuspendMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the UserUnsuspendQuery
+     * @returns The result of the UserUnsuspendMutation
      */
     async userUnsuspend(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.UserUnsuspendDocument>["userUnsuspend"]> {
-      const response = await requester<D.UserUnsuspendQuery, D.UserUnsuspendQueryVariables>(
+      const response = await requester<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(
         D.UserUnsuspendDocument,
         { id },
         opts
@@ -1246,15 +1246,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationUpdate
      *
-     * @param input - input to pass into the OrganizationUpdateQuery
+     * @param input - input to pass into the OrganizationUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationUpdateQuery
+     * @returns The result of the OrganizationUpdateMutation
      */
     async organizationUpdate(
-      input: D.Scalars["UpdateOrganizationInput"],
+      input: D.UpdateOrganizationInput,
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationUpdateDocument>["organizationUpdate"]> {
-      const response = await requester<D.OrganizationUpdateQuery, D.OrganizationUpdateQueryVariables>(
+      const response = await requester<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
         D.OrganizationUpdateDocument,
         { input },
         opts
@@ -1267,16 +1267,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * Call the Linear api with the organizationDeleteChallenge
      *
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationDeleteChallengeQuery
+     * @returns The result of the OrganizationDeleteChallengeMutation
      */
     async organizationDeleteChallenge(
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationDeleteChallengeDocument>["organizationDeleteChallenge"]> {
-      const response = await requester<D.OrganizationDeleteChallengeQuery, D.OrganizationDeleteChallengeQueryVariables>(
-        D.OrganizationDeleteChallengeDocument,
-        {},
-        opts
-      );
+      const response = await requester<
+        D.OrganizationDeleteChallengeMutation,
+        D.OrganizationDeleteChallengeMutationVariables
+      >(D.OrganizationDeleteChallengeDocument, {}, opts);
       return {
         ...response?.organizationDeleteChallenge,
       };
@@ -1284,15 +1283,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationDelete
      *
-     * @param input - input to pass into the OrganizationDeleteQuery
+     * @param input - input to pass into the OrganizationDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationDeleteQuery
+     * @returns The result of the OrganizationDeleteMutation
      */
     async organizationDelete(
-      input: D.Scalars["DeleteOrganizationInput"],
+      input: D.DeleteOrganizationInput,
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationDeleteDocument>["organizationDelete"]> {
-      const response = await requester<D.OrganizationDeleteQuery, D.OrganizationDeleteQueryVariables>(
+      const response = await requester<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
         D.OrganizationDeleteDocument,
         { input },
         opts
@@ -1304,15 +1303,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationToggleAccess
      *
-     * @param id - id to pass into the OrganizationToggleAccessQuery
+     * @param id - id to pass into the OrganizationToggleAccessMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationToggleAccessQuery
+     * @returns The result of the OrganizationToggleAccessMutation
      */
     async organizationToggleAccess(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationToggleAccessDocument>["organizationToggleAccess"]> {
-      const response = await requester<D.OrganizationToggleAccessQuery, D.OrganizationToggleAccessQueryVariables>(
+      const response = await requester<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
         D.OrganizationToggleAccessDocument,
         { id },
         opts
@@ -1324,11 +1323,11 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationChangeEmailDomain
      *
-     * @param toDomain - toDomain to pass into the OrganizationChangeEmailDomainQuery
-     * @param fromDomain - fromDomain to pass into the OrganizationChangeEmailDomainQuery
-     * @param id - id to pass into the OrganizationChangeEmailDomainQuery
+     * @param toDomain - toDomain to pass into the OrganizationChangeEmailDomainMutation
+     * @param fromDomain - fromDomain to pass into the OrganizationChangeEmailDomainMutation
+     * @param id - id to pass into the OrganizationChangeEmailDomainMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationChangeEmailDomainQuery
+     * @returns The result of the OrganizationChangeEmailDomainMutation
      */
     async organizationChangeEmailDomain(
       toDomain: D.Scalars["String"],
@@ -1337,8 +1336,8 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationChangeEmailDomainDocument>["organizationChangeEmailDomain"]> {
       const response = await requester<
-        D.OrganizationChangeEmailDomainQuery,
-        D.OrganizationChangeEmailDomainQueryVariables
+        D.OrganizationChangeEmailDomainMutation,
+        D.OrganizationChangeEmailDomainMutationVariables
       >(D.OrganizationChangeEmailDomainDocument, { toDomain, fromDomain, id }, opts);
       return {
         ...response?.organizationChangeEmailDomain,
@@ -1347,17 +1346,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationToggleSamlEnabled
      *
-     * @param id - id to pass into the OrganizationToggleSamlEnabledQuery
+     * @param id - id to pass into the OrganizationToggleSamlEnabledMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationToggleSamlEnabledQuery
+     * @returns The result of the OrganizationToggleSamlEnabledMutation
      */
     async organizationToggleSamlEnabled(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationToggleSamlEnabledDocument>["organizationToggleSamlEnabled"]> {
       const response = await requester<
-        D.OrganizationToggleSamlEnabledQuery,
-        D.OrganizationToggleSamlEnabledQueryVariables
+        D.OrganizationToggleSamlEnabledMutation,
+        D.OrganizationToggleSamlEnabledMutationVariables
       >(D.OrganizationToggleSamlEnabledDocument, { id }, opts);
       return {
         ...response?.organizationToggleSamlEnabled,
@@ -1366,21 +1365,20 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationConfigureSaml
      *
-     * @param samlConfiguration - samlConfiguration to pass into the OrganizationConfigureSamlQuery
-     * @param id - id to pass into the OrganizationConfigureSamlQuery
+     * @param samlConfiguration - samlConfiguration to pass into the OrganizationConfigureSamlMutation
+     * @param id - id to pass into the OrganizationConfigureSamlMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationConfigureSamlQuery
+     * @returns The result of the OrganizationConfigureSamlMutation
      */
     async organizationConfigureSaml(
-      samlConfiguration: D.Scalars["SamlConfigurationInput"],
+      samlConfiguration: D.SamlConfigurationInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationConfigureSamlDocument>["organizationConfigureSaml"]> {
-      const response = await requester<D.OrganizationConfigureSamlQuery, D.OrganizationConfigureSamlQueryVariables>(
-        D.OrganizationConfigureSamlDocument,
-        { samlConfiguration, id },
-        opts
-      );
+      const response = await requester<
+        D.OrganizationConfigureSamlMutation,
+        D.OrganizationConfigureSamlMutationVariables
+      >(D.OrganizationConfigureSamlDocument, { samlConfiguration, id }, opts);
       return {
         ...response?.organizationConfigureSaml,
       };
@@ -1388,15 +1386,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the eventCreate
      *
-     * @param input - input to pass into the EventCreateQuery
+     * @param input - input to pass into the EventCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the EventCreateQuery
+     * @returns The result of the EventCreateMutation
      */
     async eventCreate(
-      input: D.Scalars["EventCreateInput"],
+      input: D.EventCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.EventCreateDocument>["eventCreate"]> {
-      const response = await requester<D.EventCreateQuery, D.EventCreateQueryVariables>(
+      const response = await requester<D.EventCreateMutation, D.EventCreateMutationVariables>(
         D.EventCreateDocument,
         { input },
         opts
@@ -1408,15 +1406,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the apiKeyCreate
      *
-     * @param input - input to pass into the ApiKeyCreateQuery
+     * @param input - input to pass into the ApiKeyCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ApiKeyCreateQuery
+     * @returns The result of the ApiKeyCreateMutation
      */
     async apiKeyCreate(
-      input: D.Scalars["ApiKeyCreateInput"],
+      input: D.ApiKeyCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.ApiKeyCreateDocument>["apiKeyCreate"]> {
-      const response = await requester<D.ApiKeyCreateQuery, D.ApiKeyCreateQueryVariables>(
+      const response = await requester<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(
         D.ApiKeyCreateDocument,
         { input },
         opts
@@ -1428,15 +1426,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the apiKeyDelete
      *
-     * @param id - id to pass into the ApiKeyDeleteQuery
+     * @param id - id to pass into the ApiKeyDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ApiKeyDeleteQuery
+     * @returns The result of the ApiKeyDeleteMutation
      */
     async apiKeyDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ApiKeyDeleteDocument>["apiKeyDelete"]> {
-      const response = await requester<D.ApiKeyDeleteQuery, D.ApiKeyDeleteQueryVariables>(
+      const response = await requester<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(
         D.ApiKeyDeleteDocument,
         { id },
         opts
@@ -1448,17 +1446,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the emailUserAccountAuthChallenge
      *
-     * @param input - input to pass into the EmailUserAccountAuthChallengeQuery
+     * @param input - input to pass into the EmailUserAccountAuthChallengeMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the EmailUserAccountAuthChallengeQuery
+     * @returns The result of the EmailUserAccountAuthChallengeMutation
      */
     async emailUserAccountAuthChallenge(
-      input: D.Scalars["EmailUserAccountAuthChallengeInput"],
+      input: D.EmailUserAccountAuthChallengeInput,
       opts?: O
     ): Promise<ResultOf<typeof D.EmailUserAccountAuthChallengeDocument>["emailUserAccountAuthChallenge"]> {
       const response = await requester<
-        D.EmailUserAccountAuthChallengeQuery,
-        D.EmailUserAccountAuthChallengeQueryVariables
+        D.EmailUserAccountAuthChallengeMutation,
+        D.EmailUserAccountAuthChallengeMutationVariables
       >(D.EmailUserAccountAuthChallengeDocument, { input }, opts);
       return {
         ...response?.emailUserAccountAuthChallenge,
@@ -1467,19 +1465,18 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the emailTokenUserAccountAuth
      *
-     * @param input - input to pass into the EmailTokenUserAccountAuthQuery
+     * @param input - input to pass into the EmailTokenUserAccountAuthMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the EmailTokenUserAccountAuthQuery
+     * @returns The result of the EmailTokenUserAccountAuthMutation
      */
     async emailTokenUserAccountAuth(
-      input: D.Scalars["TokenUserAccountAuthInput"],
+      input: D.TokenUserAccountAuthInput,
       opts?: O
     ): Promise<ResultOf<typeof D.EmailTokenUserAccountAuthDocument>["emailTokenUserAccountAuth"]> {
-      const response = await requester<D.EmailTokenUserAccountAuthQuery, D.EmailTokenUserAccountAuthQueryVariables>(
-        D.EmailTokenUserAccountAuthDocument,
-        { input },
-        opts
-      );
+      const response = await requester<
+        D.EmailTokenUserAccountAuthMutation,
+        D.EmailTokenUserAccountAuthMutationVariables
+      >(D.EmailTokenUserAccountAuthDocument, { input }, opts);
       return {
         ...response?.emailTokenUserAccountAuth,
       };
@@ -1487,15 +1484,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the samlTokenUserAccountAuth
      *
-     * @param input - input to pass into the SamlTokenUserAccountAuthQuery
+     * @param input - input to pass into the SamlTokenUserAccountAuthMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the SamlTokenUserAccountAuthQuery
+     * @returns The result of the SamlTokenUserAccountAuthMutation
      */
     async samlTokenUserAccountAuth(
-      input: D.Scalars["TokenUserAccountAuthInput"],
+      input: D.TokenUserAccountAuthInput,
       opts?: O
     ): Promise<ResultOf<typeof D.SamlTokenUserAccountAuthDocument>["samlTokenUserAccountAuth"]> {
-      const response = await requester<D.SamlTokenUserAccountAuthQuery, D.SamlTokenUserAccountAuthQueryVariables>(
+      const response = await requester<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
         D.SamlTokenUserAccountAuthDocument,
         { input },
         opts
@@ -1507,15 +1504,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the googleUserAccountAuth
      *
-     * @param input - input to pass into the GoogleUserAccountAuthQuery
+     * @param input - input to pass into the GoogleUserAccountAuthMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the GoogleUserAccountAuthQuery
+     * @returns The result of the GoogleUserAccountAuthMutation
      */
     async googleUserAccountAuth(
-      input: D.Scalars["GoogleUserAccountAuthInput"],
+      input: D.GoogleUserAccountAuthInput,
       opts?: O
     ): Promise<ResultOf<typeof D.GoogleUserAccountAuthDocument>["googleUserAccountAuth"]> {
-      const response = await requester<D.GoogleUserAccountAuthQuery, D.GoogleUserAccountAuthQueryVariables>(
+      const response = await requester<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
         D.GoogleUserAccountAuthDocument,
         { input },
         opts
@@ -1527,19 +1524,19 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the createOrganizationFromOnboarding
      *
-     * @param input - input to pass into the CreateOrganizationFromOnboardingQuery
-     * @param vars - variables without 'input' to pass into the CreateOrganizationFromOnboardingQuery
+     * @param input - input to pass into the CreateOrganizationFromOnboardingMutation
+     * @param vars - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CreateOrganizationFromOnboardingQuery
+     * @returns The result of the CreateOrganizationFromOnboardingMutation
      */
     async createOrganizationFromOnboarding(
-      input: D.Scalars["CreateOrganizationInput"],
-      vars?: Omit<D.CreateOrganizationFromOnboardingQueryVariables, "input">,
+      input: D.CreateOrganizationInput,
+      vars?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">,
       opts?: O
     ): Promise<ResultOf<typeof D.CreateOrganizationFromOnboardingDocument>["createOrganizationFromOnboarding"]> {
       const response = await requester<
-        D.CreateOrganizationFromOnboardingQuery,
-        D.CreateOrganizationFromOnboardingQueryVariables
+        D.CreateOrganizationFromOnboardingMutation,
+        D.CreateOrganizationFromOnboardingMutationVariables
       >(D.CreateOrganizationFromOnboardingDocument, { input, ...vars }, opts);
       return {
         ...response?.createOrganizationFromOnboarding,
@@ -1548,17 +1545,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the joinOrganizationFromOnboarding
      *
-     * @param input - input to pass into the JoinOrganizationFromOnboardingQuery
+     * @param input - input to pass into the JoinOrganizationFromOnboardingMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the JoinOrganizationFromOnboardingQuery
+     * @returns The result of the JoinOrganizationFromOnboardingMutation
      */
     async joinOrganizationFromOnboarding(
-      input: D.Scalars["JoinOrganizationInput"],
+      input: D.JoinOrganizationInput,
       opts?: O
     ): Promise<ResultOf<typeof D.JoinOrganizationFromOnboardingDocument>["joinOrganizationFromOnboarding"]> {
       const response = await requester<
-        D.JoinOrganizationFromOnboardingQuery,
-        D.JoinOrganizationFromOnboardingQueryVariables
+        D.JoinOrganizationFromOnboardingMutation,
+        D.JoinOrganizationFromOnboardingMutationVariables
       >(D.JoinOrganizationFromOnboardingDocument, { input }, opts);
       return {
         ...response?.joinOrganizationFromOnboarding,
@@ -1567,15 +1564,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the leaveOrganization
      *
-     * @param organizationId - organizationId to pass into the LeaveOrganizationQuery
+     * @param organizationId - organizationId to pass into the LeaveOrganizationMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the LeaveOrganizationQuery
+     * @returns The result of the LeaveOrganizationMutation
      */
     async leaveOrganization(
       organizationId: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.LeaveOrganizationDocument>["leaveOrganization"]> {
-      const response = await requester<D.LeaveOrganizationQuery, D.LeaveOrganizationQueryVariables>(
+      const response = await requester<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
         D.LeaveOrganizationDocument,
         { organizationId },
         opts
@@ -1587,15 +1584,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the billingEmailUpdate
      *
-     * @param input - input to pass into the BillingEmailUpdateQuery
+     * @param input - input to pass into the BillingEmailUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the BillingEmailUpdateQuery
+     * @returns The result of the BillingEmailUpdateMutation
      */
     async billingEmailUpdate(
-      input: D.Scalars["BillingEmailUpdateInput"],
+      input: D.BillingEmailUpdateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.BillingEmailUpdateDocument>["billingEmailUpdate"]> {
-      const response = await requester<D.BillingEmailUpdateQuery, D.BillingEmailUpdateQueryVariables>(
+      const response = await requester<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
         D.BillingEmailUpdateDocument,
         { input },
         opts
@@ -1607,19 +1604,18 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the collaborativeDocumentUpdate
      *
-     * @param input - input to pass into the CollaborativeDocumentUpdateQuery
+     * @param input - input to pass into the CollaborativeDocumentUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CollaborativeDocumentUpdateQuery
+     * @returns The result of the CollaborativeDocumentUpdateMutation
      */
     async collaborativeDocumentUpdate(
-      input: D.Scalars["CollaborationDocumentUpdateInput"],
+      input: D.CollaborationDocumentUpdateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.CollaborativeDocumentUpdateDocument>["collaborativeDocumentUpdate"]> {
-      const response = await requester<D.CollaborativeDocumentUpdateQuery, D.CollaborativeDocumentUpdateQueryVariables>(
-        D.CollaborativeDocumentUpdateDocument,
-        { input },
-        opts
-      );
+      const response = await requester<
+        D.CollaborativeDocumentUpdateMutation,
+        D.CollaborativeDocumentUpdateMutationVariables
+      >(D.CollaborativeDocumentUpdateDocument, { input }, opts);
       return {
         ...response?.collaborativeDocumentUpdate,
       };
@@ -1627,15 +1623,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the commentCreate
      *
-     * @param input - input to pass into the CommentCreateQuery
+     * @param input - input to pass into the CommentCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CommentCreateQuery
+     * @returns The result of the CommentCreateMutation
      */
     async commentCreate(
-      input: D.Scalars["CommentCreateInput"],
+      input: D.CommentCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.CommentCreateDocument>["commentCreate"]> {
-      const response = await requester<D.CommentCreateQuery, D.CommentCreateQueryVariables>(
+      const response = await requester<D.CommentCreateMutation, D.CommentCreateMutationVariables>(
         D.CommentCreateDocument,
         { input },
         opts
@@ -1647,17 +1643,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the commentUpdate
      *
-     * @param input - input to pass into the CommentUpdateQuery
-     * @param id - id to pass into the CommentUpdateQuery
+     * @param input - input to pass into the CommentUpdateMutation
+     * @param id - id to pass into the CommentUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CommentUpdateQuery
+     * @returns The result of the CommentUpdateMutation
      */
     async commentUpdate(
-      input: D.Scalars["CommentUpdateInput"],
+      input: D.CommentUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.CommentUpdateDocument>["commentUpdate"]> {
-      const response = await requester<D.CommentUpdateQuery, D.CommentUpdateQueryVariables>(
+      const response = await requester<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(
         D.CommentUpdateDocument,
         { input, id },
         opts
@@ -1669,15 +1665,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the commentDelete
      *
-     * @param id - id to pass into the CommentDeleteQuery
+     * @param id - id to pass into the CommentDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CommentDeleteQuery
+     * @returns The result of the CommentDeleteMutation
      */
     async commentDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.CommentDeleteDocument>["commentDelete"]> {
-      const response = await requester<D.CommentDeleteQuery, D.CommentDeleteQueryVariables>(
+      const response = await requester<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(
         D.CommentDeleteDocument,
         { id },
         opts
@@ -1689,15 +1685,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the contactCreate
      *
-     * @param input - input to pass into the ContactCreateQuery
+     * @param input - input to pass into the ContactCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ContactCreateQuery
+     * @returns The result of the ContactCreateMutation
      */
     async contactCreate(
-      input: D.Scalars["ContactCreateInput"],
+      input: D.ContactCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.ContactCreateDocument>["contactCreate"]> {
-      const response = await requester<D.ContactCreateQuery, D.ContactCreateQueryVariables>(
+      const response = await requester<D.ContactCreateMutation, D.ContactCreateMutationVariables>(
         D.ContactCreateDocument,
         { input },
         opts
@@ -1709,15 +1705,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the customViewCreate
      *
-     * @param input - input to pass into the CustomViewCreateQuery
+     * @param input - input to pass into the CustomViewCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CustomViewCreateQuery
+     * @returns The result of the CustomViewCreateMutation
      */
     async customViewCreate(
-      input: D.Scalars["CustomViewCreateInput"],
+      input: D.CustomViewCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.CustomViewCreateDocument>["customViewCreate"]> {
-      const response = await requester<D.CustomViewCreateQuery, D.CustomViewCreateQueryVariables>(
+      const response = await requester<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(
         D.CustomViewCreateDocument,
         { input },
         opts
@@ -1729,17 +1725,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the customViewUpdate
      *
-     * @param input - input to pass into the CustomViewUpdateQuery
-     * @param id - id to pass into the CustomViewUpdateQuery
+     * @param input - input to pass into the CustomViewUpdateMutation
+     * @param id - id to pass into the CustomViewUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CustomViewUpdateQuery
+     * @returns The result of the CustomViewUpdateMutation
      */
     async customViewUpdate(
-      input: D.Scalars["CustomViewUpdateInput"],
+      input: D.CustomViewUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.CustomViewUpdateDocument>["customViewUpdate"]> {
-      const response = await requester<D.CustomViewUpdateQuery, D.CustomViewUpdateQueryVariables>(
+      const response = await requester<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(
         D.CustomViewUpdateDocument,
         { input, id },
         opts
@@ -1751,15 +1747,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the customViewDelete
      *
-     * @param id - id to pass into the CustomViewDeleteQuery
+     * @param id - id to pass into the CustomViewDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CustomViewDeleteQuery
+     * @returns The result of the CustomViewDeleteMutation
      */
     async customViewDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.CustomViewDeleteDocument>["customViewDelete"]> {
-      const response = await requester<D.CustomViewDeleteQuery, D.CustomViewDeleteQueryVariables>(
+      const response = await requester<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(
         D.CustomViewDeleteDocument,
         { id },
         opts
@@ -1771,15 +1767,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the cycleCreate
      *
-     * @param input - input to pass into the CycleCreateQuery
+     * @param input - input to pass into the CycleCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CycleCreateQuery
+     * @returns The result of the CycleCreateMutation
      */
     async cycleCreate(
-      input: D.Scalars["CycleCreateInput"],
+      input: D.CycleCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.CycleCreateDocument>["cycleCreate"]> {
-      const response = await requester<D.CycleCreateQuery, D.CycleCreateQueryVariables>(
+      const response = await requester<D.CycleCreateMutation, D.CycleCreateMutationVariables>(
         D.CycleCreateDocument,
         { input },
         opts
@@ -1791,17 +1787,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the cycleUpdate
      *
-     * @param input - input to pass into the CycleUpdateQuery
-     * @param id - id to pass into the CycleUpdateQuery
+     * @param input - input to pass into the CycleUpdateMutation
+     * @param id - id to pass into the CycleUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CycleUpdateQuery
+     * @returns The result of the CycleUpdateMutation
      */
     async cycleUpdate(
-      input: D.Scalars["CycleUpdateInput"],
+      input: D.CycleUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.CycleUpdateDocument>["cycleUpdate"]> {
-      const response = await requester<D.CycleUpdateQuery, D.CycleUpdateQueryVariables>(
+      const response = await requester<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(
         D.CycleUpdateDocument,
         { input, id },
         opts
@@ -1813,15 +1809,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the cycleArchive
      *
-     * @param id - id to pass into the CycleArchiveQuery
+     * @param id - id to pass into the CycleArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CycleArchiveQuery
+     * @returns The result of the CycleArchiveMutation
      */
     async cycleArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.CycleArchiveDocument>["cycleArchive"]> {
-      const response = await requester<D.CycleArchiveQuery, D.CycleArchiveQueryVariables>(
+      const response = await requester<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(
         D.CycleArchiveDocument,
         { id },
         opts
@@ -1834,16 +1830,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * Call the Linear api with the debugFailWithInternalError
      *
      * @param opts - options to pass to the graphql client
-     * @returns The result of the DebugFailWithInternalErrorQuery
+     * @returns The result of the DebugFailWithInternalErrorMutation
      */
     async debugFailWithInternalError(
       opts?: O
     ): Promise<ResultOf<typeof D.DebugFailWithInternalErrorDocument>["debugFailWithInternalError"]> {
-      const response = await requester<D.DebugFailWithInternalErrorQuery, D.DebugFailWithInternalErrorQueryVariables>(
-        D.DebugFailWithInternalErrorDocument,
-        {},
-        opts
-      );
+      const response = await requester<
+        D.DebugFailWithInternalErrorMutation,
+        D.DebugFailWithInternalErrorMutationVariables
+      >(D.DebugFailWithInternalErrorDocument, {}, opts);
       return {
         ...response?.debugFailWithInternalError,
       };
@@ -1852,12 +1847,12 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * Call the Linear api with the debugFailWithWarning
      *
      * @param opts - options to pass to the graphql client
-     * @returns The result of the DebugFailWithWarningQuery
+     * @returns The result of the DebugFailWithWarningMutation
      */
     async debugFailWithWarning(
       opts?: O
     ): Promise<ResultOf<typeof D.DebugFailWithWarningDocument>["debugFailWithWarning"]> {
-      const response = await requester<D.DebugFailWithWarningQuery, D.DebugFailWithWarningQueryVariables>(
+      const response = await requester<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
         D.DebugFailWithWarningDocument,
         {},
         opts
@@ -1870,10 +1865,10 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * Call the Linear api with the debugCreateSAMLOrg
      *
      * @param opts - options to pass to the graphql client
-     * @returns The result of the DebugCreateSamlOrgQuery
+     * @returns The result of the DebugCreateSamlOrgMutation
      */
     async debugCreateSAMLOrg(opts?: O): Promise<ResultOf<typeof D.DebugCreateSamlOrgDocument>["debugCreateSAMLOrg"]> {
-      const response = await requester<D.DebugCreateSamlOrgQuery, D.DebugCreateSamlOrgQueryVariables>(
+      const response = await requester<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
         D.DebugCreateSamlOrgDocument,
         {},
         opts
@@ -1885,15 +1880,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the emailUnsubscribe
      *
-     * @param input - input to pass into the EmailUnsubscribeQuery
+     * @param input - input to pass into the EmailUnsubscribeMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the EmailUnsubscribeQuery
+     * @returns The result of the EmailUnsubscribeMutation
      */
     async emailUnsubscribe(
-      input: D.Scalars["EmailUnsubscribeInput"],
+      input: D.EmailUnsubscribeInput,
       opts?: O
     ): Promise<ResultOf<typeof D.EmailUnsubscribeDocument>["emailUnsubscribe"]> {
-      const response = await requester<D.EmailUnsubscribeQuery, D.EmailUnsubscribeQueryVariables>(
+      const response = await requester<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(
         D.EmailUnsubscribeDocument,
         { input },
         opts
@@ -1905,15 +1900,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the emojiCreate
      *
-     * @param input - input to pass into the EmojiCreateQuery
+     * @param input - input to pass into the EmojiCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the EmojiCreateQuery
+     * @returns The result of the EmojiCreateMutation
      */
     async emojiCreate(
-      input: D.Scalars["EmojiCreateInput"],
+      input: D.EmojiCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.EmojiCreateDocument>["emojiCreate"]> {
-      const response = await requester<D.EmojiCreateQuery, D.EmojiCreateQueryVariables>(
+      const response = await requester<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(
         D.EmojiCreateDocument,
         { input },
         opts
@@ -1925,15 +1920,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the emojiDelete
      *
-     * @param id - id to pass into the EmojiDeleteQuery
+     * @param id - id to pass into the EmojiDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the EmojiDeleteQuery
+     * @returns The result of the EmojiDeleteMutation
      */
     async emojiDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.EmojiDeleteDocument>["emojiDelete"]> {
-      const response = await requester<D.EmojiDeleteQuery, D.EmojiDeleteQueryVariables>(
+      const response = await requester<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(
         D.EmojiDeleteDocument,
         { id },
         opts
@@ -1945,15 +1940,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the favoriteCreate
      *
-     * @param input - input to pass into the FavoriteCreateQuery
+     * @param input - input to pass into the FavoriteCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the FavoriteCreateQuery
+     * @returns The result of the FavoriteCreateMutation
      */
     async favoriteCreate(
-      input: D.Scalars["FavoriteCreateInput"],
+      input: D.FavoriteCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.FavoriteCreateDocument>["favoriteCreate"]> {
-      const response = await requester<D.FavoriteCreateQuery, D.FavoriteCreateQueryVariables>(
+      const response = await requester<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(
         D.FavoriteCreateDocument,
         { input },
         opts
@@ -1965,17 +1960,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the favoriteUpdate
      *
-     * @param input - input to pass into the FavoriteUpdateQuery
-     * @param id - id to pass into the FavoriteUpdateQuery
+     * @param input - input to pass into the FavoriteUpdateMutation
+     * @param id - id to pass into the FavoriteUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the FavoriteUpdateQuery
+     * @returns The result of the FavoriteUpdateMutation
      */
     async favoriteUpdate(
-      input: D.Scalars["FavoriteUpdateInput"],
+      input: D.FavoriteUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.FavoriteUpdateDocument>["favoriteUpdate"]> {
-      const response = await requester<D.FavoriteUpdateQuery, D.FavoriteUpdateQueryVariables>(
+      const response = await requester<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(
         D.FavoriteUpdateDocument,
         { input, id },
         opts
@@ -1987,15 +1982,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the favoriteDelete
      *
-     * @param id - id to pass into the FavoriteDeleteQuery
+     * @param id - id to pass into the FavoriteDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the FavoriteDeleteQuery
+     * @returns The result of the FavoriteDeleteMutation
      */
     async favoriteDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.FavoriteDeleteDocument>["favoriteDelete"]> {
-      const response = await requester<D.FavoriteDeleteQuery, D.FavoriteDeleteQueryVariables>(
+      const response = await requester<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(
         D.FavoriteDeleteDocument,
         { id },
         opts
@@ -2007,15 +2002,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the feedbackCreate
      *
-     * @param input - input to pass into the FeedbackCreateQuery
+     * @param input - input to pass into the FeedbackCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the FeedbackCreateQuery
+     * @returns The result of the FeedbackCreateMutation
      */
     async feedbackCreate(
-      input: D.Scalars["FeedbackCreateInput"],
+      input: D.FeedbackCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.FeedbackCreateDocument>["feedbackCreate"]> {
-      const response = await requester<D.FeedbackCreateQuery, D.FeedbackCreateQueryVariables>(
+      const response = await requester<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(
         D.FeedbackCreateDocument,
         { input },
         opts
@@ -2027,21 +2022,21 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the fileUpload
      *
-     * @param size - size to pass into the FileUploadQuery
-     * @param contentType - contentType to pass into the FileUploadQuery
-     * @param filename - filename to pass into the FileUploadQuery
-     * @param vars - variables without 'size', 'contentType', 'filename' to pass into the FileUploadQuery
+     * @param size - size to pass into the FileUploadMutation
+     * @param contentType - contentType to pass into the FileUploadMutation
+     * @param filename - filename to pass into the FileUploadMutation
+     * @param vars - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the FileUploadQuery
+     * @returns The result of the FileUploadMutation
      */
     async fileUpload(
       size: D.Scalars["Int"],
       contentType: D.Scalars["String"],
       filename: D.Scalars["String"],
-      vars?: Omit<D.FileUploadQueryVariables, "size" | "contentType" | "filename">,
+      vars?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">,
       opts?: O
     ): Promise<ResultOf<typeof D.FileUploadDocument>["fileUpload"]> {
-      const response = await requester<D.FileUploadQuery, D.FileUploadQueryVariables>(
+      const response = await requester<D.FileUploadMutation, D.FileUploadMutationVariables>(
         D.FileUploadDocument,
         { size, contentType, filename, ...vars },
         opts
@@ -2053,15 +2048,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the imageUploadFromUrl
      *
-     * @param url - url to pass into the ImageUploadFromUrlQuery
+     * @param url - url to pass into the ImageUploadFromUrlMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ImageUploadFromUrlQuery
+     * @returns The result of the ImageUploadFromUrlMutation
      */
     async imageUploadFromUrl(
       url: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ImageUploadFromUrlDocument>["imageUploadFromUrl"]> {
-      const response = await requester<D.ImageUploadFromUrlQuery, D.ImageUploadFromUrlQueryVariables>(
+      const response = await requester<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
         D.ImageUploadFromUrlDocument,
         { url },
         opts
@@ -2073,15 +2068,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationGithubConnect
      *
-     * @param installationId - installationId to pass into the IntegrationGithubConnectQuery
+     * @param installationId - installationId to pass into the IntegrationGithubConnectMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationGithubConnectQuery
+     * @returns The result of the IntegrationGithubConnectMutation
      */
     async integrationGithubConnect(
       installationId: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationGithubConnectDocument>["integrationGithubConnect"]> {
-      const response = await requester<D.IntegrationGithubConnectQuery, D.IntegrationGithubConnectQueryVariables>(
+      const response = await requester<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
         D.IntegrationGithubConnectDocument,
         { installationId },
         opts
@@ -2093,17 +2088,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationGitlabConnect
      *
-     * @param gitlabUrl - gitlabUrl to pass into the IntegrationGitlabConnectQuery
-     * @param accessToken - accessToken to pass into the IntegrationGitlabConnectQuery
+     * @param gitlabUrl - gitlabUrl to pass into the IntegrationGitlabConnectMutation
+     * @param accessToken - accessToken to pass into the IntegrationGitlabConnectMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationGitlabConnectQuery
+     * @returns The result of the IntegrationGitlabConnectMutation
      */
     async integrationGitlabConnect(
       gitlabUrl: D.Scalars["String"],
       accessToken: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationGitlabConnectDocument>["integrationGitlabConnect"]> {
-      const response = await requester<D.IntegrationGitlabConnectQuery, D.IntegrationGitlabConnectQueryVariables>(
+      const response = await requester<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
         D.IntegrationGitlabConnectDocument,
         { gitlabUrl, accessToken },
         opts
@@ -2115,19 +2110,19 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationSlack
      *
-     * @param redirectUri - redirectUri to pass into the IntegrationSlackQuery
-     * @param code - code to pass into the IntegrationSlackQuery
-     * @param vars - variables without 'redirectUri', 'code' to pass into the IntegrationSlackQuery
+     * @param redirectUri - redirectUri to pass into the IntegrationSlackMutation
+     * @param code - code to pass into the IntegrationSlackMutation
+     * @param vars - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationSlackQuery
+     * @returns The result of the IntegrationSlackMutation
      */
     async integrationSlack(
       redirectUri: D.Scalars["String"],
       code: D.Scalars["String"],
-      vars?: Omit<D.IntegrationSlackQueryVariables, "redirectUri" | "code">,
+      vars?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">,
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationSlackDocument>["integrationSlack"]> {
-      const response = await requester<D.IntegrationSlackQuery, D.IntegrationSlackQueryVariables>(
+      const response = await requester<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(
         D.IntegrationSlackDocument,
         { redirectUri, code, ...vars },
         opts
@@ -2139,17 +2134,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationSlackPersonal
      *
-     * @param redirectUri - redirectUri to pass into the IntegrationSlackPersonalQuery
-     * @param code - code to pass into the IntegrationSlackPersonalQuery
+     * @param redirectUri - redirectUri to pass into the IntegrationSlackPersonalMutation
+     * @param code - code to pass into the IntegrationSlackPersonalMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationSlackPersonalQuery
+     * @returns The result of the IntegrationSlackPersonalMutation
      */
     async integrationSlackPersonal(
       redirectUri: D.Scalars["String"],
       code: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationSlackPersonalDocument>["integrationSlackPersonal"]> {
-      const response = await requester<D.IntegrationSlackPersonalQuery, D.IntegrationSlackPersonalQueryVariables>(
+      const response = await requester<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
         D.IntegrationSlackPersonalDocument,
         { redirectUri, code },
         opts
@@ -2161,21 +2156,21 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationSlackPost
      *
-     * @param redirectUri - redirectUri to pass into the IntegrationSlackPostQuery
-     * @param teamId - teamId to pass into the IntegrationSlackPostQuery
-     * @param code - code to pass into the IntegrationSlackPostQuery
-     * @param vars - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostQuery
+     * @param redirectUri - redirectUri to pass into the IntegrationSlackPostMutation
+     * @param teamId - teamId to pass into the IntegrationSlackPostMutation
+     * @param code - code to pass into the IntegrationSlackPostMutation
+     * @param vars - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationSlackPostQuery
+     * @returns The result of the IntegrationSlackPostMutation
      */
     async integrationSlackPost(
       redirectUri: D.Scalars["String"],
       teamId: D.Scalars["String"],
       code: D.Scalars["String"],
-      vars?: Omit<D.IntegrationSlackPostQueryVariables, "redirectUri" | "teamId" | "code">,
+      vars?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">,
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationSlackPostDocument>["integrationSlackPost"]> {
-      const response = await requester<D.IntegrationSlackPostQuery, D.IntegrationSlackPostQueryVariables>(
+      const response = await requester<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
         D.IntegrationSlackPostDocument,
         { redirectUri, teamId, code, ...vars },
         opts
@@ -2187,11 +2182,11 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationSlackProjectPost
      *
-     * @param redirectUri - redirectUri to pass into the IntegrationSlackProjectPostQuery
-     * @param projectId - projectId to pass into the IntegrationSlackProjectPostQuery
-     * @param code - code to pass into the IntegrationSlackProjectPostQuery
+     * @param redirectUri - redirectUri to pass into the IntegrationSlackProjectPostMutation
+     * @param projectId - projectId to pass into the IntegrationSlackProjectPostMutation
+     * @param code - code to pass into the IntegrationSlackProjectPostMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationSlackProjectPostQuery
+     * @returns The result of the IntegrationSlackProjectPostMutation
      */
     async integrationSlackProjectPost(
       redirectUri: D.Scalars["String"],
@@ -2199,11 +2194,10 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       code: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationSlackProjectPostDocument>["integrationSlackProjectPost"]> {
-      const response = await requester<D.IntegrationSlackProjectPostQuery, D.IntegrationSlackProjectPostQueryVariables>(
-        D.IntegrationSlackProjectPostDocument,
-        { redirectUri, projectId, code },
-        opts
-      );
+      const response = await requester<
+        D.IntegrationSlackProjectPostMutation,
+        D.IntegrationSlackProjectPostMutationVariables
+      >(D.IntegrationSlackProjectPostDocument, { redirectUri, projectId, code }, opts);
       return {
         ...response?.integrationSlackProjectPost,
       };
@@ -2211,10 +2205,10 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationSlackImportEmojis
      *
-     * @param redirectUri - redirectUri to pass into the IntegrationSlackImportEmojisQuery
-     * @param code - code to pass into the IntegrationSlackImportEmojisQuery
+     * @param redirectUri - redirectUri to pass into the IntegrationSlackImportEmojisMutation
+     * @param code - code to pass into the IntegrationSlackImportEmojisMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationSlackImportEmojisQuery
+     * @returns The result of the IntegrationSlackImportEmojisMutation
      */
     async integrationSlackImportEmojis(
       redirectUri: D.Scalars["String"],
@@ -2222,8 +2216,8 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationSlackImportEmojisDocument>["integrationSlackImportEmojis"]> {
       const response = await requester<
-        D.IntegrationSlackImportEmojisQuery,
-        D.IntegrationSlackImportEmojisQueryVariables
+        D.IntegrationSlackImportEmojisMutation,
+        D.IntegrationSlackImportEmojisMutationVariables
       >(D.IntegrationSlackImportEmojisDocument, { redirectUri, code }, opts);
       return {
         ...response?.integrationSlackImportEmojis,
@@ -2232,17 +2226,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationFigma
      *
-     * @param redirectUri - redirectUri to pass into the IntegrationFigmaQuery
-     * @param code - code to pass into the IntegrationFigmaQuery
+     * @param redirectUri - redirectUri to pass into the IntegrationFigmaMutation
+     * @param code - code to pass into the IntegrationFigmaMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationFigmaQuery
+     * @returns The result of the IntegrationFigmaMutation
      */
     async integrationFigma(
       redirectUri: D.Scalars["String"],
       code: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationFigmaDocument>["integrationFigma"]> {
-      const response = await requester<D.IntegrationFigmaQuery, D.IntegrationFigmaQueryVariables>(
+      const response = await requester<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(
         D.IntegrationFigmaDocument,
         { redirectUri, code },
         opts
@@ -2254,15 +2248,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationGoogleSheets
      *
-     * @param code - code to pass into the IntegrationGoogleSheetsQuery
+     * @param code - code to pass into the IntegrationGoogleSheetsMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationGoogleSheetsQuery
+     * @returns The result of the IntegrationGoogleSheetsMutation
      */
     async integrationGoogleSheets(
       code: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationGoogleSheetsDocument>["integrationGoogleSheets"]> {
-      const response = await requester<D.IntegrationGoogleSheetsQuery, D.IntegrationGoogleSheetsQueryVariables>(
+      const response = await requester<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
         D.IntegrationGoogleSheetsDocument,
         { code },
         opts
@@ -2274,15 +2268,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the refreshGoogleSheetsData
      *
-     * @param id - id to pass into the RefreshGoogleSheetsDataQuery
+     * @param id - id to pass into the RefreshGoogleSheetsDataMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the RefreshGoogleSheetsDataQuery
+     * @returns The result of the RefreshGoogleSheetsDataMutation
      */
     async refreshGoogleSheetsData(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.RefreshGoogleSheetsDataDocument>["refreshGoogleSheetsData"]> {
-      const response = await requester<D.RefreshGoogleSheetsDataQuery, D.RefreshGoogleSheetsDataQueryVariables>(
+      const response = await requester<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
         D.RefreshGoogleSheetsDataDocument,
         { id },
         opts
@@ -2294,11 +2288,11 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationSentryConnect
      *
-     * @param organizationSlug - organizationSlug to pass into the IntegrationSentryConnectQuery
-     * @param code - code to pass into the IntegrationSentryConnectQuery
-     * @param installationId - installationId to pass into the IntegrationSentryConnectQuery
+     * @param organizationSlug - organizationSlug to pass into the IntegrationSentryConnectMutation
+     * @param code - code to pass into the IntegrationSentryConnectMutation
+     * @param installationId - installationId to pass into the IntegrationSentryConnectMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationSentryConnectQuery
+     * @returns The result of the IntegrationSentryConnectMutation
      */
     async integrationSentryConnect(
       organizationSlug: D.Scalars["String"],
@@ -2306,7 +2300,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       installationId: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationSentryConnectDocument>["integrationSentryConnect"]> {
-      const response = await requester<D.IntegrationSentryConnectQuery, D.IntegrationSentryConnectQueryVariables>(
+      const response = await requester<D.IntegrationSentryConnectMutation, D.IntegrationSentryConnectMutationVariables>(
         D.IntegrationSentryConnectDocument,
         { organizationSlug, code, installationId },
         opts
@@ -2318,15 +2312,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationDelete
      *
-     * @param id - id to pass into the IntegrationDeleteQuery
+     * @param id - id to pass into the IntegrationDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationDeleteQuery
+     * @returns The result of the IntegrationDeleteMutation
      */
     async integrationDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationDeleteDocument>["integrationDelete"]> {
-      const response = await requester<D.IntegrationDeleteQuery, D.IntegrationDeleteQueryVariables>(
+      const response = await requester<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
         D.IntegrationDeleteDocument,
         { id },
         opts
@@ -2338,19 +2332,18 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the integrationResourceArchive
      *
-     * @param id - id to pass into the IntegrationResourceArchiveQuery
+     * @param id - id to pass into the IntegrationResourceArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationResourceArchiveQuery
+     * @returns The result of the IntegrationResourceArchiveMutation
      */
     async integrationResourceArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IntegrationResourceArchiveDocument>["integrationResourceArchive"]> {
-      const response = await requester<D.IntegrationResourceArchiveQuery, D.IntegrationResourceArchiveQueryVariables>(
-        D.IntegrationResourceArchiveDocument,
-        { id },
-        opts
-      );
+      const response = await requester<
+        D.IntegrationResourceArchiveMutation,
+        D.IntegrationResourceArchiveMutationVariables
+      >(D.IntegrationResourceArchiveDocument, { id }, opts);
       return {
         ...response?.integrationResourceArchive,
       };
@@ -2358,15 +2351,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueLabelCreate
      *
-     * @param input - input to pass into the IssueLabelCreateQuery
+     * @param input - input to pass into the IssueLabelCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueLabelCreateQuery
+     * @returns The result of the IssueLabelCreateMutation
      */
     async issueLabelCreate(
-      input: D.Scalars["IssueLabelCreateInput"],
+      input: D.IssueLabelCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.IssueLabelCreateDocument>["issueLabelCreate"]> {
-      const response = await requester<D.IssueLabelCreateQuery, D.IssueLabelCreateQueryVariables>(
+      const response = await requester<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(
         D.IssueLabelCreateDocument,
         { input },
         opts
@@ -2378,17 +2371,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueLabelUpdate
      *
-     * @param input - input to pass into the IssueLabelUpdateQuery
-     * @param id - id to pass into the IssueLabelUpdateQuery
+     * @param input - input to pass into the IssueLabelUpdateMutation
+     * @param id - id to pass into the IssueLabelUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueLabelUpdateQuery
+     * @returns The result of the IssueLabelUpdateMutation
      */
     async issueLabelUpdate(
-      input: D.Scalars["IssueLabelUpdateInput"],
+      input: D.IssueLabelUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IssueLabelUpdateDocument>["issueLabelUpdate"]> {
-      const response = await requester<D.IssueLabelUpdateQuery, D.IssueLabelUpdateQueryVariables>(
+      const response = await requester<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(
         D.IssueLabelUpdateDocument,
         { input, id },
         opts
@@ -2400,15 +2393,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueLabelArchive
      *
-     * @param id - id to pass into the IssueLabelArchiveQuery
+     * @param id - id to pass into the IssueLabelArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueLabelArchiveQuery
+     * @returns The result of the IssueLabelArchiveMutation
      */
     async issueLabelArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IssueLabelArchiveDocument>["issueLabelArchive"]> {
-      const response = await requester<D.IssueLabelArchiveQuery, D.IssueLabelArchiveQueryVariables>(
+      const response = await requester<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
         D.IssueLabelArchiveDocument,
         { id },
         opts
@@ -2420,15 +2413,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueRelationCreate
      *
-     * @param input - input to pass into the IssueRelationCreateQuery
+     * @param input - input to pass into the IssueRelationCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueRelationCreateQuery
+     * @returns The result of the IssueRelationCreateMutation
      */
     async issueRelationCreate(
-      input: D.Scalars["IssueRelationCreateInput"],
+      input: D.IssueRelationCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.IssueRelationCreateDocument>["issueRelationCreate"]> {
-      const response = await requester<D.IssueRelationCreateQuery, D.IssueRelationCreateQueryVariables>(
+      const response = await requester<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
         D.IssueRelationCreateDocument,
         { input },
         opts
@@ -2440,17 +2433,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueRelationUpdate
      *
-     * @param input - input to pass into the IssueRelationUpdateQuery
-     * @param id - id to pass into the IssueRelationUpdateQuery
+     * @param input - input to pass into the IssueRelationUpdateMutation
+     * @param id - id to pass into the IssueRelationUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueRelationUpdateQuery
+     * @returns The result of the IssueRelationUpdateMutation
      */
     async issueRelationUpdate(
-      input: D.Scalars["IssueRelationUpdateInput"],
+      input: D.IssueRelationUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IssueRelationUpdateDocument>["issueRelationUpdate"]> {
-      const response = await requester<D.IssueRelationUpdateQuery, D.IssueRelationUpdateQueryVariables>(
+      const response = await requester<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
         D.IssueRelationUpdateDocument,
         { input, id },
         opts
@@ -2462,15 +2455,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueRelationDelete
      *
-     * @param id - id to pass into the IssueRelationDeleteQuery
+     * @param id - id to pass into the IssueRelationDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueRelationDeleteQuery
+     * @returns The result of the IssueRelationDeleteMutation
      */
     async issueRelationDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IssueRelationDeleteDocument>["issueRelationDelete"]> {
-      const response = await requester<D.IssueRelationDeleteQuery, D.IssueRelationDeleteQueryVariables>(
+      const response = await requester<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
         D.IssueRelationDeleteDocument,
         { id },
         opts
@@ -2482,15 +2475,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueCreate
      *
-     * @param input - input to pass into the IssueCreateQuery
+     * @param input - input to pass into the IssueCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueCreateQuery
+     * @returns The result of the IssueCreateMutation
      */
     async issueCreate(
-      input: D.Scalars["IssueCreateInput"],
+      input: D.IssueCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.IssueCreateDocument>["issueCreate"]> {
-      const response = await requester<D.IssueCreateQuery, D.IssueCreateQueryVariables>(
+      const response = await requester<D.IssueCreateMutation, D.IssueCreateMutationVariables>(
         D.IssueCreateDocument,
         { input },
         opts
@@ -2502,17 +2495,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueUpdate
      *
-     * @param input - input to pass into the IssueUpdateQuery
-     * @param id - id to pass into the IssueUpdateQuery
+     * @param input - input to pass into the IssueUpdateMutation
+     * @param id - id to pass into the IssueUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueUpdateQuery
+     * @returns The result of the IssueUpdateMutation
      */
     async issueUpdate(
-      input: D.Scalars["IssueUpdateInput"],
+      input: D.IssueUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IssueUpdateDocument>["issueUpdate"]> {
-      const response = await requester<D.IssueUpdateQuery, D.IssueUpdateQueryVariables>(
+      const response = await requester<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(
         D.IssueUpdateDocument,
         { input, id },
         opts
@@ -2524,15 +2517,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueArchive
      *
-     * @param id - id to pass into the IssueArchiveQuery
+     * @param id - id to pass into the IssueArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueArchiveQuery
+     * @returns The result of the IssueArchiveMutation
      */
     async issueArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IssueArchiveDocument>["issueArchive"]> {
-      const response = await requester<D.IssueArchiveQuery, D.IssueArchiveQueryVariables>(
+      const response = await requester<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(
         D.IssueArchiveDocument,
         { id },
         opts
@@ -2544,15 +2537,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the issueUnarchive
      *
-     * @param id - id to pass into the IssueUnarchiveQuery
+     * @param id - id to pass into the IssueUnarchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the IssueUnarchiveQuery
+     * @returns The result of the IssueUnarchiveMutation
      */
     async issueUnarchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.IssueUnarchiveDocument>["issueUnarchive"]> {
-      const response = await requester<D.IssueUnarchiveQuery, D.IssueUnarchiveQueryVariables>(
+      const response = await requester<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(
         D.IssueUnarchiveDocument,
         { id },
         opts
@@ -2564,15 +2557,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the milestoneCreate
      *
-     * @param input - input to pass into the MilestoneCreateQuery
+     * @param input - input to pass into the MilestoneCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the MilestoneCreateQuery
+     * @returns The result of the MilestoneCreateMutation
      */
     async milestoneCreate(
-      input: D.Scalars["MilestoneCreateInput"],
+      input: D.MilestoneCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.MilestoneCreateDocument>["milestoneCreate"]> {
-      const response = await requester<D.MilestoneCreateQuery, D.MilestoneCreateQueryVariables>(
+      const response = await requester<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(
         D.MilestoneCreateDocument,
         { input },
         opts
@@ -2584,17 +2577,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the milestoneUpdate
      *
-     * @param input - input to pass into the MilestoneUpdateQuery
-     * @param id - id to pass into the MilestoneUpdateQuery
+     * @param input - input to pass into the MilestoneUpdateMutation
+     * @param id - id to pass into the MilestoneUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the MilestoneUpdateQuery
+     * @returns The result of the MilestoneUpdateMutation
      */
     async milestoneUpdate(
-      input: D.Scalars["MilestoneUpdateInput"],
+      input: D.MilestoneUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.MilestoneUpdateDocument>["milestoneUpdate"]> {
-      const response = await requester<D.MilestoneUpdateQuery, D.MilestoneUpdateQueryVariables>(
+      const response = await requester<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(
         D.MilestoneUpdateDocument,
         { input, id },
         opts
@@ -2606,15 +2599,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the milestoneDelete
      *
-     * @param id - id to pass into the MilestoneDeleteQuery
+     * @param id - id to pass into the MilestoneDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the MilestoneDeleteQuery
+     * @returns The result of the MilestoneDeleteMutation
      */
     async milestoneDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.MilestoneDeleteDocument>["milestoneDelete"]> {
-      const response = await requester<D.MilestoneDeleteQuery, D.MilestoneDeleteQueryVariables>(
+      const response = await requester<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(
         D.MilestoneDeleteDocument,
         { id },
         opts
@@ -2626,17 +2619,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the notificationCreate
      *
-     * @param input - input to pass into the NotificationCreateQuery
-     * @param id - id to pass into the NotificationCreateQuery
+     * @param input - input to pass into the NotificationCreateMutation
+     * @param id - id to pass into the NotificationCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the NotificationCreateQuery
+     * @returns The result of the NotificationCreateMutation
      */
     async notificationCreate(
-      input: D.Scalars["NotificationUpdateInput"],
+      input: D.NotificationUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.NotificationCreateDocument>["notificationCreate"]> {
-      const response = await requester<D.NotificationCreateQuery, D.NotificationCreateQueryVariables>(
+      const response = await requester<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
         D.NotificationCreateDocument,
         { input, id },
         opts
@@ -2648,17 +2641,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the notificationUpdate
      *
-     * @param input - input to pass into the NotificationUpdateQuery
-     * @param id - id to pass into the NotificationUpdateQuery
+     * @param input - input to pass into the NotificationUpdateMutation
+     * @param id - id to pass into the NotificationUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the NotificationUpdateQuery
+     * @returns The result of the NotificationUpdateMutation
      */
     async notificationUpdate(
-      input: D.Scalars["NotificationUpdateInput"],
+      input: D.NotificationUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.NotificationUpdateDocument>["notificationUpdate"]> {
-      const response = await requester<D.NotificationUpdateQuery, D.NotificationUpdateQueryVariables>(
+      const response = await requester<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
         D.NotificationUpdateDocument,
         { input, id },
         opts
@@ -2670,15 +2663,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the notificationDelete
      *
-     * @param id - id to pass into the NotificationDeleteQuery
+     * @param id - id to pass into the NotificationDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the NotificationDeleteQuery
+     * @returns The result of the NotificationDeleteMutation
      */
     async notificationDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.NotificationDeleteDocument>["notificationDelete"]> {
-      const response = await requester<D.NotificationDeleteQuery, D.NotificationDeleteQueryVariables>(
+      const response = await requester<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
         D.NotificationDeleteDocument,
         { id },
         opts
@@ -2690,15 +2683,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the notificationArchive
      *
-     * @param id - id to pass into the NotificationArchiveQuery
+     * @param id - id to pass into the NotificationArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the NotificationArchiveQuery
+     * @returns The result of the NotificationArchiveMutation
      */
     async notificationArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.NotificationArchiveDocument>["notificationArchive"]> {
-      const response = await requester<D.NotificationArchiveQuery, D.NotificationArchiveQueryVariables>(
+      const response = await requester<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
         D.NotificationArchiveDocument,
         { id },
         opts
@@ -2710,15 +2703,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the notificationUnarchive
      *
-     * @param id - id to pass into the NotificationUnarchiveQuery
+     * @param id - id to pass into the NotificationUnarchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the NotificationUnarchiveQuery
+     * @returns The result of the NotificationUnarchiveMutation
      */
     async notificationUnarchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.NotificationUnarchiveDocument>["notificationUnarchive"]> {
-      const response = await requester<D.NotificationUnarchiveQuery, D.NotificationUnarchiveQueryVariables>(
+      const response = await requester<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
         D.NotificationUnarchiveDocument,
         { id },
         opts
@@ -2730,17 +2723,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the notificationSubscriptionCreate
      *
-     * @param input - input to pass into the NotificationSubscriptionCreateQuery
+     * @param input - input to pass into the NotificationSubscriptionCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the NotificationSubscriptionCreateQuery
+     * @returns The result of the NotificationSubscriptionCreateMutation
      */
     async notificationSubscriptionCreate(
-      input: D.Scalars["NotificationSubscriptionCreateInput"],
+      input: D.NotificationSubscriptionCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.NotificationSubscriptionCreateDocument>["notificationSubscriptionCreate"]> {
       const response = await requester<
-        D.NotificationSubscriptionCreateQuery,
-        D.NotificationSubscriptionCreateQueryVariables
+        D.NotificationSubscriptionCreateMutation,
+        D.NotificationSubscriptionCreateMutationVariables
       >(D.NotificationSubscriptionCreateDocument, { input }, opts);
       return {
         ...response?.notificationSubscriptionCreate,
@@ -2749,17 +2742,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the notificationSubscriptionDelete
      *
-     * @param id - id to pass into the NotificationSubscriptionDeleteQuery
+     * @param id - id to pass into the NotificationSubscriptionDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the NotificationSubscriptionDeleteQuery
+     * @returns The result of the NotificationSubscriptionDeleteMutation
      */
     async notificationSubscriptionDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.NotificationSubscriptionDeleteDocument>["notificationSubscriptionDelete"]> {
       const response = await requester<
-        D.NotificationSubscriptionDeleteQuery,
-        D.NotificationSubscriptionDeleteQueryVariables
+        D.NotificationSubscriptionDeleteMutation,
+        D.NotificationSubscriptionDeleteMutationVariables
       >(D.NotificationSubscriptionDeleteDocument, { id }, opts);
       return {
         ...response?.notificationSubscriptionDelete,
@@ -2768,15 +2761,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the oauthClientCreate
      *
-     * @param input - input to pass into the OauthClientCreateQuery
+     * @param input - input to pass into the OauthClientCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OauthClientCreateQuery
+     * @returns The result of the OauthClientCreateMutation
      */
     async oauthClientCreate(
-      input: D.Scalars["OauthClientCreateInput"],
+      input: D.OauthClientCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.OauthClientCreateDocument>["oauthClientCreate"]> {
-      const response = await requester<D.OauthClientCreateQuery, D.OauthClientCreateQueryVariables>(
+      const response = await requester<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
         D.OauthClientCreateDocument,
         { input },
         opts
@@ -2788,17 +2781,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the oauthClientUpdate
      *
-     * @param input - input to pass into the OauthClientUpdateQuery
-     * @param id - id to pass into the OauthClientUpdateQuery
+     * @param input - input to pass into the OauthClientUpdateMutation
+     * @param id - id to pass into the OauthClientUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OauthClientUpdateQuery
+     * @returns The result of the OauthClientUpdateMutation
      */
     async oauthClientUpdate(
-      input: D.Scalars["OauthClientUpdateInput"],
+      input: D.OauthClientUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OauthClientUpdateDocument>["oauthClientUpdate"]> {
-      const response = await requester<D.OauthClientUpdateQuery, D.OauthClientUpdateQueryVariables>(
+      const response = await requester<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
         D.OauthClientUpdateDocument,
         { input, id },
         opts
@@ -2810,15 +2803,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the oauthClientArchive
      *
-     * @param id - id to pass into the OauthClientArchiveQuery
+     * @param id - id to pass into the OauthClientArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OauthClientArchiveQuery
+     * @returns The result of the OauthClientArchiveMutation
      */
     async oauthClientArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OauthClientArchiveDocument>["oauthClientArchive"]> {
-      const response = await requester<D.OauthClientArchiveQuery, D.OauthClientArchiveQueryVariables>(
+      const response = await requester<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
         D.OauthClientArchiveDocument,
         { id },
         opts
@@ -2830,15 +2823,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the oauthClientRotateSecret
      *
-     * @param id - id to pass into the OauthClientRotateSecretQuery
+     * @param id - id to pass into the OauthClientRotateSecretMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OauthClientRotateSecretQuery
+     * @returns The result of the OauthClientRotateSecretMutation
      */
     async oauthClientRotateSecret(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OauthClientRotateSecretDocument>["oauthClientRotateSecret"]> {
-      const response = await requester<D.OauthClientRotateSecretQuery, D.OauthClientRotateSecretQueryVariables>(
+      const response = await requester<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
         D.OauthClientRotateSecretDocument,
         { id },
         opts
@@ -2850,17 +2843,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the oauthTokenRevoke
      *
-     * @param scope - scope to pass into the OauthTokenRevokeQuery
-     * @param appId - appId to pass into the OauthTokenRevokeQuery
+     * @param scope - scope to pass into the OauthTokenRevokeMutation
+     * @param appId - appId to pass into the OauthTokenRevokeMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OauthTokenRevokeQuery
+     * @returns The result of the OauthTokenRevokeMutation
      */
     async oauthTokenRevoke(
       scope: D.Scalars["String"],
       appId: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OauthTokenRevokeDocument>["oauthTokenRevoke"]> {
-      const response = await requester<D.OauthTokenRevokeQuery, D.OauthTokenRevokeQueryVariables>(
+      const response = await requester<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(
         D.OauthTokenRevokeDocument,
         { scope, appId },
         opts
@@ -2872,15 +2865,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationDomainVerify
      *
-     * @param input - input to pass into the OrganizationDomainVerifyQuery
+     * @param input - input to pass into the OrganizationDomainVerifyMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationDomainVerifyQuery
+     * @returns The result of the OrganizationDomainVerifyMutation
      */
     async organizationDomainVerify(
-      input: D.Scalars["OrganizationDomainVerificationInput"],
+      input: D.OrganizationDomainVerificationInput,
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationDomainVerifyDocument>["organizationDomainVerify"]> {
-      const response = await requester<D.OrganizationDomainVerifyQuery, D.OrganizationDomainVerifyQueryVariables>(
+      const response = await requester<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
         D.OrganizationDomainVerifyDocument,
         { input },
         opts
@@ -2892,15 +2885,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationDomainCreate
      *
-     * @param input - input to pass into the OrganizationDomainCreateQuery
+     * @param input - input to pass into the OrganizationDomainCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationDomainCreateQuery
+     * @returns The result of the OrganizationDomainCreateMutation
      */
     async organizationDomainCreate(
-      input: D.Scalars["OrganizationDomainCreateInput"],
+      input: D.OrganizationDomainCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationDomainCreateDocument>["organizationDomainCreate"]> {
-      const response = await requester<D.OrganizationDomainCreateQuery, D.OrganizationDomainCreateQueryVariables>(
+      const response = await requester<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
         D.OrganizationDomainCreateDocument,
         { input },
         opts
@@ -2912,15 +2905,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationDomainDelete
      *
-     * @param id - id to pass into the OrganizationDomainDeleteQuery
+     * @param id - id to pass into the OrganizationDomainDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationDomainDeleteQuery
+     * @returns The result of the OrganizationDomainDeleteMutation
      */
     async organizationDomainDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationDomainDeleteDocument>["organizationDomainDelete"]> {
-      const response = await requester<D.OrganizationDomainDeleteQuery, D.OrganizationDomainDeleteQueryVariables>(
+      const response = await requester<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
         D.OrganizationDomainDeleteDocument,
         { id },
         opts
@@ -2932,15 +2925,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationInviteCreate
      *
-     * @param input - input to pass into the OrganizationInviteCreateQuery
+     * @param input - input to pass into the OrganizationInviteCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationInviteCreateQuery
+     * @returns The result of the OrganizationInviteCreateMutation
      */
     async organizationInviteCreate(
-      input: D.Scalars["OrganizationInviteCreateInput"],
+      input: D.OrganizationInviteCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationInviteCreateDocument>["organizationInviteCreate"]> {
-      const response = await requester<D.OrganizationInviteCreateQuery, D.OrganizationInviteCreateQueryVariables>(
+      const response = await requester<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
         D.OrganizationInviteCreateDocument,
         { input },
         opts
@@ -2952,15 +2945,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the resentOrganizationInvite
      *
-     * @param id - id to pass into the ResentOrganizationInviteQuery
+     * @param id - id to pass into the ResentOrganizationInviteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ResentOrganizationInviteQuery
+     * @returns The result of the ResentOrganizationInviteMutation
      */
     async resentOrganizationInvite(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ResentOrganizationInviteDocument>["resentOrganizationInvite"]> {
-      const response = await requester<D.ResentOrganizationInviteQuery, D.ResentOrganizationInviteQueryVariables>(
+      const response = await requester<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
         D.ResentOrganizationInviteDocument,
         { id },
         opts
@@ -2972,15 +2965,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the organizationInviteDelete
      *
-     * @param id - id to pass into the OrganizationInviteDeleteQuery
+     * @param id - id to pass into the OrganizationInviteDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the OrganizationInviteDeleteQuery
+     * @returns The result of the OrganizationInviteDeleteMutation
      */
     async organizationInviteDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.OrganizationInviteDeleteDocument>["organizationInviteDelete"]> {
-      const response = await requester<D.OrganizationInviteDeleteQuery, D.OrganizationInviteDeleteQueryVariables>(
+      const response = await requester<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
         D.OrganizationInviteDeleteDocument,
         { id },
         opts
@@ -2992,15 +2985,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the projectLinkCreate
      *
-     * @param input - input to pass into the ProjectLinkCreateQuery
+     * @param input - input to pass into the ProjectLinkCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ProjectLinkCreateQuery
+     * @returns The result of the ProjectLinkCreateMutation
      */
     async projectLinkCreate(
-      input: D.Scalars["ProjectLinkCreateInput"],
+      input: D.ProjectLinkCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.ProjectLinkCreateDocument>["projectLinkCreate"]> {
-      const response = await requester<D.ProjectLinkCreateQuery, D.ProjectLinkCreateQueryVariables>(
+      const response = await requester<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
         D.ProjectLinkCreateDocument,
         { input },
         opts
@@ -3012,15 +3005,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the projectLinkDelete
      *
-     * @param id - id to pass into the ProjectLinkDeleteQuery
+     * @param id - id to pass into the ProjectLinkDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ProjectLinkDeleteQuery
+     * @returns The result of the ProjectLinkDeleteMutation
      */
     async projectLinkDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ProjectLinkDeleteDocument>["projectLinkDelete"]> {
-      const response = await requester<D.ProjectLinkDeleteQuery, D.ProjectLinkDeleteQueryVariables>(
+      const response = await requester<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
         D.ProjectLinkDeleteDocument,
         { id },
         opts
@@ -3032,15 +3025,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the projectCreate
      *
-     * @param input - input to pass into the ProjectCreateQuery
+     * @param input - input to pass into the ProjectCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ProjectCreateQuery
+     * @returns The result of the ProjectCreateMutation
      */
     async projectCreate(
-      input: D.Scalars["ProjectCreateInput"],
+      input: D.ProjectCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.ProjectCreateDocument>["projectCreate"]> {
-      const response = await requester<D.ProjectCreateQuery, D.ProjectCreateQueryVariables>(
+      const response = await requester<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(
         D.ProjectCreateDocument,
         { input },
         opts
@@ -3052,17 +3045,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the projectUpdate
      *
-     * @param input - input to pass into the ProjectUpdateQuery
-     * @param id - id to pass into the ProjectUpdateQuery
+     * @param input - input to pass into the ProjectUpdateMutation
+     * @param id - id to pass into the ProjectUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ProjectUpdateQuery
+     * @returns The result of the ProjectUpdateMutation
      */
     async projectUpdate(
-      input: D.Scalars["ProjectUpdateInput"],
+      input: D.ProjectUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ProjectUpdateDocument>["projectUpdate"]> {
-      const response = await requester<D.ProjectUpdateQuery, D.ProjectUpdateQueryVariables>(
+      const response = await requester<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(
         D.ProjectUpdateDocument,
         { input, id },
         opts
@@ -3074,15 +3067,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the projectArchive
      *
-     * @param id - id to pass into the ProjectArchiveQuery
+     * @param id - id to pass into the ProjectArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ProjectArchiveQuery
+     * @returns The result of the ProjectArchiveMutation
      */
     async projectArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ProjectArchiveDocument>["projectArchive"]> {
-      const response = await requester<D.ProjectArchiveQuery, D.ProjectArchiveQueryVariables>(
+      const response = await requester<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(
         D.ProjectArchiveDocument,
         { id },
         opts
@@ -3094,15 +3087,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the pushSubscriptionCreate
      *
-     * @param input - input to pass into the PushSubscriptionCreateQuery
+     * @param input - input to pass into the PushSubscriptionCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the PushSubscriptionCreateQuery
+     * @returns The result of the PushSubscriptionCreateMutation
      */
     async pushSubscriptionCreate(
-      input: D.Scalars["PushSubscriptionCreateInput"],
+      input: D.PushSubscriptionCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.PushSubscriptionCreateDocument>["pushSubscriptionCreate"]> {
-      const response = await requester<D.PushSubscriptionCreateQuery, D.PushSubscriptionCreateQueryVariables>(
+      const response = await requester<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
         D.PushSubscriptionCreateDocument,
         { input },
         opts
@@ -3114,15 +3107,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the pushSubscriptionDelete
      *
-     * @param id - id to pass into the PushSubscriptionDeleteQuery
+     * @param id - id to pass into the PushSubscriptionDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the PushSubscriptionDeleteQuery
+     * @returns The result of the PushSubscriptionDeleteMutation
      */
     async pushSubscriptionDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.PushSubscriptionDeleteDocument>["pushSubscriptionDelete"]> {
-      const response = await requester<D.PushSubscriptionDeleteQuery, D.PushSubscriptionDeleteQueryVariables>(
+      const response = await requester<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
         D.PushSubscriptionDeleteDocument,
         { id },
         opts
@@ -3134,15 +3127,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the reactionCreate
      *
-     * @param input - input to pass into the ReactionCreateQuery
+     * @param input - input to pass into the ReactionCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ReactionCreateQuery
+     * @returns The result of the ReactionCreateMutation
      */
     async reactionCreate(
-      input: D.Scalars["ReactionCreateInput"],
+      input: D.ReactionCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.ReactionCreateDocument>["reactionCreate"]> {
-      const response = await requester<D.ReactionCreateQuery, D.ReactionCreateQueryVariables>(
+      const response = await requester<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(
         D.ReactionCreateDocument,
         { input },
         opts
@@ -3154,15 +3147,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the reactionDelete
      *
-     * @param id - id to pass into the ReactionDeleteQuery
+     * @param id - id to pass into the ReactionDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ReactionDeleteQuery
+     * @returns The result of the ReactionDeleteMutation
      */
     async reactionDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ReactionDeleteDocument>["reactionDelete"]> {
-      const response = await requester<D.ReactionDeleteQuery, D.ReactionDeleteQueryVariables>(
+      const response = await requester<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(
         D.ReactionDeleteDocument,
         { id },
         opts
@@ -3175,12 +3168,12 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * Call the Linear api with the createCsvExportReport
      *
      * @param opts - options to pass to the graphql client
-     * @returns The result of the CreateCsvExportReportQuery
+     * @returns The result of the CreateCsvExportReportMutation
      */
     async createCsvExportReport(
       opts?: O
     ): Promise<ResultOf<typeof D.CreateCsvExportReportDocument>["createCsvExportReport"]> {
-      const response = await requester<D.CreateCsvExportReportQuery, D.CreateCsvExportReportQueryVariables>(
+      const response = await requester<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
         D.CreateCsvExportReportDocument,
         {},
         opts
@@ -3192,19 +3185,18 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the subscriptionSessionCreate
      *
-     * @param plan - plan to pass into the SubscriptionSessionCreateQuery
+     * @param plan - plan to pass into the SubscriptionSessionCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the SubscriptionSessionCreateQuery
+     * @returns The result of the SubscriptionSessionCreateMutation
      */
     async subscriptionSessionCreate(
       plan: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.SubscriptionSessionCreateDocument>["subscriptionSessionCreate"]> {
-      const response = await requester<D.SubscriptionSessionCreateQuery, D.SubscriptionSessionCreateQueryVariables>(
-        D.SubscriptionSessionCreateDocument,
-        { plan },
-        opts
-      );
+      const response = await requester<
+        D.SubscriptionSessionCreateMutation,
+        D.SubscriptionSessionCreateMutationVariables
+      >(D.SubscriptionSessionCreateDocument, { plan }, opts);
       return {
         ...response?.subscriptionSessionCreate,
       };
@@ -3213,14 +3205,14 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * Call the Linear api with the subscriptionUpdateSessionCreate
      *
      * @param opts - options to pass to the graphql client
-     * @returns The result of the SubscriptionUpdateSessionCreateQuery
+     * @returns The result of the SubscriptionUpdateSessionCreateMutation
      */
     async subscriptionUpdateSessionCreate(
       opts?: O
     ): Promise<ResultOf<typeof D.SubscriptionUpdateSessionCreateDocument>["subscriptionUpdateSessionCreate"]> {
       const response = await requester<
-        D.SubscriptionUpdateSessionCreateQuery,
-        D.SubscriptionUpdateSessionCreateQueryVariables
+        D.SubscriptionUpdateSessionCreateMutation,
+        D.SubscriptionUpdateSessionCreateMutationVariables
       >(D.SubscriptionUpdateSessionCreateDocument, {}, opts);
       return {
         ...response?.subscriptionUpdateSessionCreate,
@@ -3229,17 +3221,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the subscriptionUpdate
      *
-     * @param input - input to pass into the SubscriptionUpdateQuery
-     * @param id - id to pass into the SubscriptionUpdateQuery
+     * @param input - input to pass into the SubscriptionUpdateMutation
+     * @param id - id to pass into the SubscriptionUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the SubscriptionUpdateQuery
+     * @returns The result of the SubscriptionUpdateMutation
      */
     async subscriptionUpdate(
-      input: D.Scalars["SubscriptionUpdateInput"],
+      input: D.SubscriptionUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.SubscriptionUpdateDocument>["subscriptionUpdate"]> {
-      const response = await requester<D.SubscriptionUpdateQuery, D.SubscriptionUpdateQueryVariables>(
+      const response = await requester<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
         D.SubscriptionUpdateDocument,
         { input, id },
         opts
@@ -3251,17 +3243,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the subscriptionUpgrade
      *
-     * @param type - type to pass into the SubscriptionUpgradeQuery
-     * @param id - id to pass into the SubscriptionUpgradeQuery
+     * @param type - type to pass into the SubscriptionUpgradeMutation
+     * @param id - id to pass into the SubscriptionUpgradeMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the SubscriptionUpgradeQuery
+     * @returns The result of the SubscriptionUpgradeMutation
      */
     async subscriptionUpgrade(
       type: D.Scalars["String"],
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.SubscriptionUpgradeDocument>["subscriptionUpgrade"]> {
-      const response = await requester<D.SubscriptionUpgradeQuery, D.SubscriptionUpgradeQueryVariables>(
+      const response = await requester<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
         D.SubscriptionUpgradeDocument,
         { type, id },
         opts
@@ -3273,15 +3265,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the subscriptionArchive
      *
-     * @param id - id to pass into the SubscriptionArchiveQuery
+     * @param id - id to pass into the SubscriptionArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the SubscriptionArchiveQuery
+     * @returns The result of the SubscriptionArchiveMutation
      */
     async subscriptionArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.SubscriptionArchiveDocument>["subscriptionArchive"]> {
-      const response = await requester<D.SubscriptionArchiveQuery, D.SubscriptionArchiveQueryVariables>(
+      const response = await requester<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
         D.SubscriptionArchiveDocument,
         { id },
         opts
@@ -3293,15 +3285,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the teamMembershipCreate
      *
-     * @param input - input to pass into the TeamMembershipCreateQuery
+     * @param input - input to pass into the TeamMembershipCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TeamMembershipCreateQuery
+     * @returns The result of the TeamMembershipCreateMutation
      */
     async teamMembershipCreate(
-      input: D.Scalars["TeamMembershipCreateInput"],
+      input: D.TeamMembershipCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.TeamMembershipCreateDocument>["teamMembershipCreate"]> {
-      const response = await requester<D.TeamMembershipCreateQuery, D.TeamMembershipCreateQueryVariables>(
+      const response = await requester<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
         D.TeamMembershipCreateDocument,
         { input },
         opts
@@ -3313,15 +3305,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the teamMembershipDelete
      *
-     * @param id - id to pass into the TeamMembershipDeleteQuery
+     * @param id - id to pass into the TeamMembershipDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TeamMembershipDeleteQuery
+     * @returns The result of the TeamMembershipDeleteMutation
      */
     async teamMembershipDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.TeamMembershipDeleteDocument>["teamMembershipDelete"]> {
-      const response = await requester<D.TeamMembershipDeleteQuery, D.TeamMembershipDeleteQueryVariables>(
+      const response = await requester<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
         D.TeamMembershipDeleteDocument,
         { id },
         opts
@@ -3333,17 +3325,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the teamCreate
      *
-     * @param input - input to pass into the TeamCreateQuery
-     * @param vars - variables without 'input' to pass into the TeamCreateQuery
+     * @param input - input to pass into the TeamCreateMutation
+     * @param vars - variables without 'input' to pass into the TeamCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TeamCreateQuery
+     * @returns The result of the TeamCreateMutation
      */
     async teamCreate(
-      input: D.Scalars["TeamCreateInput"],
-      vars?: Omit<D.TeamCreateQueryVariables, "input">,
+      input: D.TeamCreateInput,
+      vars?: Omit<D.TeamCreateMutationVariables, "input">,
       opts?: O
     ): Promise<ResultOf<typeof D.TeamCreateDocument>["teamCreate"]> {
-      const response = await requester<D.TeamCreateQuery, D.TeamCreateQueryVariables>(
+      const response = await requester<D.TeamCreateMutation, D.TeamCreateMutationVariables>(
         D.TeamCreateDocument,
         { input, ...vars },
         opts
@@ -3355,17 +3347,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the teamUpdate
      *
-     * @param input - input to pass into the TeamUpdateQuery
-     * @param id - id to pass into the TeamUpdateQuery
+     * @param input - input to pass into the TeamUpdateMutation
+     * @param id - id to pass into the TeamUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TeamUpdateQuery
+     * @returns The result of the TeamUpdateMutation
      */
     async teamUpdate(
-      input: D.Scalars["TeamUpdateInput"],
+      input: D.TeamUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.TeamUpdateDocument>["teamUpdate"]> {
-      const response = await requester<D.TeamUpdateQuery, D.TeamUpdateQueryVariables>(
+      const response = await requester<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(
         D.TeamUpdateDocument,
         { input, id },
         opts
@@ -3377,15 +3369,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the teamArchive
      *
-     * @param id - id to pass into the TeamArchiveQuery
+     * @param id - id to pass into the TeamArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TeamArchiveQuery
+     * @returns The result of the TeamArchiveMutation
      */
     async teamArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.TeamArchiveDocument>["teamArchive"]> {
-      const response = await requester<D.TeamArchiveQuery, D.TeamArchiveQueryVariables>(
+      const response = await requester<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(
         D.TeamArchiveDocument,
         { id },
         opts
@@ -3397,12 +3389,12 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the teamDelete
      *
-     * @param id - id to pass into the TeamDeleteQuery
+     * @param id - id to pass into the TeamDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TeamDeleteQuery
+     * @returns The result of the TeamDeleteMutation
      */
     async teamDelete(id: D.Scalars["String"], opts?: O): Promise<ResultOf<typeof D.TeamDeleteDocument>["teamDelete"]> {
-      const response = await requester<D.TeamDeleteQuery, D.TeamDeleteQueryVariables>(
+      const response = await requester<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(
         D.TeamDeleteDocument,
         { id },
         opts
@@ -3414,15 +3406,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the templateCreate
      *
-     * @param input - input to pass into the TemplateCreateQuery
+     * @param input - input to pass into the TemplateCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TemplateCreateQuery
+     * @returns The result of the TemplateCreateMutation
      */
     async templateCreate(
-      input: D.Scalars["TemplateCreateInput"],
+      input: D.TemplateCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.TemplateCreateDocument>["templateCreate"]> {
-      const response = await requester<D.TemplateCreateQuery, D.TemplateCreateQueryVariables>(
+      const response = await requester<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(
         D.TemplateCreateDocument,
         { input },
         opts
@@ -3434,17 +3426,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the templateUpdate
      *
-     * @param input - input to pass into the TemplateUpdateQuery
-     * @param id - id to pass into the TemplateUpdateQuery
+     * @param input - input to pass into the TemplateUpdateMutation
+     * @param id - id to pass into the TemplateUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TemplateUpdateQuery
+     * @returns The result of the TemplateUpdateMutation
      */
     async templateUpdate(
-      input: D.Scalars["TemplateUpdateInput"],
+      input: D.TemplateUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.TemplateUpdateDocument>["templateUpdate"]> {
-      const response = await requester<D.TemplateUpdateQuery, D.TemplateUpdateQueryVariables>(
+      const response = await requester<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(
         D.TemplateUpdateDocument,
         { input, id },
         opts
@@ -3456,15 +3448,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the templateDelete
      *
-     * @param id - id to pass into the TemplateDeleteQuery
+     * @param id - id to pass into the TemplateDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the TemplateDeleteQuery
+     * @returns The result of the TemplateDeleteMutation
      */
     async templateDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.TemplateDeleteDocument>["templateDelete"]> {
-      const response = await requester<D.TemplateDeleteQuery, D.TemplateDeleteQueryVariables>(
+      const response = await requester<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(
         D.TemplateDeleteDocument,
         { id },
         opts
@@ -3476,17 +3468,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the userSettingsUpdate
      *
-     * @param input - input to pass into the UserSettingsUpdateQuery
-     * @param id - id to pass into the UserSettingsUpdateQuery
+     * @param input - input to pass into the UserSettingsUpdateMutation
+     * @param id - id to pass into the UserSettingsUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the UserSettingsUpdateQuery
+     * @returns The result of the UserSettingsUpdateMutation
      */
     async userSettingsUpdate(
-      input: D.Scalars["UserSettingsUpdateInput"],
+      input: D.UserSettingsUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.UserSettingsUpdateDocument>["userSettingsUpdate"]> {
-      const response = await requester<D.UserSettingsUpdateQuery, D.UserSettingsUpdateQueryVariables>(
+      const response = await requester<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
         D.UserSettingsUpdateDocument,
         { input, id },
         opts
@@ -3498,19 +3490,18 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the userSettingsFlagIncrement
      *
-     * @param flag - flag to pass into the UserSettingsFlagIncrementQuery
+     * @param flag - flag to pass into the UserSettingsFlagIncrementMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the UserSettingsFlagIncrementQuery
+     * @returns The result of the UserSettingsFlagIncrementMutation
      */
     async userSettingsFlagIncrement(
       flag: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.UserSettingsFlagIncrementDocument>["userSettingsFlagIncrement"]> {
-      const response = await requester<D.UserSettingsFlagIncrementQuery, D.UserSettingsFlagIncrementQueryVariables>(
-        D.UserSettingsFlagIncrementDocument,
-        { flag },
-        opts
-      );
+      const response = await requester<
+        D.UserSettingsFlagIncrementMutation,
+        D.UserSettingsFlagIncrementMutationVariables
+      >(D.UserSettingsFlagIncrementDocument, { flag }, opts);
       return {
         ...response?.userSettingsFlagIncrement,
       };
@@ -3519,12 +3510,12 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * Call the Linear api with the userSettingsFlagsReset
      *
      * @param opts - options to pass to the graphql client
-     * @returns The result of the UserSettingsFlagsResetQuery
+     * @returns The result of the UserSettingsFlagsResetMutation
      */
     async userSettingsFlagsReset(
       opts?: O
     ): Promise<ResultOf<typeof D.UserSettingsFlagsResetDocument>["userSettingsFlagsReset"]> {
-      const response = await requester<D.UserSettingsFlagsResetQuery, D.UserSettingsFlagsResetQueryVariables>(
+      const response = await requester<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
         D.UserSettingsFlagsResetDocument,
         {},
         opts
@@ -3536,17 +3527,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the userFlagUpdate
      *
-     * @param operation - operation to pass into the UserFlagUpdateQuery
-     * @param flag - flag to pass into the UserFlagUpdateQuery
+     * @param operation - operation to pass into the UserFlagUpdateMutation
+     * @param flag - flag to pass into the UserFlagUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the UserFlagUpdateQuery
+     * @returns The result of the UserFlagUpdateMutation
      */
     async userFlagUpdate(
-      operation: D.Scalars["UserFlagUpdateOperation"],
-      flag: D.Scalars["UserFlagType"],
+      operation: D.UserFlagUpdateOperation,
+      flag: D.UserFlagType,
       opts?: O
     ): Promise<ResultOf<typeof D.UserFlagUpdateDocument>["userFlagUpdate"]> {
-      const response = await requester<D.UserFlagUpdateQuery, D.UserFlagUpdateQueryVariables>(
+      const response = await requester<D.UserFlagUpdateMutation, D.UserFlagUpdateMutationVariables>(
         D.UserFlagUpdateDocument,
         { operation, flag },
         opts
@@ -3559,16 +3550,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      * Call the Linear api with the userSubscribeToNewsletter
      *
      * @param opts - options to pass to the graphql client
-     * @returns The result of the UserSubscribeToNewsletterQuery
+     * @returns The result of the UserSubscribeToNewsletterMutation
      */
     async userSubscribeToNewsletter(
       opts?: O
     ): Promise<ResultOf<typeof D.UserSubscribeToNewsletterDocument>["userSubscribeToNewsletter"]> {
-      const response = await requester<D.UserSubscribeToNewsletterQuery, D.UserSubscribeToNewsletterQueryVariables>(
-        D.UserSubscribeToNewsletterDocument,
-        {},
-        opts
-      );
+      const response = await requester<
+        D.UserSubscribeToNewsletterMutation,
+        D.UserSubscribeToNewsletterMutationVariables
+      >(D.UserSubscribeToNewsletterDocument, {}, opts);
       return {
         ...response?.userSubscribeToNewsletter,
       };
@@ -3576,15 +3566,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the viewPreferencesCreate
      *
-     * @param input - input to pass into the ViewPreferencesCreateQuery
+     * @param input - input to pass into the ViewPreferencesCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ViewPreferencesCreateQuery
+     * @returns The result of the ViewPreferencesCreateMutation
      */
     async viewPreferencesCreate(
-      input: D.Scalars["ViewPreferencesCreateInput"],
+      input: D.ViewPreferencesCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.ViewPreferencesCreateDocument>["viewPreferencesCreate"]> {
-      const response = await requester<D.ViewPreferencesCreateQuery, D.ViewPreferencesCreateQueryVariables>(
+      const response = await requester<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
         D.ViewPreferencesCreateDocument,
         { input },
         opts
@@ -3596,17 +3586,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the viewPreferencesUpdate
      *
-     * @param input - input to pass into the ViewPreferencesUpdateQuery
-     * @param id - id to pass into the ViewPreferencesUpdateQuery
+     * @param input - input to pass into the ViewPreferencesUpdateMutation
+     * @param id - id to pass into the ViewPreferencesUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ViewPreferencesUpdateQuery
+     * @returns The result of the ViewPreferencesUpdateMutation
      */
     async viewPreferencesUpdate(
-      input: D.Scalars["ViewPreferencesUpdateInput"],
+      input: D.ViewPreferencesUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ViewPreferencesUpdateDocument>["viewPreferencesUpdate"]> {
-      const response = await requester<D.ViewPreferencesUpdateQuery, D.ViewPreferencesUpdateQueryVariables>(
+      const response = await requester<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
         D.ViewPreferencesUpdateDocument,
         { input, id },
         opts
@@ -3618,15 +3608,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the viewPreferencesDelete
      *
-     * @param id - id to pass into the ViewPreferencesDeleteQuery
+     * @param id - id to pass into the ViewPreferencesDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the ViewPreferencesDeleteQuery
+     * @returns The result of the ViewPreferencesDeleteMutation
      */
     async viewPreferencesDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.ViewPreferencesDeleteDocument>["viewPreferencesDelete"]> {
-      const response = await requester<D.ViewPreferencesDeleteQuery, D.ViewPreferencesDeleteQueryVariables>(
+      const response = await requester<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
         D.ViewPreferencesDeleteDocument,
         { id },
         opts
@@ -3638,15 +3628,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the webhookCreate
      *
-     * @param input - input to pass into the WebhookCreateQuery
+     * @param input - input to pass into the WebhookCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the WebhookCreateQuery
+     * @returns The result of the WebhookCreateMutation
      */
     async webhookCreate(
-      input: D.Scalars["WebhookCreateInput"],
+      input: D.WebhookCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.WebhookCreateDocument>["webhookCreate"]> {
-      const response = await requester<D.WebhookCreateQuery, D.WebhookCreateQueryVariables>(
+      const response = await requester<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(
         D.WebhookCreateDocument,
         { input },
         opts
@@ -3658,17 +3648,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the webhookUpdate
      *
-     * @param input - input to pass into the WebhookUpdateQuery
-     * @param id - id to pass into the WebhookUpdateQuery
+     * @param input - input to pass into the WebhookUpdateMutation
+     * @param id - id to pass into the WebhookUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the WebhookUpdateQuery
+     * @returns The result of the WebhookUpdateMutation
      */
     async webhookUpdate(
-      input: D.Scalars["WebhookUpdateInput"],
+      input: D.WebhookUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.WebhookUpdateDocument>["webhookUpdate"]> {
-      const response = await requester<D.WebhookUpdateQuery, D.WebhookUpdateQueryVariables>(
+      const response = await requester<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(
         D.WebhookUpdateDocument,
         { input, id },
         opts
@@ -3680,15 +3670,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the webhookDelete
      *
-     * @param id - id to pass into the WebhookDeleteQuery
+     * @param id - id to pass into the WebhookDeleteMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the WebhookDeleteQuery
+     * @returns The result of the WebhookDeleteMutation
      */
     async webhookDelete(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.WebhookDeleteDocument>["webhookDelete"]> {
-      const response = await requester<D.WebhookDeleteQuery, D.WebhookDeleteQueryVariables>(
+      const response = await requester<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(
         D.WebhookDeleteDocument,
         { id },
         opts
@@ -3700,15 +3690,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the workflowStateCreate
      *
-     * @param input - input to pass into the WorkflowStateCreateQuery
+     * @param input - input to pass into the WorkflowStateCreateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the WorkflowStateCreateQuery
+     * @returns The result of the WorkflowStateCreateMutation
      */
     async workflowStateCreate(
-      input: D.Scalars["WorkflowStateCreateInput"],
+      input: D.WorkflowStateCreateInput,
       opts?: O
     ): Promise<ResultOf<typeof D.WorkflowStateCreateDocument>["workflowStateCreate"]> {
-      const response = await requester<D.WorkflowStateCreateQuery, D.WorkflowStateCreateQueryVariables>(
+      const response = await requester<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
         D.WorkflowStateCreateDocument,
         { input },
         opts
@@ -3720,17 +3710,17 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the workflowStateUpdate
      *
-     * @param input - input to pass into the WorkflowStateUpdateQuery
-     * @param id - id to pass into the WorkflowStateUpdateQuery
+     * @param input - input to pass into the WorkflowStateUpdateMutation
+     * @param id - id to pass into the WorkflowStateUpdateMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the WorkflowStateUpdateQuery
+     * @returns The result of the WorkflowStateUpdateMutation
      */
     async workflowStateUpdate(
-      input: D.Scalars["WorkflowStateUpdateInput"],
+      input: D.WorkflowStateUpdateInput,
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.WorkflowStateUpdateDocument>["workflowStateUpdate"]> {
-      const response = await requester<D.WorkflowStateUpdateQuery, D.WorkflowStateUpdateQueryVariables>(
+      const response = await requester<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
         D.WorkflowStateUpdateDocument,
         { input, id },
         opts
@@ -3742,15 +3732,15 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
     /**
      * Call the Linear api with the workflowStateArchive
      *
-     * @param id - id to pass into the WorkflowStateArchiveQuery
+     * @param id - id to pass into the WorkflowStateArchiveMutation
      * @param opts - options to pass to the graphql client
-     * @returns The result of the WorkflowStateArchiveQuery
+     * @returns The result of the WorkflowStateArchiveMutation
      */
     async workflowStateArchive(
       id: D.Scalars["String"],
       opts?: O
     ): Promise<ResultOf<typeof D.WorkflowStateArchiveDocument>["workflowStateArchive"]> {
-      const response = await requester<D.WorkflowStateArchiveQuery, D.WorkflowStateArchiveQueryVariables>(
+      const response = await requester<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
         D.WorkflowStateArchiveDocument,
         { id },
         opts

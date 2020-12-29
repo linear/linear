@@ -8,7 +8,8 @@ import {
   VariableDefinitionNode,
 } from "graphql";
 import c from "./constants";
-import { ApiDefinition } from "./types";
+import { printNamespaced } from "./print";
+import { ApiDefinition, SdkPluginContext } from "./types";
 
 /**
  * Does the operation have optional variables
@@ -80,4 +81,14 @@ export function getTypeName(type: string | NameNode | NonNullTypeNode | NamedTyp
     : type.kind === Kind.LIST_TYPE
     ? getTypeName(type.type)
     : "UNKNOWN_OPERATION_TYPE";
+}
+
+/**
+ * Get the variable document name
+ */
+export function printVariableType(context: SdkPluginContext, v: VariableDefinitionNode): string {
+  const typeName = getTypeName(v.type);
+  return c.SCALAR_NAMES.includes(typeName)
+    ? `${printNamespaced(context, "Scalars")}["${typeName}"]`
+    : printNamespaced(context, typeName);
 }

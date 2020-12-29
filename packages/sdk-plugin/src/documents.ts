@@ -41,17 +41,19 @@ export function getApiDefinitions(documents: Types.DocumentFile[]): ApiDefinitio
         .map(s => pascalCase(s))
         .join("_") ?? "UNNAMED_OPERATION";
 
+    const operationType = pascalCase(node.operation);
+
     const apiDefinition: ApiDefinition = {
       path,
       node,
       // /** The name of the generated graphql document */
       documentVariableName: `${name}Document`,
       // /** The type of the graphql operation */
-      operationType: node.operation,
+      operationType,
       // /** The type of the result from the graphql operation */
-      operationResultType: `${name}Query`,
+      operationResultType: `${name}${operationType}`,
       // /** The type of the variables for the graphql operation */
-      operationVariablesTypes: `${name}QueryVariables`,
+      operationVariablesTypes: `${name}${operationType}Variables`,
     };
 
     logger.trace(apiDefinition);

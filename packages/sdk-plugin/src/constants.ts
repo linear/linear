@@ -11,4 +11,5 @@ export default {
   SDK_TYPE: "LinearSdk",
   STATUS_TYPE: "LinearStatus",
   VARIABLE_NAME: "vars",
+  SCALAR_NAMES: ["ID", "String", "Boolean", "Int", "Float", "DateTime", "JSONObject", "JSON", "TimelessDateScalar"],
 };
