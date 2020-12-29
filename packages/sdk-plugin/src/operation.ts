@@ -6,7 +6,7 @@ import c from "./constants";
 import { printNamespaced, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
 import { ApiDefinition, SdkPluginContext } from "./types";
-import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
+import { getOptionalVariables, getRequiredVariables, getTypeName, isIdVariable } from "./variable";
 
 /**
  * Type to determine at which level of the sdk an operation is to be added
@@ -123,40 +123,39 @@ export function processSdkOperation(o: OperationDefinitionNode): SdkOperationDef
  * Get the operation args from the operation variables
  */
 function getOperationArgs(context: SdkPluginContext, o: ApiDefinition): ArgDefinition[] {
-  /** Operation id argument definition */
-  const idArg = {
-    name: c.ID_NAME,
+  /** Argument definition for each required variable */
+  const requiredVariables = getRequiredVariables(o.node).map(v => ({
+    name: v.variable.name.value,
     optional: false,
-    type: c.ID_TYPE,
-    description: `${c.ID_NAME} to pass into the ${o.operationResultType}`,
-  };
+    type: `${printNamespaced(context, "Scalars")}["${getTypeName(v.type)}"]`,
+    description: `${v.variable.name.value} to pass into the ${o.operationResultType}`,
+  }));
 
-  /** Operation variables argument definition */
+  /** Single definition for any optional variables */
+  const optionalVariables = getOptionalVariables(o.node);
   const variableType = printNamespaced(context, o.operationVariablesTypes);
-  const variablesArg = {
-    name: c.VARIABLE_NAME,
-    optional: hasOptionalVariable(o),
-    type: variableType,
-    description: `variables to pass into the ${o.operationResultType}`,
-  };
-
-  /** Handle id variables separately by making them the first arg */
-  if (hasVariable(o, c.ID_NAME)) {
-    if (hasOtherVariable(o, c.ID_NAME)) {
-      /** If we are chained do not add the id arg as it comes from the function scope */
-      const variablesWithoutIdArg = {
-        ...variablesArg,
-        type: `Omit<${variableType}, '${c.ID_NAME}'>`,
-        description: `variables without ${o.path} ${c.ID_NAME} to pass into the ${o.operationResultType}`,
+  const optionalArg = requiredVariables.length
+    ? {
+        name: c.VARIABLE_NAME,
+        optional: true,
+        type: `Omit<${variableType}, ${filterJoin(
+          requiredVariables.map(v => `'${v.name}'`),
+          " | "
+        )}>`,
+        description: `variables without ${filterJoin(
+          requiredVariables.map(v => `'${v.name}'`),
+          ", "
+        )} to pass into the ${o.operationResultType}`,
+      }
+    : {
+        name: c.VARIABLE_NAME,
+        optional: true,
+        type: variableType,
+        description: `variables to pass into the ${o.operationResultType}`,
       };
 
-      return o.path.length ? [variablesWithoutIdArg] : [idArg, variablesWithoutIdArg];
-    } else {
-      return o.path.length ? [] : [idArg];
-    }
-  } else {
-    return [variablesArg];
-  }
+  /** Spread required variables first */
+  return [...requiredVariables, optionalVariables.length ? optionalArg : undefined].filter(nonNullable);
 }
 
 /**
@@ -179,6 +178,7 @@ function getNestedDataKeys(o: ApiDefinition): string[] {
  * Get the sdk action operation body
  */
 function printOperationBody(context: SdkPluginContext, o: ApiDefinition): string {
+  const requiredVariables = getRequiredVariables(o.node);
   const nestedDataKeys = getNestedDataKeys(o);
 
   return o.path.length || nestedDataKeys.length
@@ -189,7 +189,12 @@ function printOperationBody(context: SdkPluginContext, o: ApiDefinition): string
           /** If the first field is the operation drill down for a nicer api */
           `...${filterJoin(["response", ...nestedDataKeys], "?.")},`,
           /** If we are a parent add the child sdk to the response */
-          o.path.length ? `...${printApiFunctionName(context.apiKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}),` : undefined,
+          getOperationApi(context, o)
+            ? `...${printApiFunctionName(o.path)}(${filterJoin(
+                [c.REQUESTER_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
+                ", "
+              )}),`
+            : undefined,
           `}`,
         ],
         "\n"
@@ -206,6 +211,13 @@ export function printSdkOperationName(o: ApiDefinition): string {
 }
 
 /**
+ * Get the operations for this return type
+ */
+function getOperationApi(context: SdkPluginContext, o: ApiDefinition): ApiDefinition[] {
+  return context.apiDefinitions[o.path.join("_")];
+}
+
+/**
  * Get the result type of the operation
  * Chained apis have the relevant chain api return type added
  */
@@ -216,8 +228,8 @@ function printOperationResultType(context: SdkPluginContext, o: ApiDefinition) {
 
   const resultType = filterJoin([documentResultType, ...nestedDataKeys.map(key => `['${key}']`)], "");
 
-  if (Object.keys(context.apiDefinitions).includes(context.apiKey)) {
-    return `Promise<${resultType} & ${printApiFunctionType(context.apiKey)}>`;
+  if (getOperationApi(context, o)) {
+    return `Promise<${resultType} & ${printApiFunctionType(o.path)}>`;
   } else {
     return `Promise<${resultType}>`;
   }
@@ -246,9 +258,9 @@ export function printOperation(context: SdkPluginContext, o: ApiDefinition): str
       printComment([
         `Call the Linear api with the ${operationName}`,
         ...args.jsdoc,
-        `@returns The result of the ${returnType}`,
+        `@returns The result of the ${o.operationResultType}`,
       ]),
-      printDebug({ apiKey: context.apiKey, ...o }),
+      printDebug({ apiKey: context.apiPath, ...o }),
       `async ${operationName}(${args.print}): ${returnType} {
         ${content}
       }`,

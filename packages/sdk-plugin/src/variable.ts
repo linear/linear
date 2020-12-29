@@ -1,4 +1,12 @@
-import { Kind, ListTypeNode, NamedTypeNode, NameNode, NonNullTypeNode, VariableDefinitionNode } from "graphql";
+import {
+  Kind,
+  ListTypeNode,
+  NamedTypeNode,
+  NameNode,
+  NonNullTypeNode,
+  OperationDefinitionNode,
+  VariableDefinitionNode,
+} from "graphql";
 import c from "./constants";
 import { ApiDefinition } from "./types";
 
@@ -41,6 +49,20 @@ export function isIdVariable(v: VariableDefinitionNode): boolean {
  */
 export function isRequiredVariable(v: VariableDefinitionNode): boolean {
   return v.type.kind === Kind.NON_NULL_TYPE;
+}
+
+/**
+ * Return all required variables for this node
+ */
+export function getRequiredVariables(node: OperationDefinitionNode): VariableDefinitionNode[] {
+  return node.variableDefinitions?.filter(isRequiredVariable) ?? [];
+}
+
+/**
+ * Return all optional variables for this node
+ */
+export function getOptionalVariables(node: OperationDefinitionNode): VariableDefinitionNode[] {
+  return node.variableDefinitions?.filter(v => !isRequiredVariable(v)) ?? [];
 }
 
 /**

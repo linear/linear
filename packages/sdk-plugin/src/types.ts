@@ -56,7 +56,7 @@ export type ApiDefinitions = Record<string, ApiDefinition[]>;
  */
 export interface SdkPluginContext {
   /** The api key by which to nest the operations */
-  apiKey: string;
+  apiPath: string[];
   /** The plugin config */
   config: RawSdkPluginConfig;
   /** All parsed api definitions */
