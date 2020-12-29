@@ -140,7 +140,7 @@ export class FragmentVisitor {
 
       /** Print field name if it is a scalar */
       if (Object.values(this._scalars).includes(getTypeName(node.type))) {
-        return node.name;
+        return filterJoin([printGraphqlDebug(_node), node.name], "\n");
       }
 
       /** Find a query that can return this field */
