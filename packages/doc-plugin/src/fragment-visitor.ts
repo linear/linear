@@ -150,11 +150,17 @@ export class FragmentVisitor {
         /** Get all fields required for query arguments */
         const queryRequiredArgs = requiredArgs(query.arguments).map(a => a.name.value);
 
-        return queryRequiredArgs.length
-          ? `${node.name} {
+        return filterJoin(
+          [
+            printGraphqlDebug(_node),
+            queryRequiredArgs.length
+              ? `${node.name} {
             ${filterJoin(queryRequiredArgs, "\n")}
           }`
-          : "";
+              : "",
+          ],
+          "\n"
+        );
       }
 
       /** Ignore this field */

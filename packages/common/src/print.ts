@@ -1,18 +1,26 @@
 import { filterJoin } from "./utils";
 
+const propertiesToClean = ["loc", "block"];
+
 /**
  * Clean node by removing extraneous "loc" properties for all nested objects
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function cleanNode<T extends { loc?: any }>(obj: T): Partial<T> {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    return ["loc"].includes(key)
-      ? acc
-      : {
-          ...acc,
-          [key]: Object.keys(value ?? {}).includes("loc") ? cleanNode(value) : value,
-        };
-  }, {});
+function cleanNode(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(cleanNode);
+  } else if (propertiesToClean.some(prop => obj?.hasOwnProperty?.(prop))) {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+      return propertiesToClean.includes(key)
+        ? acc
+        : {
+            ...acc,
+            [key]: cleanNode(value),
+          };
+    }, {});
+  } else {
+    return obj;
+  }
 }
 
 /**
