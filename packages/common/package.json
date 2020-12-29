@@ -13,7 +13,7 @@
     "dist"
   ],
   "scripts": {
-    "dev:common": "run-s build:common dev:common:push",
+    "dev:common": "NODE_ENV=development run-s build:common dev:common:push",
     "dev:common:push": "yalc push",
     "build:common": "yarn build:common:clean && npx tsc",
     "build:common:watch": "yarn build:common --watch",

@@ -1,5 +1,5 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, nonNullable } from "@linear/common";
+import { filterJoin, nonNullable, printGraphqlDescription } from "@linear/common";
 import autoBind from "auto-bind";
 import {
   DocumentNode,
@@ -12,6 +12,7 @@ import {
   ObjectTypeDefinitionNode,
   ScalarTypeDefinitionNode,
 } from "graphql";
+import { printGraphqlDebug } from "../../common/dist";
 import { requiredArgs } from "./args";
 import c from "./constants";
 import { getTypeName } from "./field";
@@ -117,9 +118,12 @@ export class FragmentVisitor {
         this._fragments = [...this._fragments, node];
         return filterJoin(
           [
+            printGraphqlDescription(node.description?.value),
+            printGraphqlDebug(node),
             `fragment ${node.name} on ${node.name} {
               ${filterJoin(node.fields, "\n")}
             }`,
+            " ",
           ],
           "\n"
         );

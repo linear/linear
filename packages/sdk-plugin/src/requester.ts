@@ -1,8 +1,9 @@
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
+import { printComment } from "@linear/common";
 import { ArgDefinition } from "./args";
 import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
 import c from "./constants";
-import { printDocBlock, printNamespaced } from "./print";
+import { printNamespaced } from "./print";
 import { SdkVisitorOperation } from "./sdk-visitor";
 import { hasOtherVariable, hasVariable } from "./variable";
 
@@ -28,7 +29,7 @@ export function printRequesterArgs(o: SdkVisitorOperation): string {
 export function printRequesterType(config: RawSdkPluginConfig): string[] {
   const docType = config.documentMode === DocumentMode.string ? "string" : "DocumentNode";
   return [
-    printDocBlock([`The function type for calling the graphql client`]),
+    printComment([`The function type for calling the graphql client`]),
     `export type ${c.REQUESTER_TYPE}<${c.OPTIONS_TYPE} = {}> = <R, V>(doc: ${docType}, ${c.VARIABLE_NAME}?: V, ${c.OPTIONS_NAME}?: ${c.OPTIONS_TYPE}) => Promise<R>`,
   ];
 }

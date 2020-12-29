@@ -1,3 +1,35 @@
+# A user that has access to the the resources of an organization.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A user that has access to the the resources of an organization.",
+#     "block": true
+#   },
+#   "name": "User",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "name",
+#     "displayName",
+#     "email",
+#     "avatarUrl",
+#     "disableReason",
+#     "inviteHash",
+#     "userAccountId",
+#     "",
+#     "admin",
+#     "active",
+#     "assignedIssues {\n            query\n          }",
+#     "createdIssues {\n            query\n          }",
+#     "",
+#     "createdIssueCount",
+#     ""
+#   ]
+# }
 fragment User on User {
   id
   name
@@ -9,8 +41,37 @@ fragment User on User {
   userAccountId
   admin
   active
+  assignedIssues {
+    query
+  }
+  createdIssues {
+    query
+  }
   createdIssueCount
 }
+
+# The settings of a user as a JSON object.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "The settings of a user as a JSON object.",
+#     "block": true
+#   },
+#   "name": "UserSettings",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "unsubscribedFrom",
+#     "user {\n            id\n          }"
+#   ]
+# }
 fragment UserSettings on UserSettings {
   id
   createdAt
@@ -21,6 +82,58 @@ fragment UserSettings on UserSettings {
     id
   }
 }
+
+# An issue.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An issue.",
+#     "block": true
+#   },
+#   "name": "Issue",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "number",
+#     "title",
+#     "description",
+#     "priority",
+#     "estimate",
+#     "boardOrder",
+#     "startedAt",
+#     "completedAt",
+#     "canceledAt",
+#     "autoClosedAt",
+#     "autoArchivedAt",
+#     "previousIdentifiers",
+#     "subIssueSortOrder",
+#     "identifier",
+#     "priorityLabel",
+#     "url",
+#     "team {\n            id\n          }",
+#     "cycle {\n            id\n          }",
+#     "state {\n            id\n          }",
+#     "assignee {\n            id\n          }",
+#     "parent {\n            id\n          }",
+#     "project {\n            id\n          }",
+#     "branchName",
+#     "",
+#     "creator {\n            id\n          }",
+#     "children {\n            query\n          }",
+#     "",
+#     "",
+#     "",
+#     "",
+#     ""
+#   ]
+# }
 fragment Issue on Issue {
   id
   createdAt
@@ -64,7 +177,72 @@ fragment Issue on Issue {
   creator {
     id
   }
+  children {
+    query
+  }
 }
+
+# An organizational unit that contains issues.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An organizational unit that contains issues.",
+#     "block": true
+#   },
+#   "name": "Team",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "key",
+#     "description",
+#     "cyclesEnabled",
+#     "cycleStartDay",
+#     "cycleDuration",
+#     "cycleCooldownTime",
+#     "cycleIssueAutoAssignStarted",
+#     "cycleIssueAutoAssignCompleted",
+#     "cycleLockToActive",
+#     "upcomingCycleCount",
+#     "timezone",
+#     "inviteHash",
+#     "issueEstimationType",
+#     "issueEstimationAllowZero",
+#     "issueEstimationExtended",
+#     "defaultIssueEstimate",
+#     "defaultTemplateForMembersId",
+#     "defaultTemplateForNonMembersId",
+#     "draftWorkflowState {\n            id\n          }",
+#     "startWorkflowState {\n            id\n          }",
+#     "reviewWorkflowState {\n            id\n          }",
+#     "mergeWorkflowState {\n            id\n          }",
+#     "groupIssueHistory",
+#     "slackNewIssue",
+#     "slackIssueComments",
+#     "slackIssueStatuses",
+#     "autoClosePeriod",
+#     "autoCloseStateId",
+#     "autoArchivePeriod",
+#     "markedAsDuplicateWorkflowState {\n            id\n          }",
+#     "issues {\n            query\n          }",
+#     "",
+#     "activeCycle {\n            id\n          }",
+#     "",
+#     "",
+#     "",
+#     "",
+#     "",
+#     "cycleCalenderUrl",
+#     ""
+#   ]
+# }
 fragment Team on Team {
   id
   createdAt
@@ -111,11 +289,42 @@ fragment Team on Team {
   markedAsDuplicateWorkflowState {
     id
   }
+  issues {
+    query
+  }
   activeCycle {
     id
   }
   cycleCalenderUrl
 }
+
+# A state in a team workflow.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A state in a team workflow.",
+#     "block": true
+#   },
+#   "name": "WorkflowState",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "color",
+#     "description",
+#     "position",
+#     "type",
+#     "team {\n            id\n          }",
+#     "issues {\n            query\n          }"
+#   ]
+# }
 fragment WorkflowState on WorkflowState {
   id
   createdAt
@@ -129,7 +338,43 @@ fragment WorkflowState on WorkflowState {
   team {
     id
   }
+  issues {
+    query
+  }
 }
+
+# A set of issues to be resolved in a specified amount of time.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A set of issues to be resolved in a specified amount of time.",
+#     "block": true
+#   },
+#   "name": "Cycle",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "number",
+#     "name",
+#     "startsAt",
+#     "endsAt",
+#     "completedAt",
+#     "issueCountHistory",
+#     "completedIssueCountHistory",
+#     "scopeHistory",
+#     "completedScopeHistory",
+#     "team {\n            id\n          }",
+#     "issues {\n            query\n          }",
+#     "uncompletedIssuesUponClose {\n            query\n          }"
+#   ]
+# }
 fragment Cycle on Cycle {
   id
   createdAt
@@ -147,13 +392,55 @@ fragment Cycle on Cycle {
   team {
     id
   }
+  issues {
+    query
+  }
+  uncompletedIssuesUponClose {
+    query
+  }
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "PageInfo",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "hasPreviousPage",
+#     "hasNextPage",
+#     "startCursor",
+#     "endCursor"
+#   ]
+# }
 fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
   startCursor
   endCursor
 }
+
+# Defines the membership of a user to a team.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Defines the membership of a user to a team.",
+#     "block": true
+#   },
+#   "name": "TeamMembership",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "user {\n            id\n          }",
+#     "team {\n            id\n          }"
+#   ]
+# }
 fragment TeamMembership on TeamMembership {
   id
   createdAt
@@ -166,6 +453,52 @@ fragment TeamMembership on TeamMembership {
     id
   }
 }
+
+# A project.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A project.",
+#     "block": true
+#   },
+#   "name": "Project",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "description",
+#     "slugId",
+#     "icon",
+#     "color",
+#     "state",
+#     "creator {\n            id\n          }",
+#     "lead {\n            id\n          }",
+#     "milestone {\n            id\n          }",
+#     "targetDate",
+#     "startedAt",
+#     "completedAt",
+#     "canceledAt",
+#     "sortOrder",
+#     "issueCountHistory",
+#     "completedIssueCountHistory",
+#     "scopeHistory",
+#     "completedScopeHistory",
+#     "slackNewIssue",
+#     "slackIssueComments",
+#     "slackIssueStatuses",
+#     "",
+#     "",
+#     "issues {\n            query\n          }",
+#     ""
+#   ]
+# }
 fragment Project on Project {
   id
   createdAt
@@ -198,7 +531,35 @@ fragment Project on Project {
   slackNewIssue
   slackIssueComments
   slackIssueStatuses
+  issues {
+    query
+  }
 }
+
+# A milestone that contains projects.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A milestone that contains projects.",
+#     "block": true
+#   },
+#   "name": "Milestone",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "",
+#     "sortOrder",
+#     ""
+#   ]
+# }
 fragment Milestone on Milestone {
   id
   createdAt
@@ -207,6 +568,45 @@ fragment Milestone on Milestone {
   name
   sortOrder
 }
+
+# An organization. Organizations are root-level objects that contain user accounts and teams.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An organization. Organizations are root-level objects that contain user accounts and teams.",
+#     "block": true
+#   },
+#   "name": "Organization",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "urlKey",
+#     "logoUrl",
+#     "upgradeThresholdExceeded",
+#     "periodUploadVolume",
+#     "gitBranchFormat",
+#     "gitLinkbackMessagesEnabled",
+#     "gitPublicLinkbackMessagesEnabled",
+#     "roadmapEnabled",
+#     "samlEnabled",
+#     "allowedAuthServices",
+#     "",
+#     "",
+#     "",
+#     "",
+#     "",
+#     "userCount",
+#     "createdIssueCount"
+#   ]
+# }
 fragment Organization on Organization {
   id
   createdAt
@@ -226,6 +626,32 @@ fragment Organization on Organization {
   userCount
   createdIssueCount
 }
+
+# An integration with an external service.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An integration with an external service.",
+#     "block": true
+#   },
+#   "name": "Integration",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "service",
+#     "serviceId",
+#     "",
+#     "team {\n            id\n          }",
+#     "creator {\n            id\n          }"
+#   ]
+# }
 fragment Integration on Integration {
   id
   createdAt
@@ -240,20 +666,100 @@ fragment Integration on Integration {
     id
   }
 }
+
+# Slack notification specific settings.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Slack notification specific settings.",
+#     "block": true
+#   },
+#   "name": "SlackPostSettings",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "channel",
+#     "channelId",
+#     "configurationUrl"
+#   ]
+# }
 fragment SlackPostSettings on SlackPostSettings {
   channel
   channelId
   configurationUrl
 }
+
+# Google Sheets specific settings.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Google Sheets specific settings.",
+#     "block": true
+#   },
+#   "name": "GoogleSheetsSettings",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "spreadsheetId",
+#     "spreadsheetUrl",
+#     "sheetId",
+#     "updatedIssuesAt"
+#   ]
+# }
 fragment GoogleSheetsSettings on GoogleSheetsSettings {
   spreadsheetId
   spreadsheetUrl
   sheetId
   updatedIssuesAt
 }
+
+# Sentry specific settings.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Sentry specific settings.",
+#     "block": true
+#   },
+#   "name": "SentrySettings",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "organizationSlug"
+#   ]
+# }
 fragment SentrySettings on SentrySettings {
   organizationSlug
 }
+
+# The subscription of an organization.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "The subscription of an organization.",
+#     "block": true
+#   },
+#   "name": "Subscription",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "type",
+#     "seats",
+#     "creator {\n            id\n          }",
+#     "",
+#     "canceledAt",
+#     "pendingChangeType"
+#   ]
+# }
 fragment Subscription on Subscription {
   id
   createdAt
@@ -267,6 +773,31 @@ fragment Subscription on Subscription {
   canceledAt
   pendingChangeType
 }
+
+# An external link for a project.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An external link for a project.",
+#     "block": true
+#   },
+#   "name": "ProjectLink",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "url",
+#     "label",
+#     "creator {\n            id\n          }",
+#     "project {\n            id\n          }"
+#   ]
+# }
 fragment ProjectLink on ProjectLink {
   id
   createdAt
@@ -281,6 +812,33 @@ fragment ProjectLink on ProjectLink {
     id
   }
 }
+
+# A template object used for creating new issues faster.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A template object used for creating new issues faster.",
+#     "block": true
+#   },
+#   "name": "Template",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "type",
+#     "name",
+#     "description",
+#     "templateData",
+#     "team {\n            id\n          }",
+#     "creator {\n            id\n          }"
+#   ]
+# }
 fragment Template on Template {
   id
   createdAt
@@ -297,6 +855,33 @@ fragment Template on Template {
     id
   }
 }
+
+# Labels that can be associated with issues.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Labels that can be associated with issues.",
+#     "block": true
+#   },
+#   "name": "IssueLabel",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "description",
+#     "color",
+#     "team {\n            id\n          }",
+#     "creator {\n            id\n          }",
+#     "issues {\n            query\n          }"
+#   ]
+# }
 fragment IssueLabel on IssueLabel {
   id
   createdAt
@@ -311,7 +896,36 @@ fragment IssueLabel on IssueLabel {
   creator {
     id
   }
+  issues {
+    query
+  }
 }
+
+# A webhook used to send HTTP notifications over data updates
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A webhook used to send HTTP notifications over data updates",
+#     "block": true
+#   },
+#   "name": "Webhook",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "url",
+#     "enabled",
+#     "team {\n            id\n          }",
+#     "creator {\n            id\n          }",
+#     "secret"
+#   ]
+# }
 fragment Webhook on Webhook {
   id
   createdAt
@@ -327,6 +941,33 @@ fragment Webhook on Webhook {
   }
   secret
 }
+
+# A comment associated with an issue.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A comment associated with an issue.",
+#     "block": true
+#   },
+#   "name": "Comment",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "body",
+#     "bodyData",
+#     "reactionData",
+#     "editedAt",
+#     "user {\n            id\n          }",
+#     "issue {\n            id\n          }"
+#   ]
+# }
 fragment Comment on Comment {
   id
   createdAt
@@ -343,6 +984,57 @@ fragment Comment on Comment {
     id
   }
 }
+
+# A record of changes to an issue.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A record of changes to an issue.",
+#     "block": true
+#   },
+#   "name": "IssueHistory",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "issue {\n            id\n          }",
+#     "actor {\n            id\n          }",
+#     "integration {\n            id\n          }",
+#     "updatedDescription",
+#     "fromTitle",
+#     "toTitle",
+#     "fromAssignee {\n            id\n          }",
+#     "toAssignee {\n            id\n          }",
+#     "fromPriority",
+#     "toPriority",
+#     "fromTeam {\n            id\n          }",
+#     "toTeam {\n            id\n          }",
+#     "fromParent {\n            id\n          }",
+#     "toParent {\n            id\n          }",
+#     "fromState {\n            id\n          }",
+#     "toState {\n            id\n          }",
+#     "fromCycle {\n            id\n          }",
+#     "toCycle {\n            id\n          }",
+#     "fromProject {\n            id\n          }",
+#     "toProject {\n            id\n          }",
+#     "fromEstimate",
+#     "toEstimate",
+#     "archived",
+#     "addedLabelIds",
+#     "removedLabelIds",
+#     "relationChanges",
+#     "autoClosed",
+#     "autoArchived",
+#     "fromDueDate",
+#     "toDueDate"
+#   ]
+# }
 fragment IssueHistory on IssueHistory {
   id
   createdAt
@@ -409,6 +1101,31 @@ fragment IssueHistory on IssueHistory {
   fromDueDate
   toDueDate
 }
+
+# An integration resource created by an external service.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An integration resource created by an external service.",
+#     "block": true
+#   },
+#   "name": "IntegrationResource",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "resourceType",
+#     "resourceId",
+#     "integration {\n            id\n          }",
+#     "issue {\n            id\n          }"
+#   ]
+# }
 fragment IntegrationResource on IntegrationResource {
   id
   createdAt
@@ -423,6 +1140,36 @@ fragment IntegrationResource on IntegrationResource {
     id
   }
 }
+
+# Pull request data
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Pull request data",
+#     "block": true
+#   },
+#   "name": "PullRequestPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "status",
+#     "number",
+#     "url",
+#     "draft",
+#     "id",
+#     "title",
+#     "branch",
+#     "userId",
+#     "userLogin",
+#     "repoLogin",
+#     "repoName",
+#     "createdAt",
+#     "updatedAt",
+#     "closedAt",
+#     "mergedAt"
+#   ]
+# }
 fragment PullRequestPayload on PullRequestPayload {
   status
   number
@@ -440,6 +1187,28 @@ fragment PullRequestPayload on PullRequestPayload {
   closedAt
   mergedAt
 }
+
+# GitHub's commit data
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "GitHub's commit data",
+#     "block": true
+#   },
+#   "name": "CommitPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "message",
+#     "timestamp",
+#     "url",
+#     "added",
+#     "removed",
+#     "modified"
+#   ]
+# }
 fragment CommitPayload on CommitPayload {
   id
   message
@@ -449,6 +1218,32 @@ fragment CommitPayload on CommitPayload {
   removed
   modified
 }
+
+# Sentry issue data
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Sentry issue data",
+#     "block": true
+#   },
+#   "name": "SentryIssuePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "issueId",
+#     "webUrl",
+#     "actorType",
+#     "actorId",
+#     "actorName",
+#     "projectId",
+#     "projectSlug",
+#     "issueTitle",
+#     "shortId",
+#     "firstSeen",
+#     "firstVersion"
+#   ]
+# }
 fragment SentryIssuePayload on SentryIssuePayload {
   issueId
   webUrl
@@ -462,6 +1257,30 @@ fragment SentryIssuePayload on SentryIssuePayload {
   firstSeen
   firstVersion
 }
+
+# A relation between two issues.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A relation between two issues.",
+#     "block": true
+#   },
+#   "name": "IssueRelation",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "type",
+#     "issue {\n            id\n          }",
+#     "relatedIssue {\n            id\n          }"
+#   ]
+# }
 fragment IssueRelation on IssueRelation {
   id
   createdAt
@@ -475,10 +1294,42 @@ fragment IssueRelation on IssueRelation {
     id
   }
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OrganizationExistsPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success",
+#     "exists"
+#   ]
+# }
 fragment OrganizationExistsPayload on OrganizationExistsPayload {
   success
   exists
 }
+
+# Contains either the full serialized state of the application or delta packets that the requester can
+# apply to the local data set in order to be up-to-date.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Contains either the full serialized state of the application or delta packets that the requester can\n  apply to the local data set in order to be up-to-date.",
+#     "block": true
+#   },
+#   "name": "SyncResponse",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "state",
+#     "delta",
+#     "archive",
+#     "lastSyncId",
+#     "databaseVersion"
+#   ]
+# }
 fragment SyncResponse on SyncResponse {
   state
   delta
@@ -486,11 +1337,51 @@ fragment SyncResponse on SyncResponse {
   lastSyncId
   databaseVersion
 }
+
+# Contains requested archived model objects.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Contains requested archived model objects.",
+#     "block": true
+#   },
+#   "name": "ArchiveResponse",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "archive",
+#     "totalCount",
+#     "databaseVersion"
+#   ]
+# }
 fragment ArchiveResponse on ArchiveResponse {
   archive
   totalCount
   databaseVersion
 }
+
+# A user account. Super user required.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A user account. Super user required.",
+#     "block": true
+#   },
+#   "name": "UserAccountAdminPrivileged",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "email",
+#     "service"
+#   ]
+# }
 fragment UserAccountAdminPrivileged on UserAccountAdminPrivileged {
   id
   createdAt
@@ -500,6 +1391,42 @@ fragment UserAccountAdminPrivileged on UserAccountAdminPrivileged {
   email
   service
 }
+
+# A user that has access to the the resources of an organization. Super user required.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A user that has access to the the resources of an organization. Super user required.",
+#     "block": true
+#   },
+#   "name": "UserAdminPrivileged",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "displayName",
+#     "email",
+#     "avatarUrl",
+#     "disableReason",
+#     "inviteHash",
+#     "userAccountId",
+#     "",
+#     "lastSeen",
+#     "admin",
+#     "active",
+#     "assignedIssues {\n            query\n          }",
+#     "createdIssues {\n            query\n          }",
+#     "createdIssueCount",
+#     ""
+#   ]
+# }
 fragment UserAdminPrivileged on UserAdminPrivileged {
   id
   createdAt
@@ -515,8 +1442,53 @@ fragment UserAdminPrivileged on UserAdminPrivileged {
   lastSeen
   admin
   active
+  assignedIssues {
+    query
+  }
+  createdIssues {
+    query
+  }
   createdIssueCount
 }
+
+# An organization. Super user required.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An organization. Super user required.",
+#     "block": true
+#   },
+#   "name": "OrganizationAdminPrivileged",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "urlKey",
+#     "logoUrl",
+#     "upgradeThresholdExceeded",
+#     "periodUploadVolume",
+#     "gitBranchFormat",
+#     "gitLinkbackMessagesEnabled",
+#     "gitPublicLinkbackMessagesEnabled",
+#     "roadmapEnabled",
+#     "samlEnabled",
+#     "allowedAuthServices",
+#     "",
+#     "",
+#     "",
+#     "",
+#     "userCount",
+#     "createdIssueCount",
+#     "stripeCustomerId"
+#   ]
+# }
 fragment OrganizationAdminPrivileged on OrganizationAdminPrivileged {
   id
   createdAt
@@ -537,6 +1509,35 @@ fragment OrganizationAdminPrivileged on OrganizationAdminPrivileged {
   createdIssueCount
   stripeCustomerId
 }
+
+# The subscription of an organization. Super user required.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "The subscription of an organization. Super user required.",
+#     "block": true
+#   },
+#   "name": "SubscriptionAdminPrivileged",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "type",
+#     "seats",
+#     "creator {\n            id\n          }",
+#     "",
+#     "canceledAt",
+#     "pendingChangeType",
+#     "stripeSubscriptionId",
+#     "stripeStatus"
+#   ]
+# }
 fragment SubscriptionAdminPrivileged on SubscriptionAdminPrivileged {
   id
   createdAt
@@ -552,6 +1553,28 @@ fragment SubscriptionAdminPrivileged on SubscriptionAdminPrivileged {
   stripeSubscriptionId
   stripeStatus
 }
+
+# An API key. Grants access to the user's resources.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An API key. Grants access to the user's resources.",
+#     "block": true
+#   },
+#   "name": "ApiKey",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "label"
+#   ]
+# }
 fragment ApiKey on ApiKey {
   id
   createdAt
@@ -559,6 +1582,27 @@ fragment ApiKey on ApiKey {
   archivedAt
   label
 }
+
+# Public information of the OAuth application.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Public information of the OAuth application.",
+#     "block": true
+#   },
+#   "name": "Application",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "clientId",
+#     "name",
+#     "description",
+#     "developer",
+#     "developerUrl",
+#     "imageUrl"
+#   ]
+# }
 fragment Application on Application {
   clientId
   name
@@ -567,6 +1611,29 @@ fragment Application on Application {
   developerUrl
   imageUrl
 }
+
+# Public information of the OAuth application, plus the authorized scopes for a given user.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Public information of the OAuth application, plus the authorized scopes for a given user.",
+#     "block": true
+#   },
+#   "name": "AuthorizedApplication",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "clientId",
+#     "name",
+#     "description",
+#     "developer",
+#     "developerUrl",
+#     "imageUrl",
+#     "scope",
+#     "appId"
+#   ]
+# }
 fragment AuthorizedApplication on AuthorizedApplication {
   clientId
   name
@@ -577,6 +1644,21 @@ fragment AuthorizedApplication on AuthorizedApplication {
   scope
   appId
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "AuthResolverResponse",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "token",
+#     "email",
+#     "allowDomainAccess",
+#     "users {\n            id\n          }",
+#     ""
+#   ]
+# }
 fragment AuthResolverResponse on AuthResolverResponse {
   id
   token
@@ -586,14 +1668,50 @@ fragment AuthResolverResponse on AuthResolverResponse {
     id
   }
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "SsoUrlFromEmailResponse",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success",
+#     "samlSsoUrl"
+#   ]
+# }
 fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
   success
   samlSsoUrl
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "BillingDetailsPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success",
+#     "email"
+#   ]
+# }
 fragment BillingDetailsPayload on BillingDetailsPayload {
   success
   email
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "Invoice",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "url",
+#     "created",
+#     "dueDate",
+#     "status",
+#     "total"
+#   ]
+# }
 fragment Invoice on Invoice {
   url
   created
@@ -601,18 +1719,81 @@ fragment Invoice on Invoice {
   status
   total
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "Card",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "brand",
+#     "last4"
+#   ]
+# }
 fragment Card on Card {
   brand
   last4
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "CollaborationDocumentUpdatePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment CollaborationDocumentUpdatePayload on CollaborationDocumentUpdatePayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "StepsResponse",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "version",
+#     "steps",
+#     "clientIds"
+#   ]
+# }
 fragment StepsResponse on StepsResponse {
   version
   steps
   clientIds
 }
+
+# A custom view that has been saved by a user.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A custom view that has been saved by a user.",
+#     "block": true
+#   },
+#   "name": "CustomView",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "description",
+#     "icon",
+#     "color",
+#     "",
+#     "team {\n            id\n          }",
+#     "creator {\n            id\n          }",
+#     "filters",
+#     "shared"
+#   ]
+# }
 fragment CustomView on CustomView {
   id
   createdAt
@@ -631,6 +1812,32 @@ fragment CustomView on CustomView {
   filters
   shared
 }
+
+# A custom emoji.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A custom emoji.",
+#     "block": true
+#   },
+#   "name": "Emoji",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "url",
+#     "source",
+#     "creator {\n            id\n          }",
+#     ""
+#   ]
+# }
 fragment Emoji on Emoji {
   id
   createdAt
@@ -643,6 +1850,35 @@ fragment Emoji on Emoji {
     id
   }
 }
+
+# User favorites presented in the sidebar.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "User favorites presented in the sidebar.",
+#     "block": true
+#   },
+#   "name": "Favorite",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "type",
+#     "sortOrder",
+#     "user {\n            id\n          }",
+#     "issue {\n            id\n          }",
+#     "project {\n            id\n          }",
+#     "projectTeam {\n            id\n          }",
+#     "cycle {\n            id\n          }",
+#     "label {\n            id\n          }"
+#   ]
+# }
 fragment Favorite on Favorite {
   id
   createdAt
@@ -669,19 +1905,76 @@ fragment Favorite on Favorite {
     id
   }
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "FigmaEmbedPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment FigmaEmbedPayload on FigmaEmbedPayload {
   lastSyncId
   success
 }
+
+# Object representing Figma preview information.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Object representing Figma preview information.",
+#     "block": true
+#   },
+#   "name": "FigmaEmbed",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "name",
+#     "lastModified",
+#     "nodeName",
+#     "url"
+#   ]
+# }
 fragment FigmaEmbed on FigmaEmbed {
   name
   lastModified
   nodeName
   url
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "InvitePagePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment InvitePagePayload on InvitePagePayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "InviteData",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "inviterName",
+#     "avatarURLs",
+#     "teamNames",
+#     "teamIds",
+#     "organizationName",
+#     "organizationDomain",
+#     "organizationLogoUrl",
+#     "userCount"
+#   ]
+# }
 fragment InviteData on InviteData {
   inviterName
   avatarURLs
@@ -692,6 +1985,35 @@ fragment InviteData on InviteData {
   organizationLogoUrl
   userCount
 }
+
+# A notification sent to a user.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A notification sent to a user.",
+#     "block": true
+#   },
+#   "name": "Notification",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "type",
+#     "reactionEmoji",
+#     "readAt",
+#     "emailedAt",
+#     "user {\n            id\n          }",
+#     "issue {\n            id\n          }",
+#     "team {\n            id\n          }",
+#     "comment {\n            id\n          }"
+#   ]
+# }
 fragment Notification on Notification {
   id
   createdAt
@@ -714,6 +2036,31 @@ fragment Notification on Notification {
     id
   }
 }
+
+# Notification subscriptions for models.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Notification subscriptions for models.",
+#     "block": true
+#   },
+#   "name": "NotificationSubscription",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "type",
+#     "user {\n            id\n          }",
+#     "team {\n            id\n          }",
+#     "project {\n            id\n          }"
+#   ]
+# }
 fragment NotificationSubscription on NotificationSubscription {
   id
   createdAt
@@ -730,6 +2077,34 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
 }
+
+# An invitation to the organization that has been sent via email.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "An invitation to the organization that has been sent via email.",
+#     "block": true
+#   },
+#   "name": "OrganizationInvite",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "email",
+#     "external",
+#     "acceptedAt",
+#     "expiresAt",
+#     "inviter {\n            id\n          }",
+#     "invitee {\n            id\n          }",
+#     ""
+#   ]
+# }
 fragment OrganizationInvite on OrganizationInvite {
   id
   createdAt
@@ -746,10 +2121,45 @@ fragment OrganizationInvite on OrganizationInvite {
     id
   }
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "PushSubscriptionPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment PushSubscriptionPayload on PushSubscriptionPayload {
   lastSyncId
   success
 }
+
+# A reaction associated with a comment.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A reaction associated with a comment.",
+#     "block": true
+#   },
+#   "name": "Reaction",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "emoji",
+#     "user {\n            id\n          }",
+#     "comment {\n            id\n          }"
+#   ]
+# }
 fragment Reaction on Reaction {
   id
   createdAt
@@ -763,6 +2173,29 @@ fragment Reaction on Reaction {
     id
   }
 }
+
+# View preferences.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "View preferences.",
+#     "block": true
+#   },
+#   "name": "ViewPreferences",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "type",
+#     "viewType"
+#   ]
+# }
 fragment ViewPreferences on ViewPreferences {
   id
   createdAt
@@ -771,6 +2204,18 @@ fragment ViewPreferences on ViewPreferences {
   type
   viewType
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "UserPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "user {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment UserPayload on UserPayload {
   lastSyncId
   user {
@@ -778,26 +2223,109 @@ fragment UserPayload on UserPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "UserAdminPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment UserAdminPayload on UserAdminPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OrganizationPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "",
+#     "success"
+#   ]
+# }
 fragment OrganizationPayload on OrganizationPayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OrganizationDeletePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment OrganizationDeletePayload on OrganizationDeletePayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "AdminIntegrationPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment AdminIntegrationPayload on AdminIntegrationPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OrganizationAccessPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment OrganizationAccessPayload on OrganizationAccessPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OrganizationSamlConfigurePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success",
+#     "samlEnabled"
+#   ]
+# }
 fragment OrganizationSamlConfigurePayload on OrganizationSamlConfigurePayload {
   success
   samlEnabled
 }
+
+# The integration resource's settings
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "The integration resource's settings",
+#     "block": true
+#   },
+#   "name": "SamlConfiguration",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "ssoSigningCert",
+#     "ssoEndpoint",
+#     "ssoBinding",
+#     "ssoSignAlgo",
+#     "allowedDomains"
+#   ]
+# }
 fragment SamlConfiguration on SamlConfiguration {
   ssoSigningCert
   ssoEndpoint
@@ -805,33 +2333,120 @@ fragment SamlConfiguration on SamlConfiguration {
   ssoSignAlgo
   allowedDomains
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "AdminCommandPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment AdminCommandPayload on AdminCommandPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "EventPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment EventPayload on EventPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "ApiKeyPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment ApiKeyPayload on ApiKeyPayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "ArchivePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment ArchivePayload on ArchivePayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "EmailUserAccountAuthChallengeResponse",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success",
+#     "authType"
+#   ]
+# }
 fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeResponse {
   success
   authType
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "CreateOrJoinOrganizationResponse",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "",
+#     "user {\n            id\n          }"
+#   ]
+# }
 fragment CreateOrJoinOrganizationResponse on CreateOrJoinOrganizationResponse {
   user {
     id
   }
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "BillingEmailPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success",
+#     "email"
+#   ]
+# }
 fragment BillingEmailPayload on BillingEmailPayload {
   success
   email
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "CommentPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "comment {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment CommentPayload on CommentPayload {
   lastSyncId
   comment {
@@ -839,9 +2454,31 @@ fragment CommentPayload on CommentPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "ContactPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment ContactPayload on ContactPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "CustomViewPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "customView {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment CustomViewPayload on CustomViewPayload {
   lastSyncId
   customView {
@@ -849,6 +2486,18 @@ fragment CustomViewPayload on CustomViewPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "CyclePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "cycle {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment CyclePayload on CyclePayload {
   lastSyncId
   cycle {
@@ -856,12 +2505,44 @@ fragment CyclePayload on CyclePayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "DebugPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment DebugPayload on DebugPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "EmailUnsubscribePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment EmailUnsubscribePayload on EmailUnsubscribePayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "EmojiPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "emoji {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment EmojiPayload on EmojiPayload {
   lastSyncId
   emoji {
@@ -869,6 +2550,18 @@ fragment EmojiPayload on EmojiPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "FavoritePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "favorite {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment FavoritePayload on FavoritePayload {
   lastSyncId
   favorite {
@@ -876,13 +2569,55 @@ fragment FavoritePayload on FavoritePayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "FeedbackPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment FeedbackPayload on FeedbackPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "UploadPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment UploadPayload on UploadPayload {
   lastSyncId
   success
 }
+
+# Object representing Google Cloud upload policy, plus additional data.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Object representing Google Cloud upload policy, plus additional data.",
+#     "block": true
+#   },
+#   "name": "UploadFile",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "filename",
+#     "contentType",
+#     "size",
+#     "uploadUrl",
+#     "assetUrl",
+#     "metaData"
+#   ]
+# }
 fragment UploadFile on UploadFile {
   filename
   contentType
@@ -891,15 +2626,50 @@ fragment UploadFile on UploadFile {
   assetUrl
   metaData
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "UploadFileHeader",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "key",
+#     "value"
+#   ]
+# }
 fragment UploadFileHeader on UploadFileHeader {
   key
   value
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "ImageUploadFromUrlPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "url",
+#     "success"
+#   ]
+# }
 fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
   lastSyncId
   url
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "IntegrationPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "integration {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment IntegrationPayload on IntegrationPayload {
   lastSyncId
   integration {
@@ -907,6 +2677,18 @@ fragment IntegrationPayload on IntegrationPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "IssueLabelPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "issueLabel {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment IssueLabelPayload on IssueLabelPayload {
   lastSyncId
   issueLabel {
@@ -914,6 +2696,18 @@ fragment IssueLabelPayload on IssueLabelPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "IssueRelationPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "issueRelation {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment IssueRelationPayload on IssueRelationPayload {
   lastSyncId
   issueRelation {
@@ -921,6 +2715,18 @@ fragment IssueRelationPayload on IssueRelationPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "IssuePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "issue {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment IssuePayload on IssuePayload {
   lastSyncId
   issue {
@@ -928,6 +2734,18 @@ fragment IssuePayload on IssuePayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "MilestonePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "milestone {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment MilestonePayload on MilestonePayload {
   lastSyncId
   milestone {
@@ -935,18 +2753,80 @@ fragment MilestonePayload on MilestonePayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "NotificationPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment NotificationPayload on NotificationPayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "NotificationSubscriptionPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OauthClientPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment OauthClientPayload on OauthClientPayload {
   lastSyncId
   success
 }
+
+# OAuth2 client application
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "OAuth2 client application",
+#     "block": true
+#   },
+#   "name": "OauthClient",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "clientId",
+#     "name",
+#     "description",
+#     "developer",
+#     "developerUrl",
+#     "imageUrl",
+#     "clientSecret",
+#     "redirectUris"
+#   ]
+# }
 fragment OauthClient on OauthClient {
   id
   createdAt
@@ -961,17 +2841,74 @@ fragment OauthClient on OauthClient {
   clientSecret
   redirectUris
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "RotateSecretPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment RotateSecretPayload on RotateSecretPayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OauthTokenRevokePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment OauthTokenRevokePayload on OauthTokenRevokePayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OrganizationDomainPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment OrganizationDomainPayload on OrganizationDomainPayload {
   lastSyncId
   success
 }
+
+# Defines the use of a domain by an organization.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Defines the use of a domain by an organization.",
+#     "block": true
+#   },
+#   "name": "OrganizationDomain",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "verified",
+#     "creator {\n            id\n          }",
+#     "verificationEmail"
+#   ]
+# }
 fragment OrganizationDomain on OrganizationDomain {
   id
   createdAt
@@ -984,10 +2921,33 @@ fragment OrganizationDomain on OrganizationDomain {
   }
   verificationEmail
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OrganizationInvitePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment OrganizationInvitePayload on OrganizationInvitePayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "ProjectLinkPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "projectLink {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment ProjectLinkPayload on ProjectLinkPayload {
   lastSyncId
   projectLink {
@@ -995,6 +2955,18 @@ fragment ProjectLinkPayload on ProjectLinkPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "ProjectPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "project {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment ProjectPayload on ProjectPayload {
   lastSyncId
   project {
@@ -1002,6 +2974,18 @@ fragment ProjectPayload on ProjectPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "ReactionPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "reaction {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment ReactionPayload on ReactionPayload {
   lastSyncId
   reaction {
@@ -1009,17 +2993,62 @@ fragment ReactionPayload on ReactionPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "CreateCsvExportReportPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment CreateCsvExportReportPayload on CreateCsvExportReportPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "SubscriptionSessionPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "session"
+#   ]
+# }
 fragment SubscriptionSessionPayload on SubscriptionSessionPayload {
   session
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "SubscriptionPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "",
+#     "canceledAt",
+#     "success"
+#   ]
+# }
 fragment SubscriptionPayload on SubscriptionPayload {
   lastSyncId
   canceledAt
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "TeamMembershipPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "teamMembership {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment TeamMembershipPayload on TeamMembershipPayload {
   lastSyncId
   teamMembership {
@@ -1027,6 +3056,18 @@ fragment TeamMembershipPayload on TeamMembershipPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "TeamPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "team {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment TeamPayload on TeamPayload {
   lastSyncId
   team {
@@ -1034,34 +3075,112 @@ fragment TeamPayload on TeamPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "TemplatePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "",
+#     "success"
+#   ]
+# }
 fragment TemplatePayload on TemplatePayload {
   lastSyncId
-  template {
-    id
-  }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "UserSettingsPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "",
+#     "success"
+#   ]
+# }
 fragment UserSettingsPayload on UserSettingsPayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "UserSettingsFlagPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "flag",
+#     "value",
+#     "success"
+#   ]
+# }
 fragment UserSettingsFlagPayload on UserSettingsFlagPayload {
   lastSyncId
   flag
   value
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "UserSettingsFlagsResetPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment UserSettingsFlagsResetPayload on UserSettingsFlagsResetPayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "UserSubscribeToNewsletterPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment UserSubscribeToNewsletterPayload on UserSubscribeToNewsletterPayload {
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "ViewPreferencesPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "success"
+#   ]
+# }
 fragment ViewPreferencesPayload on ViewPreferencesPayload {
   lastSyncId
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "WebhookPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "webhook {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment WebhookPayload on WebhookPayload {
   lastSyncId
   webhook {
@@ -1069,6 +3188,18 @@ fragment WebhookPayload on WebhookPayload {
   }
   success
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "WorkflowStatePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId",
+#     "workflowState {\n            id\n          }",
+#     "success"
+#   ]
+# }
 fragment WorkflowStatePayload on WorkflowStatePayload {
   lastSyncId
   workflowState {
@@ -1076,6 +3207,30 @@ fragment WorkflowStatePayload on WorkflowStatePayload {
   }
   success
 }
+
+# Collaborative editing steps for documents.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "Collaborative editing steps for documents.",
+#     "block": true
+#   },
+#   "name": "DocumentStep",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "step",
+#     "version",
+#     "clientId"
+#   ]
+# }
 fragment DocumentStep on DocumentStep {
   id
   createdAt
@@ -1085,12 +3240,56 @@ fragment DocumentStep on DocumentStep {
   version
   clientId
 }
+
+# A user's web browser push notification subscription.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A user's web browser push notification subscription.",
+#     "block": true
+#   },
+#   "name": "PushSubscription",
+#   "interfaces": [
+#     "Node"
+#   ],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt"
+#   ]
+# }
 fragment PushSubscription on PushSubscription {
   id
   createdAt
   updatedAt
   archivedAt
 }
+
+# A user account.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A user account.",
+#     "block": true
+#   },
+#   "name": "UserAccount",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "createdAt",
+#     "updatedAt",
+#     "archivedAt",
+#     "name",
+#     "email",
+#     "service",
+#     "users {\n            id\n          }"
+#   ]
+# }
 fragment UserAccount on UserAccount {
   id
   createdAt
@@ -1103,6 +3302,29 @@ fragment UserAccount on UserAccount {
     id
   }
 }
+
+# A recorded entry of a file uploaded by a user.
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "description": {
+#     "kind": "StringValue",
+#     "value": "A recorded entry of a file uploaded by a user.",
+#     "block": true
+#   },
+#   "name": "FileUpload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "id",
+#     "creator {\n            id\n          }",
+#     "",
+#     "assetUrl",
+#     "contentType",
+#     "filename",
+#     "metaData",
+#     "size"
+#   ]
+# }
 fragment FileUpload on FileUpload {
   id
   creator {
@@ -1114,9 +3336,29 @@ fragment FileUpload on FileUpload {
   metaData
   size
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "SynchronizedPayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "lastSyncId"
+#   ]
+# }
 fragment SynchronizedPayload on SynchronizedPayload {
   lastSyncId
 }
+
+# {
+#   "kind": "ObjectTypeDefinition",
+#   "name": "OrganizationDomainSimplePayload",
+#   "interfaces": [],
+#   "directives": [],
+#   "fields": [
+#     "success"
+#   ]
+# }
 fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
   success
 }
@@ -1127,236 +3369,6 @@ query user($id: String!) {
     ...User
   }
 }
-# The settings of the user.
-query user_settings($id: String!) {
-  user(id: $id) {
-    settings {
-      ...UserSettings
-    }
-  }
-}
-# Issues assigned to the user.
-query user_assignedIssues(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    assignedIssues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Issues created by the user.
-query user_createdIssues(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    createdIssues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Organization in which the user belongs to.
-query user_organization($id: String!) {
-  user(id: $id) {
-    organization {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query user_organization_users(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    organization {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query user_organization_teams(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    organization {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query user_organization_milestones(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    organization {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query user_organization_integrations(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    organization {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query user_organization_subscription($id: String!) {
-  user(id: $id) {
-    organization {
-      subscription {
-        ...Subscription
-      }
-    }
-  }
-}
-# Memberships associated with the user.
-query user_teamMemberships(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    teamMemberships(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...TeamMembership
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
 
 # The currently authenticated user.
 query viewer {
@@ -1364,350 +3376,11 @@ query viewer {
     ...User
   }
 }
-# The settings of the user.
-query viewer_settings {
-  viewer {
-    settings {
-      ...UserSettings
-    }
-  }
-}
-# Issues assigned to the user.
-query viewer_assignedIssues(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    assignedIssues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Issues created by the user.
-query viewer_createdIssues(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    createdIssues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Organization in which the user belongs to.
-query viewer_organization {
-  viewer {
-    organization {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query viewer_organization_users(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    organization {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query viewer_organization_teams(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    organization {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query viewer_organization_milestones(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    organization {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query viewer_organization_integrations(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    organization {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query viewer_organization_subscription {
-  viewer {
-    organization {
-      subscription {
-        ...Subscription
-      }
-    }
-  }
-}
-# Memberships associated with the user.
-query viewer_teamMemberships(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    teamMemberships(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...TeamMembership
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
 
 # The user's organization.
 query organization {
   organization {
     ...Organization
-  }
-}
-# Users associated with the organization.
-query organization_users(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    users(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...User
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query organization_teams(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    teams(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Team
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query organization_milestones(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    milestones(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Milestone
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query organization_integrations(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    integrations(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Integration
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query organization_subscription {
-  organization {
-    subscription {
-      ...Subscription
-    }
   }
 }
 
@@ -1763,9 +3436,53 @@ query users(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "User"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...User
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -1789,9 +3506,53 @@ query apiKeys(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "ApiKey"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...ApiKey
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -1816,140 +3577,6 @@ query authorizedApplications {
 query availableUsers {
   availableUsers {
     ...AuthResolverResponse
-  }
-}
-# Organizations this account has access to, but is not yet a member.
-query availableUsers_availableOrganizations {
-  availableUsers {
-    availableOrganizations {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query availableUsers_availableOrganizations_users(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  availableUsers {
-    availableOrganizations {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query availableUsers_availableOrganizations_teams(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  availableUsers {
-    availableOrganizations {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query availableUsers_availableOrganizations_milestones(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  availableUsers {
-    availableOrganizations {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query availableUsers_availableOrganizations_integrations(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  availableUsers {
-    availableOrganizations {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query availableUsers_availableOrganizations_subscription {
-  availableUsers {
-    availableOrganizations {
-      subscription {
-        ...Subscription
-      }
-    }
   }
 }
 
@@ -2021,9 +3648,53 @@ query comments(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Comment"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Comment
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2034,144 +3705,6 @@ query comments(
 query customView($id: String!) {
   customView(id: $id) {
     ...CustomView
-  }
-}
-# The organization of the custom view.
-query customView_organization($id: String!) {
-  customView(id: $id) {
-    organization {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query customView_organization_users(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  customView(id: $id) {
-    organization {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query customView_organization_teams(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  customView(id: $id) {
-    organization {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query customView_organization_milestones(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  customView(id: $id) {
-    organization {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query customView_organization_integrations(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  customView(id: $id) {
-    organization {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query customView_organization_subscription($id: String!) {
-  customView(id: $id) {
-    organization {
-      subscription {
-        ...Subscription
-      }
-    }
   }
 }
 
@@ -2191,9 +3724,53 @@ query customViews(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "CustomView"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...CustomView
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2204,62 +3781,6 @@ query customViews(
 query cycle($id: String!) {
   cycle(id: $id) {
     ...Cycle
-  }
-}
-# Issues associated with the cycle.
-query cycle_issues(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  cycle(id: $id) {
-    issues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Issues that weren't completed when the cycle was closed.
-query cycle_uncompletedIssuesUponClose(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  cycle(id: $id) {
-    uncompletedIssuesUponClose(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
   }
 }
 
@@ -2280,9 +3801,53 @@ query cycles(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Cycle"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Cycle
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2293,144 +3858,6 @@ query cycles(
 query emoji($id: String!) {
   emoji(id: $id) {
     ...Emoji
-  }
-}
-# The organization that the emoji belongs to.
-query emoji_organization($id: String!) {
-  emoji(id: $id) {
-    organization {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query emoji_organization_users(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  emoji(id: $id) {
-    organization {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query emoji_organization_teams(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  emoji(id: $id) {
-    organization {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query emoji_organization_milestones(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  emoji(id: $id) {
-    organization {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query emoji_organization_integrations(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  emoji(id: $id) {
-    organization {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query emoji_organization_subscription($id: String!) {
-  emoji(id: $id) {
-    organization {
-      subscription {
-        ...Subscription
-      }
-    }
   }
 }
 
@@ -2450,9 +3877,53 @@ query emojis(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Emoji"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Emoji
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2483,9 +3954,53 @@ query favorites(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Favorite"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Favorite
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2517,15 +4032,79 @@ query integration($id: String!) {
 query integration_settings($id: String!) {
   integration(id: $id) {
     settings {
+      # {
+      #   "kind": "FieldDefinition",
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "slackPost"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NamedType",
+      #     "name": {
+      #       "kind": "Name",
+      #       "value": "SlackPostSettings"
+      #     }
+      #   },
+      #   "directives": []
+      # }
       slackPost {
         ...SlackPostSettings
       }
+      # {
+      #   "kind": "FieldDefinition",
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "slackProjectPost"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NamedType",
+      #     "name": {
+      #       "kind": "Name",
+      #       "value": "SlackPostSettings"
+      #     }
+      #   },
+      #   "directives": []
+      # }
       slackProjectPost {
         ...SlackPostSettings
       }
+      # {
+      #   "kind": "FieldDefinition",
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "googleSheets"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NamedType",
+      #     "name": {
+      #       "kind": "Name",
+      #       "value": "GoogleSheetsSettings"
+      #     }
+      #   },
+      #   "directives": []
+      # }
       googleSheets {
         ...GoogleSheetsSettings
       }
+      # {
+      #   "kind": "FieldDefinition",
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "sentry"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NamedType",
+      #     "name": {
+      #       "kind": "Name",
+      #       "value": "SentrySettings"
+      #     }
+      #   },
+      #   "directives": []
+      # }
       sentry {
         ...SentrySettings
       }
@@ -2568,144 +4147,6 @@ query integration_settings_sentry($id: String!) {
     }
   }
 }
-# The organization that the integration is associated with.
-query integration_organization($id: String!) {
-  integration(id: $id) {
-    organization {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query integration_organization_users(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  integration(id: $id) {
-    organization {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query integration_organization_teams(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  integration(id: $id) {
-    organization {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query integration_organization_milestones(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  integration(id: $id) {
-    organization {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query integration_organization_integrations(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  integration(id: $id) {
-    organization {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query integration_organization_subscription($id: String!) {
-  integration(id: $id) {
-    organization {
-      subscription {
-        ...Subscription
-      }
-    }
-  }
-}
 
 # All integrations.
 query integrations(
@@ -2724,9 +4165,53 @@ query integrations(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Integration"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Integration
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2744,18 +4229,102 @@ query integrationResource_data($id: String!) {
   integrationResource(id: $id) {
     data {
       # The payload for an IntegrationResource of type 'githubPullRequest'
+      # {
+      #   "kind": "FieldDefinition",
+      #   "description": {
+      #     "kind": "StringValue",
+      #     "value": "The payload for an IntegrationResource of type 'githubPullRequest'",
+      #     "block": true
+      #   },
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "githubPullRequest"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NamedType",
+      #     "name": {
+      #       "kind": "Name",
+      #       "value": "PullRequestPayload"
+      #     }
+      #   },
+      #   "directives": []
+      # }
       githubPullRequest {
         ...PullRequestPayload
       }
       # The payload for an IntegrationResource of type 'gitlabMergeRequest'
+      # {
+      #   "kind": "FieldDefinition",
+      #   "description": {
+      #     "kind": "StringValue",
+      #     "value": "The payload for an IntegrationResource of type 'gitlabMergeRequest'",
+      #     "block": true
+      #   },
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "gitlabMergeRequest"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NamedType",
+      #     "name": {
+      #       "kind": "Name",
+      #       "value": "PullRequestPayload"
+      #     }
+      #   },
+      #   "directives": []
+      # }
       gitlabMergeRequest {
         ...PullRequestPayload
       }
       # The payload for an IntegrationResource of type 'githubCommit'
+      # {
+      #   "kind": "FieldDefinition",
+      #   "description": {
+      #     "kind": "StringValue",
+      #     "value": "The payload for an IntegrationResource of type 'githubCommit'",
+      #     "block": true
+      #   },
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "githubCommit"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NamedType",
+      #     "name": {
+      #       "kind": "Name",
+      #       "value": "CommitPayload"
+      #     }
+      #   },
+      #   "directives": []
+      # }
       githubCommit {
         ...CommitPayload
       }
       # The payload for an IntegrationResource of type 'sentryIssue'
+      # {
+      #   "kind": "FieldDefinition",
+      #   "description": {
+      #     "kind": "StringValue",
+      #     "value": "The payload for an IntegrationResource of type 'sentryIssue'",
+      #     "block": true
+      #   },
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "sentryIssue"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NamedType",
+      #     "name": {
+      #       "kind": "Name",
+      #       "value": "SentryIssuePayload"
+      #     }
+      #   },
+      #   "directives": []
+      # }
       sentryIssue {
         ...SentryIssuePayload
       }
@@ -2828,9 +4397,53 @@ query integrationResources(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "IntegrationResource"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...IntegrationResource
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2858,34 +4471,6 @@ query issueLabel($id: String!) {
     ...IssueLabel
   }
 }
-# Issues associated with the label.
-query issueLabel_issues(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  issueLabel(id: $id) {
-    issues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
 
 # All labels.
 query issueLabels(
@@ -2904,9 +4489,53 @@ query issueLabels(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "IssueLabel"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...IssueLabel
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2936,9 +4565,53 @@ query issueRelations(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "IssueRelation"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...IssueRelation
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -2949,90 +4622,6 @@ query issueRelations(
 query issue($id: String!) {
   issue(id: $id) {
     ...Issue
-  }
-}
-# Users who are subscribed to the issue.
-query issue_subscribers(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    subscribers(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...User
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Children of the issue.
-query issue_children(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    children(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Comments associated with the issue.
-query issue_comments(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    comments(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Comment
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
   }
 }
 # History entries associated with the issue.
@@ -3054,121 +4643,53 @@ query issue_history(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
+      # {
+      #   "kind": "FieldDefinition",
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "nodes"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NonNullType",
+      #     "type": {
+      #       "kind": "ListType",
+      #       "type": {
+      #         "kind": "NonNullType",
+      #         "type": {
+      #           "kind": "NamedType",
+      #           "name": {
+      #             "kind": "Name",
+      #             "value": "IssueHistory"
+      #           }
+      #         }
+      #       }
+      #     }
+      #   },
+      #   "directives": []
+      # }
       nodes {
         ...IssueHistory
       }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Labels associated with this issue.
-query issue_labels(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    labels(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...IssueLabel
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Integration resources for this issue.
-query issue_integrationResources(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    integrationResources(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...IntegrationResource
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Relations associated with this issue.
-query issue_relations(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    relations(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...IssueRelation
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Inverse relations associated with this issue.
-query issue_inverseRelations(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    inverseRelations(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...IssueRelation
-      }
+      # {
+      #   "kind": "FieldDefinition",
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "pageInfo"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NonNullType",
+      #     "type": {
+      #       "kind": "NamedType",
+      #       "name": {
+      #         "kind": "Name",
+      #         "value": "PageInfo"
+      #       }
+      #     }
+      #   },
+      #   "directives": []
+      # }
       pageInfo {
         ...PageInfo
       }
@@ -3195,9 +4716,53 @@ query issueSearch(
     orderBy: $orderBy
     query: $query
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Issue"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Issue
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3220,9 +4785,53 @@ query issues(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Issue"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Issue
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3233,172 +4842,6 @@ query issues(
 query milestone($id: String!) {
   milestone(id: $id) {
     ...Milestone
-  }
-}
-# The organization that the milestone belongs to.
-query milestone_organization($id: String!) {
-  milestone(id: $id) {
-    organization {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query milestone_organization_users(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  milestone(id: $id) {
-    organization {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query milestone_organization_teams(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  milestone(id: $id) {
-    organization {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query milestone_organization_milestones(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  milestone(id: $id) {
-    organization {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query milestone_organization_integrations(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  milestone(id: $id) {
-    organization {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query milestone_organization_subscription($id: String!) {
-  milestone(id: $id) {
-    organization {
-      subscription {
-        ...Subscription
-      }
-    }
-  }
-}
-# Projects associated with the milestone.
-query milestone_projects(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  milestone(id: $id) {
-    projects(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Project
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
   }
 }
 
@@ -3419,9 +4862,53 @@ query milestones(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Milestone"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Milestone
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3452,9 +4939,53 @@ query notifications(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Notification"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Notification
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3478,9 +5009,53 @@ query notificationSubscription(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "NotificationSubscription"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...NotificationSubscription
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3491,34 +5066,6 @@ query notificationSubscription(
 query organizationInvite($id: String!) {
   organizationInvite(id: $id) {
     ...IssueLabel
-  }
-}
-# Issues associated with the label.
-query organizationInvite_issues(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  organizationInvite(id: $id) {
-    issues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
   }
 }
 
@@ -3539,9 +5086,53 @@ query organizationInvites(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "OrganizationInvite"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...OrganizationInvite
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3572,9 +5163,53 @@ query ProjectLinks(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "ProjectLink"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...ProjectLink
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3585,118 +5220,6 @@ query ProjectLinks(
 query project($id: String!) {
   project(id: $id) {
     ...Project
-  }
-}
-# Teams associated with this project.
-query project_teams(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  project(id: $id) {
-    teams(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Team
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Users that are members of the project.
-query project_members(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  project(id: $id) {
-    members(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...User
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Issues associated with the project.
-query project_issues(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  project(id: $id) {
-    issues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Links associated with the project.
-query project_links(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  project(id: $id) {
-    links(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...ProjectLink
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
   }
 }
 
@@ -3717,9 +5240,53 @@ query projects(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Project"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Project
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3756,9 +5323,53 @@ query reactions(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Reaction"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Reaction
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3769,130 +5380,6 @@ query reactions(
 query subscription {
   subscription {
     ...Subscription
-  }
-}
-# The organization that the subscription is associated with.
-query subscription_organization {
-  subscription {
-    organization {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query subscription_organization_users(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  subscription {
-    organization {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query subscription_organization_teams(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  subscription {
-    organization {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query subscription_organization_milestones(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  subscription {
-    organization {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query subscription_organization_integrations(
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  subscription {
-    organization {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
   }
 }
 
@@ -3920,9 +5407,53 @@ query teamMemberships(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "TeamMembership"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...TeamMembership
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -3933,146 +5464,6 @@ query teamMemberships(
 query team($id: String!) {
   team(id: $id) {
     ...Team
-  }
-}
-# Issues associated with the team.
-query team_issues(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    issues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Cycles associated with the team.
-query team_cycles(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    cycles(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Cycle
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Memberships associated with the team.
-query team_memberships(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    memberships(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...TeamMembership
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Projects associated with the team.
-query team_projects(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    projects(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Project
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# The states that define the workflow associated with the team.
-query team_states(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    states(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...WorkflowState
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
   }
 }
 # Templates associated with the team.
@@ -4094,203 +5485,53 @@ query team_templates(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
+      # {
+      #   "kind": "FieldDefinition",
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "nodes"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NonNullType",
+      #     "type": {
+      #       "kind": "ListType",
+      #       "type": {
+      #         "kind": "NonNullType",
+      #         "type": {
+      #           "kind": "NamedType",
+      #           "name": {
+      #             "kind": "Name",
+      #             "value": "Template"
+      #           }
+      #         }
+      #       }
+      #     }
+      #   },
+      #   "directives": []
+      # }
       nodes {
         ...Template
       }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# Labels associated with the team.
-query team_labels(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    labels(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...IssueLabel
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
-  }
-}
-# The organization that the team is associated with.
-query team_organization($id: String!) {
-  team(id: $id) {
-    organization {
-      ...Organization
-    }
-  }
-}
-# Users associated with the organization.
-query team_organization_users(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    organization {
-      users(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...User
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Teams associated with the organization.
-query team_organization_teams(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    organization {
-      teams(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Team
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Milestones associated with the organization.
-query team_organization_milestones(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    organization {
-      milestones(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Milestone
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# Integrations associated with the organization.
-query team_organization_integrations(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    organization {
-      integrations(
-        before: $before
-        after: $after
-        first: $first
-        last: $last
-        includeArchived: $includeArchived
-        orderBy: $orderBy
-      ) {
-        nodes {
-          ...Integration
-        }
-        pageInfo {
-          ...PageInfo
-        }
-      }
-    }
-  }
-}
-# The organization's subscription to a paid plan.
-query team_organization_subscription($id: String!) {
-  team(id: $id) {
-    organization {
-      subscription {
-        ...Subscription
-      }
-    }
-  }
-}
-# Webhooks associated with the team.
-query team_webhooks(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    webhooks(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Webhook
-      }
+      # {
+      #   "kind": "FieldDefinition",
+      #   "name": {
+      #     "kind": "Name",
+      #     "value": "pageInfo"
+      #   },
+      #   "arguments": [],
+      #   "type": {
+      #     "kind": "NonNullType",
+      #     "type": {
+      #       "kind": "NamedType",
+      #       "name": {
+      #         "kind": "Name",
+      #         "value": "PageInfo"
+      #       }
+      #     }
+      #   },
+      #   "directives": []
+      # }
       pageInfo {
         ...PageInfo
       }
@@ -4315,9 +5556,53 @@ query teams(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Team"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Team
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -4355,9 +5640,53 @@ query viewPreferences(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "ViewPreferences"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...ViewPreferences
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -4388,9 +5717,53 @@ query webhooks(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "Webhook"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...Webhook
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -4401,34 +5774,6 @@ query webhooks(
 query workflowState($id: String!) {
   workflowState(id: $id) {
     ...WorkflowState
-  }
-}
-# Issues belonging in this state.
-query workflowState_issues(
-  $id: String!
-  $before: String
-  $after: String
-  $first: Int
-  $last: Int
-  $includeArchived: Boolean
-  $orderBy: PaginationOrderBy
-) {
-  workflowState(id: $id) {
-    issues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
-    }
   }
 }
 
@@ -4449,9 +5794,53 @@ query workflowStates(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "nodes"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "ListType",
+    #       "type": {
+    #         "kind": "NonNullType",
+    #         "type": {
+    #           "kind": "NamedType",
+    #           "name": {
+    #             "kind": "Name",
+    #             "value": "WorkflowState"
+    #           }
+    #         }
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     nodes {
       ...WorkflowState
     }
+    # {
+    #   "kind": "FieldDefinition",
+    #   "name": {
+    #     "kind": "Name",
+    #     "value": "pageInfo"
+    #   },
+    #   "arguments": [],
+    #   "type": {
+    #     "kind": "NonNullType",
+    #     "type": {
+    #       "kind": "NamedType",
+    #       "name": {
+    #         "kind": "Name",
+    #         "value": "PageInfo"
+    #       }
+    #     }
+    #   },
+    #   "directives": []
+    # }
     pageInfo {
       ...PageInfo
     }
@@ -4751,7 +6140,8 @@ mutation feedbackCreate($input: FeedbackCreateInput!) {
   }
 }
 
-# XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage.
+# XHR request payload to upload an images, video and other attachments directly to Linear's cloud
+# storage.
 mutation fileUpload($metaData: JSON, $size: Int!, $contentType: String!, $filename: String!) {
   fileUpload(metaData: $metaData, size: $size, contentType: $contentType, filename: $filename) {
     ...UploadPayload
@@ -5192,7 +6582,8 @@ mutation teamMembershipDelete($id: String!) {
   }
 }
 
-# Creates a new team. The user who creates the team will automatically be added as a member to the newly created team.
+# Creates a new team. The user who creates the team will automatically be added as a member to the
+# newly created team.
 mutation teamCreate($copySettingsFromTeamId: String, $input: TeamCreateInput!) {
   teamCreate(copySettingsFromTeamId: $copySettingsFromTeamId, input: $input) {
     ...TeamPayload

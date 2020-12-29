@@ -13,7 +13,7 @@
     "dist"
   ],
   "scripts": {
-    "dev:client": "run-s dev:client:update build:client dev:client:push",
+    "dev:client": "NODE_ENV=development run-s dev:client:update build:client dev:client:push",
     "dev:client:push": "yalc push",
     "dev:client:update": "yalc update",
     "build:client": "yarn generate && yarn build:client:clean && npx tsc",

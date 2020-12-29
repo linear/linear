@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "dev:plugin": "yarn dev:plugin:doc",
-    "dev:plugin:doc": "run-s dev:plugin:doc:update build:plugin:doc dev:plugin:doc:push",
+    "dev:plugin:doc": "NODE_ENV=development run-s dev:plugin:doc:update build:plugin:doc dev:plugin:doc:push",
     "dev:plugin:doc:push": "yalc push",
     "dev:plugin:doc:update": "yalc update",
     "build:plugin": "yarn build:plugin:doc",

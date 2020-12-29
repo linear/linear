@@ -11,20 +11,6 @@ export function printNamespaced(config: SdkPluginConfig, name: string): string {
 }
 
 /**
- * Return a jsdoc formatted block
- */
-export function printDocBlock(lines: string[]): string {
-  return [
-    "/**",
-    ...lines
-      .filter(t => t && t !== "")
-      .reduce((prev, t) => [...prev, ...t.split("\n")], [] as string[])
-      .map(line => ` * ${line}`),
-    " */",
-  ].join("\n");
-}
-
-/**
  * Return the name of the operation
  */
 export function printOperationName(o: OperationDefinitionNode): string {

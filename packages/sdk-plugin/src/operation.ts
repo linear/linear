@@ -1,10 +1,10 @@
-import { filterJoin, getLast, nonNullable } from "@linear/common";
+import { filterJoin, getLast, nonNullable, printComment } from "@linear/common";
 import { FieldNode, Kind, OperationDefinitionNode, SelectionSetNode } from "graphql";
 import { printApiFunctionName, printApiFunctionType } from "./api";
 import { ArgDefinition, getArgList } from "./args";
 import { SdkPluginConfig } from "./config";
 import c from "./constants";
-import { printDocBlock, printNamespaced, printOperationName } from "./print";
+import { printNamespaced, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
 import { SdkVisitorOperation } from "./sdk-visitor";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
@@ -262,7 +262,7 @@ export function printOperation(o: SdkVisitorOperation, config: SdkPluginConfig):
 
   /** Build a function for this graphql operation */
   return `
-    ${printDocBlock([
+    ${printComment([
       `Call the Linear api with the ${o.operationResultType}`,
       ...args.jsdoc,
       `@returns The result of the ${o.operationResultType}`,

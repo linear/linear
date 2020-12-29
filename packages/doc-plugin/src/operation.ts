@@ -1,17 +1,10 @@
-import { filterJoin, getLast } from "@linear/common";
-import { FieldDefinitionNode, ObjectTypeDefinitionNode, StringValueNode } from "graphql";
+import { filterJoin, getLast, printGraphqlDebug, printGraphqlDescription } from "@linear/common";
+import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { getTypeName, isScalarField, isValidField, printInputArgs, printResponseArgs } from "./field";
 import { findFragment, printOperationFragment } from "./fragment";
 import { findObject } from "./object";
 import { findQuery } from "./query";
 import { OperationType, OperationVisitorContext } from "./types";
-
-/**
- * Print the description as a graphql file comment
- */
-export function printDescription<T extends { description?: StringValueNode }>(node: T): string | undefined {
-  return node.description?.value ? filterJoin(["#", node.description.value], " ") : undefined;
-}
 
 /**
  * Print the operation wrapper
@@ -27,15 +20,18 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
 
     return filterJoin(
       [
-        printDescription(lastField),
+        /** The operation description */
+        printGraphqlDescription(lastField.description?.value),
+        /** The operation definition */
         `${type} ${operationName}${printInputArgs(fields)} {`,
+        /** Each field and its required content */
         fields
           .slice()
           .reverse()
           .reduce((acc, field) => {
             return `${field.name.value}${printResponseArgs(field)} {
-          ${acc === "" ? body : acc}
-        }`;
+              ${acc === "" ? body : acc}
+            }`;
           }, ""),
         `}`,
       ],
@@ -64,7 +60,11 @@ function printOperationFields(
             return operation
               ? filterJoin(
                   [
-                    printDescription(field),
+                    /** The field description */
+                    printGraphqlDescription(field.description?.value),
+                    /** Debug detail */
+                    printGraphqlDebug(field),
+                    /** The field content */
                     `${field.name.value} {
                       ${operation}
                     }`,
