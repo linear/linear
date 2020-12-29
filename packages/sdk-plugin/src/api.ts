@@ -1,28 +1,21 @@
 import { indentMultiline } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, printComment, printDebug, upperFirst } from "@linear/common";
+import { filterJoin, printComment, upperFirst } from "@linear/common";
 import { VariableDefinitionNode } from "graphql";
 import { getArgList } from "./args";
 import c from "./constants";
+import { printOperation } from "./operation";
 import { getRequesterArg } from "./requester";
-import { ApiDefinition, ApiDefinitions } from "./types";
+import { SdkPluginContext } from "./types";
 import { getTypeName, isRequiredVariable } from "./variable";
 
-export function printOperation(apiDefinition: ApiDefinition): string {
-  return printDebug(apiDefinition);
-}
-
-export function printApiDefinition(
-  apiDefinitions: ApiDefinitions,
-  apiKey: string,
-  definitions: ApiDefinition[]
-): string {
+export function printApiDefinition(context: SdkPluginContext): string {
   /** For each operation get the function string content */
   const content = filterJoin(
-    definitions.map(o => printOperation(o)).map(s => indentMultiline(s, 2)),
+    context.definitions.map(o => printOperation(context, o)).map(s => indentMultiline(s, 2)),
     "\n"
   );
 
-  return printApiFunction(apiDefinitions, apiKey, definitions, content);
+  return printApiFunction(context, content);
 }
 
 /**
@@ -42,25 +35,20 @@ export function printApiFunctionType(apiKey: string): string {
 /**
  * Print the api function with content
  */
-export function printApiFunction(
-  apiDefinitions: ApiDefinitions,
-  apiKey: string,
-  definitions: ApiDefinition[],
-  content: string
-): string {
-  const name = printApiFunctionName(apiKey);
-  const type = printApiFunctionType(apiKey);
+export function printApiFunction(context: SdkPluginContext, content: string): string {
+  const name = printApiFunctionName(context.apiKey);
+  const type = printApiFunctionType(context.apiKey);
 
-  const keys = apiKey.split("_");
+  const keys = context.apiKey.split("_");
   const parentDefinitions = keys.slice(0, -1).map((key, index) => {
     const parentKey = keys.slice(0, index).join("_");
-    return apiDefinitions[parentKey].find(
+    return context.apiDefinitions[parentKey].find(
       definition => definition.path.join("_") === keys.slice(0, index + 1).join("_")
     );
   });
 
   const requiredVariables = parentDefinitions.reduce<VariableDefinitionNode[]>((acc, definition) => {
-    return [...acc, ...(definition?.operation.variableDefinitions?.filter(isRequiredVariable) ?? [])];
+    return [...acc, ...(definition?.node.variableDefinitions?.filter(isRequiredVariable) ?? [])];
   }, []);
 
   const args = getArgList([
@@ -75,8 +63,8 @@ export function printApiFunction(
     })),
   ]);
 
-  const apiDescription = apiKey
-    ? `Initialize a set of operations, scoped to ${apiKey}, to run against the Linear api`
+  const apiDescription = context.apiKey
+    ? `Initialize a set of operations, scoped to ${context.apiKey}, to run against the Linear api`
     : "Initialize a set of operations to run against the Linear api";
 
   return filterJoin(
@@ -84,8 +72,8 @@ export function printApiFunction(
       printComment([
         apiDescription,
         ...args.jsdoc,
-        apiKey.length
-          ? `@returns The set of available operations scoped to a single ${apiKey}`
+        context.apiKey.length
+          ? `@returns The set of available operations scoped to a single ${context.apiKey}`
           : "@returns The set of available operations",
       ]),
       `export function ${name}<${c.OPTIONS_TYPE}>(${args.print}) {

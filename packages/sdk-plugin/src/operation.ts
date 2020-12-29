@@ -1,12 +1,11 @@
-import { filterJoin, getLast, nonNullable, printComment } from "@linear/common";
+import { filterJoin, getLast, nonNullable, printComment, printDebug } from "@linear/common";
 import { FieldNode, Kind, OperationDefinitionNode, SelectionSetNode } from "graphql";
 import { printApiFunctionName, printApiFunctionType } from "./api";
 import { ArgDefinition, getArgList } from "./args";
-import { SdkPluginConfig } from "./config";
 import c from "./constants";
 import { printNamespaced, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
-import { SdkVisitorOperation } from "./sdk-visitor";
+import { ApiDefinition, SdkPluginContext } from "./types";
 import { hasOptionalVariable, hasOtherVariable, hasVariable, isIdVariable } from "./variable";
 
 /**
@@ -123,7 +122,7 @@ export function processSdkOperation(o: OperationDefinitionNode): SdkOperationDef
 /**
  * Get the operation args from the operation variables
  */
-function getOperationArgs(o: SdkVisitorOperation, config: SdkPluginConfig): ArgDefinition[] {
+function getOperationArgs(context: SdkPluginContext, o: ApiDefinition): ArgDefinition[] {
   /** Operation id argument definition */
   const idArg = {
     name: c.ID_NAME,
@@ -133,7 +132,7 @@ function getOperationArgs(o: SdkVisitorOperation, config: SdkPluginConfig): ArgD
   };
 
   /** Operation variables argument definition */
-  const variableType = printNamespaced(config, o.operationVariablesTypes);
+  const variableType = printNamespaced(context, o.operationVariablesTypes);
   const variablesArg = {
     name: c.VARIABLE_NAME,
     optional: hasOptionalVariable(o),
@@ -143,19 +142,17 @@ function getOperationArgs(o: SdkVisitorOperation, config: SdkPluginConfig): ArgD
 
   /** Handle id variables separately by making them the first arg */
   if (hasVariable(o, c.ID_NAME)) {
-    const chainChildKey = getChainChildKey(o);
-
     if (hasOtherVariable(o, c.ID_NAME)) {
       /** If we are chained do not add the id arg as it comes from the function scope */
       const variablesWithoutIdArg = {
         ...variablesArg,
         type: `Omit<${variableType}, '${c.ID_NAME}'>`,
-        description: `variables without ${chainChildKey} ${c.ID_NAME} to pass into the ${o.operationResultType}`,
+        description: `variables without ${o.path} ${c.ID_NAME} to pass into the ${o.operationResultType}`,
       };
 
-      return chainChildKey ? [variablesWithoutIdArg] : [idArg, variablesWithoutIdArg];
+      return o.path.length ? [variablesWithoutIdArg] : [idArg, variablesWithoutIdArg];
     } else {
-      return chainChildKey ? [] : [idArg];
+      return o.path.length ? [] : [idArg];
     }
   } else {
     return [variablesArg];
@@ -163,81 +160,64 @@ function getOperationArgs(o: SdkVisitorOperation, config: SdkPluginConfig): ArgD
 }
 
 /**
- * Get the chain key if the operation should create an api
- */
-export function getChainParentKey(o: SdkVisitorOperation): string | undefined {
-  return o.node.chainType === SdkChainType.parent ? o.node.chainKey : undefined;
-}
-
-/**
- * Get the chain key if the operation is nested within an api
- */
-export function getChainChildKey(o: SdkVisitorOperation): string | undefined {
-  return o.node.chainType === SdkChainType.child ? o.node.chainKey : undefined;
-}
-
-/**
  * Get the set of keys by which to nest the data
  */
-function getNestedDataKeys(o: SdkVisitorOperation): string[] {
-  const operationName = printSdkOperationName(o);
-  const chainChildKey = getChainChildKey(o);
-  const firstField = getFirstField(o.node.selectionSet);
+function getNestedDataKeys(o: ApiDefinition): string[] {
+  // const operationName = printSdkOperationName(o);
+  // const firstField = getFirstField(o.node.selectionSet);
 
   return [
-    chainChildKey,
-    /** If the operation name is the same as the first field we can drill into the data */
-    operationName === getFirstFieldName(o.node.selectionSet) ? operationName : undefined,
-    /** If the operation is a child and named the same as the first field inside the first field we can also drill */
-    chainChildKey && operationName === getFirstFieldName(firstField.selectionSet) ? operationName : undefined,
+    ...o.path,
+    // /** If the operation name is the same as the first field we can drill into the data */
+    // operationName === getFirstFieldName(o.node.selectionSet) ? operationName : undefined,
+    // /** If the operation is a child and named the same as the first field inside the first field we can also drill */
+    // chainChildKey && operationName === getFirstFieldName(firstField.selectionSet) ? operationName : undefined,
   ].filter(nonNullable);
 }
 
 /**
  * Get the sdk action operation body
  */
-function printOperationBody(o: SdkVisitorOperation, config: SdkPluginConfig): string {
-  const chainParentKey = getChainParentKey(o);
+function printOperationBody(context: SdkPluginContext, o: ApiDefinition): string {
   const nestedDataKeys = getNestedDataKeys(o);
 
-  return chainParentKey || nestedDataKeys.length
+  return o.path.length || nestedDataKeys.length
     ? filterJoin(
         [
-          `const response = await ${printRequesterCall(o, config)}`,
+          `const response = await ${printRequesterCall(context, o)}`,
           `return {`,
           /** If the first field is the operation drill down for a nicer api */
           `...${filterJoin(["response", ...nestedDataKeys], "?.")},`,
           /** If we are a parent add the child sdk to the response */
-          chainParentKey ? `...${printApiFunctionName(chainParentKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}),` : undefined,
+          o.path.length ? `...${printApiFunctionName(context.apiKey)}(${c.ID_NAME}, ${c.REQUESTER_NAME}),` : undefined,
           `}`,
         ],
         "\n"
       )
-    : `return ${printRequesterCall(o, config)}`;
+    : `return ${printRequesterCall(context, o)}`;
 }
 
 /**
  * Get the name of the operation
  * Chained apis have the chain key removed from the name
  */
-export function printSdkOperationName(o: SdkVisitorOperation): string {
-  return getLast(printOperationName(o.node).split("_")) ?? "NO_OPERATION_NAME";
+export function printSdkOperationName(o: ApiDefinition): string {
+  return getLast(printOperationName(o).split("_")) ?? "NO_OPERATION_NAME";
 }
 
 /**
  * Get the result type of the operation
  * Chained apis have the relevant chain api return type added
  */
-function printOperationResultType(o: SdkVisitorOperation, config: SdkPluginConfig) {
+function printOperationResultType(context: SdkPluginContext, o: ApiDefinition) {
   const nestedDataKeys = getNestedDataKeys(o);
-  const chainParentKey = getChainParentKey(o);
-  const documentName = printNamespaced(config, o.documentVariableName);
+  const documentName = printNamespaced(context, o.documentVariableName);
   const documentResultType = `ResultOf<typeof ${documentName}>`;
 
   const resultType = filterJoin([documentResultType, ...nestedDataKeys.map(key => `['${key}']`)], "");
 
-  if (chainParentKey) {
-    return `Promise<${resultType} & ${printApiFunctionType(chainParentKey)}>`;
+  if (Object.keys(context.apiDefinitions).includes(context.apiKey)) {
+    return `Promise<${resultType} & ${printApiFunctionType(context.apiKey)}>`;
   } else {
     return `Promise<${resultType}>`;
   }
@@ -246,12 +226,12 @@ function printOperationResultType(o: SdkVisitorOperation, config: SdkPluginConfi
 /**
  * Process a graphql operation and return a generated operation string
  */
-export function printOperation(o: SdkVisitorOperation, config: SdkPluginConfig): string {
+export function printOperation(context: SdkPluginContext, o: ApiDefinition): string {
   const operationName = printSdkOperationName(o);
-  const returnType = printOperationResultType(o, config);
-  const content = printOperationBody(o, config);
+  const returnType = printOperationResultType(context, o);
+  const content = printOperationBody(context, o);
   const args = getArgList([
-    ...getOperationArgs(o, config),
+    ...getOperationArgs(context, o),
     {
       name: c.OPTIONS_NAME,
       optional: true,
@@ -261,14 +241,18 @@ export function printOperation(o: SdkVisitorOperation, config: SdkPluginConfig):
   ]);
 
   /** Build a function for this graphql operation */
-  return `
-    ${printComment([
-      `Call the Linear api with the ${o.operationResultType}`,
-      ...args.jsdoc,
-      `@returns The result of the ${o.operationResultType}`,
-    ])}
-    async ${operationName}(${args.print}): ${returnType} {
-      ${content}
-    }
-  `;
+  return filterJoin(
+    [
+      printComment([
+        `Call the Linear api with the ${operationName}`,
+        ...args.jsdoc,
+        `@returns The result of the ${returnType}`,
+      ]),
+      printDebug({ apiKey: context.apiKey, ...o }),
+      `async ${operationName}(${args.print}): ${returnType} {
+        ${content}
+      }`,
+    ],
+    "\n"
+  );
 }

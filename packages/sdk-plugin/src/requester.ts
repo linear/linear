@@ -1,16 +1,15 @@
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
 import { printComment } from "@linear/common";
 import { ArgDefinition } from "./args";
-import { RawSdkPluginConfig, SdkPluginConfig } from "./config";
 import c from "./constants";
 import { printNamespaced } from "./print";
-import { SdkVisitorOperation } from "./sdk-visitor";
+import { ApiDefinition, RawSdkPluginConfig, SdkPluginContext } from "./types";
 import { hasOtherVariable, hasVariable } from "./variable";
 
 /**
  * Get the requester args from the operation variables
  */
-export function printRequesterArgs(o: SdkVisitorOperation): string {
+export function printRequesterArgs(o: ApiDefinition): string {
   if (hasVariable(o, c.ID_NAME)) {
     /** Merge id variable into requester variables */
     if (hasOtherVariable(o, c.ID_NAME)) {
@@ -37,10 +36,10 @@ export function printRequesterType(config: RawSdkPluginConfig): string[] {
 /**
  * Print the call to the requester
  */
-export function printRequesterCall(o: SdkVisitorOperation, config: SdkPluginConfig): string {
-  const variableType = printNamespaced(config, o.operationVariablesTypes);
-  const documentName = printNamespaced(config, o.documentVariableName);
-  const resultType = printNamespaced(config, o.operationResultType);
+export function printRequesterCall(context: SdkPluginContext, o: ApiDefinition): string {
+  const variableType = printNamespaced(context, o.operationVariablesTypes);
+  const documentName = printNamespaced(context, o.documentVariableName);
+  const resultType = printNamespaced(context, o.operationResultType);
 
   return `${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${documentName}, ${printRequesterArgs(o)}, ${
     c.OPTIONS_NAME

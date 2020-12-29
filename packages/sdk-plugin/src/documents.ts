@@ -1,6 +1,7 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
-import { nonNullable } from "@linear/common";
+import { logger, nonNullable } from "@linear/common";
 import { DocumentNode, Kind, OperationDefinitionNode } from "graphql";
+import { pascalCase } from "pascal-case";
 import { ApiDefinition, ApiDefinitions } from "./types";
 
 /**
@@ -30,12 +31,24 @@ function getOperations(documents: Types.DocumentFile[]): OperationDefinitionNode
  * Process the documents and return a definition object for generating the api
  */
 export function getApiDefinitions(documents: Types.DocumentFile[]): ApiDefinitions {
-  return getOperations(documents).reduce<ApiDefinitions>((acc, operation) => {
-    const path = (operation.name?.value ?? "").split("_");
+  return getOperations(documents).reduce<ApiDefinitions>((acc, node) => {
+    const path = (node.name?.value ?? "").split("_");
     const key = path.slice(0, path.length - 1).join("_");
+
+    logger.trace({ ...node, path, documentVariableName: pascalCase(node.name?.value ?? "UNNAMED_OPERATION") });
+
+    const name = pascalCase(node.name?.value ?? "UNNAMED_OPERATION");
     const apiDefinition: ApiDefinition = {
       path,
-      operation,
+      node,
+      // /** The name of the generated graphql document */
+      documentVariableName: `${name}Document`,
+      // /** The type of the graphql operation */
+      operationType: node.operation,
+      // /** The type of the result from the graphql operation */
+      operationResultType: `${name}Query`,
+      // /** The type of the variables for the graphql operation */
+      operationVariablesTypes: `${name}QueryVariables`,
     };
 
     return { ...acc, [key]: [...(acc[key] ?? []), apiDefinition] };

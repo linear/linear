@@ -4,7 +4,7 @@ import { getTypeName, isScalarField, isValidField, printInputArgs, printResponse
 import { findFragment, printOperationFragment } from "./fragment";
 import { findObject } from "./object";
 import { findQuery } from "./query";
-import { DocVisitorContext, OperationType } from "./types";
+import { DocPluginContext, OperationType } from "./types";
 
 /**
  * Print the operation wrapper
@@ -46,7 +46,7 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
  * Nest the objects until a fragment or scalar is found
  */
 function printOperationFields(
-  context: DocVisitorContext,
+  context: DocPluginContext,
   fields: FieldDefinitionNode[],
   object: ObjectTypeDefinitionNode
 ): string {
@@ -85,7 +85,7 @@ function printOperationFields(
 /**
  * Print the body of the operation
  */
-export function printOperationBody(context: DocVisitorContext, fields: FieldDefinitionNode[]): string | undefined {
+export function printOperationBody(context: DocPluginContext, fields: FieldDefinitionNode[]): string | undefined {
   const lastField = getLast(fields);
 
   if (isValidField(lastField)) {
@@ -106,7 +106,7 @@ export function printOperationBody(context: DocVisitorContext, fields: FieldDefi
 }
 
 export function printFieldOperation(
-  context: DocVisitorContext,
+  context: DocPluginContext,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {
@@ -122,7 +122,7 @@ export function printFieldOperation(
  * @param fields a list of fields by which to nest the query
  */
 export function printOperations(
-  context: DocVisitorContext,
+  context: DocPluginContext,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {

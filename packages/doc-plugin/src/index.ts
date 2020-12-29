@@ -2,7 +2,6 @@ import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin
 import { logger } from "@linear/common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
-import { RawDocPluginConfig } from "./config";
 import { getTypeName } from "./field";
 import { FragmentVisitor } from "./fragment-visitor";
 import { OperationVisitor } from "./operation-visitor";
@@ -10,7 +9,7 @@ import { OperationVisitor } from "./operation-visitor";
 /**
  * Graphql-codegen plugin for outputting the typed Linear documents
  */
-export const plugin: PluginFunction<RawDocPluginConfig> = async (schema: GraphQLSchema) => {
+export const plugin: PluginFunction = async (schema: GraphQLSchema) => {
   try {
     /** Get ast from schema */
     const ast = parse(printSchema(schema));
@@ -46,7 +45,7 @@ export const plugin: PluginFunction<RawDocPluginConfig> = async (schema: GraphQL
 export const validate: PluginValidateFn = async (
   _schema: GraphQLSchema,
   _documents: Types.DocumentFile[],
-  config: RawDocPluginConfig,
+  config: unknown,
   outputFile: string
 ) => {
   const packageName = "@linear/doc-plugin";

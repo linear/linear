@@ -1,18 +1,16 @@
 import { Kind, ListTypeNode, NamedTypeNode, NameNode, NonNullTypeNode, VariableDefinitionNode } from "graphql";
 import c from "./constants";
-import { getChainChildKey } from "./operation";
-import { SdkVisitorOperation } from "./sdk-visitor";
+import { ApiDefinition } from "./types";
 
 /**
  * Does the operation have optional variables
  */
-export function hasOptionalVariable(o: SdkVisitorOperation): boolean {
-  const isChainChild = getChainChildKey(o);
+export function hasOptionalVariable(o: ApiDefinition): boolean {
   return (
     !o.node.variableDefinitions ||
     o.node.variableDefinitions.length === 0 ||
     o.node.variableDefinitions.every(
-      v => (isChainChild ? isIdVariable(v) : false) || !isRequiredVariable(v) || v.defaultValue
+      v => (o.path.length ? isIdVariable(v) : false) || !isRequiredVariable(v) || v.defaultValue
     )
   );
 }
@@ -20,14 +18,14 @@ export function hasOptionalVariable(o: SdkVisitorOperation): boolean {
 /**
  * Does the operation have a variable that matches the arg
  */
-export function hasVariable(o: SdkVisitorOperation, variableName: string): boolean {
+export function hasVariable(o: ApiDefinition, variableName: string): boolean {
   return Boolean(o.node.variableDefinitions?.some(v => v.variable.name.value === variableName));
 }
 
 /**
  * Does the operation have a variable other than the arg
  */
-export function hasOtherVariable(o: SdkVisitorOperation, variableName: string): boolean {
+export function hasOtherVariable(o: ApiDefinition, variableName: string): boolean {
   return Boolean(o.node.variableDefinitions?.some(v => v.variable.name.value !== variableName));
 }
 

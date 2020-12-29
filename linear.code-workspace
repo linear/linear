@@ -53,6 +53,7 @@
     "gitlens.currentLine.enabled": false,
     "typescript.tsdk": "node_modules/typescript/lib",
     "cSpell.words": [
+      "codegen",
       "yalc"
     ]
   }

@@ -4,10 +4,10 @@ import { filterJoin, logger, nonNullable } from "@linear/common";
 import { GraphQLSchema } from "graphql";
 import { extname } from "path";
 import { printApiDefinition } from "./api";
-import { RawSdkPluginConfig } from "./config";
 import c from "./constants";
 import { getApiDefinitions } from "./documents";
 import { printRequesterType } from "./requester";
+import { RawSdkPluginConfig } from "./types";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear sdk
@@ -26,8 +26,8 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
 
     const printedDefinitions = Object.entries(apiDefinitions).map(([apiKey, definitions]) => {
       logger.info("Generating api", apiKey);
-      /** Create an ast visitor configured with the plugin input */
-      return printApiDefinition(apiDefinitions, apiKey, definitions);
+
+      return printApiDefinition({ config, apiDefinitions, apiKey, definitions });
     });
 
     logger.info("Printing api");
