@@ -1,6 +1,6 @@
 import { LoadedFragment } from "@graphql-codegen/visitor-plugin-common";
 import { DocumentNode, FragmentDefinitionNode, Kind } from "graphql";
-import { RawSdkPluginConfig } from "./config";
+import { RawSdkPluginConfig } from "./types";
 
 /*
  * Get a list of all fragment definitions

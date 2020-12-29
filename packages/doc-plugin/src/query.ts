@@ -1,13 +1,13 @@
 import { FieldDefinitionNode } from "graphql";
 import c from "./constants";
 import { getTypeName } from "./field";
-import { DocVisitorContext, Named } from "./types";
+import { DocPluginContext, Named } from "./types";
 
 /**
  * Find a query that can return this field
  * */
 export function findQuery(
-  context: DocVisitorContext,
+  context: DocPluginContext,
   field: Named<FieldDefinitionNode> | FieldDefinitionNode
 ): FieldDefinitionNode | undefined {
   /** Ignore queries for connections */

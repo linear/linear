@@ -32,9 +32,9 @@ export enum OperationType {
 export type Fragment = NamedFields<ObjectTypeDefinitionNode>;
 
 /**
- * Stateful context for operation building information
+ * Stateful context for document building information
  */
-export interface DocVisitorContext {
+export interface DocPluginContext {
   schema: GraphQLSchema;
   scalars: Scalars;
   fragments: Fragment[];

@@ -16,7 +16,7 @@ import { requiredArgs } from "./args";
 import { getTypeName } from "./field";
 import { isConnection, isEdge, isOperationRoot } from "./object";
 import { findQuery } from "./query";
-import { DocVisitorContext, Named, NamedFields, OperationType, Scalars } from "./types";
+import { DocPluginContext, Named, NamedFields, OperationType, Scalars } from "./types";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
@@ -38,7 +38,7 @@ export class FragmentVisitor {
   /**
    * Return a context object for recording state
    */
-  public get context(): DocVisitorContext {
+  public get context(): DocPluginContext {
     return {
       schema: this._schema,
       scalars: this._scalars,
