@@ -27,7 +27,7 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
     const printedDefinitions = Object.entries(apiDefinitions).map(([apiKey, definitions]) => {
       logger.info("Generating api", apiKey);
 
-      return printApiDefinition({ config, apiDefinitions, apiKey, definitions });
+      return printApiDefinition({ config, apiDefinitions, apiPath: apiKey.split("_"), definitions });
     });
 
     logger.info("Printing api");

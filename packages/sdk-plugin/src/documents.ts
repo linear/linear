@@ -35,9 +35,12 @@ export function getApiDefinitions(documents: Types.DocumentFile[]): ApiDefinitio
     const path = (node.name?.value ?? "").split("_");
     const key = path.slice(0, path.length - 1).join("_");
 
-    logger.trace({ ...node, path, documentVariableName: pascalCase(node.name?.value ?? "UNNAMED_OPERATION") });
+    const name =
+      node.name?.value
+        .split("_")
+        .map(s => pascalCase(s))
+        .join("_") ?? "UNNAMED_OPERATION";
 
-    const name = pascalCase(node.name?.value ?? "UNNAMED_OPERATION");
     const apiDefinition: ApiDefinition = {
       path,
       node,
@@ -51,6 +54,7 @@ export function getApiDefinitions(documents: Types.DocumentFile[]): ApiDefinitio
       operationVariablesTypes: `${name}QueryVariables`,
     };
 
+    logger.trace(apiDefinition);
     return { ...acc, [key]: [...(acc[key] ?? []), apiDefinition] };
   }, {});
 }

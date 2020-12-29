@@ -1,25 +1,33 @@
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
-import { printComment } from "@linear/common";
+import { filterJoin, printComment } from "@linear/common";
 import { ArgDefinition } from "./args";
 import c from "./constants";
 import { printNamespaced } from "./print";
 import { ApiDefinition, RawSdkPluginConfig, SdkPluginContext } from "./types";
-import { hasOtherVariable, hasVariable } from "./variable";
+import { getOptionalVariables, getRequiredVariables } from "./variable";
 
 /**
  * Get the requester args from the operation variables
  */
 export function printRequesterArgs(o: ApiDefinition): string {
-  if (hasVariable(o, c.ID_NAME)) {
+  const requiredVariables = getRequiredVariables(o.node);
+  const requiredArg = filterJoin(
+    requiredVariables.map(v => v.variable.name?.value),
+    ", "
+  );
+
+  const optionalVariables = getOptionalVariables(o.node);
+
+  if (requiredArg) {
     /** Merge id variable into requester variables */
-    if (hasOtherVariable(o, c.ID_NAME)) {
-      return `{${c.ID_NAME}, ...${c.VARIABLE_NAME}}`;
+    if (optionalVariables.length) {
+      return `{${requiredArg}, ...${c.VARIABLE_NAME}}`;
     } else {
-      return `{${c.ID_NAME}}`;
+      return `{${requiredArg}}`;
     }
-  } else {
-    return c.VARIABLE_NAME;
   }
+
+  return optionalVariables.length ? c.VARIABLE_NAME : "{}";
 }
 
 /**
@@ -41,9 +49,10 @@ export function printRequesterCall(context: SdkPluginContext, o: ApiDefinition):
   const documentName = printNamespaced(context, o.documentVariableName);
   const resultType = printNamespaced(context, o.operationResultType);
 
-  return `${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${documentName}, ${printRequesterArgs(o)}, ${
-    c.OPTIONS_NAME
-  });`;
+  return `${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${filterJoin(
+    [documentName, printRequesterArgs(o), c.OPTIONS_NAME],
+    ", "
+  )});`;
 }
 
 /**
