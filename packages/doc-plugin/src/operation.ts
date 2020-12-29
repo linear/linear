@@ -4,7 +4,7 @@ import { getTypeName, isScalarField, isValidField, printInputArgs, printResponse
 import { findFragment, printOperationFragment } from "./fragment";
 import { findObject } from "./object";
 import { findQuery } from "./query";
-import { OperationType, OperationVisitorContext } from "./types";
+import { DocVisitorContext, OperationType } from "./types";
 
 /**
  * Print the operation wrapper
@@ -46,7 +46,7 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
  * Nest the objects until a fragment or scalar is found
  */
 function printOperationFields(
-  context: OperationVisitorContext,
+  context: DocVisitorContext,
   fields: FieldDefinitionNode[],
   object: ObjectTypeDefinitionNode
 ): string {
@@ -85,10 +85,7 @@ function printOperationFields(
 /**
  * Print the body of the operation
  */
-export function printOperationBody(
-  context: OperationVisitorContext,
-  fields: FieldDefinitionNode[]
-): string | undefined {
+export function printOperationBody(context: DocVisitorContext, fields: FieldDefinitionNode[]): string | undefined {
   const lastField = getLast(fields);
 
   if (isValidField(lastField)) {
@@ -109,7 +106,7 @@ export function printOperationBody(
 }
 
 export function printFieldOperation(
-  context: OperationVisitorContext,
+  context: DocVisitorContext,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {
@@ -125,7 +122,7 @@ export function printFieldOperation(
  * @param fields a list of fields by which to nest the query
  */
 export function printOperations(
-  context: OperationVisitorContext,
+  context: DocVisitorContext,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {
@@ -148,7 +145,7 @@ export function printOperations(
           /** No need to go further if the field is a connection */
           ["pageInfo", "nodes"].includes(field.name.value) ||
           /** No need to go further if we can get this field from a root query */
-          findQuery(context.queries, field)
+          findQuery(context, field)
         ) {
           return undefined;
         } else {

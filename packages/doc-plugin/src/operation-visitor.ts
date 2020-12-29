@@ -4,13 +4,13 @@ import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, GraphQLSchema, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { isScalarField } from "./field";
 import { printOperations } from "./operation";
-import { OperationType, OperationVisitorContext } from "./types";
+import { DocVisitorContext, OperationType } from "./types";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating operations
  */
 export class OperationVisitor {
-  private _context: OperationVisitorContext = {
+  private _context: DocVisitorContext = {
     schema: new GraphQLSchema({}),
     scalars: DEFAULT_SCALARS,
     fragments: [],
@@ -20,7 +20,7 @@ export class OperationVisitor {
   };
 
   /** Initialise the visitor */
-  public constructor(context: OperationVisitorContext) {
+  public constructor(context: DocVisitorContext) {
     autoBind(this);
 
     this._context = context;

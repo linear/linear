@@ -8,7 +8,7 @@ import { ApiDefinition, ApiDefinitions } from "./types";
 import { getTypeName, isRequiredVariable } from "./variable";
 
 export function printOperation(apiDefinition: ApiDefinition): string {
-  return `/** ${apiDefinition.path.join("-")} */`;
+  return printDebug(apiDefinition);
 }
 
 export function printApiDefinition(
@@ -79,22 +79,24 @@ export function printApiFunction(
     ? `Initialize a set of operations, scoped to ${apiKey}, to run against the Linear api`
     : "Initialize a set of operations to run against the Linear api";
 
-  return `
-      ${printComment([
+  return filterJoin(
+    [
+      printComment([
         apiDescription,
         ...args.jsdoc,
-        printDebug({ apiKey }),
         apiKey.length
           ? `@returns The set of available operations scoped to a single ${apiKey}`
           : "@returns The set of available operations",
-      ])}
-      export function ${name}<${c.OPTIONS_TYPE}>(${args.print}) {
+      ]),
+      `export function ${name}<${c.OPTIONS_TYPE}>(${args.print}) {
         return {
           ${content}
         };
-      }
-      
-      ${printComment([`The returned type from calling ${name}`, apiDescription])}
-      export type ${type} = ReturnType<typeof ${name}>;
-    `;
+      }`,
+      " ",
+      printComment([`The returned type from calling ${name}`, apiDescription]),
+      `export type ${type} = ReturnType<typeof ${name}>;`,
+    ],
+    "\n"
+  );
 }

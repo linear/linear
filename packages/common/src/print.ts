@@ -3,15 +3,15 @@ import { filterJoin } from "./utils";
 const propertiesToClean = ["loc", "block"];
 
 /**
- * Clean node by removing extraneous "loc" properties for all nested objects
+ * Clean node for debug output by removing extraneous properties for all nested objects
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function cleanNode(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(cleanNode);
-  } else if (propertiesToClean.some(prop => obj?.hasOwnProperty?.(prop))) {
+  } else if (typeof obj === "object") {
     return Object.entries(obj).reduce((acc, [key, value]) => {
-      return propertiesToClean.includes(key)
+      return propertiesToClean.includes(key) || (Array.isArray(value) && value.length === 0)
         ? acc
         : {
             ...acc,
