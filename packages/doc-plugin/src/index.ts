@@ -20,26 +20,16 @@ export const plugin: PluginFunction<RawDocPluginConfig> = async (schema: GraphQL
     const fragmentVisitor = new FragmentVisitor(schema);
     const fragments = visit(ast, fragmentVisitor);
     logger.debug({
-      scalars: fragmentVisitor.scalars,
-      fragments: fragmentVisitor.fragments.map(x => x.name),
-      objects: fragmentVisitor.objects.map(x => x.name.value),
-      queries: fragmentVisitor.queries.map(x => getTypeName(x.type)),
-      operationMap: fragmentVisitor.operationMap,
+      scalars: fragmentVisitor.context.scalars,
+      fragments: fragmentVisitor.context.fragments.map(x => x.name),
+      objects: fragmentVisitor.context.objects.map(x => x.name.value),
+      queries: fragmentVisitor.context.queries.map(x => getTypeName(x.type)),
+      operationMap: fragmentVisitor.context.operationMap,
     });
 
     /** Generate queries */
     logger.info("Generating operations");
-    const operations = visit(
-      ast,
-      new OperationVisitor({
-        schema,
-        scalars: fragmentVisitor.scalars,
-        fragments: fragmentVisitor.fragments,
-        objects: fragmentVisitor.objects,
-        queries: fragmentVisitor.queries,
-        operationMap: fragmentVisitor.operationMap,
-      })
-    );
+    const operations = visit(ast, new OperationVisitor(fragmentVisitor.context));
 
     /** Print the result */
     logger.info("Printing fragments and operations");

@@ -34,7 +34,7 @@ export type Fragment = NamedFields<ObjectTypeDefinitionNode>;
 /**
  * Stateful context for operation building information
  */
-export interface OperationVisitorContext {
+export interface DocVisitorContext {
   schema: GraphQLSchema;
   scalars: Scalars;
   fragments: Fragment[];

@@ -1,5 +1,5 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, nonNullable, printGraphqlDescription } from "@linear/common";
+import { filterJoin, nonNullable, printGraphqlDebug, printGraphqlDescription } from "@linear/common";
 import autoBind from "auto-bind";
 import {
   DocumentNode,
@@ -12,12 +12,11 @@ import {
   ObjectTypeDefinitionNode,
   ScalarTypeDefinitionNode,
 } from "graphql";
-import { printGraphqlDebug } from "../../common/dist";
 import { requiredArgs } from "./args";
-import c from "./constants";
 import { getTypeName } from "./field";
+import { isConnection, isEdge, isOperationRoot } from "./object";
 import { findQuery } from "./query";
-import { Named, NamedFields, OperationType, Scalars } from "./types";
+import { DocVisitorContext, Named, NamedFields, OperationType, Scalars } from "./types";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
@@ -29,7 +28,7 @@ export class FragmentVisitor {
   private _objects: ObjectTypeDefinitionNode[] = [];
   private _queries: readonly FieldDefinitionNode[] = [];
 
-  /** Initialise the visitor */
+  /** Initialize the visitor */
   public constructor(schema: GraphQLSchema) {
     autoBind(this);
 
@@ -37,40 +36,19 @@ export class FragmentVisitor {
   }
 
   /**
-   * Return all scalar definitions
+   * Return a context object for recording state
    */
-  public get scalars(): Scalars {
-    return this._scalars;
-  }
-
-  /**
-   * Return all fragment definitions
-   */
-  public get fragments(): NamedFields<ObjectTypeDefinitionNode>[] {
-    return this._fragments;
-  }
-
-  /**
-   * Return all object definitions
-   */
-  public get objects(): ObjectTypeDefinitionNode[] {
-    return this._objects;
-  }
-
-  /**
-   * Return all query definitions
-   */
-  public get queries(): readonly FieldDefinitionNode[] {
-    return this._queries;
-  }
-
-  /**
-   * Return a map between operation types and the schema name
-   */
-  public get operationMap(): Record<OperationType, string> {
+  public get context(): DocVisitorContext {
     return {
-      [OperationType.query]: this._schema.getQueryType()?.name ?? "Query",
-      [OperationType.mutation]: this._schema.getMutationType()?.name ?? "Mutation",
+      schema: this._schema,
+      scalars: this._scalars,
+      fragments: this._fragments,
+      objects: this._objects,
+      queries: this._queries,
+      operationMap: {
+        [OperationType.query]: this._schema.getQueryType()?.name ?? "Query",
+        [OperationType.mutation]: this._schema.getMutationType()?.name ?? "Mutation",
+      },
     };
   }
 
@@ -97,7 +75,7 @@ export class FragmentVisitor {
     enter: (node: ObjectTypeDefinitionNode): ObjectTypeDefinitionNode => {
       this._objects = [...this._objects, node];
 
-      if (node.name.value === this.operationMap[OperationType.query]) {
+      if (node.name.value === this.context.operationMap[OperationType.query]) {
         /** Record all queries */
         this._queries = node.fields ?? [];
       }
@@ -109,12 +87,9 @@ export class FragmentVisitor {
     leave: (_node: ObjectTypeDefinitionNode): string | null => {
       const node = (_node as unknown) as NamedFields<ObjectTypeDefinitionNode>;
       const hasFields = (node.fields ?? []).filter(x => Boolean(x && x !== "cursor")).length;
-      const isConnection = node.name.endsWith(c.CONNECTION_TYPE);
-      const isEdge = node.name.endsWith(c.EDGE_TYPE);
-      const isOperationRoot = Object.values(this.operationMap).includes(node.name);
 
       /** Print non empty object definitions */
-      if (hasFields && !isConnection && !isEdge && !isOperationRoot) {
+      if (hasFields && !isConnection(node) && !isEdge(node) && !isOperationRoot(this.context, node)) {
         this._fragments = [...this._fragments, node];
         return filterJoin(
           [
@@ -144,7 +119,7 @@ export class FragmentVisitor {
       }
 
       /** Find a query that can return this field */
-      const query = findQuery(this.queries, node);
+      const query = findQuery(this.context, node);
 
       if (query) {
         /** Get all fields required for query arguments */
@@ -153,10 +128,11 @@ export class FragmentVisitor {
         return filterJoin(
           [
             printGraphqlDebug(_node),
+            printGraphqlDebug(query),
             queryRequiredArgs.length
               ? `${node.name} {
-            ${filterJoin(queryRequiredArgs, "\n")}
-          }`
+                ${filterJoin(queryRequiredArgs, "\n")}
+              }`
               : "",
           ],
           "\n"
