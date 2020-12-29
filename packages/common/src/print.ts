@@ -1,5 +1,8 @@
 import { filterJoin } from "./utils";
 
+/**
+ * Properties to remove when cleaning nodes for debug output
+ */
 const propertiesToClean = ["loc", "block"];
 
 /**
