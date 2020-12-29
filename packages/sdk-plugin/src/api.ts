@@ -1,9 +1,8 @@
 import { indentMultiline } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, logger, upperFirst } from "@linear/common";
+import { filterJoin, printComment, printDebug, upperFirst } from "@linear/common";
 import { VariableDefinitionNode } from "graphql";
 import { getArgList } from "./args";
 import c from "./constants";
-import { printDocBlock } from "./print";
 import { getRequesterArg } from "./requester";
 import { ApiDefinition, ApiDefinitions } from "./types";
 import { getTypeName, isRequiredVariable } from "./variable";
@@ -64,8 +63,6 @@ export function printApiFunction(
     return [...acc, ...(definition?.operation.variableDefinitions?.filter(isRequiredVariable) ?? [])];
   }, []);
 
-  logger.trace(apiKey, JSON.stringify(requiredVariables, null, 2));
-
   const args = getArgList([
     /** The requester function arg */
     getRequesterArg(),
@@ -79,13 +76,14 @@ export function printApiFunction(
   ]);
 
   const apiDescription = apiKey
-    ? `Initialise a set of operations, scoped to ${apiKey}, to run against the Linear api`
-    : "Initialise a set of operations to run against the Linear api";
+    ? `Initialize a set of operations, scoped to ${apiKey}, to run against the Linear api`
+    : "Initialize a set of operations to run against the Linear api";
 
   return `
-      ${printDocBlock([
+      ${printComment([
         apiDescription,
         ...args.jsdoc,
+        printDebug({ apiKey }),
         apiKey.length
           ? `@returns The set of available operations scoped to a single ${apiKey}`
           : "@returns The set of available operations",
@@ -96,7 +94,7 @@ export function printApiFunction(
         };
       }
       
-      ${printDocBlock([`The returned type from calling ${name}`, apiDescription])}
+      ${printComment([`The returned type from calling ${name}`, apiDescription])}
       export type ${type} = ReturnType<typeof ${name}>;
     `;
 }
