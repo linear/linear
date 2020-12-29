@@ -6,7 +6,7 @@ import c from "./constants";
 import { printNamespaced, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
 import { ApiDefinition, SdkPluginContext } from "./types";
-import { getOptionalVariables, getRequiredVariables, getTypeName, isIdVariable } from "./variable";
+import { getOptionalVariables, getRequiredVariables, isIdVariable, printVariableType } from "./variable";
 
 /**
  * Type to determine at which level of the sdk an operation is to be added
@@ -127,7 +127,7 @@ function getOperationArgs(context: SdkPluginContext, o: ApiDefinition): ArgDefin
   const requiredVariables = getRequiredVariables(o.node).map(v => ({
     name: v.variable.name.value,
     optional: false,
-    type: `${printNamespaced(context, "Scalars")}["${getTypeName(v.type)}"]`,
+    type: printVariableType(context, v),
     description: `${v.variable.name.value} to pass into the ${o.operationResultType}`,
   }));
 
