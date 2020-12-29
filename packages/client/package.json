@@ -19,8 +19,8 @@
     "build:client": "yarn generate && yarn build:client:clean && npx tsc",
     "build:client:clean": "npx rimraf dist",
     "schema": "npx graphql-codegen --config codegen.schema.yml",
-    "generate": "run-s generate:clean generate:doc generate:api",
-    "generate:api": "npx graphql-codegen --config codegen.api.yml",
+    "generate": "run-s generate:clean generate:doc generate:sdk",
+    "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml",
     "generate:doc": "npx graphql-codegen --config codegen.documents.yml",
     "generate:clean": "npx rimraf src/_generated"
   },

@@ -1,17 +1,17 @@
 overwrite: true
 schema: ./src/schema.graphql
-documents: ./src/documents/**
+documents: ./src/_generated/**
 hooks:
   afterOneFileWrite:
     - prettier --write
 generates:
-  src/_generated/sdk-documents.ts:
+  src/_generated/documents.ts:
     plugins:
       - typescript
       - typescript-operations
       - typed-document-node
-  src/_generated/sdk-api.ts:
+  src/_generated/sdk.ts:
     plugins:
       - "@linear/sdk-plugin"
     config:
-      documentFile: ./sdk-documents
+      documentFile: ./documents
