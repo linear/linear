@@ -199,26 +199,33 @@ function getNestedDataKeys(o: SdkOperation): string[] {
 function printOperationBody(context: SdkPluginContext, o: SdkOperation): string {
   const requiredVariables = getRequiredVariables(o.node);
   const nestedDataKeys = getNestedDataKeys(o);
+  const operationApi = getOperationApi(context, o);
 
-  return o.path.length || nestedDataKeys.length
-    ? filterJoin(
-        [
-          `const response = await ${printRequesterCall(context, o)}`,
-          `return {`,
-          /** If the first field is the operation drill down for a nicer api */
-          `...${filterJoin(["response", ...nestedDataKeys], "?.")},`,
-          /** If we are a parent add the child sdk to the response */
-          getOperationApi(context, o)
-            ? `...${printApiFunctionName(o.path)}(${filterJoin(
-                [c.REQUESTER_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
-                ", "
-              )}),`
-            : undefined,
-          `}`,
-        ],
-        "\n"
-      )
-    : `return ${printRequesterCall(context, o)}`;
+  /** Extract from the response data if we are nested */
+  if (o.path.length || nestedDataKeys.length) {
+    const response = `const response = await ${printRequesterCall(context, o)}`;
+    const extractedResponse = filterJoin(["response", ...nestedDataKeys], "?.");
+
+    return operationApi
+      ? filterJoin(
+          [
+            response,
+            `return {`,
+            /** If the first field is the operation drill down for a nicer api */
+            `...${extractedResponse},`,
+            /** Add the child sdk to the response */
+            `...${printApiFunctionName(o.path)}(${filterJoin(
+              [c.REQUESTER_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
+              ", "
+            )}),`,
+            `}`,
+          ],
+          "\n"
+        )
+      : filterJoin([response, `return ${extractedResponse}`]);
+  } else {
+    return `return ${printRequesterCall(context, o)}`;
+  }
 }
 
 /**

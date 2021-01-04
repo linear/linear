@@ -17,9 +17,10 @@ export function findQuery(
 
   const match = context.queries.find(q => {
     return (
+      /** Matches name */
+      // q.name.value === (field as FieldDefinitionNode).name?.value ?? field.name &&
       /** Matches return type */
       getTypeName(q.type) === getTypeName(field.type)
-      /** Takes an id argument */
       // requiredArgs(q.arguments)?.find(a => a.name.value === c.ID_NAME)
       // /** Matches required arguments */
       // requiredArgs(q.arguments).every(a => a.name.value field.arguments.)

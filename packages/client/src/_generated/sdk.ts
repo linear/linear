@@ -78,9 +78,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { urlKey },
         opts
       );
-      return {
-        ...response?.organizationExists,
-      };
+      return response?.organizationExists;
     },
     /**
      * Call the Linear api with the syncBootstrap
@@ -100,9 +98,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { databaseVersion, sinceSyncId },
         opts
       );
-      return {
-        ...response?.syncBootstrap,
-      };
+      return response?.syncBootstrap;
     },
     /**
      * Call the Linear api with the syncUpdates
@@ -117,9 +113,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { sinceSyncId },
         opts
       );
-      return {
-        ...response?.syncUpdates,
-      };
+      return response?.syncUpdates;
     },
     /**
      * Call the Linear api with the archivedModelSync
@@ -139,9 +133,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { identifier, modelClass },
         opts
       );
-      return {
-        ...response?.archivedModelSync,
-      };
+      return response?.archivedModelSync;
     },
     /**
      * Call the Linear api with the archivedModelsSync
@@ -163,9 +155,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { modelClass, teamId, ...vars },
         opts
       );
-      return {
-        ...response?.archivedModelsSync,
-      };
+      return response?.archivedModelsSync;
     },
     /**
      * Call the Linear api with the users
@@ -176,9 +166,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async users(vars?: D.UsersQueryVariables, opts?: O): Promise<ResultOf<typeof D.UsersDocument>["users"]> {
       const response = await requester<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, vars, opts);
-      return {
-        ...response?.users,
-      };
+      return response?.users;
     },
     /**
      * Call the Linear api with the apiKeys
@@ -189,9 +177,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async apiKeys(vars?: D.ApiKeysQueryVariables, opts?: O): Promise<ResultOf<typeof D.ApiKeysDocument>["apiKeys"]> {
       const response = await requester<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, vars, opts);
-      return {
-        ...response?.apiKeys,
-      };
+      return response?.apiKeys;
     },
     /**
      * Call the Linear api with the application
@@ -211,9 +197,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { clientId, ...vars },
         opts
       );
-      return {
-        ...response?.application,
-      };
+      return response?.application;
     },
     /**
      * Call the Linear api with the authorizedApplications
@@ -229,25 +213,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         {},
         opts
       );
-      return {
-        ...response?.authorizedApplications,
-      };
-    },
-    /**
-     * Call the Linear api with the availableUsers
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the AvailableUsersQuery
-     */
-    async availableUsers(opts?: O): Promise<ResultOf<typeof D.AvailableUsersDocument>["availableUsers"]> {
-      const response = await requester<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(
-        D.AvailableUsersDocument,
-        {},
-        opts
-      );
-      return {
-        ...response?.availableUsers,
-      };
+      return response?.authorizedApplications;
     },
     /**
      * Call the Linear api with the ssoUrlFromEmail
@@ -267,9 +233,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { email, ...vars },
         opts
       );
-      return {
-        ...response?.ssoUrlFromEmail,
-      };
+      return response?.ssoUrlFromEmail;
     },
     /**
      * Call the Linear api with the billingDetails
@@ -327,9 +291,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async comment(id: string, opts?: O): Promise<ResultOf<typeof D.CommentDocument>["comment"]> {
       const response = await requester<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, { id }, opts);
-      return {
-        ...response?.comment,
-      };
+      return response?.comment;
     },
     /**
      * Call the Linear api with the comments
@@ -343,9 +305,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       opts?: O
     ): Promise<ResultOf<typeof D.CommentsDocument>["comments"]> {
       const response = await requester<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument, vars, opts);
-      return {
-        ...response?.comments,
-      };
+      return response?.comments;
     },
     /**
      * Call the Linear api with the customView
@@ -360,9 +320,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.customView,
-      };
+      return response?.customView;
     },
     /**
      * Call the Linear api with the customViews
@@ -380,9 +338,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.customViews,
-      };
+      return response?.customViews;
     },
     /**
      * Call the Linear api with the cycle
@@ -407,9 +363,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async cycles(vars?: D.CyclesQueryVariables, opts?: O): Promise<ResultOf<typeof D.CyclesDocument>["cycles"]> {
       const response = await requester<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument, vars, opts);
-      return {
-        ...response?.cycles,
-      };
+      return response?.cycles;
     },
     /**
      * Call the Linear api with the emoji
@@ -420,9 +374,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async emoji(id: string, opts?: O): Promise<ResultOf<typeof D.EmojiDocument>["emoji"]> {
       const response = await requester<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, { id }, opts);
-      return {
-        ...response?.emoji,
-      };
+      return response?.emoji;
     },
     /**
      * Call the Linear api with the emojis
@@ -433,9 +385,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async emojis(vars?: D.EmojisQueryVariables, opts?: O): Promise<ResultOf<typeof D.EmojisDocument>["emojis"]> {
       const response = await requester<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument, vars, opts);
-      return {
-        ...response?.emojis,
-      };
+      return response?.emojis;
     },
     /**
      * Call the Linear api with the favorite
@@ -446,9 +396,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async favorite(id: string, opts?: O): Promise<ResultOf<typeof D.FavoriteDocument>["favorite"]> {
       const response = await requester<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, { id }, opts);
-      return {
-        ...response?.favorite,
-      };
+      return response?.favorite;
     },
     /**
      * Call the Linear api with the favorites
@@ -462,9 +410,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       opts?: O
     ): Promise<ResultOf<typeof D.FavoritesDocument>["favorites"]> {
       const response = await requester<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument, vars, opts);
-      return {
-        ...response?.favorites,
-      };
+      return response?.favorites;
     },
     /**
      * Call the Linear api with the figmaEmbedInfo
@@ -490,27 +436,6 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       };
     },
     /**
-     * Call the Linear api with the integration
-     *
-     * @param id - id to pass into the IntegrationQuery
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationQuery
-     */
-    async integration(
-      id: string,
-      opts?: O
-    ): Promise<ResultOf<typeof D.IntegrationDocument>["integration"] & LinearSdkIntegration> {
-      const response = await requester<D.IntegrationQuery, D.IntegrationQueryVariables>(
-        D.IntegrationDocument,
-        { id },
-        opts
-      );
-      return {
-        ...response?.integration,
-        ...createLinearSdkIntegration(requester, id),
-      };
-    },
-    /**
      * Call the Linear api with the integrations
      *
      * @param vars - variables to pass into the IntegrationsQuery
@@ -526,30 +451,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.integrations,
-      };
-    },
-    /**
-     * Call the Linear api with the integrationResource
-     *
-     * @param id - id to pass into the IntegrationResourceQuery
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationResourceQuery
-     */
-    async integrationResource(
-      id: string,
-      opts?: O
-    ): Promise<ResultOf<typeof D.IntegrationResourceDocument>["integrationResource"] & LinearSdkIntegrationResource> {
-      const response = await requester<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
-        D.IntegrationResourceDocument,
-        { id },
-        opts
-      );
-      return {
-        ...response?.integrationResource,
-        ...createLinearSdkIntegrationResource(requester, id),
-      };
+      return response?.integrations;
     },
     /**
      * Call the Linear api with the integrationResources
@@ -567,9 +469,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.integrationResources,
-      };
+      return response?.integrationResources;
     },
     /**
      * Call the Linear api with the inviteInfo
@@ -631,9 +531,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.issueLabels,
-      };
+      return response?.issueLabels;
     },
     /**
      * Call the Linear api with the issueRelation
@@ -648,9 +546,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.issueRelation,
-      };
+      return response?.issueRelation;
     },
     /**
      * Call the Linear api with the issueRelations
@@ -668,9 +564,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.issueRelations,
-      };
+      return response?.issueRelations;
     },
     /**
      * Call the Linear api with the issue
@@ -704,9 +598,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { query, ...vars },
         opts
       );
-      return {
-        ...response?.issueSearch,
-      };
+      return response?.issueSearch;
     },
     /**
      * Call the Linear api with the issues
@@ -717,9 +609,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async issues(vars?: D.IssuesQueryVariables, opts?: O): Promise<ResultOf<typeof D.IssuesDocument>["issues"]> {
       const response = await requester<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, vars, opts);
-      return {
-        ...response?.issues,
-      };
+      return response?.issues;
     },
     /**
      * Call the Linear api with the milestone
@@ -750,9 +640,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       opts?: O
     ): Promise<ResultOf<typeof D.MilestonesDocument>["milestones"]> {
       const response = await requester<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument, vars, opts);
-      return {
-        ...response?.milestones,
-      };
+      return response?.milestones;
     },
     /**
      * Call the Linear api with the notification
@@ -766,9 +654,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         {},
         opts
       );
-      return {
-        ...response?.notification,
-      };
+      return response?.notification;
     },
     /**
      * Call the Linear api with the notifications
@@ -786,9 +672,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.notifications,
-      };
+      return response?.notifications;
     },
     /**
      * Call the Linear api with the notificationSubscription
@@ -806,9 +690,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.notificationSubscription,
-      };
+      return response?.notificationSubscription;
     },
     /**
      * Call the Linear api with the organizationInvite
@@ -847,9 +729,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.organizationInvites,
-      };
+      return response?.organizationInvites;
     },
     /**
      * Call the Linear api with the projectLink
@@ -864,9 +744,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.projectLink,
-      };
+      return response?.projectLink;
     },
     /**
      * Call the Linear api with the ProjectLinks
@@ -884,9 +762,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.ProjectLinks,
-      };
+      return response?.ProjectLinks;
     },
     /**
      * Call the Linear api with the project
@@ -914,9 +790,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       opts?: O
     ): Promise<ResultOf<typeof D.ProjectsDocument>["projects"]> {
       const response = await requester<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars, opts);
-      return {
-        ...response?.projects,
-      };
+      return response?.projects;
     },
     /**
      * Call the Linear api with the pushSubscriptionTest
@@ -932,9 +806,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         {},
         opts
       );
-      return {
-        ...response?.pushSubscriptionTest,
-      };
+      return response?.pushSubscriptionTest;
     },
     /**
      * Call the Linear api with the reaction
@@ -945,9 +817,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async reaction(id: string, opts?: O): Promise<ResultOf<typeof D.ReactionDocument>["reaction"]> {
       const response = await requester<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, { id }, opts);
-      return {
-        ...response?.reaction,
-      };
+      return response?.reaction;
     },
     /**
      * Call the Linear api with the reactions
@@ -961,9 +831,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       opts?: O
     ): Promise<ResultOf<typeof D.ReactionsDocument>["reactions"]> {
       const response = await requester<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, vars, opts);
-      return {
-        ...response?.reactions,
-      };
+      return response?.reactions;
     },
     /**
      * Call the Linear api with the subscription
@@ -977,9 +845,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         {},
         opts
       );
-      return {
-        ...response?.subscription,
-      };
+      return response?.subscription;
     },
     /**
      * Call the Linear api with the teamMembership
@@ -994,9 +860,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.teamMembership,
-      };
+      return response?.teamMembership;
     },
     /**
      * Call the Linear api with the teamMemberships
@@ -1014,9 +878,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.teamMemberships,
-      };
+      return response?.teamMemberships;
     },
     /**
      * Call the Linear api with the team
@@ -1041,9 +903,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async teams(vars?: D.TeamsQueryVariables, opts?: O): Promise<ResultOf<typeof D.TeamsDocument>["teams"]> {
       const response = await requester<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars, opts);
-      return {
-        ...response?.teams,
-      };
+      return response?.teams;
     },
     /**
      * Call the Linear api with the templates
@@ -1053,9 +913,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async templates(opts?: O): Promise<ResultOf<typeof D.TemplatesDocument>["templates"]> {
       const response = await requester<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument, {}, opts);
-      return {
-        ...response?.templates,
-      };
+      return response?.templates;
     },
     /**
      * Call the Linear api with the template
@@ -1066,9 +924,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async template(id: string, opts?: O): Promise<ResultOf<typeof D.TemplateDocument>["template"]> {
       const response = await requester<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, { id }, opts);
-      return {
-        ...response?.template,
-      };
+      return response?.template;
     },
     /**
      * Call the Linear api with the viewPreferences
@@ -1086,9 +942,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.viewPreferences,
-      };
+      return response?.viewPreferences;
     },
     /**
      * Call the Linear api with the webhook
@@ -1099,9 +953,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
      */
     async webhook(id: string, opts?: O): Promise<ResultOf<typeof D.WebhookDocument>["webhook"]> {
       const response = await requester<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, { id }, opts);
-      return {
-        ...response?.webhook,
-      };
+      return response?.webhook;
     },
     /**
      * Call the Linear api with the webhooks
@@ -1115,9 +967,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
       opts?: O
     ): Promise<ResultOf<typeof D.WebhooksDocument>["webhooks"]> {
       const response = await requester<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, vars, opts);
-      return {
-        ...response?.webhooks,
-      };
+      return response?.webhooks;
     },
     /**
      * Call the Linear api with the workflowState
@@ -1156,9 +1006,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.workflowStates,
-      };
+      return response?.workflowStates;
     },
     /**
      * Call the Linear api with the userUpdate
@@ -1178,9 +1026,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.userUpdate,
-      };
+      return response?.userUpdate;
     },
     /**
      * Call the Linear api with the userSuspend
@@ -1195,9 +1041,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.userSuspend,
-      };
+      return response?.userSuspend;
     },
     /**
      * Call the Linear api with the userUnsuspend
@@ -1212,9 +1056,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.userUnsuspend,
-      };
+      return response?.userUnsuspend;
     },
     /**
      * Call the Linear api with the organizationUpdate
@@ -1232,9 +1074,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.organizationUpdate,
-      };
+      return response?.organizationUpdate;
     },
     /**
      * Call the Linear api with the organizationDeleteChallenge
@@ -1249,9 +1089,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.OrganizationDeleteChallengeMutation,
         D.OrganizationDeleteChallengeMutationVariables
       >(D.OrganizationDeleteChallengeDocument, {}, opts);
-      return {
-        ...response?.organizationDeleteChallenge,
-      };
+      return response?.organizationDeleteChallenge;
     },
     /**
      * Call the Linear api with the organizationDelete
@@ -1269,9 +1107,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.organizationDelete,
-      };
+      return response?.organizationDelete;
     },
     /**
      * Call the Linear api with the organizationToggleAccess
@@ -1289,9 +1125,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.organizationToggleAccess,
-      };
+      return response?.organizationToggleAccess;
     },
     /**
      * Call the Linear api with the organizationChangeEmailDomain
@@ -1312,9 +1146,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.OrganizationChangeEmailDomainMutation,
         D.OrganizationChangeEmailDomainMutationVariables
       >(D.OrganizationChangeEmailDomainDocument, { toDomain, fromDomain, id }, opts);
-      return {
-        ...response?.organizationChangeEmailDomain,
-      };
+      return response?.organizationChangeEmailDomain;
     },
     /**
      * Call the Linear api with the organizationToggleSamlEnabled
@@ -1331,9 +1163,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.OrganizationToggleSamlEnabledMutation,
         D.OrganizationToggleSamlEnabledMutationVariables
       >(D.OrganizationToggleSamlEnabledDocument, { id }, opts);
-      return {
-        ...response?.organizationToggleSamlEnabled,
-      };
+      return response?.organizationToggleSamlEnabled;
     },
     /**
      * Call the Linear api with the organizationConfigureSaml
@@ -1352,9 +1182,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.OrganizationConfigureSamlMutation,
         D.OrganizationConfigureSamlMutationVariables
       >(D.OrganizationConfigureSamlDocument, { samlConfiguration, id }, opts);
-      return {
-        ...response?.organizationConfigureSaml,
-      };
+      return response?.organizationConfigureSaml;
     },
     /**
      * Call the Linear api with the eventCreate
@@ -1372,9 +1200,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.eventCreate,
-      };
+      return response?.eventCreate;
     },
     /**
      * Call the Linear api with the apiKeyCreate
@@ -1392,9 +1218,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.apiKeyCreate,
-      };
+      return response?.apiKeyCreate;
     },
     /**
      * Call the Linear api with the apiKeyDelete
@@ -1409,9 +1233,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.apiKeyDelete,
-      };
+      return response?.apiKeyDelete;
     },
     /**
      * Call the Linear api with the emailUserAccountAuthChallenge
@@ -1428,9 +1250,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.EmailUserAccountAuthChallengeMutation,
         D.EmailUserAccountAuthChallengeMutationVariables
       >(D.EmailUserAccountAuthChallengeDocument, { input }, opts);
-      return {
-        ...response?.emailUserAccountAuthChallenge,
-      };
+      return response?.emailUserAccountAuthChallenge;
     },
     /**
      * Call the Linear api with the emailTokenUserAccountAuth
@@ -1447,9 +1267,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.EmailTokenUserAccountAuthMutation,
         D.EmailTokenUserAccountAuthMutationVariables
       >(D.EmailTokenUserAccountAuthDocument, { input }, opts);
-      return {
-        ...response?.emailTokenUserAccountAuth,
-      };
+      return response?.emailTokenUserAccountAuth;
     },
     /**
      * Call the Linear api with the samlTokenUserAccountAuth
@@ -1467,9 +1285,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.samlTokenUserAccountAuth,
-      };
+      return response?.samlTokenUserAccountAuth;
     },
     /**
      * Call the Linear api with the googleUserAccountAuth
@@ -1487,9 +1303,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.googleUserAccountAuth,
-      };
+      return response?.googleUserAccountAuth;
     },
     /**
      * Call the Linear api with the createOrganizationFromOnboarding
@@ -1508,9 +1322,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.CreateOrganizationFromOnboardingMutation,
         D.CreateOrganizationFromOnboardingMutationVariables
       >(D.CreateOrganizationFromOnboardingDocument, { input, ...vars }, opts);
-      return {
-        ...response?.createOrganizationFromOnboarding,
-      };
+      return response?.createOrganizationFromOnboarding;
     },
     /**
      * Call the Linear api with the joinOrganizationFromOnboarding
@@ -1527,9 +1339,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.JoinOrganizationFromOnboardingMutation,
         D.JoinOrganizationFromOnboardingMutationVariables
       >(D.JoinOrganizationFromOnboardingDocument, { input }, opts);
-      return {
-        ...response?.joinOrganizationFromOnboarding,
-      };
+      return response?.joinOrganizationFromOnboarding;
     },
     /**
      * Call the Linear api with the leaveOrganization
@@ -1547,9 +1357,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { organizationId },
         opts
       );
-      return {
-        ...response?.leaveOrganization,
-      };
+      return response?.leaveOrganization;
     },
     /**
      * Call the Linear api with the billingEmailUpdate
@@ -1567,9 +1375,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.billingEmailUpdate,
-      };
+      return response?.billingEmailUpdate;
     },
     /**
      * Call the Linear api with the collaborativeDocumentUpdate
@@ -1586,9 +1392,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.CollaborativeDocumentUpdateMutation,
         D.CollaborativeDocumentUpdateMutationVariables
       >(D.CollaborativeDocumentUpdateDocument, { input }, opts);
-      return {
-        ...response?.collaborativeDocumentUpdate,
-      };
+      return response?.collaborativeDocumentUpdate;
     },
     /**
      * Call the Linear api with the commentCreate
@@ -1606,9 +1410,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.commentCreate,
-      };
+      return response?.commentCreate;
     },
     /**
      * Call the Linear api with the commentUpdate
@@ -1628,9 +1430,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.commentUpdate,
-      };
+      return response?.commentUpdate;
     },
     /**
      * Call the Linear api with the commentDelete
@@ -1645,9 +1445,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.commentDelete,
-      };
+      return response?.commentDelete;
     },
     /**
      * Call the Linear api with the contactCreate
@@ -1665,9 +1463,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.contactCreate,
-      };
+      return response?.contactCreate;
     },
     /**
      * Call the Linear api with the customViewCreate
@@ -1685,9 +1481,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.customViewCreate,
-      };
+      return response?.customViewCreate;
     },
     /**
      * Call the Linear api with the customViewUpdate
@@ -1707,9 +1501,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.customViewUpdate,
-      };
+      return response?.customViewUpdate;
     },
     /**
      * Call the Linear api with the customViewDelete
@@ -1727,9 +1519,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.customViewDelete,
-      };
+      return response?.customViewDelete;
     },
     /**
      * Call the Linear api with the cycleCreate
@@ -1747,9 +1537,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.cycleCreate,
-      };
+      return response?.cycleCreate;
     },
     /**
      * Call the Linear api with the cycleUpdate
@@ -1769,9 +1557,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.cycleUpdate,
-      };
+      return response?.cycleUpdate;
     },
     /**
      * Call the Linear api with the cycleArchive
@@ -1786,9 +1572,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.cycleArchive,
-      };
+      return response?.cycleArchive;
     },
     /**
      * Call the Linear api with the debugFailWithInternalError
@@ -1803,9 +1587,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.DebugFailWithInternalErrorMutation,
         D.DebugFailWithInternalErrorMutationVariables
       >(D.DebugFailWithInternalErrorDocument, {}, opts);
-      return {
-        ...response?.debugFailWithInternalError,
-      };
+      return response?.debugFailWithInternalError;
     },
     /**
      * Call the Linear api with the debugFailWithWarning
@@ -1821,9 +1603,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         {},
         opts
       );
-      return {
-        ...response?.debugFailWithWarning,
-      };
+      return response?.debugFailWithWarning;
     },
     /**
      * Call the Linear api with the debugCreateSAMLOrg
@@ -1837,9 +1617,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         {},
         opts
       );
-      return {
-        ...response?.debugCreateSAMLOrg,
-      };
+      return response?.debugCreateSAMLOrg;
     },
     /**
      * Call the Linear api with the emailUnsubscribe
@@ -1857,9 +1635,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.emailUnsubscribe,
-      };
+      return response?.emailUnsubscribe;
     },
     /**
      * Call the Linear api with the emojiCreate
@@ -1877,9 +1653,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.emojiCreate,
-      };
+      return response?.emojiCreate;
     },
     /**
      * Call the Linear api with the emojiDelete
@@ -1894,9 +1668,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.emojiDelete,
-      };
+      return response?.emojiDelete;
     },
     /**
      * Call the Linear api with the favoriteCreate
@@ -1914,9 +1686,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.favoriteCreate,
-      };
+      return response?.favoriteCreate;
     },
     /**
      * Call the Linear api with the favoriteUpdate
@@ -1936,9 +1706,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.favoriteUpdate,
-      };
+      return response?.favoriteUpdate;
     },
     /**
      * Call the Linear api with the favoriteDelete
@@ -1953,9 +1721,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.favoriteDelete,
-      };
+      return response?.favoriteDelete;
     },
     /**
      * Call the Linear api with the feedbackCreate
@@ -1973,9 +1739,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.feedbackCreate,
-      };
+      return response?.feedbackCreate;
     },
     /**
      * Call the Linear api with the fileUpload
@@ -1999,9 +1763,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { size, contentType, filename, ...vars },
         opts
       );
-      return {
-        ...response?.fileUpload,
-      };
+      return response?.fileUpload;
     },
     /**
      * Call the Linear api with the imageUploadFromUrl
@@ -2019,9 +1781,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { url },
         opts
       );
-      return {
-        ...response?.imageUploadFromUrl,
-      };
+      return response?.imageUploadFromUrl;
     },
     /**
      * Call the Linear api with the integrationGithubConnect
@@ -2039,9 +1799,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { installationId },
         opts
       );
-      return {
-        ...response?.integrationGithubConnect,
-      };
+      return response?.integrationGithubConnect;
     },
     /**
      * Call the Linear api with the integrationGitlabConnect
@@ -2061,9 +1819,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { gitlabUrl, accessToken },
         opts
       );
-      return {
-        ...response?.integrationGitlabConnect,
-      };
+      return response?.integrationGitlabConnect;
     },
     /**
      * Call the Linear api with the integrationSlack
@@ -2085,9 +1841,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { redirectUri, code, ...vars },
         opts
       );
-      return {
-        ...response?.integrationSlack,
-      };
+      return response?.integrationSlack;
     },
     /**
      * Call the Linear api with the integrationSlackPersonal
@@ -2107,9 +1861,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { redirectUri, code },
         opts
       );
-      return {
-        ...response?.integrationSlackPersonal,
-      };
+      return response?.integrationSlackPersonal;
     },
     /**
      * Call the Linear api with the integrationSlackPost
@@ -2133,9 +1885,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { redirectUri, teamId, code, ...vars },
         opts
       );
-      return {
-        ...response?.integrationSlackPost,
-      };
+      return response?.integrationSlackPost;
     },
     /**
      * Call the Linear api with the integrationSlackProjectPost
@@ -2156,9 +1906,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.IntegrationSlackProjectPostMutation,
         D.IntegrationSlackProjectPostMutationVariables
       >(D.IntegrationSlackProjectPostDocument, { redirectUri, projectId, code }, opts);
-      return {
-        ...response?.integrationSlackProjectPost,
-      };
+      return response?.integrationSlackProjectPost;
     },
     /**
      * Call the Linear api with the integrationSlackImportEmojis
@@ -2177,9 +1925,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.IntegrationSlackImportEmojisMutation,
         D.IntegrationSlackImportEmojisMutationVariables
       >(D.IntegrationSlackImportEmojisDocument, { redirectUri, code }, opts);
-      return {
-        ...response?.integrationSlackImportEmojis,
-      };
+      return response?.integrationSlackImportEmojis;
     },
     /**
      * Call the Linear api with the integrationFigma
@@ -2199,9 +1945,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { redirectUri, code },
         opts
       );
-      return {
-        ...response?.integrationFigma,
-      };
+      return response?.integrationFigma;
     },
     /**
      * Call the Linear api with the integrationGoogleSheets
@@ -2219,9 +1963,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { code },
         opts
       );
-      return {
-        ...response?.integrationGoogleSheets,
-      };
+      return response?.integrationGoogleSheets;
     },
     /**
      * Call the Linear api with the refreshGoogleSheetsData
@@ -2239,9 +1981,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.refreshGoogleSheetsData,
-      };
+      return response?.refreshGoogleSheetsData;
     },
     /**
      * Call the Linear api with the integrationSentryConnect
@@ -2263,9 +2003,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { organizationSlug, code, installationId },
         opts
       );
-      return {
-        ...response?.integrationSentryConnect,
-      };
+      return response?.integrationSentryConnect;
     },
     /**
      * Call the Linear api with the integrationDelete
@@ -2283,9 +2021,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.integrationDelete,
-      };
+      return response?.integrationDelete;
     },
     /**
      * Call the Linear api with the integrationResourceArchive
@@ -2302,9 +2038,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.IntegrationResourceArchiveMutation,
         D.IntegrationResourceArchiveMutationVariables
       >(D.IntegrationResourceArchiveDocument, { id }, opts);
-      return {
-        ...response?.integrationResourceArchive,
-      };
+      return response?.integrationResourceArchive;
     },
     /**
      * Call the Linear api with the issueLabelCreate
@@ -2322,9 +2056,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.issueLabelCreate,
-      };
+      return response?.issueLabelCreate;
     },
     /**
      * Call the Linear api with the issueLabelUpdate
@@ -2344,9 +2076,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.issueLabelUpdate,
-      };
+      return response?.issueLabelUpdate;
     },
     /**
      * Call the Linear api with the issueLabelArchive
@@ -2364,9 +2094,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.issueLabelArchive,
-      };
+      return response?.issueLabelArchive;
     },
     /**
      * Call the Linear api with the issueRelationCreate
@@ -2384,9 +2112,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.issueRelationCreate,
-      };
+      return response?.issueRelationCreate;
     },
     /**
      * Call the Linear api with the issueRelationUpdate
@@ -2406,9 +2132,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.issueRelationUpdate,
-      };
+      return response?.issueRelationUpdate;
     },
     /**
      * Call the Linear api with the issueRelationDelete
@@ -2426,9 +2150,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.issueRelationDelete,
-      };
+      return response?.issueRelationDelete;
     },
     /**
      * Call the Linear api with the issueCreate
@@ -2446,9 +2168,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.issueCreate,
-      };
+      return response?.issueCreate;
     },
     /**
      * Call the Linear api with the issueUpdate
@@ -2468,9 +2188,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.issueUpdate,
-      };
+      return response?.issueUpdate;
     },
     /**
      * Call the Linear api with the issueArchive
@@ -2485,9 +2203,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.issueArchive,
-      };
+      return response?.issueArchive;
     },
     /**
      * Call the Linear api with the issueUnarchive
@@ -2502,9 +2218,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.issueUnarchive,
-      };
+      return response?.issueUnarchive;
     },
     /**
      * Call the Linear api with the milestoneCreate
@@ -2522,9 +2236,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.milestoneCreate,
-      };
+      return response?.milestoneCreate;
     },
     /**
      * Call the Linear api with the milestoneUpdate
@@ -2544,9 +2256,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.milestoneUpdate,
-      };
+      return response?.milestoneUpdate;
     },
     /**
      * Call the Linear api with the milestoneDelete
@@ -2564,9 +2274,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.milestoneDelete,
-      };
+      return response?.milestoneDelete;
     },
     /**
      * Call the Linear api with the notificationCreate
@@ -2586,9 +2294,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.notificationCreate,
-      };
+      return response?.notificationCreate;
     },
     /**
      * Call the Linear api with the notificationUpdate
@@ -2608,9 +2314,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.notificationUpdate,
-      };
+      return response?.notificationUpdate;
     },
     /**
      * Call the Linear api with the notificationDelete
@@ -2628,9 +2332,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.notificationDelete,
-      };
+      return response?.notificationDelete;
     },
     /**
      * Call the Linear api with the notificationArchive
@@ -2648,9 +2350,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.notificationArchive,
-      };
+      return response?.notificationArchive;
     },
     /**
      * Call the Linear api with the notificationUnarchive
@@ -2668,9 +2368,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.notificationUnarchive,
-      };
+      return response?.notificationUnarchive;
     },
     /**
      * Call the Linear api with the notificationSubscriptionCreate
@@ -2687,9 +2385,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.NotificationSubscriptionCreateMutation,
         D.NotificationSubscriptionCreateMutationVariables
       >(D.NotificationSubscriptionCreateDocument, { input }, opts);
-      return {
-        ...response?.notificationSubscriptionCreate,
-      };
+      return response?.notificationSubscriptionCreate;
     },
     /**
      * Call the Linear api with the notificationSubscriptionDelete
@@ -2706,9 +2402,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.NotificationSubscriptionDeleteMutation,
         D.NotificationSubscriptionDeleteMutationVariables
       >(D.NotificationSubscriptionDeleteDocument, { id }, opts);
-      return {
-        ...response?.notificationSubscriptionDelete,
-      };
+      return response?.notificationSubscriptionDelete;
     },
     /**
      * Call the Linear api with the oauthClientCreate
@@ -2726,9 +2420,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.oauthClientCreate,
-      };
+      return response?.oauthClientCreate;
     },
     /**
      * Call the Linear api with the oauthClientUpdate
@@ -2748,9 +2440,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.oauthClientUpdate,
-      };
+      return response?.oauthClientUpdate;
     },
     /**
      * Call the Linear api with the oauthClientArchive
@@ -2768,9 +2458,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.oauthClientArchive,
-      };
+      return response?.oauthClientArchive;
     },
     /**
      * Call the Linear api with the oauthClientRotateSecret
@@ -2788,9 +2476,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.oauthClientRotateSecret,
-      };
+      return response?.oauthClientRotateSecret;
     },
     /**
      * Call the Linear api with the oauthTokenRevoke
@@ -2810,9 +2496,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { scope, appId },
         opts
       );
-      return {
-        ...response?.oauthTokenRevoke,
-      };
+      return response?.oauthTokenRevoke;
     },
     /**
      * Call the Linear api with the organizationDomainVerify
@@ -2830,9 +2514,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.organizationDomainVerify,
-      };
+      return response?.organizationDomainVerify;
     },
     /**
      * Call the Linear api with the organizationDomainCreate
@@ -2850,9 +2532,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.organizationDomainCreate,
-      };
+      return response?.organizationDomainCreate;
     },
     /**
      * Call the Linear api with the organizationDomainDelete
@@ -2870,9 +2550,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.organizationDomainDelete,
-      };
+      return response?.organizationDomainDelete;
     },
     /**
      * Call the Linear api with the organizationInviteCreate
@@ -2890,9 +2568,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.organizationInviteCreate,
-      };
+      return response?.organizationInviteCreate;
     },
     /**
      * Call the Linear api with the resentOrganizationInvite
@@ -2910,9 +2586,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.resentOrganizationInvite,
-      };
+      return response?.resentOrganizationInvite;
     },
     /**
      * Call the Linear api with the organizationInviteDelete
@@ -2930,9 +2604,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.organizationInviteDelete,
-      };
+      return response?.organizationInviteDelete;
     },
     /**
      * Call the Linear api with the projectLinkCreate
@@ -2950,9 +2622,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.projectLinkCreate,
-      };
+      return response?.projectLinkCreate;
     },
     /**
      * Call the Linear api with the projectLinkDelete
@@ -2970,9 +2640,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.projectLinkDelete,
-      };
+      return response?.projectLinkDelete;
     },
     /**
      * Call the Linear api with the projectCreate
@@ -2990,9 +2658,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.projectCreate,
-      };
+      return response?.projectCreate;
     },
     /**
      * Call the Linear api with the projectUpdate
@@ -3012,9 +2678,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.projectUpdate,
-      };
+      return response?.projectUpdate;
     },
     /**
      * Call the Linear api with the projectArchive
@@ -3029,9 +2693,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.projectArchive,
-      };
+      return response?.projectArchive;
     },
     /**
      * Call the Linear api with the pushSubscriptionCreate
@@ -3049,9 +2711,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.pushSubscriptionCreate,
-      };
+      return response?.pushSubscriptionCreate;
     },
     /**
      * Call the Linear api with the pushSubscriptionDelete
@@ -3069,9 +2729,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.pushSubscriptionDelete,
-      };
+      return response?.pushSubscriptionDelete;
     },
     /**
      * Call the Linear api with the reactionCreate
@@ -3089,9 +2747,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.reactionCreate,
-      };
+      return response?.reactionCreate;
     },
     /**
      * Call the Linear api with the reactionDelete
@@ -3106,9 +2762,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.reactionDelete,
-      };
+      return response?.reactionDelete;
     },
     /**
      * Call the Linear api with the createCsvExportReport
@@ -3124,9 +2778,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         {},
         opts
       );
-      return {
-        ...response?.createCsvExportReport,
-      };
+      return response?.createCsvExportReport;
     },
     /**
      * Call the Linear api with the subscriptionSessionCreate
@@ -3143,9 +2795,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.SubscriptionSessionCreateMutation,
         D.SubscriptionSessionCreateMutationVariables
       >(D.SubscriptionSessionCreateDocument, { plan }, opts);
-      return {
-        ...response?.subscriptionSessionCreate,
-      };
+      return response?.subscriptionSessionCreate;
     },
     /**
      * Call the Linear api with the subscriptionUpdateSessionCreate
@@ -3160,9 +2810,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.SubscriptionUpdateSessionCreateMutation,
         D.SubscriptionUpdateSessionCreateMutationVariables
       >(D.SubscriptionUpdateSessionCreateDocument, {}, opts);
-      return {
-        ...response?.subscriptionUpdateSessionCreate,
-      };
+      return response?.subscriptionUpdateSessionCreate;
     },
     /**
      * Call the Linear api with the subscriptionUpdate
@@ -3182,9 +2830,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.subscriptionUpdate,
-      };
+      return response?.subscriptionUpdate;
     },
     /**
      * Call the Linear api with the subscriptionUpgrade
@@ -3204,9 +2850,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { type, id },
         opts
       );
-      return {
-        ...response?.subscriptionUpgrade,
-      };
+      return response?.subscriptionUpgrade;
     },
     /**
      * Call the Linear api with the subscriptionArchive
@@ -3224,9 +2868,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.subscriptionArchive,
-      };
+      return response?.subscriptionArchive;
     },
     /**
      * Call the Linear api with the teamMembershipCreate
@@ -3244,9 +2886,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.teamMembershipCreate,
-      };
+      return response?.teamMembershipCreate;
     },
     /**
      * Call the Linear api with the teamMembershipDelete
@@ -3264,9 +2904,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.teamMembershipDelete,
-      };
+      return response?.teamMembershipDelete;
     },
     /**
      * Call the Linear api with the teamCreate
@@ -3286,9 +2924,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, ...vars },
         opts
       );
-      return {
-        ...response?.teamCreate,
-      };
+      return response?.teamCreate;
     },
     /**
      * Call the Linear api with the teamUpdate
@@ -3308,9 +2944,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.teamUpdate,
-      };
+      return response?.teamUpdate;
     },
     /**
      * Call the Linear api with the teamArchive
@@ -3325,9 +2959,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.teamArchive,
-      };
+      return response?.teamArchive;
     },
     /**
      * Call the Linear api with the teamDelete
@@ -3342,9 +2974,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.teamDelete,
-      };
+      return response?.teamDelete;
     },
     /**
      * Call the Linear api with the templateCreate
@@ -3362,9 +2992,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.templateCreate,
-      };
+      return response?.templateCreate;
     },
     /**
      * Call the Linear api with the templateUpdate
@@ -3384,9 +3012,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.templateUpdate,
-      };
+      return response?.templateUpdate;
     },
     /**
      * Call the Linear api with the templateDelete
@@ -3401,9 +3027,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.templateDelete,
-      };
+      return response?.templateDelete;
     },
     /**
      * Call the Linear api with the userSettingsUpdate
@@ -3423,9 +3047,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.userSettingsUpdate,
-      };
+      return response?.userSettingsUpdate;
     },
     /**
      * Call the Linear api with the userSettingsFlagIncrement
@@ -3442,9 +3064,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.UserSettingsFlagIncrementMutation,
         D.UserSettingsFlagIncrementMutationVariables
       >(D.UserSettingsFlagIncrementDocument, { flag }, opts);
-      return {
-        ...response?.userSettingsFlagIncrement,
-      };
+      return response?.userSettingsFlagIncrement;
     },
     /**
      * Call the Linear api with the userSettingsFlagsReset
@@ -3460,9 +3080,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         {},
         opts
       );
-      return {
-        ...response?.userSettingsFlagsReset,
-      };
+      return response?.userSettingsFlagsReset;
     },
     /**
      * Call the Linear api with the userFlagUpdate
@@ -3482,9 +3100,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { operation, flag },
         opts
       );
-      return {
-        ...response?.userFlagUpdate,
-      };
+      return response?.userFlagUpdate;
     },
     /**
      * Call the Linear api with the userSubscribeToNewsletter
@@ -3499,9 +3115,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         D.UserSubscribeToNewsletterMutation,
         D.UserSubscribeToNewsletterMutationVariables
       >(D.UserSubscribeToNewsletterDocument, {}, opts);
-      return {
-        ...response?.userSubscribeToNewsletter,
-      };
+      return response?.userSubscribeToNewsletter;
     },
     /**
      * Call the Linear api with the viewPreferencesCreate
@@ -3519,9 +3133,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.viewPreferencesCreate,
-      };
+      return response?.viewPreferencesCreate;
     },
     /**
      * Call the Linear api with the viewPreferencesUpdate
@@ -3541,9 +3153,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.viewPreferencesUpdate,
-      };
+      return response?.viewPreferencesUpdate;
     },
     /**
      * Call the Linear api with the viewPreferencesDelete
@@ -3561,9 +3171,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.viewPreferencesDelete,
-      };
+      return response?.viewPreferencesDelete;
     },
     /**
      * Call the Linear api with the webhookCreate
@@ -3581,9 +3189,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.webhookCreate,
-      };
+      return response?.webhookCreate;
     },
     /**
      * Call the Linear api with the webhookUpdate
@@ -3603,9 +3209,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.webhookUpdate,
-      };
+      return response?.webhookUpdate;
     },
     /**
      * Call the Linear api with the webhookDelete
@@ -3620,9 +3224,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.webhookDelete,
-      };
+      return response?.webhookDelete;
     },
     /**
      * Call the Linear api with the workflowStateCreate
@@ -3640,9 +3242,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input },
         opts
       );
-      return {
-        ...response?.workflowStateCreate,
-      };
+      return response?.workflowStateCreate;
     },
     /**
      * Call the Linear api with the workflowStateUpdate
@@ -3662,9 +3262,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { input, id },
         opts
       );
-      return {
-        ...response?.workflowStateUpdate,
-      };
+      return response?.workflowStateUpdate;
     },
     /**
      * Call the Linear api with the workflowStateArchive
@@ -3682,9 +3280,7 @@ export function createLinearSdk<O>(requester: LinearRequester<O>) {
         { id },
         opts
       );
-      return {
-        ...response?.workflowStateArchive,
-      };
+      return response?.workflowStateArchive;
     },
   };
 }
@@ -3720,9 +3316,7 @@ export function createLinearSdkUser<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.user?.assignedIssues,
-      };
+      return response?.user?.assignedIssues;
     },
     /**
      * Call the Linear api with the createdIssues
@@ -3740,9 +3334,7 @@ export function createLinearSdkUser<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.user?.createdIssues,
-      };
+      return response?.user?.createdIssues;
     },
     /**
      * Call the Linear api with the teamMemberships
@@ -3760,9 +3352,7 @@ export function createLinearSdkUser<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.user?.teamMemberships,
-      };
+      return response?.user?.teamMemberships;
     },
   };
 }
@@ -3797,9 +3387,7 @@ export function createLinearSdkViewer<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.viewer?.assignedIssues,
-      };
+      return response?.viewer?.assignedIssues;
     },
     /**
      * Call the Linear api with the createdIssues
@@ -3817,9 +3405,7 @@ export function createLinearSdkViewer<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.viewer?.createdIssues,
-      };
+      return response?.viewer?.createdIssues;
     },
     /**
      * Call the Linear api with the teamMemberships
@@ -3837,9 +3423,7 @@ export function createLinearSdkViewer<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.viewer?.teamMemberships,
-      };
+      return response?.viewer?.teamMemberships;
     },
   };
 }
@@ -3874,9 +3458,7 @@ export function createLinearSdkOrganization<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.organization?.users,
-      };
+      return response?.organization?.users;
     },
     /**
      * Call the Linear api with the teams
@@ -3894,9 +3476,7 @@ export function createLinearSdkOrganization<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.organization?.teams,
-      };
+      return response?.organization?.teams;
     },
     /**
      * Call the Linear api with the milestones
@@ -3914,9 +3494,7 @@ export function createLinearSdkOrganization<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.organization?.milestones,
-      };
+      return response?.organization?.milestones;
     },
     /**
      * Call the Linear api with the integrations
@@ -3934,9 +3512,7 @@ export function createLinearSdkOrganization<O>(requester: LinearRequester<O>) {
         vars,
         opts
       );
-      return {
-        ...response?.organization?.integrations,
-      };
+      return response?.organization?.integrations;
     },
   };
 }
@@ -3969,9 +3545,7 @@ export function createLinearSdkBillingDetails<O>(requester: LinearRequester<O>) 
         {},
         opts
       );
-      return {
-        ...response?.billingDetails?.invoices,
-      };
+      return response?.billingDetails?.invoices;
     },
     /**
      * Call the Linear api with the paymentMethod
@@ -3986,9 +3560,7 @@ export function createLinearSdkBillingDetails<O>(requester: LinearRequester<O>) 
         D.BillingDetails_PaymentMethodQuery,
         D.BillingDetails_PaymentMethodQueryVariables
       >(D.BillingDetails_PaymentMethodDocument, {}, opts);
-      return {
-        ...response?.billingDetails?.paymentMethod,
-      };
+      return response?.billingDetails?.paymentMethod;
     },
   };
 }
@@ -4028,9 +3600,7 @@ export function createLinearSdkCollaborativeDocumentJoin<O>(
         D.CollaborativeDocumentJoin_StepsQuery,
         D.CollaborativeDocumentJoin_StepsQueryVariables
       >(D.CollaborativeDocumentJoin_StepsDocument, { clientId, issueId, version }, opts);
-      return {
-        ...response?.collaborativeDocumentJoin?.steps,
-      };
+      return response?.collaborativeDocumentJoin?.steps;
     },
   };
 }
@@ -4066,9 +3636,7 @@ export function createLinearSdkCycle<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.cycle?.issues,
-      };
+      return response?.cycle?.issues;
     },
     /**
      * Call the Linear api with the uncompletedIssuesUponClose
@@ -4085,9 +3653,7 @@ export function createLinearSdkCycle<O>(requester: LinearRequester<O>, id: strin
         D.Cycle_UncompletedIssuesUponCloseQuery,
         D.Cycle_UncompletedIssuesUponCloseQueryVariables
       >(D.Cycle_UncompletedIssuesUponCloseDocument, { id, ...vars }, opts);
-      return {
-        ...response?.cycle?.uncompletedIssuesUponClose,
-      };
+      return response?.cycle?.uncompletedIssuesUponClose;
     },
   };
 }
@@ -4123,9 +3689,7 @@ export function createLinearSdkFigmaEmbedInfo<O>(requester: LinearRequester<O>, 
         { fileId, ...vars },
         opts
       );
-      return {
-        ...response?.figmaEmbedInfo?.figmaEmbed,
-      };
+      return response?.figmaEmbedInfo?.figmaEmbed;
     },
   };
 }
@@ -4135,291 +3699,6 @@ export function createLinearSdkFigmaEmbedInfo<O>(requester: LinearRequester<O>, 
  * Initialize a set of operations, scoped to figmaEmbedInfo, to run against the Linear api
  */
 export type LinearSdkFigmaEmbedInfo = ReturnType<typeof createLinearSdkFigmaEmbedInfo>;
-
-/**
- * Initialize a set of operations, scoped to integration, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @param id - id to scope the returned operations by
- * @returns The set of available operations scoped to a single integration
- */
-export function createLinearSdkIntegration<O>(requester: LinearRequester<O>, id: string) {
-  return {
-    /**
-     * Call the Linear api with the settings
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the Integration_SettingsQuery
-     */
-    async settings(
-      opts?: O
-    ): Promise<
-      ResultOf<typeof D.Integration_SettingsDocument>["integration"]["settings"] & LinearSdkIntegrationSettings
-    > {
-      const response = await requester<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
-        D.Integration_SettingsDocument,
-        { id },
-        opts
-      );
-      return {
-        ...response?.integration?.settings,
-        ...createLinearSdkIntegrationSettings(requester, id),
-      };
-    },
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkIntegration
- * Initialize a set of operations, scoped to integration, to run against the Linear api
- */
-export type LinearSdkIntegration = ReturnType<typeof createLinearSdkIntegration>;
-
-/**
- * Initialize a set of operations, scoped to integration,settings, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @param id - id to scope the returned operations by
- * @returns The set of available operations scoped to a single integration,settings
- */
-export function createLinearSdkIntegrationSettings<O>(requester: LinearRequester<O>, id: string) {
-  return {
-    /**
-     * Call the Linear api with the slackPost
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the Integration_Settings_SlackPostQuery
-     */
-    async slackPost(
-      opts?: O
-    ): Promise<ResultOf<typeof D.Integration_Settings_SlackPostDocument>["integration"]["settings"]["slackPost"]> {
-      const response = await requester<
-        D.Integration_Settings_SlackPostQuery,
-        D.Integration_Settings_SlackPostQueryVariables
-      >(D.Integration_Settings_SlackPostDocument, { id }, opts);
-      return {
-        ...response?.integration?.settings?.slackPost,
-      };
-    },
-    /**
-     * Call the Linear api with the slackProjectPost
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the Integration_Settings_SlackProjectPostQuery
-     */
-    async slackProjectPost(
-      opts?: O
-    ): Promise<
-      ResultOf<typeof D.Integration_Settings_SlackProjectPostDocument>["integration"]["settings"]["slackProjectPost"]
-    > {
-      const response = await requester<
-        D.Integration_Settings_SlackProjectPostQuery,
-        D.Integration_Settings_SlackProjectPostQueryVariables
-      >(D.Integration_Settings_SlackProjectPostDocument, { id }, opts);
-      return {
-        ...response?.integration?.settings?.slackProjectPost,
-      };
-    },
-    /**
-     * Call the Linear api with the googleSheets
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the Integration_Settings_GoogleSheetsQuery
-     */
-    async googleSheets(
-      opts?: O
-    ): Promise<
-      ResultOf<typeof D.Integration_Settings_GoogleSheetsDocument>["integration"]["settings"]["googleSheets"]
-    > {
-      const response = await requester<
-        D.Integration_Settings_GoogleSheetsQuery,
-        D.Integration_Settings_GoogleSheetsQueryVariables
-      >(D.Integration_Settings_GoogleSheetsDocument, { id }, opts);
-      return {
-        ...response?.integration?.settings?.googleSheets,
-      };
-    },
-    /**
-     * Call the Linear api with the sentry
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the Integration_Settings_SentryQuery
-     */
-    async sentry(
-      opts?: O
-    ): Promise<ResultOf<typeof D.Integration_Settings_SentryDocument>["integration"]["settings"]["sentry"]> {
-      const response = await requester<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
-        D.Integration_Settings_SentryDocument,
-        { id },
-        opts
-      );
-      return {
-        ...response?.integration?.settings?.sentry,
-      };
-    },
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkIntegrationSettings
- * Initialize a set of operations, scoped to integration,settings, to run against the Linear api
- */
-export type LinearSdkIntegrationSettings = ReturnType<typeof createLinearSdkIntegrationSettings>;
-
-/**
- * Initialize a set of operations, scoped to integrationResource, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @param id - id to scope the returned operations by
- * @returns The set of available operations scoped to a single integrationResource
- */
-export function createLinearSdkIntegrationResource<O>(requester: LinearRequester<O>, id: string) {
-  return {
-    /**
-     * Call the Linear api with the data
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationResource_DataQuery
-     */
-    async data(
-      opts?: O
-    ): Promise<
-      ResultOf<typeof D.IntegrationResource_DataDocument>["integrationResource"]["data"] &
-        LinearSdkIntegrationResourceData
-    > {
-      const response = await requester<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
-        D.IntegrationResource_DataDocument,
-        { id },
-        opts
-      );
-      return {
-        ...response?.integrationResource?.data,
-        ...createLinearSdkIntegrationResourceData(requester, id),
-      };
-    },
-    /**
-     * Call the Linear api with the pullRequest
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationResource_PullRequestQuery
-     */
-    async pullRequest(
-      opts?: O
-    ): Promise<ResultOf<typeof D.IntegrationResource_PullRequestDocument>["integrationResource"]["pullRequest"]> {
-      const response = await requester<
-        D.IntegrationResource_PullRequestQuery,
-        D.IntegrationResource_PullRequestQueryVariables
-      >(D.IntegrationResource_PullRequestDocument, { id }, opts);
-      return {
-        ...response?.integrationResource?.pullRequest,
-      };
-    },
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkIntegrationResource
- * Initialize a set of operations, scoped to integrationResource, to run against the Linear api
- */
-export type LinearSdkIntegrationResource = ReturnType<typeof createLinearSdkIntegrationResource>;
-
-/**
- * Initialize a set of operations, scoped to integrationResource,data, to run against the Linear api
- *
- * @param requester - function to call the graphql client
- * @param id - id to scope the returned operations by
- * @returns The set of available operations scoped to a single integrationResource,data
- */
-export function createLinearSdkIntegrationResourceData<O>(requester: LinearRequester<O>, id: string) {
-  return {
-    /**
-     * Call the Linear api with the githubPullRequest
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationResource_Data_GithubPullRequestQuery
-     */
-    async githubPullRequest(
-      opts?: O
-    ): Promise<
-      ResultOf<
-        typeof D.IntegrationResource_Data_GithubPullRequestDocument
-      >["integrationResource"]["data"]["githubPullRequest"]
-    > {
-      const response = await requester<
-        D.IntegrationResource_Data_GithubPullRequestQuery,
-        D.IntegrationResource_Data_GithubPullRequestQueryVariables
-      >(D.IntegrationResource_Data_GithubPullRequestDocument, { id }, opts);
-      return {
-        ...response?.integrationResource?.data?.githubPullRequest,
-      };
-    },
-    /**
-     * Call the Linear api with the gitlabMergeRequest
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationResource_Data_GitlabMergeRequestQuery
-     */
-    async gitlabMergeRequest(
-      opts?: O
-    ): Promise<
-      ResultOf<
-        typeof D.IntegrationResource_Data_GitlabMergeRequestDocument
-      >["integrationResource"]["data"]["gitlabMergeRequest"]
-    > {
-      const response = await requester<
-        D.IntegrationResource_Data_GitlabMergeRequestQuery,
-        D.IntegrationResource_Data_GitlabMergeRequestQueryVariables
-      >(D.IntegrationResource_Data_GitlabMergeRequestDocument, { id }, opts);
-      return {
-        ...response?.integrationResource?.data?.gitlabMergeRequest,
-      };
-    },
-    /**
-     * Call the Linear api with the githubCommit
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationResource_Data_GithubCommitQuery
-     */
-    async githubCommit(
-      opts?: O
-    ): Promise<
-      ResultOf<typeof D.IntegrationResource_Data_GithubCommitDocument>["integrationResource"]["data"]["githubCommit"]
-    > {
-      const response = await requester<
-        D.IntegrationResource_Data_GithubCommitQuery,
-        D.IntegrationResource_Data_GithubCommitQueryVariables
-      >(D.IntegrationResource_Data_GithubCommitDocument, { id }, opts);
-      return {
-        ...response?.integrationResource?.data?.githubCommit,
-      };
-    },
-    /**
-     * Call the Linear api with the sentryIssue
-     *
-     * @param opts - options to pass to the graphql client
-     * @returns The result of the IntegrationResource_Data_SentryIssueQuery
-     */
-    async sentryIssue(
-      opts?: O
-    ): Promise<
-      ResultOf<typeof D.IntegrationResource_Data_SentryIssueDocument>["integrationResource"]["data"]["sentryIssue"]
-    > {
-      const response = await requester<
-        D.IntegrationResource_Data_SentryIssueQuery,
-        D.IntegrationResource_Data_SentryIssueQueryVariables
-      >(D.IntegrationResource_Data_SentryIssueDocument, { id }, opts);
-      return {
-        ...response?.integrationResource?.data?.sentryIssue,
-      };
-    },
-  };
-}
-
-/**
- * The returned type from calling createLinearSdkIntegrationResourceData
- * Initialize a set of operations, scoped to integrationResource,data, to run against the Linear api
- */
-export type LinearSdkIntegrationResourceData = ReturnType<typeof createLinearSdkIntegrationResourceData>;
 
 /**
  * Initialize a set of operations, scoped to inviteInfo, to run against the Linear api
@@ -4446,9 +3725,7 @@ export function createLinearSdkInviteInfo<O>(requester: LinearRequester<O>, user
         { userHash, ...vars },
         opts
       );
-      return {
-        ...response?.inviteInfo?.inviteData,
-      };
+      return response?.inviteInfo?.inviteData;
     },
   };
 }
@@ -4484,9 +3761,7 @@ export function createLinearSdkIssueLabel<O>(requester: LinearRequester<O>, id: 
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issueLabel?.issues,
-      };
+      return response?.issueLabel?.issues;
     },
   };
 }
@@ -4522,9 +3797,7 @@ export function createLinearSdkIssue<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issue?.subscribers,
-      };
+      return response?.issue?.subscribers;
     },
     /**
      * Call the Linear api with the children
@@ -4542,9 +3815,7 @@ export function createLinearSdkIssue<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issue?.children,
-      };
+      return response?.issue?.children;
     },
     /**
      * Call the Linear api with the comments
@@ -4562,9 +3833,7 @@ export function createLinearSdkIssue<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issue?.comments,
-      };
+      return response?.issue?.comments;
     },
     /**
      * Call the Linear api with the history
@@ -4582,9 +3851,7 @@ export function createLinearSdkIssue<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issue?.history,
-      };
+      return response?.issue?.history;
     },
     /**
      * Call the Linear api with the labels
@@ -4602,9 +3869,7 @@ export function createLinearSdkIssue<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issue?.labels,
-      };
+      return response?.issue?.labels;
     },
     /**
      * Call the Linear api with the integrationResources
@@ -4622,9 +3887,7 @@ export function createLinearSdkIssue<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issue?.integrationResources,
-      };
+      return response?.issue?.integrationResources;
     },
     /**
      * Call the Linear api with the relations
@@ -4642,9 +3905,7 @@ export function createLinearSdkIssue<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issue?.relations,
-      };
+      return response?.issue?.relations;
     },
     /**
      * Call the Linear api with the inverseRelations
@@ -4662,9 +3923,7 @@ export function createLinearSdkIssue<O>(requester: LinearRequester<O>, id: strin
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.issue?.inverseRelations,
-      };
+      return response?.issue?.inverseRelations;
     },
   };
 }
@@ -4700,9 +3959,7 @@ export function createLinearSdkMilestone<O>(requester: LinearRequester<O>, id: s
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.milestone?.projects,
-      };
+      return response?.milestone?.projects;
     },
   };
 }
@@ -4738,9 +3995,7 @@ export function createLinearSdkOrganizationInvite<O>(requester: LinearRequester<
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.organizationInvite?.issues,
-      };
+      return response?.organizationInvite?.issues;
     },
   };
 }
@@ -4776,9 +4031,7 @@ export function createLinearSdkProject<O>(requester: LinearRequester<O>, id: str
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.project?.teams,
-      };
+      return response?.project?.teams;
     },
     /**
      * Call the Linear api with the members
@@ -4796,9 +4049,7 @@ export function createLinearSdkProject<O>(requester: LinearRequester<O>, id: str
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.project?.members,
-      };
+      return response?.project?.members;
     },
     /**
      * Call the Linear api with the issues
@@ -4816,9 +4067,7 @@ export function createLinearSdkProject<O>(requester: LinearRequester<O>, id: str
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.project?.issues,
-      };
+      return response?.project?.issues;
     },
     /**
      * Call the Linear api with the links
@@ -4836,9 +4085,7 @@ export function createLinearSdkProject<O>(requester: LinearRequester<O>, id: str
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.project?.links,
-      };
+      return response?.project?.links;
     },
   };
 }
@@ -4874,9 +4121,7 @@ export function createLinearSdkTeam<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.team?.issues,
-      };
+      return response?.team?.issues;
     },
     /**
      * Call the Linear api with the cycles
@@ -4894,9 +4139,7 @@ export function createLinearSdkTeam<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.team?.cycles,
-      };
+      return response?.team?.cycles;
     },
     /**
      * Call the Linear api with the memberships
@@ -4914,9 +4157,7 @@ export function createLinearSdkTeam<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.team?.memberships,
-      };
+      return response?.team?.memberships;
     },
     /**
      * Call the Linear api with the projects
@@ -4934,9 +4175,7 @@ export function createLinearSdkTeam<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.team?.projects,
-      };
+      return response?.team?.projects;
     },
     /**
      * Call the Linear api with the states
@@ -4954,9 +4193,7 @@ export function createLinearSdkTeam<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.team?.states,
-      };
+      return response?.team?.states;
     },
     /**
      * Call the Linear api with the templates
@@ -4974,9 +4211,7 @@ export function createLinearSdkTeam<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.team?.templates,
-      };
+      return response?.team?.templates;
     },
     /**
      * Call the Linear api with the labels
@@ -4994,9 +4229,7 @@ export function createLinearSdkTeam<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.team?.labels,
-      };
+      return response?.team?.labels;
     },
     /**
      * Call the Linear api with the webhooks
@@ -5014,9 +4247,7 @@ export function createLinearSdkTeam<O>(requester: LinearRequester<O>, id: string
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.team?.webhooks,
-      };
+      return response?.team?.webhooks;
     },
   };
 }
@@ -5052,9 +4283,7 @@ export function createLinearSdkWorkflowState<O>(requester: LinearRequester<O>, i
         { id, ...vars },
         opts
       );
-      return {
-        ...response?.workflowState?.issues,
-      };
+      return response?.workflowState?.issues;
     },
   };
 }
