@@ -1,7 +1,7 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, logger, nonNullable } from "@linear/common";
-import { GraphQLSchema } from "graphql";
+import { ContextVisitor, filterJoin, logger, nonNullable } from "@linear/plugin-common";
+import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
 import { printApiDefinition } from "./api";
 import c from "./constants";
@@ -18,16 +18,31 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
   config: RawSdkPluginConfig
 ) => {
   try {
+    /** Get ast from schema */
+    const ast = parse(printSchema(schema));
+
+    /** Collect plugin context */
+    logger.info("Gathering context");
+    const contextVisitor = new ContextVisitor(schema);
+    visit(ast, contextVisitor);
+
     /** Process a list of documents to add information for chaining the api operations */
     logger.info("Processing documents");
-
     const apiDefinitions = getApiDefinitions(documents);
     logger.debug(apiDefinitions);
 
+    /** Print each api definition  */
     const printedDefinitions = Object.entries(apiDefinitions).map(([apiKey, definitions]) => {
       logger.info("Generating api", apiKey);
 
-      return printApiDefinition({ config, apiDefinitions, apiPath: apiKey.split("_"), definitions });
+      return printApiDefinition({
+        ...contextVisitor.context,
+        fragments: [],
+        config,
+        apiDefinitions,
+        apiPath: apiKey.split("_"),
+        definitions,
+      });
     });
 
     logger.info("Printing api");
@@ -69,7 +84,7 @@ export const validate: PluginValidateFn = async (
   config: RawSdkPluginConfig,
   outputFile: string
 ) => {
-  const packageName = "@linear/sdk-plugin";
+  const packageName = "@linear/plugin-sdk";
   logger.info(`Validating ${packageName}`);
   logger.debug({ config });
 

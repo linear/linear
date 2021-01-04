@@ -1,12 +1,18 @@
 import { indentMultiline } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, printComment, upperFirst } from "@linear/common";
-import { VariableDefinitionNode } from "graphql";
-import { getArgList } from "./args";
+import {
+  ArgumentTypescriptVisitor,
+  filterJoin,
+  getArgList,
+  printComment,
+  printDebug,
+  upperFirst,
+} from "@linear/plugin-common";
+import { visit } from "graphql";
 import c from "./constants";
-import { printOperation } from "./operation";
+import { getParentOperation, printOperation } from "./operation";
 import { getRequesterArg } from "./requester";
 import { SdkPluginContext } from "./types";
-import { getRequiredVariables, getTypeName } from "./variable";
+import { getRequiredVariables } from "./variable";
 
 export function printApiDefinition(context: SdkPluginContext): string {
   /** For each operation get the function string content */
@@ -39,16 +45,12 @@ export function printApiFunction(context: SdkPluginContext, content: string): st
   const name = printApiFunctionName(context.apiPath);
   const type = printApiFunctionType(context.apiPath);
 
-  const parentDefinitions = context.apiPath.slice(0, -1).map((key, index) => {
-    const parentKey = context.apiPath.slice(0, index).join("_");
-    return context.apiDefinitions[parentKey].find(
-      definition => definition.path.join("_") === context.apiPath.slice(0, index + 1).join("_")
-    );
-  });
+  /** Get the required variables for the parent operation */
+  const parentOperation = getParentOperation(context);
+  const requiredVariables = getRequiredVariables(parentOperation?.node);
 
-  const requiredVariables = parentDefinitions.reduce<VariableDefinitionNode[]>((acc, definition) => {
-    return [...acc, ...(definition?.node ? getRequiredVariables(definition?.node) : [])];
-  }, []);
+  /** Create a visitor to print the arg type */
+  const argVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
 
   const args = getArgList([
     /** The requester function arg */
@@ -57,7 +59,7 @@ export function printApiFunction(context: SdkPluginContext, content: string): st
     ...requiredVariables.map(v => ({
       name: v.variable.name.value,
       optional: false,
-      type: getTypeName(v.type),
+      type: visit(v.type, argVisitor),
       description: `${v.variable.name.value} to scope the returned operations by`,
     })),
   ]);
@@ -75,14 +77,22 @@ export function printApiFunction(context: SdkPluginContext, content: string): st
           ? `@returns The set of available operations scoped to a single ${context.apiPath}`
           : "@returns The set of available operations",
       ]),
+      printDebug({
+        name,
+        type,
+        parentDefinition: parentOperation,
+        apiPath: context.apiPath,
+        requiredVariables,
+      }),
       `export function ${name}<${c.OPTIONS_TYPE}>(${args.print}) {
         return {
           ${content}
         };
       }`,
-      " ",
+      "\n",
       printComment([`The returned type from calling ${name}`, apiDescription]),
       `export type ${type} = ReturnType<typeof ${name}>;`,
+      "\n",
     ],
     "\n"
   );

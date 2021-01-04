@@ -1,26 +1,18 @@
-import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, getKeyByValue } from "@linear/common";
 import autoBind from "auto-bind";
-import { DocumentNode, FieldDefinitionNode, GraphQLSchema, Kind, ObjectTypeDefinitionNode } from "graphql";
+import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { isScalarField } from "./field";
 import { printOperations } from "./operation";
-import { DocPluginContext, OperationType } from "./types";
+import { OperationType, PluginContext } from "./types";
+import { filterJoin, getKeyByValue } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating operations
  */
 export class OperationVisitor {
-  private _context: DocPluginContext = {
-    schema: new GraphQLSchema({}),
-    scalars: DEFAULT_SCALARS,
-    fragments: [],
-    objects: [],
-    operationMap: { [OperationType.query]: "Query", [OperationType.mutation]: "Mutation" },
-    queries: [],
-  };
+  private _context: PluginContext;
 
-  /** Initialise the visitor */
-  public constructor(context: DocPluginContext) {
+  /** Initialize the visitor */
+  public constructor(context: PluginContext) {
     autoBind(this);
 
     this._context = context;

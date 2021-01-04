@@ -27,7 +27,7 @@
     "target": "es6",
     "incremental": true,
     "paths": {
-      "@linear/common": [
+      "@linear/plugin-common": [
         "../packages/common/src"
       ]
     }

@@ -1,10 +1,11 @@
-import { filterJoin, getLast, printGraphqlDebug, printGraphqlDescription } from "@linear/common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { getTypeName, isScalarField, isValidField, printInputArgs, printResponseArgs } from "./field";
 import { findFragment, printOperationFragment } from "./fragment";
 import { findObject } from "./object";
+import { printGraphqlDebug, printGraphqlDescription } from "./print";
 import { findQuery } from "./query";
-import { DocPluginContext, OperationType } from "./types";
+import { OperationType, PluginContext } from "./types";
+import { filterJoin, getLast } from "./utils";
 
 /**
  * Print the operation wrapper
@@ -46,7 +47,7 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
  * Nest the objects until a fragment or scalar is found
  */
 function printOperationFields(
-  context: DocPluginContext,
+  context: PluginContext,
   fields: FieldDefinitionNode[],
   object: ObjectTypeDefinitionNode
 ): string {
@@ -85,7 +86,7 @@ function printOperationFields(
 /**
  * Print the body of the operation
  */
-export function printOperationBody(context: DocPluginContext, fields: FieldDefinitionNode[]): string | undefined {
+export function printOperationBody(context: PluginContext, fields: FieldDefinitionNode[]): string | undefined {
   const lastField = getLast(fields);
 
   if (isValidField(lastField)) {
@@ -106,7 +107,7 @@ export function printOperationBody(context: DocPluginContext, fields: FieldDefin
 }
 
 export function printFieldOperation(
-  context: DocPluginContext,
+  context: PluginContext,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {
@@ -122,7 +123,7 @@ export function printFieldOperation(
  * @param fields a list of fields by which to nest the query
  */
 export function printOperations(
-  context: DocPluginContext,
+  context: PluginContext,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {

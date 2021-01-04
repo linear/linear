@@ -1,7 +1,7 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import c from "./constants";
 import { getTypeName } from "./field";
-import { DocPluginContext, Named, NamedFields } from "./types";
+import { Named, NamedFields, PluginContext } from "./types";
 
 /**
  * Get the object type matching the name arg
@@ -38,7 +38,7 @@ export function isEdge(object?: ObjectTypeDefinitionNode | NamedFields<ObjectTyp
  * Is the object an operation root
  */
 export function isOperationRoot(
-  context: DocPluginContext,
+  context: PluginContext,
   object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode>
 ): boolean {
   return object ? Object.values(context.operationMap).includes(getObjectName(object)) : false;

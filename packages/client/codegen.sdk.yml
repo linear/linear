@@ -12,6 +12,6 @@ generates:
       - typed-document-node
   src/_generated/sdk.ts:
     plugins:
-      - "@linear/sdk-plugin"
+      - "@linear/plugin-sdk"
     config:
       documentFile: ./documents

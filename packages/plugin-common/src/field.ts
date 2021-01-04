@@ -1,4 +1,4 @@
-import { filterJoin } from "@linear/common";
+import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import {
   FieldDefinitionNode,
   InputValueDefinitionNode,
@@ -9,11 +9,11 @@ import {
   NonNullTypeNode,
   visit,
 } from "graphql";
-import { ArgumentVisitor } from "./argument-visitor";
+import { ArgumentGraphqlVisitor } from "./argument-graphql-visitor";
 import c from "./constants";
-import { Scalars } from "./types";
+import { filterJoin } from "./utils";
 
-const argVisitor = new ArgumentVisitor();
+const argVisitor = new ArgumentGraphqlVisitor();
 
 /**
  * Print the arg for passing into the operation input
@@ -69,7 +69,7 @@ export function getTypeName(type: string | NameNode | NonNullTypeNode | NamedTyp
 /**
  * Determine whether the node is a scalar field
  */
-export function isScalarField(scalars: Scalars, node: FieldDefinitionNode): boolean {
+export function isScalarField(scalars: typeof DEFAULT_SCALARS, node: FieldDefinitionNode): boolean {
   return Object.keys(scalars).includes(getTypeName(node.type));
 }
 

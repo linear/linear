@@ -1,8 +1,8 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
-import { logger, nonNullable } from "@linear/common";
+import { nonNullable } from "@linear/plugin-common";
 import { DocumentNode, Kind, OperationDefinitionNode } from "graphql";
 import { pascalCase } from "pascal-case";
-import { ApiDefinition, ApiDefinitions } from "./types";
+import { SdkDefinition, SdkOperation } from "./types";
 
 /**
  * Get a list of all non null document notes
@@ -30,8 +30,8 @@ function getOperations(documents: Types.DocumentFile[]): OperationDefinitionNode
 /**
  * Process the documents and return a definition object for generating the api
  */
-export function getApiDefinitions(documents: Types.DocumentFile[]): ApiDefinitions {
-  return getOperations(documents).reduce<ApiDefinitions>((acc, node) => {
+export function getApiDefinitions(documents: Types.DocumentFile[]): SdkDefinition {
+  return getOperations(documents).reduce<SdkDefinition>((acc, node) => {
     const path = (node.name?.value ?? "").split("_");
     const key = path.slice(0, path.length - 1).join("_");
 
@@ -43,20 +43,19 @@ export function getApiDefinitions(documents: Types.DocumentFile[]): ApiDefinitio
 
     const operationType = pascalCase(node.operation);
 
-    const apiDefinition: ApiDefinition = {
+    const apiDefinition: SdkOperation = {
       path,
       node,
-      // /** The name of the generated graphql document */
+      /** The name of the generated graphql document */
       documentVariableName: `${name}Document`,
-      // /** The type of the graphql operation */
+      /** The type of the graphql operation */
       operationType,
-      // /** The type of the result from the graphql operation */
+      /** The type of the result from the graphql operation */
       operationResultType: `${name}${operationType}`,
-      // /** The type of the variables for the graphql operation */
+      /** The type of the variables for the graphql operation */
       operationVariablesTypes: `${name}${operationType}Variables`,
     };
 
-    logger.trace(apiDefinition);
     return { ...acc, [key]: [...(acc[key] ?? []), apiDefinition] };
   }, {});
 }
