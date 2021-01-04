@@ -8,12 +8,12 @@ import {
   printComment,
   printDebug,
 } from "@linear/plugin-common";
-import { FieldNode, Kind, OperationDefinitionNode, SelectionSetNode, visit } from "graphql";
+import { FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode, SelectionSetNode, visit } from "graphql";
 import { printApiFunctionName, printApiFunctionType } from "./api";
 import c from "./constants";
 import { printNamespaced, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
-import { SdkOperation, SdkPluginContext } from "./types";
+import { SdkOperation, SdkOperationObject, SdkPluginContext } from "./types";
 import { getOptionalVariables, getRequiredVariables, isIdVariable } from "./variable";
 
 /**
@@ -178,19 +178,86 @@ function getOperationArgs(context: SdkPluginContext, o: SdkOperation): ArgDefini
 }
 
 /**
- * Get the set of keys by which to nest the data
+ * Drill into the selection set to return the resulting field
  */
-function getNestedDataKeys(o: SdkOperation): string[] {
-  // const operationName = printSdkOperationName(o);
-  // const firstField = getFirstField(o.node.selectionSet);
+function getOperationResultField(context: SdkPluginContext, o: SdkOperation): FieldNode | undefined {
+  return o.path.reduce<FieldNode>((acc, key) => {
+    const field = acc?.selectionSet?.selections?.find(selection => {
+      return selection.kind === Kind.FIELD && selection.name.value === key;
+    }) as FieldNode;
+    if (field) {
+      return field;
+    } else {
+      throw new Error(`No selection set found on operation with nested keys: ${filterJoin(o.path, ", ")}`);
+    }
+  }, (o.node as unknown) as FieldNode);
+}
 
-  return [
-    ...o.path,
-    // /** If the operation name is the same as the first field we can drill into the data */
-    // operationName === getFirstFieldName(o.node.selectionSet) ? operationName : undefined,
-    // /** If the operation is a child and named the same as the first field inside the first field we can also drill */
-    // chainChildKey && operationName === getFirstFieldName(firstField.selectionSet) ? operationName : undefined,
-  ].filter(nonNullable);
+/**
+ * Find a fragment definition that matches the operation response
+ */
+function getOperationFragment(context: SdkPluginContext, o: SdkOperation) {
+  const resultField = getOperationResultField(context, o);
+
+  /** Get the fragment spread if it exists */
+  const fragmentSpread = resultField?.selectionSet?.selections.find(field => field.kind === Kind.FRAGMENT_SPREAD) as
+    | FragmentSpreadNode
+    | undefined;
+
+  /** Match the fragment if it exists */
+  return context.objects.find(f => f.name.value === fragmentSpread?.name?.value);
+}
+
+/**
+ * Get a list of all fields with a corresponding api and query definition
+ */
+function getOperationObjects(context: SdkPluginContext, o: SdkOperation): SdkOperationObject[] {
+  const fragment = getOperationFragment(context, o);
+
+  const fields =
+    fragment?.fields?.map(field => {
+      return {
+        field,
+        apiDefinition: context.apiDefinitions[field.name.value],
+        queryDefinition: context.apiDefinitions[""].find(d => d.path.join("") === field.name.value),
+      };
+    }) ?? [];
+
+  return fields.filter(({ field, apiDefinition, queryDefinition }) =>
+    Boolean(field && apiDefinition && queryDefinition)
+  ) as SdkOperationObject[];
+}
+
+/**
+ * Print each object returned in the response with a corresponding api definition
+ */
+function printOperationObjects(context: SdkPluginContext, o: SdkOperation): (string | undefined)[] {
+  const operationObjects = getOperationObjects(context, o);
+
+  return (
+    operationObjects.map(({ field, queryDefinition }) => {
+      const requiredVariables = getRequiredVariables(queryDefinition?.node);
+
+      if (requiredVariables.length) {
+        return `${field.name.value}: ${filterJoin(
+          requiredVariables.map(v =>
+            filterJoin(["response", ...o.path, field.name.value, v.variable.name.value], "?.")
+          ),
+          " && "
+        )} ? ${printApiFunctionName([field.name.value])}(${filterJoin(
+          [
+            c.REQUESTER_NAME,
+            ...requiredVariables.map(v =>
+              filterJoin(["response", ...o.path, field.name.value, v.variable.name.value], "?.")
+            ),
+          ],
+          ", "
+        )}) : undefined,`;
+      } else {
+        return `${field.name.value}: ${printApiFunctionName([field.name.value])}(${c.REQUESTER_NAME}),`;
+      }
+    }) ?? []
+  );
 }
 
 /**
@@ -198,21 +265,23 @@ function getNestedDataKeys(o: SdkOperation): string[] {
  */
 function printOperationBody(context: SdkPluginContext, o: SdkOperation): string {
   const requiredVariables = getRequiredVariables(o.node);
-  const nestedDataKeys = getNestedDataKeys(o);
-  const operationApi = getOperationApi(context, o);
 
   /** Extract from the response data if we are nested */
-  if (o.path.length || nestedDataKeys.length) {
-    const response = `const response = await ${printRequesterCall(context, o)}`;
-    const extractedResponse = filterJoin(["response", ...nestedDataKeys], "?.");
+  if (o.path.length) {
+    const operationApi = getOperationApi(context, o);
+    const operationObjects = printOperationObjects(context, o);
 
-    return operationApi
+    const response = `const response = await ${printRequesterCall(context, o)}`;
+    const extractedResponse = filterJoin(["response", ...o.path], "?.");
+
+    return operationApi || operationObjects.length > 0
       ? filterJoin(
           [
             response,
             `return {`,
             /** If the first field is the operation drill down for a nicer api */
             `...${extractedResponse},`,
+            ...operationObjects,
             /** Add the child sdk to the response */
             `...${printApiFunctionName(o.path)}(${filterJoin(
               [c.REQUESTER_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
@@ -222,7 +291,7 @@ function printOperationBody(context: SdkPluginContext, o: SdkOperation): string 
           ],
           "\n"
         )
-      : filterJoin([response, `return ${extractedResponse}`]);
+      : filterJoin([response, `return ${extractedResponse}`], "\n");
   } else {
     return `return ${printRequesterCall(context, o)}`;
   }
@@ -248,17 +317,29 @@ function getOperationApi(context: SdkPluginContext, o: SdkOperation): SdkOperati
  * Chained apis have the relevant chain api return type added
  */
 function printOperationResultType(context: SdkPluginContext, o: SdkOperation) {
-  const nestedDataKeys = getNestedDataKeys(o);
   const documentName = printNamespaced(context, o.documentVariableName);
+  const operationObjects = getOperationObjects(context, o);
   const documentResultType = `ResultOf<typeof ${documentName}>`;
 
-  const resultType = filterJoin([documentResultType, ...nestedDataKeys.map(key => `['${key}']`)], "");
+  const resultType = filterJoin([documentResultType, ...o.path.map(key => `['${key}']`)], "");
 
-  if (getOperationApi(context, o)) {
-    return `Promise<${resultType} & ${printApiFunctionType(o.path)}>`;
-  } else {
-    return `Promise<${resultType}>`;
-  }
+  const overriddenType = operationObjects.length
+    ? `Omit<${resultType}, ${filterJoin(
+        operationObjects.map(({ field }) => `'${field.name.value}'`),
+        " | "
+      )}>`
+    : resultType;
+
+  return `Promise<${filterJoin(
+    [
+      overriddenType,
+      ...operationObjects.map(({ apiDefinition, field }) =>
+        apiDefinition ? `{${field.name.value}?: ${printApiFunctionType([field.name.value])}}` : undefined
+      ),
+      getOperationApi(context, o) ? printApiFunctionType(o.path) : undefined,
+    ],
+    " & "
+  )}>`;
 }
 
 /**

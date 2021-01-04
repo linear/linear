@@ -62,3 +62,13 @@ export interface ArgDefinition {
   /** The name of a default variable */
   defaultName?: string;
 }
+
+/**
+ * Processed arg definition for printing
+ */
+export interface ArgList {
+  /** The jsdoc string for arguments */
+  jsdoc: string[];
+  /** The typescript string for arguments */
+  print: string;
+}
