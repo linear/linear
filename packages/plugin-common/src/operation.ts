@@ -1,7 +1,6 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { getTypeName, isScalarField, isValidField, printInputArgs, printResponseArgs } from "./field";
 import { findFragment, printOperationFragment } from "./fragment";
-import { logger } from "./logger";
 import { findObject } from "./object";
 import { printGraphqlDebug, printGraphqlDescription } from "./print";
 import { findQuery } from "./query";
@@ -139,14 +138,6 @@ export function printOperations(
       const object = findObject(context.objects, lastField);
 
       const fieldOperations = (object?.fields ?? [])?.map(field => {
-        logger.trace({
-          fields: fields.map(f => f.name.value),
-          field: field.name.value,
-          scalar: isScalarField(context.scalars, field),
-          parent: fields.map(f => getTypeName(f.type)).includes(getTypeName(field.type)),
-          connection: ["pageInfo", "nodes"].includes(field.name.value),
-          query: findQuery(context, field),
-        });
         if (
           /** No need to go further than scalar fields */
           isScalarField(context.scalars, field) ||

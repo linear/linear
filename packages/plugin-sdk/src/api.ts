@@ -1,5 +1,6 @@
 import { indentMultiline } from "@graphql-codegen/visitor-plugin-common";
 import {
+  ArgList,
   ArgumentTypescriptVisitor,
   filterJoin,
   getArgList,
@@ -7,7 +8,7 @@ import {
   printDebug,
   upperFirst,
 } from "@linear/plugin-common";
-import { visit } from "graphql";
+import { VariableDefinitionNode, visit } from "graphql";
 import c from "./constants";
 import { getParentOperation, printOperation } from "./operation";
 import { getRequesterArg } from "./requester";
@@ -39,6 +40,26 @@ export function printApiFunctionType(path: string[]): string {
 }
 
 /**
+ * Print the list of variables for calling an api function
+ */
+export function printApiFunctionArgs(context: SdkPluginContext, variables: VariableDefinitionNode[]): ArgList {
+  /** Create a visitor to print the arg type */
+  const argVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
+
+  return getArgList([
+    /** The requester function arg */
+    getRequesterArg(),
+    /** Args required by the parent operations */
+    ...variables.map(v => ({
+      name: v.variable.name.value,
+      optional: false,
+      type: visit(v.type, argVisitor),
+      description: `${v.variable.name.value} to scope the returned operations by`,
+    })),
+  ]);
+}
+
+/**
  * Print the api function with content
  */
 export function printApiFunction(context: SdkPluginContext, content: string): string {
@@ -48,21 +69,7 @@ export function printApiFunction(context: SdkPluginContext, content: string): st
   /** Get the required variables for the parent operation */
   const parentOperation = getParentOperation(context);
   const requiredVariables = getRequiredVariables(parentOperation?.node);
-
-  /** Create a visitor to print the arg type */
-  const argVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
-
-  const args = getArgList([
-    /** The requester function arg */
-    getRequesterArg(),
-    /** Args required by the parent operations */
-    ...requiredVariables.map(v => ({
-      name: v.variable.name.value,
-      optional: false,
-      type: visit(v.type, argVisitor),
-      description: `${v.variable.name.value} to scope the returned operations by`,
-    })),
-  ]);
+  const args = printApiFunctionArgs(context, requiredVariables);
 
   const apiDescription = context.apiPath.length
     ? `Initialize a set of operations, scoped to ${context.apiPath}, to run against the Linear api`

@@ -1,5 +1,5 @@
 import { InputValueDefinitionNode, Kind } from "graphql";
-import { ArgDefinition } from "./types";
+import { ArgDefinition, ArgList } from "./types";
 import { filterJoin, nonNullable } from "./utils";
 
 /**
@@ -12,7 +12,7 @@ export function requiredArgs(args: readonly InputValueDefinitionNode[] = []): In
 /**
  * Transform a list of arg strings into the jsdoc and printed output
  */
-export function getArgList(args: (ArgDefinition | undefined)[]): { jsdoc: string[]; print: string } {
+export function getArgList(args: (ArgDefinition | undefined)[]): ArgList {
   return {
     jsdoc: [
       " ",

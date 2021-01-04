@@ -1,6 +1,6 @@
 import { ClientSideBasePluginConfig, RawClientSideBasePluginConfig } from "@graphql-codegen/visitor-plugin-common";
 import { PluginContext } from "@linear/plugin-common";
-import { OperationDefinitionNode } from "graphql";
+import { FieldDefinitionNode, OperationDefinitionNode } from "graphql";
 
 export interface RawSdkPluginConfig extends RawClientSideBasePluginConfig {
   /**
@@ -64,4 +64,16 @@ export interface SdkPluginContext extends PluginContext {
   apiDefinitions: SdkDefinition;
   /** The list of api definitions to add to this api */
   definitions: SdkOperation[];
+}
+
+/**
+ * A pairing between an operation field and the definitions corresponding to the field
+ */
+export interface SdkOperationObject {
+  /** The operation field node */
+  field: FieldDefinitionNode;
+  /** The matching api definition */
+  apiDefinition: SdkOperation[];
+  /** The matching query definition */
+  queryDefinition: SdkOperation;
 }
