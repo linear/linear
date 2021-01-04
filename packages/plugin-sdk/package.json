@@ -1,5 +1,5 @@
 {
-  "name": "@linear/sdk-plugin",
+  "name": "@linear/plugin-sdk",
   "version": "1.0.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
@@ -26,7 +26,7 @@
     "@graphql-codegen/visitor-plugin-common": "1.17.17",
     "@graphql-tools/graphql-file-loader": "6.2.5",
     "@graphql-tools/load": "6.2.5",
-    "@linear/common": "^1.0.0",
+    "@linear/plugin-common": "^1.0.0",
     "auto-bind": "4.0.0",
     "graphql": "15.4.0",
     "pascal-case": "3.1.2",

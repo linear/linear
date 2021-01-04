@@ -1,8 +1,6 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import { ASTNode, FieldDefinitionNode, GraphQLSchema, ObjectTypeDefinitionNode } from "graphql";
 
-export type Scalars = typeof DEFAULT_SCALARS;
-
 /**
  * Changes name and type properties to string
  */
@@ -34,11 +32,33 @@ export type Fragment = NamedFields<ObjectTypeDefinitionNode>;
 /**
  * Stateful context for document building information
  */
-export interface DocPluginContext {
+export interface PluginContext {
+  /** The whole graphql schema */
   schema: GraphQLSchema;
-  scalars: Scalars;
+  /** All scalars including custom */
+  scalars: typeof DEFAULT_SCALARS;
+  /** All generated fragments */
   fragments: Fragment[];
+  /** All object definitions */
   objects: ObjectTypeDefinitionNode[];
+  /** All query definitions */
   queries: readonly FieldDefinitionNode[];
+  /** A map for determining operation type names */
   operationMap: Record<OperationType, string>;
+}
+
+/**
+ * A description of an arg
+ */
+export interface ArgDefinition {
+  /** The name of the argument */
+  name: string;
+  /** Whether the argument is optional */
+  optional: boolean;
+  /** The string type of the argument */
+  type: string;
+  /** The jsdoc definition of the argument */
+  description: string;
+  /** The name of a default variable */
+  defaultName?: string;
 }

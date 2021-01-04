@@ -6,4 +6,4 @@ hooks:
 generates:
   src/_generated/documents.graphql:
     plugins:
-      - "@linear/doc-plugin"
+      - "@linear/plugin-doc"

@@ -5110,6 +5110,9 @@ export type OrganizationDomainSimplePayload = {
 export type UserFragment = { __typename?: "User" } & Pick<
   User,
   | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "archivedAt"
   | "name"
   | "displayName"
   | "email"
@@ -5117,6 +5120,7 @@ export type UserFragment = { __typename?: "User" } & Pick<
   | "disableReason"
   | "inviteHash"
   | "userAccountId"
+  | "lastSeen"
   | "admin"
   | "active"
   | "createdIssueCount"
@@ -5124,7 +5128,7 @@ export type UserFragment = { __typename?: "User" } & Pick<
 
 export type UserSettingsFragment = { __typename?: "UserSettings" } & Pick<
   UserSettings,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "unsubscribedFrom"
+  "id" | "createdAt" | "updatedAt" | "archivedAt" | "notificationPreferences" | "unsubscribedFrom"
 > & { user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type IssueFragment = { __typename?: "Issue" } & Pick<
@@ -5136,6 +5140,7 @@ export type IssueFragment = { __typename?: "Issue" } & Pick<
   | "number"
   | "title"
   | "description"
+  | "descriptionData"
   | "priority"
   | "estimate"
   | "boardOrder"
@@ -5144,6 +5149,7 @@ export type IssueFragment = { __typename?: "Issue" } & Pick<
   | "canceledAt"
   | "autoClosedAt"
   | "autoArchivedAt"
+  | "dueDate"
   | "previousIdentifiers"
   | "subIssueSortOrder"
   | "identifier"
@@ -8549,6 +8555,9 @@ export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "displayName" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
@@ -8556,6 +8565,7 @@ export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "disableReason" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "userAccountId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSeen" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "admin" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "active" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
@@ -8579,6 +8589,7 @@ export const UserSettingsFragmentDoc: DocumentNode<UserSettingsFragment, unknown
           { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "notificationPreferences" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "unsubscribedFrom" }, arguments: [], directives: [] },
           {
             kind: "Field",
@@ -8613,6 +8624,7 @@ export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "title" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "descriptionData" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "priority" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "estimate" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "boardOrder" }, arguments: [], directives: [] },
@@ -8621,6 +8633,7 @@ export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "autoClosedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "autoArchivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "dueDate" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "previousIdentifiers" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "subIssueSortOrder" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "identifier" }, arguments: [], directives: [] },

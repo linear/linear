@@ -1,64 +1,40 @@
-import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, nonNullable, printGraphqlDebug, printGraphqlDescription } from "@linear/common";
 import autoBind from "auto-bind";
 import {
   DocumentNode,
   FieldDefinitionNode,
-  GraphQLSchema,
   ListTypeNode,
   NamedTypeNode,
   NameNode,
   NonNullTypeNode,
   ObjectTypeDefinitionNode,
-  ScalarTypeDefinitionNode,
 } from "graphql";
 import { requiredArgs } from "./args";
 import { getTypeName } from "./field";
-import { isConnection, isEdge, isOperationRoot } from "./object";
+import { isValidFragment } from "./fragment";
+import { printGraphqlDebug, printGraphqlDescription } from "./print";
 import { findQuery } from "./query";
-import { DocPluginContext, Named, NamedFields, OperationType, Scalars } from "./types";
+import { Named, NamedFields, PluginContext } from "./types";
+import { filterJoin, nonNullable } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
 export class FragmentVisitor {
-  private _schema: GraphQLSchema;
-  private _scalars: Scalars = DEFAULT_SCALARS;
-  private _fragments: NamedFields<ObjectTypeDefinitionNode>[] = [];
-  private _objects: ObjectTypeDefinitionNode[] = [];
-  private _queries: readonly FieldDefinitionNode[] = [];
+  private _context: PluginContext;
 
   /** Initialize the visitor */
-  public constructor(schema: GraphQLSchema) {
+  public constructor(context: Omit<PluginContext, "fragments">) {
     autoBind(this);
 
-    this._schema = schema;
+    this._context = { ...context, fragments: [] };
   }
 
   /**
-   * Return a context object for recording state
+   * Return the plugin context with fragments
    */
-  public get context(): DocPluginContext {
-    return {
-      schema: this._schema,
-      scalars: this._scalars,
-      fragments: this._fragments,
-      objects: this._objects,
-      queries: this._queries,
-      operationMap: {
-        [OperationType.query]: this._schema.getQueryType()?.name ?? "Query",
-        [OperationType.mutation]: this._schema.getMutationType()?.name ?? "Mutation",
-      },
-    };
+  public get context(): PluginContext {
+    return this._context;
   }
-
-  public ScalarTypeDefinition = {
-    /** Record all scalars */
-    enter: (node: ScalarTypeDefinitionNode): ScalarTypeDefinitionNode => {
-      this._scalars = { ...this._scalars, [node.name.value]: node.name.value };
-      return node;
-    },
-  };
 
   public Document = {
     /** Join all string definitions */
@@ -71,26 +47,16 @@ export class FragmentVisitor {
   };
 
   public ObjectTypeDefinition = {
-    /** Record all object types */
-    enter: (node: ObjectTypeDefinitionNode): ObjectTypeDefinitionNode => {
-      this._objects = [...this._objects, node];
-
-      if (node.name.value === this.context.operationMap[OperationType.query]) {
-        /** Record all queries */
-        this._queries = node.fields ?? [];
-      }
-
-      return node;
-    },
-
     /** Print a fragment if there are fields */
     leave: (_node: ObjectTypeDefinitionNode): string | null => {
       const node = (_node as unknown) as NamedFields<ObjectTypeDefinitionNode>;
-      const hasFields = (node.fields ?? []).filter(x => Boolean(x && x !== "cursor")).length;
 
-      /** Print non empty object definitions */
-      if (hasFields && !isConnection(node) && !isEdge(node) && !isOperationRoot(this.context, node)) {
-        this._fragments = [...this._fragments, node];
+      /** Process non empty object definitions */
+      if (isValidFragment(this._context, node)) {
+        /** Record fragment on context */
+        this._context.fragments = [...this._context.fragments, node];
+
+        /** Print fragment */
         return filterJoin(
           [
             printGraphqlDescription(node.description?.value),
@@ -114,12 +80,12 @@ export class FragmentVisitor {
       const node = (_node as unknown) as Named<FieldDefinitionNode>;
 
       /** Print field name if it is a scalar */
-      if (Object.values(this._scalars).includes(getTypeName(node.type))) {
+      if (Object.values(this._context.scalars).includes(getTypeName(node.type))) {
         return filterJoin([printGraphqlDebug(_node), node.name], "\n");
       }
 
       /** Find a query that can return this field */
-      const query = findQuery(this.context, node);
+      const query = findQuery(this._context, node);
 
       if (query) {
         /** Get all fields required for query arguments */
@@ -155,7 +121,7 @@ export class FragmentVisitor {
     /** Print type value using scalar map */
     leave: (_node: NamedTypeNode): string => {
       const node = (_node as unknown) as Named<NamedTypeNode>;
-      return this._scalars[node.name] ?? node.name;
+      return this._context.scalars[node.name] ?? node.name;
     },
   };
 

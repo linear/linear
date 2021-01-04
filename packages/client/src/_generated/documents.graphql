@@ -1,6 +1,9 @@
 # A user that has access to the the resources of an organization.
 fragment User on User {
   id
+  createdAt
+  updatedAt
+  archivedAt
   name
   displayName
   email
@@ -8,6 +11,7 @@ fragment User on User {
   disableReason
   inviteHash
   userAccountId
+  lastSeen
   admin
   active
   createdIssueCount
@@ -19,6 +23,7 @@ fragment UserSettings on UserSettings {
   createdAt
   updatedAt
   archivedAt
+  notificationPreferences
   unsubscribedFrom
   user {
     id
@@ -34,6 +39,7 @@ fragment Issue on Issue {
   number
   title
   description
+  descriptionData
   priority
   estimate
   boardOrder
@@ -42,6 +48,7 @@ fragment Issue on Issue {
   canceledAt
   autoClosedAt
   autoArchivedAt
+  dueDate
   previousIdentifiers
   subIssueSortOrder
   identifier

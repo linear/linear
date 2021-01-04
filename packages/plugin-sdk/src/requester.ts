@@ -1,15 +1,14 @@
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
-import { filterJoin, printComment } from "@linear/common";
-import { ArgDefinition } from "./args";
+import { ArgDefinition, filterJoin, printComment } from "@linear/plugin-common";
 import c from "./constants";
 import { printNamespaced } from "./print";
-import { ApiDefinition, RawSdkPluginConfig, SdkPluginContext } from "./types";
+import { RawSdkPluginConfig, SdkOperation, SdkPluginContext } from "./types";
 import { getOptionalVariables, getRequiredVariables } from "./variable";
 
 /**
  * Get the requester args from the operation variables
  */
-export function printRequesterArgs(o: ApiDefinition): string {
+export function printRequesterArgs(o: SdkOperation): string {
   const requiredVariables = getRequiredVariables(o.node);
   const requiredArg = filterJoin(
     requiredVariables.map(v => v.variable.name?.value),
@@ -44,7 +43,7 @@ export function printRequesterType(config: RawSdkPluginConfig): string[] {
 /**
  * Print the call to the requester
  */
-export function printRequesterCall(context: SdkPluginContext, o: ApiDefinition): string {
+export function printRequesterCall(context: SdkPluginContext, o: SdkOperation): string {
   const variableType = printNamespaced(context, o.operationVariablesTypes);
   const documentName = printNamespaced(context, o.documentVariableName);
   const resultType = printNamespaced(context, o.operationResultType);

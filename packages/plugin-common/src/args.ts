@@ -1,19 +1,12 @@
-import { filterJoin, nonNullable } from "@linear/common";
+import { InputValueDefinitionNode, Kind } from "graphql";
+import { ArgDefinition } from "./types";
+import { filterJoin, nonNullable } from "./utils";
 
 /**
- * A description of an arg
+ * Return only the required arguments
  */
-export interface ArgDefinition {
-  /** The name of the argument */
-  name: string;
-  /** Whether the argument is optional */
-  optional: boolean;
-  /** The string type of the argument */
-  type: string;
-  /** The jsdoc definition of the argument */
-  description: string;
-  /** The name of a default variable */
-  defaultName?: string;
+export function requiredArgs(args: readonly InputValueDefinitionNode[] = []): InputValueDefinitionNode[] {
+  return args.filter(a => a.type.kind === Kind.NON_NULL_TYPE);
 }
 
 /**

@@ -1,10 +1,7 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { logger } from "@linear/common";
+import { ContextVisitor, FragmentVisitor, getTypeName, logger, OperationVisitor } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
-import { getTypeName } from "./field";
-import { FragmentVisitor } from "./fragment-visitor";
-import { OperationVisitor } from "./operation-visitor";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear documents
@@ -14,9 +11,14 @@ export const plugin: PluginFunction = async (schema: GraphQLSchema) => {
     /** Get ast from schema */
     const ast = parse(printSchema(schema));
 
+    /** Collect plugin context */
+    logger.info("Gathering context");
+    const contextVisitor = new ContextVisitor(schema);
+    visit(ast, contextVisitor);
+
     /** Generate fragments */
     logger.info("Generating fragments");
-    const fragmentVisitor = new FragmentVisitor(schema);
+    const fragmentVisitor = new FragmentVisitor(contextVisitor.context);
     const fragments = visit(ast, fragmentVisitor);
     logger.debug({
       scalars: fragmentVisitor.context.scalars,
@@ -48,7 +50,7 @@ export const validate: PluginValidateFn = async (
   config: unknown,
   outputFile: string
 ) => {
-  const packageName = "@linear/doc-plugin";
+  const packageName = "@linear/plugin-doc";
   logger.info(`Validating ${packageName}`);
   logger.debug({ config });
 

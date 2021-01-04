@@ -1,12 +1,20 @@
-import { filterJoin, getLast, nonNullable, printComment, printDebug } from "@linear/common";
-import { FieldNode, Kind, OperationDefinitionNode, SelectionSetNode } from "graphql";
+import {
+  ArgDefinition,
+  ArgumentTypescriptVisitor,
+  filterJoin,
+  getArgList,
+  getLast,
+  nonNullable,
+  printComment,
+  printDebug,
+} from "@linear/plugin-common";
+import { FieldNode, Kind, OperationDefinitionNode, SelectionSetNode, visit } from "graphql";
 import { printApiFunctionName, printApiFunctionType } from "./api";
-import { ArgDefinition, getArgList } from "./args";
 import c from "./constants";
 import { printNamespaced, printOperationName } from "./print";
 import { printRequesterCall } from "./requester";
-import { ApiDefinition, SdkPluginContext } from "./types";
-import { getOptionalVariables, getRequiredVariables, isIdVariable, printVariableType } from "./variable";
+import { SdkOperation, SdkPluginContext } from "./types";
+import { getOptionalVariables, getRequiredVariables, isIdVariable } from "./variable";
 
 /**
  * Type to determine at which level of the sdk an operation is to be added
@@ -122,14 +130,29 @@ export function processSdkOperation(o: OperationDefinitionNode): SdkOperationDef
 /**
  * Get the operation args from the operation variables
  */
-function getOperationArgs(context: SdkPluginContext, o: ApiDefinition): ArgDefinition[] {
-  /** Argument definition for each required variable */
-  const requiredVariables = getRequiredVariables(o.node).map(v => ({
-    name: v.variable.name.value,
-    optional: false,
-    type: printVariableType(context, v),
-    description: `${v.variable.name.value} to pass into the ${o.operationResultType}`,
-  }));
+function getOperationArgs(context: SdkPluginContext, o: SdkOperation): ArgDefinition[] {
+  const argVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
+
+  /** Get all required variable names in the parent scope */
+  const parentOperation = getParentOperation(context);
+  const parentRequiredVariables = getRequiredVariables(parentOperation?.node) ?? [];
+  const parentRequiredVariableNames = parentRequiredVariables.map(v => v.variable.name.value);
+
+  /** Argument definition for each required variable that is not in the parent scope */
+  const requiredVariables: (ArgDefinition | undefined)[] = getRequiredVariables(o.node).map(v =>
+    parentRequiredVariableNames.includes(v.variable.name.value)
+      ? undefined
+      : {
+          name: v.variable.name.value,
+          optional: false,
+          type: visit(v.type, argVisitor),
+          description: `${v.variable.name.value} to pass into the ${o.operationResultType}`,
+        }
+  );
+  const requiredVariableNames = [
+    ...parentRequiredVariableNames.map(v => `'${v}'`),
+    ...requiredVariables.map(v => (v ? `'${v.name}'` : undefined)),
+  ];
 
   /** Single definition for any optional variables */
   const optionalVariables = getOptionalVariables(o.node);
@@ -138,14 +161,10 @@ function getOperationArgs(context: SdkPluginContext, o: ApiDefinition): ArgDefin
     ? {
         name: c.VARIABLE_NAME,
         optional: true,
-        type: `Omit<${variableType}, ${filterJoin(
-          requiredVariables.map(v => `'${v.name}'`),
-          " | "
-        )}>`,
-        description: `variables without ${filterJoin(
-          requiredVariables.map(v => `'${v.name}'`),
-          ", "
-        )} to pass into the ${o.operationResultType}`,
+        type: `Omit<${variableType}, ${filterJoin(requiredVariableNames, " | ")}>`,
+        description: `variables without ${filterJoin(requiredVariableNames, ", ")} to pass into the ${
+          o.operationResultType
+        }`,
       }
     : {
         name: c.VARIABLE_NAME,
@@ -161,7 +180,7 @@ function getOperationArgs(context: SdkPluginContext, o: ApiDefinition): ArgDefin
 /**
  * Get the set of keys by which to nest the data
  */
-function getNestedDataKeys(o: ApiDefinition): string[] {
+function getNestedDataKeys(o: SdkOperation): string[] {
   // const operationName = printSdkOperationName(o);
   // const firstField = getFirstField(o.node.selectionSet);
 
@@ -177,7 +196,7 @@ function getNestedDataKeys(o: ApiDefinition): string[] {
 /**
  * Get the sdk action operation body
  */
-function printOperationBody(context: SdkPluginContext, o: ApiDefinition): string {
+function printOperationBody(context: SdkPluginContext, o: SdkOperation): string {
   const requiredVariables = getRequiredVariables(o.node);
   const nestedDataKeys = getNestedDataKeys(o);
 
@@ -206,14 +225,14 @@ function printOperationBody(context: SdkPluginContext, o: ApiDefinition): string
  * Get the name of the operation
  * Chained apis have the chain key removed from the name
  */
-export function printSdkOperationName(o: ApiDefinition): string {
+export function printSdkOperationName(o: SdkOperation): string {
   return getLast(printOperationName(o).split("_")) ?? "NO_OPERATION_NAME";
 }
 
 /**
  * Get the operations for this return type
  */
-function getOperationApi(context: SdkPluginContext, o: ApiDefinition): ApiDefinition[] {
+function getOperationApi(context: SdkPluginContext, o: SdkOperation): SdkOperation[] {
   return context.apiDefinitions[o.path.join("_")];
 }
 
@@ -221,7 +240,7 @@ function getOperationApi(context: SdkPluginContext, o: ApiDefinition): ApiDefini
  * Get the result type of the operation
  * Chained apis have the relevant chain api return type added
  */
-function printOperationResultType(context: SdkPluginContext, o: ApiDefinition) {
+function printOperationResultType(context: SdkPluginContext, o: SdkOperation) {
   const nestedDataKeys = getNestedDataKeys(o);
   const documentName = printNamespaced(context, o.documentVariableName);
   const documentResultType = `ResultOf<typeof ${documentName}>`;
@@ -238,7 +257,7 @@ function printOperationResultType(context: SdkPluginContext, o: ApiDefinition) {
 /**
  * Process a graphql operation and return a generated operation string
  */
-export function printOperation(context: SdkPluginContext, o: ApiDefinition): string {
+export function printOperation(context: SdkPluginContext, o: SdkOperation): string {
   const operationName = printSdkOperationName(o);
   const returnType = printOperationResultType(context, o);
   const content = printOperationBody(context, o);
@@ -267,4 +286,12 @@ export function printOperation(context: SdkPluginContext, o: ApiDefinition): str
     ],
     "\n"
   );
+}
+
+/**
+ * Find the operation definition for the parent api function
+ */
+export function getParentOperation(context: SdkPluginContext): SdkOperation | undefined {
+  const parentKey = context.apiPath.slice(0, -1).join("_") ?? "";
+  return context.apiDefinitions[parentKey].find(d => d.path.join("_") === context.apiPath.join("_"));
 }
