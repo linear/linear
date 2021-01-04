@@ -1693,13 +1693,6 @@ query authorizedApplications {
   }
 }
 
-# Fetch users belonging to this user account.
-query availableUsers {
-  availableUsers {
-    ...AuthResolverResponse
-  }
-}
-
 # Fetch SSO login URL for the email provided.
 query ssoUrlFromEmail($isDesktop: Boolean, $email: String!) {
   ssoUrlFromEmail(isDesktop: $isDesktop, email: $email) {
@@ -1978,68 +1971,6 @@ query figmaEmbedInfo_figmaEmbed($nodeId: String, $fileId: String!) {
   }
 }
 
-# One specific integration.
-query integration($id: String!) {
-  integration(id: $id) {
-    ...Integration
-  }
-}
-# Settings related to the integration.
-query integration_settings($id: String!) {
-  integration(id: $id) {
-    settings {
-      slackPost {
-        ...SlackPostSettings
-      }
-      slackProjectPost {
-        ...SlackPostSettings
-      }
-      googleSheets {
-        ...GoogleSheetsSettings
-      }
-      sentry {
-        ...SentrySettings
-      }
-    }
-  }
-}
-query integration_settings_slackPost($id: String!) {
-  integration(id: $id) {
-    settings {
-      slackPost {
-        ...SlackPostSettings
-      }
-    }
-  }
-}
-query integration_settings_slackProjectPost($id: String!) {
-  integration(id: $id) {
-    settings {
-      slackProjectPost {
-        ...SlackPostSettings
-      }
-    }
-  }
-}
-query integration_settings_googleSheets($id: String!) {
-  integration(id: $id) {
-    settings {
-      googleSheets {
-        ...GoogleSheetsSettings
-      }
-    }
-  }
-}
-query integration_settings_sentry($id: String!) {
-  integration(id: $id) {
-    settings {
-      sentry {
-        ...SentrySettings
-      }
-    }
-  }
-}
-
 # All integrations.
 query integrations(
   $before: String
@@ -2062,84 +1993,6 @@ query integrations(
     }
     pageInfo {
       ...PageInfo
-    }
-  }
-}
-
-# One specific integration resource. (e.g. linked GitHub pull requests for an issue)
-query integrationResource($id: String!) {
-  integrationResource(id: $id) {
-    ...IntegrationResource
-  }
-}
-# Detailed information about the external resource.
-query integrationResource_data($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      # The payload for an IntegrationResource of type 'githubPullRequest'
-      githubPullRequest {
-        ...PullRequestPayload
-      }
-      # The payload for an IntegrationResource of type 'gitlabMergeRequest'
-      gitlabMergeRequest {
-        ...PullRequestPayload
-      }
-      # The payload for an IntegrationResource of type 'githubCommit'
-      githubCommit {
-        ...CommitPayload
-      }
-      # The payload for an IntegrationResource of type 'sentryIssue'
-      sentryIssue {
-        ...SentryIssuePayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'githubPullRequest'
-query integrationResource_data_githubPullRequest($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      githubPullRequest {
-        ...PullRequestPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'gitlabMergeRequest'
-query integrationResource_data_gitlabMergeRequest($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      gitlabMergeRequest {
-        ...PullRequestPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'githubCommit'
-query integrationResource_data_githubCommit($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      githubCommit {
-        ...CommitPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'sentryIssue'
-query integrationResource_data_sentryIssue($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      sentryIssue {
-        ...SentryIssuePayload
-      }
-    }
-  }
-}
-# Pull request information for GitHub pull requests and GitLab merge requests.
-query integrationResource_pullRequest($id: String!) {
-  integrationResource(id: $id) {
-    pullRequest {
-      ...PullRequestPayload
     }
   }
 }

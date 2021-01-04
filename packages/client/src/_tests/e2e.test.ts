@@ -113,7 +113,7 @@ if (process.env.E2E_API_KEY) {
 
         /** Update issue */
         const updatedInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
-        const updatedIssue = await client.issueUpdate(createdId, { input: updatedInput });
+        const updatedIssue = await client.issueUpdate(updatedInput, createdId);
         expectSuccess(updatedIssue, { success: true, issue: expect.objectContaining(updatedInput) });
 
         /** Archive issue */
