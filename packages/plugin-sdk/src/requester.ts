@@ -52,7 +52,7 @@ export function printRequesterCall(context: SdkPluginContext, o: SdkOperation): 
   return `${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${filterJoin(
     [documentName, printRequesterArgs(o)],
     ", "
-  )});`;
+  )})`;
 }
 
 /**

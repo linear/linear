@@ -23,6 +23,7 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
       [
         /** The operation description */
         printGraphqlDescription(lastField.description?.value),
+        printGraphqlDebug({ type, operationName, field: lastField }),
         /** The operation definition */
         `${type} ${operationName}${printInputArgs(fields)} {`,
         /** Each field and its required content */

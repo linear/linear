@@ -8078,14 +8078,6 @@ export type OrganizationDomainDeleteMutation = { __typename?: "Mutation" } & {
   organizationDomainDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
-export type OrganizationInviteCreateMutationVariables = Exact<{
-  input: OrganizationInviteCreateInput;
-}>;
-
-export type OrganizationInviteCreateMutation = { __typename?: "Mutation" } & {
-  organizationInviteCreate: { __typename?: "OrganizationInvitePayload" } & OrganizationInvitePayloadFragment;
-};
-
 export type ResentOrganizationInviteMutationVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -26174,55 +26166,6 @@ export const OrganizationDomainDeleteDocument: DocumentNode<
       },
     },
     ...ArchivePayloadFragmentDoc.definitions,
-  ],
-};
-export const OrganizationInviteCreateDocument: DocumentNode<
-  OrganizationInviteCreateMutation,
-  OrganizationInviteCreateMutationVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "organizationInviteCreate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteCreateInput" } },
-          },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationInviteCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvitePayload" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationInvitePayloadFragmentDoc.definitions,
   ],
 };
 export const ResentOrganizationInviteDocument: DocumentNode<

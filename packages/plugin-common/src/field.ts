@@ -67,6 +67,23 @@ export function getTypeName(type: string | NameNode | NonNullTypeNode | NamedTyp
 }
 
 /**
+ * Get the string type name from any type node
+ */
+export function isListType(type: string | NameNode | NonNullTypeNode | NamedTypeNode | ListTypeNode): boolean {
+  return typeof type === "string"
+    ? false
+    : type.kind === Kind.NON_NULL_TYPE
+    ? isListType(type.type)
+    : type.kind === Kind.NAMED_TYPE
+    ? isListType(type.name)
+    : type.kind === Kind.NAME
+    ? isListType(type.value)
+    : type.kind === Kind.LIST_TYPE
+    ? true
+    : false;
+}
+
+/**
  * Determine whether the node is a scalar field
  */
 export function isScalarField(scalars: typeof DEFAULT_SCALARS, node: FieldDefinitionNode): boolean {

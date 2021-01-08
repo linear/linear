@@ -1,12 +1,4 @@
-import {
-  ArgDefinition,
-  filterJoin,
-  getArgList,
-  logger,
-  nonNullable,
-  printComment,
-  printDebug,
-} from "@linear/plugin-common";
+import { ArgDefinition, filterJoin, getArgList, nonNullable, printComment, printDebug } from "@linear/plugin-common";
 import { FieldNode, FragmentSpreadNode, Kind } from "graphql";
 import c from "./constants";
 import { printNamespaced, printSdkFunctionName, printSdkOperationName } from "./print";
@@ -123,7 +115,6 @@ function printOperationObjects(context: SdkPluginContext, o: SdkOperation): (str
   return (
     operationObjects.map(({ field, queryDefinition }) => {
       const requiredVariables = getOperationArgs(context, queryDefinition);
-
       const queryToCall = `() => ${printSdkFunctionName([])}(${c.REQUESTER_NAME}).${field.name.value}`;
 
       if (requiredVariables.length) {
@@ -160,7 +151,7 @@ export function getOperationList(context: SdkPluginContext, o: SdkOperation): Fi
 function printOperationList(context: SdkPluginContext, o: SdkOperation): string | undefined {
   const listField = getOperationList(context, o);
   const extractedResponse = printOperationResponse(o);
-  logger.trace({ listField });
+
   return listField
     ? `${c.LIST_NAME}: ${extractedResponse}.${c.LIST_NAME}.map(x => ({
     ...x,
@@ -179,7 +170,7 @@ function printOperationResponse(o: SdkOperation): string {
 /**
  * Get the sdk action operation body
  */
-function printOperationBody(context: SdkPluginContext, definition: SdkDefinition, o: SdkOperation): string {
+function printOperationBody(context: SdkPluginContext, o: SdkOperation): string | undefined {
   const requiredVariables = getRequiredVariables(o.node);
 
   /** Extract from the response data if we are nested */
@@ -188,14 +179,23 @@ function printOperationBody(context: SdkPluginContext, definition: SdkDefinition
     const operationObjects = printOperationObjects(context, o);
     const operationList = printOperationList(context, o);
 
-    const response = `const response = await ${printRequesterCall(context, o)}`;
     const extractedResponse = printOperationResponse(o);
+
+    // if (isListType(o.query)) {
+    //   return filterJoin(
+    //     [
+    //       `return ${extractedResponse}.map(x => {
+    //       ${printOperationBody(context, o.query)}
+    //     })`,
+    //     ],
+    //     "\n"
+    //   );
+    // }
 
     /** Return an object if required */
     if (operationApi || operationObjects.length || operationList) {
       return filterJoin(
         [
-          response,
           `return {`,
           /** If the first field is the operation drill down for a nicer api */
           `...${extractedResponse},`,
@@ -213,10 +213,10 @@ function printOperationBody(context: SdkPluginContext, definition: SdkDefinition
         "\n"
       );
     } else {
-      return filterJoin([response, `return ${extractedResponse}`], "\n");
+      return filterJoin([`return ${extractedResponse}`], "\n");
     }
   } else {
-    return `return ${printRequesterCall(context, o)}`;
+    return undefined;
   }
 }
 
@@ -225,7 +225,7 @@ function printOperationBody(context: SdkPluginContext, definition: SdkDefinition
  */
 export function printOperation(context: SdkPluginContext, definition: SdkDefinition, o: SdkOperation): string {
   const operationName = printSdkOperationName(o);
-  const content = printOperationBody(context, definition, o);
+  const body = printOperationBody(context, o);
   const args = getArgList(getOperationArgs(context, o));
 
   /** Build a function for this graphql operation */
@@ -237,8 +237,14 @@ export function printOperation(context: SdkPluginContext, definition: SdkDefinit
         `@returns The result of the ${o.operationResultType}`,
       ]),
       printDebug({ apiKey: definition.sdkPath, ...o }),
-      `async ${operationName}(${args.printInput}): Promise<${o.returnType}> {
-        ${content}
+      `${operationName}(${args.printInput}): Promise<${o.returnType}> {
+        return ${printRequesterCall(context, o)}${
+        body
+          ? `.then(response => {
+            ${body}
+          })`
+          : ""
+      }
       }`,
     ],
     "\n"
