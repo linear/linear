@@ -84,7 +84,7 @@ function printSdkReturnType(context: SdkPluginContext, o: SdkOperation): string 
       const fieldArgs = getArgList(getOperationArgs(context, queryDefinition));
 
       /** Join all nested field sdks */
-      return `${field.name.value}?: (${fieldArgs.printInput}) => Promise<${fieldReturnType} | undefined>`;
+      return `${field.name.value}?: (${fieldArgs.printInput}) => Promise<${fieldReturnType}>`;
     } else {
       return undefined;
     }
