@@ -1,5 +1,5 @@
 import { ClientSideBasePluginConfig, RawClientSideBasePluginConfig } from "@graphql-codegen/visitor-plugin-common";
-import { PluginContext } from "@linear/plugin-common";
+import { ArgDefinition, PluginContext } from "@linear/plugin-common";
 import { FieldDefinitionNode, OperationDefinitionNode } from "graphql";
 
 export interface RawSdkPluginConfig extends RawClientSideBasePluginConfig {
@@ -30,13 +30,15 @@ export interface SdkPluginConfig extends ClientSideBasePluginConfig {
 }
 
 /**
- * Description for generating a chained api function
+ * Definition for generating an sdk operation
  */
 export interface SdkOperation {
   /** The path through the schema to return this data */
   path: string[];
   /** The graphql node being processed with chain info added */
   node: OperationDefinitionNode;
+  /** The parsed and printed required variables */
+  requiredVariables: Record<string, ArgDefinition>;
   /** The name of the generated graphql document */
   documentVariableName?: string;
   /** The type of the graphql operation */
@@ -45,25 +47,8 @@ export interface SdkOperation {
   operationResultType?: string;
   /** The type of the variables for the graphql operation */
   operationVariablesTypes?: string;
-}
-
-/**
- * A map from api path to a list of definitions for that path
- */
-export type SdkDefinition = Record<string, SdkOperation[]>;
-
-/**
- * Stateful context for sdk building information
- */
-export interface SdkPluginContext extends PluginContext {
-  /** The api key by which to nest the operations */
-  apiPath: string[];
-  /** The plugin config */
-  config: RawSdkPluginConfig;
-  /** All parsed api definitions */
-  apiDefinitions: SdkDefinition;
-  /** The list of api definitions to add to this api */
-  definitions: SdkOperation[];
+  /** The type returned from this operation */
+  returnType: string;
 }
 
 /**
@@ -72,8 +57,35 @@ export interface SdkPluginContext extends PluginContext {
 export interface SdkOperationObject {
   /** The operation field node */
   field: FieldDefinitionNode;
-  /** The matching api definition */
-  apiDefinition: SdkOperation[];
+  /** The matching sdk definition */
+  definition: SdkDefinition;
   /** The matching query definition */
   queryDefinition: SdkOperation;
+}
+
+/**
+ * Definition for generating an sdk
+ */
+export interface SdkDefinition {
+  /** The api keys by which to nest operations */
+  sdkPath: string[];
+  /** The name of the sdk function */
+  sdkName: string;
+  /** The name of the sdk function type */
+  sdkType: string;
+  /** The operations to generate */
+  operations: SdkOperation[];
+}
+
+/**
+ * A map from api key to each sdk definition
+ */
+export type SdkDefinitions = Record<string, SdkDefinition>;
+
+/**
+ * The plugin context specific to the sdk plugin config
+ */
+export interface SdkPluginContext extends PluginContext<RawSdkPluginConfig> {
+  /** All definitions for the sdk */
+  sdkDefinitions: SdkDefinitions;
 }

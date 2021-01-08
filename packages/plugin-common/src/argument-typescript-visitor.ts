@@ -1,22 +1,37 @@
 import autoBind from "auto-bind";
-import { InputValueDefinitionNode, ListTypeNode, NamedTypeNode, NameNode, NonNullTypeNode } from "graphql";
+import {
+  InputValueDefinitionNode,
+  ListTypeNode,
+  NamedTypeNode,
+  NameNode,
+  NonNullTypeNode,
+  VariableDefinitionNode,
+} from "graphql";
 import { Named, PluginContext } from "./types";
 import { filterJoin } from "./utils";
 
 /**
  * Graphql-codegen visitor for printing a typescript argument
  */
-export class ArgumentTypescriptVisitor {
-  private _context: PluginContext;
+export class ArgumentTypescriptVisitor<C> {
+  private _context: PluginContext<C>;
   private _namespace?: string;
 
   /** Initialize the visitor */
-  public constructor(context: PluginContext, namespace?: string) {
+  public constructor(context: PluginContext<C>, namespace?: string) {
     autoBind(this);
 
     this._context = context;
     this._namespace = namespace;
   }
+
+  public VariableDefinition = {
+    /** Print variable type */
+    leave(_node: VariableDefinitionNode): string {
+      const node = (_node as unknown) as Named<VariableDefinitionNode>;
+      return node.type;
+    },
+  };
 
   public Name = {
     /** Print name value */

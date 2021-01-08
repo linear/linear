@@ -23,7 +23,10 @@ export function printOperationFragment(fragment: NamedFields<ObjectTypeDefinitio
 /**
  * Check whether this fragment has valid content and is not a connection, edge or root
  */
-export function isValidFragment(context: PluginContext, fragment: NamedFields<ObjectTypeDefinitionNode>): boolean {
+export function isValidFragment<C>(
+  context: PluginContext<C>,
+  fragment: NamedFields<ObjectTypeDefinitionNode>
+): boolean {
   const hasFields = (fragment.fields ?? []).filter(x => Boolean(x && x !== "cursor")).length;
 
   return Boolean(hasFields && !isConnection(fragment) && !isEdge(fragment) && !isOperationRoot(context, fragment));

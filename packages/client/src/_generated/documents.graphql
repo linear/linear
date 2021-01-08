@@ -635,14 +635,16 @@ fragment ApiKey on ApiKey {
   label
 }
 
-# Public information of the OAuth application.
-fragment Application on Application {
+# Public information of the OAuth application, plus whether the application has been authorized for
+# the given scopes.
+fragment UserAuthorizedApplication on UserAuthorizedApplication {
   clientId
   name
   description
   developer
   developerUrl
   imageUrl
+  isAuthorized
 }
 
 # Public information of the OAuth application, plus the authorized scopes for a given user.
@@ -1294,6 +1296,16 @@ fragment SynchronizedPayload on SynchronizedPayload {
   lastSyncId
 }
 
+# Public information of the OAuth application.
+fragment Application on Application {
+  clientId
+  name
+  description
+  developer
+  developerUrl
+  imageUrl
+}
+
 fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
   success
 }
@@ -1679,10 +1691,10 @@ query apiKeys(
   }
 }
 
-# Get information for an application.
-query application($redirectUri: String, $clientId: String!) {
-  application(redirectUri: $redirectUri, clientId: $clientId) {
-    ...Application
+# Get information for an application and whether a user has approved it for the given scopes.
+query applicationWithAuthorization($redirectUri: String, $scope: [String!]!, $clientId: String!) {
+  applicationWithAuthorization(redirectUri: $redirectUri, scope: $scope, clientId: $clientId) {
+    ...UserAuthorizedApplication
   }
 }
 

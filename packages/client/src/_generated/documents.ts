@@ -42,8 +42,8 @@ export type Query = {
   users: UserConnection;
   /** All API keys for the user. */
   apiKeys: ApiKeyConnection;
-  /** Get information for an application. */
-  application: Application;
+  /** Get information for an application and whether a user has approved it for the given scopes. */
+  applicationWithAuthorization: UserAuthorizedApplication;
   /** Get all authorized applications for a user */
   authorizedApplications: Array<AuthorizedApplication>;
   /** Fetch users belonging to this user account. */
@@ -200,8 +200,9 @@ export type QueryApiKeysArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryApplicationArgs = {
+export type QueryApplicationWithAuthorizationArgs = {
   redirectUri?: Maybe<Scalars["String"]>;
+  scope: Array<Scalars["String"]>;
   clientId: Scalars["String"];
 };
 
@@ -2225,9 +2226,9 @@ export type ApiKey = Node & {
   label: Scalars["String"];
 };
 
-/** Public information of the OAuth application. */
-export type Application = {
-  __typename?: "Application";
+/** Public information of the OAuth application, plus whether the application has been authorized for the given scopes. */
+export type UserAuthorizedApplication = {
+  __typename?: "UserAuthorizedApplication";
   /** OAuth application's client ID. */
   clientId: Scalars["String"];
   /** Application name. */
@@ -2240,6 +2241,8 @@ export type Application = {
   developerUrl: Scalars["String"];
   /** Image of the application. */
   imageUrl?: Maybe<Scalars["String"]>;
+  /** Whether the user has authorized the application for the given scopes. */
+  isAuthorized: Scalars["Boolean"];
 };
 
 /** Public information of the OAuth application, plus the authorized scopes for a given user. */
@@ -5101,6 +5104,23 @@ export type SynchronizedPayload = {
   lastSyncId: Scalars["Float"];
 };
 
+/** Public information of the OAuth application. */
+export type Application = {
+  __typename?: "Application";
+  /** OAuth application's client ID. */
+  clientId: Scalars["String"];
+  /** Application name. */
+  name: Scalars["String"];
+  /** Information about the application. */
+  description?: Maybe<Scalars["String"]>;
+  /** Name of the developer. */
+  developer: Scalars["String"];
+  /** Url of the developer (homepage or docs). */
+  developerUrl: Scalars["String"];
+  /** Image of the application. */
+  imageUrl?: Maybe<Scalars["String"]>;
+};
+
 export type OrganizationDomainSimplePayload = {
   __typename?: "OrganizationDomainSimplePayload";
   /** Whether the operation was successful. */
@@ -5514,9 +5534,9 @@ export type ApiKeyFragment = { __typename?: "ApiKey" } & Pick<
   "id" | "createdAt" | "updatedAt" | "archivedAt" | "label"
 >;
 
-export type ApplicationFragment = { __typename?: "Application" } & Pick<
-  Application,
-  "clientId" | "name" | "description" | "developer" | "developerUrl" | "imageUrl"
+export type UserAuthorizedApplicationFragment = { __typename?: "UserAuthorizedApplication" } & Pick<
+  UserAuthorizedApplication,
+  "clientId" | "name" | "description" | "developer" | "developerUrl" | "imageUrl" | "isAuthorized"
 >;
 
 export type AuthorizedApplicationFragment = { __typename?: "AuthorizedApplication" } & Pick<
@@ -5933,6 +5953,11 @@ export type SynchronizedPayloadFragment = { __typename?: "SynchronizedPayload" }
   "lastSyncId"
 >;
 
+export type ApplicationFragment = { __typename?: "Application" } & Pick<
+  Application,
+  "clientId" | "name" | "description" | "developer" | "developerUrl" | "imageUrl"
+>;
+
 export type OrganizationDomainSimplePayloadFragment = { __typename?: "OrganizationDomainSimplePayload" } & Pick<
   OrganizationDomainSimplePayload,
   "success"
@@ -6214,13 +6239,14 @@ export type ApiKeysQuery = { __typename?: "Query" } & {
   };
 };
 
-export type ApplicationQueryVariables = Exact<{
+export type ApplicationWithAuthorizationQueryVariables = Exact<{
   redirectUri?: Maybe<Scalars["String"]>;
+  scope: Array<Scalars["String"]>;
   clientId: Scalars["String"];
 }>;
 
-export type ApplicationQuery = { __typename?: "Query" } & {
-  application: { __typename?: "Application" } & ApplicationFragment;
+export type ApplicationWithAuthorizationQuery = { __typename?: "Query" } & {
+  applicationWithAuthorization: { __typename?: "UserAuthorizedApplication" } & UserAuthorizedApplicationFragment;
 };
 
 export type AuthorizedApplicationsQueryVariables = Exact<{ [key: string]: never }>;
@@ -9851,13 +9877,13 @@ export const ApiKeyFragmentDoc: DocumentNode<ApiKeyFragment, unknown> = {
     },
   ],
 };
-export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> = {
+export const UserAuthorizedApplicationFragmentDoc: DocumentNode<UserAuthorizedApplicationFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Application" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Application" } },
+      name: { kind: "Name", value: "UserAuthorizedApplication" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAuthorizedApplication" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
@@ -9868,6 +9894,7 @@ export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> 
           { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "isAuthorized" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -11881,6 +11908,28 @@ export const SynchronizedPayloadFragmentDoc: DocumentNode<SynchronizedPayloadFra
     },
   ],
 };
+export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Application" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Application" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
 export const OrganizationDomainSimplePayloadFragmentDoc: DocumentNode<
   OrganizationDomainSimplePayloadFragment,
   unknown
@@ -13882,18 +13931,33 @@ export const ApiKeysDocument: DocumentNode<ApiKeysQuery, ApiKeysQueryVariables> 
     ...PageInfoFragmentDoc.definitions,
   ],
 };
-export const ApplicationDocument: DocumentNode<ApplicationQuery, ApplicationQueryVariables> = {
+export const ApplicationWithAuthorizationDocument: DocumentNode<
+  ApplicationWithAuthorizationQuery,
+  ApplicationWithAuthorizationQueryVariables
+> = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "application" },
+      name: { kind: "Name", value: "applicationWithAuthorization" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "scope" } },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "ListType",
+              type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+            },
+          },
           directives: [],
         },
         {
@@ -13909,12 +13973,17 @@ export const ApplicationDocument: DocumentNode<ApplicationQuery, ApplicationQuer
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "application" },
+            name: { kind: "Name", value: "applicationWithAuthorization" },
             arguments: [
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "redirectUri" },
                 value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "scope" },
+                value: { kind: "Variable", name: { kind: "Name", value: "scope" } },
               },
               {
                 kind: "Argument",
@@ -13925,13 +13994,15 @@ export const ApplicationDocument: DocumentNode<ApplicationQuery, ApplicationQuer
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Application" }, directives: [] }],
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "UserAuthorizedApplication" }, directives: [] },
+              ],
             },
           },
         ],
       },
     },
-    ...ApplicationFragmentDoc.definitions,
+    ...UserAuthorizedApplicationFragmentDoc.definitions,
   ],
 };
 export const AuthorizedApplicationsDocument: DocumentNode<

@@ -75,3 +75,5 @@ tsconfig.tsbuildinfo
 # yalc
 .yalc
 yalc.*
+
+scratch.ts

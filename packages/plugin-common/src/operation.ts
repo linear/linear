@@ -46,8 +46,8 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
 /**
  * Nest the objects until a fragment or scalar is found
  */
-function printOperationFields(
-  context: PluginContext,
+function printOperationFields<C>(
+  context: PluginContext<C>,
   fields: FieldDefinitionNode[],
   object: ObjectTypeDefinitionNode
 ): string {
@@ -86,7 +86,7 @@ function printOperationFields(
 /**
  * Print the body of the operation
  */
-export function printOperationBody(context: PluginContext, fields: FieldDefinitionNode[]): string | undefined {
+export function printOperationBody<C>(context: PluginContext<C>, fields: FieldDefinitionNode[]): string | undefined {
   const lastField = getLast(fields);
 
   if (isValidField(lastField)) {
@@ -106,8 +106,8 @@ export function printOperationBody(context: PluginContext, fields: FieldDefiniti
   return undefined;
 }
 
-export function printFieldOperation(
-  context: PluginContext,
+export function printFieldOperation<C>(
+  context: PluginContext<C>,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {
@@ -122,8 +122,8 @@ export function printFieldOperation(
  * @param type either a query or a mutation
  * @param fields a list of fields by which to nest the query
  */
-export function printOperations(
-  context: PluginContext,
+export function printOperations<C>(
+  context: PluginContext<C>,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {
