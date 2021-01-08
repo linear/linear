@@ -62,6 +62,7 @@ export function getSdkDefinitions<C>(context: PluginContext<C>, documents: Types
     const argVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
 
     const sdkOperation: SdkOperation = {
+      name,
       path: operationPath,
       node,
       /** The parsed and printed required variables */

@@ -40,8 +40,6 @@ export function getOperationArgs(context: SdkPluginContext, o: SdkOperation): Ar
     ...requiredVariables.map(v => (v ? `'${v.name}'` : undefined)),
   ];
 
-  logger.trace({ o, parentOperation, parentRequiredVariableNames, requiredVariableNames });
-
   /** Single definition for any optional variables */
   const optionalVariables = getOptionalVariables(o.node);
   const variableType = printNamespaced(context, o.operationVariablesTypes);
@@ -68,7 +66,7 @@ export function getOperationArgs(context: SdkPluginContext, o: SdkOperation): Ar
 /**
  * Drill into the selection set to return the resulting field
  */
-function getOperationResultField(o: SdkOperation): FieldNode | undefined {
+export function getOperationResultField(o: SdkOperation): FieldNode | undefined {
   return o.path.reduce<FieldNode>((acc, key) => {
     const field = acc?.selectionSet?.selections?.find(selection => {
       return selection.kind === Kind.FIELD && selection.name.value === key;
@@ -132,8 +130,11 @@ function printOperationObjects(context: SdkPluginContext, o: SdkOperation): (str
         const requiredVariableNames = requiredVariables.map(v =>
           filterJoin(["response", ...o.path, field.name.value, v.name], "?.")
         );
+        const castVariableNames = requiredVariables.map(
+          v => `${filterJoin(["response", ...o.path, field.name.value, v.name], "?.")} as ${v.type}`
+        );
         return `${field.name.value}: ${filterJoin(requiredVariableNames, " && ")} ? ${queryToCall}(${filterJoin(
-          requiredVariableNames,
+          castVariableNames,
           ", "
         )}) : undefined,`;
       } else {
@@ -141,6 +142,38 @@ function printOperationObjects(context: SdkPluginContext, o: SdkOperation): (str
       }
     }) ?? []
   );
+}
+
+/**
+ * Find the operation field with list data if it exists
+ */
+export function getOperationList(context: SdkPluginContext, o: SdkOperation): FieldNode | undefined {
+  const resultField = getOperationResultField(o);
+  return resultField?.selectionSet?.selections.find(
+    f => f.kind === Kind.FIELD && f.name.value === c.LIST_NAME
+  ) as FieldNode;
+}
+
+/**
+ * Loop through any returned list data and attach sdks if required
+ */
+function printOperationList(context: SdkPluginContext, o: SdkOperation): string | undefined {
+  const listField = getOperationList(context, o);
+  const extractedResponse = printOperationResponse(o);
+  logger.trace({ listField });
+  return listField
+    ? `${c.LIST_NAME}: ${extractedResponse}.${c.LIST_NAME}.map(x => ({
+    ...x,
+    ...x,
+  }))`
+    : undefined;
+}
+
+/**
+ * Print the response from the api drilled down by the operation path
+ */
+function printOperationResponse(o: SdkOperation): string {
+  return filterJoin(["response", ...o.path], "?.");
 }
 
 /**
@@ -153,34 +186,29 @@ function printOperationBody(context: SdkPluginContext, definition: SdkDefinition
   if (o.path.length) {
     const operationApi = getReturnOperations(context, o);
     const operationObjects = printOperationObjects(context, o);
+    const operationList = printOperationList(context, o);
 
     const response = `const response = await ${printRequesterCall(context, o)}`;
-    const extractedResponse = filterJoin(["response", ...o.path], "?.");
+    const extractedResponse = printOperationResponse(o);
 
     /** Return an object if required */
-    if (operationApi || operationObjects.length > 0) {
+    if (operationApi || operationObjects.length || operationList) {
       return filterJoin(
         [
           response,
-          `if (${extractedResponse}) {`,
-          filterJoin(
-            [
-              `return {`,
-              /** If the first field is the operation drill down for a nicer api */
-              `...${extractedResponse},`,
-              ...operationObjects,
-              /** Add the child sdk to the response */
-              operationApi
-                ? `...${printSdkFunctionName(o.path)}(${filterJoin(
-                    [c.REQUESTER_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
-                    ", "
-                  )}),`
-                : undefined,
-              "}",
-            ],
-            "\n"
-          ),
-          "} else { return undefined }",
+          `return {`,
+          /** If the first field is the operation drill down for a nicer api */
+          `...${extractedResponse},`,
+          ...operationObjects,
+          operationList,
+          /** Add the child sdk to the response */
+          operationApi
+            ? `...${printSdkFunctionName(o.path)}(${filterJoin(
+                [c.REQUESTER_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
+                ", "
+              )}),`
+            : undefined,
+          "}",
         ],
         "\n"
       );
@@ -209,7 +237,7 @@ export function printOperation(context: SdkPluginContext, definition: SdkDefinit
         `@returns The result of the ${o.operationResultType}`,
       ]),
       printDebug({ apiKey: definition.sdkPath, ...o }),
-      `async ${operationName}(${args.printInput}): Promise<${o.returnType} | undefined> {
+      `async ${operationName}(${args.printInput}): Promise<${o.returnType}> {
         ${content}
       }`,
     ],

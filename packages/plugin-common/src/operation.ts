@@ -146,7 +146,7 @@ export function printOperations<C>(
           /** No need to go further if the field is a connection */
           ["pageInfo", "nodes"].includes(field.name.value) ||
           /** No need to go further if we can get this field from a root query */
-          findQuery(context, field)
+          (findQuery(context, field) && fields.length > 0)
         ) {
           return undefined;
         } else {

@@ -4,6 +4,7 @@ export default {
   NAMESPACE_DOCUMENT: "D",
   REQUESTER_NAME: "requester",
   REQUESTER_TYPE: "LinearRequester",
+  LIST_NAME: "nodes",
   SDK_NAME: "createLinearSdk",
   SDK_TYPE: "LinearSdk",
   STATUS_TYPE: "LinearStatus",

@@ -33,6 +33,8 @@ export interface SdkPluginConfig extends ClientSideBasePluginConfig {
  * Definition for generating an sdk operation
  */
 export interface SdkOperation {
+  /** The name of this operation */
+  name: string;
   /** The path through the schema to return this data */
   path: string[];
   /** The graphql node being processed with chain info added */
