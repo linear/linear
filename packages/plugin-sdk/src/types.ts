@@ -51,6 +51,8 @@ export interface SdkOperation {
   operationVariablesTypes?: string;
   /** The type returned from this operation */
   returnType: string;
+  /** The query for this operation */
+  query?: FieldDefinitionNode;
 }
 
 /**

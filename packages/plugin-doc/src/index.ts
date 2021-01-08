@@ -1,5 +1,5 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, FragmentVisitor, getTypeName, logger, OperationVisitor } from "@linear/plugin-common";
+import { ContextVisitor, FragmentVisitor, logger, OperationVisitor } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
 
@@ -28,7 +28,7 @@ export const plugin: PluginFunction = async (
       scalars: fragmentVisitor.context.scalars,
       fragments: fragmentVisitor.context.fragments.map(x => x.name),
       objects: fragmentVisitor.context.objects.map(x => x.name.value),
-      queries: fragmentVisitor.context.queries.map(x => getTypeName(x.type)),
+      queries: fragmentVisitor.context.queries.map(x => x.name.value),
       operationMap: fragmentVisitor.context.operationMap,
     });
 

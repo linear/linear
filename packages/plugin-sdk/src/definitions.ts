@@ -61,10 +61,14 @@ export function getSdkDefinitions<C>(context: PluginContext<C>, documents: Types
     /** Create a visitor to print the arg type */
     const argVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
 
+    /** Find a matching query if it exists */
+    const query = context.queries.find(q => q.name.value === node.name?.value);
+
     const sdkOperation: SdkOperation = {
       name,
       path: operationPath,
       node,
+      query,
       /** The parsed and printed required variables */
       requiredVariables: getRequiredVariables(node).reduce(
         (acc2, v) => ({

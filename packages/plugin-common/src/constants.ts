@@ -16,6 +16,7 @@ export default {
     "availableUsers",
     "integration",
     "integrationResource",
+    "organizationInviteCreate",
   ],
   SKIP_DIRECTIVES: ["skipSdk", "deprecated"],
 };

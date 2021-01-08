@@ -3851,13 +3851,6 @@ mutation organizationDomainDelete($id: String!) {
   }
 }
 
-# Creates a new organization invite.
-mutation organizationInviteCreate($input: OrganizationInviteCreateInput!) {
-  organizationInviteCreate(input: $input) {
-    ...OrganizationInvitePayload
-  }
-}
-
 # Re-send an organization invite.
 mutation resentOrganizationInvite($id: String!) {
   resentOrganizationInvite(id: $id) {
