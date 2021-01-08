@@ -8,11 +8,11 @@ import { filterJoin, getKeyByValue } from "./utils";
 /**
  * Graphql-codegen visitor for processing the ast and generating operations
  */
-export class OperationVisitor {
-  private _context: PluginContext;
+export class OperationVisitor<C> {
+  private _context: PluginContext<C>;
 
   /** Initialize the visitor */
-  public constructor(context: PluginContext) {
+  public constructor(context: PluginContext<C>) {
     autoBind(this);
 
     this._context = context;

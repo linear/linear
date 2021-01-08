@@ -2,8 +2,6 @@ export default {
   ID_NAME: "id",
   ID_TYPE: "string",
   NAMESPACE_DOCUMENT: "D",
-  OPTIONS_NAME: "opts",
-  OPTIONS_TYPE: "O",
   REQUESTER_NAME: "requester",
   REQUESTER_TYPE: "LinearRequester",
   SDK_NAME: "createLinearSdk",

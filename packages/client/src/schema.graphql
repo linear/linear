@@ -153,18 +153,22 @@ type Query {
     orderBy: PaginationOrderBy
   ): ApiKeyConnection!
   """
-  Get information for an application.
+  Get information for an application and whether a user has approved it for the given scopes.
   """
-  application(
+  applicationWithAuthorization(
     """
     Redirect URI for the application.
     """
     redirectUri: String
     """
+    Scopes being requested by the application
+    """
+    scope: [String!]!
+    """
     The client ID of the application.
     """
     clientId: String!
-  ): Application!
+  ): UserAuthorizedApplication!
   """
   Get all authorized applications for a user
   """
@@ -3948,9 +3952,9 @@ type ApiKey implements Node {
   label: String!
 }
 """
-Public information of the OAuth application.
+Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
 """
-type Application {
+type UserAuthorizedApplication {
   """
   OAuth application's client ID.
   """
@@ -3975,6 +3979,10 @@ type Application {
   Image of the application.
   """
   imageUrl: String
+  """
+  Whether the user has authorized the application for the given scopes.
+  """
+  isAuthorized: Boolean!
 }
 """
 Public information of the OAuth application, plus the authorized scopes for a given user.
@@ -8397,6 +8405,35 @@ type SynchronizedPayload {
   The identifier of the last sync operation.
   """
   lastSyncId: Float!
+}
+"""
+Public information of the OAuth application.
+"""
+type Application {
+  """
+  OAuth application's client ID.
+  """
+  clientId: String!
+  """
+  Application name.
+  """
+  name: String!
+  """
+  Information about the application.
+  """
+  description: String
+  """
+  Name of the developer.
+  """
+  developer: String!
+  """
+  Url of the developer (homepage or docs).
+  """
+  developerUrl: String!
+  """
+  Image of the application.
+  """
+  imageUrl: String
 }
 type OrganizationDomainSimplePayload {
   """

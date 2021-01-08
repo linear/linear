@@ -6,14 +6,18 @@ import { extname } from "path";
 /**
  * Graphql-codegen plugin for outputting the typed Linear documents
  */
-export const plugin: PluginFunction = async (schema: GraphQLSchema) => {
+export const plugin: PluginFunction = async (
+  schema: GraphQLSchema,
+  _documents: Types.DocumentFile[],
+  config: unknown
+) => {
   try {
     /** Get ast from schema */
     const ast = parse(printSchema(schema));
 
     /** Collect plugin context */
     logger.info("Gathering context");
-    const contextVisitor = new ContextVisitor(schema);
+    const contextVisitor = new ContextVisitor(schema, config);
     visit(ast, contextVisitor);
 
     /** Generate fragments */

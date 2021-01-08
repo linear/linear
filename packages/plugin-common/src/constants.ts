@@ -17,6 +17,5 @@ export default {
     "integration",
     "integrationResource",
   ],
-  SKIP_DIRECTIVES: ["skipSdk"],
-  RECURSION_LIMIT: 3000,
+  SKIP_DIRECTIVES: ["skipSdk", "deprecated"],
 };

@@ -32,7 +32,7 @@ export type Fragment = NamedFields<ObjectTypeDefinitionNode>;
 /**
  * Stateful context for document building information
  */
-export interface PluginContext {
+export interface PluginContext<C> {
   /** The whole graphql schema */
   schema: GraphQLSchema;
   /** All scalars including custom */
@@ -45,6 +45,8 @@ export interface PluginContext {
   queries: readonly FieldDefinitionNode[];
   /** A map for determining operation type names */
   operationMap: Record<OperationType, string>;
+  /** The plugin config */
+  config: C;
 }
 
 /**
@@ -69,6 +71,8 @@ export interface ArgDefinition {
 export interface ArgList {
   /** The jsdoc string for arguments */
   jsdoc: string[];
-  /** The typescript string for arguments */
-  print: string;
+  /** The typescript string for argument input */
+  printInput: string;
+  /** The typescript string for argument output */
+  printOutput: string;
 }

@@ -36,7 +36,8 @@ export function printRequesterType(config: RawSdkPluginConfig): string[] {
   const docType = config.documentMode === DocumentMode.string ? "string" : "DocumentNode";
   return [
     printComment([`The function type for calling the graphql client`]),
-    `export type ${c.REQUESTER_TYPE}<${c.OPTIONS_TYPE} = {}> = <R, V>(doc: ${docType}, ${c.VARIABLE_NAME}?: V, ${c.OPTIONS_NAME}?: ${c.OPTIONS_TYPE}) => Promise<R>`,
+    `export type ${c.REQUESTER_TYPE} = <R, V>(doc: ${docType}, ${c.VARIABLE_NAME}?: V) => Promise<R>`,
+    "\n",
   ];
 }
 
@@ -49,7 +50,7 @@ export function printRequesterCall(context: SdkPluginContext, o: SdkOperation): 
   const resultType = printNamespaced(context, o.operationResultType);
 
   return `${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${filterJoin(
-    [documentName, printRequesterArgs(o), c.OPTIONS_NAME],
+    [documentName, printRequesterArgs(o)],
     ", "
   )});`;
 }
@@ -61,7 +62,7 @@ export function getRequesterArg(): ArgDefinition {
   return {
     name: c.REQUESTER_NAME,
     optional: false,
-    type: `${c.REQUESTER_TYPE}<${c.OPTIONS_TYPE}>`,
+    type: c.REQUESTER_TYPE,
     description: "function to call the graphql client",
   };
 }

@@ -61,6 +61,7 @@
       "codegen",
       "octokit",
       "precommit",
+      "sdks",
       "yalc"
     ]
   }

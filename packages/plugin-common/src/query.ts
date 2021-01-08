@@ -6,8 +6,8 @@ import { Named, PluginContext } from "./types";
 /**
  * Find a query that can return this field
  * */
-export function findQuery(
-  context: PluginContext,
+export function findQuery<C>(
+  context: PluginContext<C>,
   field: Named<FieldDefinitionNode> | FieldDefinitionNode
 ): FieldDefinitionNode | undefined {
   /** Ignore queries for connections */

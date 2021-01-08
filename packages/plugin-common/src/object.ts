@@ -37,8 +37,8 @@ export function isEdge(object?: ObjectTypeDefinitionNode | NamedFields<ObjectTyp
 /**
  * Is the object an operation root
  */
-export function isOperationRoot(
-  context: PluginContext,
+export function isOperationRoot<C>(
+  context: PluginContext<C>,
   object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode>
 ): boolean {
   return object ? Object.values(context.operationMap).includes(getObjectName(object)) : false;

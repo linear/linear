@@ -19,11 +19,11 @@ import { filterJoin, nonNullable } from "./utils";
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
-export class FragmentVisitor {
-  private _context: PluginContext;
+export class FragmentVisitor<C> {
+  private _context: PluginContext<C>;
 
   /** Initialize the visitor */
-  public constructor(context: Omit<PluginContext, "fragments">) {
+  public constructor(context: Omit<PluginContext<C>, "fragments">) {
     autoBind(this);
 
     this._context = { ...context, fragments: [] };
@@ -32,7 +32,7 @@ export class FragmentVisitor {
   /**
    * Return the plugin context with fragments
    */
-  public get context(): PluginContext {
+  public get context(): PluginContext<C> {
     return this._context;
   }
 

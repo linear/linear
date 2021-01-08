@@ -20,9 +20,15 @@ export function getArgList(args: (ArgDefinition | undefined)[]): ArgList {
         return `@param ${name} - ${description}`;
       }),
     ],
-    print: filterJoin(
+    printInput: filterJoin(
       args.filter(nonNullable).map(({ name, type, optional, defaultName }) => {
         return `${name}${optional ? "?" : ""}: ${type}${defaultName ? ` = ${defaultName}` : ""}`;
+      }),
+      ", "
+    ),
+    printOutput: filterJoin(
+      args.filter(nonNullable).map(({ name }) => {
+        return name;
       }),
       ", "
     ),
