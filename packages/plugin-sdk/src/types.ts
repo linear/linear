@@ -1,6 +1,6 @@
 import { ClientSideBasePluginConfig, RawClientSideBasePluginConfig } from "@graphql-codegen/visitor-plugin-common";
 import { ArgDefinition, PluginContext } from "@linear/plugin-common";
-import { FieldDefinitionNode, OperationDefinitionNode } from "graphql";
+import { FieldDefinitionNode, ObjectTypeDefinitionNode, OperationDefinitionNode } from "graphql";
 
 export interface RawSdkPluginConfig extends RawClientSideBasePluginConfig {
   /**
@@ -39,6 +39,10 @@ export interface SdkOperation {
   path: string[];
   /** The graphql node being processed with chain info added */
   node: OperationDefinitionNode;
+  /** The query for this operation */
+  query?: FieldDefinitionNode;
+  /** The model for this operation */
+  model?: SdkModel;
   /** The parsed and printed required variables */
   requiredVariables: Record<string, ArgDefinition>;
   /** The name of the generated graphql document */
@@ -51,8 +55,6 @@ export interface SdkOperation {
   operationVariablesTypes?: string;
   /** The type returned from this operation */
   returnType: string;
-  /** The query for this operation */
-  query?: FieldDefinitionNode;
 }
 
 /**
@@ -90,6 +92,54 @@ export type SdkDefinitions = Record<string, SdkDefinition>;
  * The plugin context specific to the sdk plugin config
  */
 export interface SdkPluginContext extends PluginContext<RawSdkPluginConfig> {
+  /** Processed models for output */
+  models: SdkModel[];
   /** All definitions for the sdk */
   sdkDefinitions: SdkDefinitions;
+}
+
+/**
+ * A wrapped scalar field node
+ */
+export interface SdkScalarField {
+  __typename: "SdkScalarField";
+  /** The field definition */
+  node: FieldDefinitionNode;
+  /** The name of the field */
+  name: string;
+  /** Printed typescript type */
+  type: string;
+}
+
+/**
+ * A wrapped field node with query detail
+ */
+export interface SdkQueryField extends Omit<SdkScalarField, "__typename"> {
+  __typename: "SdkQueryField";
+  /** A query for returning this field if it exists */
+  query: FieldDefinitionNode;
+  /** The list of all arguments for the query */
+  args: ArgDefinition[];
+}
+
+/**
+ * The processed sdk model node
+ */
+export interface SdkModelNode extends Omit<ObjectTypeDefinitionNode, "fields"> {
+  /** The processed field nodes */
+  fields?: (SdkScalarField | SdkQueryField)[];
+}
+
+/**
+ * A model definition for the sdk
+ */
+export interface SdkModel {
+  /** The name of the object */
+  name: string;
+  /** The object definition */
+  node: SdkModelNode;
+  /** The list of scalar fields */
+  scalarFields: SdkScalarField[];
+  /** The list of fields with queries */
+  queryFields: SdkQueryField[];
 }

@@ -1,4 +1,5 @@
 import { filterJoin, getLast, upperFirst } from "@linear/plugin-common";
+import { pascalCase } from "pascal-case";
 import c from "./constants";
 import { SdkOperation, SdkPluginContext } from "./types";
 
@@ -50,4 +51,14 @@ export function printOperationReturnType(operationType: string, path: string[]):
  */
 export function printSdkOperationName(o: SdkOperation): string {
   return getLast(printOperationName(o).split("_")) ?? "NO_OPERATION_NAME";
+}
+
+/**
+ * Return the name in pascal case with underscores still remaining
+ */
+export function printPascal(str?: string): string {
+  return (str ?? "")
+    .split("_")
+    .map(s => pascalCase(s))
+    .join("_");
 }

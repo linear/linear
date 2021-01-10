@@ -30,6 +30,12 @@ fragment UserSettings on UserSettings {
   }
 }
 
+fragment IssueConnection on IssueConnection {
+  nodes {
+    id
+  }
+}
+
 # An issue.
 fragment Issue on Issue {
   id
@@ -147,6 +153,12 @@ fragment WorkflowState on WorkflowState {
   }
 }
 
+fragment CycleConnection on CycleConnection {
+  nodes {
+    id
+  }
+}
+
 # A set of issues to be resolved in a specified amount of time.
 fragment Cycle on Cycle {
   id
@@ -174,6 +186,12 @@ fragment PageInfo on PageInfo {
   endCursor
 }
 
+fragment TeamMembershipConnection on TeamMembershipConnection {
+  nodes {
+    id
+  }
+}
+
 # Defines the membership of a user to a team.
 fragment TeamMembership on TeamMembership {
   id
@@ -184,6 +202,12 @@ fragment TeamMembership on TeamMembership {
     id
   }
   team {
+    id
+  }
+}
+
+fragment ProjectConnection on ProjectConnection {
+  nodes {
     id
   }
 }
@@ -254,6 +278,30 @@ fragment Organization on Organization {
   createdIssueCount
 }
 
+fragment UserConnection on UserConnection {
+  nodes {
+    id
+  }
+}
+
+fragment TeamConnection on TeamConnection {
+  nodes {
+    id
+  }
+}
+
+fragment MilestoneConnection on MilestoneConnection {
+  nodes {
+    id
+  }
+}
+
+fragment IntegrationConnection on IntegrationConnection {
+  nodes {
+    id
+  }
+}
+
 # An integration with an external service.
 fragment Integration on Integration {
   id
@@ -305,6 +353,12 @@ fragment Subscription on Subscription {
   pendingChangeType
 }
 
+fragment ProjectLinkConnection on ProjectLinkConnection {
+  nodes {
+    id
+  }
+}
+
 # An external link for a project.
 fragment ProjectLink on ProjectLink {
   id
@@ -317,6 +371,12 @@ fragment ProjectLink on ProjectLink {
     id
   }
   project {
+    id
+  }
+}
+
+fragment WorkflowStateConnection on WorkflowStateConnection {
+  nodes {
     id
   }
 }
@@ -339,6 +399,12 @@ fragment Template on Template {
   }
 }
 
+fragment IssueLabelConnection on IssueLabelConnection {
+  nodes {
+    id
+  }
+}
+
 # Labels that can be associated with issues.
 fragment IssueLabel on IssueLabel {
   id
@@ -352,6 +418,12 @@ fragment IssueLabel on IssueLabel {
     id
   }
   creator {
+    id
+  }
+}
+
+fragment WebhookConnection on WebhookConnection {
+  nodes {
     id
   }
 }
@@ -371,6 +443,12 @@ fragment Webhook on Webhook {
     id
   }
   secret
+}
+
+fragment CommentConnection on CommentConnection {
+  nodes {
+    id
+  }
 }
 
 # A comment associated with an issue.
@@ -459,6 +537,12 @@ fragment IssueHistory on IssueHistory {
   toDueDate
 }
 
+fragment IntegrationResourceConnection on IntegrationResourceConnection {
+  nodes {
+    id
+  }
+}
+
 # An integration resource created by an external service.
 fragment IntegrationResource on IntegrationResource {
   id
@@ -518,6 +602,12 @@ fragment SentryIssuePayload on SentryIssuePayload {
   shortId
   firstSeen
   firstVersion
+}
+
+fragment IssueRelationConnection on IssueRelationConnection {
+  nodes {
+    id
+  }
 }
 
 # A relation between two issues.
@@ -722,6 +812,12 @@ fragment CustomView on CustomView {
   shared
 }
 
+fragment CustomViewConnection on CustomViewConnection {
+  nodes {
+    id
+  }
+}
+
 # A custom emoji.
 fragment Emoji on Emoji {
   id
@@ -732,6 +828,12 @@ fragment Emoji on Emoji {
   url
   source
   creator {
+    id
+  }
+}
+
+fragment EmojiConnection on EmojiConnection {
+  nodes {
     id
   }
 }
@@ -760,6 +862,12 @@ fragment Favorite on Favorite {
     id
   }
   label {
+    id
+  }
+}
+
+fragment FavoriteConnection on FavoriteConnection {
+  nodes {
     id
   }
 }
@@ -868,6 +976,12 @@ fragment Reaction on Reaction {
     id
   }
   comment {
+    id
+  }
+}
+
+fragment ReactionConnection on ReactionConnection {
+  nodes {
     id
   }
 }
@@ -1335,12 +1449,7 @@ query user_assignedIssues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -1363,12 +1472,7 @@ query user_createdIssues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -1391,12 +1495,7 @@ query user_teamMemberships(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...TeamMembership
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...TeamMembershipConnection
     }
   }
 }
@@ -1425,12 +1524,7 @@ query viewer_assignedIssues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -1452,12 +1546,7 @@ query viewer_createdIssues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -1479,12 +1568,7 @@ query viewer_teamMemberships(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...TeamMembership
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...TeamMembershipConnection
     }
   }
 }
@@ -1513,12 +1597,7 @@ query organization_users(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...User
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...UserConnection
     }
   }
 }
@@ -1540,12 +1619,7 @@ query organization_teams(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Team
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...TeamConnection
     }
   }
 }
@@ -1567,12 +1641,7 @@ query organization_milestones(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Milestone
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...MilestoneConnection
     }
   }
 }
@@ -1594,12 +1663,7 @@ query organization_integrations(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Integration
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IntegrationConnection
     }
   }
 }
@@ -1639,6 +1703,120 @@ query archivedModelsSync($modelClass: String!, $teamId: String!, $before: DateTi
   }
 }
 
+# Finds a user account by email or identifier. Super user required.
+query adminUserAccountLookup($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    ...UserAccountAdminPrivileged
+  }
+}
+query adminUserAccountLookup_users($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      ...UserAdminPrivileged
+    }
+  }
+}
+# Issues assigned to the user.
+query adminUserAccountLookup_users_assignedIssues($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      assignedIssues {
+        ...IssueConnection
+      }
+    }
+  }
+}
+# Issues created by the user.
+query adminUserAccountLookup_users_createdIssues($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      createdIssues {
+        ...IssueConnection
+      }
+    }
+  }
+}
+# Organization in which the user belongs to. Super user required.
+query adminUserAccountLookup_users_organization($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      organization {
+        ...OrganizationAdminPrivileged
+      }
+    }
+  }
+}
+# Users associated with the organization.
+query adminUserAccountLookup_users_organization_users($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      organization {
+        users {
+          ...UserConnection
+        }
+      }
+    }
+  }
+}
+# Teams associated with the organization.
+query adminUserAccountLookup_users_organization_teams($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      organization {
+        teams {
+          ...TeamConnection
+        }
+      }
+    }
+  }
+}
+# Milestones associated with the organization.
+query adminUserAccountLookup_users_organization_milestones($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      organization {
+        milestones {
+          ...MilestoneConnection
+        }
+      }
+    }
+  }
+}
+# Integrations associated with the organization.
+query adminUserAccountLookup_users_organization_integrations($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      organization {
+        integrations {
+          ...IntegrationConnection
+        }
+      }
+    }
+  }
+}
+# The organization's subscription to a paid plan. Super user required.
+query adminUserAccountLookup_users_organization_subscription($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      organization {
+        subscription {
+          ...SubscriptionAdminPrivileged
+        }
+      }
+    }
+  }
+}
+# Memberships associated with the user.
+query adminUserAccountLookup_users_teamMemberships($email: String, $id: String) {
+  adminUserAccountLookup(email: $email, id: $id) {
+    users {
+      teamMemberships {
+        ...TeamMembershipConnection
+      }
+    }
+  }
+}
+
 # All users of the organization.
 query users(
   $before: String
@@ -1656,12 +1834,7 @@ query users(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...User
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...UserConnection
   }
 }
 
@@ -1702,6 +1875,13 @@ query applicationWithAuthorization($redirectUri: String, $scope: [String!]!, $cl
 query authorizedApplications {
   authorizedApplications {
     ...AuthorizedApplication
+  }
+}
+
+# Fetch users belonging to this user account.
+query availableUsers {
+  availableUsers {
+    ...AuthResolverResponse
   }
 }
 
@@ -1773,12 +1953,7 @@ query comments(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Comment
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...CommentConnection
   }
 }
 
@@ -1805,12 +1980,7 @@ query customViews(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...CustomView
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...CustomViewConnection
   }
 }
 
@@ -1839,12 +2009,7 @@ query cycle_issues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -1867,12 +2032,7 @@ query cycle_uncompletedIssuesUponClose(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -1894,12 +2054,7 @@ query cycles(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Cycle
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...CycleConnection
   }
 }
 
@@ -1926,12 +2081,7 @@ query emojis(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Emoji
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...EmojiConnection
   }
 }
 
@@ -1959,12 +2109,7 @@ query favorites(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Favorite
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...FavoriteConnection
   }
 }
 
@@ -1979,6 +2124,68 @@ query figmaEmbedInfo_figmaEmbed($nodeId: String, $fileId: String!) {
   figmaEmbedInfo(nodeId: $nodeId, fileId: $fileId) {
     figmaEmbed {
       ...FigmaEmbed
+    }
+  }
+}
+
+# One specific integration.
+query integration($id: String!) {
+  integration(id: $id) {
+    ...Integration
+  }
+}
+# Settings related to the integration.
+query integration_settings($id: String!) {
+  integration(id: $id) {
+    settings {
+      slackPost {
+        ...SlackPostSettings
+      }
+      slackProjectPost {
+        ...SlackPostSettings
+      }
+      googleSheets {
+        ...GoogleSheetsSettings
+      }
+      sentry {
+        ...SentrySettings
+      }
+    }
+  }
+}
+query integration_settings_slackPost($id: String!) {
+  integration(id: $id) {
+    settings {
+      slackPost {
+        ...SlackPostSettings
+      }
+    }
+  }
+}
+query integration_settings_slackProjectPost($id: String!) {
+  integration(id: $id) {
+    settings {
+      slackProjectPost {
+        ...SlackPostSettings
+      }
+    }
+  }
+}
+query integration_settings_googleSheets($id: String!) {
+  integration(id: $id) {
+    settings {
+      googleSheets {
+        ...GoogleSheetsSettings
+      }
+    }
+  }
+}
+query integration_settings_sentry($id: String!) {
+  integration(id: $id) {
+    settings {
+      sentry {
+        ...SentrySettings
+      }
     }
   }
 }
@@ -2000,11 +2207,84 @@ query integrations(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Integration
+    ...IntegrationConnection
+  }
+}
+
+# One specific integration resource. (e.g. linked GitHub pull requests for an issue)
+query integrationResource($id: String!) {
+  integrationResource(id: $id) {
+    ...IntegrationResource
+  }
+}
+# Detailed information about the external resource.
+query integrationResource_data($id: String!) {
+  integrationResource(id: $id) {
+    data {
+      # The payload for an IntegrationResource of type 'githubPullRequest'
+      githubPullRequest {
+        ...PullRequestPayload
+      }
+      # The payload for an IntegrationResource of type 'gitlabMergeRequest'
+      gitlabMergeRequest {
+        ...PullRequestPayload
+      }
+      # The payload for an IntegrationResource of type 'githubCommit'
+      githubCommit {
+        ...CommitPayload
+      }
+      # The payload for an IntegrationResource of type 'sentryIssue'
+      sentryIssue {
+        ...SentryIssuePayload
+      }
     }
-    pageInfo {
-      ...PageInfo
+  }
+}
+# The payload for an IntegrationResource of type 'githubPullRequest'
+query integrationResource_data_githubPullRequest($id: String!) {
+  integrationResource(id: $id) {
+    data {
+      githubPullRequest {
+        ...PullRequestPayload
+      }
+    }
+  }
+}
+# The payload for an IntegrationResource of type 'gitlabMergeRequest'
+query integrationResource_data_gitlabMergeRequest($id: String!) {
+  integrationResource(id: $id) {
+    data {
+      gitlabMergeRequest {
+        ...PullRequestPayload
+      }
+    }
+  }
+}
+# The payload for an IntegrationResource of type 'githubCommit'
+query integrationResource_data_githubCommit($id: String!) {
+  integrationResource(id: $id) {
+    data {
+      githubCommit {
+        ...CommitPayload
+      }
+    }
+  }
+}
+# The payload for an IntegrationResource of type 'sentryIssue'
+query integrationResource_data_sentryIssue($id: String!) {
+  integrationResource(id: $id) {
+    data {
+      sentryIssue {
+        ...SentryIssuePayload
+      }
+    }
+  }
+}
+# Pull request information for GitHub pull requests and GitLab merge requests.
+query integrationResource_pullRequest($id: String!) {
+  integrationResource(id: $id) {
+    pullRequest {
+      ...PullRequestPayload
     }
   }
 }
@@ -2026,12 +2306,7 @@ query integrationResources(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...IntegrationResource
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...IntegrationResourceConnection
   }
 }
 
@@ -2075,12 +2350,7 @@ query issueLabel_issues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -2102,12 +2372,7 @@ query issueLabels(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...IssueLabel
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...IssueLabelConnection
   }
 }
 
@@ -2134,12 +2399,7 @@ query issueRelations(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...IssueRelation
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...IssueRelationConnection
   }
 }
 
@@ -2168,12 +2428,7 @@ query issue_subscribers(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...User
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...UserConnection
     }
   }
 }
@@ -2196,12 +2451,7 @@ query issue_children(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -2224,12 +2474,7 @@ query issue_comments(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Comment
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...CommentConnection
     }
   }
 }
@@ -2280,12 +2525,7 @@ query issue_labels(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...IssueLabel
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueLabelConnection
     }
   }
 }
@@ -2308,12 +2548,7 @@ query issue_integrationResources(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...IntegrationResource
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IntegrationResourceConnection
     }
   }
 }
@@ -2336,12 +2571,7 @@ query issue_relations(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...IssueRelation
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueRelationConnection
     }
   }
 }
@@ -2364,12 +2594,7 @@ query issue_inverseRelations(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...IssueRelation
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueRelationConnection
     }
   }
 }
@@ -2393,12 +2618,7 @@ query issueSearch(
     orderBy: $orderBy
     query: $query
   ) {
-    nodes {
-      ...Issue
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...IssueConnection
   }
 }
 
@@ -2418,12 +2638,7 @@ query issues(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Issue
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...IssueConnection
   }
 }
 
@@ -2452,12 +2667,7 @@ query milestone_projects(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Project
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...ProjectConnection
     }
   }
 }
@@ -2479,12 +2689,7 @@ query milestones(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Milestone
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...MilestoneConnection
   }
 }
 
@@ -2572,12 +2777,7 @@ query organizationInvite_issues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -2632,12 +2832,7 @@ query ProjectLinks(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...ProjectLink
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...ProjectLinkConnection
   }
 }
 
@@ -2666,12 +2861,7 @@ query project_teams(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Team
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...TeamConnection
     }
   }
 }
@@ -2694,12 +2884,7 @@ query project_members(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...User
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...UserConnection
     }
   }
 }
@@ -2722,12 +2907,7 @@ query project_issues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -2750,12 +2930,7 @@ query project_links(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...ProjectLink
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...ProjectLinkConnection
     }
   }
 }
@@ -2777,12 +2952,7 @@ query projects(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Project
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...ProjectConnection
   }
 }
 
@@ -2816,12 +2986,7 @@ query reactions(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Reaction
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...ReactionConnection
   }
 }
 
@@ -2856,12 +3021,7 @@ query teamMemberships(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...TeamMembership
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...TeamMembershipConnection
   }
 }
 
@@ -2890,12 +3050,7 @@ query team_issues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -2918,12 +3073,7 @@ query team_cycles(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Cycle
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...CycleConnection
     }
   }
 }
@@ -2946,12 +3096,7 @@ query team_memberships(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...TeamMembership
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...TeamMembershipConnection
     }
   }
 }
@@ -2974,12 +3119,7 @@ query team_projects(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Project
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...ProjectConnection
     }
   }
 }
@@ -3002,12 +3142,7 @@ query team_states(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...WorkflowState
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...WorkflowStateConnection
     }
   }
 }
@@ -3058,12 +3193,7 @@ query team_labels(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...IssueLabel
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueLabelConnection
     }
   }
 }
@@ -3086,12 +3216,7 @@ query team_webhooks(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Webhook
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...WebhookConnection
     }
   }
 }
@@ -3113,12 +3238,7 @@ query teams(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Team
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...TeamConnection
   }
 }
 
@@ -3186,12 +3306,7 @@ query webhooks(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Webhook
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...WebhookConnection
   }
 }
 
@@ -3220,12 +3335,7 @@ query workflowState_issues(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Issue
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueConnection
     }
   }
 }
@@ -3247,18 +3357,27 @@ query workflowStates(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...WorkflowState
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...WorkflowStateConnection
   }
 }
 # Updates a user. Only available to organization admins and the user themselves.
 mutation userUpdate($input: UpdateUserInput!, $id: String!) {
   userUpdate(input: $input, id: $id) {
     ...UserPayload
+  }
+}
+
+# Makes user an admin. Can only be called by an admin.
+mutation userPromoteAdmin($id: String!) {
+  userPromoteAdmin(id: $id) {
+    ...UserAdminPayload
+  }
+}
+
+# Makes user a regular user. Can only be called by an admin.
+mutation userDemoteAdmin($id: String!) {
+  userDemoteAdmin(id: $id) {
+    ...UserAdminPayload
   }
 }
 
@@ -3297,6 +3416,13 @@ mutation organizationDelete($input: DeleteOrganizationInput!) {
   }
 }
 
+# Deletes an integration. Superuser privileges required.
+mutation adminDeleteIntegration($id: String!) {
+  adminDeleteIntegration(id: $id) {
+    ...AdminIntegrationPayload
+  }
+}
+
 # Disable organization access. Superuser privileges required.
 mutation organizationToggleAccess($id: String!) {
   organizationToggleAccess(id: $id) {
@@ -3322,6 +3448,41 @@ mutation organizationToggleSamlEnabled($id: String!) {
 mutation organizationConfigureSaml($samlConfiguration: SamlConfigurationInput!, $id: String!) {
   organizationConfigureSaml(samlConfiguration: $samlConfiguration, id: $id) {
     ...OrganizationSamlConfigurePayload
+  }
+}
+
+# Executes admin command.
+mutation adminCommand($input: AdminCommandInput!) {
+  adminCommand(input: $input) {
+    ...AdminCommandPayload
+  }
+}
+
+# Sends out emails in bulk to our users.
+mutation adminBulkEmail($randomDelay: Int, $emails: [String!]!, $markdownContent: String!, $subject: String!) {
+  adminBulkEmail(randomDelay: $randomDelay, emails: $emails, markdownContent: $markdownContent, subject: $subject) {
+    ...AdminCommandPayload
+  }
+}
+
+# Creates a stripe customer for an organization.
+mutation adminCreateStripeCustomer($organizationId: String!) {
+  adminCreateStripeCustomer(organizationId: $organizationId) {
+    ...AdminCommandPayload
+  }
+}
+
+# Schedules a task. Currently only anonymous tasks without any parameters can be scheduled.
+mutation adminScheduleAnonymousTask($taskName: String!) {
+  adminScheduleAnonymousTask(taskName: $taskName) {
+    ...AdminCommandPayload
+  }
+}
+
+# Changes the email address for the user account and all of its users.
+mutation adminUserAccountChangeEmail($newEmail: String!, $id: String!) {
+  adminUserAccountChangeEmail(newEmail: $newEmail, id: $id) {
+    ...UserAccountAdminPrivileged
   }
 }
 
@@ -3848,6 +4009,13 @@ mutation organizationDomainCreate($input: OrganizationDomainCreateInput!) {
 mutation organizationDomainDelete($id: String!) {
   organizationDomainDelete(id: $id) {
     ...ArchivePayload
+  }
+}
+
+# Creates a new organization invite.
+mutation organizationInviteCreate($input: OrganizationInviteCreateInput!) {
+  organizationInviteCreate(input: $input) {
+    ...OrganizationInvitePayload
   }
 }
 

@@ -37,14 +37,9 @@ export function wrapString(s: string, length = 100): string {
  * Return a jsdoc formatted block
  */
 export function printComment(lines: string[]): string {
-  return [
-    "/**",
-    ...lines
-      .filter(t => t && t !== "")
-      .reduce((prev, t) => [...prev, ...t.split("\n")], [] as string[])
-      .map(line => ` * ${line}`),
-    " */",
-  ].join("\n");
+  const parsed = lines.filter(t => t && t !== "").reduce((prev, t) => [...prev, ...t.split("\n")], [] as string[]);
+
+  return parsed.length > 1 ? ["/**", ...parsed.map(line => ` * ${line}`), " */"].join("\n") : `/** ${parsed[0]} */`;
 }
 
 /**

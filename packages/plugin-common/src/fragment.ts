@@ -1,6 +1,6 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode, OperationTypeDefinitionNode } from "graphql";
 import { getTypeName } from "./field";
-import { isConnection, isEdge, isOperationRoot } from "./object";
+import { isEdge, isOperationRoot } from "./object";
 import { Fragment, NamedFields, PluginContext } from "./types";
 
 /**
@@ -29,5 +29,5 @@ export function isValidFragment<C>(
 ): boolean {
   const hasFields = (fragment.fields ?? []).filter(x => Boolean(x && x !== "cursor")).length;
 
-  return Boolean(hasFields && !isConnection(fragment) && !isEdge(fragment) && !isOperationRoot(context, fragment));
+  return Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment));
 }
