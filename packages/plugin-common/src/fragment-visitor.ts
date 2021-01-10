@@ -8,7 +8,7 @@ import {
   NonNullTypeNode,
   ObjectTypeDefinitionNode,
 } from "graphql";
-import { requiredArgs } from "./args";
+import { getRequiredArgs } from "./args";
 import { getTypeName } from "./field";
 import { isValidFragment } from "./fragment";
 import { printGraphqlDebug, printGraphqlDescription } from "./print";
@@ -87,9 +87,10 @@ export class FragmentVisitor<C> {
       /** Find a query that can return this field */
       const query = findQuery(this._context, node);
 
-      if (query) {
+      /** Specifically exclude UserSettings until NotificationQuery returns a different type */
+      if (query && getTypeName(node.type) !== "UserSettings") {
         /** Get all fields required for query arguments */
-        const queryRequiredArgs = requiredArgs(query.arguments).map(a => a.name.value);
+        const queryRequiredArgs = getRequiredArgs(query.arguments).map(a => a.name.value);
 
         return filterJoin(
           [

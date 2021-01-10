@@ -5,7 +5,7 @@ import { filterJoin, nonNullable } from "./utils";
 /**
  * Return only the required arguments
  */
-export function requiredArgs(args: readonly InputValueDefinitionNode[] = []): InputValueDefinitionNode[] {
+export function getRequiredArgs(args: readonly InputValueDefinitionNode[] = []): InputValueDefinitionNode[] {
   return args.filter(a => a.type.kind === Kind.NON_NULL_TYPE);
 }
 
@@ -14,6 +14,7 @@ export function requiredArgs(args: readonly InputValueDefinitionNode[] = []): In
  */
 export function getArgList(args: (ArgDefinition | undefined)[]): ArgList {
   return {
+    args: args.filter(nonNullable),
     jsdoc: [
       " ",
       ...args.filter(nonNullable).map(({ name, description }) => {

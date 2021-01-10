@@ -1,6 +1,7 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
 import { FieldDefinitionNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode } from "graphql";
+import c from "./constants";
 import { OperationType, PluginContext } from "./types";
 
 /**
@@ -49,7 +50,9 @@ export class ContextVisitor<C> {
   public ObjectTypeDefinition = {
     /** Record all object types */
     enter: (node: ObjectTypeDefinitionNode): ObjectTypeDefinitionNode => {
-      this._objects = [...this._objects, node];
+      if (!node.name.value.endsWith(c.EDGE_TYPE)) {
+        this._objects = [...this._objects, node];
+      }
 
       if (node.name.value === this.context.operationMap[OperationType.query]) {
         /** Record all queries */

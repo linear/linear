@@ -3,11 +3,13 @@ import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
 import { ContextVisitor, filterJoin, logger, nonNullable, PluginContext } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
+import { printSdkClasses } from "./class";
 import c from "./constants";
-import { getSdkDefinitions, printSdkDefinition } from "./definitions";
+import { getSdkDefinitions } from "./definitions";
+import { printSdkModels } from "./model";
+import { ModelVisitor } from "./model-visitor";
 import { printRequesterType } from "./requester";
-import { printSdkReturnTypes } from "./return-type";
-import { RawSdkPluginConfig, SdkPluginContext } from "./types";
+import { RawSdkPluginConfig, SdkModel, SdkPluginContext } from "./types";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear sdk
@@ -30,25 +32,36 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
       fragments: [],
     };
 
+    /** Print the query return types  */
+    logger.info("Generating models");
+    const modelVisitor = new ModelVisitor(context);
+    const models = visit(ast, modelVisitor) as SdkModel[];
+    logger.debug({ models: models.map(model => model.name) });
+
     /** Process a list of documents to add information for chaining the api operations */
     logger.info("Processing documents");
-    const sdkDefinitions = getSdkDefinitions(context, documents);
+    const sdkDefinitions = getSdkDefinitions(context, documents, models);
     logger.debug(sdkDefinitions);
     const sdkContext: SdkPluginContext = {
       ...context,
+      models,
       sdkDefinitions,
     };
 
+    /** Print the models  */
+    logger.info("Generating models");
+    const printedModels = printSdkModels(sdkContext);
+
     /** Print the query return types  */
-    logger.info("Generating return types");
-    const printedReturnTypes = printSdkReturnTypes(sdkContext);
+    logger.info("Generating operations");
+    const printedOperations = printSdkClasses(sdkContext);
 
-    /** Print each api definition  */
-    const printedDefinitions = Object.entries(sdkDefinitions).map(([apiKey, definition]) => {
-      logger.info("Generating api", apiKey);
+    // /** Print each api definition  */
+    // const printedDefinitions = Object.entries(sdkDefinitions).map(([apiKey, definition]) => {
+    //   logger.info("Generating api", apiKey);
 
-      return printSdkDefinition(sdkContext, definition);
-    });
+    //   return printSdkDefinition(sdkContext, definition);
+    // });
 
     logger.info("Printing api");
     return {
@@ -69,9 +82,8 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
           /** Print the requester function */
           ...printRequesterType(config),
           /** Print the query return types */
-          printedReturnTypes,
-          /** Print the definitions */
-          ...printedDefinitions,
+          printedModels,
+          printedOperations,
         ],
         "\n"
       ),

@@ -4,18 +4,18 @@ import {
   ArgumentTypescriptVisitor,
   filterJoin,
   getArgList,
+  logger,
   nonNullable,
   PluginContext,
   printComment,
   printDebug,
 } from "@linear/plugin-common";
 import { DocumentNode, Kind, OperationDefinitionNode, visit } from "graphql";
-import { pascalCase } from "pascal-case";
 import c from "./constants";
 import { getParentOperation, printOperation } from "./operation";
-import { printOperationReturnType, printSdkFunctionName, printSdkFunctionType } from "./print";
+import { printOperationReturnType, printPascal, printSdkFunctionName, printSdkFunctionType } from "./print";
 import { getRequesterArg } from "./requester";
-import { SdkDefinition, SdkDefinitions, SdkOperation, SdkPluginContext } from "./types";
+import { SdkDefinition, SdkDefinitions, SdkModel, SdkOperation, SdkPluginContext } from "./types";
 import { getRequiredVariables } from "./variable";
 
 /**
@@ -44,38 +44,38 @@ function getSdkOperations(documents: Types.DocumentFile[]): OperationDefinitionN
 /**
  * Process the documents and return a definition object for generating the api
  */
-export function getSdkDefinitions<C>(context: PluginContext<C>, documents: Types.DocumentFile[]): SdkDefinitions {
+export function getSdkDefinitions<C>(
+  context: PluginContext<C>,
+  documents: Types.DocumentFile[],
+  models: SdkModel[]
+): SdkDefinitions {
   return getSdkOperations(documents).reduce<SdkDefinitions>((acc, node) => {
     const operationPath = (node.name?.value ?? "").split("_");
     const sdkPath = operationPath.slice(0, operationPath.length - 1);
     const sdkKey = sdkPath.join("_");
 
-    const name =
-      node.name?.value
-        .split("_")
-        .map(s => pascalCase(s))
-        .join("_") ?? "UNNAMED_OPERATION";
-
-    const operationType = pascalCase(node.operation);
-
-    /** Create a visitor to print the arg type */
-    const argVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
+    const name = printPascal(node.name?.value);
+    const operationType = printPascal(node.operation);
 
     /** Find a matching query if it exists */
     const query = context.queries.find(q => q.name.value === node.name?.value);
-
+    if (query) {
+      logger.trace(visit(query.type, new ArgumentTypescriptVisitor(context)));
+    }
     const sdkOperation: SdkOperation = {
       name,
       path: operationPath,
       node,
       query,
+      /** Find a matching object if it exists */
+      model: query ? models.find(b => b.name === visit(query.type, new ArgumentTypescriptVisitor(context))) : undefined,
       /** The parsed and printed required variables */
       requiredVariables: getRequiredVariables(node).reduce(
         (acc2, v) => ({
           ...acc2,
           [v.variable.name.value]: {
             name: v.variable.name.value,
-            type: visit(v, argVisitor),
+            type: visit(v, new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT)),
             optional: false,
           },
         }),

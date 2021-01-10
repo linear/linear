@@ -1,6 +1,8 @@
 import { filterJoin, getArgList, printComment } from "@linear/plugin-common";
+import c from "./constants";
 import { getOperationArgs, getOperationObjects } from "./operation";
 import { printNamespaced, printOperationReturnType, printSdkFunctionType } from "./print";
+import { printRequesterArgs } from "./requester";
 import { SdkDefinition, SdkOperation, SdkPluginContext } from "./types";
 
 /**
@@ -8,7 +10,12 @@ import { SdkDefinition, SdkOperation, SdkPluginContext } from "./types";
  */
 export function printSdkReturnTypes(context: SdkPluginContext): string {
   const returnTypes = Object.values(context.sdkDefinitions).reduce<string[]>((acc, definition) => {
-    return [...acc, ...definition.operations.map(o => printSdkReturnType(context, o))];
+    return [
+      ...acc,
+      ...definition.operations.map(o =>
+        filterJoin([printSdkReturnType(context, o), printSdkClass(context, o)], "\n\n")
+      ),
+    ];
   }, []);
 
   return filterJoin(returnTypes, "\n\n");
@@ -109,4 +116,84 @@ function printSdkReturnType(context: SdkPluginContext, o: SdkOperation): string 
     const returnType = filterJoin([operationSdkType, omittedResultType], " & ");
     return filterJoin([comment, `export type ${o.returnType} = ${returnType}`], "\n");
   }
+}
+
+/**
+ * Print the exported return type for an sdk operation
+ */
+function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
+  const requiredVariables = getArgList(getOperationArgs(context, o));
+  const variableType = printNamespaced(context, o.operationVariablesTypes);
+  const documentName = printNamespaced(context, o.documentVariableName);
+  const resultType = printNamespaced(context, o.operationResultType);
+
+  return `
+    export class ${o.operationResultType} {
+      private _${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}
+      ${filterJoin(
+        o.model?.queryFields.map(field =>
+          field.args.some(arg => !arg.optional)
+            ? filterJoin(
+                [
+                  field.node.description?.value ? printComment([field.node.description.value]) : undefined,
+                  `private _${field.name}?: { ${getArgList(field.args).printOutput} }`,
+                ],
+                "\n"
+              )
+            : undefined
+        ),
+        "\n"
+      )}
+
+      public constructor(${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}) {
+        this._${c.REQUESTER_NAME} = ${c.REQUESTER_NAME}
+      }
+
+      public async fetch(${requiredVariables.printInput}) {
+        await ${`this._${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${filterJoin(
+          [documentName, printRequesterArgs(o)],
+          ", "
+        )}).then(response => {
+          const r = ${filterJoin(["response", ...o.path], "?.")}
+          ${filterJoin(
+            o.model?.scalarFields.map(field => `this.${field.name} = r.${field.name} ?? undefined`),
+            "\n"
+          )}
+          ${filterJoin(
+            o.model?.queryFields.map(field =>
+              field.args.some(arg => !arg.optional) ? `this._${field.name} = r.${field.name} ?? undefined` : undefined
+            ),
+            "\n"
+          )}
+        })`}
+
+        return this
+      }
+
+      ${filterJoin(
+        o.model?.scalarFields.map(field =>
+          filterJoin(
+            [
+              field.node.description?.value ? printComment([field.node.description.value]) : undefined,
+              `public ${field.name}?: ${field.type}`,
+            ],
+            "\n"
+          )
+        ),
+        "\n"
+      )}
+
+      ${filterJoin(
+        o.model?.queryFields.map(field => {
+          return `
+          ${field.node.description ? printComment([field.node.description?.value]) : undefined}
+          public get ${field.name}() {
+            // return new 
+          }
+        `;
+        }),
+        "\n\n"
+      )}
+    }
+  `;
 }

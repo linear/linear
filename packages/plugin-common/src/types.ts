@@ -69,6 +69,8 @@ export interface ArgDefinition {
  * Processed arg definition for printing
  */
 export interface ArgList {
+  /** The list of arg definitions */
+  args: ArgDefinition[];
   /** The jsdoc string for arguments */
   jsdoc: string[];
   /** The typescript string for argument input */
