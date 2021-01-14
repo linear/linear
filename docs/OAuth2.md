@@ -81,7 +81,7 @@ After a successful request, a valid access token will be returned in the respons
   ]
 }
 ```
-> Note: A user can only have a maximum of *10* valid access tokens for the same application and scopes at any given time. If a request is made for an 11th access token from your app with the same scopes, the oldest token will automatically be revoked.
+A user can only have a maximum of *10* access tokens for the same application and scopes at any given time. If a request is made for an 11th access token from your app with the same scopes, the oldest token will automatically be revoked.
 
 ### Step 4: Making an API request
 
