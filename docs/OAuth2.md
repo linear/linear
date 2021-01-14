@@ -40,6 +40,8 @@ Example of an authorization URL:
 https://linear.app/oauth/authorize?client_id=client1&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth%2Fcallback&response_type=code&scope=read,write
 ```
 
+If the user has already authorized your application for the given scopes, they will be automatically redirected to your redirect url rather than having to approve your application again.
+
 ### Step 2: Linear redirects back to your site or application
 
 Once the user approves your application they will be redirected to your application with the OAuth authorization `code` in the URL. If you specified a state parameter in step 1, it will be returned as well. The parameter will always match the value specified in step 1. If the values don’t match, the request should not be trusted.
@@ -79,6 +81,7 @@ After a successful request, a valid access token will be returned in the respons
   ]
 }
 ```
+A user can only have a maximum of *10* access tokens for the same application and scopes at any given time. If a request is made for an 11th access token from your app with the same scopes, the oldest token will automatically be revoked.
 
 ### Step 4: Making an API request
 
