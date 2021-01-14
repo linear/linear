@@ -40,7 +40,7 @@ Example of an authorization URL:
 https://linear.app/oauth/authorize?client_id=client1&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth%2Fcallback&response_type=code&scope=read,write
 ```
 
-> Note: If the user has already authorized your application for the given scopes, they will be automatically redirected to your redirect url rather than having to approve your application again.
+If the user has already authorized your application for the given scopes, they will be automatically redirected to your redirect url rather than having to approve your application again.
 
 ### Step 2: Linear redirects back to your site or application
 
