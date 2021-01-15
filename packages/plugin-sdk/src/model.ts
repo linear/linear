@@ -1,5 +1,6 @@
 import {
   getArgList,
+  getLast,
   printComment,
   printDebug,
   printList,
@@ -10,6 +11,7 @@ import c from "./constants";
 import { printNamespaced, printPascal } from "./print";
 import { getRequestArg } from "./request";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
+import { getOptionalVariables } from "./variable";
 
 /**
  * Print all models
@@ -34,6 +36,7 @@ function printModelField(field: SdkModelField, content: string): string {
  */
 function printModel(context: SdkPluginContext, model: SdkModel): string {
   const dataType = `${printNamespaced(context, model.name)}Fragment`;
+  const operations = context.sdkDefinitions[model.name.toLowerCase()]?.operations ?? [];
   const args = getArgList([
     getRequestArg(),
     {
@@ -161,10 +164,59 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                   return printModelField(
                     field,
                     `public get ${field.name}(): Promise<${typeName} | undefined> {
-                        return new ${fieldQueryName}(this.${c.REQUEST_NAME}).fetch(${printList(fieldQueryArgs, ", ")})
-                      }`
+                      return new ${fieldQueryName}(this.${c.REQUEST_NAME}).fetch(${printList(fieldQueryArgs, ", ")})
+                    }`
                   );
                 }
+              }),
+              "\n"
+            ),
+          ],
+          "\n"
+        )}
+        ${printList(
+          [
+            printDebug("operations"),
+            printList(
+              operations.map(o => {
+                const fieldName = getLast(o.path);
+                const field = model.fields.connection.find(f => f.name === fieldName);
+                const requiredVariableNames = Object.keys(o.requiredVariables).map(v => `'${v}'`);
+                const optionalArgs = getOptionalVariables(o.node);
+                const variableType = printNamespaced(context, o.operationVariablesTypes);
+                const optionalArg = optionalArgs
+                  ? getArgList([
+                      {
+                        name: c.VARIABLE_NAME,
+                        optional: true,
+                        type: requiredVariableNames.length
+                          ? `Omit<${variableType}, ${printList(requiredVariableNames, " | ")}>`
+                          : variableType,
+                        description: `variables without ${printList(requiredVariableNames, ", ")} to pass into the ${
+                          o.operationResultType
+                        }`,
+                      },
+                    ])
+                  : undefined;
+                const operationArgs = printList(
+                  [`this.${c.REQUEST_NAME}`, ...Object.keys(o.requiredVariables).map(v => `this.${v}`), ,],
+                  ", "
+                );
+                const variableCheck = printList([...Object.keys(o.requiredVariables).map(v => `this.${v}`), ,], " && ");
+                const operationCall = `new ${o.name}${o.operationType}(${operationArgs}).fetch(${optionalArg?.printOutput})`;
+
+                return printList(
+                  [
+                    printComment([field?.node.description?.value]),
+                    printDebug(o),
+                    `public ${optionalArg ? "" : "get"} ${fieldName}(${optionalArg?.printInput}) {
+                        return ${variableCheck ? `${variableCheck} ?` : ""} ${operationCall} ${
+                      variableCheck ? `: undefined` : ""
+                    }
+                    }`,
+                  ],
+                  "\n"
+                );
               }),
               "\n"
             ),

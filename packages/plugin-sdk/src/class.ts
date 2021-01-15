@@ -88,7 +88,7 @@ function printOperation(context: SdkPluginContext, o: SdkOperation): string {
           )}
         }
 
-        public async fetch(${requiredVariables.printInput}) {
+        public async fetch(${requiredVariables.printInput}): Promise<${fragmentName} | undefined> {
           return ${`this.${c.REQUEST_NAME}<${resultType}, ${variableType}>(${printList(
             [documentName, printOperationArgs(o, parentVariables)],
             ", "
