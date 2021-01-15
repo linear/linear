@@ -1,4 +1,4 @@
-import { getArgList, printComment, printDebug, printList } from "@linear/plugin-common";
+import { ArgDefinition, getArgList, printComment, printDebug, printList } from "@linear/plugin-common";
 import c from "./constants";
 import { getOperationArgs } from "./operation";
 import { printNamespaced } from "./print";
@@ -20,19 +20,19 @@ export function printOperations(context: SdkPluginContext): string {
 /**
  * Get the request args from the operation variables
  */
-export function printOperationArgs(o: SdkOperation, parent?: SdkOperation): string {
-  const parentVariables = parent ? Object.keys(parent.requiredVariables) : [];
+export function printOperationArgs(o: SdkOperation, parentVariables: Record<string, ArgDefinition>): string {
+  const parentVariableNames = Object.keys(parentVariables);
   const requiredVariables = Object.keys(o.requiredVariables);
   const optionalVariables = getOptionalVariables(o.node);
 
-  if (parentVariables.length || requiredVariables.length) {
+  if (parentVariableNames.length || requiredVariables.length) {
     return `{
       ${printList(
         [
           /** Merge required variables from parent scope */
-          ...parentVariables.map(v => `${v}: this._${v}`),
+          ...parentVariableNames.map(v => `${v}: this._${v}`),
           /** Merge remaining required variables */
-          ...requiredVariables.map(v => (parentVariables.includes(v) ? undefined : v)),
+          ...requiredVariables.map(v => (parentVariableNames.includes(v) ? undefined : v)),
           /** Spread optional variables */
           optionalVariables.length ? `...${c.VARIABLE_NAME}` : undefined,
         ],
@@ -44,6 +44,17 @@ export function printOperationArgs(o: SdkOperation, parent?: SdkOperation): stri
   return optionalVariables.length ? c.VARIABLE_NAME : "{}";
 }
 
+function getOperationParentVariables(context: SdkPluginContext, o: SdkOperation): Record<string, ArgDefinition> {
+  return o.sdkPath.reduce((acc, _, i) => {
+    const sdkKey = o.sdkPath.slice(0, i).join("_");
+    const parentKey = o.sdkPath.slice(0, i + 1).join("_");
+    return {
+      ...acc,
+      ...context.sdkDefinitions[sdkKey].operations.find(p => p.path.join("_") === parentKey)?.requiredVariables,
+    };
+  }, {});
+}
+
 /**
  * Print the exported return type for an sdk operation
  */
@@ -53,8 +64,8 @@ function printOperation(context: SdkPluginContext, o: SdkOperation): string {
   const documentName = printNamespaced(context, o.documentVariableName);
   const resultType = printNamespaced(context, o.operationResultType);
   const fragmentName = o.fragment?.name.value;
-  const parent = context.sdkDefinitions[""].operations.find(p => p.path.join("_") === o.sdkPath.join("_"));
-  const parentArgs = getArgList([getRequestArg(), ...Object.values(parent?.requiredVariables ?? {})]);
+  const parentVariables = getOperationParentVariables(context, o);
+  const parentArgs = getArgList([getRequestArg(), ...Object.values(parentVariables ?? {})]);
 
   return printList(
     [
@@ -62,21 +73,21 @@ function printOperation(context: SdkPluginContext, o: SdkOperation): string {
       printDebug(o),
       `export class ${o.operationResultType} extends ${c.REQUEST_CLASS} {
         ${printList(
-          Object.values(parent?.requiredVariables ?? {}).map(arg => `private _${arg.name}: ${arg.type}`),
+          Object.values(parentVariables ?? {}).map(arg => `private _${arg.name}: ${arg.type}`),
           "\n"
         )}
 
         public constructor(${parentArgs.printInput}) {
           super(${c.REQUEST_NAME})
           ${printList(
-            Object.values(parent?.requiredVariables ?? {}).map(arg => `this._${arg.name} = ${arg.name}`),
+            Object.values(parentVariables ?? {}).map(arg => `this._${arg.name} = ${arg.name}`),
             "\n"
           )}
         }
 
         public async fetch(${requiredVariables.printInput}) {
           return ${`this.${c.REQUEST_NAME}<${resultType}, ${variableType}>(${printList(
-            [documentName, printOperationArgs(o, parent)],
+            [documentName, printOperationArgs(o, parentVariables)],
             ", "
           )}).then(response => {
             const data = ${printList(["response", ...o.path], "?.")}
