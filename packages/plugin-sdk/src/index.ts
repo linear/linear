@@ -71,8 +71,6 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
         "/* eslint-disable @typescript-eslint/no-unused-vars */",
         /** Import DocumentNode if required */
         config.documentMode !== DocumentMode.string ? `import { DocumentNode } from 'graphql'` : undefined,
-        /** Import ResultOf util for document return types */
-        `import { ResultOf } from '@graphql-typed-document-node/core'`,
       ].filter(nonNullable),
       content: printList(
         [

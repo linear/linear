@@ -1,6 +1,6 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import c from "./constants";
-import { reduceListType, reduceTypeName } from "./field";
+import { reduceTypeName } from "./field";
 import { Named, NamedFields, PluginContext } from "./types";
 
 /**
@@ -10,8 +10,7 @@ export function findObject<C>(
   context: PluginContext<C>,
   field?: FieldDefinitionNode | Named<FieldDefinitionNode>
 ): ObjectTypeDefinitionNode | undefined {
-  /** Ignore list types */
-  if (field && !reduceListType(field.type)) {
+  if (field) {
     const type = reduceTypeName(field.type);
     return context.objects.find(o => o.name.value === type);
   }

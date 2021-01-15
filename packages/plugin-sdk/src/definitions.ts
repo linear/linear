@@ -101,6 +101,7 @@ export function getSdkDefinitions<C>(
     const sdkOperation: SdkOperation = {
       name: operationName,
       path: operationPath,
+      sdkPath,
       node,
       query,
       model,

@@ -37,6 +37,8 @@ export interface SdkOperation {
   name: string;
   /** The path through the schema to return this data */
   path: string[];
+  /** The path through the schema to return the parent operation */
+  sdkPath: string[];
   /** The graphql node being processed with chain info added */
   node: OperationDefinitionNode;
   /** The query for this operation */

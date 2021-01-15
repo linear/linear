@@ -147,9 +147,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             printDebug("fields.query"),
             printList(
               model.fields.query.map(field => {
-                const typeName =
-                  reduceListType(field.node.type) ??
-                  printTypescriptType(context, field.node.type, c.NAMESPACE_DOCUMENT);
+                const typeName = reduceListType(field.node.type) ?? printTypescriptType(context, field.node.type);
                 const fieldQueryName = `${printPascal(field.query.name.value)}Query`;
                 const fieldQueryArgs = field.args?.map(arg => `this._${field.name}?.${arg.name}`);
 
