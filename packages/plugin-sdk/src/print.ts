@@ -1,4 +1,4 @@
-import { filterJoin, getLast, upperFirst } from "@linear/plugin-common";
+import { getLast, printList, upperFirst } from "@linear/plugin-common";
 import { pascalCase } from "pascal-case";
 import c from "./constants";
 import { SdkOperation, SdkPluginContext } from "./types";
@@ -7,7 +7,7 @@ import { SdkOperation, SdkPluginContext } from "./types";
  * Prepend the import namespace if required
  */
 export function printNamespaced(context: SdkPluginContext, name?: string): string {
-  return context.config.documentFile ? filterJoin([c.NAMESPACE_DOCUMENT, name], ".") : name ?? "UNNAMED_IMPORT";
+  return context.config.documentFile ? printList([c.NAMESPACE_DOCUMENT, name], ".") : name ?? "UNNAMED_IMPORT";
 }
 
 /**

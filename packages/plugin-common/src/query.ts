@@ -1,6 +1,6 @@
 import { FieldDefinitionNode } from "graphql";
 import c from "./constants";
-import { getTypeName } from "./field";
+import { reduceListType, reduceTypeName } from "./field";
 import { Named, PluginContext } from "./types";
 
 /**
@@ -11,7 +11,7 @@ export function findQuery<C>(
   field: Named<FieldDefinitionNode> | FieldDefinitionNode
 ): FieldDefinitionNode | undefined {
   /** Ignore queries for connections */
-  if (getTypeName(field.type).endsWith(c.CONNECTION_TYPE)) {
+  if (reduceTypeName(field.type).endsWith(c.CONNECTION_TYPE)) {
     return undefined;
   }
 
@@ -20,7 +20,11 @@ export function findQuery<C>(
       /** Matches name */
       // q.name.value === (field as FieldDefinitionNode).name?.value ?? field.name &&
       /** Matches return type */
-      getTypeName(q.type) === getTypeName(field.type)
+      reduceTypeName(q.type) === reduceTypeName(field.type) &&
+      /** Matches list type */
+      // reduceListType(q.type) === reduceListType(field.type)&&
+      /** Is not a list type */
+      !reduceListType(field.type)
       // requiredArgs(q.arguments)?.find(a => a.name.value === c.ID_NAME)
       // /** Matches required arguments */
       // requiredArgs(q.arguments).every(a => a.name.value field.arguments.)

@@ -6,6 +6,12 @@ export * from "./documents";
 /** The function type for calling the graphql client */
 export type LinearRequest = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
 
+/**
+ * A user that has access to the the resources of an organization.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserFragment response data
+ */
 export class User {
   private _request: LinearRequest;
 
@@ -30,62 +36,52 @@ export class User {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The user's full name. */
   public name?: string;
-
   /** The user's display (nick) name. Unique within each organization. */
   public displayName?: string;
-
   /** The user's email address. */
   public email?: string;
-
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
-
   /** Reason why is the account disabled. */
   public disableReason?: string;
-
   /** Unique hash for the user to be used in invite URLs. */
   public inviteHash?: string;
-
   public userAccountId?: string;
-
   /** The last time the user was seen online. If null, the user is currently online. */
   public lastSeen?: D.Scalars["DateTime"];
-
   /** Whether the user is an organization administrator. */
   public admin?: boolean;
-
   /** Whether the user account is active or disabled. */
   public active?: boolean;
-
   /** Number of issues created. */
   public createdIssueCount?: number;
-
   /** The settings of the user. */
   public get settings(): Promise<UserSettings | undefined> {
     return new NotificationQuery(this._request).fetch();
   }
-
   /** Organization in which the user belongs to. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * The settings of a user as a JSON object.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserSettingsFragment response data
+ */
 export class UserSettings {
   private _request: LinearRequest;
   private _user?: D.UserSettingsFragment["user"];
@@ -103,46 +99,47 @@ export class UserSettings {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The notification channel settings the user has selected. */
   public notificationPreferences?: D.Scalars["JSONObject"];
-
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom?: string[];
-
   /** The user to whom this notification was targeted for. */
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 
+/**
+ * A IssueConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueConnectionFragment response data
+ */
 export class IssueConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.IssueConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.IssueConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Issue(request, node)) : undefined;
   }
 
-  public get nodes(): Issue[] | undefined {
-    return this._nodes?.map(node => new Issue(this._request, node));
-  }
+  public nodes?: Issue[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * An issue.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueFragment response data
+ */
 export class Issue {
   private _request: LinearRequest;
   private _team?: D.IssueFragment["team"];
@@ -189,112 +186,89 @@ export class Issue {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The issue's unique number. */
   public number?: number;
-
   /** The issue's title. */
   public title?: string;
-
   /** The issue's description in markdown format. */
   public description?: string;
-
   /** The issue's description as a Prosemirror document. */
   public descriptionData?: D.Scalars["JSON"];
-
   /** The priority of the issue. */
   public priority?: number;
-
   /** The estimate of the complexity of the issue.. */
   public estimate?: number;
-
   /** The order of the item in its column on the board. */
   public boardOrder?: number;
-
   /** The time at which the issue was moved into started state. */
   public startedAt?: D.Scalars["DateTime"];
-
   /** The time at which the issue was moved into completed state. */
   public completedAt?: D.Scalars["DateTime"];
-
   /** The time at which the issue was moved into canceled state. */
   public canceledAt?: D.Scalars["DateTime"];
-
   /** The time at which the issue was automatically closed by the auto pruning process. */
   public autoClosedAt?: D.Scalars["DateTime"];
-
   /** The time at which the issue was automatically archived by the auto pruning process. */
   public autoArchivedAt?: D.Scalars["DateTime"];
-
   /** The date at which the issue is due. */
   public dueDate?: D.Scalars["TimelessDateScalar"];
-
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers?: string[];
-
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   public subIssueSortOrder?: number;
-
   /** Issue's human readable identifier (e.g. ENG-123). */
   public identifier?: string;
-
   /** Label for the priority. */
   public priorityLabel?: string;
-
   /** Issue URL. */
   public url?: string;
-
   /** Suggested branch name for the issue. */
   public branchName?: string;
-
   /** The team that the issue is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-
   /** The cycle that the issue is associated with. */
   public get cycle(): Promise<Cycle | undefined> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-
   /** The workflow state that the issue is associated with. */
   public get state(): Promise<WorkflowState | undefined> | undefined {
     return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
   }
-
   /** The user to whom the issue is assigned to. */
   public get assignee(): Promise<User | undefined> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
-
   /** The parent of the issue. */
   public get parent(): Promise<Issue | undefined> | undefined {
     return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
-
   /** The project that the issue is associated with. */
   public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-
   /** The user who created the issue. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
 
+/**
+ * An organizational unit that contains issues.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TeamFragment response data
+ */
 export class Team {
   private _request: LinearRequest;
   private _draftWorkflowState?: D.TeamFragment["draftWorkflowState"];
@@ -347,146 +321,115 @@ export class Team {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The team's name. */
   public name?: string;
-
   /** The team's unique key. The key is used in URLs. */
   public key?: string;
-
   /** The team's description. */
   public description?: string;
-
   /** Whether the team uses cycles. */
   public cyclesEnabled?: boolean;
-
   /** The day of the week that a new cycle starts. */
   public cycleStartDay?: number;
-
   /** The duration of a cycle in weeks. */
   public cycleDuration?: number;
-
   /** The cooldown time after each cycle in weeks. */
   public cycleCooldownTime?: number;
-
   /** Auto assign started issues to current cycle. */
   public cycleIssueAutoAssignStarted?: boolean;
-
   /** Auto assign completed issues to current cycle. */
   public cycleIssueAutoAssignCompleted?: boolean;
-
   /** Only allow issues issues with cycles in Active Issues. */
   public cycleLockToActive?: boolean;
-
   /** How many upcoming cycles to create. */
   public upcomingCycleCount?: number;
-
   /** The timezone of the team. Defaults to "America/Los_Angeles" */
   public timezone?: string;
-
   /** Unique hash for the team to be used in invite URLs. */
   public inviteHash?: string;
-
   /** The issue estimation type to use. */
   public issueEstimationType?: string;
-
   /** Whether to allow zeros in issues estimates. */
   public issueEstimationAllowZero?: boolean;
-
   /** Whether to add additional points to the estimate scale. */
   public issueEstimationExtended?: boolean;
-
   /** What to use as an default estimate for unestimated issues. */
   public defaultIssueEstimate?: number;
-
   /** The default template to use for new issues created by members of the team. */
   public defaultTemplateForMembersId?: string;
-
   /** The default template to use for new issues created by non-members of the team. */
   public defaultTemplateForNonMembersId?: string;
-
   /** Whether to group recent issue history entries. */
   public groupIssueHistory?: boolean;
-
   /** Whether to send new issue notifications to Slack. */
   public slackNewIssue?: boolean;
-
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments?: boolean;
-
   /** Whether to send new issue status updates to Slack. */
   public slackIssueStatuses?: boolean;
-
   /** Period after which issues are automatically closed in months. Null/undefined means disabled. */
   public autoClosePeriod?: number;
-
   /** The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state. */
   public autoCloseStateId?: string;
-
   /** Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled. */
   public autoArchivePeriod?: number;
-
   /** Calender feed (iCal) for cycles. */
   public cycleCalenderUrl?: string;
-
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
   public get draftWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._draftWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._draftWorkflowState?.id)
       : undefined;
   }
-
   /** The workflow state into which issues are moved when a PR has been opened. */
   public get startWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._startWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
       : undefined;
   }
-
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   public get reviewWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._reviewWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._reviewWorkflowState?.id)
       : undefined;
   }
-
   /** The workflow state into which issues are moved when a PR has been merged. */
   public get mergeWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._mergeWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
       : undefined;
   }
-
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
   public get markedAsDuplicateWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._markedAsDuplicateWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
   }
-
   /** Team's currently active cycle. */
   public get activeCycle(): Promise<Cycle | undefined> | undefined {
     return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
   }
-
   /** The organization that the team is associated with. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * A state in a team workflow.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial WorkflowStateFragment response data
+ */
 export class WorkflowState {
   private _request: LinearRequest;
   private _team?: D.WorkflowStateFragment["team"];
@@ -507,55 +450,53 @@ export class WorkflowState {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The state's name. */
   public name?: string;
-
   /** The state's UI color as a HEX string. */
   public color?: string;
-
   /** Description of the state. */
   public description?: string;
-
   /** The position of the state in the team flow. */
   public position?: number;
-
   /** The type of the state. */
   public type?: string;
-
   /** The team to which this state belongs to. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
 
+/**
+ * A CycleConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CycleConnectionFragment response data
+ */
 export class CycleConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.CycleConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.CycleConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Cycle(request, node)) : undefined;
   }
 
-  public get nodes(): Cycle[] | undefined {
-    return this._nodes?.map(node => new Cycle(this._request, node));
-  }
+  public nodes?: Cycle[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A set of issues to be resolved in a specified amount of time.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CycleFragment response data
+ */
 export class Cycle {
   private _request: LinearRequest;
   private _team?: D.CycleFragment["team"];
@@ -580,52 +521,45 @@ export class Cycle {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The number of the cycle. */
   public number?: number;
-
   /** The custom name of the cycle. */
   public name?: string;
-
   /** The start time of the cycle. */
   public startsAt?: D.Scalars["DateTime"];
-
   /** The end time of the cycle. */
   public endsAt?: D.Scalars["DateTime"];
-
   /** The completion time of the cycle. If null, the cycle hasn't been completed. */
   public completedAt?: D.Scalars["DateTime"];
-
   /** The total number of issues in the cycle after each day. */
   public issueCountHistory?: number[];
-
   /** The number of completed issues in the cycle after each day. */
   public completedIssueCountHistory?: number[];
-
   /** The total number of estimation points after each day. */
   public scopeHistory?: number[];
-
   /** The number of completed estimation points after each day. */
   public completedScopeHistory?: number[];
-
   /** The team that the cycle is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
 
+/**
+ * A PageInfo model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial PageInfoFragment response data
+ */
 export class PageInfo {
   public constructor(request: LinearRequest, data: D.PageInfoFragment) {
     this.hasPreviousPage = data.hasPreviousPage ?? undefined;
@@ -636,32 +570,36 @@ export class PageInfo {
 
   /** Indicates if there are more results when paginating backward. */
   public hasPreviousPage?: boolean;
-
   /** Indicates if there are more results when paginating forward. */
   public hasNextPage?: boolean;
-
   /** Cursor representing the first result in the paginated results. */
   public startCursor?: string;
-
   /** Cursor representing the last result in the paginated results. */
   public endCursor?: string;
 }
 
+/**
+ * A TeamMembershipConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TeamMembershipConnectionFragment response data
+ */
 export class TeamMembershipConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.TeamMembershipConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.TeamMembershipConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new TeamMembership(request, node)) : undefined;
   }
 
-  public get nodes(): TeamMembership[] | undefined {
-    return this._nodes?.map(node => new TeamMembership(this._request, node));
-  }
+  public nodes?: TeamMembership[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * Defines the membership of a user to a team.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TeamMembershipFragment response data
+ */
 export class TeamMembership {
   private _request: LinearRequest;
   private _user?: D.TeamMembershipFragment["user"];
@@ -679,45 +617,47 @@ export class TeamMembership {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The user that the membership is associated with. */
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-
   /** The team that the membership is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
 
+/**
+ * A ProjectConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ProjectConnectionFragment response data
+ */
 export class ProjectConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.ProjectConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.ProjectConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Project(request, node)) : undefined;
   }
 
-  public get nodes(): Project[] | undefined {
-    return this._nodes?.map(node => new Project(this._request, node));
-  }
+  public nodes?: Project[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A project.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ProjectFragment response data
+ */
 export class Project {
   private _request: LinearRequest;
   private _creator?: D.ProjectFragment["creator"];
@@ -755,89 +695,71 @@ export class Project {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The project's name. */
   public name?: string;
-
   /** The project's description. */
   public description?: string;
-
   /** The project's unique URL slug. */
   public slugId?: string;
-
   /** The icon of the project. */
   public icon?: string;
-
   /** The project's color. */
   public color?: string;
-
   /** The type of the state. */
   public state?: string;
-
   /** The estimated completion date of the project. */
   public targetDate?: D.Scalars["TimelessDateScalar"];
-
   /** The time at which the project was moved into started state. */
   public startedAt?: D.Scalars["DateTime"];
-
   /** The time at which the project was moved into completed state. */
   public completedAt?: D.Scalars["DateTime"];
-
   /** The time at which the project was moved into canceled state. */
   public canceledAt?: D.Scalars["DateTime"];
-
   /** The sort order for the project within its milestone. */
   public sortOrder?: number;
-
   /** The total number of issues in the project after each week. */
   public issueCountHistory?: number[];
-
   /** The number of completed issues in the project after each week. */
   public completedIssueCountHistory?: number[];
-
   /** The total number of estimation points after each week. */
   public scopeHistory?: number[];
-
   /** The number of completed estimation points after each week. */
   public completedScopeHistory?: number[];
-
   /** Whether to send new issue notifications to Slack. */
   public slackNewIssue?: boolean;
-
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments?: boolean;
-
   /** Whether to send new issue status updates to Slack. */
   public slackIssueStatuses?: boolean;
-
   /** The user who created the project. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-
   /** The project lead. */
   public get lead(): Promise<User | undefined> | undefined {
     return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
-
   /** The milestone that this project is associated with. */
   public get milestone(): Promise<Milestone | undefined> | undefined {
     return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
   }
 }
 
+/**
+ * A milestone that contains projects.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial MilestoneFragment response data
+ */
 export class Milestone {
   private _request: LinearRequest;
 
@@ -853,31 +775,31 @@ export class Milestone {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The name of the milestone. */
   public name?: string;
-
   /** The sort order for the milestone. */
   public sortOrder?: number;
-
   /** The organization that the milestone belongs to. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * An organization. Organizations are root-level objects that contain user accounts and teams.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationFragment response data
+ */
 export class Organization {
   private _request: LinearRequest;
 
@@ -904,123 +826,116 @@ export class Organization {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The organization's name. */
   public name?: string;
-
   /** The organization's unique URL key. */
   public urlKey?: string;
-
   /** The organization's logo URL. */
   public logoUrl?: string;
-
   public upgradeThresholdExceeded?: boolean;
-
   /** Rolling 30-day total upload volume for the organization, in megabytes. */
   public periodUploadVolume?: number;
-
   /** How git branches are formatted. If null, default formatting will be used. */
   public gitBranchFormat?: string;
-
   /** Whether the Git integration linkback messages should be sent to private repositories. */
   public gitLinkbackMessagesEnabled?: boolean;
-
   /** Whether the Git integration linkback messages should be sent to public repositories. */
   public gitPublicLinkbackMessagesEnabled?: boolean;
-
   /** Whether the organization is using a roadmap. */
   public roadmapEnabled?: boolean;
-
   /** Whether SAML authentication is enabled for organization. */
   public samlEnabled?: boolean;
-
   /** Allowed authentication providers, empty array means all are allowed */
   public allowedAuthServices?: string[];
-
   /** Number of active users in the organization. */
   public userCount?: number;
-
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
-
   /** The organization's subscription to a paid plan. */
   public get subscription(): Promise<Subscription | undefined> {
     return new SubscriptionQuery(this._request).fetch();
   }
 }
 
+/**
+ * A UserConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserConnectionFragment response data
+ */
 export class UserConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.UserConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.UserConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new User(request, node)) : undefined;
   }
 
-  public get nodes(): User[] | undefined {
-    return this._nodes?.map(node => new User(this._request, node));
-  }
+  public nodes?: User[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A TeamConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TeamConnectionFragment response data
+ */
 export class TeamConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.TeamConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.TeamConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Team(request, node)) : undefined;
   }
 
-  public get nodes(): Team[] | undefined {
-    return this._nodes?.map(node => new Team(this._request, node));
-  }
+  public nodes?: Team[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A MilestoneConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial MilestoneConnectionFragment response data
+ */
 export class MilestoneConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.MilestoneConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.MilestoneConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Milestone(request, node)) : undefined;
   }
 
-  public get nodes(): Milestone[] | undefined {
-    return this._nodes?.map(node => new Milestone(this._request, node));
-  }
+  public nodes?: Milestone[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A IntegrationConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IntegrationConnectionFragment response data
+ */
 export class IntegrationConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.IntegrationConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.IntegrationConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Integration(request, node)) : undefined;
   }
 
-  public get nodes(): Integration[] | undefined {
-    return this._nodes?.map(node => new Integration(this._request, node));
-  }
+  public nodes?: Integration[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * An integration with an external service.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IntegrationFragment response data
+ */
 export class Integration {
   private _request: LinearRequest;
   private _team?: D.IntegrationFragment["team"];
@@ -1034,47 +949,68 @@ export class Integration {
     this.archivedAt = data.archivedAt ?? undefined;
     this.service = data.service ?? undefined;
     this.serviceId = data.serviceId ?? undefined;
+    this.settings = data.settings ? new IntegrationSettings(request, data.settings) : undefined;
     this._team = data.team ?? undefined;
     this._creator = data.creator ?? undefined;
   }
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The integration's type. */
   public service?: string;
-
   /** The external service identifier. */
   public serviceId?: string;
-
+  /** Settings related to the integration. */
+  public settings?: IntegrationSettings;
   /** The organization that the integration is associated with. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
-
   /** The team that the integration is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-
   /** The user that added the integration. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
 
+/**
+ * The integration resource's settings
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IntegrationSettingsFragment response data
+ */
+export class IntegrationSettings {
+  public constructor(request: LinearRequest, data: D.IntegrationSettingsFragment) {
+    this.slackPost = data.slackPost ? new SlackPostSettings(request, data.slackPost) : undefined;
+    this.slackProjectPost = data.slackProjectPost ? new SlackPostSettings(request, data.slackProjectPost) : undefined;
+    this.googleSheets = data.googleSheets ? new GoogleSheetsSettings(request, data.googleSheets) : undefined;
+    this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
+  }
+
+  public slackPost?: SlackPostSettings;
+  public slackProjectPost?: SlackPostSettings;
+  public googleSheets?: GoogleSheetsSettings;
+  public sentry?: SentrySettings;
+}
+
+/**
+ * Slack notification specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SlackPostSettingsFragment response data
+ */
 export class SlackPostSettings {
   public constructor(request: LinearRequest, data: D.SlackPostSettingsFragment) {
     this.channel = data.channel ?? undefined;
@@ -1083,12 +1019,16 @@ export class SlackPostSettings {
   }
 
   public channel?: string;
-
   public channelId?: string;
-
   public configurationUrl?: string;
 }
 
+/**
+ * Google Sheets specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial GoogleSheetsSettingsFragment response data
+ */
 export class GoogleSheetsSettings {
   public constructor(request: LinearRequest, data: D.GoogleSheetsSettingsFragment) {
     this.spreadsheetId = data.spreadsheetId ?? undefined;
@@ -1098,14 +1038,17 @@ export class GoogleSheetsSettings {
   }
 
   public spreadsheetId?: string;
-
   public spreadsheetUrl?: string;
-
   public sheetId?: number;
-
   public updatedIssuesAt?: D.Scalars["DateTime"];
 }
 
+/**
+ * Sentry specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SentrySettingsFragment response data
+ */
 export class SentrySettings {
   public constructor(request: LinearRequest, data: D.SentrySettingsFragment) {
     this.organizationSlug = data.organizationSlug ?? undefined;
@@ -1115,6 +1058,12 @@ export class SentrySettings {
   public organizationSlug?: string;
 }
 
+/**
+ * The subscription of an organization.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SubscriptionFragment response data
+ */
 export class Subscription {
   private _request: LinearRequest;
   private _creator?: D.SubscriptionFragment["creator"];
@@ -1134,57 +1083,55 @@ export class Subscription {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The subscription type. */
   public type?: string;
-
   /** The number of seats in the subscription. */
   public seats?: number;
-
   /** The date the subscription was canceled, if any. */
   public canceledAt?: D.Scalars["DateTime"];
-
   /** The subscription type of a pending change. Null if no change pending. */
   public pendingChangeType?: string;
-
   /** The creator of the subscription. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-
   /** The organization that the subscription is associated with. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * A ProjectLinkConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ProjectLinkConnectionFragment response data
+ */
 export class ProjectLinkConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.ProjectLinkConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.ProjectLinkConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new ProjectLink(request, node)) : undefined;
   }
 
-  public get nodes(): ProjectLink[] | undefined {
-    return this._nodes?.map(node => new ProjectLink(this._request, node));
-  }
+  public nodes?: ProjectLink[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * An external link for a project.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ProjectLinkFragment response data
+ */
 export class ProjectLink {
   private _request: LinearRequest;
   private _creator?: D.ProjectLinkFragment["creator"];
@@ -1204,63 +1151,67 @@ export class ProjectLink {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The link's URL. */
   public url?: string;
-
   /** The link's label. */
   public label?: string;
-
   /** The user who created the link. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-
   /** The project that the link is associated with. */
   public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
 
+/**
+ * A WorkflowStateConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial WorkflowStateConnectionFragment response data
+ */
 export class WorkflowStateConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.WorkflowStateConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.WorkflowStateConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new WorkflowState(request, node)) : undefined;
   }
 
-  public get nodes(): WorkflowState[] | undefined {
-    return this._nodes?.map(node => new WorkflowState(this._request, node));
-  }
+  public nodes?: WorkflowState[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A TemplateConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TemplateConnectionFragment response data
+ */
 export class TemplateConnection {
-  private _request: LinearRequest;
-
   public constructor(request: LinearRequest, data: D.TemplateConnectionFragment) {
-    this._request = request;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Template(request, node)) : undefined;
   }
 
-  public get nodes(): Template[] | undefined {
-    return this._nodes?.map(node => new Template(this._request, node));
-  }
+  public nodes?: Template[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A template object used for creating new issues faster.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TemplateFragment response data
+ */
 export class Template {
   private _request: LinearRequest;
   private _team?: D.TemplateFragment["team"];
@@ -1282,57 +1233,55 @@ export class Template {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The entity type this template is for. */
   public type?: string;
-
   /** The name of the template. */
   public name?: string;
-
   /** Template description. */
   public description?: string;
-
   /** Template data. */
   public templateData?: D.Scalars["JSON"];
-
   /** The team that the template is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-
   /** The user who created the template. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
 
+/**
+ * A IssueLabelConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueLabelConnectionFragment response data
+ */
 export class IssueLabelConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.IssueLabelConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.IssueLabelConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new IssueLabel(request, node)) : undefined;
   }
 
-  public get nodes(): IssueLabel[] | undefined {
-    return this._nodes?.map(node => new IssueLabel(this._request, node));
-  }
+  public nodes?: IssueLabel[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * Labels that can be associated with issues.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueLabelFragment response data
+ */
 export class IssueLabel {
   private _request: LinearRequest;
   private _team?: D.IssueLabelFragment["team"];
@@ -1353,54 +1302,53 @@ export class IssueLabel {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The label's name. */
   public name?: string;
-
   /** The label's description. */
   public description?: string;
-
   /** The label's color as a HEX string. */
   public color?: string;
-
   /** The team to which the label belongs to. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-
   /** The user who created the label. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
 
+/**
+ * A WebhookConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial WebhookConnectionFragment response data
+ */
 export class WebhookConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.WebhookConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.WebhookConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Webhook(request, node)) : undefined;
   }
 
-  public get nodes(): Webhook[] | undefined {
-    return this._nodes?.map(node => new Webhook(this._request, node));
-  }
+  public nodes?: Webhook[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A webhook used to send HTTP notifications over data updates
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial WebhookFragment response data
+ */
 export class Webhook {
   private _request: LinearRequest;
   private _team?: D.WebhookFragment["team"];
@@ -1421,54 +1369,53 @@ export class Webhook {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** Webhook URL */
   public url?: string;
-
   /** Whether the Webhook is enabled. */
   public enabled?: boolean;
-
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
-
   /** The team that the webhook is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-
   /** The user who created the webhook. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
 
+/**
+ * A CommentConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CommentConnectionFragment response data
+ */
 export class CommentConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.CommentConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.CommentConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Comment(request, node)) : undefined;
   }
 
-  public get nodes(): Comment[] | undefined {
-    return this._nodes?.map(node => new Comment(this._request, node));
-  }
+  public nodes?: Comment[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A comment associated with an issue.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CommentFragment response data
+ */
 export class Comment {
   private _request: LinearRequest;
   private _user?: D.CommentFragment["user"];
@@ -1490,42 +1437,55 @@ export class Comment {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The comment content in markdown format. */
   public body?: string;
-
   /** Comment content as a Prosemirror document. */
   public bodyData?: D.Scalars["JSON"];
-
   /** Emoji reactions on the comment. */
   public reactionData?: D.Scalars["JSON"][];
-
   /** The time user edited the comment. */
   public editedAt?: D.Scalars["DateTime"];
-
   /** The user who wrote the comment. */
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-
   /** The issue that the comment is associated with. */
   public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
 
+/**
+ * A IssueHistoryConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueHistoryConnectionFragment response data
+ */
+export class IssueHistoryConnection {
+  public constructor(request: LinearRequest, data: D.IssueHistoryConnectionFragment) {
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new IssueHistory(request, node)) : undefined;
+  }
+
+  public nodes?: IssueHistory[];
+  public pageInfo?: PageInfo;
+}
+
+/**
+ * A record of changes to an issue.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueHistoryFragment response data
+ */
 export class IssueHistory {
   private _request: LinearRequest;
   private _issue?: D.IssueHistoryFragment["issue"];
@@ -1584,153 +1544,127 @@ export class IssueHistory {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** Whether the issue's description was updated. */
   public updatedDescription?: boolean;
-
   /** What the title was changed from. */
   public fromTitle?: string;
-
   /** What the title was changed to. */
   public toTitle?: string;
-
   /** What the priority was changed from. */
   public fromPriority?: number;
-
   /** What the priority was changed to. */
   public toPriority?: number;
-
   /** What the estimate was changed from. */
   public fromEstimate?: number;
-
   /** What the estimate was changed to. */
   public toEstimate?: number;
-
   /** Whether the issue was archived or un-archived. */
   public archived?: boolean;
-
   /** ID's of labels that were added. */
   public addedLabelIds?: string[];
-
   /** ID's of labels that were removed. */
   public removedLabelIds?: string[];
-
   /** Changed issue relationships. */
   public relationChanges?: string[];
-
   public autoClosed?: boolean;
-
   public autoArchived?: boolean;
-
   /** What the due date was changed from */
   public fromDueDate?: D.Scalars["TimelessDateScalar"];
-
   /** What the due date was changed to */
   public toDueDate?: D.Scalars["TimelessDateScalar"];
-
   /** The issue that was changed. */
   public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   public get actor(): Promise<User | undefined> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-
   /** The integration that made these changes. If null, possibly means that the change was made by a user. */
   public get integration(): Promise<Integration | undefined> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
-
   /** The user from whom the issue was re-assigned from. */
   public get fromAssignee(): Promise<User | undefined> | undefined {
     return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
   }
-
   /** The user to whom the issue was assigned to. */
   public get toAssignee(): Promise<User | undefined> | undefined {
     return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
   }
-
   /** The team from which the issue was moved from. */
   public get fromTeam(): Promise<Team | undefined> | undefined {
     return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
   }
-
   /** The team to which the issue was moved to. */
   public get toTeam(): Promise<Team | undefined> | undefined {
     return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
   }
-
   /** The previous parent of the issue. */
   public get fromParent(): Promise<Issue | undefined> | undefined {
     return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
-
   /** The new parent of the issue. */
   public get toParent(): Promise<Issue | undefined> | undefined {
     return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
-
   /** The previous workflow state of the issue. */
   public get fromState(): Promise<WorkflowState | undefined> | undefined {
     return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
   }
-
   /** The new workflow state of the issue. */
   public get toState(): Promise<WorkflowState | undefined> | undefined {
     return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
   }
-
   /** The previous cycle of the issue. */
   public get fromCycle(): Promise<Cycle | undefined> | undefined {
     return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
   }
-
   /** The new cycle of the issue. */
   public get toCycle(): Promise<Cycle | undefined> | undefined {
     return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
   }
-
   /** The previous project of the issue. */
   public get fromProject(): Promise<Project | undefined> | undefined {
     return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
   }
-
   /** The new project of the issue. */
   public get toProject(): Promise<Project | undefined> | undefined {
     return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
   }
 }
 
+/**
+ * A IntegrationResourceConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IntegrationResourceConnectionFragment response data
+ */
 export class IntegrationResourceConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.IntegrationResourceConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.IntegrationResourceConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new IntegrationResource(request, node)) : undefined;
   }
 
-  public get nodes(): IntegrationResource[] | undefined {
-    return this._nodes?.map(node => new IntegrationResource(this._request, node));
-  }
+  public nodes?: IntegrationResource[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * An integration resource created by an external service.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IntegrationResourceFragment response data
+ */
 export class IntegrationResource {
   private _request: LinearRequest;
   private _integration?: D.IntegrationResourceFragment["integration"];
@@ -1744,42 +1678,75 @@ export class IntegrationResource {
     this.archivedAt = data.archivedAt ?? undefined;
     this.resourceType = data.resourceType ?? undefined;
     this.resourceId = data.resourceId ?? undefined;
+    this.data = data.data ? new IntegrationResourceData(request, data.data) : undefined;
+    this.pullRequest = data.pullRequest ? new PullRequestPayload(request, data.pullRequest) : undefined;
     this._integration = data.integration ?? undefined;
     this._issue = data.issue ?? undefined;
   }
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The integration's type. */
   public resourceType?: string;
-
   /** The external service resource ID. */
   public resourceId?: string;
-
+  /** Detailed information about the external resource. */
+  public data?: IntegrationResourceData;
+  /** Pull request information for GitHub pull requests and GitLab merge requests. */
+  public pullRequest?: PullRequestPayload;
   /** The integration that the resource is associated with. */
   public get integration(): Promise<Integration | undefined> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
-
   /** The issue that the resource is associated with. */
   public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
 
+/**
+ * Integration resource's payload
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IntegrationResourceDataFragment response data
+ */
+export class IntegrationResourceData {
+  public constructor(request: LinearRequest, data: D.IntegrationResourceDataFragment) {
+    this.githubPullRequest = data.githubPullRequest
+      ? new PullRequestPayload(request, data.githubPullRequest)
+      : undefined;
+    this.gitlabMergeRequest = data.gitlabMergeRequest
+      ? new PullRequestPayload(request, data.gitlabMergeRequest)
+      : undefined;
+    this.githubCommit = data.githubCommit ? new CommitPayload(request, data.githubCommit) : undefined;
+    this.sentryIssue = data.sentryIssue ? new SentryIssuePayload(request, data.sentryIssue) : undefined;
+  }
+
+  /** The payload for an IntegrationResource of type 'githubPullRequest' */
+  public githubPullRequest?: PullRequestPayload;
+  /** The payload for an IntegrationResource of type 'gitlabMergeRequest' */
+  public gitlabMergeRequest?: PullRequestPayload;
+  /** The payload for an IntegrationResource of type 'githubCommit' */
+  public githubCommit?: CommitPayload;
+  /** The payload for an IntegrationResource of type 'sentryIssue' */
+  public sentryIssue?: SentryIssuePayload;
+}
+
+/**
+ * Pull request data
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial PullRequestPayloadFragment response data
+ */
 export class PullRequestPayload {
   public constructor(request: LinearRequest, data: D.PullRequestPayloadFragment) {
     this.status = data.status ?? undefined;
@@ -1800,36 +1767,28 @@ export class PullRequestPayload {
   }
 
   public status?: string;
-
   public number?: number;
-
   public url?: string;
-
   public draft?: boolean;
-
   public id?: string;
-
   public title?: string;
-
   public branch?: string;
-
   public userId?: string;
-
   public userLogin?: string;
-
   public repoLogin?: string;
-
   public repoName?: string;
-
   public createdAt?: string;
-
   public updatedAt?: string;
-
   public closedAt?: string;
-
   public mergedAt?: string;
 }
 
+/**
+ * GitHub's commit data
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CommitPayloadFragment response data
+ */
 export class CommitPayload {
   public constructor(request: LinearRequest, data: D.CommitPayloadFragment) {
     this.id = data.id ?? undefined;
@@ -1842,20 +1801,20 @@ export class CommitPayload {
   }
 
   public id?: string;
-
   public message?: string;
-
   public timestamp?: string;
-
   public url?: string;
-
   public added?: string[];
-
   public removed?: string[];
-
   public modified?: string[];
 }
 
+/**
+ * Sentry issue data
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SentryIssuePayloadFragment response data
+ */
 export class SentryIssuePayload {
   public constructor(request: LinearRequest, data: D.SentryIssuePayloadFragment) {
     this.issueId = data.issueId ?? undefined;
@@ -1873,53 +1832,50 @@ export class SentryIssuePayload {
 
   /** The Sentry identifier for the issue. */
   public issueId?: string;
-
   /** The description of the issue. */
   public webUrl?: string;
-
   /** The type of the actor who created the issue. */
   public actorType?: string;
-
   /** The Sentry identifier of the actor who created the issue. */
   public actorId?: number;
-
   /** The name of the Sentry actor who created this issue. */
   public actorName?: string;
-
   /** The Sentry identifier of the project this issue belongs to. */
   public projectId?: number;
-
   /** The slug of the project this issue belongs to. */
   public projectSlug?: string;
-
   /** The title of the issue. */
   public issueTitle?: string;
-
   /** The shortId of the issue. */
   public shortId?: string;
-
   /** The date this issue was first seen. */
   public firstSeen?: string;
-
   /** The name of the first release version this issue appeared on, if available. */
   public firstVersion?: string;
 }
 
+/**
+ * A IssueRelationConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueRelationConnectionFragment response data
+ */
 export class IssueRelationConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.IssueRelationConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.IssueRelationConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new IssueRelation(request, node)) : undefined;
   }
 
-  public get nodes(): IssueRelation[] | undefined {
-    return this._nodes?.map(node => new IssueRelation(this._request, node));
-  }
+  public nodes?: IssueRelation[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A relation between two issues.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueRelationFragment response data
+ */
 export class IssueRelation {
   private _request: LinearRequest;
   private _issue?: D.IssueRelationFragment["issue"];
@@ -1938,33 +1894,33 @@ export class IssueRelation {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The relationship of the issue with the related issue. */
   public type?: string;
-
   /** The issue whose relationship is being described. */
   public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-
   /** The related issue. */
   public get relatedIssue(): Promise<Issue | undefined> | undefined {
     return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
   }
 }
 
+/**
+ * A OrganizationExistsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationExistsPayloadFragment response data
+ */
 export class OrganizationExistsPayload {
   public constructor(request: LinearRequest, data: D.OrganizationExistsPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -1973,11 +1929,17 @@ export class OrganizationExistsPayload {
 
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** Whether the organization exists. */
   public exists?: boolean;
 }
 
+/**
+ * Contains either the full serialized state of the application or delta packets that the requester can
+ *   apply to the local data set in order to be up-to-date.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SyncResponseFragment response data
+ */
 export class SyncResponse {
   public constructor(request: LinearRequest, data: D.SyncResponseFragment) {
     this.state = data.state ?? undefined;
@@ -1992,23 +1954,25 @@ export class SyncResponse {
    *     Mutually exclusive with the delta property
    */
   public state?: string;
-
   /**
    * JSON serialized delta changes that the client can apply to its local state
    *     in order to catch up with the state of the world.
    */
   public delta?: string;
-
   /** A JSON serialized collection of model objects loaded from the archive */
   public archive?: string;
-
   /** The last sync id covered by the response. */
   public lastSyncId?: number;
-
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   public databaseVersion?: number;
 }
 
+/**
+ * Contains requested archived model objects.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ArchiveResponseFragment response data
+ */
 export class ArchiveResponse {
   public constructor(request: LinearRequest, data: D.ArchiveResponseFragment) {
     this.archive = data.archive ?? undefined;
@@ -2018,14 +1982,18 @@ export class ArchiveResponse {
 
   /** A JSON serialized collection of model objects loaded from the archive */
   public archive?: string;
-
   /** The total number of entities in the archive. */
   public totalCount?: number;
-
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   public databaseVersion?: number;
 }
 
+/**
+ * A user account. Super user required.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserAccountAdminPrivilegedFragment response data
+ */
 export class UserAccountAdminPrivileged {
   public constructor(request: LinearRequest, data: D.UserAccountAdminPrivilegedFragment) {
     this.id = data.id ?? undefined;
@@ -2035,30 +2003,32 @@ export class UserAccountAdminPrivileged {
     this.name = data.name ?? undefined;
     this.email = data.email ?? undefined;
     this.service = data.service ?? undefined;
+    this.users = data.users ? data.users.map(node => new UserAdminPrivileged(request, node)) : undefined;
   }
 
   /** The models identifier. */
   public id?: string;
-
   /** The time at which the model was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /** The time at which the model was updated. */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the model was archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The user's name. */
   public name?: string;
-
   /** The user's email address. */
   public email?: string;
-
   /** The authentication service used to create the account. */
   public service?: string;
+  public users?: UserAdminPrivileged[];
 }
 
+/**
+ * A user that has access to the the resources of an organization. Super user required.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserAdminPrivilegedFragment response data
+ */
 export class UserAdminPrivileged {
   private _request: LinearRequest;
 
@@ -2079,61 +2049,55 @@ export class UserAdminPrivileged {
     this.admin = data.admin ?? undefined;
     this.active = data.active ?? undefined;
     this.createdIssueCount = data.createdIssueCount ?? undefined;
+    this.organization = data.organization ? new OrganizationAdminPrivileged(request, data.organization) : undefined;
   }
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The user's full name. */
   public name?: string;
-
   /** The user's display (nick) name. Unique within each organization. */
   public displayName?: string;
-
   /** The user's email address. */
   public email?: string;
-
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
-
   /** Reason why is the account disabled. */
   public disableReason?: string;
-
   /** Unique hash for the user to be used in invite URLs. */
   public inviteHash?: string;
-
   public userAccountId?: string;
-
   /** The last time the user was seen online. If null, the user is currently online. */
   public lastSeen?: D.Scalars["DateTime"];
-
   /** Whether the user is an organization administrator. */
   public admin?: boolean;
-
   /** Whether the user account is active or disabled. */
   public active?: boolean;
-
   /** Number of issues created. */
   public createdIssueCount?: number;
-
+  /** Organization in which the user belongs to. Super user required. */
+  public organization?: OrganizationAdminPrivileged;
   /** The settings of the user. */
   public get settings(): Promise<UserSettings | undefined> {
     return new NotificationQuery(this._request).fetch();
   }
 }
 
+/**
+ * An organization. Super user required.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationAdminPrivilegedFragment response data
+ */
 export class OrganizationAdminPrivileged {
   public constructor(request: LinearRequest, data: D.OrganizationAdminPrivilegedFragment) {
     this.id = data.id ?? undefined;
@@ -2154,65 +2118,57 @@ export class OrganizationAdminPrivileged {
     this.userCount = data.userCount ?? undefined;
     this.createdIssueCount = data.createdIssueCount ?? undefined;
     this.stripeCustomerId = data.stripeCustomerId ?? undefined;
+    this.subscription = data.subscription ? new SubscriptionAdminPrivileged(request, data.subscription) : undefined;
   }
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The organization's name. */
   public name?: string;
-
   /** The organization's unique URL key. */
   public urlKey?: string;
-
   /** The organization's logo URL. */
   public logoUrl?: string;
-
   public upgradeThresholdExceeded?: boolean;
-
   /** Rolling 30-day total upload volume for the organization, in megabytes. */
   public periodUploadVolume?: number;
-
   /** How git branches are formatted. If null, default formatting will be used. */
   public gitBranchFormat?: string;
-
   /** Whether the Git integration linkback messages should be sent to private repositories. */
   public gitLinkbackMessagesEnabled?: boolean;
-
   /** Whether the Git integration linkback messages should be sent to public repositories. */
   public gitPublicLinkbackMessagesEnabled?: boolean;
-
   /** Whether the organization is using a roadmap. */
   public roadmapEnabled?: boolean;
-
   /** Whether SAML authentication is enabled for organization. */
   public samlEnabled?: boolean;
-
   /** Allowed authentication providers, empty array means all are allowed */
   public allowedAuthServices?: string[];
-
   /** Number of active users in the organization. */
   public userCount?: number;
-
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
-
   /** The Stripe identifier for the organization. */
   public stripeCustomerId?: string;
+  /** The organization's subscription to a paid plan. Super user required. */
+  public subscription?: SubscriptionAdminPrivileged;
 }
 
+/**
+ * The subscription of an organization. Super user required.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SubscriptionAdminPrivilegedFragment response data
+ */
 export class SubscriptionAdminPrivileged {
   private _request: LinearRequest;
   private _creator?: D.SubscriptionAdminPrivilegedFragment["creator"];
@@ -2234,48 +2190,59 @@ export class SubscriptionAdminPrivileged {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The subscription type. */
   public type?: string;
-
   /** The number of seats in the subscription. */
   public seats?: number;
-
   /** The date the subscription was canceled, if any. */
   public canceledAt?: D.Scalars["DateTime"];
-
   /** The subscription type of a pending change. Null if no change pending. */
   public pendingChangeType?: string;
-
   /** The Stripe identifier for the subscription. */
   public stripeSubscriptionId?: string;
-
   /** The Stripe status for the subscription. */
   public stripeStatus?: string;
-
   /** The creator of the subscription. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-
   /** The organization that the subscription is associated with. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * A ApiKeyConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ApiKeyConnectionFragment response data
+ */
+export class ApiKeyConnection {
+  public constructor(request: LinearRequest, data: D.ApiKeyConnectionFragment) {
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined;
+  }
+
+  public nodes?: ApiKey[];
+  public pageInfo?: PageInfo;
+}
+
+/**
+ * An API key. Grants access to the user's resources.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ApiKeyFragment response data
+ */
 export class ApiKey {
   public constructor(request: LinearRequest, data: D.ApiKeyFragment) {
     this.id = data.id ?? undefined;
@@ -2287,23 +2254,25 @@ export class ApiKey {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The label of the API key. */
   public label?: string;
 }
 
+/**
+ * Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserAuthorizedApplicationFragment response data
+ */
 export class UserAuthorizedApplication {
   public constructor(request: LinearRequest, data: D.UserAuthorizedApplicationFragment) {
     this.clientId = data.clientId ?? undefined;
@@ -2317,26 +2286,26 @@ export class UserAuthorizedApplication {
 
   /** OAuth application's client ID. */
   public clientId?: string;
-
   /** Application name. */
   public name?: string;
-
   /** Information about the application. */
   public description?: string;
-
   /** Name of the developer. */
   public developer?: string;
-
   /** Url of the developer (homepage or docs). */
   public developerUrl?: string;
-
   /** Image of the application. */
   public imageUrl?: string;
-
   /** Whether the user has authorized the application for the given scopes. */
   public isAuthorized?: boolean;
 }
 
+/**
+ * Public information of the OAuth application, plus the authorized scopes for a given user.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial AuthorizedApplicationFragment response data
+ */
 export class AuthorizedApplication {
   public constructor(request: LinearRequest, data: D.AuthorizedApplicationFragment) {
     this.clientId = data.clientId ?? undefined;
@@ -2351,65 +2320,60 @@ export class AuthorizedApplication {
 
   /** OAuth application's client ID. */
   public clientId?: string;
-
   /** Application name. */
   public name?: string;
-
   /** Information about the application. */
   public description?: string;
-
   /** Name of the developer. */
   public developer?: string;
-
   /** Url of the developer (homepage or docs). */
   public developerUrl?: string;
-
   /** Image of the application. */
   public imageUrl?: string;
-
   /** Scopes that are authorized for this application for a given user. */
   public scope?: string[];
-
   /** OAuth application's ID. */
   public appId?: string;
 }
 
+/**
+ * A AuthResolverResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial AuthResolverResponseFragment response data
+ */
 export class AuthResolverResponse {
-  private _request: LinearRequest;
-  private _users?: D.AuthResolverResponseFragment["users"];
-
   public constructor(request: LinearRequest, data: D.AuthResolverResponseFragment) {
-    this._request = request;
     this.id = data.id ?? undefined;
     this.token = data.token ?? undefined;
     this.email = data.email ?? undefined;
     this.allowDomainAccess = data.allowDomainAccess ?? undefined;
-    this._users = data.users ?? undefined;
+    this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
+    this.availableOrganizations = data.availableOrganizations
+      ? data.availableOrganizations.map(node => new Organization(request, node))
+      : undefined;
   }
 
   /** User account ID. */
   public id?: string;
-
   /** JWT token for authentication of the account. */
   public token?: string;
-
   /** Email for the authenticated account. */
   public email?: string;
-
   /** Should the signup flow allow access for the domain. */
   public allowDomainAccess?: boolean;
-
   /** Users belonging to this account. */
-  public get users(): User[] | undefined {
-    return this._users?.map(node => new User(this._request, node));
-  }
-
+  public users?: User[];
   /** Organizations this account has access to, but is not yet a member. */
-  public get availableOrganizations(): Organization[] | undefined {
-    return this._availableOrganizations?.map(node => new Organization(this._request, node));
-  }
+  public availableOrganizations?: Organization[];
 }
 
+/**
+ * A SsoUrlFromEmailResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SsoUrlFromEmailResponseFragment response data
+ */
 export class SsoUrlFromEmailResponse {
   public constructor(request: LinearRequest, data: D.SsoUrlFromEmailResponseFragment) {
     this.success = data.success ?? undefined;
@@ -2418,24 +2382,40 @@ export class SsoUrlFromEmailResponse {
 
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** SAML SSO sign-in URL. */
   public samlSsoUrl?: string;
 }
 
+/**
+ * A BillingDetailsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial BillingDetailsPayloadFragment response data
+ */
 export class BillingDetailsPayload {
   public constructor(request: LinearRequest, data: D.BillingDetailsPayloadFragment) {
     this.success = data.success ?? undefined;
     this.email = data.email ?? undefined;
+    this.paymentMethod = data.paymentMethod ? new Card(request, data.paymentMethod) : undefined;
+    this.invoices = data.invoices ? data.invoices.map(node => new Invoice(request, node)) : undefined;
   }
 
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The customer's email address the invoices are sent to. */
   public email?: string;
+  /** List of invoices, if any. */
+  public invoices?: Invoice[];
+  /** The payment method. */
+  public paymentMethod?: Card;
 }
 
+/**
+ * A Invoice model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial InvoiceFragment response data
+ */
 export class Invoice {
   public constructor(request: LinearRequest, data: D.InvoiceFragment) {
     this.url = data.url ?? undefined;
@@ -2447,20 +2427,22 @@ export class Invoice {
 
   /** The URL at which the invoice can be viewed or paid. */
   public url?: string;
-
   /** The creation date of the invoice. */
   public created?: D.Scalars["TimelessDateScalar"];
-
   /** The due date of the invoice. */
   public dueDate?: D.Scalars["TimelessDateScalar"];
-
   /** The status of the invoice. */
   public status?: string;
-
   /** The invoice total, in cents. */
   public total?: number;
 }
 
+/**
+ * A Card model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CardFragment response data
+ */
 export class Card {
   public constructor(request: LinearRequest, data: D.CardFragment) {
     this.brand = data.brand ?? undefined;
@@ -2469,20 +2451,34 @@ export class Card {
 
   /** The brand of the card, e.g. Visa. */
   public brand?: string;
-
   /** The last four digits used to identify the card. */
   public last4?: string;
 }
 
+/**
+ * A CollaborationDocumentUpdatePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CollaborationDocumentUpdatePayloadFragment response data
+ */
 export class CollaborationDocumentUpdatePayload {
   public constructor(request: LinearRequest, data: D.CollaborationDocumentUpdatePayloadFragment) {
     this.success = data.success ?? undefined;
+    this.steps = data.steps ? new StepsResponse(request, data.steps) : undefined;
   }
 
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** Document steps the client has not seen yet and need to rebase it's local steps on. */
+  public steps?: StepsResponse;
 }
 
+/**
+ * A StepsResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial StepsResponseFragment response data
+ */
 export class StepsResponse {
   public constructor(request: LinearRequest, data: D.StepsResponseFragment) {
     this.version = data.version ?? undefined;
@@ -2492,14 +2488,18 @@ export class StepsResponse {
 
   /** Client's document version. */
   public version?: number;
-
   /** New document steps from the client. */
   public steps?: D.Scalars["JSON"][];
-
   /** List of client IDs for the document steps. */
   public clientIds?: string[];
 }
 
+/**
+ * A custom view that has been saved by a user.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CustomViewFragment response data
+ */
 export class CustomView {
   private _request: LinearRequest;
   private _team?: D.CustomViewFragment["team"];
@@ -2523,68 +2523,63 @@ export class CustomView {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The name of the custom view. */
   public name?: string;
-
   /** The description of the custom view. */
   public description?: string;
-
   /** The icon of the custom view. */
   public icon?: string;
-
   /** The color of the icon of the custom view. */
   public color?: string;
-
   /** The filters applied to issues in the custom view. */
   public filters?: D.Scalars["JSONObject"];
-
   /** Whether the custom view is shared with everyone in the organization. */
   public shared?: boolean;
-
   /** The organization of the custom view. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
-
   /** The team associated with the custom view. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-
   /** The user who created the custom view. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
 
+/**
+ * A CustomViewConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CustomViewConnectionFragment response data
+ */
 export class CustomViewConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.CustomViewConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.CustomViewConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined;
   }
 
-  public get nodes(): CustomView[] | undefined {
-    return this._nodes?.map(node => new CustomView(this._request, node));
-  }
+  public nodes?: CustomView[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A custom emoji.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial EmojiFragment response data
+ */
 export class Emoji {
   private _request: LinearRequest;
   private _creator?: D.EmojiFragment["creator"];
@@ -2603,54 +2598,53 @@ export class Emoji {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The emoji's name. */
   public name?: string;
-
   /** The emoji image URL. */
   public url?: string;
-
   /** The source of the emoji. */
   public source?: string;
-
   /** The user who created the emoji. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-
   /** The organization that the emoji belongs to. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * A EmojiConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial EmojiConnectionFragment response data
+ */
 export class EmojiConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.EmojiConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.EmojiConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
   }
 
-  public get nodes(): Emoji[] | undefined {
-    return this._nodes?.map(node => new Emoji(this._request, node));
-  }
+  public nodes?: Emoji[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * User favorites presented in the sidebar.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FavoriteFragment response data
+ */
 export class Favorite {
   private _request: LinearRequest;
   private _user?: D.FavoriteFragment["user"];
@@ -2678,84 +2672,88 @@ export class Favorite {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The type of the favorite. */
   public type?: string;
-
   /** The order of the item in the favorites list. */
   public sortOrder?: number;
-
   /** The owner of the favorite. */
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-
   /** Favorited issue. */
   public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-
   /** Favorited project. */
   public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-
   /** Favorited project team. */
   public get projectTeam(): Promise<Project | undefined> | undefined {
     return this._projectTeam?.id ? new ProjectQuery(this._request).fetch(this._projectTeam?.id) : undefined;
   }
-
   /** Favorited cycle. */
   public get cycle(): Promise<Cycle | undefined> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-
   /** Favorited issue label. */
   public get label(): Promise<IssueLabel | undefined> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
 }
 
+/**
+ * A FavoriteConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FavoriteConnectionFragment response data
+ */
 export class FavoriteConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.FavoriteConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.FavoriteConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
   }
 
-  public get nodes(): Favorite[] | undefined {
-    return this._nodes?.map(node => new Favorite(this._request, node));
-  }
+  public nodes?: Favorite[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A FigmaEmbedPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FigmaEmbedPayloadFragment response data
+ */
 export class FigmaEmbedPayload {
   public constructor(request: LinearRequest, data: D.FigmaEmbedPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.figmaEmbed = data.figmaEmbed ? new FigmaEmbed(request, data.figmaEmbed) : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** Figma embed information. */
+  public figmaEmbed?: FigmaEmbed;
 }
 
+/**
+ * Object representing Figma preview information.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FigmaEmbedFragment response data
+ */
 export class FigmaEmbed {
   public constructor(request: LinearRequest, data: D.FigmaEmbedFragment) {
     this.name = data.name ?? undefined;
@@ -2766,26 +2764,38 @@ export class FigmaEmbed {
 
   /** Figma file name. */
   public name?: string;
-
   /** Date when the file was updated at the time of embedding. */
   public lastModified?: D.Scalars["DateTime"];
-
   /** Node name. */
   public nodeName?: string;
-
   /** Figma screenshot URL. */
   public url?: string;
 }
 
+/**
+ * A InvitePagePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial InvitePagePayloadFragment response data
+ */
 export class InvitePagePayload {
   public constructor(request: LinearRequest, data: D.InvitePagePayloadFragment) {
     this.success = data.success ?? undefined;
+    this.inviteData = data.inviteData ? new InviteData(request, data.inviteData) : undefined;
   }
 
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** Invite data. */
+  public inviteData?: InviteData;
 }
 
+/**
+ * A InviteData model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial InviteDataFragment response data
+ */
 export class InviteData {
   public constructor(request: LinearRequest, data: D.InviteDataFragment) {
     this.inviterName = data.inviterName ?? undefined;
@@ -2800,29 +2810,44 @@ export class InviteData {
 
   /** The name of the inviter. */
   public inviterName?: string;
-
   /** Avatar URLs for the invitees. */
   public avatarURLs?: string[];
-
   /** Team names for the invitees. */
   public teamNames?: string[];
-
   /** Team identifiers for the invitees. */
   public teamIds?: string[];
-
   /** The name of the organization the users were invited to. */
   public organizationName?: string;
-
   /** The domain of the organization the users were invited to. */
   public organizationDomain?: string;
-
   /** The logo of the organization the users were invited to. */
   public organizationLogoUrl?: string;
-
   /** The user count of the organization. */
   public userCount?: number;
 }
 
+/**
+ * A NotificationConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationConnectionFragment response data
+ */
+export class NotificationConnection {
+  public constructor(request: LinearRequest, data: D.NotificationConnectionFragment) {
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined;
+  }
+
+  public nodes?: Notification[];
+  public pageInfo?: PageInfo;
+}
+
+/**
+ * A notification sent to a user.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationFragment response data
+ */
 export class Notification {
   private _request: LinearRequest;
   private _user?: D.NotificationFragment["user"];
@@ -2848,55 +2873,66 @@ export class Notification {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** Notification type */
   public type?: string;
-
   /** Name of the reaction emoji associated with the notification. */
   public reactionEmoji?: string;
-
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: D.Scalars["DateTime"];
-
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
   public emailedAt?: D.Scalars["DateTime"];
-
   /** The recipient of the notification. */
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-
   /** The issue that the notification is associated with. */
   public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-
   /** The team which the notification is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-
   /** The comment which the notification is associated with. */
   public get comment(): Promise<Comment | undefined> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
 
+/**
+ * A NotificationSubscriptionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationSubscriptionConnectionFragment response data
+ */
+export class NotificationSubscriptionConnection {
+  public constructor(request: LinearRequest, data: D.NotificationSubscriptionConnectionFragment) {
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined;
+  }
+
+  public nodes?: NotificationSubscription[];
+  public pageInfo?: PageInfo;
+}
+
+/**
+ * Notification subscriptions for models.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationSubscriptionFragment response data
+ */
 export class NotificationSubscription {
   private _request: LinearRequest;
   private _user?: D.NotificationSubscriptionFragment["user"];
@@ -2917,38 +2953,53 @@ export class NotificationSubscription {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The type of the subscription. */
   public type?: string;
-
   /** The user associated with notification subscriptions. */
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-
   /** Subscribed team. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-
   /** Subscribed project. */
   public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
 
+/**
+ * A OrganizationInviteConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationInviteConnectionFragment response data
+ */
+export class OrganizationInviteConnection {
+  public constructor(request: LinearRequest, data: D.OrganizationInviteConnectionFragment) {
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined;
+  }
+
+  public nodes?: OrganizationInvite[];
+  public pageInfo?: PageInfo;
+}
+
+/**
+ * An invitation to the organization that has been sent via email.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationInviteFragment response data
+ */
 export class OrganizationInvite {
   private _request: LinearRequest;
   private _inviter?: D.OrganizationInviteFragment["inviter"];
@@ -2970,47 +3021,43 @@ export class OrganizationInvite {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The invitees email address. */
   public email?: string;
-
   /** The invite was sent to external address. */
   public external?: boolean;
-
   /** The time at which the invite was accepted. Null, if the invite hasn't been accepted */
   public acceptedAt?: D.Scalars["DateTime"];
-
   /** The time at which the invite will be expiring. Null, if the invite shouldn't expire */
   public expiresAt?: D.Scalars["DateTime"];
-
   /** The user who created the invitation. */
   public get inviter(): Promise<User | undefined> | undefined {
     return this._inviter?.id ? new UserQuery(this._request).fetch(this._inviter?.id) : undefined;
   }
-
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
   public get invitee(): Promise<User | undefined> | undefined {
     return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
   }
-
   /** The organization that the invite is associated with. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * A PushSubscriptionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial PushSubscriptionPayloadFragment response data
+ */
 export class PushSubscriptionPayload {
   public constructor(request: LinearRequest, data: D.PushSubscriptionPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
@@ -3019,11 +3066,16 @@ export class PushSubscriptionPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
 }
 
+/**
+ * A reaction associated with a comment.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ReactionFragment response data
+ */
 export class Reaction {
   private _request: LinearRequest;
   private _user?: D.ReactionFragment["user"];
@@ -3042,48 +3094,65 @@ export class Reaction {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** Name of the reaction's emoji. */
   public emoji?: string;
-
   /** The user who reacted. */
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-
   /** The comment that the reaction is associated with. */
   public get comment(): Promise<Comment | undefined> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
 
+/**
+ * A ReactionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ReactionConnectionFragment response data
+ */
 export class ReactionConnection {
-  private _request: LinearRequest;
-  private _nodes?: D.ReactionConnectionFragment["nodes"];
-
   public constructor(request: LinearRequest, data: D.ReactionConnectionFragment) {
-    this._request = request;
-
-    this._nodes = data.nodes ?? undefined;
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined;
   }
 
-  public get nodes(): Reaction[] | undefined {
-    return this._nodes?.map(node => new Reaction(this._request, node));
-  }
+  public nodes?: Reaction[];
+  public pageInfo?: PageInfo;
 }
 
+/**
+ * A ViewPreferencesConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ViewPreferencesConnectionFragment response data
+ */
+export class ViewPreferencesConnection {
+  public constructor(request: LinearRequest, data: D.ViewPreferencesConnectionFragment) {
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new ViewPreferences(request, node)) : undefined;
+  }
+
+  public nodes?: ViewPreferences[];
+  public pageInfo?: PageInfo;
+}
+
+/**
+ * View preferences.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ViewPreferencesFragment response data
+ */
 export class ViewPreferences {
   public constructor(request: LinearRequest, data: D.ViewPreferencesFragment) {
     this.id = data.id ?? undefined;
@@ -3096,26 +3165,27 @@ export class ViewPreferences {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The view preference type. */
   public type?: string;
-
   /** The view type. */
   public viewType?: string;
 }
 
+/**
+ * A UserPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserPayloadFragment response data
+ */
 export class UserPayload {
   private _request: LinearRequest;
   private _user?: D.UserPayloadFragment["user"];
@@ -3129,16 +3199,20 @@ export class UserPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The user that was created or updated. */
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 
+/**
+ * A UserAdminPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserAdminPayloadFragment response data
+ */
 export class UserAdminPayload {
   public constructor(request: LinearRequest, data: D.UserAdminPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3148,6 +3222,12 @@ export class UserAdminPayload {
   public success?: boolean;
 }
 
+/**
+ * A OrganizationPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationPayloadFragment response data
+ */
 export class OrganizationPayload {
   private _request: LinearRequest;
 
@@ -3159,16 +3239,20 @@ export class OrganizationPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The organization that was created or updated. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * A OrganizationDeletePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationDeletePayloadFragment response data
+ */
 export class OrganizationDeletePayload {
   public constructor(request: LinearRequest, data: D.OrganizationDeletePayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3178,6 +3262,12 @@ export class OrganizationDeletePayload {
   public success?: boolean;
 }
 
+/**
+ * A AdminIntegrationPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial AdminIntegrationPayloadFragment response data
+ */
 export class AdminIntegrationPayload {
   public constructor(request: LinearRequest, data: D.AdminIntegrationPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3187,6 +3277,12 @@ export class AdminIntegrationPayload {
   public success?: boolean;
 }
 
+/**
+ * A OrganizationAccessPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationAccessPayloadFragment response data
+ */
 export class OrganizationAccessPayload {
   public constructor(request: LinearRequest, data: D.OrganizationAccessPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3196,19 +3292,35 @@ export class OrganizationAccessPayload {
   public success?: boolean;
 }
 
+/**
+ * A OrganizationSamlConfigurePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationSamlConfigurePayloadFragment response data
+ */
 export class OrganizationSamlConfigurePayload {
   public constructor(request: LinearRequest, data: D.OrganizationSamlConfigurePayloadFragment) {
     this.success = data.success ?? undefined;
     this.samlEnabled = data.samlEnabled ?? undefined;
+    this.samlConfiguration = data.samlConfiguration
+      ? new SamlConfiguration(request, data.samlConfiguration)
+      : undefined;
   }
 
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** Whether SAML is enabled for the organization. */
   public samlEnabled?: boolean;
+  /** Organization's current SAML configuration. */
+  public samlConfiguration?: SamlConfiguration;
 }
 
+/**
+ * The integration resource's settings
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SamlConfigurationFragment response data
+ */
 export class SamlConfiguration {
   public constructor(request: LinearRequest, data: D.SamlConfigurationFragment) {
     this.ssoSigningCert = data.ssoSigningCert ?? undefined;
@@ -3220,20 +3332,22 @@ export class SamlConfiguration {
 
   /** X.509 Signing Certificate in string form. */
   public ssoSigningCert?: string;
-
   /** Sign in endpoint URL for the identity provider. */
   public ssoEndpoint?: string;
-
   /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
   public ssoBinding?: string;
-
   /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
   public ssoSignAlgo?: string;
-
   /** List of allowed email domains for SAML authentication. */
   public allowedDomains?: string[];
 }
 
+/**
+ * A AdminCommandPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial AdminCommandPayloadFragment response data
+ */
 export class AdminCommandPayload {
   public constructor(request: LinearRequest, data: D.AdminCommandPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3243,6 +3357,12 @@ export class AdminCommandPayload {
   public success?: boolean;
 }
 
+/**
+ * A EventPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial EventPayloadFragment response data
+ */
 export class EventPayload {
   public constructor(request: LinearRequest, data: D.EventPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3252,19 +3372,33 @@ export class EventPayload {
   public success?: boolean;
 }
 
+/**
+ * A ApiKeyPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ApiKeyPayloadFragment response data
+ */
 export class ApiKeyPayload {
   public constructor(request: LinearRequest, data: D.ApiKeyPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.apiKey = data.apiKey ? new ApiKey(request, data.apiKey) : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The API key that was created. */
+  public apiKey?: ApiKey;
 }
 
+/**
+ * A ArchivePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ArchivePayloadFragment response data
+ */
 export class ArchivePayload {
   public constructor(request: LinearRequest, data: D.ArchivePayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
@@ -3273,11 +3407,16 @@ export class ArchivePayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
 }
 
+/**
+ * A EmailUserAccountAuthChallengeResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial EmailUserAccountAuthChallengeResponseFragment response data
+ */
 export class EmailUserAccountAuthChallengeResponse {
   public constructor(request: LinearRequest, data: D.EmailUserAccountAuthChallengeResponseFragment) {
     this.success = data.success ?? undefined;
@@ -3286,30 +3425,39 @@ export class EmailUserAccountAuthChallengeResponse {
 
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** Supported challenge for this user account. Can be either verificationCode or password. */
   public authType?: string;
 }
 
+/**
+ * A CreateOrJoinOrganizationResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CreateOrJoinOrganizationResponseFragment response data
+ */
 export class CreateOrJoinOrganizationResponse {
   private _request: LinearRequest;
   private _user?: D.CreateOrJoinOrganizationResponseFragment["user"];
 
   public constructor(request: LinearRequest, data: D.CreateOrJoinOrganizationResponseFragment) {
     this._request = request;
-
     this._user = data.user ?? undefined;
   }
 
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
-
   public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 
+/**
+ * A BillingEmailPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial BillingEmailPayloadFragment response data
+ */
 export class BillingEmailPayload {
   public constructor(request: LinearRequest, data: D.BillingEmailPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3318,11 +3466,16 @@ export class BillingEmailPayload {
 
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The customer's email address the invoices are sent to. */
   public email?: string;
 }
 
+/**
+ * A CommentPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CommentPayloadFragment response data
+ */
 export class CommentPayload {
   private _request: LinearRequest;
   private _comment?: D.CommentPayloadFragment["comment"];
@@ -3336,16 +3489,20 @@ export class CommentPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The comment that was created or updated. */
   public get comment(): Promise<Comment | undefined> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
 
+/**
+ * A ContactPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ContactPayloadFragment response data
+ */
 export class ContactPayload {
   public constructor(request: LinearRequest, data: D.ContactPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3355,6 +3512,12 @@ export class ContactPayload {
   public success?: boolean;
 }
 
+/**
+ * A CustomViewPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CustomViewPayloadFragment response data
+ */
 export class CustomViewPayload {
   private _request: LinearRequest;
   private _customView?: D.CustomViewPayloadFragment["customView"];
@@ -3368,16 +3531,20 @@ export class CustomViewPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The custom view that was created or updated. */
   public get customView(): Promise<CustomView | undefined> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
 }
 
+/**
+ * A CyclePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CyclePayloadFragment response data
+ */
 export class CyclePayload {
   private _request: LinearRequest;
   private _cycle?: D.CyclePayloadFragment["cycle"];
@@ -3391,16 +3558,20 @@ export class CyclePayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The Cycle that was created or updated. */
   public get cycle(): Promise<Cycle | undefined> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
 }
 
+/**
+ * A DebugPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial DebugPayloadFragment response data
+ */
 export class DebugPayload {
   public constructor(request: LinearRequest, data: D.DebugPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3410,6 +3581,12 @@ export class DebugPayload {
   public success?: boolean;
 }
 
+/**
+ * A EmailUnsubscribePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial EmailUnsubscribePayloadFragment response data
+ */
 export class EmailUnsubscribePayload {
   public constructor(request: LinearRequest, data: D.EmailUnsubscribePayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3419,6 +3596,12 @@ export class EmailUnsubscribePayload {
   public success?: boolean;
 }
 
+/**
+ * A EmojiPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial EmojiPayloadFragment response data
+ */
 export class EmojiPayload {
   private _request: LinearRequest;
   private _emoji?: D.EmojiPayloadFragment["emoji"];
@@ -3432,16 +3615,20 @@ export class EmojiPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The emoji that was created. */
   public get emoji(): Promise<Emoji | undefined> | undefined {
     return this._emoji?.id ? new EmojiQuery(this._request).fetch(this._emoji?.id) : undefined;
   }
 }
 
+/**
+ * A FavoritePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FavoritePayloadFragment response data
+ */
 export class FavoritePayload {
   private _request: LinearRequest;
   private _favorite?: D.FavoritePayloadFragment["favorite"];
@@ -3455,16 +3642,20 @@ export class FavoritePayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The object that was added as a favorite. */
   public get favorite(): Promise<Favorite | undefined> | undefined {
     return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
   }
 }
 
+/**
+ * A FeedbackPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FeedbackPayloadFragment response data
+ */
 export class FeedbackPayload {
   public constructor(request: LinearRequest, data: D.FeedbackPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3474,19 +3665,33 @@ export class FeedbackPayload {
   public success?: boolean;
 }
 
+/**
+ * A UploadPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UploadPayloadFragment response data
+ */
 export class UploadPayload {
   public constructor(request: LinearRequest, data: D.UploadPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.uploadFile = data.uploadFile ? new UploadFile(request, data.uploadFile) : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** Object describing the file to be uploaded. */
+  public uploadFile?: UploadFile;
 }
 
+/**
+ * Object representing Google Cloud upload policy, plus additional data.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UploadFileFragment response data
+ */
 export class UploadFile {
   public constructor(request: LinearRequest, data: D.UploadFileFragment) {
     this.filename = data.filename ?? undefined;
@@ -3495,26 +3700,29 @@ export class UploadFile {
     this.uploadUrl = data.uploadUrl ?? undefined;
     this.assetUrl = data.assetUrl ?? undefined;
     this.metaData = data.metaData ?? undefined;
+    this.headers = data.headers ? data.headers.map(node => new UploadFileHeader(request, node)) : undefined;
   }
 
   /** The filename. */
   public filename?: string;
-
   /** The content type. */
   public contentType?: string;
-
   /** The size of the uploaded file. */
   public size?: number;
-
   /** The signed URL the for the uploaded file. (assigned automatically) */
   public uploadUrl?: string;
-
   /** The asset URL for the uploaded file. (assigned automatically) */
   public assetUrl?: string;
-
   public metaData?: D.Scalars["JSON"];
+  public headers?: UploadFileHeader[];
 }
 
+/**
+ * A UploadFileHeader model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UploadFileHeaderFragment response data
+ */
 export class UploadFileHeader {
   public constructor(request: LinearRequest, data: D.UploadFileHeaderFragment) {
     this.key = data.key ?? undefined;
@@ -3523,11 +3731,16 @@ export class UploadFileHeader {
 
   /** Upload file header key. */
   public key?: string;
-
   /** Upload file header value. */
   public value?: string;
 }
 
+/**
+ * A ImageUploadFromUrlPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ImageUploadFromUrlPayloadFragment response data
+ */
 export class ImageUploadFromUrlPayload {
   public constructor(request: LinearRequest, data: D.ImageUploadFromUrlPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
@@ -3537,14 +3750,18 @@ export class ImageUploadFromUrlPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** The URL containing the image. */
   public url?: string;
-
   /** Whether the operation was successful. */
   public success?: boolean;
 }
 
+/**
+ * A IntegrationPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IntegrationPayloadFragment response data
+ */
 export class IntegrationPayload {
   private _request: LinearRequest;
   private _integration?: D.IntegrationPayloadFragment["integration"];
@@ -3558,16 +3775,20 @@ export class IntegrationPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The integration that was created or updated. */
   public get integration(): Promise<Integration | undefined> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
 }
 
+/**
+ * A IssueLabelPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueLabelPayloadFragment response data
+ */
 export class IssueLabelPayload {
   private _request: LinearRequest;
   private _issueLabel?: D.IssueLabelPayloadFragment["issueLabel"];
@@ -3581,16 +3802,20 @@ export class IssueLabelPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The label that was created or updated. */
   public get issueLabel(): Promise<IssueLabel | undefined> | undefined {
     return this._issueLabel?.id ? new IssueLabelQuery(this._request).fetch(this._issueLabel?.id) : undefined;
   }
 }
 
+/**
+ * A IssueRelationPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueRelationPayloadFragment response data
+ */
 export class IssueRelationPayload {
   private _request: LinearRequest;
   private _issueRelation?: D.IssueRelationPayloadFragment["issueRelation"];
@@ -3604,16 +3829,20 @@ export class IssueRelationPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The issue relation that was created or updated. */
   public get issueRelation(): Promise<IssueRelation | undefined> | undefined {
     return this._issueRelation?.id ? new IssueRelationQuery(this._request).fetch(this._issueRelation?.id) : undefined;
   }
 }
 
+/**
+ * A IssuePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssuePayloadFragment response data
+ */
 export class IssuePayload {
   private _request: LinearRequest;
   private _issue?: D.IssuePayloadFragment["issue"];
@@ -3627,16 +3856,20 @@ export class IssuePayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The issue that was created or updated. */
   public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
 
+/**
+ * A MilestonePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial MilestonePayloadFragment response data
+ */
 export class MilestonePayload {
   private _request: LinearRequest;
   private _milestone?: D.MilestonePayloadFragment["milestone"];
@@ -3650,55 +3883,85 @@ export class MilestonePayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The milesteone that was created or updated. */
   public get milestone(): Promise<Milestone | undefined> | undefined {
     return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
   }
 }
 
+/**
+ * A NotificationPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationPayloadFragment response data
+ */
 export class NotificationPayload {
   public constructor(request: LinearRequest, data: D.NotificationPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.notification = data.notification ? new Notification(request, data.notification) : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The notification that was created or updated. */
+  public notification?: Notification;
 }
 
+/**
+ * A NotificationSubscriptionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationSubscriptionPayloadFragment response data
+ */
 export class NotificationSubscriptionPayload {
   public constructor(request: LinearRequest, data: D.NotificationSubscriptionPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.notificationSubscription = data.notificationSubscription
+      ? new NotificationSubscription(request, data.notificationSubscription)
+      : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The notification subscription that was created or updated. */
+  public notificationSubscription?: NotificationSubscription;
 }
 
+/**
+ * A OauthClientPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OauthClientPayloadFragment response data
+ */
 export class OauthClientPayload {
   public constructor(request: LinearRequest, data: D.OauthClientPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.oauthClient = data.oauthClient ? new OauthClient(request, data.oauthClient) : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The OAuth client application that was created or updated. */
+  public oauthClient?: OauthClient;
 }
 
+/**
+ * OAuth2 client application
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OauthClientFragment response data
+ */
 export class OauthClient {
   public constructor(request: LinearRequest, data: D.OauthClientFragment) {
     this.id = data.id ?? undefined;
@@ -3717,44 +3980,39 @@ export class OauthClient {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** OAuth application's client ID. */
   public clientId?: string;
-
   /** OAuth application's client name. */
   public name?: string;
-
   /** Information about the application. */
   public description?: string;
-
   /** Name of the developer. */
   public developer?: string;
-
   /** Url of the developer. */
   public developerUrl?: string;
-
   /** Image of the application. */
   public imageUrl?: string;
-
   /** OAuth application's client secret. */
   public clientSecret?: string;
-
   /** List of allowed redirect URIs for the application. */
   public redirectUris?: string[];
 }
 
+/**
+ * A RotateSecretPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial RotateSecretPayloadFragment response data
+ */
 export class RotateSecretPayload {
   public constructor(request: LinearRequest, data: D.RotateSecretPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
@@ -3763,11 +4021,16 @@ export class RotateSecretPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
 }
 
+/**
+ * A OauthTokenRevokePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OauthTokenRevokePayloadFragment response data
+ */
 export class OauthTokenRevokePayload {
   public constructor(request: LinearRequest, data: D.OauthTokenRevokePayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3777,19 +4040,35 @@ export class OauthTokenRevokePayload {
   public success?: boolean;
 }
 
+/**
+ * A OrganizationDomainPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationDomainPayloadFragment response data
+ */
 export class OrganizationDomainPayload {
   public constructor(request: LinearRequest, data: D.OrganizationDomainPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.organizationDomain = data.organizationDomain
+      ? new OrganizationDomain(request, data.organizationDomain)
+      : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The organization domain that was created or updated. */
+  public organizationDomain?: OrganizationDomain;
 }
 
+/**
+ * Defines the use of a domain by an organization.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationDomainFragment response data
+ */
 export class OrganizationDomain {
   private _request: LinearRequest;
   private _creator?: D.OrganizationDomainFragment["creator"];
@@ -3808,47 +4087,56 @@ export class OrganizationDomain {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** Domain name */
   public name?: string;
-
   /** Is this domain verified */
   public verified?: boolean;
-
   /** E-mail used to verify this domain */
   public verificationEmail?: string;
-
   /** The user who added the domain. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
 
+/**
+ * A OrganizationInvitePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationInvitePayloadFragment response data
+ */
 export class OrganizationInvitePayload {
   public constructor(request: LinearRequest, data: D.OrganizationInvitePayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.organizationInvite = data.organizationInvite
+      ? new OrganizationInvite(request, data.organizationInvite)
+      : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The organization invite that was created or updated. */
+  public organizationInvite?: OrganizationInvite;
 }
 
+/**
+ * A ProjectLinkPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ProjectLinkPayloadFragment response data
+ */
 export class ProjectLinkPayload {
   private _request: LinearRequest;
   private _projectLink?: D.ProjectLinkPayloadFragment["projectLink"];
@@ -3862,16 +4150,20 @@ export class ProjectLinkPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The project that was created or updated. */
   public get projectLink(): Promise<ProjectLink | undefined> | undefined {
     return this._projectLink?.id ? new ProjectLinkQuery(this._request).fetch(this._projectLink?.id) : undefined;
   }
 }
 
+/**
+ * A ProjectPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ProjectPayloadFragment response data
+ */
 export class ProjectPayload {
   private _request: LinearRequest;
   private _project?: D.ProjectPayloadFragment["project"];
@@ -3885,16 +4177,20 @@ export class ProjectPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The project that was created or updated. */
   public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
 
+/**
+ * A ReactionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ReactionPayloadFragment response data
+ */
 export class ReactionPayload {
   private _request: LinearRequest;
   private _reaction?: D.ReactionPayloadFragment["reaction"];
@@ -3908,14 +4204,18 @@ export class ReactionPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   public success?: boolean;
-
   public get reaction(): Promise<Reaction | undefined> | undefined {
     return this._reaction?.id ? new ReactionQuery(this._request).fetch(this._reaction?.id) : undefined;
   }
 }
 
+/**
+ * A CreateCsvExportReportPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CreateCsvExportReportPayloadFragment response data
+ */
 export class CreateCsvExportReportPayload {
   public constructor(request: LinearRequest, data: D.CreateCsvExportReportPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -3925,6 +4225,12 @@ export class CreateCsvExportReportPayload {
   public success?: boolean;
 }
 
+/**
+ * A SubscriptionSessionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SubscriptionSessionPayloadFragment response data
+ */
 export class SubscriptionSessionPayload {
   public constructor(request: LinearRequest, data: D.SubscriptionSessionPayloadFragment) {
     this.session = data.session ?? undefined;
@@ -3934,6 +4240,12 @@ export class SubscriptionSessionPayload {
   public session?: string;
 }
 
+/**
+ * A SubscriptionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SubscriptionPayloadFragment response data
+ */
 export class SubscriptionPayload {
   private _request: LinearRequest;
 
@@ -3946,19 +4258,22 @@ export class SubscriptionPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** The date the subscription was set to cancel at the end of the billing period, if any. */
   public canceledAt?: D.Scalars["DateTime"];
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The subscription entity being mutated. */
   public get subscription(): Promise<Subscription | undefined> {
     return new SubscriptionQuery(this._request).fetch();
   }
 }
 
+/**
+ * A TeamMembershipPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TeamMembershipPayloadFragment response data
+ */
 export class TeamMembershipPayload {
   private _request: LinearRequest;
   private _teamMembership?: D.TeamMembershipPayloadFragment["teamMembership"];
@@ -3972,10 +4287,8 @@ export class TeamMembershipPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The team membership that was created or updated. */
   public get teamMembership(): Promise<TeamMembership | undefined> | undefined {
     return this._teamMembership?.id
@@ -3984,6 +4297,12 @@ export class TeamMembershipPayload {
   }
 }
 
+/**
+ * A TeamPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TeamPayloadFragment response data
+ */
 export class TeamPayload {
   private _request: LinearRequest;
   private _team?: D.TeamPayloadFragment["team"];
@@ -3997,16 +4316,20 @@ export class TeamPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The team that was created or updated. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
 
+/**
+ * A TemplatePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial TemplatePayloadFragment response data
+ */
 export class TemplatePayload {
   private _request: LinearRequest;
 
@@ -4018,16 +4341,20 @@ export class TemplatePayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The template that was created or updated. */
   public get template(): Promise<Template | undefined> {
     return new TemplatesQuery(this._request).fetch();
   }
 }
 
+/**
+ * A UserSettingsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserSettingsPayloadFragment response data
+ */
 export class UserSettingsPayload {
   private _request: LinearRequest;
 
@@ -4039,16 +4366,20 @@ export class UserSettingsPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The user's settings. */
   public get userSettings(): Promise<UserSettings | undefined> {
     return new NotificationQuery(this._request).fetch();
   }
 }
 
+/**
+ * A UserSettingsFlagPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserSettingsFlagPayloadFragment response data
+ */
 export class UserSettingsFlagPayload {
   public constructor(request: LinearRequest, data: D.UserSettingsFlagPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
@@ -4059,17 +4390,20 @@ export class UserSettingsFlagPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** The flag key which was updated. */
   public flag?: string;
-
   /** The flag value after update. */
   public value?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
 }
 
+/**
+ * A UserSettingsFlagsResetPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserSettingsFlagsResetPayloadFragment response data
+ */
 export class UserSettingsFlagsResetPayload {
   public constructor(request: LinearRequest, data: D.UserSettingsFlagsResetPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
@@ -4078,11 +4412,16 @@ export class UserSettingsFlagsResetPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
 }
 
+/**
+ * A UserSubscribeToNewsletterPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserSubscribeToNewsletterPayloadFragment response data
+ */
 export class UserSubscribeToNewsletterPayload {
   public constructor(request: LinearRequest, data: D.UserSubscribeToNewsletterPayloadFragment) {
     this.success = data.success ?? undefined;
@@ -4092,19 +4431,33 @@ export class UserSubscribeToNewsletterPayload {
   public success?: boolean;
 }
 
+/**
+ * A ViewPreferencesPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ViewPreferencesPayloadFragment response data
+ */
 export class ViewPreferencesPayload {
   public constructor(request: LinearRequest, data: D.ViewPreferencesPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
+    this.viewPreferences = data.viewPreferences ? new ViewPreferences(request, data.viewPreferences) : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The view preferences entity being mutated. */
+  public viewPreferences?: ViewPreferences;
 }
 
+/**
+ * A WebhookPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial WebhookPayloadFragment response data
+ */
 export class WebhookPayload {
   private _request: LinearRequest;
   private _webhook?: D.WebhookPayloadFragment["webhook"];
@@ -4118,16 +4471,20 @@ export class WebhookPayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The webhook entity being mutated. */
   public get webhook(): Promise<Webhook | undefined> | undefined {
     return this._webhook?.id ? new WebhookQuery(this._request).fetch(this._webhook?.id) : undefined;
   }
 }
 
+/**
+ * A WorkflowStatePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial WorkflowStatePayloadFragment response data
+ */
 export class WorkflowStatePayload {
   private _request: LinearRequest;
   private _workflowState?: D.WorkflowStatePayloadFragment["workflowState"];
@@ -4141,16 +4498,20 @@ export class WorkflowStatePayload {
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-
   /** Whether the operation was successful. */
   public success?: boolean;
-
   /** The state that was created or updated. */
   public get workflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._workflowState?.id ? new WorkflowStateQuery(this._request).fetch(this._workflowState?.id) : undefined;
   }
 }
 
+/**
+ * Collaborative editing steps for documents.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial DocumentStepFragment response data
+ */
 export class DocumentStep {
   public constructor(request: LinearRequest, data: D.DocumentStepFragment) {
     this.id = data.id ?? undefined;
@@ -4164,29 +4525,29 @@ export class DocumentStep {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** Step data. */
   public step?: D.Scalars["JSON"];
-
   /** Step version. */
   public version?: number;
-
   /** Connected client ID. */
   public clientId?: string;
 }
 
+/**
+ * A user's web browser push notification subscription.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial PushSubscriptionFragment response data
+ */
 export class PushSubscription {
   public constructor(request: LinearRequest, data: D.PushSubscriptionFragment) {
     this.id = data.id ?? undefined;
@@ -4197,26 +4558,41 @@ export class PushSubscription {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The time at which the entity was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
 }
 
-export class UserAccount {
-  private _request: LinearRequest;
-  private _users?: D.UserAccountFragment["users"];
+/**
+ * A PushSubscriptionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial PushSubscriptionConnectionFragment response data
+ */
+export class PushSubscriptionConnection {
+  public constructor(request: LinearRequest, data: D.PushSubscriptionConnectionFragment) {
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new PushSubscription(request, node)) : undefined;
+  }
 
+  public nodes?: PushSubscription[];
+  public pageInfo?: PageInfo;
+}
+
+/**
+ * A user account.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UserAccountFragment response data
+ */
+export class UserAccount {
   public constructor(request: LinearRequest, data: D.UserAccountFragment) {
-    this._request = request;
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
     this.updatedAt = data.updatedAt ?? undefined;
@@ -4224,36 +4600,33 @@ export class UserAccount {
     this.name = data.name ?? undefined;
     this.email = data.email ?? undefined;
     this.service = data.service ?? undefined;
-    this._users = data.users ?? undefined;
+    this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
   }
 
   /** The models identifier. */
   public id?: string;
-
   /** The time at which the model was created. */
   public createdAt?: D.Scalars["DateTime"];
-
   /** The time at which the model was updated. */
   public updatedAt?: D.Scalars["DateTime"];
-
   /** The time at which the model was archived. */
   public archivedAt?: D.Scalars["DateTime"];
-
   /** The user's name. */
   public name?: string;
-
   /** The user's email address. */
   public email?: string;
-
   /** The authentication service used to create the account. */
   public service?: string;
-
   /** Users belonging to the account. */
-  public get users(): User[] | undefined {
-    return this._users?.map(node => new User(this._request, node));
-  }
+  public users?: User[];
 }
 
+/**
+ * A recorded entry of a file uploaded by a user.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FileUploadFragment response data
+ */
 export class FileUpload {
   private _request: LinearRequest;
   private _creator?: D.FileUploadFragment["creator"];
@@ -4271,33 +4644,32 @@ export class FileUpload {
 
   /** The unique identifier of the entity. */
   public id?: string;
-
   /** The asset URL this file is available at. */
   public assetUrl?: string;
-
   /** The MIME type of the uploaded file. */
   public contentType?: string;
-
   /** The name of the uploaded file. */
   public filename?: string;
-
   /** Additional metadata of the file. */
   public metaData?: D.Scalars["JSON"];
-
   /** Size of the uploaded file in bytes. */
   public size?: number;
-
   /** The user who uploaded the file. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-
   /** The organization the upload belongs to. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 
+/**
+ * A SynchronizedPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SynchronizedPayloadFragment response data
+ */
 export class SynchronizedPayload {
   public constructor(request: LinearRequest, data: D.SynchronizedPayloadFragment) {
     this.lastSyncId = data.lastSyncId ?? undefined;
@@ -4307,6 +4679,12 @@ export class SynchronizedPayload {
   public lastSyncId?: number;
 }
 
+/**
+ * Public information of the OAuth application.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ApplicationFragment response data
+ */
 export class Application {
   public constructor(request: LinearRequest, data: D.ApplicationFragment) {
     this.clientId = data.clientId ?? undefined;
@@ -4319,23 +4697,24 @@ export class Application {
 
   /** OAuth application's client ID. */
   public clientId?: string;
-
   /** Application name. */
   public name?: string;
-
   /** Information about the application. */
   public description?: string;
-
   /** Name of the developer. */
   public developer?: string;
-
   /** Url of the developer (homepage or docs). */
   public developerUrl?: string;
-
   /** Image of the application. */
   public imageUrl?: string;
 }
 
+/**
+ * A OrganizationDomainSimplePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationDomainSimplePayloadFragment response data
+ */
 export class OrganizationDomainSimplePayload {
   public constructor(request: LinearRequest, data: D.OrganizationDomainSimplePayloadFragment) {
     this.success = data.success ?? undefined;
@@ -8191,6 +8570,168 @@ export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery {
       D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables
     >(D.AdminUserAccountLookup_Users_Organization_SubscriptionDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.organization?.subscription;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_UsersQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch() {
+    return this._request<D.AvailableUsers_UsersQuery, D.AvailableUsers_UsersQueryVariables>(
+      D.AvailableUsers_UsersDocument,
+      {}
+    ).then(response => {
+      const data = response?.availableUsers?.users;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_AvailableOrganizationsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch() {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizationsQuery,
+      D.AvailableUsers_AvailableOrganizationsQueryVariables
+    >(D.AvailableUsers_AvailableOrganizationsDocument, {}).then(response => {
+      const data = response?.availableUsers?.availableOrganizations;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_Users_AssignedIssuesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_Users_AssignedIssuesQueryVariables) {
+    return this._request<
+      D.AvailableUsers_Users_AssignedIssuesQuery,
+      D.AvailableUsers_Users_AssignedIssuesQueryVariables
+    >(D.AvailableUsers_Users_AssignedIssuesDocument, vars).then(response => {
+      const data = response?.availableUsers?.users?.assignedIssues;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_Users_CreatedIssuesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_Users_CreatedIssuesQueryVariables) {
+    return this._request<D.AvailableUsers_Users_CreatedIssuesQuery, D.AvailableUsers_Users_CreatedIssuesQueryVariables>(
+      D.AvailableUsers_Users_CreatedIssuesDocument,
+      vars
+    ).then(response => {
+      const data = response?.availableUsers?.users?.createdIssues;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_Users_TeamMembershipsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_Users_TeamMembershipsQueryVariables) {
+    return this._request<
+      D.AvailableUsers_Users_TeamMembershipsQuery,
+      D.AvailableUsers_Users_TeamMembershipsQueryVariables
+    >(D.AvailableUsers_Users_TeamMembershipsDocument, vars).then(response => {
+      const data = response?.availableUsers?.users?.teamMemberships;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_AvailableOrganizations_UsersQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_UsersQueryVariables) {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizations_UsersQuery,
+      D.AvailableUsers_AvailableOrganizations_UsersQueryVariables
+    >(D.AvailableUsers_AvailableOrganizations_UsersDocument, vars).then(response => {
+      const data = response?.availableUsers?.availableOrganizations?.users;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_AvailableOrganizations_TeamsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_TeamsQueryVariables) {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizations_TeamsQuery,
+      D.AvailableUsers_AvailableOrganizations_TeamsQueryVariables
+    >(D.AvailableUsers_AvailableOrganizations_TeamsDocument, vars).then(response => {
+      const data = response?.availableUsers?.availableOrganizations?.teams;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_AvailableOrganizations_MilestonesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_MilestonesQueryVariables) {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizations_MilestonesQuery,
+      D.AvailableUsers_AvailableOrganizations_MilestonesQueryVariables
+    >(D.AvailableUsers_AvailableOrganizations_MilestonesDocument, vars).then(response => {
+      const data = response?.availableUsers?.availableOrganizations?.milestones;
+      return data ? new (this._request, data)() : undefined;
+    });
+  }
+}
+
+export class AvailableUsers_AvailableOrganizations_IntegrationsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_IntegrationsQueryVariables) {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizations_IntegrationsQuery,
+      D.AvailableUsers_AvailableOrganizations_IntegrationsQueryVariables
+    >(D.AvailableUsers_AvailableOrganizations_IntegrationsDocument, vars).then(response => {
+      const data = response?.availableUsers?.availableOrganizations?.integrations;
       return data ? new (this._request, data)() : undefined;
     });
   }

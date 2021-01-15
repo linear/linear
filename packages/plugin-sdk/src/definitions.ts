@@ -2,13 +2,13 @@ import { Types } from "@graphql-codegen/plugin-helpers";
 import { indentMultiline } from "@graphql-codegen/visitor-plugin-common";
 import {
   ArgumentTypescriptVisitor,
-  filterJoin,
   getArgList,
   logger,
   nonNullable,
   PluginContext,
   printComment,
   printDebug,
+  printList,
 } from "@linear/plugin-common";
 import { DocumentNode, Kind, OperationDefinitionNode, visit } from "graphql";
 import c from "./constants";
@@ -129,12 +129,12 @@ export function printSdkDefinition(context: SdkPluginContext, definition: SdkDef
     : "Initialize a set of operations to run against the Linear api";
 
   /** For each operation get the function string content */
-  const content = filterJoin(
+  const content = printList(
     definition.operations.map(o => printOperation(context, definition, o)).map(s => indentMultiline(s, 2)),
     ",\n"
   );
 
-  return filterJoin(
+  return printList(
     [
       "\n",
       printComment([

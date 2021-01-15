@@ -8,8 +8,8 @@ import {
   NonNullTypeNode,
   VariableDefinitionNode,
 } from "graphql";
+import { printList } from "./print";
 import { Named, PluginContext } from "./types";
-import { filterJoin } from "./utils";
 
 /**
  * Graphql-codegen visitor for printing a typescript argument
@@ -46,9 +46,9 @@ export class ArgumentTypescriptVisitor<C> {
     leave: (_node: NamedTypeNode): string => {
       const node = (_node as unknown) as Named<NamedTypeNode>;
       if (this._context.scalars[node.name]) {
-        return DEFAULT_SCALARS[node.name] ?? `${filterJoin([this._namespace, "Scalars"], ".")}['${node.name}']`;
+        return DEFAULT_SCALARS[node.name] ?? `${printList([this._namespace, "Scalars"], ".")}['${node.name}']`;
       } else {
-        return filterJoin([this._namespace, node.name], ".");
+        return printList([this._namespace, node.name], ".");
       }
     },
   };

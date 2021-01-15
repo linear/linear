@@ -20,13 +20,6 @@ export function lowerFirst(s?: string): string {
 }
 
 /**
- * Filter a list of strings and join into a single string
- */
-export function filterJoin(a: (string | undefined)[] = [], joinString?: string): string {
-  return a.filter(Boolean).join(joinString ?? "");
-}
-
-/**
  * Return the last element in an array
  */
 export function getLast<T>(a: T[] = []): T | undefined {

@@ -23351,6 +23351,24 @@
               "ofType": null
             },
             "defaultValue": null
+          },
+          {
+            "name": "allowedAuthServices",
+            "description": "List of services that are allowed to be used for login.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,

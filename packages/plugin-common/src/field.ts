@@ -11,7 +11,7 @@ import {
 } from "graphql";
 import { ArgumentGraphqlVisitor } from "./argument-graphql-visitor";
 import c from "./constants";
-import { filterJoin } from "./utils";
+import { printList } from "./print";
 
 const argVisitor = new ArgumentGraphqlVisitor();
 
@@ -32,7 +32,7 @@ function printInputArg(node?: InputValueDefinitionNode): string {
  */
 export function printInputArgs(fields: FieldDefinitionNode[]): string {
   const args = fields.flatMap(field => field.arguments);
-  return args?.length ? filterJoin(["(", ...args.map(printInputArg), ")"], "\n") : "";
+  return args?.length ? printList(["(", ...args.map(printInputArg), ")"], "\n") : "";
 }
 
 /**
@@ -46,48 +46,50 @@ function printResponseArg(node: InputValueDefinitionNode): string {
  * Print the args list for passing into the operation response
  */
 export function printResponseArgs(field: FieldDefinitionNode): string {
-  return field.arguments?.length ? filterJoin(["(", ...field.arguments.map(printResponseArg), ")"], "\n") : "";
+  return field.arguments?.length ? printList(["(", ...field.arguments.map(printResponseArg), ")"], "\n") : "";
 }
 
 /**
- * Get the string type name from any type node
+ * Get the deepest type name from any type node
  */
-export function getTypeName(type: string | NameNode | NonNullTypeNode | NamedTypeNode | ListTypeNode): string {
+export function reduceTypeName(type: string | NameNode | NonNullTypeNode | NamedTypeNode | ListTypeNode): string {
   return typeof type === "string"
     ? type
     : type.kind === Kind.NON_NULL_TYPE
-    ? getTypeName(type.type)
+    ? reduceTypeName(type.type)
     : type.kind === Kind.NAMED_TYPE
-    ? getTypeName(type.name)
+    ? reduceTypeName(type.name)
     : type.kind === Kind.NAME
-    ? getTypeName(type.value)
+    ? reduceTypeName(type.value)
     : type.kind === Kind.LIST_TYPE
-    ? getTypeName(type.type)
-    : "UNKNOWN_OPERATION_TYPE";
+    ? reduceTypeName(type.type)
+    : "UNKNOWN_TYPE_NAME";
 }
 
 /**
- * Get the string type name from any type node
+ * Get the list type name from any type node
  */
-export function isListType(type: string | NameNode | NonNullTypeNode | NamedTypeNode | ListTypeNode): boolean {
+export function reduceListType(
+  type: string | NameNode | NonNullTypeNode | NamedTypeNode | ListTypeNode
+): string | undefined {
   return typeof type === "string"
-    ? false
+    ? undefined
     : type.kind === Kind.NON_NULL_TYPE
-    ? isListType(type.type)
+    ? reduceListType(type.type)
     : type.kind === Kind.NAMED_TYPE
-    ? isListType(type.name)
+    ? undefined
     : type.kind === Kind.NAME
-    ? isListType(type.value)
+    ? undefined
     : type.kind === Kind.LIST_TYPE
-    ? true
-    : false;
+    ? reduceTypeName(type.type)
+    : undefined;
 }
 
 /**
  * Determine whether the node is a scalar field
  */
 export function isScalarField(scalars: typeof DEFAULT_SCALARS, node: FieldDefinitionNode): boolean {
-  return Object.keys(scalars).includes(getTypeName(node.type));
+  return Object.keys(scalars).includes(reduceTypeName(node.type));
 }
 
 /**

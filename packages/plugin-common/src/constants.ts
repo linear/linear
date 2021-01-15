@@ -17,5 +17,6 @@ export default {
     // "integrationResource",
     // "organizationInviteCreate",
   ],
+  SKIP_OBJECTS: ["UserSettings"],
   SKIP_DIRECTIVES: ["skipSdk", "deprecated"],
 };

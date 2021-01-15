@@ -1,6 +1,7 @@
 import { InputValueDefinitionNode, Kind } from "graphql";
+import { printList } from "./print";
 import { ArgDefinition, ArgList } from "./types";
-import { filterJoin, nonNullable } from "./utils";
+import { nonNullable } from "./utils";
 
 /**
  * Return only the required arguments
@@ -21,13 +22,13 @@ export function getArgList(args: (ArgDefinition | undefined)[]): ArgList {
         return `@param ${name} - ${description}`;
       }),
     ],
-    printInput: filterJoin(
+    printInput: printList(
       args.filter(nonNullable).map(({ name, type, optional, defaultName }) => {
         return `${name}${optional ? "?" : ""}: ${type}${defaultName ? ` = ${defaultName}` : ""}`;
       }),
       ", "
     ),
-    printOutput: filterJoin(
+    printOutput: printList(
       args.filter(nonNullable).map(({ name }) => {
         return name;
       }),

@@ -1,16 +1,16 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import c from "./constants";
-import { getTypeName } from "./field";
+import { reduceTypeName } from "./field";
 import { Named, NamedFields, PluginContext } from "./types";
 
 /**
  * Get the object type matching the name arg
  */
-export function findObject(
-  objects: ObjectTypeDefinitionNode[],
+export function findObject<C>(
+  context: PluginContext<C>,
   field?: FieldDefinitionNode | Named<FieldDefinitionNode>
 ): ObjectTypeDefinitionNode | undefined {
-  return field ? objects.find(o => o.name.value === getTypeName(field.type)) : undefined;
+  return field ? context.objects.find(o => o.name.value === reduceTypeName(field.type)) : undefined;
 }
 
 /**
