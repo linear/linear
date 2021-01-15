@@ -4477,26 +4477,6 @@ export class AuthorizedApplicationsQuery extends Request {
 }
 
 /**
- * Query AvailableUsersDocument for AuthResolverResponse
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsersQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch() {
-    return this.request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument, {}).then(
-      response => {
-        const data = response?.availableUsers;
-        return data ? new AuthResolverResponse(this.request, data) : undefined;
-      }
-    );
-  }
-}
-
-/**
  * Query SsoUrlFromEmailDocument for SsoUrlFromEmailResponse
  *
  * @param request - function to call the graphql client
@@ -8933,195 +8913,6 @@ export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery extends
 }
 
 /**
- * Query AvailableUsers_UsersDocument for undefined
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_UsersQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch() {
-    return this.request<D.AvailableUsers_UsersQuery, D.AvailableUsers_UsersQueryVariables>(
-      D.AvailableUsers_UsersDocument,
-      {}
-    ).then(response => {
-      const data = response?.availableUsers?.users;
-      return data ? new undefined(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
- * Query AvailableUsers_AvailableOrganizationsDocument for undefined
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_AvailableOrganizationsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch() {
-    return this.request<
-      D.AvailableUsers_AvailableOrganizationsQuery,
-      D.AvailableUsers_AvailableOrganizationsQueryVariables
-    >(D.AvailableUsers_AvailableOrganizationsDocument, {}).then(response => {
-      const data = response?.availableUsers?.availableOrganizations;
-      return data ? new undefined(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
- * Query AvailableUsers_Users_AssignedIssuesDocument for IssueConnection
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_Users_AssignedIssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch(vars?: D.AvailableUsers_Users_AssignedIssuesQueryVariables) {
-    return this.request<
-      D.AvailableUsers_Users_AssignedIssuesQuery,
-      D.AvailableUsers_Users_AssignedIssuesQueryVariables
-    >(D.AvailableUsers_Users_AssignedIssuesDocument, vars).then(response => {
-      const data = response?.availableUsers?.users?.assignedIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
- * Query AvailableUsers_Users_CreatedIssuesDocument for IssueConnection
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_Users_CreatedIssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch(vars?: D.AvailableUsers_Users_CreatedIssuesQueryVariables) {
-    return this.request<D.AvailableUsers_Users_CreatedIssuesQuery, D.AvailableUsers_Users_CreatedIssuesQueryVariables>(
-      D.AvailableUsers_Users_CreatedIssuesDocument,
-      vars
-    ).then(response => {
-      const data = response?.availableUsers?.users?.createdIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
- * Query AvailableUsers_Users_TeamMembershipsDocument for TeamMembershipConnection
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_Users_TeamMembershipsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch(vars?: D.AvailableUsers_Users_TeamMembershipsQueryVariables) {
-    return this.request<
-      D.AvailableUsers_Users_TeamMembershipsQuery,
-      D.AvailableUsers_Users_TeamMembershipsQueryVariables
-    >(D.AvailableUsers_Users_TeamMembershipsDocument, vars).then(response => {
-      const data = response?.availableUsers?.users?.teamMemberships;
-      return data ? new TeamMembershipConnection(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
- * Query AvailableUsers_AvailableOrganizations_UsersDocument for UserConnection
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_AvailableOrganizations_UsersQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_UsersQueryVariables) {
-    return this.request<
-      D.AvailableUsers_AvailableOrganizations_UsersQuery,
-      D.AvailableUsers_AvailableOrganizations_UsersQueryVariables
-    >(D.AvailableUsers_AvailableOrganizations_UsersDocument, vars).then(response => {
-      const data = response?.availableUsers?.availableOrganizations?.users;
-      return data ? new UserConnection(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
- * Query AvailableUsers_AvailableOrganizations_TeamsDocument for TeamConnection
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_AvailableOrganizations_TeamsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_TeamsQueryVariables) {
-    return this.request<
-      D.AvailableUsers_AvailableOrganizations_TeamsQuery,
-      D.AvailableUsers_AvailableOrganizations_TeamsQueryVariables
-    >(D.AvailableUsers_AvailableOrganizations_TeamsDocument, vars).then(response => {
-      const data = response?.availableUsers?.availableOrganizations?.teams;
-      return data ? new TeamConnection(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
- * Query AvailableUsers_AvailableOrganizations_MilestonesDocument for MilestoneConnection
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_AvailableOrganizations_MilestonesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_MilestonesQueryVariables) {
-    return this.request<
-      D.AvailableUsers_AvailableOrganizations_MilestonesQuery,
-      D.AvailableUsers_AvailableOrganizations_MilestonesQueryVariables
-    >(D.AvailableUsers_AvailableOrganizations_MilestonesDocument, vars).then(response => {
-      const data = response?.availableUsers?.availableOrganizations?.milestones;
-      return data ? new MilestoneConnection(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
- * Query AvailableUsers_AvailableOrganizations_IntegrationsDocument for IntegrationConnection
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsers_AvailableOrganizations_IntegrationsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_IntegrationsQueryVariables) {
-    return this.request<
-      D.AvailableUsers_AvailableOrganizations_IntegrationsQuery,
-      D.AvailableUsers_AvailableOrganizations_IntegrationsQueryVariables
-    >(D.AvailableUsers_AvailableOrganizations_IntegrationsDocument, vars).then(response => {
-      const data = response?.availableUsers?.availableOrganizations?.integrations;
-      return data ? new IntegrationConnection(this.request, data) : undefined;
-    });
-  }
-}
-
-/**
  * Query BillingDetails_InvoicesDocument for undefined
  *
  * @param request - function to call the graphql client
@@ -9310,17 +9101,21 @@ export class Integration_SettingsQuery extends Request {
  * Query Integration_Settings_SlackPostDocument for SlackPostSettings
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Integration_Settings_SlackPostQuery extends Request {
-  public constructor(request: LinearRequest) {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
     super(request);
+    this._id = id;
   }
 
   public async fetch() {
     return this.request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
       D.Integration_Settings_SlackPostDocument,
       {
-        id,
+        id: this._id,
       }
     ).then(response => {
       const data = response?.integration?.settings?.slackPost;
@@ -9333,10 +9128,14 @@ export class Integration_Settings_SlackPostQuery extends Request {
  * Query Integration_Settings_SlackProjectPostDocument for SlackPostSettings
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Integration_Settings_SlackProjectPostQuery extends Request {
-  public constructor(request: LinearRequest) {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
     super(request);
+    this._id = id;
   }
 
   public async fetch() {
@@ -9344,7 +9143,7 @@ export class Integration_Settings_SlackProjectPostQuery extends Request {
       D.Integration_Settings_SlackProjectPostQuery,
       D.Integration_Settings_SlackProjectPostQueryVariables
     >(D.Integration_Settings_SlackProjectPostDocument, {
-      id,
+      id: this._id,
     }).then(response => {
       const data = response?.integration?.settings?.slackProjectPost;
       return data ? new SlackPostSettings(this.request, data) : undefined;
@@ -9356,17 +9155,21 @@ export class Integration_Settings_SlackProjectPostQuery extends Request {
  * Query Integration_Settings_GoogleSheetsDocument for GoogleSheetsSettings
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Integration_Settings_GoogleSheetsQuery extends Request {
-  public constructor(request: LinearRequest) {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
     super(request);
+    this._id = id;
   }
 
   public async fetch() {
     return this.request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
       D.Integration_Settings_GoogleSheetsDocument,
       {
-        id,
+        id: this._id,
       }
     ).then(response => {
       const data = response?.integration?.settings?.googleSheets;
@@ -9379,17 +9182,21 @@ export class Integration_Settings_GoogleSheetsQuery extends Request {
  * Query Integration_Settings_SentryDocument for SentrySettings
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Integration_Settings_SentryQuery extends Request {
-  public constructor(request: LinearRequest) {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
     super(request);
+    this._id = id;
   }
 
   public async fetch() {
     return this.request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
       D.Integration_Settings_SentryDocument,
       {
-        id,
+        id: this._id,
       }
     ).then(response => {
       const data = response?.integration?.settings?.sentry;
@@ -9456,10 +9263,14 @@ export class IntegrationResource_PullRequestQuery extends Request {
  * Query IntegrationResource_Data_GithubPullRequestDocument for PullRequestPayload
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
-  public constructor(request: LinearRequest) {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
     super(request);
+    this._id = id;
   }
 
   public async fetch() {
@@ -9467,7 +9278,7 @@ export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
       D.IntegrationResource_Data_GithubPullRequestQuery,
       D.IntegrationResource_Data_GithubPullRequestQueryVariables
     >(D.IntegrationResource_Data_GithubPullRequestDocument, {
-      id,
+      id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.githubPullRequest;
       return data ? new PullRequestPayload(this.request, data) : undefined;
@@ -9479,10 +9290,14 @@ export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
  * Query IntegrationResource_Data_GitlabMergeRequestDocument for PullRequestPayload
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
-  public constructor(request: LinearRequest) {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
     super(request);
+    this._id = id;
   }
 
   public async fetch() {
@@ -9490,7 +9305,7 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
       D.IntegrationResource_Data_GitlabMergeRequestQuery,
       D.IntegrationResource_Data_GitlabMergeRequestQueryVariables
     >(D.IntegrationResource_Data_GitlabMergeRequestDocument, {
-      id,
+      id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.gitlabMergeRequest;
       return data ? new PullRequestPayload(this.request, data) : undefined;
@@ -9502,10 +9317,14 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
  * Query IntegrationResource_Data_GithubCommitDocument for CommitPayload
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class IntegrationResource_Data_GithubCommitQuery extends Request {
-  public constructor(request: LinearRequest) {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
     super(request);
+    this._id = id;
   }
 
   public async fetch() {
@@ -9513,7 +9332,7 @@ export class IntegrationResource_Data_GithubCommitQuery extends Request {
       D.IntegrationResource_Data_GithubCommitQuery,
       D.IntegrationResource_Data_GithubCommitQueryVariables
     >(D.IntegrationResource_Data_GithubCommitDocument, {
-      id,
+      id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.githubCommit;
       return data ? new CommitPayload(this.request, data) : undefined;
@@ -9525,10 +9344,14 @@ export class IntegrationResource_Data_GithubCommitQuery extends Request {
  * Query IntegrationResource_Data_SentryIssueDocument for SentryIssuePayload
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class IntegrationResource_Data_SentryIssueQuery extends Request {
-  public constructor(request: LinearRequest) {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
     super(request);
+    this._id = id;
   }
 
   public async fetch() {
@@ -9536,7 +9359,7 @@ export class IntegrationResource_Data_SentryIssueQuery extends Request {
       D.IntegrationResource_Data_SentryIssueQuery,
       D.IntegrationResource_Data_SentryIssueQueryVariables
     >(D.IntegrationResource_Data_SentryIssueDocument, {
-      id,
+      id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.sentryIssue;
       return data ? new SentryIssuePayload(this.request, data) : undefined;

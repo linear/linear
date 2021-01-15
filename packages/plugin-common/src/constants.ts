@@ -4,6 +4,7 @@ export default {
   EDGE_TYPE: "Edge",
   SKIP_FIELDS: [
     "edges",
+    "availableUsers",
     // "adminUserAccountLookup",
     // "adminCommand",
     // "adminBulkEmail",
