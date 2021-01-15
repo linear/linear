@@ -83,6 +83,18 @@ export class User extends Request {
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this.request).fetch();
   }
+  /** Issues assigned to the user. */
+  public assignedIssues(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
+    return this.id ? new User_AssignedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Issues created by the user. */
+  public createdIssues(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
+    return this.id ? new User_CreatedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Memberships associated with the user. */
+  public teamMemberships(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
+    return this.id ? new User_TeamMembershipsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
 }
 
 /**
@@ -269,6 +281,38 @@ export class Issue extends Request {
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
+  /** Users who are subscribed to the issue. */
+  public subscribers(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
+    return this.id ? new Issue_SubscribersQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Children of the issue. */
+  public children(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
+    return this.id ? new Issue_ChildrenQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Comments associated with the issue. */
+  public comments(vars?: Omit<D.Issue_CommentsQueryVariables, "id">) {
+    return this.id ? new Issue_CommentsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** History entries associated with the issue. */
+  public history(vars?: Omit<D.Issue_HistoryQueryVariables, "id">) {
+    return this.id ? new Issue_HistoryQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Labels associated with this issue. */
+  public labels(vars?: Omit<D.Issue_LabelsQueryVariables, "id">) {
+    return this.id ? new Issue_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Integration resources for this issue. */
+  public integrationResources(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
+    return this.id ? new Issue_IntegrationResourcesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Relations associated with this issue. */
+  public relations(vars?: Omit<D.Issue_RelationsQueryVariables, "id">) {
+    return this.id ? new Issue_RelationsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Inverse relations associated with this issue. */
+  public inverseRelations(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
+    return this.id ? new Issue_InverseRelationsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
 }
 
 /**
@@ -429,6 +473,38 @@ export class Team extends Request {
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this.request).fetch();
   }
+  /** Issues associated with the team. */
+  public issues(vars?: Omit<D.Team_IssuesQueryVariables, "id">) {
+    return this.id ? new Team_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Cycles associated with the team. */
+  public cycles(vars?: Omit<D.Team_CyclesQueryVariables, "id">) {
+    return this.id ? new Team_CyclesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Memberships associated with the team. */
+  public memberships(vars?: Omit<D.Team_MembershipsQueryVariables, "id">) {
+    return this.id ? new Team_MembershipsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Projects associated with the team. */
+  public projects(vars?: Omit<D.Team_ProjectsQueryVariables, "id">) {
+    return this.id ? new Team_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** The states that define the workflow associated with the team. */
+  public states(vars?: Omit<D.Team_StatesQueryVariables, "id">) {
+    return this.id ? new Team_StatesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Templates associated with the team. */
+  public templates(vars?: Omit<D.Team_TemplatesQueryVariables, "id">) {
+    return this.id ? new Team_TemplatesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Labels associated with the team. */
+  public labels(vars?: Omit<D.Team_LabelsQueryVariables, "id">) {
+    return this.id ? new Team_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Webhooks associated with the team. */
+  public webhooks(vars?: Omit<D.Team_WebhooksQueryVariables, "id">) {
+    return this.id ? new Team_WebhooksQuery(this.request, this.id).fetch(vars) : undefined;
+  }
 }
 
 /**
@@ -557,6 +633,14 @@ export class Cycle extends Request {
   /** The team that the cycle is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  }
+  /** Issues associated with the cycle. */
+  public issues(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
+    return this.id ? new Cycle_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Issues that weren't completed when the cycle was closed. */
+  public uncompletedIssuesUponClose(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
+    return this.id ? new Cycle_UncompletedIssuesUponCloseQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
 
@@ -759,6 +843,22 @@ export class Project extends Request {
   public get milestone(): Promise<Milestone | undefined> | undefined {
     return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
   }
+  /** Teams associated with this project. */
+  public teams(vars?: Omit<D.Project_TeamsQueryVariables, "id">) {
+    return this.id ? new Project_TeamsQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Users that are members of the project. */
+  public members(vars?: Omit<D.Project_MembersQueryVariables, "id">) {
+    return this.id ? new Project_MembersQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Issues associated with the project. */
+  public issues(vars?: Omit<D.Project_IssuesQueryVariables, "id">) {
+    return this.id ? new Project_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  }
+  /** Links associated with the project. */
+  public links(vars?: Omit<D.Project_LinksQueryVariables, "id">) {
+    return this.id ? new Project_LinksQuery(this.request, this.id).fetch(vars) : undefined;
+  }
 }
 
 /**
@@ -796,6 +896,10 @@ export class Milestone extends Request {
   /** The organization that the milestone belongs to. */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this.request).fetch();
+  }
+  /** Projects associated with the milestone. */
+  public projects(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
+    return this.id ? new Milestone_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
 
@@ -866,6 +970,22 @@ export class Organization extends Request {
   /** The organization's subscription to a paid plan. */
   public get subscription(): Promise<Subscription | undefined> {
     return new SubscriptionQuery(this.request).fetch();
+  }
+  /** Users associated with the organization. */
+  public users(vars?: D.Organization_UsersQueryVariables) {
+    return new Organization_UsersQuery(this.request).fetch(vars);
+  }
+  /** Teams associated with the organization. */
+  public teams(vars?: D.Organization_TeamsQueryVariables) {
+    return new Organization_TeamsQuery(this.request).fetch(vars);
+  }
+  /** Milestones associated with the organization. */
+  public milestones(vars?: D.Organization_MilestonesQueryVariables) {
+    return new Organization_MilestonesQuery(this.request).fetch(vars);
+  }
+  /** Integrations associated with the organization. */
+  public integrations(vars?: D.Organization_IntegrationsQueryVariables) {
+    return new Organization_IntegrationsQuery(this.request).fetch(vars);
   }
 }
 
@@ -988,6 +1108,10 @@ export class Integration extends Request {
   /** The user that added the integration. */
   public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  }
+  /** undefined */
+  public settings(vars?: Omit<D.Integration_SettingsQueryVariables, "id">) {
+    return this.id ? new Integration_SettingsQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
 
@@ -4775,7 +4899,7 @@ export class UserQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<User | undefined> {
     return this.request<D.UserQuery, D.UserQueryVariables>(D.UserDocument, {
       id,
     }).then(response => {
@@ -4795,7 +4919,7 @@ export class ViewerQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<User | undefined> {
     return this.request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, {}).then(response => {
       const data = response?.viewer;
       return data ? new User(this.request, data) : undefined;
@@ -4813,7 +4937,7 @@ export class OrganizationQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<Organization | undefined> {
     return this.request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument, {}).then(
       response => {
         const data = response?.organization;
@@ -4833,7 +4957,7 @@ export class OrganizationExistsQuery extends Request {
     super(request);
   }
 
-  public async fetch(urlKey: string) {
+  public async fetch(urlKey: string): Promise<OrganizationExistsPayload | undefined> {
     return this.request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(D.OrganizationExistsDocument, {
       urlKey,
     }).then(response => {
@@ -4853,7 +4977,7 @@ export class SyncBootstrapQuery extends Request {
     super(request);
   }
 
-  public async fetch(databaseVersion: number, sinceSyncId: number) {
+  public async fetch(databaseVersion: number, sinceSyncId: number): Promise<SyncResponse | undefined> {
     return this.request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument, {
       databaseVersion,
       sinceSyncId,
@@ -4874,7 +4998,7 @@ export class SyncUpdatesQuery extends Request {
     super(request);
   }
 
-  public async fetch(sinceSyncId: number) {
+  public async fetch(sinceSyncId: number): Promise<SyncResponse | undefined> {
     return this.request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument, {
       sinceSyncId,
     }).then(response => {
@@ -4894,7 +5018,7 @@ export class ArchivedModelSyncQuery extends Request {
     super(request);
   }
 
-  public async fetch(identifier: string, modelClass: string) {
+  public async fetch(identifier: string, modelClass: string): Promise<ArchiveResponse | undefined> {
     return this.request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument, {
       identifier,
       modelClass,
@@ -4919,7 +5043,7 @@ export class ArchivedModelsSyncQuery extends Request {
     modelClass: string,
     teamId: string,
     vars?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
-  ) {
+  ): Promise<ArchiveResponse | undefined> {
     return this.request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(D.ArchivedModelsSyncDocument, {
       modelClass,
       teamId,
@@ -4941,7 +5065,7 @@ export class AdminUserAccountLookupQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookupQueryVariables) {
+  public async fetch(vars?: D.AdminUserAccountLookupQueryVariables): Promise<UserAccountAdminPrivileged | undefined> {
     return this.request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
       D.AdminUserAccountLookupDocument,
       vars
@@ -4962,7 +5086,7 @@ export class UsersQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.UsersQueryVariables) {
+  public async fetch(vars?: D.UsersQueryVariables): Promise<UserConnection | undefined> {
     return this.request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, vars).then(response => {
       const data = response?.users;
       return data ? new UserConnection(this.request, data) : undefined;
@@ -4980,7 +5104,7 @@ export class ApiKeysQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.ApiKeysQueryVariables) {
+  public async fetch(vars?: D.ApiKeysQueryVariables): Promise<ApiKeyConnection | undefined> {
     return this.request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, vars).then(response => {
       const data = response?.apiKeys;
       return data ? new ApiKeyConnection(this.request, data) : undefined;
@@ -5002,7 +5126,7 @@ export class ApplicationWithAuthorizationQuery extends Request {
     scope: string[],
     clientId: string,
     vars?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
-  ) {
+  ): Promise<UserAuthorizedApplication | undefined> {
     return this.request<D.ApplicationWithAuthorizationQuery, D.ApplicationWithAuthorizationQueryVariables>(
       D.ApplicationWithAuthorizationDocument,
       {
@@ -5027,7 +5151,7 @@ export class AuthorizedApplicationsQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<undefined | undefined> {
     return this.request<D.AuthorizedApplicationsQuery, D.AuthorizedApplicationsQueryVariables>(
       D.AuthorizedApplicationsDocument,
       {}
@@ -5048,7 +5172,10 @@ export class SsoUrlFromEmailQuery extends Request {
     super(request);
   }
 
-  public async fetch(email: string, vars?: Omit<D.SsoUrlFromEmailQueryVariables, "email">) {
+  public async fetch(
+    email: string,
+    vars?: Omit<D.SsoUrlFromEmailQueryVariables, "email">
+  ): Promise<SsoUrlFromEmailResponse | undefined> {
     return this.request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument, {
       email,
       ...vars,
@@ -5069,7 +5196,7 @@ export class BillingDetailsQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<BillingDetailsPayload | undefined> {
     return this.request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument, {}).then(
       response => {
         const data = response?.billingDetails;
@@ -5089,7 +5216,11 @@ export class CollaborativeDocumentJoinQuery extends Request {
     super(request);
   }
 
-  public async fetch(clientId: string, issueId: string, version: number) {
+  public async fetch(
+    clientId: string,
+    issueId: string,
+    version: number
+  ): Promise<CollaborationDocumentUpdatePayload | undefined> {
     return this.request<D.CollaborativeDocumentJoinQuery, D.CollaborativeDocumentJoinQueryVariables>(
       D.CollaborativeDocumentJoinDocument,
       {
@@ -5114,7 +5245,7 @@ export class CommentQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Comment | undefined> {
     return this.request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, {
       id,
     }).then(response => {
@@ -5134,7 +5265,7 @@ export class CommentsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.CommentsQueryVariables) {
+  public async fetch(vars?: D.CommentsQueryVariables): Promise<CommentConnection | undefined> {
     return this.request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument, vars).then(response => {
       const data = response?.comments;
       return data ? new CommentConnection(this.request, data) : undefined;
@@ -5152,7 +5283,7 @@ export class CustomViewQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<CustomView | undefined> {
     return this.request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, {
       id,
     }).then(response => {
@@ -5172,7 +5303,7 @@ export class CustomViewsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.CustomViewsQueryVariables) {
+  public async fetch(vars?: D.CustomViewsQueryVariables): Promise<CustomViewConnection | undefined> {
     return this.request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument, vars).then(response => {
       const data = response?.customViews;
       return data ? new CustomViewConnection(this.request, data) : undefined;
@@ -5190,7 +5321,7 @@ export class CycleQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Cycle | undefined> {
     return this.request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, {
       id,
     }).then(response => {
@@ -5210,7 +5341,7 @@ export class CyclesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.CyclesQueryVariables) {
+  public async fetch(vars?: D.CyclesQueryVariables): Promise<CycleConnection | undefined> {
     return this.request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument, vars).then(response => {
       const data = response?.cycles;
       return data ? new CycleConnection(this.request, data) : undefined;
@@ -5228,7 +5359,7 @@ export class EmojiQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Emoji | undefined> {
     return this.request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, {
       id,
     }).then(response => {
@@ -5248,7 +5379,7 @@ export class EmojisQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.EmojisQueryVariables) {
+  public async fetch(vars?: D.EmojisQueryVariables): Promise<EmojiConnection | undefined> {
     return this.request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument, vars).then(response => {
       const data = response?.emojis;
       return data ? new EmojiConnection(this.request, data) : undefined;
@@ -5266,7 +5397,7 @@ export class FavoriteQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Favorite | undefined> {
     return this.request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, {
       id,
     }).then(response => {
@@ -5286,7 +5417,7 @@ export class FavoritesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.FavoritesQueryVariables) {
+  public async fetch(vars?: D.FavoritesQueryVariables): Promise<FavoriteConnection | undefined> {
     return this.request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument, vars).then(response => {
       const data = response?.favorites;
       return data ? new FavoriteConnection(this.request, data) : undefined;
@@ -5304,7 +5435,10 @@ export class FigmaEmbedInfoQuery extends Request {
     super(request);
   }
 
-  public async fetch(fileId: string, vars?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">) {
+  public async fetch(
+    fileId: string,
+    vars?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">
+  ): Promise<FigmaEmbedPayload | undefined> {
     return this.request<D.FigmaEmbedInfoQuery, D.FigmaEmbedInfoQueryVariables>(D.FigmaEmbedInfoDocument, {
       fileId,
       ...vars,
@@ -5325,7 +5459,7 @@ export class IntegrationQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Integration | undefined> {
     return this.request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument, {
       id,
     }).then(response => {
@@ -5345,7 +5479,7 @@ export class IntegrationsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.IntegrationsQueryVariables) {
+  public async fetch(vars?: D.IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
     return this.request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument, vars).then(
       response => {
         const data = response?.integrations;
@@ -5365,7 +5499,7 @@ export class IntegrationResourceQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<IntegrationResource | undefined> {
     return this.request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
       D.IntegrationResourceDocument,
       {
@@ -5388,7 +5522,7 @@ export class IntegrationResourcesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.IntegrationResourcesQueryVariables) {
+  public async fetch(vars?: D.IntegrationResourcesQueryVariables): Promise<IntegrationResourceConnection | undefined> {
     return this.request<D.IntegrationResourcesQuery, D.IntegrationResourcesQueryVariables>(
       D.IntegrationResourcesDocument,
       vars
@@ -5409,7 +5543,10 @@ export class InviteInfoQuery extends Request {
     super(request);
   }
 
-  public async fetch(userHash: string, vars?: Omit<D.InviteInfoQueryVariables, "userHash">) {
+  public async fetch(
+    userHash: string,
+    vars?: Omit<D.InviteInfoQueryVariables, "userHash">
+  ): Promise<InvitePagePayload | undefined> {
     return this.request<D.InviteInfoQuery, D.InviteInfoQueryVariables>(D.InviteInfoDocument, {
       userHash,
       ...vars,
@@ -5430,7 +5567,7 @@ export class IssueLabelQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<IssueLabel | undefined> {
     return this.request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, {
       id,
     }).then(response => {
@@ -5450,7 +5587,7 @@ export class IssueLabelsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.IssueLabelsQueryVariables) {
+  public async fetch(vars?: D.IssueLabelsQueryVariables): Promise<IssueLabelConnection | undefined> {
     return this.request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument, vars).then(response => {
       const data = response?.issueLabels;
       return data ? new IssueLabelConnection(this.request, data) : undefined;
@@ -5468,7 +5605,7 @@ export class IssueRelationQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<IssueRelation | undefined> {
     return this.request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, {
       id,
     }).then(response => {
@@ -5488,7 +5625,7 @@ export class IssueRelationsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.IssueRelationsQueryVariables) {
+  public async fetch(vars?: D.IssueRelationsQueryVariables): Promise<IssueRelationConnection | undefined> {
     return this.request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(D.IssueRelationsDocument, vars).then(
       response => {
         const data = response?.issueRelations;
@@ -5508,7 +5645,7 @@ export class IssueQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Issue | undefined> {
     return this.request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, {
       id,
     }).then(response => {
@@ -5528,7 +5665,10 @@ export class IssueSearchQuery extends Request {
     super(request);
   }
 
-  public async fetch(query: string, vars?: Omit<D.IssueSearchQueryVariables, "query">) {
+  public async fetch(
+    query: string,
+    vars?: Omit<D.IssueSearchQueryVariables, "query">
+  ): Promise<IssueConnection | undefined> {
     return this.request<D.IssueSearchQuery, D.IssueSearchQueryVariables>(D.IssueSearchDocument, {
       query,
       ...vars,
@@ -5549,7 +5689,7 @@ export class IssuesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.IssuesQueryVariables) {
+  public async fetch(vars?: D.IssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, vars).then(response => {
       const data = response?.issues;
       return data ? new IssueConnection(this.request, data) : undefined;
@@ -5567,7 +5707,7 @@ export class MilestoneQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Milestone | undefined> {
     return this.request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, {
       id,
     }).then(response => {
@@ -5587,7 +5727,7 @@ export class MilestonesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.MilestonesQueryVariables) {
+  public async fetch(vars?: D.MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
     return this.request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument, vars).then(response => {
       const data = response?.milestones;
       return data ? new MilestoneConnection(this.request, data) : undefined;
@@ -5605,7 +5745,7 @@ export class NotificationQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<UserSettings | undefined> {
     return this.request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument, {}).then(
       response => {
         const data = response?.notification;
@@ -5625,7 +5765,7 @@ export class NotificationsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.NotificationsQueryVariables) {
+  public async fetch(vars?: D.NotificationsQueryVariables): Promise<NotificationConnection | undefined> {
     return this.request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument, vars).then(
       response => {
         const data = response?.notifications;
@@ -5645,7 +5785,9 @@ export class NotificationSubscriptionQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.NotificationSubscriptionQueryVariables) {
+  public async fetch(
+    vars?: D.NotificationSubscriptionQueryVariables
+  ): Promise<NotificationSubscriptionConnection | undefined> {
     return this.request<D.NotificationSubscriptionQuery, D.NotificationSubscriptionQueryVariables>(
       D.NotificationSubscriptionDocument,
       vars
@@ -5666,7 +5808,7 @@ export class OrganizationInviteQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<IssueLabel | undefined> {
     return this.request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(D.OrganizationInviteDocument, {
       id,
     }).then(response => {
@@ -5686,7 +5828,7 @@ export class OrganizationInvitesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.OrganizationInvitesQueryVariables) {
+  public async fetch(vars?: D.OrganizationInvitesQueryVariables): Promise<OrganizationInviteConnection | undefined> {
     return this.request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
       D.OrganizationInvitesDocument,
       vars
@@ -5707,7 +5849,7 @@ export class ProjectLinkQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ProjectLink | undefined> {
     return this.request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
       id,
     }).then(response => {
@@ -5727,7 +5869,7 @@ export class ProjectLinksQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.ProjectLinksQueryVariables) {
+  public async fetch(vars?: D.ProjectLinksQueryVariables): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
       response => {
         const data = response?.ProjectLinks;
@@ -5747,7 +5889,7 @@ export class ProjectQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Project | undefined> {
     return this.request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
       id,
     }).then(response => {
@@ -5767,7 +5909,7 @@ export class ProjectsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.ProjectsQueryVariables) {
+  public async fetch(vars?: D.ProjectsQueryVariables): Promise<ProjectConnection | undefined> {
     return this.request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars).then(response => {
       const data = response?.projects;
       return data ? new ProjectConnection(this.request, data) : undefined;
@@ -5785,7 +5927,7 @@ export class PushSubscriptionTestQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionTestQuery, D.PushSubscriptionTestQueryVariables>(
       D.PushSubscriptionTestDocument,
       {}
@@ -5806,7 +5948,7 @@ export class ReactionQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Reaction | undefined> {
     return this.request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, {
       id,
     }).then(response => {
@@ -5826,7 +5968,7 @@ export class ReactionsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.ReactionsQueryVariables) {
+  public async fetch(vars?: D.ReactionsQueryVariables): Promise<ReactionConnection | undefined> {
     return this.request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, vars).then(response => {
       const data = response?.reactions;
       return data ? new ReactionConnection(this.request, data) : undefined;
@@ -5844,7 +5986,7 @@ export class SubscriptionQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<Subscription | undefined> {
     return this.request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument, {}).then(
       response => {
         const data = response?.subscription;
@@ -5864,7 +6006,7 @@ export class TeamMembershipQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<TeamMembership | undefined> {
     return this.request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument, {
       id,
     }).then(response => {
@@ -5884,7 +6026,7 @@ export class TeamMembershipsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.TeamMembershipsQueryVariables) {
+  public async fetch(vars?: D.TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(D.TeamMembershipsDocument, vars).then(
       response => {
         const data = response?.teamMemberships;
@@ -5904,7 +6046,7 @@ export class TeamQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Team | undefined> {
     return this.request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
       id,
     }).then(response => {
@@ -5924,7 +6066,7 @@ export class TeamsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.TeamsQueryVariables) {
+  public async fetch(vars?: D.TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return this.request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars).then(response => {
       const data = response?.teams;
       return data ? new TeamConnection(this.request, data) : undefined;
@@ -5942,7 +6084,7 @@ export class TemplatesQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<undefined | undefined> {
     return this.request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument, {}).then(response => {
       const data = response?.templates;
       return data ? new undefined(this.request, data) : undefined;
@@ -5960,7 +6102,7 @@ export class TemplateQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Template | undefined> {
     return this.request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, {
       id,
     }).then(response => {
@@ -5980,7 +6122,7 @@ export class ViewPreferencesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.ViewPreferencesQueryVariables) {
+  public async fetch(vars?: D.ViewPreferencesQueryVariables): Promise<ViewPreferencesConnection | undefined> {
     return this.request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument, vars).then(
       response => {
         const data = response?.viewPreferences;
@@ -6000,7 +6142,7 @@ export class WebhookQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<Webhook | undefined> {
     return this.request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, {
       id,
     }).then(response => {
@@ -6020,7 +6162,7 @@ export class WebhooksQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.WebhooksQueryVariables) {
+  public async fetch(vars?: D.WebhooksQueryVariables): Promise<WebhookConnection | undefined> {
     return this.request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, vars).then(response => {
       const data = response?.webhooks;
       return data ? new WebhookConnection(this.request, data) : undefined;
@@ -6038,7 +6180,7 @@ export class WorkflowStateQuery extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<WorkflowState | undefined> {
     return this.request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, {
       id,
     }).then(response => {
@@ -6058,7 +6200,7 @@ export class WorkflowStatesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.WorkflowStatesQueryVariables) {
+  public async fetch(vars?: D.WorkflowStatesQueryVariables): Promise<WorkflowStateConnection | undefined> {
     return this.request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(D.WorkflowStatesDocument, vars).then(
       response => {
         const data = response?.workflowStates;
@@ -6078,7 +6220,7 @@ export class UserUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.UpdateUserInput, id: string) {
+  public async fetch(input: D.UpdateUserInput, id: string): Promise<UserPayload | undefined> {
     return this.request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument, {
       input,
       id,
@@ -6099,7 +6241,7 @@ export class UserPromoteAdminMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(D.UserPromoteAdminDocument, {
       id,
     }).then(response => {
@@ -6119,7 +6261,7 @@ export class UserDemoteAdminMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument, {
       id,
     }).then(response => {
@@ -6139,7 +6281,7 @@ export class UserSuspendMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, {
       id,
     }).then(response => {
@@ -6159,7 +6301,7 @@ export class UserUnsuspendMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument, {
       id,
     }).then(response => {
@@ -6179,7 +6321,7 @@ export class OrganizationUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.UpdateOrganizationInput) {
+  public async fetch(input: D.UpdateOrganizationInput): Promise<OrganizationPayload | undefined> {
     return this.request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
       D.OrganizationUpdateDocument,
       {
@@ -6202,7 +6344,7 @@ export class OrganizationDeleteChallengeMutation extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<OrganizationDeletePayload | undefined> {
     return this.request<D.OrganizationDeleteChallengeMutation, D.OrganizationDeleteChallengeMutationVariables>(
       D.OrganizationDeleteChallengeDocument,
       {}
@@ -6223,7 +6365,7 @@ export class OrganizationDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.DeleteOrganizationInput) {
+  public async fetch(input: D.DeleteOrganizationInput): Promise<OrganizationDeletePayload | undefined> {
     return this.request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
       D.OrganizationDeleteDocument,
       {
@@ -6246,7 +6388,7 @@ export class AdminDeleteIntegrationMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<AdminIntegrationPayload | undefined> {
     return this.request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
       D.AdminDeleteIntegrationDocument,
       {
@@ -6269,7 +6411,7 @@ export class OrganizationToggleAccessMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<OrganizationAccessPayload | undefined> {
     return this.request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
       D.OrganizationToggleAccessDocument,
       {
@@ -6292,7 +6434,7 @@ export class OrganizationChangeEmailDomainMutation extends Request {
     super(request);
   }
 
-  public async fetch(toDomain: string, fromDomain: string, id: string) {
+  public async fetch(toDomain: string, fromDomain: string, id: string): Promise<OrganizationAccessPayload | undefined> {
     return this.request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
       D.OrganizationChangeEmailDomainDocument,
       {
@@ -6317,7 +6459,7 @@ export class OrganizationToggleSamlEnabledMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<OrganizationSamlConfigurePayload | undefined> {
     return this.request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
       D.OrganizationToggleSamlEnabledDocument,
       {
@@ -6340,7 +6482,10 @@ export class OrganizationConfigureSamlMutation extends Request {
     super(request);
   }
 
-  public async fetch(samlConfiguration: D.SamlConfigurationInput, id: string) {
+  public async fetch(
+    samlConfiguration: D.SamlConfigurationInput,
+    id: string
+  ): Promise<OrganizationSamlConfigurePayload | undefined> {
     return this.request<D.OrganizationConfigureSamlMutation, D.OrganizationConfigureSamlMutationVariables>(
       D.OrganizationConfigureSamlDocument,
       {
@@ -6364,7 +6509,7 @@ export class AdminCommandMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.AdminCommandInput) {
+  public async fetch(input: D.AdminCommandInput): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument, {
       input,
     }).then(response => {
@@ -6389,7 +6534,7 @@ export class AdminBulkEmailMutation extends Request {
     markdownContent: string,
     subject: string,
     vars?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
-  ) {
+  ): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument, {
       emails,
       markdownContent,
@@ -6412,7 +6557,7 @@ export class AdminCreateStripeCustomerMutation extends Request {
     super(request);
   }
 
-  public async fetch(organizationId: string) {
+  public async fetch(organizationId: string): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
       D.AdminCreateStripeCustomerDocument,
       {
@@ -6435,7 +6580,7 @@ export class AdminScheduleAnonymousTaskMutation extends Request {
     super(request);
   }
 
-  public async fetch(taskName: string) {
+  public async fetch(taskName: string): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
       D.AdminScheduleAnonymousTaskDocument,
       {
@@ -6458,7 +6603,7 @@ export class AdminUserAccountChangeEmailMutation extends Request {
     super(request);
   }
 
-  public async fetch(newEmail: string, id: string) {
+  public async fetch(newEmail: string, id: string): Promise<UserAccountAdminPrivileged | undefined> {
     return this.request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
       D.AdminUserAccountChangeEmailDocument,
       {
@@ -6482,7 +6627,7 @@ export class EventCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.EventCreateInput) {
+  public async fetch(input: D.EventCreateInput): Promise<EventPayload | undefined> {
     return this.request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument, {
       input,
     }).then(response => {
@@ -6502,7 +6647,7 @@ export class ApiKeyCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.ApiKeyCreateInput) {
+  public async fetch(input: D.ApiKeyCreateInput): Promise<ApiKeyPayload | undefined> {
     return this.request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument, {
       input,
     }).then(response => {
@@ -6522,7 +6667,7 @@ export class ApiKeyDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument, {
       id,
     }).then(response => {
@@ -6542,7 +6687,9 @@ export class EmailUserAccountAuthChallengeMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.EmailUserAccountAuthChallengeInput) {
+  public async fetch(
+    input: D.EmailUserAccountAuthChallengeInput
+  ): Promise<EmailUserAccountAuthChallengeResponse | undefined> {
     return this.request<D.EmailUserAccountAuthChallengeMutation, D.EmailUserAccountAuthChallengeMutationVariables>(
       D.EmailUserAccountAuthChallengeDocument,
       {
@@ -6565,7 +6712,7 @@ export class EmailTokenUserAccountAuthMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.TokenUserAccountAuthInput) {
+  public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
       D.EmailTokenUserAccountAuthDocument,
       {
@@ -6588,7 +6735,7 @@ export class SamlTokenUserAccountAuthMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.TokenUserAccountAuthInput) {
+  public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
       D.SamlTokenUserAccountAuthDocument,
       {
@@ -6611,7 +6758,7 @@ export class GoogleUserAccountAuthMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.GoogleUserAccountAuthInput) {
+  public async fetch(input: D.GoogleUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
       D.GoogleUserAccountAuthDocument,
       {
@@ -6637,7 +6784,7 @@ export class CreateOrganizationFromOnboardingMutation extends Request {
   public async fetch(
     input: D.CreateOrganizationInput,
     vars?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
-  ) {
+  ): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<
       D.CreateOrganizationFromOnboardingMutation,
       D.CreateOrganizationFromOnboardingMutationVariables
@@ -6661,7 +6808,7 @@ export class JoinOrganizationFromOnboardingMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.JoinOrganizationInput) {
+  public async fetch(input: D.JoinOrganizationInput): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
       D.JoinOrganizationFromOnboardingDocument,
       {
@@ -6684,7 +6831,7 @@ export class LeaveOrganizationMutation extends Request {
     super(request);
   }
 
-  public async fetch(organizationId: string) {
+  public async fetch(organizationId: string): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
       D.LeaveOrganizationDocument,
       {
@@ -6707,7 +6854,7 @@ export class BillingEmailUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.BillingEmailUpdateInput) {
+  public async fetch(input: D.BillingEmailUpdateInput): Promise<BillingEmailPayload | undefined> {
     return this.request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
       D.BillingEmailUpdateDocument,
       {
@@ -6730,7 +6877,9 @@ export class CollaborativeDocumentUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.CollaborationDocumentUpdateInput) {
+  public async fetch(
+    input: D.CollaborationDocumentUpdateInput
+  ): Promise<CollaborationDocumentUpdatePayload | undefined> {
     return this.request<D.CollaborativeDocumentUpdateMutation, D.CollaborativeDocumentUpdateMutationVariables>(
       D.CollaborativeDocumentUpdateDocument,
       {
@@ -6753,7 +6902,7 @@ export class CommentCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.CommentCreateInput) {
+  public async fetch(input: D.CommentCreateInput): Promise<CommentPayload | undefined> {
     return this.request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument, {
       input,
     }).then(response => {
@@ -6773,7 +6922,7 @@ export class CommentUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.CommentUpdateInput, id: string) {
+  public async fetch(input: D.CommentUpdateInput, id: string): Promise<CommentPayload | undefined> {
     return this.request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument, {
       input,
       id,
@@ -6794,7 +6943,7 @@ export class CommentDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument, {
       id,
     }).then(response => {
@@ -6814,7 +6963,7 @@ export class ContactCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.ContactCreateInput) {
+  public async fetch(input: D.ContactCreateInput): Promise<ContactPayload | undefined> {
     return this.request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument, {
       input,
     }).then(response => {
@@ -6834,7 +6983,7 @@ export class CustomViewCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.CustomViewCreateInput) {
+  public async fetch(input: D.CustomViewCreateInput): Promise<CustomViewPayload | undefined> {
     return this.request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(D.CustomViewCreateDocument, {
       input,
     }).then(response => {
@@ -6854,7 +7003,7 @@ export class CustomViewUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.CustomViewUpdateInput, id: string) {
+  public async fetch(input: D.CustomViewUpdateInput, id: string): Promise<CustomViewPayload | undefined> {
     return this.request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(D.CustomViewUpdateDocument, {
       input,
       id,
@@ -6875,7 +7024,7 @@ export class CustomViewDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(D.CustomViewDeleteDocument, {
       id,
     }).then(response => {
@@ -6895,7 +7044,7 @@ export class CycleCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.CycleCreateInput) {
+  public async fetch(input: D.CycleCreateInput): Promise<CyclePayload | undefined> {
     return this.request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument, {
       input,
     }).then(response => {
@@ -6915,7 +7064,7 @@ export class CycleUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.CycleUpdateInput, id: string) {
+  public async fetch(input: D.CycleUpdateInput, id: string): Promise<CyclePayload | undefined> {
     return this.request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument, {
       input,
       id,
@@ -6936,7 +7085,7 @@ export class CycleArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument, {
       id,
     }).then(response => {
@@ -6956,7 +7105,7 @@ export class DebugFailWithInternalErrorMutation extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugFailWithInternalErrorMutation, D.DebugFailWithInternalErrorMutationVariables>(
       D.DebugFailWithInternalErrorDocument,
       {}
@@ -6977,7 +7126,7 @@ export class DebugFailWithWarningMutation extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
       D.DebugFailWithWarningDocument,
       {}
@@ -6998,7 +7147,7 @@ export class DebugCreateSamlOrgMutation extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
       D.DebugCreateSamlOrgDocument,
       {}
@@ -7019,7 +7168,7 @@ export class EmailUnsubscribeMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.EmailUnsubscribeInput) {
+  public async fetch(input: D.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload | undefined> {
     return this.request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(D.EmailUnsubscribeDocument, {
       input,
     }).then(response => {
@@ -7039,7 +7188,7 @@ export class EmojiCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.EmojiCreateInput) {
+  public async fetch(input: D.EmojiCreateInput): Promise<EmojiPayload | undefined> {
     return this.request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument, {
       input,
     }).then(response => {
@@ -7059,7 +7208,7 @@ export class EmojiDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument, {
       id,
     }).then(response => {
@@ -7079,7 +7228,7 @@ export class FavoriteCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.FavoriteCreateInput) {
+  public async fetch(input: D.FavoriteCreateInput): Promise<FavoritePayload | undefined> {
     return this.request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument, {
       input,
     }).then(response => {
@@ -7099,7 +7248,7 @@ export class FavoriteUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.FavoriteUpdateInput, id: string) {
+  public async fetch(input: D.FavoriteUpdateInput, id: string): Promise<FavoritePayload | undefined> {
     return this.request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument, {
       input,
       id,
@@ -7120,7 +7269,7 @@ export class FavoriteDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument, {
       id,
     }).then(response => {
@@ -7140,7 +7289,7 @@ export class FeedbackCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.FeedbackCreateInput) {
+  public async fetch(input: D.FeedbackCreateInput): Promise<FeedbackPayload | undefined> {
     return this.request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument, {
       input,
     }).then(response => {
@@ -7165,7 +7314,7 @@ export class FileUploadMutation extends Request {
     contentType: string,
     filename: string,
     vars?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
-  ) {
+  ): Promise<UploadPayload | undefined> {
     return this.request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument, {
       size,
       contentType,
@@ -7188,7 +7337,7 @@ export class ImageUploadFromUrlMutation extends Request {
     super(request);
   }
 
-  public async fetch(url: string) {
+  public async fetch(url: string): Promise<ImageUploadFromUrlPayload | undefined> {
     return this.request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
       D.ImageUploadFromUrlDocument,
       {
@@ -7211,7 +7360,7 @@ export class IntegrationGithubConnectMutation extends Request {
     super(request);
   }
 
-  public async fetch(installationId: string) {
+  public async fetch(installationId: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
       D.IntegrationGithubConnectDocument,
       {
@@ -7234,7 +7383,7 @@ export class IntegrationGitlabConnectMutation extends Request {
     super(request);
   }
 
-  public async fetch(gitlabUrl: string, accessToken: string) {
+  public async fetch(gitlabUrl: string, accessToken: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
       D.IntegrationGitlabConnectDocument,
       {
@@ -7262,7 +7411,7 @@ export class IntegrationSlackMutation extends Request {
     redirectUri: string,
     code: string,
     vars?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
-  ) {
+  ): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(D.IntegrationSlackDocument, {
       redirectUri,
       code,
@@ -7284,7 +7433,7 @@ export class IntegrationSlackPersonalMutation extends Request {
     super(request);
   }
 
-  public async fetch(redirectUri: string, code: string) {
+  public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
       D.IntegrationSlackPersonalDocument,
       {
@@ -7313,7 +7462,7 @@ export class IntegrationSlackPostMutation extends Request {
     teamId: string,
     code: string,
     vars?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
-  ) {
+  ): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
       D.IntegrationSlackPostDocument,
       {
@@ -7339,7 +7488,7 @@ export class IntegrationSlackProjectPostMutation extends Request {
     super(request);
   }
 
-  public async fetch(redirectUri: string, projectId: string, code: string) {
+  public async fetch(redirectUri: string, projectId: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
       D.IntegrationSlackProjectPostDocument,
       {
@@ -7364,7 +7513,7 @@ export class IntegrationSlackImportEmojisMutation extends Request {
     super(request);
   }
 
-  public async fetch(redirectUri: string, code: string) {
+  public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
       D.IntegrationSlackImportEmojisDocument,
       {
@@ -7388,7 +7537,7 @@ export class IntegrationFigmaMutation extends Request {
     super(request);
   }
 
-  public async fetch(redirectUri: string, code: string) {
+  public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(D.IntegrationFigmaDocument, {
       redirectUri,
       code,
@@ -7409,7 +7558,7 @@ export class IntegrationGoogleSheetsMutation extends Request {
     super(request);
   }
 
-  public async fetch(code: string) {
+  public async fetch(code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
       D.IntegrationGoogleSheetsDocument,
       {
@@ -7432,7 +7581,7 @@ export class RefreshGoogleSheetsDataMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
       D.RefreshGoogleSheetsDataDocument,
       {
@@ -7455,7 +7604,11 @@ export class IntegrationSentryConnectMutation extends Request {
     super(request);
   }
 
-  public async fetch(organizationSlug: string, code: string, installationId: string) {
+  public async fetch(
+    organizationSlug: string,
+    code: string,
+    installationId: string
+  ): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSentryConnectMutation, D.IntegrationSentryConnectMutationVariables>(
       D.IntegrationSentryConnectDocument,
       {
@@ -7480,7 +7633,7 @@ export class IntegrationDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
       D.IntegrationDeleteDocument,
       {
@@ -7503,7 +7656,7 @@ export class IntegrationResourceArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
       D.IntegrationResourceArchiveDocument,
       {
@@ -7526,7 +7679,7 @@ export class IssueLabelCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.IssueLabelCreateInput) {
+  public async fetch(input: D.IssueLabelCreateInput): Promise<IssueLabelPayload | undefined> {
     return this.request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(D.IssueLabelCreateDocument, {
       input,
     }).then(response => {
@@ -7546,7 +7699,7 @@ export class IssueLabelUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.IssueLabelUpdateInput, id: string) {
+  public async fetch(input: D.IssueLabelUpdateInput, id: string): Promise<IssueLabelPayload | undefined> {
     return this.request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(D.IssueLabelUpdateDocument, {
       input,
       id,
@@ -7567,7 +7720,7 @@ export class IssueLabelArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
       D.IssueLabelArchiveDocument,
       {
@@ -7590,7 +7743,7 @@ export class IssueRelationCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.IssueRelationCreateInput) {
+  public async fetch(input: D.IssueRelationCreateInput): Promise<IssueRelationPayload | undefined> {
     return this.request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
       D.IssueRelationCreateDocument,
       {
@@ -7613,7 +7766,7 @@ export class IssueRelationUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.IssueRelationUpdateInput, id: string) {
+  public async fetch(input: D.IssueRelationUpdateInput, id: string): Promise<IssueRelationPayload | undefined> {
     return this.request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
       D.IssueRelationUpdateDocument,
       {
@@ -7637,7 +7790,7 @@ export class IssueRelationDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
       D.IssueRelationDeleteDocument,
       {
@@ -7660,7 +7813,7 @@ export class IssueCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.IssueCreateInput) {
+  public async fetch(input: D.IssueCreateInput): Promise<IssuePayload | undefined> {
     return this.request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument, {
       input,
     }).then(response => {
@@ -7680,7 +7833,7 @@ export class IssueUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.IssueUpdateInput, id: string) {
+  public async fetch(input: D.IssueUpdateInput, id: string): Promise<IssuePayload | undefined> {
     return this.request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument, {
       input,
       id,
@@ -7701,7 +7854,7 @@ export class IssueArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument, {
       id,
     }).then(response => {
@@ -7721,7 +7874,7 @@ export class IssueUnarchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument, {
       id,
     }).then(response => {
@@ -7741,7 +7894,7 @@ export class MilestoneCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.MilestoneCreateInput) {
+  public async fetch(input: D.MilestoneCreateInput): Promise<MilestonePayload | undefined> {
     return this.request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument, {
       input,
     }).then(response => {
@@ -7761,7 +7914,7 @@ export class MilestoneUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.MilestoneUpdateInput, id: string) {
+  public async fetch(input: D.MilestoneUpdateInput, id: string): Promise<MilestonePayload | undefined> {
     return this.request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument, {
       input,
       id,
@@ -7782,7 +7935,7 @@ export class MilestoneDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument, {
       id,
     }).then(response => {
@@ -7802,7 +7955,7 @@ export class NotificationCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.NotificationUpdateInput, id: string) {
+  public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return this.request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
       D.NotificationCreateDocument,
       {
@@ -7826,7 +7979,7 @@ export class NotificationUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.NotificationUpdateInput, id: string) {
+  public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return this.request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
       D.NotificationUpdateDocument,
       {
@@ -7850,7 +8003,7 @@ export class NotificationDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
       D.NotificationDeleteDocument,
       {
@@ -7873,7 +8026,7 @@ export class NotificationArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
       D.NotificationArchiveDocument,
       {
@@ -7896,7 +8049,7 @@ export class NotificationUnarchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
       D.NotificationUnarchiveDocument,
       {
@@ -7919,7 +8072,9 @@ export class NotificationSubscriptionCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.NotificationSubscriptionCreateInput) {
+  public async fetch(
+    input: D.NotificationSubscriptionCreateInput
+  ): Promise<NotificationSubscriptionPayload | undefined> {
     return this.request<D.NotificationSubscriptionCreateMutation, D.NotificationSubscriptionCreateMutationVariables>(
       D.NotificationSubscriptionCreateDocument,
       {
@@ -7942,7 +8097,7 @@ export class NotificationSubscriptionDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
       D.NotificationSubscriptionDeleteDocument,
       {
@@ -7965,7 +8120,7 @@ export class OauthClientCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.OauthClientCreateInput) {
+  public async fetch(input: D.OauthClientCreateInput): Promise<OauthClientPayload | undefined> {
     return this.request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
       D.OauthClientCreateDocument,
       {
@@ -7988,7 +8143,7 @@ export class OauthClientUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.OauthClientUpdateInput, id: string) {
+  public async fetch(input: D.OauthClientUpdateInput, id: string): Promise<OauthClientPayload | undefined> {
     return this.request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
       D.OauthClientUpdateDocument,
       {
@@ -8012,7 +8167,7 @@ export class OauthClientArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
       D.OauthClientArchiveDocument,
       {
@@ -8035,7 +8190,7 @@ export class OauthClientRotateSecretMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<RotateSecretPayload | undefined> {
     return this.request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
       D.OauthClientRotateSecretDocument,
       {
@@ -8058,7 +8213,7 @@ export class OauthTokenRevokeMutation extends Request {
     super(request);
   }
 
-  public async fetch(scope: string[], appId: string) {
+  public async fetch(scope: string[], appId: string): Promise<OauthTokenRevokePayload | undefined> {
     return this.request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(D.OauthTokenRevokeDocument, {
       scope,
       appId,
@@ -8079,7 +8234,7 @@ export class OrganizationDomainVerifyMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.OrganizationDomainVerificationInput) {
+  public async fetch(input: D.OrganizationDomainVerificationInput): Promise<OrganizationDomainPayload | undefined> {
     return this.request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
       D.OrganizationDomainVerifyDocument,
       {
@@ -8102,7 +8257,7 @@ export class OrganizationDomainCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.OrganizationDomainCreateInput) {
+  public async fetch(input: D.OrganizationDomainCreateInput): Promise<OrganizationDomainPayload | undefined> {
     return this.request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
       D.OrganizationDomainCreateDocument,
       {
@@ -8125,7 +8280,7 @@ export class OrganizationDomainDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
       D.OrganizationDomainDeleteDocument,
       {
@@ -8148,7 +8303,7 @@ export class OrganizationInviteCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.OrganizationInviteCreateInput) {
+  public async fetch(input: D.OrganizationInviteCreateInput): Promise<OrganizationInvitePayload | undefined> {
     return this.request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
       D.OrganizationInviteCreateDocument,
       {
@@ -8171,7 +8326,7 @@ export class ResentOrganizationInviteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
       D.ResentOrganizationInviteDocument,
       {
@@ -8194,7 +8349,7 @@ export class OrganizationInviteDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
       D.OrganizationInviteDeleteDocument,
       {
@@ -8217,7 +8372,7 @@ export class ProjectLinkCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.ProjectLinkCreateInput) {
+  public async fetch(input: D.ProjectLinkCreateInput): Promise<ProjectLinkPayload | undefined> {
     return this.request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
       D.ProjectLinkCreateDocument,
       {
@@ -8240,7 +8395,7 @@ export class ProjectLinkDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
       D.ProjectLinkDeleteDocument,
       {
@@ -8263,7 +8418,7 @@ export class ProjectCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.ProjectCreateInput) {
+  public async fetch(input: D.ProjectCreateInput): Promise<ProjectPayload | undefined> {
     return this.request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument, {
       input,
     }).then(response => {
@@ -8283,7 +8438,7 @@ export class ProjectUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.ProjectUpdateInput, id: string) {
+  public async fetch(input: D.ProjectUpdateInput, id: string): Promise<ProjectPayload | undefined> {
     return this.request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument, {
       input,
       id,
@@ -8304,7 +8459,7 @@ export class ProjectArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument, {
       id,
     }).then(response => {
@@ -8324,7 +8479,7 @@ export class PushSubscriptionCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.PushSubscriptionCreateInput) {
+  public async fetch(input: D.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
       D.PushSubscriptionCreateDocument,
       {
@@ -8347,7 +8502,7 @@ export class PushSubscriptionDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
       D.PushSubscriptionDeleteDocument,
       {
@@ -8370,7 +8525,7 @@ export class ReactionCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.ReactionCreateInput) {
+  public async fetch(input: D.ReactionCreateInput): Promise<ReactionPayload | undefined> {
     return this.request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument, {
       input,
     }).then(response => {
@@ -8390,7 +8545,7 @@ export class ReactionDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument, {
       id,
     }).then(response => {
@@ -8410,7 +8565,7 @@ export class CreateCsvExportReportMutation extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<CreateCsvExportReportPayload | undefined> {
     return this.request<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
       D.CreateCsvExportReportDocument,
       {}
@@ -8431,7 +8586,7 @@ export class SubscriptionSessionCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(plan: string) {
+  public async fetch(plan: string): Promise<SubscriptionSessionPayload | undefined> {
     return this.request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
       D.SubscriptionSessionCreateDocument,
       {
@@ -8454,7 +8609,7 @@ export class SubscriptionUpdateSessionCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<SubscriptionSessionPayload | undefined> {
     return this.request<D.SubscriptionUpdateSessionCreateMutation, D.SubscriptionUpdateSessionCreateMutationVariables>(
       D.SubscriptionUpdateSessionCreateDocument,
       {}
@@ -8475,7 +8630,7 @@ export class SubscriptionUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.SubscriptionUpdateInput, id: string) {
+  public async fetch(input: D.SubscriptionUpdateInput, id: string): Promise<SubscriptionPayload | undefined> {
     return this.request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
       D.SubscriptionUpdateDocument,
       {
@@ -8499,7 +8654,7 @@ export class SubscriptionUpgradeMutation extends Request {
     super(request);
   }
 
-  public async fetch(type: string, id: string) {
+  public async fetch(type: string, id: string): Promise<SubscriptionPayload | undefined> {
     return this.request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
       D.SubscriptionUpgradeDocument,
       {
@@ -8523,7 +8678,7 @@ export class SubscriptionArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
       D.SubscriptionArchiveDocument,
       {
@@ -8546,7 +8701,7 @@ export class TeamMembershipCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.TeamMembershipCreateInput) {
+  public async fetch(input: D.TeamMembershipCreateInput): Promise<TeamMembershipPayload | undefined> {
     return this.request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
       D.TeamMembershipCreateDocument,
       {
@@ -8569,7 +8724,7 @@ export class TeamMembershipDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
       D.TeamMembershipDeleteDocument,
       {
@@ -8592,7 +8747,10 @@ export class TeamCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.TeamCreateInput, vars?: Omit<D.TeamCreateMutationVariables, "input">) {
+  public async fetch(
+    input: D.TeamCreateInput,
+    vars?: Omit<D.TeamCreateMutationVariables, "input">
+  ): Promise<TeamPayload | undefined> {
     return this.request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument, {
       input,
       ...vars,
@@ -8613,7 +8771,7 @@ export class TeamUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.TeamUpdateInput, id: string) {
+  public async fetch(input: D.TeamUpdateInput, id: string): Promise<TeamPayload | undefined> {
     return this.request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument, {
       input,
       id,
@@ -8634,7 +8792,7 @@ export class TeamArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument, {
       id,
     }).then(response => {
@@ -8654,7 +8812,7 @@ export class TeamDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument, {
       id,
     }).then(response => {
@@ -8674,7 +8832,7 @@ export class TemplateCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.TemplateCreateInput) {
+  public async fetch(input: D.TemplateCreateInput): Promise<TemplatePayload | undefined> {
     return this.request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument, {
       input,
     }).then(response => {
@@ -8694,7 +8852,7 @@ export class TemplateUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.TemplateUpdateInput, id: string) {
+  public async fetch(input: D.TemplateUpdateInput, id: string): Promise<TemplatePayload | undefined> {
     return this.request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument, {
       input,
       id,
@@ -8715,7 +8873,7 @@ export class TemplateDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument, {
       id,
     }).then(response => {
@@ -8735,7 +8893,7 @@ export class UserSettingsUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.UserSettingsUpdateInput, id: string) {
+  public async fetch(input: D.UserSettingsUpdateInput, id: string): Promise<UserSettingsPayload | undefined> {
     return this.request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
       D.UserSettingsUpdateDocument,
       {
@@ -8759,7 +8917,7 @@ export class UserSettingsFlagIncrementMutation extends Request {
     super(request);
   }
 
-  public async fetch(flag: string) {
+  public async fetch(flag: string): Promise<UserSettingsFlagPayload | undefined> {
     return this.request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
       D.UserSettingsFlagIncrementDocument,
       {
@@ -8782,7 +8940,7 @@ export class UserSettingsFlagsResetMutation extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<UserSettingsFlagsResetPayload | undefined> {
     return this.request<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
       D.UserSettingsFlagsResetDocument,
       {}
@@ -8803,7 +8961,10 @@ export class UserFlagUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(operation: D.UserFlagUpdateOperation, flag: D.UserFlagType) {
+  public async fetch(
+    operation: D.UserFlagUpdateOperation,
+    flag: D.UserFlagType
+  ): Promise<UserSettingsFlagPayload | undefined> {
     return this.request<D.UserFlagUpdateMutation, D.UserFlagUpdateMutationVariables>(D.UserFlagUpdateDocument, {
       operation,
       flag,
@@ -8824,7 +8985,7 @@ export class UserSubscribeToNewsletterMutation extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<UserSubscribeToNewsletterPayload | undefined> {
     return this.request<D.UserSubscribeToNewsletterMutation, D.UserSubscribeToNewsletterMutationVariables>(
       D.UserSubscribeToNewsletterDocument,
       {}
@@ -8845,7 +9006,7 @@ export class ViewPreferencesCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.ViewPreferencesCreateInput) {
+  public async fetch(input: D.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload | undefined> {
     return this.request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
       D.ViewPreferencesCreateDocument,
       {
@@ -8868,7 +9029,7 @@ export class ViewPreferencesUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.ViewPreferencesUpdateInput, id: string) {
+  public async fetch(input: D.ViewPreferencesUpdateInput, id: string): Promise<ViewPreferencesPayload | undefined> {
     return this.request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
       D.ViewPreferencesUpdateDocument,
       {
@@ -8892,7 +9053,7 @@ export class ViewPreferencesDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
       D.ViewPreferencesDeleteDocument,
       {
@@ -8915,7 +9076,7 @@ export class WebhookCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.WebhookCreateInput) {
+  public async fetch(input: D.WebhookCreateInput): Promise<WebhookPayload | undefined> {
     return this.request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
       input,
     }).then(response => {
@@ -8935,7 +9096,7 @@ export class WebhookUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.WebhookUpdateInput, id: string) {
+  public async fetch(input: D.WebhookUpdateInput, id: string): Promise<WebhookPayload | undefined> {
     return this.request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument, {
       input,
       id,
@@ -8956,7 +9117,7 @@ export class WebhookDeleteMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument, {
       id,
     }).then(response => {
@@ -8976,7 +9137,7 @@ export class WorkflowStateCreateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.WorkflowStateCreateInput) {
+  public async fetch(input: D.WorkflowStateCreateInput): Promise<WorkflowStatePayload | undefined> {
     return this.request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
       D.WorkflowStateCreateDocument,
       {
@@ -8999,7 +9160,7 @@ export class WorkflowStateUpdateMutation extends Request {
     super(request);
   }
 
-  public async fetch(input: D.WorkflowStateUpdateInput, id: string) {
+  public async fetch(input: D.WorkflowStateUpdateInput, id: string): Promise<WorkflowStatePayload | undefined> {
     return this.request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
       D.WorkflowStateUpdateDocument,
       {
@@ -9023,7 +9184,7 @@ export class WorkflowStateArchiveMutation extends Request {
     super(request);
   }
 
-  public async fetch(id: string) {
+  public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
       D.WorkflowStateArchiveDocument,
       {
@@ -9050,7 +9211,7 @@ export class User_AssignedIssuesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
       D.User_AssignedIssuesDocument,
       {
@@ -9078,7 +9239,7 @@ export class User_CreatedIssuesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
       id: this._id,
       ...vars,
@@ -9103,7 +9264,9 @@ export class User_TeamMembershipsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
+  public async fetch(
+    vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">
+  ): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
       D.User_TeamMembershipsDocument,
       {
@@ -9127,7 +9290,7 @@ export class Viewer_AssignedIssuesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.Viewer_AssignedIssuesQueryVariables) {
+  public async fetch(vars?: D.Viewer_AssignedIssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.Viewer_AssignedIssuesQuery, D.Viewer_AssignedIssuesQueryVariables>(
       D.Viewer_AssignedIssuesDocument,
       vars
@@ -9148,7 +9311,7 @@ export class Viewer_CreatedIssuesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.Viewer_CreatedIssuesQueryVariables) {
+  public async fetch(vars?: D.Viewer_CreatedIssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.Viewer_CreatedIssuesQuery, D.Viewer_CreatedIssuesQueryVariables>(
       D.Viewer_CreatedIssuesDocument,
       vars
@@ -9169,7 +9332,7 @@ export class Viewer_TeamMembershipsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.Viewer_TeamMembershipsQueryVariables) {
+  public async fetch(vars?: D.Viewer_TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.Viewer_TeamMembershipsQuery, D.Viewer_TeamMembershipsQueryVariables>(
       D.Viewer_TeamMembershipsDocument,
       vars
@@ -9190,7 +9353,7 @@ export class Organization_UsersQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.Organization_UsersQueryVariables) {
+  public async fetch(vars?: D.Organization_UsersQueryVariables): Promise<UserConnection | undefined> {
     return this.request<D.Organization_UsersQuery, D.Organization_UsersQueryVariables>(
       D.Organization_UsersDocument,
       vars
@@ -9211,7 +9374,7 @@ export class Organization_TeamsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.Organization_TeamsQueryVariables) {
+  public async fetch(vars?: D.Organization_TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return this.request<D.Organization_TeamsQuery, D.Organization_TeamsQueryVariables>(
       D.Organization_TeamsDocument,
       vars
@@ -9232,7 +9395,7 @@ export class Organization_MilestonesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.Organization_MilestonesQueryVariables) {
+  public async fetch(vars?: D.Organization_MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
     return this.request<D.Organization_MilestonesQuery, D.Organization_MilestonesQueryVariables>(
       D.Organization_MilestonesDocument,
       vars
@@ -9253,7 +9416,7 @@ export class Organization_IntegrationsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.Organization_IntegrationsQueryVariables) {
+  public async fetch(vars?: D.Organization_IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
     return this.request<D.Organization_IntegrationsQuery, D.Organization_IntegrationsQueryVariables>(
       D.Organization_IntegrationsDocument,
       vars
@@ -9274,7 +9437,7 @@ export class AdminUserAccountLookup_UsersQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_UsersQueryVariables) {
+  public async fetch(vars?: D.AdminUserAccountLookup_UsersQueryVariables): Promise<undefined | undefined> {
     return this.request<D.AdminUserAccountLookup_UsersQuery, D.AdminUserAccountLookup_UsersQueryVariables>(
       D.AdminUserAccountLookup_UsersDocument,
       vars
@@ -9295,7 +9458,9 @@ export class AdminUserAccountLookup_Users_AssignedIssuesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_AssignedIssuesQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_AssignedIssuesQueryVariables
+  ): Promise<IssueConnection | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_AssignedIssuesQuery,
       D.AdminUserAccountLookup_Users_AssignedIssuesQueryVariables
@@ -9316,7 +9481,9 @@ export class AdminUserAccountLookup_Users_CreatedIssuesQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_CreatedIssuesQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_CreatedIssuesQueryVariables
+  ): Promise<IssueConnection | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_CreatedIssuesQuery,
       D.AdminUserAccountLookup_Users_CreatedIssuesQueryVariables
@@ -9337,7 +9504,9 @@ export class AdminUserAccountLookup_Users_OrganizationQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_OrganizationQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_OrganizationQueryVariables
+  ): Promise<OrganizationAdminPrivileged | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_OrganizationQuery,
       D.AdminUserAccountLookup_Users_OrganizationQueryVariables
@@ -9358,7 +9527,9 @@ export class AdminUserAccountLookup_Users_TeamMembershipsQuery extends Request {
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_TeamMembershipsQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_TeamMembershipsQueryVariables
+  ): Promise<TeamMembershipConnection | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_TeamMembershipsQuery,
       D.AdminUserAccountLookup_Users_TeamMembershipsQueryVariables
@@ -9379,7 +9550,9 @@ export class AdminUserAccountLookup_Users_Organization_UsersQuery extends Reques
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_UsersQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_Organization_UsersQueryVariables
+  ): Promise<UserConnection | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_Organization_UsersQuery,
       D.AdminUserAccountLookup_Users_Organization_UsersQueryVariables
@@ -9400,7 +9573,9 @@ export class AdminUserAccountLookup_Users_Organization_TeamsQuery extends Reques
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_TeamsQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_Organization_TeamsQueryVariables
+  ): Promise<TeamConnection | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_Organization_TeamsQuery,
       D.AdminUserAccountLookup_Users_Organization_TeamsQueryVariables
@@ -9421,7 +9596,9 @@ export class AdminUserAccountLookup_Users_Organization_MilestonesQuery extends R
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_MilestonesQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_Organization_MilestonesQueryVariables
+  ): Promise<MilestoneConnection | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_Organization_MilestonesQuery,
       D.AdminUserAccountLookup_Users_Organization_MilestonesQueryVariables
@@ -9442,7 +9619,9 @@ export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery extends
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_IntegrationsQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_Organization_IntegrationsQueryVariables
+  ): Promise<IntegrationConnection | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_Organization_IntegrationsQuery,
       D.AdminUserAccountLookup_Users_Organization_IntegrationsQueryVariables
@@ -9463,7 +9642,9 @@ export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery extends
     super(request);
   }
 
-  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables) {
+  public async fetch(
+    vars?: D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables
+  ): Promise<SubscriptionAdminPrivileged | undefined> {
     return this.request<
       D.AdminUserAccountLookup_Users_Organization_SubscriptionQuery,
       D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables
@@ -9484,7 +9665,7 @@ export class BillingDetails_InvoicesQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<undefined | undefined> {
     return this.request<D.BillingDetails_InvoicesQuery, D.BillingDetails_InvoicesQueryVariables>(
       D.BillingDetails_InvoicesDocument,
       {}
@@ -9505,7 +9686,7 @@ export class BillingDetails_PaymentMethodQuery extends Request {
     super(request);
   }
 
-  public async fetch() {
+  public async fetch(): Promise<Card | undefined> {
     return this.request<D.BillingDetails_PaymentMethodQuery, D.BillingDetails_PaymentMethodQueryVariables>(
       D.BillingDetails_PaymentMethodDocument,
       {}
@@ -9536,7 +9717,7 @@ export class CollaborativeDocumentJoin_StepsQuery extends Request {
     this._version = version;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<StepsResponse | undefined> {
     return this.request<D.CollaborativeDocumentJoin_StepsQuery, D.CollaborativeDocumentJoin_StepsQueryVariables>(
       D.CollaborativeDocumentJoin_StepsDocument,
       {
@@ -9565,7 +9746,7 @@ export class Cycle_IssuesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
       id: this._id,
       ...vars,
@@ -9590,7 +9771,9 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
+  public async fetch(
+    vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
+  ): Promise<IssueConnection | undefined> {
     return this.request<D.Cycle_UncompletedIssuesUponCloseQuery, D.Cycle_UncompletedIssuesUponCloseQueryVariables>(
       D.Cycle_UncompletedIssuesUponCloseDocument,
       {
@@ -9618,7 +9801,9 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
     this._fileId = fileId;
   }
 
-  public async fetch(vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">) {
+  public async fetch(
+    vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
+  ): Promise<FigmaEmbed | undefined> {
     return this.request<D.FigmaEmbedInfo_FigmaEmbedQuery, D.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       D.FigmaEmbedInfo_FigmaEmbedDocument,
       {
@@ -9646,7 +9831,7 @@ export class Integration_SettingsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<IntegrationSettings | undefined> {
     return this.request<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
       D.Integration_SettingsDocument,
       {
@@ -9673,7 +9858,7 @@ export class Integration_Settings_SlackPostQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<SlackPostSettings | undefined> {
     return this.request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
       D.Integration_Settings_SlackPostDocument,
       {
@@ -9700,7 +9885,7 @@ export class Integration_Settings_SlackProjectPostQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<SlackPostSettings | undefined> {
     return this.request<
       D.Integration_Settings_SlackProjectPostQuery,
       D.Integration_Settings_SlackProjectPostQueryVariables
@@ -9727,7 +9912,7 @@ export class Integration_Settings_GoogleSheetsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<GoogleSheetsSettings | undefined> {
     return this.request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
       D.Integration_Settings_GoogleSheetsDocument,
       {
@@ -9754,7 +9939,7 @@ export class Integration_Settings_SentryQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<SentrySettings | undefined> {
     return this.request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
       D.Integration_Settings_SentryDocument,
       {
@@ -9781,7 +9966,7 @@ export class IntegrationResource_DataQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<IntegrationResourceData | undefined> {
     return this.request<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
       D.IntegrationResource_DataDocument,
       {
@@ -9808,7 +9993,7 @@ export class IntegrationResource_PullRequestQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<D.IntegrationResource_PullRequestQuery, D.IntegrationResource_PullRequestQueryVariables>(
       D.IntegrationResource_PullRequestDocument,
       {
@@ -9835,7 +10020,7 @@ export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<
       D.IntegrationResource_Data_GithubPullRequestQuery,
       D.IntegrationResource_Data_GithubPullRequestQueryVariables
@@ -9862,7 +10047,7 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<
       D.IntegrationResource_Data_GitlabMergeRequestQuery,
       D.IntegrationResource_Data_GitlabMergeRequestQueryVariables
@@ -9889,7 +10074,7 @@ export class IntegrationResource_Data_GithubCommitQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<CommitPayload | undefined> {
     return this.request<
       D.IntegrationResource_Data_GithubCommitQuery,
       D.IntegrationResource_Data_GithubCommitQueryVariables
@@ -9916,7 +10101,7 @@ export class IntegrationResource_Data_SentryIssueQuery extends Request {
     this._id = id;
   }
 
-  public async fetch() {
+  public async fetch(): Promise<SentryIssuePayload | undefined> {
     return this.request<
       D.IntegrationResource_Data_SentryIssueQuery,
       D.IntegrationResource_Data_SentryIssueQueryVariables
@@ -9943,7 +10128,7 @@ export class InviteInfo_InviteDataQuery extends Request {
     this._userHash = userHash;
   }
 
-  public async fetch(vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">) {
+  public async fetch(vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">): Promise<InviteData | undefined> {
     return this.request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
       D.InviteInfo_InviteDataDocument,
       {
@@ -9971,7 +10156,7 @@ export class IssueLabel_IssuesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
       id: this._id,
       ...vars,
@@ -9996,7 +10181,7 @@ export class Issue_SubscribersQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">): Promise<UserConnection | undefined> {
     return this.request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
       id: this._id,
       ...vars,
@@ -10021,7 +10206,7 @@ export class Issue_ChildrenQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
       id: this._id,
       ...vars,
@@ -10046,7 +10231,7 @@ export class Issue_CommentsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">): Promise<CommentConnection | undefined> {
     return this.request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
       id: this._id,
       ...vars,
@@ -10071,7 +10256,7 @@ export class Issue_HistoryQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">): Promise<IssueHistoryConnection | undefined> {
     return this.request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
       id: this._id,
       ...vars,
@@ -10096,7 +10281,7 @@ export class Issue_LabelsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
       id: this._id,
       ...vars,
@@ -10121,7 +10306,9 @@ export class Issue_IntegrationResourcesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
+  public async fetch(
+    vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
+  ): Promise<IntegrationResourceConnection | undefined> {
     return this.request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
       D.Issue_IntegrationResourcesDocument,
       {
@@ -10149,7 +10336,7 @@ export class Issue_RelationsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">): Promise<IssueRelationConnection | undefined> {
     return this.request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
       id: this._id,
       ...vars,
@@ -10174,7 +10361,9 @@ export class Issue_InverseRelationsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
+  public async fetch(
+    vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">
+  ): Promise<IssueRelationConnection | undefined> {
     return this.request<D.Issue_InverseRelationsQuery, D.Issue_InverseRelationsQueryVariables>(
       D.Issue_InverseRelationsDocument,
       {
@@ -10202,7 +10391,7 @@ export class Milestone_ProjectsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
       id: this._id,
       ...vars,
@@ -10227,7 +10416,9 @@ export class OrganizationInvite_IssuesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
+  public async fetch(
+    vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">
+  ): Promise<IssueConnection | undefined> {
     return this.request<D.OrganizationInvite_IssuesQuery, D.OrganizationInvite_IssuesQueryVariables>(
       D.OrganizationInvite_IssuesDocument,
       {
@@ -10255,7 +10446,7 @@ export class Project_TeamsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">): Promise<TeamConnection | undefined> {
     return this.request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
       id: this._id,
       ...vars,
@@ -10280,7 +10471,7 @@ export class Project_MembersQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">): Promise<UserConnection | undefined> {
     return this.request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
       id: this._id,
       ...vars,
@@ -10305,7 +10496,7 @@ export class Project_IssuesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
       id: this._id,
       ...vars,
@@ -10330,7 +10521,7 @@ export class Project_LinksQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
       id: this._id,
       ...vars,
@@ -10355,7 +10546,7 @@ export class Team_IssuesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
       id: this._id,
       ...vars,
@@ -10380,7 +10571,7 @@ export class Team_CyclesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">): Promise<CycleConnection | undefined> {
     return this.request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
       id: this._id,
       ...vars,
@@ -10405,7 +10596,9 @@ export class Team_MembershipsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Team_MembershipsQueryVariables, "id">) {
+  public async fetch(
+    vars?: Omit<D.Team_MembershipsQueryVariables, "id">
+  ): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
       id: this._id,
       ...vars,
@@ -10430,7 +10623,7 @@ export class Team_ProjectsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
       id: this._id,
       ...vars,
@@ -10455,7 +10648,7 @@ export class Team_StatesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">): Promise<WorkflowStateConnection | undefined> {
     return this.request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
       id: this._id,
       ...vars,
@@ -10480,7 +10673,7 @@ export class Team_TemplatesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">): Promise<TemplateConnection | undefined> {
     return this.request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
       id: this._id,
       ...vars,
@@ -10505,7 +10698,7 @@ export class Team_LabelsQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
       id: this._id,
       ...vars,
@@ -10530,7 +10723,7 @@ export class Team_WebhooksQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">): Promise<WebhookConnection | undefined> {
     return this.request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
       id: this._id,
       ...vars,
@@ -10555,7 +10748,7 @@ export class WorkflowState_IssuesQuery extends Request {
     this._id = id;
   }
 
-  public async fetch(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
+  public async fetch(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
       D.WorkflowState_IssuesDocument,
       {
