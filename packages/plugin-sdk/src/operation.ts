@@ -2,7 +2,7 @@ import { ArgDefinition, getArgList, nonNullable, printComment, printDebug, print
 import { FieldNode, FragmentSpreadNode, Kind } from "graphql";
 import c from "./constants";
 import { printNamespaced, printSdkFunctionName, printSdkOperationName } from "./print";
-import { printRequesterCall } from "./requester";
+import { printRequestCall } from "./request";
 import { getReturnOperations } from "./return-type";
 import { SdkDefinition, SdkOperation, SdkOperationObject, SdkPluginContext } from "./types";
 import { getOptionalVariables, getRequiredVariables } from "./variable";
@@ -115,7 +115,7 @@ function printOperationObjects(context: SdkPluginContext, o: SdkOperation): (str
   return (
     operationObjects.map(({ field, queryDefinition }) => {
       const requiredVariables = getOperationArgs(context, queryDefinition);
-      const queryToCall = `() => ${printSdkFunctionName([])}(${c.REQUESTER_NAME}).${field.name.value}`;
+      const queryToCall = `() => ${printSdkFunctionName([])}(${c.REQUEST_NAME}).${field.name.value}`;
 
       if (requiredVariables.length) {
         const requiredVariableNames = requiredVariables.map(v =>
@@ -204,7 +204,7 @@ function printOperationBody(context: SdkPluginContext, o: SdkOperation): string 
           /** Add the child sdk to the response */
           operationApi
             ? `...${printSdkFunctionName(o.path)}(${printList(
-                [c.REQUESTER_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
+                [c.REQUEST_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
                 ", "
               )}),`
             : undefined,
@@ -238,7 +238,7 @@ export function printOperation(context: SdkPluginContext, definition: SdkDefinit
       ]),
       printDebug({ apiKey: definition.sdkPath, ...o }),
       `${operationName}(${args.printInput}): Promise<${o.returnType}> {
-        return ${printRequesterCall(context, o)}${
+        return ${printRequestCall(context, o)}${
         body
           ? `.then(response => {
             ${body}

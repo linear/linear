@@ -2,7 +2,7 @@ import { getArgList, printComment, printList } from "@linear/plugin-common";
 import c from "./constants";
 import { getOperationArgs, getOperationObjects } from "./operation";
 import { printNamespaced, printOperationReturnType, printSdkFunctionType } from "./print";
-import { printRequesterArgs } from "./requester";
+import { printRequestArgs } from "./request";
 import { SdkDefinition, SdkOperation, SdkPluginContext } from "./types";
 
 /**
@@ -127,7 +127,7 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
 
   return `
     export class ${o.operationResultType} {
-      private _${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}
+      private _${c.REQUEST_NAME}: ${c.REQUEST_TYPE}
       ${printList(
         o.model?.fields.query.map(field =>
           field.args.some(arg => !arg.optional)
@@ -143,13 +143,13 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
         "\n"
       )}
 
-      public constructor(${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}) {
-        this._${c.REQUESTER_NAME} = ${c.REQUESTER_NAME}
+      public constructor(${c.REQUEST_NAME}: ${c.REQUEST_TYPE}) {
+        this._${c.REQUEST_NAME} = ${c.REQUEST_NAME}
       }
 
       public async fetch(${requiredVariables.printInput}) {
-        await ${`this._${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${printList(
-          [documentName, printRequesterArgs(o)],
+        await ${`this._${c.REQUEST_NAME}<${resultType}, ${variableType}>(${printList(
+          [documentName, printRequestArgs(o)],
           ", "
         )}).then(response => {
           const r = ${printList(["response", ...o.path], "?.")}

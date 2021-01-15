@@ -7,16 +7,27 @@ export * from "./documents";
 export type LinearRequest = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
 
 /**
+ * Base class to provide a request function
+ *
+ * @param request - function to call the graphql client
+ */
+export class Request {
+  public constructor(request: LinearRequest) {
+    this.request = request;
+  }
+
+  protected request: LinearRequest;
+}
+
+/**
  * A user that has access to the the resources of an organization.
  *
  * @param request - function to call the graphql client
  * @param data - the initial UserFragment response data
  */
-export class User {
-  private _request: LinearRequest;
-
+export class User extends Request {
   public constructor(request: LinearRequest, data: D.UserFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.displayName = data.displayName ?? undefined;
@@ -51,11 +62,11 @@ export class User {
   public createdIssueCount?: number;
   /** The settings of the user. */
   public get settings(): Promise<UserSettings | undefined> {
-    return new NotificationQuery(this._request).fetch();
+    return new NotificationQuery(this.request).fetch();
   }
   /** Organization in which the user belongs to. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -65,12 +76,11 @@ export class User {
  * @param request - function to call the graphql client
  * @param data - the initial UserSettingsFragment response data
  */
-export class UserSettings {
-  private _request: LinearRequest;
+export class UserSettings extends Request {
   private _user?: D.UserSettingsFragment["user"];
 
   public constructor(request: LinearRequest, data: D.UserSettingsFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.unsubscribedFrom = data.unsubscribedFrom ?? undefined;
     this._user = data.user ?? undefined;
@@ -82,7 +92,7 @@ export class UserSettings {
   public unsubscribedFrom?: string[];
   /** The user to whom this notification was targeted for. */
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
 }
 
@@ -92,8 +102,9 @@ export class UserSettings {
  * @param request - function to call the graphql client
  * @param data - the initial IssueConnectionFragment response data
  */
-export class IssueConnection {
+export class IssueConnection extends Request {
   public constructor(request: LinearRequest, data: D.IssueConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Issue(request, node)) : undefined;
   }
@@ -108,8 +119,7 @@ export class IssueConnection {
  * @param request - function to call the graphql client
  * @param data - the initial IssueFragment response data
  */
-export class Issue {
-  private _request: LinearRequest;
+export class Issue extends Request {
   private _team?: D.IssueFragment["team"];
   private _cycle?: D.IssueFragment["cycle"];
   private _state?: D.IssueFragment["state"];
@@ -119,7 +129,7 @@ export class Issue {
   private _creator?: D.IssueFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.IssueFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.number = data.number ?? undefined;
     this.title = data.title ?? undefined;
@@ -170,31 +180,31 @@ export class Issue {
   public previousIdentifiers?: string[];
   /** The team that the issue is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** The cycle that the issue is associated with. */
   public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
   }
   /** The workflow state that the issue is associated with. */
   public get state(): Promise<WorkflowState | undefined> | undefined {
-    return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
+    return this._state?.id ? new WorkflowStateQuery(this.request).fetch(this._state?.id) : undefined;
   }
   /** The user to whom the issue is assigned to. */
   public get assignee(): Promise<User | undefined> | undefined {
-    return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
+    return this._assignee?.id ? new UserQuery(this.request).fetch(this._assignee?.id) : undefined;
   }
   /** The parent of the issue. */
   public get parent(): Promise<Issue | undefined> | undefined {
-    return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
+    return this._parent?.id ? new IssueQuery(this.request).fetch(this._parent?.id) : undefined;
   }
   /** The project that the issue is associated with. */
   public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
   }
   /** The user who created the issue. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
 }
 
@@ -204,8 +214,7 @@ export class Issue {
  * @param request - function to call the graphql client
  * @param data - the initial TeamFragment response data
  */
-export class Team {
-  private _request: LinearRequest;
+export class Team extends Request {
   private _draftWorkflowState?: D.TeamFragment["draftWorkflowState"];
   private _startWorkflowState?: D.TeamFragment["startWorkflowState"];
   private _reviewWorkflowState?: D.TeamFragment["reviewWorkflowState"];
@@ -214,7 +223,7 @@ export class Team {
   private _activeCycle?: D.TeamFragment["activeCycle"];
 
   public constructor(request: LinearRequest, data: D.TeamFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.key = data.key ?? undefined;
@@ -310,40 +319,40 @@ export class Team {
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
   public get draftWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._draftWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._draftWorkflowState?.id)
+      ? new WorkflowStateQuery(this.request).fetch(this._draftWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been opened. */
   public get startWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._startWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
+      ? new WorkflowStateQuery(this.request).fetch(this._startWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   public get reviewWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._reviewWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._reviewWorkflowState?.id)
+      ? new WorkflowStateQuery(this.request).fetch(this._reviewWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been merged. */
   public get mergeWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._mergeWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
+      ? new WorkflowStateQuery(this.request).fetch(this._mergeWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
   public get markedAsDuplicateWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._markedAsDuplicateWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
+      ? new WorkflowStateQuery(this.request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
   }
   /** Team's currently active cycle. */
   public get activeCycle(): Promise<Cycle | undefined> | undefined {
-    return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
+    return this._activeCycle?.id ? new CycleQuery(this.request).fetch(this._activeCycle?.id) : undefined;
   }
   /** The organization that the team is associated with. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -353,12 +362,11 @@ export class Team {
  * @param request - function to call the graphql client
  * @param data - the initial WorkflowStateFragment response data
  */
-export class WorkflowState {
-  private _request: LinearRequest;
+export class WorkflowState extends Request {
   private _team?: D.WorkflowStateFragment["team"];
 
   public constructor(request: LinearRequest, data: D.WorkflowStateFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.color = data.color ?? undefined;
@@ -382,7 +390,7 @@ export class WorkflowState {
   public type?: string;
   /** The team to which this state belongs to. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
 }
 
@@ -392,8 +400,9 @@ export class WorkflowState {
  * @param request - function to call the graphql client
  * @param data - the initial CycleConnectionFragment response data
  */
-export class CycleConnection {
+export class CycleConnection extends Request {
   public constructor(request: LinearRequest, data: D.CycleConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Cycle(request, node)) : undefined;
   }
@@ -408,12 +417,11 @@ export class CycleConnection {
  * @param request - function to call the graphql client
  * @param data - the initial CycleFragment response data
  */
-export class Cycle {
-  private _request: LinearRequest;
+export class Cycle extends Request {
   private _team?: D.CycleFragment["team"];
 
   public constructor(request: LinearRequest, data: D.CycleFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.number = data.number ?? undefined;
     this.name = data.name ?? undefined;
@@ -440,7 +448,7 @@ export class Cycle {
   public completedScopeHistory?: number[];
   /** The team that the cycle is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
 }
 
@@ -450,8 +458,9 @@ export class Cycle {
  * @param request - function to call the graphql client
  * @param data - the initial PageInfoFragment response data
  */
-export class PageInfo {
+export class PageInfo extends Request {
   public constructor(request: LinearRequest, data: D.PageInfoFragment) {
+    super(request);
     this.hasPreviousPage = data.hasPreviousPage ?? undefined;
     this.hasNextPage = data.hasNextPage ?? undefined;
     this.startCursor = data.startCursor ?? undefined;
@@ -474,8 +483,9 @@ export class PageInfo {
  * @param request - function to call the graphql client
  * @param data - the initial TeamMembershipConnectionFragment response data
  */
-export class TeamMembershipConnection {
+export class TeamMembershipConnection extends Request {
   public constructor(request: LinearRequest, data: D.TeamMembershipConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new TeamMembership(request, node)) : undefined;
   }
@@ -490,13 +500,12 @@ export class TeamMembershipConnection {
  * @param request - function to call the graphql client
  * @param data - the initial TeamMembershipFragment response data
  */
-export class TeamMembership {
-  private _request: LinearRequest;
+export class TeamMembership extends Request {
   private _user?: D.TeamMembershipFragment["user"];
   private _team?: D.TeamMembershipFragment["team"];
 
   public constructor(request: LinearRequest, data: D.TeamMembershipFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this._user = data.user ?? undefined;
     this._team = data.team ?? undefined;
@@ -506,11 +515,11 @@ export class TeamMembership {
   public id?: string;
   /** The user that the membership is associated with. */
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
   /** The team that the membership is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
 }
 
@@ -520,8 +529,9 @@ export class TeamMembership {
  * @param request - function to call the graphql client
  * @param data - the initial ProjectConnectionFragment response data
  */
-export class ProjectConnection {
+export class ProjectConnection extends Request {
   public constructor(request: LinearRequest, data: D.ProjectConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Project(request, node)) : undefined;
   }
@@ -536,14 +546,13 @@ export class ProjectConnection {
  * @param request - function to call the graphql client
  * @param data - the initial ProjectFragment response data
  */
-export class Project {
-  private _request: LinearRequest;
+export class Project extends Request {
   private _creator?: D.ProjectFragment["creator"];
   private _lead?: D.ProjectFragment["lead"];
   private _milestone?: D.ProjectFragment["milestone"];
 
   public constructor(request: LinearRequest, data: D.ProjectFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.description = data.description ?? undefined;
@@ -596,15 +605,15 @@ export class Project {
   public completedScopeHistory?: number[];
   /** The user who created the project. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** The project lead. */
   public get lead(): Promise<User | undefined> | undefined {
-    return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
+    return this._lead?.id ? new UserQuery(this.request).fetch(this._lead?.id) : undefined;
   }
   /** The milestone that this project is associated with. */
   public get milestone(): Promise<Milestone | undefined> | undefined {
-    return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
+    return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
   }
 }
 
@@ -614,11 +623,9 @@ export class Project {
  * @param request - function to call the graphql client
  * @param data - the initial MilestoneFragment response data
  */
-export class Milestone {
-  private _request: LinearRequest;
-
+export class Milestone extends Request {
   public constructor(request: LinearRequest, data: D.MilestoneFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.sortOrder = data.sortOrder ?? undefined;
@@ -632,7 +639,7 @@ export class Milestone {
   public sortOrder?: number;
   /** The organization that the milestone belongs to. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -642,11 +649,9 @@ export class Milestone {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationFragment response data
  */
-export class Organization {
-  private _request: LinearRequest;
-
+export class Organization extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.urlKey = data.urlKey ?? undefined;
@@ -692,7 +697,7 @@ export class Organization {
   public allowedAuthServices?: string[];
   /** The organization's subscription to a paid plan. */
   public get subscription(): Promise<Subscription | undefined> {
-    return new SubscriptionQuery(this._request).fetch();
+    return new SubscriptionQuery(this.request).fetch();
   }
 }
 
@@ -702,8 +707,9 @@ export class Organization {
  * @param request - function to call the graphql client
  * @param data - the initial UserConnectionFragment response data
  */
-export class UserConnection {
+export class UserConnection extends Request {
   public constructor(request: LinearRequest, data: D.UserConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new User(request, node)) : undefined;
   }
@@ -718,8 +724,9 @@ export class UserConnection {
  * @param request - function to call the graphql client
  * @param data - the initial TeamConnectionFragment response data
  */
-export class TeamConnection {
+export class TeamConnection extends Request {
   public constructor(request: LinearRequest, data: D.TeamConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Team(request, node)) : undefined;
   }
@@ -734,8 +741,9 @@ export class TeamConnection {
  * @param request - function to call the graphql client
  * @param data - the initial MilestoneConnectionFragment response data
  */
-export class MilestoneConnection {
+export class MilestoneConnection extends Request {
   public constructor(request: LinearRequest, data: D.MilestoneConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Milestone(request, node)) : undefined;
   }
@@ -750,8 +758,9 @@ export class MilestoneConnection {
  * @param request - function to call the graphql client
  * @param data - the initial IntegrationConnectionFragment response data
  */
-export class IntegrationConnection {
+export class IntegrationConnection extends Request {
   public constructor(request: LinearRequest, data: D.IntegrationConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Integration(request, node)) : undefined;
   }
@@ -766,13 +775,12 @@ export class IntegrationConnection {
  * @param request - function to call the graphql client
  * @param data - the initial IntegrationFragment response data
  */
-export class Integration {
-  private _request: LinearRequest;
+export class Integration extends Request {
   private _team?: D.IntegrationFragment["team"];
   private _creator?: D.IntegrationFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.IntegrationFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.service = data.service ?? undefined;
     this.serviceId = data.serviceId ?? undefined;
@@ -791,15 +799,15 @@ export class Integration {
   public settings?: IntegrationSettings;
   /** The organization that the integration is associated with. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
   /** The team that the integration is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** The user that added the integration. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
 }
 
@@ -809,8 +817,9 @@ export class Integration {
  * @param request - function to call the graphql client
  * @param data - the initial IntegrationSettingsFragment response data
  */
-export class IntegrationSettings {
+export class IntegrationSettings extends Request {
   public constructor(request: LinearRequest, data: D.IntegrationSettingsFragment) {
+    super(request);
     this.slackPost = data.slackPost ? new SlackPostSettings(request, data.slackPost) : undefined;
     this.slackProjectPost = data.slackProjectPost ? new SlackPostSettings(request, data.slackProjectPost) : undefined;
     this.googleSheets = data.googleSheets ? new GoogleSheetsSettings(request, data.googleSheets) : undefined;
@@ -829,8 +838,9 @@ export class IntegrationSettings {
  * @param request - function to call the graphql client
  * @param data - the initial SlackPostSettingsFragment response data
  */
-export class SlackPostSettings {
+export class SlackPostSettings extends Request {
   public constructor(request: LinearRequest, data: D.SlackPostSettingsFragment) {
+    super(request);
     this.channel = data.channel ?? undefined;
     this.channelId = data.channelId ?? undefined;
     this.configurationUrl = data.configurationUrl ?? undefined;
@@ -847,8 +857,9 @@ export class SlackPostSettings {
  * @param request - function to call the graphql client
  * @param data - the initial GoogleSheetsSettingsFragment response data
  */
-export class GoogleSheetsSettings {
+export class GoogleSheetsSettings extends Request {
   public constructor(request: LinearRequest, data: D.GoogleSheetsSettingsFragment) {
+    super(request);
     this.spreadsheetId = data.spreadsheetId ?? undefined;
     this.spreadsheetUrl = data.spreadsheetUrl ?? undefined;
     this.sheetId = data.sheetId ?? undefined;
@@ -865,8 +876,9 @@ export class GoogleSheetsSettings {
  * @param request - function to call the graphql client
  * @param data - the initial SentrySettingsFragment response data
  */
-export class SentrySettings {
+export class SentrySettings extends Request {
   public constructor(request: LinearRequest, data: D.SentrySettingsFragment) {
+    super(request);
     this.organizationSlug = data.organizationSlug ?? undefined;
   }
 
@@ -880,12 +892,11 @@ export class SentrySettings {
  * @param request - function to call the graphql client
  * @param data - the initial SubscriptionFragment response data
  */
-export class Subscription {
-  private _request: LinearRequest;
+export class Subscription extends Request {
   private _creator?: D.SubscriptionFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.SubscriptionFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
     this.seats = data.seats ?? undefined;
@@ -903,11 +914,11 @@ export class Subscription {
   public pendingChangeType?: string;
   /** The creator of the subscription. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -917,8 +928,9 @@ export class Subscription {
  * @param request - function to call the graphql client
  * @param data - the initial ProjectLinkConnectionFragment response data
  */
-export class ProjectLinkConnection {
+export class ProjectLinkConnection extends Request {
   public constructor(request: LinearRequest, data: D.ProjectLinkConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new ProjectLink(request, node)) : undefined;
   }
@@ -933,13 +945,12 @@ export class ProjectLinkConnection {
  * @param request - function to call the graphql client
  * @param data - the initial ProjectLinkFragment response data
  */
-export class ProjectLink {
-  private _request: LinearRequest;
+export class ProjectLink extends Request {
   private _creator?: D.ProjectLinkFragment["creator"];
   private _project?: D.ProjectLinkFragment["project"];
 
   public constructor(request: LinearRequest, data: D.ProjectLinkFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.url = data.url ?? undefined;
     this.label = data.label ?? undefined;
@@ -955,11 +966,11 @@ export class ProjectLink {
   public label?: string;
   /** The user who created the link. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** The project that the link is associated with. */
   public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
   }
 }
 
@@ -969,8 +980,9 @@ export class ProjectLink {
  * @param request - function to call the graphql client
  * @param data - the initial WorkflowStateConnectionFragment response data
  */
-export class WorkflowStateConnection {
+export class WorkflowStateConnection extends Request {
   public constructor(request: LinearRequest, data: D.WorkflowStateConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new WorkflowState(request, node)) : undefined;
   }
@@ -985,8 +997,9 @@ export class WorkflowStateConnection {
  * @param request - function to call the graphql client
  * @param data - the initial TemplateConnectionFragment response data
  */
-export class TemplateConnection {
+export class TemplateConnection extends Request {
   public constructor(request: LinearRequest, data: D.TemplateConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Template(request, node)) : undefined;
   }
@@ -1001,13 +1014,12 @@ export class TemplateConnection {
  * @param request - function to call the graphql client
  * @param data - the initial TemplateFragment response data
  */
-export class Template {
-  private _request: LinearRequest;
+export class Template extends Request {
   private _team?: D.TemplateFragment["team"];
   private _creator?: D.TemplateFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.TemplateFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
     this.name = data.name ?? undefined;
@@ -1026,11 +1038,11 @@ export class Template {
   public description?: string;
   /** The team that the template is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the template. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
 }
 
@@ -1040,8 +1052,9 @@ export class Template {
  * @param request - function to call the graphql client
  * @param data - the initial IssueLabelConnectionFragment response data
  */
-export class IssueLabelConnection {
+export class IssueLabelConnection extends Request {
   public constructor(request: LinearRequest, data: D.IssueLabelConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueLabel(request, node)) : undefined;
   }
@@ -1056,13 +1069,12 @@ export class IssueLabelConnection {
  * @param request - function to call the graphql client
  * @param data - the initial IssueLabelFragment response data
  */
-export class IssueLabel {
-  private _request: LinearRequest;
+export class IssueLabel extends Request {
   private _team?: D.IssueLabelFragment["team"];
   private _creator?: D.IssueLabelFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.IssueLabelFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.description = data.description ?? undefined;
@@ -1081,11 +1093,11 @@ export class IssueLabel {
   public color?: string;
   /** The team to which the label belongs to. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the label. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
 }
 
@@ -1095,8 +1107,9 @@ export class IssueLabel {
  * @param request - function to call the graphql client
  * @param data - the initial WebhookConnectionFragment response data
  */
-export class WebhookConnection {
+export class WebhookConnection extends Request {
   public constructor(request: LinearRequest, data: D.WebhookConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Webhook(request, node)) : undefined;
   }
@@ -1111,13 +1124,12 @@ export class WebhookConnection {
  * @param request - function to call the graphql client
  * @param data - the initial WebhookFragment response data
  */
-export class Webhook {
-  private _request: LinearRequest;
+export class Webhook extends Request {
   private _team?: D.WebhookFragment["team"];
   private _creator?: D.WebhookFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.WebhookFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.url = data.url ?? undefined;
     this.enabled = data.enabled ?? undefined;
@@ -1136,11 +1148,11 @@ export class Webhook {
   public secret?: string;
   /** The team that the webhook is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the webhook. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
 }
 
@@ -1150,8 +1162,9 @@ export class Webhook {
  * @param request - function to call the graphql client
  * @param data - the initial CommentConnectionFragment response data
  */
-export class CommentConnection {
+export class CommentConnection extends Request {
   public constructor(request: LinearRequest, data: D.CommentConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Comment(request, node)) : undefined;
   }
@@ -1166,13 +1179,12 @@ export class CommentConnection {
  * @param request - function to call the graphql client
  * @param data - the initial CommentFragment response data
  */
-export class Comment {
-  private _request: LinearRequest;
+export class Comment extends Request {
   private _user?: D.CommentFragment["user"];
   private _issue?: D.CommentFragment["issue"];
 
   public constructor(request: LinearRequest, data: D.CommentFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.body = data.body ?? undefined;
     this.reactionData = data.reactionData ?? undefined;
@@ -1188,11 +1200,11 @@ export class Comment {
   public reactionData?: D.Scalars["JSON"][];
   /** The user who wrote the comment. */
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
   /** The issue that the comment is associated with. */
   public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
   }
 }
 
@@ -1202,8 +1214,9 @@ export class Comment {
  * @param request - function to call the graphql client
  * @param data - the initial IssueHistoryConnectionFragment response data
  */
-export class IssueHistoryConnection {
+export class IssueHistoryConnection extends Request {
   public constructor(request: LinearRequest, data: D.IssueHistoryConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueHistory(request, node)) : undefined;
   }
@@ -1218,8 +1231,7 @@ export class IssueHistoryConnection {
  * @param request - function to call the graphql client
  * @param data - the initial IssueHistoryFragment response data
  */
-export class IssueHistory {
-  private _request: LinearRequest;
+export class IssueHistory extends Request {
   private _issue?: D.IssueHistoryFragment["issue"];
   private _actor?: D.IssueHistoryFragment["actor"];
   private _integration?: D.IssueHistoryFragment["integration"];
@@ -1237,7 +1249,7 @@ export class IssueHistory {
   private _toProject?: D.IssueHistoryFragment["toProject"];
 
   public constructor(request: LinearRequest, data: D.IssueHistoryFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.updatedDescription = data.updatedDescription ?? undefined;
     this.fromTitle = data.fromTitle ?? undefined;
@@ -1297,63 +1309,63 @@ export class IssueHistory {
   public relationChanges?: string[];
   /** The issue that was changed. */
   public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
   }
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   public get actor(): Promise<User | undefined> | undefined {
-    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+    return this._actor?.id ? new UserQuery(this.request).fetch(this._actor?.id) : undefined;
   }
   /** The integration that made these changes. If null, possibly means that the change was made by a user. */
   public get integration(): Promise<Integration | undefined> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+    return this._integration?.id ? new IntegrationQuery(this.request).fetch(this._integration?.id) : undefined;
   }
   /** The user from whom the issue was re-assigned from. */
   public get fromAssignee(): Promise<User | undefined> | undefined {
-    return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
+    return this._fromAssignee?.id ? new UserQuery(this.request).fetch(this._fromAssignee?.id) : undefined;
   }
   /** The user to whom the issue was assigned to. */
   public get toAssignee(): Promise<User | undefined> | undefined {
-    return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
+    return this._toAssignee?.id ? new UserQuery(this.request).fetch(this._toAssignee?.id) : undefined;
   }
   /** The team from which the issue was moved from. */
   public get fromTeam(): Promise<Team | undefined> | undefined {
-    return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
+    return this._fromTeam?.id ? new TeamQuery(this.request).fetch(this._fromTeam?.id) : undefined;
   }
   /** The team to which the issue was moved to. */
   public get toTeam(): Promise<Team | undefined> | undefined {
-    return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
+    return this._toTeam?.id ? new TeamQuery(this.request).fetch(this._toTeam?.id) : undefined;
   }
   /** The previous parent of the issue. */
   public get fromParent(): Promise<Issue | undefined> | undefined {
-    return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
+    return this._fromParent?.id ? new IssueQuery(this.request).fetch(this._fromParent?.id) : undefined;
   }
   /** The new parent of the issue. */
   public get toParent(): Promise<Issue | undefined> | undefined {
-    return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
+    return this._toParent?.id ? new IssueQuery(this.request).fetch(this._toParent?.id) : undefined;
   }
   /** The previous workflow state of the issue. */
   public get fromState(): Promise<WorkflowState | undefined> | undefined {
-    return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
+    return this._fromState?.id ? new WorkflowStateQuery(this.request).fetch(this._fromState?.id) : undefined;
   }
   /** The new workflow state of the issue. */
   public get toState(): Promise<WorkflowState | undefined> | undefined {
-    return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
+    return this._toState?.id ? new WorkflowStateQuery(this.request).fetch(this._toState?.id) : undefined;
   }
   /** The previous cycle of the issue. */
   public get fromCycle(): Promise<Cycle | undefined> | undefined {
-    return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
+    return this._fromCycle?.id ? new CycleQuery(this.request).fetch(this._fromCycle?.id) : undefined;
   }
   /** The new cycle of the issue. */
   public get toCycle(): Promise<Cycle | undefined> | undefined {
-    return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
+    return this._toCycle?.id ? new CycleQuery(this.request).fetch(this._toCycle?.id) : undefined;
   }
   /** The previous project of the issue. */
   public get fromProject(): Promise<Project | undefined> | undefined {
-    return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
+    return this._fromProject?.id ? new ProjectQuery(this.request).fetch(this._fromProject?.id) : undefined;
   }
   /** The new project of the issue. */
   public get toProject(): Promise<Project | undefined> | undefined {
-    return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
+    return this._toProject?.id ? new ProjectQuery(this.request).fetch(this._toProject?.id) : undefined;
   }
 }
 
@@ -1363,8 +1375,9 @@ export class IssueHistory {
  * @param request - function to call the graphql client
  * @param data - the initial IntegrationResourceConnectionFragment response data
  */
-export class IntegrationResourceConnection {
+export class IntegrationResourceConnection extends Request {
   public constructor(request: LinearRequest, data: D.IntegrationResourceConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IntegrationResource(request, node)) : undefined;
   }
@@ -1379,13 +1392,12 @@ export class IntegrationResourceConnection {
  * @param request - function to call the graphql client
  * @param data - the initial IntegrationResourceFragment response data
  */
-export class IntegrationResource {
-  private _request: LinearRequest;
+export class IntegrationResource extends Request {
   private _integration?: D.IntegrationResourceFragment["integration"];
   private _issue?: D.IntegrationResourceFragment["issue"];
 
   public constructor(request: LinearRequest, data: D.IntegrationResourceFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.resourceType = data.resourceType ?? undefined;
     this.resourceId = data.resourceId ?? undefined;
@@ -1407,11 +1419,11 @@ export class IntegrationResource {
   public pullRequest?: PullRequestPayload;
   /** The integration that the resource is associated with. */
   public get integration(): Promise<Integration | undefined> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+    return this._integration?.id ? new IntegrationQuery(this.request).fetch(this._integration?.id) : undefined;
   }
   /** The issue that the resource is associated with. */
   public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
   }
 }
 
@@ -1421,8 +1433,9 @@ export class IntegrationResource {
  * @param request - function to call the graphql client
  * @param data - the initial IntegrationResourceDataFragment response data
  */
-export class IntegrationResourceData {
+export class IntegrationResourceData extends Request {
   public constructor(request: LinearRequest, data: D.IntegrationResourceDataFragment) {
+    super(request);
     this.githubPullRequest = data.githubPullRequest
       ? new PullRequestPayload(request, data.githubPullRequest)
       : undefined;
@@ -1449,8 +1462,9 @@ export class IntegrationResourceData {
  * @param request - function to call the graphql client
  * @param data - the initial PullRequestPayloadFragment response data
  */
-export class PullRequestPayload {
+export class PullRequestPayload extends Request {
   public constructor(request: LinearRequest, data: D.PullRequestPayloadFragment) {
+    super(request);
     this.status = data.status ?? undefined;
     this.number = data.number ?? undefined;
     this.url = data.url ?? undefined;
@@ -1491,8 +1505,9 @@ export class PullRequestPayload {
  * @param request - function to call the graphql client
  * @param data - the initial CommitPayloadFragment response data
  */
-export class CommitPayload {
+export class CommitPayload extends Request {
   public constructor(request: LinearRequest, data: D.CommitPayloadFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.message = data.message ?? undefined;
     this.timestamp = data.timestamp ?? undefined;
@@ -1517,8 +1532,9 @@ export class CommitPayload {
  * @param request - function to call the graphql client
  * @param data - the initial SentryIssuePayloadFragment response data
  */
-export class SentryIssuePayload {
+export class SentryIssuePayload extends Request {
   public constructor(request: LinearRequest, data: D.SentryIssuePayloadFragment) {
+    super(request);
     this.issueId = data.issueId ?? undefined;
     this.webUrl = data.webUrl ?? undefined;
     this.actorType = data.actorType ?? undefined;
@@ -1562,8 +1578,9 @@ export class SentryIssuePayload {
  * @param request - function to call the graphql client
  * @param data - the initial IssueRelationConnectionFragment response data
  */
-export class IssueRelationConnection {
+export class IssueRelationConnection extends Request {
   public constructor(request: LinearRequest, data: D.IssueRelationConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueRelation(request, node)) : undefined;
   }
@@ -1578,13 +1595,12 @@ export class IssueRelationConnection {
  * @param request - function to call the graphql client
  * @param data - the initial IssueRelationFragment response data
  */
-export class IssueRelation {
-  private _request: LinearRequest;
+export class IssueRelation extends Request {
   private _issue?: D.IssueRelationFragment["issue"];
   private _relatedIssue?: D.IssueRelationFragment["relatedIssue"];
 
   public constructor(request: LinearRequest, data: D.IssueRelationFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
     this._issue = data.issue ?? undefined;
@@ -1597,11 +1613,11 @@ export class IssueRelation {
   public type?: string;
   /** The issue whose relationship is being described. */
   public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
   }
   /** The related issue. */
   public get relatedIssue(): Promise<Issue | undefined> | undefined {
-    return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
+    return this._relatedIssue?.id ? new IssueQuery(this.request).fetch(this._relatedIssue?.id) : undefined;
   }
 }
 
@@ -1611,8 +1627,9 @@ export class IssueRelation {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationExistsPayloadFragment response data
  */
-export class OrganizationExistsPayload {
+export class OrganizationExistsPayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationExistsPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
     this.exists = data.exists ?? undefined;
   }
@@ -1630,8 +1647,9 @@ export class OrganizationExistsPayload {
  * @param request - function to call the graphql client
  * @param data - the initial SyncResponseFragment response data
  */
-export class SyncResponse {
+export class SyncResponse extends Request {
   public constructor(request: LinearRequest, data: D.SyncResponseFragment) {
+    super(request);
     this.state = data.state ?? undefined;
     this.delta = data.delta ?? undefined;
     this.archive = data.archive ?? undefined;
@@ -1663,8 +1681,9 @@ export class SyncResponse {
  * @param request - function to call the graphql client
  * @param data - the initial ArchiveResponseFragment response data
  */
-export class ArchiveResponse {
+export class ArchiveResponse extends Request {
   public constructor(request: LinearRequest, data: D.ArchiveResponseFragment) {
+    super(request);
     this.archive = data.archive ?? undefined;
     this.totalCount = data.totalCount ?? undefined;
     this.databaseVersion = data.databaseVersion ?? undefined;
@@ -1684,8 +1703,9 @@ export class ArchiveResponse {
  * @param request - function to call the graphql client
  * @param data - the initial UserAccountAdminPrivilegedFragment response data
  */
-export class UserAccountAdminPrivileged {
+export class UserAccountAdminPrivileged extends Request {
   public constructor(request: LinearRequest, data: D.UserAccountAdminPrivilegedFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.email = data.email ?? undefined;
@@ -1710,11 +1730,9 @@ export class UserAccountAdminPrivileged {
  * @param request - function to call the graphql client
  * @param data - the initial UserAdminPrivilegedFragment response data
  */
-export class UserAdminPrivileged {
-  private _request: LinearRequest;
-
+export class UserAdminPrivileged extends Request {
   public constructor(request: LinearRequest, data: D.UserAdminPrivilegedFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.displayName = data.displayName ?? undefined;
@@ -1752,7 +1770,7 @@ export class UserAdminPrivileged {
   public organization?: OrganizationAdminPrivileged;
   /** The settings of the user. */
   public get settings(): Promise<UserSettings | undefined> {
-    return new NotificationQuery(this._request).fetch();
+    return new NotificationQuery(this.request).fetch();
   }
 }
 
@@ -1762,8 +1780,9 @@ export class UserAdminPrivileged {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationAdminPrivilegedFragment response data
  */
-export class OrganizationAdminPrivileged {
+export class OrganizationAdminPrivileged extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationAdminPrivilegedFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.urlKey = data.urlKey ?? undefined;
@@ -1821,12 +1840,11 @@ export class OrganizationAdminPrivileged {
  * @param request - function to call the graphql client
  * @param data - the initial SubscriptionAdminPrivilegedFragment response data
  */
-export class SubscriptionAdminPrivileged {
-  private _request: LinearRequest;
+export class SubscriptionAdminPrivileged extends Request {
   private _creator?: D.SubscriptionAdminPrivilegedFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.SubscriptionAdminPrivilegedFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
     this.seats = data.seats ?? undefined;
@@ -1850,11 +1868,11 @@ export class SubscriptionAdminPrivileged {
   public stripeStatus?: string;
   /** The creator of the subscription. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -1864,8 +1882,9 @@ export class SubscriptionAdminPrivileged {
  * @param request - function to call the graphql client
  * @param data - the initial ApiKeyConnectionFragment response data
  */
-export class ApiKeyConnection {
+export class ApiKeyConnection extends Request {
   public constructor(request: LinearRequest, data: D.ApiKeyConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined;
   }
@@ -1880,8 +1899,9 @@ export class ApiKeyConnection {
  * @param request - function to call the graphql client
  * @param data - the initial ApiKeyFragment response data
  */
-export class ApiKey {
+export class ApiKey extends Request {
   public constructor(request: LinearRequest, data: D.ApiKeyFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.label = data.label ?? undefined;
   }
@@ -1898,8 +1918,9 @@ export class ApiKey {
  * @param request - function to call the graphql client
  * @param data - the initial UserAuthorizedApplicationFragment response data
  */
-export class UserAuthorizedApplication {
+export class UserAuthorizedApplication extends Request {
   public constructor(request: LinearRequest, data: D.UserAuthorizedApplicationFragment) {
+    super(request);
     this.clientId = data.clientId ?? undefined;
     this.name = data.name ?? undefined;
     this.description = data.description ?? undefined;
@@ -1931,8 +1952,9 @@ export class UserAuthorizedApplication {
  * @param request - function to call the graphql client
  * @param data - the initial AuthorizedApplicationFragment response data
  */
-export class AuthorizedApplication {
+export class AuthorizedApplication extends Request {
   public constructor(request: LinearRequest, data: D.AuthorizedApplicationFragment) {
+    super(request);
     this.clientId = data.clientId ?? undefined;
     this.name = data.name ?? undefined;
     this.description = data.description ?? undefined;
@@ -1967,8 +1989,9 @@ export class AuthorizedApplication {
  * @param request - function to call the graphql client
  * @param data - the initial AuthResolverResponseFragment response data
  */
-export class AuthResolverResponse {
+export class AuthResolverResponse extends Request {
   public constructor(request: LinearRequest, data: D.AuthResolverResponseFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.token = data.token ?? undefined;
     this.email = data.email ?? undefined;
@@ -1999,8 +2022,9 @@ export class AuthResolverResponse {
  * @param request - function to call the graphql client
  * @param data - the initial SsoUrlFromEmailResponseFragment response data
  */
-export class SsoUrlFromEmailResponse {
+export class SsoUrlFromEmailResponse extends Request {
   public constructor(request: LinearRequest, data: D.SsoUrlFromEmailResponseFragment) {
+    super(request);
     this.success = data.success ?? undefined;
     this.samlSsoUrl = data.samlSsoUrl ?? undefined;
   }
@@ -2017,8 +2041,9 @@ export class SsoUrlFromEmailResponse {
  * @param request - function to call the graphql client
  * @param data - the initial BillingDetailsPayloadFragment response data
  */
-export class BillingDetailsPayload {
+export class BillingDetailsPayload extends Request {
   public constructor(request: LinearRequest, data: D.BillingDetailsPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
     this.email = data.email ?? undefined;
     this.paymentMethod = data.paymentMethod ? new Card(request, data.paymentMethod) : undefined;
@@ -2041,8 +2066,9 @@ export class BillingDetailsPayload {
  * @param request - function to call the graphql client
  * @param data - the initial InvoiceFragment response data
  */
-export class Invoice {
+export class Invoice extends Request {
   public constructor(request: LinearRequest, data: D.InvoiceFragment) {
+    super(request);
     this.url = data.url ?? undefined;
     this.status = data.status ?? undefined;
     this.total = data.total ?? undefined;
@@ -2062,8 +2088,9 @@ export class Invoice {
  * @param request - function to call the graphql client
  * @param data - the initial CardFragment response data
  */
-export class Card {
+export class Card extends Request {
   public constructor(request: LinearRequest, data: D.CardFragment) {
+    super(request);
     this.brand = data.brand ?? undefined;
     this.last4 = data.last4 ?? undefined;
   }
@@ -2080,8 +2107,9 @@ export class Card {
  * @param request - function to call the graphql client
  * @param data - the initial CollaborationDocumentUpdatePayloadFragment response data
  */
-export class CollaborationDocumentUpdatePayload {
+export class CollaborationDocumentUpdatePayload extends Request {
   public constructor(request: LinearRequest, data: D.CollaborationDocumentUpdatePayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
     this.steps = data.steps ? new StepsResponse(request, data.steps) : undefined;
   }
@@ -2098,8 +2126,9 @@ export class CollaborationDocumentUpdatePayload {
  * @param request - function to call the graphql client
  * @param data - the initial StepsResponseFragment response data
  */
-export class StepsResponse {
+export class StepsResponse extends Request {
   public constructor(request: LinearRequest, data: D.StepsResponseFragment) {
+    super(request);
     this.version = data.version ?? undefined;
     this.steps = data.steps ?? undefined;
     this.clientIds = data.clientIds ?? undefined;
@@ -2119,13 +2148,12 @@ export class StepsResponse {
  * @param request - function to call the graphql client
  * @param data - the initial CustomViewFragment response data
  */
-export class CustomView {
-  private _request: LinearRequest;
+export class CustomView extends Request {
   private _team?: D.CustomViewFragment["team"];
   private _creator?: D.CustomViewFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.CustomViewFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.description = data.description ?? undefined;
@@ -2150,15 +2178,15 @@ export class CustomView {
   public shared?: boolean;
   /** The organization of the custom view. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
   /** The team associated with the custom view. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the custom view. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
 }
 
@@ -2168,8 +2196,9 @@ export class CustomView {
  * @param request - function to call the graphql client
  * @param data - the initial CustomViewConnectionFragment response data
  */
-export class CustomViewConnection {
+export class CustomViewConnection extends Request {
   public constructor(request: LinearRequest, data: D.CustomViewConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined;
   }
@@ -2184,12 +2213,11 @@ export class CustomViewConnection {
  * @param request - function to call the graphql client
  * @param data - the initial EmojiFragment response data
  */
-export class Emoji {
-  private _request: LinearRequest;
+export class Emoji extends Request {
   private _creator?: D.EmojiFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.EmojiFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.url = data.url ?? undefined;
@@ -2207,11 +2235,11 @@ export class Emoji {
   public source?: string;
   /** The user who created the emoji. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the emoji belongs to. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -2221,8 +2249,9 @@ export class Emoji {
  * @param request - function to call the graphql client
  * @param data - the initial EmojiConnectionFragment response data
  */
-export class EmojiConnection {
+export class EmojiConnection extends Request {
   public constructor(request: LinearRequest, data: D.EmojiConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
   }
@@ -2237,8 +2266,7 @@ export class EmojiConnection {
  * @param request - function to call the graphql client
  * @param data - the initial FavoriteFragment response data
  */
-export class Favorite {
-  private _request: LinearRequest;
+export class Favorite extends Request {
   private _user?: D.FavoriteFragment["user"];
   private _issue?: D.FavoriteFragment["issue"];
   private _project?: D.FavoriteFragment["project"];
@@ -2247,7 +2275,7 @@ export class Favorite {
   private _label?: D.FavoriteFragment["label"];
 
   public constructor(request: LinearRequest, data: D.FavoriteFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
     this.sortOrder = data.sortOrder ?? undefined;
@@ -2267,27 +2295,27 @@ export class Favorite {
   public sortOrder?: number;
   /** The owner of the favorite. */
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
   /** Favorited issue. */
   public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
   }
   /** Favorited project. */
   public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
   }
   /** Favorited project team. */
   public get projectTeam(): Promise<Project | undefined> | undefined {
-    return this._projectTeam?.id ? new ProjectQuery(this._request).fetch(this._projectTeam?.id) : undefined;
+    return this._projectTeam?.id ? new ProjectQuery(this.request).fetch(this._projectTeam?.id) : undefined;
   }
   /** Favorited cycle. */
   public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
   }
   /** Favorited issue label. */
   public get label(): Promise<IssueLabel | undefined> | undefined {
-    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+    return this._label?.id ? new IssueLabelQuery(this.request).fetch(this._label?.id) : undefined;
   }
 }
 
@@ -2297,8 +2325,9 @@ export class Favorite {
  * @param request - function to call the graphql client
  * @param data - the initial FavoriteConnectionFragment response data
  */
-export class FavoriteConnection {
+export class FavoriteConnection extends Request {
   public constructor(request: LinearRequest, data: D.FavoriteConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
   }
@@ -2313,8 +2342,9 @@ export class FavoriteConnection {
  * @param request - function to call the graphql client
  * @param data - the initial FigmaEmbedPayloadFragment response data
  */
-export class FigmaEmbedPayload {
+export class FigmaEmbedPayload extends Request {
   public constructor(request: LinearRequest, data: D.FigmaEmbedPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.figmaEmbed = data.figmaEmbed ? new FigmaEmbed(request, data.figmaEmbed) : undefined;
@@ -2334,8 +2364,9 @@ export class FigmaEmbedPayload {
  * @param request - function to call the graphql client
  * @param data - the initial FigmaEmbedFragment response data
  */
-export class FigmaEmbed {
+export class FigmaEmbed extends Request {
   public constructor(request: LinearRequest, data: D.FigmaEmbedFragment) {
+    super(request);
     this.name = data.name ?? undefined;
     this.nodeName = data.nodeName ?? undefined;
     this.url = data.url ?? undefined;
@@ -2355,8 +2386,9 @@ export class FigmaEmbed {
  * @param request - function to call the graphql client
  * @param data - the initial InvitePagePayloadFragment response data
  */
-export class InvitePagePayload {
+export class InvitePagePayload extends Request {
   public constructor(request: LinearRequest, data: D.InvitePagePayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
     this.inviteData = data.inviteData ? new InviteData(request, data.inviteData) : undefined;
   }
@@ -2373,8 +2405,9 @@ export class InvitePagePayload {
  * @param request - function to call the graphql client
  * @param data - the initial InviteDataFragment response data
  */
-export class InviteData {
+export class InviteData extends Request {
   public constructor(request: LinearRequest, data: D.InviteDataFragment) {
+    super(request);
     this.inviterName = data.inviterName ?? undefined;
     this.organizationName = data.organizationName ?? undefined;
     this.organizationDomain = data.organizationDomain ?? undefined;
@@ -2409,8 +2442,9 @@ export class InviteData {
  * @param request - function to call the graphql client
  * @param data - the initial NotificationConnectionFragment response data
  */
-export class NotificationConnection {
+export class NotificationConnection extends Request {
   public constructor(request: LinearRequest, data: D.NotificationConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined;
   }
@@ -2425,15 +2459,14 @@ export class NotificationConnection {
  * @param request - function to call the graphql client
  * @param data - the initial NotificationFragment response data
  */
-export class Notification {
-  private _request: LinearRequest;
+export class Notification extends Request {
   private _user?: D.NotificationFragment["user"];
   private _issue?: D.NotificationFragment["issue"];
   private _team?: D.NotificationFragment["team"];
   private _comment?: D.NotificationFragment["comment"];
 
   public constructor(request: LinearRequest, data: D.NotificationFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
     this.reactionEmoji = data.reactionEmoji ?? undefined;
@@ -2451,19 +2484,19 @@ export class Notification {
   public reactionEmoji?: string;
   /** The recipient of the notification. */
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
   /** The issue that the notification is associated with. */
   public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
   }
   /** The team which the notification is associated with. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** The comment which the notification is associated with. */
   public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
+    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
   }
 }
 
@@ -2473,8 +2506,9 @@ export class Notification {
  * @param request - function to call the graphql client
  * @param data - the initial NotificationSubscriptionConnectionFragment response data
  */
-export class NotificationSubscriptionConnection {
+export class NotificationSubscriptionConnection extends Request {
   public constructor(request: LinearRequest, data: D.NotificationSubscriptionConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined;
   }
@@ -2489,14 +2523,13 @@ export class NotificationSubscriptionConnection {
  * @param request - function to call the graphql client
  * @param data - the initial NotificationSubscriptionFragment response data
  */
-export class NotificationSubscription {
-  private _request: LinearRequest;
+export class NotificationSubscription extends Request {
   private _user?: D.NotificationSubscriptionFragment["user"];
   private _team?: D.NotificationSubscriptionFragment["team"];
   private _project?: D.NotificationSubscriptionFragment["project"];
 
   public constructor(request: LinearRequest, data: D.NotificationSubscriptionFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
     this._user = data.user ?? undefined;
@@ -2510,15 +2543,15 @@ export class NotificationSubscription {
   public type?: string;
   /** The user associated with notification subscriptions. */
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
   /** Subscribed team. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** Subscribed project. */
   public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
   }
 }
 
@@ -2528,8 +2561,9 @@ export class NotificationSubscription {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationInviteConnectionFragment response data
  */
-export class OrganizationInviteConnection {
+export class OrganizationInviteConnection extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationInviteConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined;
   }
@@ -2544,13 +2578,12 @@ export class OrganizationInviteConnection {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationInviteFragment response data
  */
-export class OrganizationInvite {
-  private _request: LinearRequest;
+export class OrganizationInvite extends Request {
   private _inviter?: D.OrganizationInviteFragment["inviter"];
   private _invitee?: D.OrganizationInviteFragment["invitee"];
 
   public constructor(request: LinearRequest, data: D.OrganizationInviteFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.email = data.email ?? undefined;
     this.external = data.external ?? undefined;
@@ -2566,15 +2599,15 @@ export class OrganizationInvite {
   public external?: boolean;
   /** The user who created the invitation. */
   public get inviter(): Promise<User | undefined> | undefined {
-    return this._inviter?.id ? new UserQuery(this._request).fetch(this._inviter?.id) : undefined;
+    return this._inviter?.id ? new UserQuery(this.request).fetch(this._inviter?.id) : undefined;
   }
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
   public get invitee(): Promise<User | undefined> | undefined {
-    return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
+    return this._invitee?.id ? new UserQuery(this.request).fetch(this._invitee?.id) : undefined;
   }
   /** The organization that the invite is associated with. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -2584,8 +2617,9 @@ export class OrganizationInvite {
  * @param request - function to call the graphql client
  * @param data - the initial PushSubscriptionPayloadFragment response data
  */
-export class PushSubscriptionPayload {
+export class PushSubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: D.PushSubscriptionPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
@@ -2602,13 +2636,12 @@ export class PushSubscriptionPayload {
  * @param request - function to call the graphql client
  * @param data - the initial ReactionFragment response data
  */
-export class Reaction {
-  private _request: LinearRequest;
+export class Reaction extends Request {
   private _user?: D.ReactionFragment["user"];
   private _comment?: D.ReactionFragment["comment"];
 
   public constructor(request: LinearRequest, data: D.ReactionFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.emoji = data.emoji ?? undefined;
     this._user = data.user ?? undefined;
@@ -2621,11 +2654,11 @@ export class Reaction {
   public emoji?: string;
   /** The user who reacted. */
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
   /** The comment that the reaction is associated with. */
   public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
+    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
   }
 }
 
@@ -2635,8 +2668,9 @@ export class Reaction {
  * @param request - function to call the graphql client
  * @param data - the initial ReactionConnectionFragment response data
  */
-export class ReactionConnection {
+export class ReactionConnection extends Request {
   public constructor(request: LinearRequest, data: D.ReactionConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined;
   }
@@ -2651,8 +2685,9 @@ export class ReactionConnection {
  * @param request - function to call the graphql client
  * @param data - the initial ViewPreferencesConnectionFragment response data
  */
-export class ViewPreferencesConnection {
+export class ViewPreferencesConnection extends Request {
   public constructor(request: LinearRequest, data: D.ViewPreferencesConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new ViewPreferences(request, node)) : undefined;
   }
@@ -2667,8 +2702,9 @@ export class ViewPreferencesConnection {
  * @param request - function to call the graphql client
  * @param data - the initial ViewPreferencesFragment response data
  */
-export class ViewPreferences {
+export class ViewPreferences extends Request {
   public constructor(request: LinearRequest, data: D.ViewPreferencesFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
     this.viewType = data.viewType ?? undefined;
@@ -2688,12 +2724,11 @@ export class ViewPreferences {
  * @param request - function to call the graphql client
  * @param data - the initial UserPayloadFragment response data
  */
-export class UserPayload {
-  private _request: LinearRequest;
+export class UserPayload extends Request {
   private _user?: D.UserPayloadFragment["user"];
 
   public constructor(request: LinearRequest, data: D.UserPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._user = data.user ?? undefined;
@@ -2705,7 +2740,7 @@ export class UserPayload {
   public success?: boolean;
   /** The user that was created or updated. */
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
 }
 
@@ -2715,8 +2750,9 @@ export class UserPayload {
  * @param request - function to call the graphql client
  * @param data - the initial UserAdminPayloadFragment response data
  */
-export class UserAdminPayload {
+export class UserAdminPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserAdminPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -2730,11 +2766,9 @@ export class UserAdminPayload {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationPayloadFragment response data
  */
-export class OrganizationPayload {
-  private _request: LinearRequest;
-
+export class OrganizationPayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
@@ -2745,7 +2779,7 @@ export class OrganizationPayload {
   public success?: boolean;
   /** The organization that was created or updated. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -2755,8 +2789,9 @@ export class OrganizationPayload {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationDeletePayloadFragment response data
  */
-export class OrganizationDeletePayload {
+export class OrganizationDeletePayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationDeletePayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -2770,8 +2805,9 @@ export class OrganizationDeletePayload {
  * @param request - function to call the graphql client
  * @param data - the initial AdminIntegrationPayloadFragment response data
  */
-export class AdminIntegrationPayload {
+export class AdminIntegrationPayload extends Request {
   public constructor(request: LinearRequest, data: D.AdminIntegrationPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -2785,8 +2821,9 @@ export class AdminIntegrationPayload {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationAccessPayloadFragment response data
  */
-export class OrganizationAccessPayload {
+export class OrganizationAccessPayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationAccessPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -2800,8 +2837,9 @@ export class OrganizationAccessPayload {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationSamlConfigurePayloadFragment response data
  */
-export class OrganizationSamlConfigurePayload {
+export class OrganizationSamlConfigurePayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationSamlConfigurePayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
     this.samlEnabled = data.samlEnabled ?? undefined;
     this.samlConfiguration = data.samlConfiguration
@@ -2823,8 +2861,9 @@ export class OrganizationSamlConfigurePayload {
  * @param request - function to call the graphql client
  * @param data - the initial SamlConfigurationFragment response data
  */
-export class SamlConfiguration {
+export class SamlConfiguration extends Request {
   public constructor(request: LinearRequest, data: D.SamlConfigurationFragment) {
+    super(request);
     this.ssoSigningCert = data.ssoSigningCert ?? undefined;
     this.ssoEndpoint = data.ssoEndpoint ?? undefined;
     this.ssoBinding = data.ssoBinding ?? undefined;
@@ -2850,8 +2889,9 @@ export class SamlConfiguration {
  * @param request - function to call the graphql client
  * @param data - the initial AdminCommandPayloadFragment response data
  */
-export class AdminCommandPayload {
+export class AdminCommandPayload extends Request {
   public constructor(request: LinearRequest, data: D.AdminCommandPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -2865,8 +2905,9 @@ export class AdminCommandPayload {
  * @param request - function to call the graphql client
  * @param data - the initial EventPayloadFragment response data
  */
-export class EventPayload {
+export class EventPayload extends Request {
   public constructor(request: LinearRequest, data: D.EventPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -2880,8 +2921,9 @@ export class EventPayload {
  * @param request - function to call the graphql client
  * @param data - the initial ApiKeyPayloadFragment response data
  */
-export class ApiKeyPayload {
+export class ApiKeyPayload extends Request {
   public constructor(request: LinearRequest, data: D.ApiKeyPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.apiKey = data.apiKey ? new ApiKey(request, data.apiKey) : undefined;
@@ -2901,8 +2943,9 @@ export class ApiKeyPayload {
  * @param request - function to call the graphql client
  * @param data - the initial ArchivePayloadFragment response data
  */
-export class ArchivePayload {
+export class ArchivePayload extends Request {
   public constructor(request: LinearRequest, data: D.ArchivePayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
@@ -2919,8 +2962,9 @@ export class ArchivePayload {
  * @param request - function to call the graphql client
  * @param data - the initial EmailUserAccountAuthChallengeResponseFragment response data
  */
-export class EmailUserAccountAuthChallengeResponse {
+export class EmailUserAccountAuthChallengeResponse extends Request {
   public constructor(request: LinearRequest, data: D.EmailUserAccountAuthChallengeResponseFragment) {
+    super(request);
     this.success = data.success ?? undefined;
     this.authType = data.authType ?? undefined;
   }
@@ -2937,20 +2981,19 @@ export class EmailUserAccountAuthChallengeResponse {
  * @param request - function to call the graphql client
  * @param data - the initial CreateOrJoinOrganizationResponseFragment response data
  */
-export class CreateOrJoinOrganizationResponse {
-  private _request: LinearRequest;
+export class CreateOrJoinOrganizationResponse extends Request {
   private _user?: D.CreateOrJoinOrganizationResponseFragment["user"];
 
   public constructor(request: LinearRequest, data: D.CreateOrJoinOrganizationResponseFragment) {
-    this._request = request;
+    super(request);
     this._user = data.user ?? undefined;
   }
 
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
   public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
   }
 }
 
@@ -2960,8 +3003,9 @@ export class CreateOrJoinOrganizationResponse {
  * @param request - function to call the graphql client
  * @param data - the initial BillingEmailPayloadFragment response data
  */
-export class BillingEmailPayload {
+export class BillingEmailPayload extends Request {
   public constructor(request: LinearRequest, data: D.BillingEmailPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
     this.email = data.email ?? undefined;
   }
@@ -2978,12 +3022,11 @@ export class BillingEmailPayload {
  * @param request - function to call the graphql client
  * @param data - the initial CommentPayloadFragment response data
  */
-export class CommentPayload {
-  private _request: LinearRequest;
+export class CommentPayload extends Request {
   private _comment?: D.CommentPayloadFragment["comment"];
 
   public constructor(request: LinearRequest, data: D.CommentPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._comment = data.comment ?? undefined;
@@ -2995,7 +3038,7 @@ export class CommentPayload {
   public success?: boolean;
   /** The comment that was created or updated. */
   public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
+    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
   }
 }
 
@@ -3005,8 +3048,9 @@ export class CommentPayload {
  * @param request - function to call the graphql client
  * @param data - the initial ContactPayloadFragment response data
  */
-export class ContactPayload {
+export class ContactPayload extends Request {
   public constructor(request: LinearRequest, data: D.ContactPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -3020,12 +3064,11 @@ export class ContactPayload {
  * @param request - function to call the graphql client
  * @param data - the initial CustomViewPayloadFragment response data
  */
-export class CustomViewPayload {
-  private _request: LinearRequest;
+export class CustomViewPayload extends Request {
   private _customView?: D.CustomViewPayloadFragment["customView"];
 
   public constructor(request: LinearRequest, data: D.CustomViewPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._customView = data.customView ?? undefined;
@@ -3037,7 +3080,7 @@ export class CustomViewPayload {
   public success?: boolean;
   /** The custom view that was created or updated. */
   public get customView(): Promise<CustomView | undefined> | undefined {
-    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+    return this._customView?.id ? new CustomViewQuery(this.request).fetch(this._customView?.id) : undefined;
   }
 }
 
@@ -3047,12 +3090,11 @@ export class CustomViewPayload {
  * @param request - function to call the graphql client
  * @param data - the initial CyclePayloadFragment response data
  */
-export class CyclePayload {
-  private _request: LinearRequest;
+export class CyclePayload extends Request {
   private _cycle?: D.CyclePayloadFragment["cycle"];
 
   public constructor(request: LinearRequest, data: D.CyclePayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -3064,7 +3106,7 @@ export class CyclePayload {
   public success?: boolean;
   /** The Cycle that was created or updated. */
   public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
   }
 }
 
@@ -3074,8 +3116,9 @@ export class CyclePayload {
  * @param request - function to call the graphql client
  * @param data - the initial DebugPayloadFragment response data
  */
-export class DebugPayload {
+export class DebugPayload extends Request {
   public constructor(request: LinearRequest, data: D.DebugPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -3089,8 +3132,9 @@ export class DebugPayload {
  * @param request - function to call the graphql client
  * @param data - the initial EmailUnsubscribePayloadFragment response data
  */
-export class EmailUnsubscribePayload {
+export class EmailUnsubscribePayload extends Request {
   public constructor(request: LinearRequest, data: D.EmailUnsubscribePayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -3104,12 +3148,11 @@ export class EmailUnsubscribePayload {
  * @param request - function to call the graphql client
  * @param data - the initial EmojiPayloadFragment response data
  */
-export class EmojiPayload {
-  private _request: LinearRequest;
+export class EmojiPayload extends Request {
   private _emoji?: D.EmojiPayloadFragment["emoji"];
 
   public constructor(request: LinearRequest, data: D.EmojiPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._emoji = data.emoji ?? undefined;
@@ -3121,7 +3164,7 @@ export class EmojiPayload {
   public success?: boolean;
   /** The emoji that was created. */
   public get emoji(): Promise<Emoji | undefined> | undefined {
-    return this._emoji?.id ? new EmojiQuery(this._request).fetch(this._emoji?.id) : undefined;
+    return this._emoji?.id ? new EmojiQuery(this.request).fetch(this._emoji?.id) : undefined;
   }
 }
 
@@ -3131,12 +3174,11 @@ export class EmojiPayload {
  * @param request - function to call the graphql client
  * @param data - the initial FavoritePayloadFragment response data
  */
-export class FavoritePayload {
-  private _request: LinearRequest;
+export class FavoritePayload extends Request {
   private _favorite?: D.FavoritePayloadFragment["favorite"];
 
   public constructor(request: LinearRequest, data: D.FavoritePayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._favorite = data.favorite ?? undefined;
@@ -3148,7 +3190,7 @@ export class FavoritePayload {
   public success?: boolean;
   /** The object that was added as a favorite. */
   public get favorite(): Promise<Favorite | undefined> | undefined {
-    return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
+    return this._favorite?.id ? new FavoriteQuery(this.request).fetch(this._favorite?.id) : undefined;
   }
 }
 
@@ -3158,8 +3200,9 @@ export class FavoritePayload {
  * @param request - function to call the graphql client
  * @param data - the initial FeedbackPayloadFragment response data
  */
-export class FeedbackPayload {
+export class FeedbackPayload extends Request {
   public constructor(request: LinearRequest, data: D.FeedbackPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -3173,8 +3216,9 @@ export class FeedbackPayload {
  * @param request - function to call the graphql client
  * @param data - the initial UploadPayloadFragment response data
  */
-export class UploadPayload {
+export class UploadPayload extends Request {
   public constructor(request: LinearRequest, data: D.UploadPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.uploadFile = data.uploadFile ? new UploadFile(request, data.uploadFile) : undefined;
@@ -3194,8 +3238,9 @@ export class UploadPayload {
  * @param request - function to call the graphql client
  * @param data - the initial UploadFileFragment response data
  */
-export class UploadFile {
+export class UploadFile extends Request {
   public constructor(request: LinearRequest, data: D.UploadFileFragment) {
+    super(request);
     this.filename = data.filename ?? undefined;
     this.contentType = data.contentType ?? undefined;
     this.size = data.size ?? undefined;
@@ -3223,8 +3268,9 @@ export class UploadFile {
  * @param request - function to call the graphql client
  * @param data - the initial UploadFileHeaderFragment response data
  */
-export class UploadFileHeader {
+export class UploadFileHeader extends Request {
   public constructor(request: LinearRequest, data: D.UploadFileHeaderFragment) {
+    super(request);
     this.key = data.key ?? undefined;
     this.value = data.value ?? undefined;
   }
@@ -3241,8 +3287,9 @@ export class UploadFileHeader {
  * @param request - function to call the graphql client
  * @param data - the initial ImageUploadFromUrlPayloadFragment response data
  */
-export class ImageUploadFromUrlPayload {
+export class ImageUploadFromUrlPayload extends Request {
   public constructor(request: LinearRequest, data: D.ImageUploadFromUrlPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.url = data.url ?? undefined;
     this.success = data.success ?? undefined;
@@ -3262,12 +3309,11 @@ export class ImageUploadFromUrlPayload {
  * @param request - function to call the graphql client
  * @param data - the initial IntegrationPayloadFragment response data
  */
-export class IntegrationPayload {
-  private _request: LinearRequest;
+export class IntegrationPayload extends Request {
   private _integration?: D.IntegrationPayloadFragment["integration"];
 
   public constructor(request: LinearRequest, data: D.IntegrationPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._integration = data.integration ?? undefined;
@@ -3279,7 +3325,7 @@ export class IntegrationPayload {
   public success?: boolean;
   /** The integration that was created or updated. */
   public get integration(): Promise<Integration | undefined> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+    return this._integration?.id ? new IntegrationQuery(this.request).fetch(this._integration?.id) : undefined;
   }
 }
 
@@ -3289,12 +3335,11 @@ export class IntegrationPayload {
  * @param request - function to call the graphql client
  * @param data - the initial IssueLabelPayloadFragment response data
  */
-export class IssueLabelPayload {
-  private _request: LinearRequest;
+export class IssueLabelPayload extends Request {
   private _issueLabel?: D.IssueLabelPayloadFragment["issueLabel"];
 
   public constructor(request: LinearRequest, data: D.IssueLabelPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._issueLabel = data.issueLabel ?? undefined;
@@ -3306,7 +3351,7 @@ export class IssueLabelPayload {
   public success?: boolean;
   /** The label that was created or updated. */
   public get issueLabel(): Promise<IssueLabel | undefined> | undefined {
-    return this._issueLabel?.id ? new IssueLabelQuery(this._request).fetch(this._issueLabel?.id) : undefined;
+    return this._issueLabel?.id ? new IssueLabelQuery(this.request).fetch(this._issueLabel?.id) : undefined;
   }
 }
 
@@ -3316,12 +3361,11 @@ export class IssueLabelPayload {
  * @param request - function to call the graphql client
  * @param data - the initial IssueRelationPayloadFragment response data
  */
-export class IssueRelationPayload {
-  private _request: LinearRequest;
+export class IssueRelationPayload extends Request {
   private _issueRelation?: D.IssueRelationPayloadFragment["issueRelation"];
 
   public constructor(request: LinearRequest, data: D.IssueRelationPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._issueRelation = data.issueRelation ?? undefined;
@@ -3333,7 +3377,7 @@ export class IssueRelationPayload {
   public success?: boolean;
   /** The issue relation that was created or updated. */
   public get issueRelation(): Promise<IssueRelation | undefined> | undefined {
-    return this._issueRelation?.id ? new IssueRelationQuery(this._request).fetch(this._issueRelation?.id) : undefined;
+    return this._issueRelation?.id ? new IssueRelationQuery(this.request).fetch(this._issueRelation?.id) : undefined;
   }
 }
 
@@ -3343,12 +3387,11 @@ export class IssueRelationPayload {
  * @param request - function to call the graphql client
  * @param data - the initial IssuePayloadFragment response data
  */
-export class IssuePayload {
-  private _request: LinearRequest;
+export class IssuePayload extends Request {
   private _issue?: D.IssuePayloadFragment["issue"];
 
   public constructor(request: LinearRequest, data: D.IssuePayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._issue = data.issue ?? undefined;
@@ -3360,7 +3403,7 @@ export class IssuePayload {
   public success?: boolean;
   /** The issue that was created or updated. */
   public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
   }
 }
 
@@ -3370,12 +3413,11 @@ export class IssuePayload {
  * @param request - function to call the graphql client
  * @param data - the initial MilestonePayloadFragment response data
  */
-export class MilestonePayload {
-  private _request: LinearRequest;
+export class MilestonePayload extends Request {
   private _milestone?: D.MilestonePayloadFragment["milestone"];
 
   public constructor(request: LinearRequest, data: D.MilestonePayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._milestone = data.milestone ?? undefined;
@@ -3387,7 +3429,7 @@ export class MilestonePayload {
   public success?: boolean;
   /** The milesteone that was created or updated. */
   public get milestone(): Promise<Milestone | undefined> | undefined {
-    return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
+    return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
   }
 }
 
@@ -3397,8 +3439,9 @@ export class MilestonePayload {
  * @param request - function to call the graphql client
  * @param data - the initial NotificationPayloadFragment response data
  */
-export class NotificationPayload {
+export class NotificationPayload extends Request {
   public constructor(request: LinearRequest, data: D.NotificationPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.notification = data.notification ? new Notification(request, data.notification) : undefined;
@@ -3418,8 +3461,9 @@ export class NotificationPayload {
  * @param request - function to call the graphql client
  * @param data - the initial NotificationSubscriptionPayloadFragment response data
  */
-export class NotificationSubscriptionPayload {
+export class NotificationSubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: D.NotificationSubscriptionPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.notificationSubscription = data.notificationSubscription
@@ -3441,8 +3485,9 @@ export class NotificationSubscriptionPayload {
  * @param request - function to call the graphql client
  * @param data - the initial OauthClientPayloadFragment response data
  */
-export class OauthClientPayload {
+export class OauthClientPayload extends Request {
   public constructor(request: LinearRequest, data: D.OauthClientPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.oauthClient = data.oauthClient ? new OauthClient(request, data.oauthClient) : undefined;
@@ -3462,8 +3507,9 @@ export class OauthClientPayload {
  * @param request - function to call the graphql client
  * @param data - the initial OauthClientFragment response data
  */
-export class OauthClient {
+export class OauthClient extends Request {
   public constructor(request: LinearRequest, data: D.OauthClientFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.clientId = data.clientId ?? undefined;
     this.name = data.name ?? undefined;
@@ -3501,8 +3547,9 @@ export class OauthClient {
  * @param request - function to call the graphql client
  * @param data - the initial RotateSecretPayloadFragment response data
  */
-export class RotateSecretPayload {
+export class RotateSecretPayload extends Request {
   public constructor(request: LinearRequest, data: D.RotateSecretPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
@@ -3519,8 +3566,9 @@ export class RotateSecretPayload {
  * @param request - function to call the graphql client
  * @param data - the initial OauthTokenRevokePayloadFragment response data
  */
-export class OauthTokenRevokePayload {
+export class OauthTokenRevokePayload extends Request {
   public constructor(request: LinearRequest, data: D.OauthTokenRevokePayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -3534,8 +3582,9 @@ export class OauthTokenRevokePayload {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationDomainPayloadFragment response data
  */
-export class OrganizationDomainPayload {
+export class OrganizationDomainPayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationDomainPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.organizationDomain = data.organizationDomain
@@ -3557,12 +3606,11 @@ export class OrganizationDomainPayload {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationDomainFragment response data
  */
-export class OrganizationDomain {
-  private _request: LinearRequest;
+export class OrganizationDomain extends Request {
   private _creator?: D.OrganizationDomainFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.OrganizationDomainFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.verified = data.verified ?? undefined;
@@ -3580,7 +3628,7 @@ export class OrganizationDomain {
   public verificationEmail?: string;
   /** The user who added the domain. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
 }
 
@@ -3590,8 +3638,9 @@ export class OrganizationDomain {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationInvitePayloadFragment response data
  */
-export class OrganizationInvitePayload {
+export class OrganizationInvitePayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationInvitePayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.organizationInvite = data.organizationInvite
@@ -3613,12 +3662,11 @@ export class OrganizationInvitePayload {
  * @param request - function to call the graphql client
  * @param data - the initial ProjectLinkPayloadFragment response data
  */
-export class ProjectLinkPayload {
-  private _request: LinearRequest;
+export class ProjectLinkPayload extends Request {
   private _projectLink?: D.ProjectLinkPayloadFragment["projectLink"];
 
   public constructor(request: LinearRequest, data: D.ProjectLinkPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._projectLink = data.projectLink ?? undefined;
@@ -3630,7 +3678,7 @@ export class ProjectLinkPayload {
   public success?: boolean;
   /** The project that was created or updated. */
   public get projectLink(): Promise<ProjectLink | undefined> | undefined {
-    return this._projectLink?.id ? new ProjectLinkQuery(this._request).fetch(this._projectLink?.id) : undefined;
+    return this._projectLink?.id ? new ProjectLinkQuery(this.request).fetch(this._projectLink?.id) : undefined;
   }
 }
 
@@ -3640,12 +3688,11 @@ export class ProjectLinkPayload {
  * @param request - function to call the graphql client
  * @param data - the initial ProjectPayloadFragment response data
  */
-export class ProjectPayload {
-  private _request: LinearRequest;
+export class ProjectPayload extends Request {
   private _project?: D.ProjectPayloadFragment["project"];
 
   public constructor(request: LinearRequest, data: D.ProjectPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._project = data.project ?? undefined;
@@ -3657,7 +3704,7 @@ export class ProjectPayload {
   public success?: boolean;
   /** The project that was created or updated. */
   public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
   }
 }
 
@@ -3667,12 +3714,11 @@ export class ProjectPayload {
  * @param request - function to call the graphql client
  * @param data - the initial ReactionPayloadFragment response data
  */
-export class ReactionPayload {
-  private _request: LinearRequest;
+export class ReactionPayload extends Request {
   private _reaction?: D.ReactionPayloadFragment["reaction"];
 
   public constructor(request: LinearRequest, data: D.ReactionPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._reaction = data.reaction ?? undefined;
@@ -3682,7 +3728,7 @@ export class ReactionPayload {
   public lastSyncId?: number;
   public success?: boolean;
   public get reaction(): Promise<Reaction | undefined> | undefined {
-    return this._reaction?.id ? new ReactionQuery(this._request).fetch(this._reaction?.id) : undefined;
+    return this._reaction?.id ? new ReactionQuery(this.request).fetch(this._reaction?.id) : undefined;
   }
 }
 
@@ -3692,8 +3738,9 @@ export class ReactionPayload {
  * @param request - function to call the graphql client
  * @param data - the initial CreateCsvExportReportPayloadFragment response data
  */
-export class CreateCsvExportReportPayload {
+export class CreateCsvExportReportPayload extends Request {
   public constructor(request: LinearRequest, data: D.CreateCsvExportReportPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -3707,8 +3754,9 @@ export class CreateCsvExportReportPayload {
  * @param request - function to call the graphql client
  * @param data - the initial SubscriptionSessionPayloadFragment response data
  */
-export class SubscriptionSessionPayload {
+export class SubscriptionSessionPayload extends Request {
   public constructor(request: LinearRequest, data: D.SubscriptionSessionPayloadFragment) {
+    super(request);
     this.session = data.session ?? undefined;
   }
 
@@ -3722,11 +3770,9 @@ export class SubscriptionSessionPayload {
  * @param request - function to call the graphql client
  * @param data - the initial SubscriptionPayloadFragment response data
  */
-export class SubscriptionPayload {
-  private _request: LinearRequest;
-
+export class SubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: D.SubscriptionPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
@@ -3737,7 +3783,7 @@ export class SubscriptionPayload {
   public success?: boolean;
   /** The subscription entity being mutated. */
   public get subscription(): Promise<Subscription | undefined> {
-    return new SubscriptionQuery(this._request).fetch();
+    return new SubscriptionQuery(this.request).fetch();
   }
 }
 
@@ -3747,12 +3793,11 @@ export class SubscriptionPayload {
  * @param request - function to call the graphql client
  * @param data - the initial TeamMembershipPayloadFragment response data
  */
-export class TeamMembershipPayload {
-  private _request: LinearRequest;
+export class TeamMembershipPayload extends Request {
   private _teamMembership?: D.TeamMembershipPayloadFragment["teamMembership"];
 
   public constructor(request: LinearRequest, data: D.TeamMembershipPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._teamMembership = data.teamMembership ?? undefined;
@@ -3764,9 +3809,7 @@ export class TeamMembershipPayload {
   public success?: boolean;
   /** The team membership that was created or updated. */
   public get teamMembership(): Promise<TeamMembership | undefined> | undefined {
-    return this._teamMembership?.id
-      ? new TeamMembershipQuery(this._request).fetch(this._teamMembership?.id)
-      : undefined;
+    return this._teamMembership?.id ? new TeamMembershipQuery(this.request).fetch(this._teamMembership?.id) : undefined;
   }
 }
 
@@ -3776,12 +3819,11 @@ export class TeamMembershipPayload {
  * @param request - function to call the graphql client
  * @param data - the initial TeamPayloadFragment response data
  */
-export class TeamPayload {
-  private _request: LinearRequest;
+export class TeamPayload extends Request {
   private _team?: D.TeamPayloadFragment["team"];
 
   public constructor(request: LinearRequest, data: D.TeamPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._team = data.team ?? undefined;
@@ -3793,7 +3835,7 @@ export class TeamPayload {
   public success?: boolean;
   /** The team that was created or updated. */
   public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
 }
 
@@ -3803,11 +3845,9 @@ export class TeamPayload {
  * @param request - function to call the graphql client
  * @param data - the initial TemplatePayloadFragment response data
  */
-export class TemplatePayload {
-  private _request: LinearRequest;
-
+export class TemplatePayload extends Request {
   public constructor(request: LinearRequest, data: D.TemplatePayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
@@ -3818,7 +3858,7 @@ export class TemplatePayload {
   public success?: boolean;
   /** The template that was created or updated. */
   public get template(): Promise<Template | undefined> {
-    return new TemplatesQuery(this._request).fetch();
+    return new TemplatesQuery(this.request).fetch();
   }
 }
 
@@ -3828,11 +3868,9 @@ export class TemplatePayload {
  * @param request - function to call the graphql client
  * @param data - the initial UserSettingsPayloadFragment response data
  */
-export class UserSettingsPayload {
-  private _request: LinearRequest;
-
+export class UserSettingsPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserSettingsPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
@@ -3843,7 +3881,7 @@ export class UserSettingsPayload {
   public success?: boolean;
   /** The user's settings. */
   public get userSettings(): Promise<UserSettings | undefined> {
-    return new NotificationQuery(this._request).fetch();
+    return new NotificationQuery(this.request).fetch();
   }
 }
 
@@ -3853,8 +3891,9 @@ export class UserSettingsPayload {
  * @param request - function to call the graphql client
  * @param data - the initial UserSettingsFlagPayloadFragment response data
  */
-export class UserSettingsFlagPayload {
+export class UserSettingsFlagPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserSettingsFlagPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.flag = data.flag ?? undefined;
     this.value = data.value ?? undefined;
@@ -3877,8 +3916,9 @@ export class UserSettingsFlagPayload {
  * @param request - function to call the graphql client
  * @param data - the initial UserSettingsFlagsResetPayloadFragment response data
  */
-export class UserSettingsFlagsResetPayload {
+export class UserSettingsFlagsResetPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserSettingsFlagsResetPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
@@ -3895,8 +3935,9 @@ export class UserSettingsFlagsResetPayload {
  * @param request - function to call the graphql client
  * @param data - the initial UserSubscribeToNewsletterPayloadFragment response data
  */
-export class UserSubscribeToNewsletterPayload {
+export class UserSubscribeToNewsletterPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserSubscribeToNewsletterPayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -3910,8 +3951,9 @@ export class UserSubscribeToNewsletterPayload {
  * @param request - function to call the graphql client
  * @param data - the initial ViewPreferencesPayloadFragment response data
  */
-export class ViewPreferencesPayload {
+export class ViewPreferencesPayload extends Request {
   public constructor(request: LinearRequest, data: D.ViewPreferencesPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.viewPreferences = data.viewPreferences ? new ViewPreferences(request, data.viewPreferences) : undefined;
@@ -3931,12 +3973,11 @@ export class ViewPreferencesPayload {
  * @param request - function to call the graphql client
  * @param data - the initial WebhookPayloadFragment response data
  */
-export class WebhookPayload {
-  private _request: LinearRequest;
+export class WebhookPayload extends Request {
   private _webhook?: D.WebhookPayloadFragment["webhook"];
 
   public constructor(request: LinearRequest, data: D.WebhookPayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._webhook = data.webhook ?? undefined;
@@ -3948,7 +3989,7 @@ export class WebhookPayload {
   public success?: boolean;
   /** The webhook entity being mutated. */
   public get webhook(): Promise<Webhook | undefined> | undefined {
-    return this._webhook?.id ? new WebhookQuery(this._request).fetch(this._webhook?.id) : undefined;
+    return this._webhook?.id ? new WebhookQuery(this.request).fetch(this._webhook?.id) : undefined;
   }
 }
 
@@ -3958,12 +3999,11 @@ export class WebhookPayload {
  * @param request - function to call the graphql client
  * @param data - the initial WorkflowStatePayloadFragment response data
  */
-export class WorkflowStatePayload {
-  private _request: LinearRequest;
+export class WorkflowStatePayload extends Request {
   private _workflowState?: D.WorkflowStatePayloadFragment["workflowState"];
 
   public constructor(request: LinearRequest, data: D.WorkflowStatePayloadFragment) {
-    this._request = request;
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this._workflowState = data.workflowState ?? undefined;
@@ -3975,7 +4015,7 @@ export class WorkflowStatePayload {
   public success?: boolean;
   /** The state that was created or updated. */
   public get workflowState(): Promise<WorkflowState | undefined> | undefined {
-    return this._workflowState?.id ? new WorkflowStateQuery(this._request).fetch(this._workflowState?.id) : undefined;
+    return this._workflowState?.id ? new WorkflowStateQuery(this.request).fetch(this._workflowState?.id) : undefined;
   }
 }
 
@@ -3985,8 +4025,9 @@ export class WorkflowStatePayload {
  * @param request - function to call the graphql client
  * @param data - the initial DocumentStepFragment response data
  */
-export class DocumentStep {
+export class DocumentStep extends Request {
   public constructor(request: LinearRequest, data: D.DocumentStepFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.version = data.version ?? undefined;
     this.clientId = data.clientId ?? undefined;
@@ -4006,8 +4047,9 @@ export class DocumentStep {
  * @param request - function to call the graphql client
  * @param data - the initial PushSubscriptionFragment response data
  */
-export class PushSubscription {
+export class PushSubscription extends Request {
   public constructor(request: LinearRequest, data: D.PushSubscriptionFragment) {
+    super(request);
     this.id = data.id ?? undefined;
   }
 
@@ -4021,8 +4063,9 @@ export class PushSubscription {
  * @param request - function to call the graphql client
  * @param data - the initial PushSubscriptionConnectionFragment response data
  */
-export class PushSubscriptionConnection {
+export class PushSubscriptionConnection extends Request {
   public constructor(request: LinearRequest, data: D.PushSubscriptionConnectionFragment) {
+    super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new PushSubscription(request, node)) : undefined;
   }
@@ -4037,8 +4080,9 @@ export class PushSubscriptionConnection {
  * @param request - function to call the graphql client
  * @param data - the initial UserAccountFragment response data
  */
-export class UserAccount {
+export class UserAccount extends Request {
   public constructor(request: LinearRequest, data: D.UserAccountFragment) {
+    super(request);
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.email = data.email ?? undefined;
@@ -4064,12 +4108,11 @@ export class UserAccount {
  * @param request - function to call the graphql client
  * @param data - the initial FileUploadFragment response data
  */
-export class FileUpload {
-  private _request: LinearRequest;
+export class FileUpload extends Request {
   private _creator?: D.FileUploadFragment["creator"];
 
   public constructor(request: LinearRequest, data: D.FileUploadFragment) {
-    this._request = request;
+    super(request);
     this.id = data.id ?? undefined;
     this.assetUrl = data.assetUrl ?? undefined;
     this.contentType = data.contentType ?? undefined;
@@ -4090,11 +4133,11 @@ export class FileUpload {
   public size?: number;
   /** The user who uploaded the file. */
   public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** The organization the upload belongs to. */
   public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this._request).fetch();
+    return new OrganizationQuery(this.request).fetch();
   }
 }
 
@@ -4104,8 +4147,9 @@ export class FileUpload {
  * @param request - function to call the graphql client
  * @param data - the initial SynchronizedPayloadFragment response data
  */
-export class SynchronizedPayload {
+export class SynchronizedPayload extends Request {
   public constructor(request: LinearRequest, data: D.SynchronizedPayloadFragment) {
+    super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
   }
 
@@ -4119,8 +4163,9 @@ export class SynchronizedPayload {
  * @param request - function to call the graphql client
  * @param data - the initial ApplicationFragment response data
  */
-export class Application {
+export class Application extends Request {
   public constructor(request: LinearRequest, data: D.ApplicationFragment) {
+    super(request);
     this.clientId = data.clientId ?? undefined;
     this.name = data.name ?? undefined;
     this.description = data.description ?? undefined;
@@ -4149,8 +4194,9 @@ export class Application {
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationDomainSimplePayloadFragment response data
  */
-export class OrganizationDomainSimplePayload {
+export class OrganizationDomainSimplePayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationDomainSimplePayloadFragment) {
+    super(request);
     this.success = data.success ?? undefined;
   }
 
@@ -4162,17 +4208,17 @@ export class OrganizationDomainSimplePayload {
  *
  * @param request - function to call the graphql client
  */
-export class UserQuery {
-  private _request: LinearRequest;
-
+export class UserQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserQuery, D.UserQueryVariables>(D.UserDocument).then(response => {
+    return this.request<D.UserQuery, D.UserQueryVariables>(D.UserDocument, {
+      id,
+    }).then(response => {
       const data = response?.user;
-      return data ? new User(this._request, data) : undefined;
+      return data ? new User(this.request, data) : undefined;
     });
   }
 }
@@ -4182,17 +4228,15 @@ export class UserQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ViewerQuery {
-  private _request: LinearRequest;
-
+export class ViewerQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument).then(response => {
+    return this.request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, {}).then(response => {
       const data = response?.viewer;
-      return data ? new User(this._request, data) : undefined;
+      return data ? new User(this.request, data) : undefined;
     });
   }
 }
@@ -4202,18 +4246,18 @@ export class ViewerQuery {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationQuery {
-  private _request: LinearRequest;
-
+export class OrganizationQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument).then(response => {
-      const data = response?.organization;
-      return data ? new Organization(this._request, data) : undefined;
-    });
+    return this.request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument, {}).then(
+      response => {
+        const data = response?.organization;
+        return data ? new Organization(this.request, data) : undefined;
+      }
+    );
   }
 }
 
@@ -4222,19 +4266,17 @@ export class OrganizationQuery {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationExistsQuery {
-  private _request: LinearRequest;
-
+export class OrganizationExistsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(urlKey: string) {
-    return this._request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(
-      D.OrganizationExistsDocument
-    ).then(response => {
+    return this.request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(D.OrganizationExistsDocument, {
+      urlKey,
+    }).then(response => {
       const data = response?.organizationExists;
-      return data ? new OrganizationExistsPayload(this._request, data) : undefined;
+      return data ? new OrganizationExistsPayload(this.request, data) : undefined;
     });
   }
 }
@@ -4244,20 +4286,19 @@ export class OrganizationExistsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class SyncBootstrapQuery {
-  private _request: LinearRequest;
-
+export class SyncBootstrapQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(databaseVersion: number, sinceSyncId: number) {
-    return this._request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument).then(
-      response => {
-        const data = response?.syncBootstrap;
-        return data ? new SyncResponse(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument, {
+      databaseVersion,
+      sinceSyncId,
+    }).then(response => {
+      const data = response?.syncBootstrap;
+      return data ? new SyncResponse(this.request, data) : undefined;
+    });
   }
 }
 
@@ -4266,17 +4307,17 @@ export class SyncBootstrapQuery {
  *
  * @param request - function to call the graphql client
  */
-export class SyncUpdatesQuery {
-  private _request: LinearRequest;
-
+export class SyncUpdatesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(sinceSyncId: number) {
-    return this._request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument).then(response => {
+    return this.request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument, {
+      sinceSyncId,
+    }).then(response => {
       const data = response?.syncUpdates;
-      return data ? new SyncResponse(this._request, data) : undefined;
+      return data ? new SyncResponse(this.request, data) : undefined;
     });
   }
 }
@@ -4286,20 +4327,19 @@ export class SyncUpdatesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ArchivedModelSyncQuery {
-  private _request: LinearRequest;
-
+export class ArchivedModelSyncQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(identifier: string, modelClass: string) {
-    return this._request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument).then(
-      response => {
-        const data = response?.archivedModelSync;
-        return data ? new ArchiveResponse(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument, {
+      identifier,
+      modelClass,
+    }).then(response => {
+      const data = response?.archivedModelSync;
+      return data ? new ArchiveResponse(this.request, data) : undefined;
+    });
   }
 }
 
@@ -4308,11 +4348,9 @@ export class ArchivedModelSyncQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ArchivedModelsSyncQuery {
-  private _request: LinearRequest;
-
+export class ArchivedModelsSyncQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(
@@ -4320,11 +4358,13 @@ export class ArchivedModelsSyncQuery {
     teamId: string,
     vars?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
   ) {
-    return this._request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(
-      D.ArchivedModelsSyncDocument
-    ).then(response => {
+    return this.request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(D.ArchivedModelsSyncDocument, {
+      modelClass,
+      teamId,
+      ...vars,
+    }).then(response => {
       const data = response?.archivedModelsSync;
-      return data ? new ArchiveResponse(this._request, data) : undefined;
+      return data ? new ArchiveResponse(this.request, data) : undefined;
     });
   }
 }
@@ -4334,19 +4374,18 @@ export class ArchivedModelsSyncQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookupQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookupQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookupQueryVariables) {
-    return this._request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
-      D.AdminUserAccountLookupDocument
+    return this.request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
+      D.AdminUserAccountLookupDocument,
+      vars
     ).then(response => {
       const data = response?.adminUserAccountLookup;
-      return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
+      return data ? new UserAccountAdminPrivileged(this.request, data) : undefined;
     });
   }
 }
@@ -4356,17 +4395,15 @@ export class AdminUserAccountLookupQuery {
  *
  * @param request - function to call the graphql client
  */
-export class UsersQuery {
-  private _request: LinearRequest;
-
+export class UsersQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.UsersQueryVariables) {
-    return this._request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument).then(response => {
+    return this.request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, vars).then(response => {
       const data = response?.users;
-      return data ? new UserConnection(this._request, data) : undefined;
+      return data ? new UserConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4376,17 +4413,15 @@ export class UsersQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ApiKeysQuery {
-  private _request: LinearRequest;
-
+export class ApiKeysQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.ApiKeysQueryVariables) {
-    return this._request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument).then(response => {
+    return this.request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, vars).then(response => {
       const data = response?.apiKeys;
-      return data ? new ApiKeyConnection(this._request, data) : undefined;
+      return data ? new ApiKeyConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4396,11 +4431,9 @@ export class ApiKeysQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ApplicationWithAuthorizationQuery {
-  private _request: LinearRequest;
-
+export class ApplicationWithAuthorizationQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(
@@ -4408,11 +4441,16 @@ export class ApplicationWithAuthorizationQuery {
     clientId: string,
     vars?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
   ) {
-    return this._request<D.ApplicationWithAuthorizationQuery, D.ApplicationWithAuthorizationQueryVariables>(
-      D.ApplicationWithAuthorizationDocument
+    return this.request<D.ApplicationWithAuthorizationQuery, D.ApplicationWithAuthorizationQueryVariables>(
+      D.ApplicationWithAuthorizationDocument,
+      {
+        scope,
+        clientId,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.applicationWithAuthorization;
-      return data ? new UserAuthorizedApplication(this._request, data) : undefined;
+      return data ? new UserAuthorizedApplication(this.request, data) : undefined;
     });
   }
 }
@@ -4422,19 +4460,18 @@ export class ApplicationWithAuthorizationQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AuthorizedApplicationsQuery {
-  private _request: LinearRequest;
-
+export class AuthorizedApplicationsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.AuthorizedApplicationsQuery, D.AuthorizedApplicationsQueryVariables>(
-      D.AuthorizedApplicationsDocument
+    return this.request<D.AuthorizedApplicationsQuery, D.AuthorizedApplicationsQueryVariables>(
+      D.AuthorizedApplicationsDocument,
+      {}
     ).then(response => {
       const data = response?.authorizedApplications;
-      return data ? new undefined(this._request, data) : undefined;
+      return data ? new undefined(this.request, data) : undefined;
     });
   }
 }
@@ -4444,18 +4481,16 @@ export class AuthorizedApplicationsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsersQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsersQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument).then(
+    return this.request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument, {}).then(
       response => {
         const data = response?.availableUsers;
-        return data ? new AuthResolverResponse(this._request, data) : undefined;
+        return data ? new AuthResolverResponse(this.request, data) : undefined;
       }
     );
   }
@@ -4466,20 +4501,19 @@ export class AvailableUsersQuery {
  *
  * @param request - function to call the graphql client
  */
-export class SsoUrlFromEmailQuery {
-  private _request: LinearRequest;
-
+export class SsoUrlFromEmailQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(email: string, vars?: Omit<D.SsoUrlFromEmailQueryVariables, "email">) {
-    return this._request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument).then(
-      response => {
-        const data = response?.ssoUrlFromEmail;
-        return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument, {
+      email,
+      ...vars,
+    }).then(response => {
+      const data = response?.ssoUrlFromEmail;
+      return data ? new SsoUrlFromEmailResponse(this.request, data) : undefined;
+    });
   }
 }
 
@@ -4488,18 +4522,16 @@ export class SsoUrlFromEmailQuery {
  *
  * @param request - function to call the graphql client
  */
-export class BillingDetailsQuery {
-  private _request: LinearRequest;
-
+export class BillingDetailsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument).then(
+    return this.request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument, {}).then(
       response => {
         const data = response?.billingDetails;
-        return data ? new BillingDetailsPayload(this._request, data) : undefined;
+        return data ? new BillingDetailsPayload(this.request, data) : undefined;
       }
     );
   }
@@ -4510,19 +4542,22 @@ export class BillingDetailsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class CollaborativeDocumentJoinQuery {
-  private _request: LinearRequest;
-
+export class CollaborativeDocumentJoinQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(clientId: string, issueId: string, version: number) {
-    return this._request<D.CollaborativeDocumentJoinQuery, D.CollaborativeDocumentJoinQueryVariables>(
-      D.CollaborativeDocumentJoinDocument
+    return this.request<D.CollaborativeDocumentJoinQuery, D.CollaborativeDocumentJoinQueryVariables>(
+      D.CollaborativeDocumentJoinDocument,
+      {
+        clientId,
+        issueId,
+        version,
+      }
     ).then(response => {
       const data = response?.collaborativeDocumentJoin;
-      return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
+      return data ? new CollaborationDocumentUpdatePayload(this.request, data) : undefined;
     });
   }
 }
@@ -4532,17 +4567,17 @@ export class CollaborativeDocumentJoinQuery {
  *
  * @param request - function to call the graphql client
  */
-export class CommentQuery {
-  private _request: LinearRequest;
-
+export class CommentQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument).then(response => {
+    return this.request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, {
+      id,
+    }).then(response => {
       const data = response?.comment;
-      return data ? new Comment(this._request, data) : undefined;
+      return data ? new Comment(this.request, data) : undefined;
     });
   }
 }
@@ -4552,17 +4587,15 @@ export class CommentQuery {
  *
  * @param request - function to call the graphql client
  */
-export class CommentsQuery {
-  private _request: LinearRequest;
-
+export class CommentsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.CommentsQueryVariables) {
-    return this._request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument).then(response => {
+    return this.request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument, vars).then(response => {
       const data = response?.comments;
-      return data ? new CommentConnection(this._request, data) : undefined;
+      return data ? new CommentConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4572,17 +4605,17 @@ export class CommentsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewQuery {
-  private _request: LinearRequest;
-
+export class CustomViewQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument).then(response => {
+    return this.request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, {
+      id,
+    }).then(response => {
       const data = response?.customView;
-      return data ? new CustomView(this._request, data) : undefined;
+      return data ? new CustomView(this.request, data) : undefined;
     });
   }
 }
@@ -4592,17 +4625,15 @@ export class CustomViewQuery {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewsQuery {
-  private _request: LinearRequest;
-
+export class CustomViewsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.CustomViewsQueryVariables) {
-    return this._request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument).then(response => {
+    return this.request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument, vars).then(response => {
       const data = response?.customViews;
-      return data ? new CustomViewConnection(this._request, data) : undefined;
+      return data ? new CustomViewConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4612,17 +4643,17 @@ export class CustomViewsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class CycleQuery {
-  private _request: LinearRequest;
-
+export class CycleQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument).then(response => {
+    return this.request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, {
+      id,
+    }).then(response => {
       const data = response?.cycle;
-      return data ? new Cycle(this._request, data) : undefined;
+      return data ? new Cycle(this.request, data) : undefined;
     });
   }
 }
@@ -4632,17 +4663,15 @@ export class CycleQuery {
  *
  * @param request - function to call the graphql client
  */
-export class CyclesQuery {
-  private _request: LinearRequest;
-
+export class CyclesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.CyclesQueryVariables) {
-    return this._request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument).then(response => {
+    return this.request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument, vars).then(response => {
       const data = response?.cycles;
-      return data ? new CycleConnection(this._request, data) : undefined;
+      return data ? new CycleConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4652,17 +4681,17 @@ export class CyclesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class EmojiQuery {
-  private _request: LinearRequest;
-
+export class EmojiQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument).then(response => {
+    return this.request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, {
+      id,
+    }).then(response => {
       const data = response?.emoji;
-      return data ? new Emoji(this._request, data) : undefined;
+      return data ? new Emoji(this.request, data) : undefined;
     });
   }
 }
@@ -4672,17 +4701,15 @@ export class EmojiQuery {
  *
  * @param request - function to call the graphql client
  */
-export class EmojisQuery {
-  private _request: LinearRequest;
-
+export class EmojisQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.EmojisQueryVariables) {
-    return this._request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument).then(response => {
+    return this.request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument, vars).then(response => {
       const data = response?.emojis;
-      return data ? new EmojiConnection(this._request, data) : undefined;
+      return data ? new EmojiConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4692,17 +4719,17 @@ export class EmojisQuery {
  *
  * @param request - function to call the graphql client
  */
-export class FavoriteQuery {
-  private _request: LinearRequest;
-
+export class FavoriteQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument).then(response => {
+    return this.request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, {
+      id,
+    }).then(response => {
       const data = response?.favorite;
-      return data ? new Favorite(this._request, data) : undefined;
+      return data ? new Favorite(this.request, data) : undefined;
     });
   }
 }
@@ -4712,17 +4739,15 @@ export class FavoriteQuery {
  *
  * @param request - function to call the graphql client
  */
-export class FavoritesQuery {
-  private _request: LinearRequest;
-
+export class FavoritesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.FavoritesQueryVariables) {
-    return this._request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument).then(response => {
+    return this.request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument, vars).then(response => {
       const data = response?.favorites;
-      return data ? new FavoriteConnection(this._request, data) : undefined;
+      return data ? new FavoriteConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4732,20 +4757,19 @@ export class FavoritesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class FigmaEmbedInfoQuery {
-  private _request: LinearRequest;
-
+export class FigmaEmbedInfoQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(fileId: string, vars?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">) {
-    return this._request<D.FigmaEmbedInfoQuery, D.FigmaEmbedInfoQueryVariables>(D.FigmaEmbedInfoDocument).then(
-      response => {
-        const data = response?.figmaEmbedInfo;
-        return data ? new FigmaEmbedPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.FigmaEmbedInfoQuery, D.FigmaEmbedInfoQueryVariables>(D.FigmaEmbedInfoDocument, {
+      fileId,
+      ...vars,
+    }).then(response => {
+      const data = response?.figmaEmbedInfo;
+      return data ? new FigmaEmbedPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -4754,17 +4778,17 @@ export class FigmaEmbedInfoQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationQuery {
-  private _request: LinearRequest;
-
+export class IntegrationQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument).then(response => {
+    return this.request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument, {
+      id,
+    }).then(response => {
       const data = response?.integration;
-      return data ? new Integration(this._request, data) : undefined;
+      return data ? new Integration(this.request, data) : undefined;
     });
   }
 }
@@ -4774,18 +4798,18 @@ export class IntegrationQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationsQuery {
-  private _request: LinearRequest;
-
+export class IntegrationsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.IntegrationsQueryVariables) {
-    return this._request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument).then(response => {
-      const data = response?.integrations;
-      return data ? new IntegrationConnection(this._request, data) : undefined;
-    });
+    return this.request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument, vars).then(
+      response => {
+        const data = response?.integrations;
+        return data ? new IntegrationConnection(this.request, data) : undefined;
+      }
+    );
   }
 }
 
@@ -4794,19 +4818,20 @@ export class IntegrationsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResourceQuery {
-  private _request: LinearRequest;
-
+export class IntegrationResourceQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
-      D.IntegrationResourceDocument
+    return this.request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
+      D.IntegrationResourceDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.integrationResource;
-      return data ? new IntegrationResource(this._request, data) : undefined;
+      return data ? new IntegrationResource(this.request, data) : undefined;
     });
   }
 }
@@ -4816,19 +4841,18 @@ export class IntegrationResourceQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResourcesQuery {
-  private _request: LinearRequest;
-
+export class IntegrationResourcesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.IntegrationResourcesQueryVariables) {
-    return this._request<D.IntegrationResourcesQuery, D.IntegrationResourcesQueryVariables>(
-      D.IntegrationResourcesDocument
+    return this.request<D.IntegrationResourcesQuery, D.IntegrationResourcesQueryVariables>(
+      D.IntegrationResourcesDocument,
+      vars
     ).then(response => {
       const data = response?.integrationResources;
-      return data ? new IntegrationResourceConnection(this._request, data) : undefined;
+      return data ? new IntegrationResourceConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4838,17 +4862,18 @@ export class IntegrationResourcesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class InviteInfoQuery {
-  private _request: LinearRequest;
-
+export class InviteInfoQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(userHash: string, vars?: Omit<D.InviteInfoQueryVariables, "userHash">) {
-    return this._request<D.InviteInfoQuery, D.InviteInfoQueryVariables>(D.InviteInfoDocument).then(response => {
+    return this.request<D.InviteInfoQuery, D.InviteInfoQueryVariables>(D.InviteInfoDocument, {
+      userHash,
+      ...vars,
+    }).then(response => {
       const data = response?.inviteInfo;
-      return data ? new InvitePagePayload(this._request, data) : undefined;
+      return data ? new InvitePagePayload(this.request, data) : undefined;
     });
   }
 }
@@ -4858,17 +4883,17 @@ export class InviteInfoQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelQuery {
-  private _request: LinearRequest;
-
+export class IssueLabelQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument).then(response => {
+    return this.request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, {
+      id,
+    }).then(response => {
       const data = response?.issueLabel;
-      return data ? new IssueLabel(this._request, data) : undefined;
+      return data ? new IssueLabel(this.request, data) : undefined;
     });
   }
 }
@@ -4878,17 +4903,15 @@ export class IssueLabelQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelsQuery {
-  private _request: LinearRequest;
-
+export class IssueLabelsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.IssueLabelsQueryVariables) {
-    return this._request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument).then(response => {
+    return this.request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument, vars).then(response => {
       const data = response?.issueLabels;
-      return data ? new IssueLabelConnection(this._request, data) : undefined;
+      return data ? new IssueLabelConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4898,20 +4921,18 @@ export class IssueLabelsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationQuery {
-  private _request: LinearRequest;
-
+export class IssueRelationQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument).then(
-      response => {
-        const data = response?.issueRelation;
-        return data ? new IssueRelation(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, {
+      id,
+    }).then(response => {
+      const data = response?.issueRelation;
+      return data ? new IssueRelation(this.request, data) : undefined;
+    });
   }
 }
 
@@ -4920,18 +4941,16 @@ export class IssueRelationQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationsQuery {
-  private _request: LinearRequest;
-
+export class IssueRelationsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.IssueRelationsQueryVariables) {
-    return this._request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(D.IssueRelationsDocument).then(
+    return this.request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(D.IssueRelationsDocument, vars).then(
       response => {
         const data = response?.issueRelations;
-        return data ? new IssueRelationConnection(this._request, data) : undefined;
+        return data ? new IssueRelationConnection(this.request, data) : undefined;
       }
     );
   }
@@ -4942,17 +4961,17 @@ export class IssueRelationsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IssueQuery {
-  private _request: LinearRequest;
-
+export class IssueQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument).then(response => {
+    return this.request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, {
+      id,
+    }).then(response => {
       const data = response?.issue;
-      return data ? new Issue(this._request, data) : undefined;
+      return data ? new Issue(this.request, data) : undefined;
     });
   }
 }
@@ -4962,17 +4981,18 @@ export class IssueQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IssueSearchQuery {
-  private _request: LinearRequest;
-
+export class IssueSearchQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(query: string, vars?: Omit<D.IssueSearchQueryVariables, "query">) {
-    return this._request<D.IssueSearchQuery, D.IssueSearchQueryVariables>(D.IssueSearchDocument).then(response => {
+    return this.request<D.IssueSearchQuery, D.IssueSearchQueryVariables>(D.IssueSearchDocument, {
+      query,
+      ...vars,
+    }).then(response => {
       const data = response?.issueSearch;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -4982,17 +5002,15 @@ export class IssueSearchQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IssuesQuery {
-  private _request: LinearRequest;
-
+export class IssuesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.IssuesQueryVariables) {
-    return this._request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument).then(response => {
+    return this.request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, vars).then(response => {
       const data = response?.issues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -5002,17 +5020,17 @@ export class IssuesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class MilestoneQuery {
-  private _request: LinearRequest;
-
+export class MilestoneQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument).then(response => {
+    return this.request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, {
+      id,
+    }).then(response => {
       const data = response?.milestone;
-      return data ? new Milestone(this._request, data) : undefined;
+      return data ? new Milestone(this.request, data) : undefined;
     });
   }
 }
@@ -5022,17 +5040,15 @@ export class MilestoneQuery {
  *
  * @param request - function to call the graphql client
  */
-export class MilestonesQuery {
-  private _request: LinearRequest;
-
+export class MilestonesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.MilestonesQueryVariables) {
-    return this._request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument).then(response => {
+    return this.request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument, vars).then(response => {
       const data = response?.milestones;
-      return data ? new MilestoneConnection(this._request, data) : undefined;
+      return data ? new MilestoneConnection(this.request, data) : undefined;
     });
   }
 }
@@ -5042,18 +5058,18 @@ export class MilestonesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationQuery {
-  private _request: LinearRequest;
-
+export class NotificationQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument).then(response => {
-      const data = response?.notification;
-      return data ? new UserSettings(this._request, data) : undefined;
-    });
+    return this.request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument, {}).then(
+      response => {
+        const data = response?.notification;
+        return data ? new UserSettings(this.request, data) : undefined;
+      }
+    );
   }
 }
 
@@ -5062,18 +5078,16 @@ export class NotificationQuery {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationsQuery {
-  private _request: LinearRequest;
-
+export class NotificationsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.NotificationsQueryVariables) {
-    return this._request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument).then(
+    return this.request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument, vars).then(
       response => {
         const data = response?.notifications;
-        return data ? new NotificationConnection(this._request, data) : undefined;
+        return data ? new NotificationConnection(this.request, data) : undefined;
       }
     );
   }
@@ -5084,19 +5098,18 @@ export class NotificationsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationSubscriptionQuery {
-  private _request: LinearRequest;
-
+export class NotificationSubscriptionQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.NotificationSubscriptionQueryVariables) {
-    return this._request<D.NotificationSubscriptionQuery, D.NotificationSubscriptionQueryVariables>(
-      D.NotificationSubscriptionDocument
+    return this.request<D.NotificationSubscriptionQuery, D.NotificationSubscriptionQueryVariables>(
+      D.NotificationSubscriptionDocument,
+      vars
     ).then(response => {
       const data = response?.notificationSubscription;
-      return data ? new NotificationSubscriptionConnection(this._request, data) : undefined;
+      return data ? new NotificationSubscriptionConnection(this.request, data) : undefined;
     });
   }
 }
@@ -5106,19 +5119,17 @@ export class NotificationSubscriptionQuery {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationInviteQuery {
-  private _request: LinearRequest;
-
+export class OrganizationInviteQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(
-      D.OrganizationInviteDocument
-    ).then(response => {
+    return this.request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(D.OrganizationInviteDocument, {
+      id,
+    }).then(response => {
       const data = response?.organizationInvite;
-      return data ? new IssueLabel(this._request, data) : undefined;
+      return data ? new IssueLabel(this.request, data) : undefined;
     });
   }
 }
@@ -5128,19 +5139,18 @@ export class OrganizationInviteQuery {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationInvitesQuery {
-  private _request: LinearRequest;
-
+export class OrganizationInvitesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.OrganizationInvitesQueryVariables) {
-    return this._request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
-      D.OrganizationInvitesDocument
+    return this.request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
+      D.OrganizationInvitesDocument,
+      vars
     ).then(response => {
       const data = response?.organizationInvites;
-      return data ? new OrganizationInviteConnection(this._request, data) : undefined;
+      return data ? new OrganizationInviteConnection(this.request, data) : undefined;
     });
   }
 }
@@ -5150,17 +5160,17 @@ export class OrganizationInvitesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectLinkQuery {
-  private _request: LinearRequest;
-
+export class ProjectLinkQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument).then(response => {
+    return this.request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
+      id,
+    }).then(response => {
       const data = response?.projectLink;
-      return data ? new ProjectLink(this._request, data) : undefined;
+      return data ? new ProjectLink(this.request, data) : undefined;
     });
   }
 }
@@ -5170,18 +5180,18 @@ export class ProjectLinkQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectLinksQuery {
-  private _request: LinearRequest;
-
+export class ProjectLinksQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.ProjectLinksQueryVariables) {
-    return this._request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument).then(response => {
-      const data = response?.ProjectLinks;
-      return data ? new ProjectLinkConnection(this._request, data) : undefined;
-    });
+    return this.request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
+      response => {
+        const data = response?.ProjectLinks;
+        return data ? new ProjectLinkConnection(this.request, data) : undefined;
+      }
+    );
   }
 }
 
@@ -5190,17 +5200,17 @@ export class ProjectLinksQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectQuery {
-  private _request: LinearRequest;
-
+export class ProjectQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument).then(response => {
+    return this.request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
+      id,
+    }).then(response => {
       const data = response?.project;
-      return data ? new Project(this._request, data) : undefined;
+      return data ? new Project(this.request, data) : undefined;
     });
   }
 }
@@ -5210,17 +5220,15 @@ export class ProjectQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectsQuery {
-  private _request: LinearRequest;
-
+export class ProjectsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.ProjectsQueryVariables) {
-    return this._request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument).then(response => {
+    return this.request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars).then(response => {
       const data = response?.projects;
-      return data ? new ProjectConnection(this._request, data) : undefined;
+      return data ? new ProjectConnection(this.request, data) : undefined;
     });
   }
 }
@@ -5230,19 +5238,18 @@ export class ProjectsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class PushSubscriptionTestQuery {
-  private _request: LinearRequest;
-
+export class PushSubscriptionTestQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.PushSubscriptionTestQuery, D.PushSubscriptionTestQueryVariables>(
-      D.PushSubscriptionTestDocument
+    return this.request<D.PushSubscriptionTestQuery, D.PushSubscriptionTestQueryVariables>(
+      D.PushSubscriptionTestDocument,
+      {}
     ).then(response => {
       const data = response?.pushSubscriptionTest;
-      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
+      return data ? new PushSubscriptionPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5252,17 +5259,17 @@ export class PushSubscriptionTestQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ReactionQuery {
-  private _request: LinearRequest;
-
+export class ReactionQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument).then(response => {
+    return this.request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, {
+      id,
+    }).then(response => {
       const data = response?.reaction;
-      return data ? new Reaction(this._request, data) : undefined;
+      return data ? new Reaction(this.request, data) : undefined;
     });
   }
 }
@@ -5272,17 +5279,15 @@ export class ReactionQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ReactionsQuery {
-  private _request: LinearRequest;
-
+export class ReactionsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.ReactionsQueryVariables) {
-    return this._request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument).then(response => {
+    return this.request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, vars).then(response => {
       const data = response?.reactions;
-      return data ? new ReactionConnection(this._request, data) : undefined;
+      return data ? new ReactionConnection(this.request, data) : undefined;
     });
   }
 }
@@ -5292,18 +5297,18 @@ export class ReactionsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionQuery {
-  private _request: LinearRequest;
-
+export class SubscriptionQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument).then(response => {
-      const data = response?.subscription;
-      return data ? new Subscription(this._request, data) : undefined;
-    });
+    return this.request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument, {}).then(
+      response => {
+        const data = response?.subscription;
+        return data ? new Subscription(this.request, data) : undefined;
+      }
+    );
   }
 }
 
@@ -5312,20 +5317,18 @@ export class SubscriptionQuery {
  *
  * @param request - function to call the graphql client
  */
-export class TeamMembershipQuery {
-  private _request: LinearRequest;
-
+export class TeamMembershipQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument).then(
-      response => {
-        const data = response?.teamMembership;
-        return data ? new TeamMembership(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument, {
+      id,
+    }).then(response => {
+      const data = response?.teamMembership;
+      return data ? new TeamMembership(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5334,18 +5337,16 @@ export class TeamMembershipQuery {
  *
  * @param request - function to call the graphql client
  */
-export class TeamMembershipsQuery {
-  private _request: LinearRequest;
-
+export class TeamMembershipsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.TeamMembershipsQueryVariables) {
-    return this._request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(D.TeamMembershipsDocument).then(
+    return this.request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(D.TeamMembershipsDocument, vars).then(
       response => {
         const data = response?.teamMemberships;
-        return data ? new TeamMembershipConnection(this._request, data) : undefined;
+        return data ? new TeamMembershipConnection(this.request, data) : undefined;
       }
     );
   }
@@ -5356,17 +5357,17 @@ export class TeamMembershipsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class TeamQuery {
-  private _request: LinearRequest;
-
+export class TeamQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument).then(response => {
+    return this.request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
+      id,
+    }).then(response => {
       const data = response?.team;
-      return data ? new Team(this._request, data) : undefined;
+      return data ? new Team(this.request, data) : undefined;
     });
   }
 }
@@ -5376,17 +5377,15 @@ export class TeamQuery {
  *
  * @param request - function to call the graphql client
  */
-export class TeamsQuery {
-  private _request: LinearRequest;
-
+export class TeamsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.TeamsQueryVariables) {
-    return this._request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument).then(response => {
+    return this.request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars).then(response => {
       const data = response?.teams;
-      return data ? new TeamConnection(this._request, data) : undefined;
+      return data ? new TeamConnection(this.request, data) : undefined;
     });
   }
 }
@@ -5396,17 +5395,15 @@ export class TeamsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class TemplatesQuery {
-  private _request: LinearRequest;
-
+export class TemplatesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument).then(response => {
+    return this.request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument, {}).then(response => {
       const data = response?.templates;
-      return data ? new undefined(this._request, data) : undefined;
+      return data ? new undefined(this.request, data) : undefined;
     });
   }
 }
@@ -5416,17 +5413,17 @@ export class TemplatesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class TemplateQuery {
-  private _request: LinearRequest;
-
+export class TemplateQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument).then(response => {
+    return this.request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, {
+      id,
+    }).then(response => {
       const data = response?.template;
-      return data ? new Template(this._request, data) : undefined;
+      return data ? new Template(this.request, data) : undefined;
     });
   }
 }
@@ -5436,18 +5433,16 @@ export class TemplateQuery {
  *
  * @param request - function to call the graphql client
  */
-export class ViewPreferencesQuery {
-  private _request: LinearRequest;
-
+export class ViewPreferencesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.ViewPreferencesQueryVariables) {
-    return this._request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument).then(
+    return this.request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument, vars).then(
       response => {
         const data = response?.viewPreferences;
-        return data ? new ViewPreferencesConnection(this._request, data) : undefined;
+        return data ? new ViewPreferencesConnection(this.request, data) : undefined;
       }
     );
   }
@@ -5458,17 +5453,17 @@ export class ViewPreferencesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class WebhookQuery {
-  private _request: LinearRequest;
-
+export class WebhookQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument).then(response => {
+    return this.request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, {
+      id,
+    }).then(response => {
       const data = response?.webhook;
-      return data ? new Webhook(this._request, data) : undefined;
+      return data ? new Webhook(this.request, data) : undefined;
     });
   }
 }
@@ -5478,17 +5473,15 @@ export class WebhookQuery {
  *
  * @param request - function to call the graphql client
  */
-export class WebhooksQuery {
-  private _request: LinearRequest;
-
+export class WebhooksQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.WebhooksQueryVariables) {
-    return this._request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument).then(response => {
+    return this.request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, vars).then(response => {
       const data = response?.webhooks;
-      return data ? new WebhookConnection(this._request, data) : undefined;
+      return data ? new WebhookConnection(this.request, data) : undefined;
     });
   }
 }
@@ -5498,20 +5491,18 @@ export class WebhooksQuery {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStateQuery {
-  private _request: LinearRequest;
-
+export class WorkflowStateQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument).then(
-      response => {
-        const data = response?.workflowState;
-        return data ? new WorkflowState(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, {
+      id,
+    }).then(response => {
+      const data = response?.workflowState;
+      return data ? new WorkflowState(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5520,18 +5511,16 @@ export class WorkflowStateQuery {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStatesQuery {
-  private _request: LinearRequest;
-
+export class WorkflowStatesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.WorkflowStatesQueryVariables) {
-    return this._request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(D.WorkflowStatesDocument).then(
+    return this.request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(D.WorkflowStatesDocument, vars).then(
       response => {
         const data = response?.workflowStates;
-        return data ? new WorkflowStateConnection(this._request, data) : undefined;
+        return data ? new WorkflowStateConnection(this.request, data) : undefined;
       }
     );
   }
@@ -5542,17 +5531,18 @@ export class WorkflowStatesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class UserUpdateMutation {
-  private _request: LinearRequest;
-
+export class UserUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.UpdateUserInput, id: string) {
-    return this._request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument).then(response => {
+    return this.request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
       const data = response?.userUpdate;
-      return data ? new UserPayload(this._request, data) : undefined;
+      return data ? new UserPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5562,19 +5552,17 @@ export class UserUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserPromoteAdminMutation {
-  private _request: LinearRequest;
-
+export class UserPromoteAdminMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(
-      D.UserPromoteAdminDocument
-    ).then(response => {
+    return this.request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(D.UserPromoteAdminDocument, {
+      id,
+    }).then(response => {
       const data = response?.userPromoteAdmin;
-      return data ? new UserAdminPayload(this._request, data) : undefined;
+      return data ? new UserAdminPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5584,20 +5572,18 @@ export class UserPromoteAdminMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserDemoteAdminMutation {
-  private _request: LinearRequest;
-
+export class UserDemoteAdminMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument).then(
-      response => {
-        const data = response?.userDemoteAdmin;
-        return data ? new UserAdminPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument, {
+      id,
+    }).then(response => {
+      const data = response?.userDemoteAdmin;
+      return data ? new UserAdminPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5606,20 +5592,18 @@ export class UserDemoteAdminMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserSuspendMutation {
-  private _request: LinearRequest;
-
+export class UserSuspendMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument).then(
-      response => {
-        const data = response?.userSuspend;
-        return data ? new UserAdminPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, {
+      id,
+    }).then(response => {
+      const data = response?.userSuspend;
+      return data ? new UserAdminPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5628,20 +5612,18 @@ export class UserSuspendMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserUnsuspendMutation {
-  private _request: LinearRequest;
-
+export class UserUnsuspendMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument).then(
-      response => {
-        const data = response?.userUnsuspend;
-        return data ? new UserAdminPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument, {
+      id,
+    }).then(response => {
+      const data = response?.userUnsuspend;
+      return data ? new UserAdminPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5650,19 +5632,20 @@ export class UserUnsuspendMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationUpdateMutation {
-  private _request: LinearRequest;
-
+export class OrganizationUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.UpdateOrganizationInput) {
-    return this._request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
-      D.OrganizationUpdateDocument
+    return this.request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
+      D.OrganizationUpdateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.organizationUpdate;
-      return data ? new OrganizationPayload(this._request, data) : undefined;
+      return data ? new OrganizationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5672,19 +5655,18 @@ export class OrganizationUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDeleteChallengeMutation {
-  private _request: LinearRequest;
-
+export class OrganizationDeleteChallengeMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.OrganizationDeleteChallengeMutation, D.OrganizationDeleteChallengeMutationVariables>(
-      D.OrganizationDeleteChallengeDocument
+    return this.request<D.OrganizationDeleteChallengeMutation, D.OrganizationDeleteChallengeMutationVariables>(
+      D.OrganizationDeleteChallengeDocument,
+      {}
     ).then(response => {
       const data = response?.organizationDeleteChallenge;
-      return data ? new OrganizationDeletePayload(this._request, data) : undefined;
+      return data ? new OrganizationDeletePayload(this.request, data) : undefined;
     });
   }
 }
@@ -5694,19 +5676,20 @@ export class OrganizationDeleteChallengeMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDeleteMutation {
-  private _request: LinearRequest;
-
+export class OrganizationDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.DeleteOrganizationInput) {
-    return this._request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
-      D.OrganizationDeleteDocument
+    return this.request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
+      D.OrganizationDeleteDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.organizationDelete;
-      return data ? new OrganizationDeletePayload(this._request, data) : undefined;
+      return data ? new OrganizationDeletePayload(this.request, data) : undefined;
     });
   }
 }
@@ -5716,19 +5699,20 @@ export class OrganizationDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class AdminDeleteIntegrationMutation {
-  private _request: LinearRequest;
-
+export class AdminDeleteIntegrationMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
-      D.AdminDeleteIntegrationDocument
+    return this.request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
+      D.AdminDeleteIntegrationDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.adminDeleteIntegration;
-      return data ? new AdminIntegrationPayload(this._request, data) : undefined;
+      return data ? new AdminIntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5738,19 +5722,20 @@ export class AdminDeleteIntegrationMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationToggleAccessMutation {
-  private _request: LinearRequest;
-
+export class OrganizationToggleAccessMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
-      D.OrganizationToggleAccessDocument
+    return this.request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
+      D.OrganizationToggleAccessDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.organizationToggleAccess;
-      return data ? new OrganizationAccessPayload(this._request, data) : undefined;
+      return data ? new OrganizationAccessPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5760,19 +5745,22 @@ export class OrganizationToggleAccessMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationChangeEmailDomainMutation {
-  private _request: LinearRequest;
-
+export class OrganizationChangeEmailDomainMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(toDomain: string, fromDomain: string, id: string) {
-    return this._request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
-      D.OrganizationChangeEmailDomainDocument
+    return this.request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
+      D.OrganizationChangeEmailDomainDocument,
+      {
+        toDomain,
+        fromDomain,
+        id,
+      }
     ).then(response => {
       const data = response?.organizationChangeEmailDomain;
-      return data ? new OrganizationAccessPayload(this._request, data) : undefined;
+      return data ? new OrganizationAccessPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5782,19 +5770,20 @@ export class OrganizationChangeEmailDomainMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationToggleSamlEnabledMutation {
-  private _request: LinearRequest;
-
+export class OrganizationToggleSamlEnabledMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
-      D.OrganizationToggleSamlEnabledDocument
+    return this.request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
+      D.OrganizationToggleSamlEnabledDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.organizationToggleSamlEnabled;
-      return data ? new OrganizationSamlConfigurePayload(this._request, data) : undefined;
+      return data ? new OrganizationSamlConfigurePayload(this.request, data) : undefined;
     });
   }
 }
@@ -5804,19 +5793,21 @@ export class OrganizationToggleSamlEnabledMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationConfigureSamlMutation {
-  private _request: LinearRequest;
-
+export class OrganizationConfigureSamlMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(samlConfiguration: D.SamlConfigurationInput, id: string) {
-    return this._request<D.OrganizationConfigureSamlMutation, D.OrganizationConfigureSamlMutationVariables>(
-      D.OrganizationConfigureSamlDocument
+    return this.request<D.OrganizationConfigureSamlMutation, D.OrganizationConfigureSamlMutationVariables>(
+      D.OrganizationConfigureSamlDocument,
+      {
+        samlConfiguration,
+        id,
+      }
     ).then(response => {
       const data = response?.organizationConfigureSaml;
-      return data ? new OrganizationSamlConfigurePayload(this._request, data) : undefined;
+      return data ? new OrganizationSamlConfigurePayload(this.request, data) : undefined;
     });
   }
 }
@@ -5826,20 +5817,18 @@ export class OrganizationConfigureSamlMutation {
  *
  * @param request - function to call the graphql client
  */
-export class AdminCommandMutation {
-  private _request: LinearRequest;
-
+export class AdminCommandMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.AdminCommandInput) {
-    return this._request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument).then(
-      response => {
-        const data = response?.adminCommand;
-        return data ? new AdminCommandPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument, {
+      input,
+    }).then(response => {
+      const data = response?.adminCommand;
+      return data ? new AdminCommandPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5848,11 +5837,9 @@ export class AdminCommandMutation {
  *
  * @param request - function to call the graphql client
  */
-export class AdminBulkEmailMutation {
-  private _request: LinearRequest;
-
+export class AdminBulkEmailMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(
@@ -5861,12 +5848,15 @@ export class AdminBulkEmailMutation {
     subject: string,
     vars?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
   ) {
-    return this._request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument).then(
-      response => {
-        const data = response?.adminBulkEmail;
-        return data ? new AdminCommandPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument, {
+      emails,
+      markdownContent,
+      subject,
+      ...vars,
+    }).then(response => {
+      const data = response?.adminBulkEmail;
+      return data ? new AdminCommandPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5875,19 +5865,20 @@ export class AdminBulkEmailMutation {
  *
  * @param request - function to call the graphql client
  */
-export class AdminCreateStripeCustomerMutation {
-  private _request: LinearRequest;
-
+export class AdminCreateStripeCustomerMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(organizationId: string) {
-    return this._request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
-      D.AdminCreateStripeCustomerDocument
+    return this.request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
+      D.AdminCreateStripeCustomerDocument,
+      {
+        organizationId,
+      }
     ).then(response => {
       const data = response?.adminCreateStripeCustomer;
-      return data ? new AdminCommandPayload(this._request, data) : undefined;
+      return data ? new AdminCommandPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5897,19 +5888,20 @@ export class AdminCreateStripeCustomerMutation {
  *
  * @param request - function to call the graphql client
  */
-export class AdminScheduleAnonymousTaskMutation {
-  private _request: LinearRequest;
-
+export class AdminScheduleAnonymousTaskMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(taskName: string) {
-    return this._request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
-      D.AdminScheduleAnonymousTaskDocument
+    return this.request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
+      D.AdminScheduleAnonymousTaskDocument,
+      {
+        taskName,
+      }
     ).then(response => {
       const data = response?.adminScheduleAnonymousTask;
-      return data ? new AdminCommandPayload(this._request, data) : undefined;
+      return data ? new AdminCommandPayload(this.request, data) : undefined;
     });
   }
 }
@@ -5919,19 +5911,21 @@ export class AdminScheduleAnonymousTaskMutation {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountChangeEmailMutation {
-  private _request: LinearRequest;
-
+export class AdminUserAccountChangeEmailMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(newEmail: string, id: string) {
-    return this._request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
-      D.AdminUserAccountChangeEmailDocument
+    return this.request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
+      D.AdminUserAccountChangeEmailDocument,
+      {
+        newEmail,
+        id,
+      }
     ).then(response => {
       const data = response?.adminUserAccountChangeEmail;
-      return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
+      return data ? new UserAccountAdminPrivileged(this.request, data) : undefined;
     });
   }
 }
@@ -5941,20 +5935,18 @@ export class AdminUserAccountChangeEmailMutation {
  *
  * @param request - function to call the graphql client
  */
-export class EventCreateMutation {
-  private _request: LinearRequest;
-
+export class EventCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.EventCreateInput) {
-    return this._request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument).then(
-      response => {
-        const data = response?.eventCreate;
-        return data ? new EventPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.eventCreate;
+      return data ? new EventPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5963,20 +5955,18 @@ export class EventCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ApiKeyCreateMutation {
-  private _request: LinearRequest;
-
+export class ApiKeyCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.ApiKeyCreateInput) {
-    return this._request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument).then(
-      response => {
-        const data = response?.apiKeyCreate;
-        return data ? new ApiKeyPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.apiKeyCreate;
+      return data ? new ApiKeyPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -5985,20 +5975,18 @@ export class ApiKeyCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ApiKeyDeleteMutation {
-  private _request: LinearRequest;
-
+export class ApiKeyDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument).then(
-      response => {
-        const data = response?.apiKeyDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.apiKeyDelete;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6007,19 +5995,20 @@ export class ApiKeyDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class EmailUserAccountAuthChallengeMutation {
-  private _request: LinearRequest;
-
+export class EmailUserAccountAuthChallengeMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.EmailUserAccountAuthChallengeInput) {
-    return this._request<D.EmailUserAccountAuthChallengeMutation, D.EmailUserAccountAuthChallengeMutationVariables>(
-      D.EmailUserAccountAuthChallengeDocument
+    return this.request<D.EmailUserAccountAuthChallengeMutation, D.EmailUserAccountAuthChallengeMutationVariables>(
+      D.EmailUserAccountAuthChallengeDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.emailUserAccountAuthChallenge;
-      return data ? new EmailUserAccountAuthChallengeResponse(this._request, data) : undefined;
+      return data ? new EmailUserAccountAuthChallengeResponse(this.request, data) : undefined;
     });
   }
 }
@@ -6029,19 +6018,20 @@ export class EmailUserAccountAuthChallengeMutation {
  *
  * @param request - function to call the graphql client
  */
-export class EmailTokenUserAccountAuthMutation {
-  private _request: LinearRequest;
-
+export class EmailTokenUserAccountAuthMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.TokenUserAccountAuthInput) {
-    return this._request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
-      D.EmailTokenUserAccountAuthDocument
+    return this.request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
+      D.EmailTokenUserAccountAuthDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.emailTokenUserAccountAuth;
-      return data ? new AuthResolverResponse(this._request, data) : undefined;
+      return data ? new AuthResolverResponse(this.request, data) : undefined;
     });
   }
 }
@@ -6051,19 +6041,20 @@ export class EmailTokenUserAccountAuthMutation {
  *
  * @param request - function to call the graphql client
  */
-export class SamlTokenUserAccountAuthMutation {
-  private _request: LinearRequest;
-
+export class SamlTokenUserAccountAuthMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.TokenUserAccountAuthInput) {
-    return this._request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
-      D.SamlTokenUserAccountAuthDocument
+    return this.request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
+      D.SamlTokenUserAccountAuthDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.samlTokenUserAccountAuth;
-      return data ? new AuthResolverResponse(this._request, data) : undefined;
+      return data ? new AuthResolverResponse(this.request, data) : undefined;
     });
   }
 }
@@ -6073,19 +6064,20 @@ export class SamlTokenUserAccountAuthMutation {
  *
  * @param request - function to call the graphql client
  */
-export class GoogleUserAccountAuthMutation {
-  private _request: LinearRequest;
-
+export class GoogleUserAccountAuthMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.GoogleUserAccountAuthInput) {
-    return this._request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
-      D.GoogleUserAccountAuthDocument
+    return this.request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
+      D.GoogleUserAccountAuthDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.googleUserAccountAuth;
-      return data ? new AuthResolverResponse(this._request, data) : undefined;
+      return data ? new AuthResolverResponse(this.request, data) : undefined;
     });
   }
 }
@@ -6095,23 +6087,24 @@ export class GoogleUserAccountAuthMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CreateOrganizationFromOnboardingMutation {
-  private _request: LinearRequest;
-
+export class CreateOrganizationFromOnboardingMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(
     input: D.CreateOrganizationInput,
     vars?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
   ) {
-    return this._request<
+    return this.request<
       D.CreateOrganizationFromOnboardingMutation,
       D.CreateOrganizationFromOnboardingMutationVariables
-    >(D.CreateOrganizationFromOnboardingDocument).then(response => {
+    >(D.CreateOrganizationFromOnboardingDocument, {
+      input,
+      ...vars,
+    }).then(response => {
       const data = response?.createOrganizationFromOnboarding;
-      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
     });
   }
 }
@@ -6121,19 +6114,20 @@ export class CreateOrganizationFromOnboardingMutation {
  *
  * @param request - function to call the graphql client
  */
-export class JoinOrganizationFromOnboardingMutation {
-  private _request: LinearRequest;
-
+export class JoinOrganizationFromOnboardingMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.JoinOrganizationInput) {
-    return this._request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
-      D.JoinOrganizationFromOnboardingDocument
+    return this.request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
+      D.JoinOrganizationFromOnboardingDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.joinOrganizationFromOnboarding;
-      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
     });
   }
 }
@@ -6143,19 +6137,20 @@ export class JoinOrganizationFromOnboardingMutation {
  *
  * @param request - function to call the graphql client
  */
-export class LeaveOrganizationMutation {
-  private _request: LinearRequest;
-
+export class LeaveOrganizationMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(organizationId: string) {
-    return this._request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
-      D.LeaveOrganizationDocument
+    return this.request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
+      D.LeaveOrganizationDocument,
+      {
+        organizationId,
+      }
     ).then(response => {
       const data = response?.leaveOrganization;
-      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
     });
   }
 }
@@ -6165,19 +6160,20 @@ export class LeaveOrganizationMutation {
  *
  * @param request - function to call the graphql client
  */
-export class BillingEmailUpdateMutation {
-  private _request: LinearRequest;
-
+export class BillingEmailUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.BillingEmailUpdateInput) {
-    return this._request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
-      D.BillingEmailUpdateDocument
+    return this.request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
+      D.BillingEmailUpdateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.billingEmailUpdate;
-      return data ? new BillingEmailPayload(this._request, data) : undefined;
+      return data ? new BillingEmailPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6187,19 +6183,20 @@ export class BillingEmailUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CollaborativeDocumentUpdateMutation {
-  private _request: LinearRequest;
-
+export class CollaborativeDocumentUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.CollaborationDocumentUpdateInput) {
-    return this._request<D.CollaborativeDocumentUpdateMutation, D.CollaborativeDocumentUpdateMutationVariables>(
-      D.CollaborativeDocumentUpdateDocument
+    return this.request<D.CollaborativeDocumentUpdateMutation, D.CollaborativeDocumentUpdateMutationVariables>(
+      D.CollaborativeDocumentUpdateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.collaborativeDocumentUpdate;
-      return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
+      return data ? new CollaborationDocumentUpdatePayload(this.request, data) : undefined;
     });
   }
 }
@@ -6209,20 +6206,18 @@ export class CollaborativeDocumentUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CommentCreateMutation {
-  private _request: LinearRequest;
-
+export class CommentCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.CommentCreateInput) {
-    return this._request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument).then(
-      response => {
-        const data = response?.commentCreate;
-        return data ? new CommentPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.commentCreate;
+      return data ? new CommentPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6231,20 +6226,19 @@ export class CommentCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CommentUpdateMutation {
-  private _request: LinearRequest;
-
+export class CommentUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.CommentUpdateInput, id: string) {
-    return this._request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument).then(
-      response => {
-        const data = response?.commentUpdate;
-        return data ? new CommentPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
+      const data = response?.commentUpdate;
+      return data ? new CommentPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6253,20 +6247,18 @@ export class CommentUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CommentDeleteMutation {
-  private _request: LinearRequest;
-
+export class CommentDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument).then(
-      response => {
-        const data = response?.commentDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.commentDelete;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6275,20 +6267,18 @@ export class CommentDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ContactCreateMutation {
-  private _request: LinearRequest;
-
+export class ContactCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.ContactCreateInput) {
-    return this._request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument).then(
-      response => {
-        const data = response?.contactCreate;
-        return data ? new ContactPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.contactCreate;
+      return data ? new ContactPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6297,19 +6287,17 @@ export class ContactCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewCreateMutation {
-  private _request: LinearRequest;
-
+export class CustomViewCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.CustomViewCreateInput) {
-    return this._request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(
-      D.CustomViewCreateDocument
-    ).then(response => {
+    return this.request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(D.CustomViewCreateDocument, {
+      input,
+    }).then(response => {
       const data = response?.customViewCreate;
-      return data ? new CustomViewPayload(this._request, data) : undefined;
+      return data ? new CustomViewPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6319,19 +6307,18 @@ export class CustomViewCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewUpdateMutation {
-  private _request: LinearRequest;
-
+export class CustomViewUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.CustomViewUpdateInput, id: string) {
-    return this._request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(
-      D.CustomViewUpdateDocument
-    ).then(response => {
+    return this.request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(D.CustomViewUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
       const data = response?.customViewUpdate;
-      return data ? new CustomViewPayload(this._request, data) : undefined;
+      return data ? new CustomViewPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6341,19 +6328,17 @@ export class CustomViewUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewDeleteMutation {
-  private _request: LinearRequest;
-
+export class CustomViewDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(
-      D.CustomViewDeleteDocument
-    ).then(response => {
+    return this.request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(D.CustomViewDeleteDocument, {
+      id,
+    }).then(response => {
       const data = response?.customViewDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -6363,20 +6348,18 @@ export class CustomViewDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CycleCreateMutation {
-  private _request: LinearRequest;
-
+export class CycleCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.CycleCreateInput) {
-    return this._request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument).then(
-      response => {
-        const data = response?.cycleCreate;
-        return data ? new CyclePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.cycleCreate;
+      return data ? new CyclePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6385,20 +6368,19 @@ export class CycleCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CycleUpdateMutation {
-  private _request: LinearRequest;
-
+export class CycleUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.CycleUpdateInput, id: string) {
-    return this._request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument).then(
-      response => {
-        const data = response?.cycleUpdate;
-        return data ? new CyclePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
+      const data = response?.cycleUpdate;
+      return data ? new CyclePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6407,20 +6389,18 @@ export class CycleUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CycleArchiveMutation {
-  private _request: LinearRequest;
-
+export class CycleArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument).then(
-      response => {
-        const data = response?.cycleArchive;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument, {
+      id,
+    }).then(response => {
+      const data = response?.cycleArchive;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6429,19 +6409,18 @@ export class CycleArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class DebugFailWithInternalErrorMutation {
-  private _request: LinearRequest;
-
+export class DebugFailWithInternalErrorMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.DebugFailWithInternalErrorMutation, D.DebugFailWithInternalErrorMutationVariables>(
-      D.DebugFailWithInternalErrorDocument
+    return this.request<D.DebugFailWithInternalErrorMutation, D.DebugFailWithInternalErrorMutationVariables>(
+      D.DebugFailWithInternalErrorDocument,
+      {}
     ).then(response => {
       const data = response?.debugFailWithInternalError;
-      return data ? new DebugPayload(this._request, data) : undefined;
+      return data ? new DebugPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6451,19 +6430,18 @@ export class DebugFailWithInternalErrorMutation {
  *
  * @param request - function to call the graphql client
  */
-export class DebugFailWithWarningMutation {
-  private _request: LinearRequest;
-
+export class DebugFailWithWarningMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
-      D.DebugFailWithWarningDocument
+    return this.request<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
+      D.DebugFailWithWarningDocument,
+      {}
     ).then(response => {
       const data = response?.debugFailWithWarning;
-      return data ? new DebugPayload(this._request, data) : undefined;
+      return data ? new DebugPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6473,19 +6451,18 @@ export class DebugFailWithWarningMutation {
  *
  * @param request - function to call the graphql client
  */
-export class DebugCreateSamlOrgMutation {
-  private _request: LinearRequest;
-
+export class DebugCreateSamlOrgMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
-      D.DebugCreateSamlOrgDocument
+    return this.request<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
+      D.DebugCreateSamlOrgDocument,
+      {}
     ).then(response => {
       const data = response?.debugCreateSAMLOrg;
-      return data ? new DebugPayload(this._request, data) : undefined;
+      return data ? new DebugPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6495,19 +6472,17 @@ export class DebugCreateSamlOrgMutation {
  *
  * @param request - function to call the graphql client
  */
-export class EmailUnsubscribeMutation {
-  private _request: LinearRequest;
-
+export class EmailUnsubscribeMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.EmailUnsubscribeInput) {
-    return this._request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(
-      D.EmailUnsubscribeDocument
-    ).then(response => {
+    return this.request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(D.EmailUnsubscribeDocument, {
+      input,
+    }).then(response => {
       const data = response?.emailUnsubscribe;
-      return data ? new EmailUnsubscribePayload(this._request, data) : undefined;
+      return data ? new EmailUnsubscribePayload(this.request, data) : undefined;
     });
   }
 }
@@ -6517,20 +6492,18 @@ export class EmailUnsubscribeMutation {
  *
  * @param request - function to call the graphql client
  */
-export class EmojiCreateMutation {
-  private _request: LinearRequest;
-
+export class EmojiCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.EmojiCreateInput) {
-    return this._request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument).then(
-      response => {
-        const data = response?.emojiCreate;
-        return data ? new EmojiPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.emojiCreate;
+      return data ? new EmojiPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6539,20 +6512,18 @@ export class EmojiCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class EmojiDeleteMutation {
-  private _request: LinearRequest;
-
+export class EmojiDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument).then(
-      response => {
-        const data = response?.emojiDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.emojiDelete;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6561,20 +6532,18 @@ export class EmojiDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class FavoriteCreateMutation {
-  private _request: LinearRequest;
-
+export class FavoriteCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.FavoriteCreateInput) {
-    return this._request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument).then(
-      response => {
-        const data = response?.favoriteCreate;
-        return data ? new FavoritePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.favoriteCreate;
+      return data ? new FavoritePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6583,20 +6552,19 @@ export class FavoriteCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class FavoriteUpdateMutation {
-  private _request: LinearRequest;
-
+export class FavoriteUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.FavoriteUpdateInput, id: string) {
-    return this._request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument).then(
-      response => {
-        const data = response?.favoriteUpdate;
-        return data ? new FavoritePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
+      const data = response?.favoriteUpdate;
+      return data ? new FavoritePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6605,20 +6573,18 @@ export class FavoriteUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class FavoriteDeleteMutation {
-  private _request: LinearRequest;
-
+export class FavoriteDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument).then(
-      response => {
-        const data = response?.favoriteDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.favoriteDelete;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6627,20 +6593,18 @@ export class FavoriteDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class FeedbackCreateMutation {
-  private _request: LinearRequest;
-
+export class FeedbackCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.FeedbackCreateInput) {
-    return this._request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument).then(
-      response => {
-        const data = response?.feedbackCreate;
-        return data ? new FeedbackPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.feedbackCreate;
+      return data ? new FeedbackPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -6649,11 +6613,9 @@ export class FeedbackCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class FileUploadMutation {
-  private _request: LinearRequest;
-
+export class FileUploadMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(
@@ -6662,9 +6624,14 @@ export class FileUploadMutation {
     filename: string,
     vars?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
   ) {
-    return this._request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument).then(response => {
+    return this.request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument, {
+      size,
+      contentType,
+      filename,
+      ...vars,
+    }).then(response => {
       const data = response?.fileUpload;
-      return data ? new UploadPayload(this._request, data) : undefined;
+      return data ? new UploadPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6674,19 +6641,20 @@ export class FileUploadMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ImageUploadFromUrlMutation {
-  private _request: LinearRequest;
-
+export class ImageUploadFromUrlMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(url: string) {
-    return this._request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
-      D.ImageUploadFromUrlDocument
+    return this.request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
+      D.ImageUploadFromUrlDocument,
+      {
+        url,
+      }
     ).then(response => {
       const data = response?.imageUploadFromUrl;
-      return data ? new ImageUploadFromUrlPayload(this._request, data) : undefined;
+      return data ? new ImageUploadFromUrlPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6696,19 +6664,20 @@ export class ImageUploadFromUrlMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationGithubConnectMutation {
-  private _request: LinearRequest;
-
+export class IntegrationGithubConnectMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(installationId: string) {
-    return this._request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
-      D.IntegrationGithubConnectDocument
+    return this.request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
+      D.IntegrationGithubConnectDocument,
+      {
+        installationId,
+      }
     ).then(response => {
       const data = response?.integrationGithubConnect;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6718,19 +6687,21 @@ export class IntegrationGithubConnectMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationGitlabConnectMutation {
-  private _request: LinearRequest;
-
+export class IntegrationGitlabConnectMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(gitlabUrl: string, accessToken: string) {
-    return this._request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
-      D.IntegrationGitlabConnectDocument
+    return this.request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
+      D.IntegrationGitlabConnectDocument,
+      {
+        gitlabUrl,
+        accessToken,
+      }
     ).then(response => {
       const data = response?.integrationGitlabConnect;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6740,11 +6711,9 @@ export class IntegrationGitlabConnectMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackMutation {
-  private _request: LinearRequest;
-
+export class IntegrationSlackMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(
@@ -6752,11 +6721,13 @@ export class IntegrationSlackMutation {
     code: string,
     vars?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
   ) {
-    return this._request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(
-      D.IntegrationSlackDocument
-    ).then(response => {
+    return this.request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(D.IntegrationSlackDocument, {
+      redirectUri,
+      code,
+      ...vars,
+    }).then(response => {
       const data = response?.integrationSlack;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6766,19 +6737,21 @@ export class IntegrationSlackMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackPersonalMutation {
-  private _request: LinearRequest;
-
+export class IntegrationSlackPersonalMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(redirectUri: string, code: string) {
-    return this._request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
-      D.IntegrationSlackPersonalDocument
+    return this.request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
+      D.IntegrationSlackPersonalDocument,
+      {
+        redirectUri,
+        code,
+      }
     ).then(response => {
       const data = response?.integrationSlackPersonal;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6788,11 +6761,9 @@ export class IntegrationSlackPersonalMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackPostMutation {
-  private _request: LinearRequest;
-
+export class IntegrationSlackPostMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(
@@ -6801,11 +6772,17 @@ export class IntegrationSlackPostMutation {
     code: string,
     vars?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
   ) {
-    return this._request<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
-      D.IntegrationSlackPostDocument
+    return this.request<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
+      D.IntegrationSlackPostDocument,
+      {
+        redirectUri,
+        teamId,
+        code,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.integrationSlackPost;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6815,19 +6792,22 @@ export class IntegrationSlackPostMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackProjectPostMutation {
-  private _request: LinearRequest;
-
+export class IntegrationSlackProjectPostMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(redirectUri: string, projectId: string, code: string) {
-    return this._request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
-      D.IntegrationSlackProjectPostDocument
+    return this.request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
+      D.IntegrationSlackProjectPostDocument,
+      {
+        redirectUri,
+        projectId,
+        code,
+      }
     ).then(response => {
       const data = response?.integrationSlackProjectPost;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6837,19 +6817,21 @@ export class IntegrationSlackProjectPostMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackImportEmojisMutation {
-  private _request: LinearRequest;
-
+export class IntegrationSlackImportEmojisMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(redirectUri: string, code: string) {
-    return this._request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
-      D.IntegrationSlackImportEmojisDocument
+    return this.request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
+      D.IntegrationSlackImportEmojisDocument,
+      {
+        redirectUri,
+        code,
+      }
     ).then(response => {
       const data = response?.integrationSlackImportEmojis;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6859,19 +6841,18 @@ export class IntegrationSlackImportEmojisMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationFigmaMutation {
-  private _request: LinearRequest;
-
+export class IntegrationFigmaMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(redirectUri: string, code: string) {
-    return this._request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(
-      D.IntegrationFigmaDocument
-    ).then(response => {
+    return this.request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(D.IntegrationFigmaDocument, {
+      redirectUri,
+      code,
+    }).then(response => {
       const data = response?.integrationFigma;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6881,19 +6862,20 @@ export class IntegrationFigmaMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationGoogleSheetsMutation {
-  private _request: LinearRequest;
-
+export class IntegrationGoogleSheetsMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(code: string) {
-    return this._request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
-      D.IntegrationGoogleSheetsDocument
+    return this.request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
+      D.IntegrationGoogleSheetsDocument,
+      {
+        code,
+      }
     ).then(response => {
       const data = response?.integrationGoogleSheets;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6903,19 +6885,20 @@ export class IntegrationGoogleSheetsMutation {
  *
  * @param request - function to call the graphql client
  */
-export class RefreshGoogleSheetsDataMutation {
-  private _request: LinearRequest;
-
+export class RefreshGoogleSheetsDataMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
-      D.RefreshGoogleSheetsDataDocument
+    return this.request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
+      D.RefreshGoogleSheetsDataDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.refreshGoogleSheetsData;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6925,19 +6908,22 @@ export class RefreshGoogleSheetsDataMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSentryConnectMutation {
-  private _request: LinearRequest;
-
+export class IntegrationSentryConnectMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(organizationSlug: string, code: string, installationId: string) {
-    return this._request<D.IntegrationSentryConnectMutation, D.IntegrationSentryConnectMutationVariables>(
-      D.IntegrationSentryConnectDocument
+    return this.request<D.IntegrationSentryConnectMutation, D.IntegrationSentryConnectMutationVariables>(
+      D.IntegrationSentryConnectDocument,
+      {
+        organizationSlug,
+        code,
+        installationId,
+      }
     ).then(response => {
       const data = response?.integrationSentryConnect;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+      return data ? new IntegrationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -6947,19 +6933,20 @@ export class IntegrationSentryConnectMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationDeleteMutation {
-  private _request: LinearRequest;
-
+export class IntegrationDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
-      D.IntegrationDeleteDocument
+    return this.request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
+      D.IntegrationDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.integrationDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -6969,19 +6956,20 @@ export class IntegrationDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResourceArchiveMutation {
-  private _request: LinearRequest;
-
+export class IntegrationResourceArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
-      D.IntegrationResourceArchiveDocument
+    return this.request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
+      D.IntegrationResourceArchiveDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.integrationResourceArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -6991,19 +6979,17 @@ export class IntegrationResourceArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelCreateMutation {
-  private _request: LinearRequest;
-
+export class IssueLabelCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.IssueLabelCreateInput) {
-    return this._request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(
-      D.IssueLabelCreateDocument
-    ).then(response => {
+    return this.request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(D.IssueLabelCreateDocument, {
+      input,
+    }).then(response => {
       const data = response?.issueLabelCreate;
-      return data ? new IssueLabelPayload(this._request, data) : undefined;
+      return data ? new IssueLabelPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7013,19 +6999,18 @@ export class IssueLabelCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelUpdateMutation {
-  private _request: LinearRequest;
-
+export class IssueLabelUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.IssueLabelUpdateInput, id: string) {
-    return this._request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(
-      D.IssueLabelUpdateDocument
-    ).then(response => {
+    return this.request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(D.IssueLabelUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
       const data = response?.issueLabelUpdate;
-      return data ? new IssueLabelPayload(this._request, data) : undefined;
+      return data ? new IssueLabelPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7035,19 +7020,20 @@ export class IssueLabelUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelArchiveMutation {
-  private _request: LinearRequest;
-
+export class IssueLabelArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
-      D.IssueLabelArchiveDocument
+    return this.request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
+      D.IssueLabelArchiveDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.issueLabelArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7057,19 +7043,20 @@ export class IssueLabelArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationCreateMutation {
-  private _request: LinearRequest;
-
+export class IssueRelationCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.IssueRelationCreateInput) {
-    return this._request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
-      D.IssueRelationCreateDocument
+    return this.request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
+      D.IssueRelationCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.issueRelationCreate;
-      return data ? new IssueRelationPayload(this._request, data) : undefined;
+      return data ? new IssueRelationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7079,19 +7066,21 @@ export class IssueRelationCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationUpdateMutation {
-  private _request: LinearRequest;
-
+export class IssueRelationUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.IssueRelationUpdateInput, id: string) {
-    return this._request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
-      D.IssueRelationUpdateDocument
+    return this.request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
+      D.IssueRelationUpdateDocument,
+      {
+        input,
+        id,
+      }
     ).then(response => {
       const data = response?.issueRelationUpdate;
-      return data ? new IssueRelationPayload(this._request, data) : undefined;
+      return data ? new IssueRelationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7101,19 +7090,20 @@ export class IssueRelationUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationDeleteMutation {
-  private _request: LinearRequest;
-
+export class IssueRelationDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
-      D.IssueRelationDeleteDocument
+    return this.request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
+      D.IssueRelationDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.issueRelationDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7123,20 +7113,18 @@ export class IssueRelationDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueCreateMutation {
-  private _request: LinearRequest;
-
+export class IssueCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.IssueCreateInput) {
-    return this._request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument).then(
-      response => {
-        const data = response?.issueCreate;
-        return data ? new IssuePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.issueCreate;
+      return data ? new IssuePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7145,20 +7133,19 @@ export class IssueCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueUpdateMutation {
-  private _request: LinearRequest;
-
+export class IssueUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.IssueUpdateInput, id: string) {
-    return this._request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument).then(
-      response => {
-        const data = response?.issueUpdate;
-        return data ? new IssuePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
+      const data = response?.issueUpdate;
+      return data ? new IssuePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7167,20 +7154,18 @@ export class IssueUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueArchiveMutation {
-  private _request: LinearRequest;
-
+export class IssueArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument).then(
-      response => {
-        const data = response?.issueArchive;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument, {
+      id,
+    }).then(response => {
+      const data = response?.issueArchive;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7189,20 +7174,18 @@ export class IssueArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class IssueUnarchiveMutation {
-  private _request: LinearRequest;
-
+export class IssueUnarchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument).then(
-      response => {
-        const data = response?.issueUnarchive;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument, {
+      id,
+    }).then(response => {
+      const data = response?.issueUnarchive;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7211,20 +7194,18 @@ export class IssueUnarchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class MilestoneCreateMutation {
-  private _request: LinearRequest;
-
+export class MilestoneCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.MilestoneCreateInput) {
-    return this._request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument).then(
-      response => {
-        const data = response?.milestoneCreate;
-        return data ? new MilestonePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.milestoneCreate;
+      return data ? new MilestonePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7233,20 +7214,19 @@ export class MilestoneCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class MilestoneUpdateMutation {
-  private _request: LinearRequest;
-
+export class MilestoneUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.MilestoneUpdateInput, id: string) {
-    return this._request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument).then(
-      response => {
-        const data = response?.milestoneUpdate;
-        return data ? new MilestonePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
+      const data = response?.milestoneUpdate;
+      return data ? new MilestonePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7255,20 +7235,18 @@ export class MilestoneUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class MilestoneDeleteMutation {
-  private _request: LinearRequest;
-
+export class MilestoneDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument).then(
-      response => {
-        const data = response?.milestoneDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.milestoneDelete;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7277,19 +7255,21 @@ export class MilestoneDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationCreateMutation {
-  private _request: LinearRequest;
-
+export class NotificationCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.NotificationUpdateInput, id: string) {
-    return this._request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
-      D.NotificationCreateDocument
+    return this.request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
+      D.NotificationCreateDocument,
+      {
+        input,
+        id,
+      }
     ).then(response => {
       const data = response?.notificationCreate;
-      return data ? new NotificationPayload(this._request, data) : undefined;
+      return data ? new NotificationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7299,19 +7279,21 @@ export class NotificationCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationUpdateMutation {
-  private _request: LinearRequest;
-
+export class NotificationUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.NotificationUpdateInput, id: string) {
-    return this._request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
-      D.NotificationUpdateDocument
+    return this.request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
+      D.NotificationUpdateDocument,
+      {
+        input,
+        id,
+      }
     ).then(response => {
       const data = response?.notificationUpdate;
-      return data ? new NotificationPayload(this._request, data) : undefined;
+      return data ? new NotificationPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7321,19 +7303,20 @@ export class NotificationUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationDeleteMutation {
-  private _request: LinearRequest;
-
+export class NotificationDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
-      D.NotificationDeleteDocument
+    return this.request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
+      D.NotificationDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.notificationDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7343,19 +7326,20 @@ export class NotificationDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationArchiveMutation {
-  private _request: LinearRequest;
-
+export class NotificationArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
-      D.NotificationArchiveDocument
+    return this.request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
+      D.NotificationArchiveDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.notificationArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7365,19 +7349,20 @@ export class NotificationArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationUnarchiveMutation {
-  private _request: LinearRequest;
-
+export class NotificationUnarchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
-      D.NotificationUnarchiveDocument
+    return this.request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
+      D.NotificationUnarchiveDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.notificationUnarchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7387,19 +7372,20 @@ export class NotificationUnarchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationSubscriptionCreateMutation {
-  private _request: LinearRequest;
-
+export class NotificationSubscriptionCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.NotificationSubscriptionCreateInput) {
-    return this._request<D.NotificationSubscriptionCreateMutation, D.NotificationSubscriptionCreateMutationVariables>(
-      D.NotificationSubscriptionCreateDocument
+    return this.request<D.NotificationSubscriptionCreateMutation, D.NotificationSubscriptionCreateMutationVariables>(
+      D.NotificationSubscriptionCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.notificationSubscriptionCreate;
-      return data ? new NotificationSubscriptionPayload(this._request, data) : undefined;
+      return data ? new NotificationSubscriptionPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7409,19 +7395,20 @@ export class NotificationSubscriptionCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationSubscriptionDeleteMutation {
-  private _request: LinearRequest;
-
+export class NotificationSubscriptionDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
-      D.NotificationSubscriptionDeleteDocument
+    return this.request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
+      D.NotificationSubscriptionDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.notificationSubscriptionDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7431,19 +7418,20 @@ export class NotificationSubscriptionDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OauthClientCreateMutation {
-  private _request: LinearRequest;
-
+export class OauthClientCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.OauthClientCreateInput) {
-    return this._request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
-      D.OauthClientCreateDocument
+    return this.request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
+      D.OauthClientCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.oauthClientCreate;
-      return data ? new OauthClientPayload(this._request, data) : undefined;
+      return data ? new OauthClientPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7453,19 +7441,21 @@ export class OauthClientCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OauthClientUpdateMutation {
-  private _request: LinearRequest;
-
+export class OauthClientUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.OauthClientUpdateInput, id: string) {
-    return this._request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
-      D.OauthClientUpdateDocument
+    return this.request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
+      D.OauthClientUpdateDocument,
+      {
+        input,
+        id,
+      }
     ).then(response => {
       const data = response?.oauthClientUpdate;
-      return data ? new OauthClientPayload(this._request, data) : undefined;
+      return data ? new OauthClientPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7475,19 +7465,20 @@ export class OauthClientUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OauthClientArchiveMutation {
-  private _request: LinearRequest;
-
+export class OauthClientArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
-      D.OauthClientArchiveDocument
+    return this.request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
+      D.OauthClientArchiveDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.oauthClientArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7497,19 +7488,20 @@ export class OauthClientArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OauthClientRotateSecretMutation {
-  private _request: LinearRequest;
-
+export class OauthClientRotateSecretMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
-      D.OauthClientRotateSecretDocument
+    return this.request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
+      D.OauthClientRotateSecretDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.oauthClientRotateSecret;
-      return data ? new RotateSecretPayload(this._request, data) : undefined;
+      return data ? new RotateSecretPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7519,19 +7511,18 @@ export class OauthClientRotateSecretMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OauthTokenRevokeMutation {
-  private _request: LinearRequest;
-
+export class OauthTokenRevokeMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(scope: string[], appId: string) {
-    return this._request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(
-      D.OauthTokenRevokeDocument
-    ).then(response => {
+    return this.request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(D.OauthTokenRevokeDocument, {
+      scope,
+      appId,
+    }).then(response => {
       const data = response?.oauthTokenRevoke;
-      return data ? new OauthTokenRevokePayload(this._request, data) : undefined;
+      return data ? new OauthTokenRevokePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7541,19 +7532,20 @@ export class OauthTokenRevokeMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDomainVerifyMutation {
-  private _request: LinearRequest;
-
+export class OrganizationDomainVerifyMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.OrganizationDomainVerificationInput) {
-    return this._request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
-      D.OrganizationDomainVerifyDocument
+    return this.request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
+      D.OrganizationDomainVerifyDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.organizationDomainVerify;
-      return data ? new OrganizationDomainPayload(this._request, data) : undefined;
+      return data ? new OrganizationDomainPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7563,19 +7555,20 @@ export class OrganizationDomainVerifyMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDomainCreateMutation {
-  private _request: LinearRequest;
-
+export class OrganizationDomainCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.OrganizationDomainCreateInput) {
-    return this._request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
-      D.OrganizationDomainCreateDocument
+    return this.request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
+      D.OrganizationDomainCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.organizationDomainCreate;
-      return data ? new OrganizationDomainPayload(this._request, data) : undefined;
+      return data ? new OrganizationDomainPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7585,19 +7578,20 @@ export class OrganizationDomainCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDomainDeleteMutation {
-  private _request: LinearRequest;
-
+export class OrganizationDomainDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
-      D.OrganizationDomainDeleteDocument
+    return this.request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
+      D.OrganizationDomainDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.organizationDomainDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7607,19 +7601,20 @@ export class OrganizationDomainDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationInviteCreateMutation {
-  private _request: LinearRequest;
-
+export class OrganizationInviteCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.OrganizationInviteCreateInput) {
-    return this._request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
-      D.OrganizationInviteCreateDocument
+    return this.request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
+      D.OrganizationInviteCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.organizationInviteCreate;
-      return data ? new OrganizationInvitePayload(this._request, data) : undefined;
+      return data ? new OrganizationInvitePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7629,19 +7624,20 @@ export class OrganizationInviteCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ResentOrganizationInviteMutation {
-  private _request: LinearRequest;
-
+export class ResentOrganizationInviteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
-      D.ResentOrganizationInviteDocument
+    return this.request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
+      D.ResentOrganizationInviteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.resentOrganizationInvite;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7651,19 +7647,20 @@ export class ResentOrganizationInviteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationInviteDeleteMutation {
-  private _request: LinearRequest;
-
+export class OrganizationInviteDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
-      D.OrganizationInviteDeleteDocument
+    return this.request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
+      D.OrganizationInviteDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.organizationInviteDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7673,19 +7670,20 @@ export class OrganizationInviteDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectLinkCreateMutation {
-  private _request: LinearRequest;
-
+export class ProjectLinkCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.ProjectLinkCreateInput) {
-    return this._request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
-      D.ProjectLinkCreateDocument
+    return this.request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
+      D.ProjectLinkCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.projectLinkCreate;
-      return data ? new ProjectLinkPayload(this._request, data) : undefined;
+      return data ? new ProjectLinkPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7695,19 +7693,20 @@ export class ProjectLinkCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectLinkDeleteMutation {
-  private _request: LinearRequest;
-
+export class ProjectLinkDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
-      D.ProjectLinkDeleteDocument
+    return this.request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
+      D.ProjectLinkDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.projectLinkDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -7717,20 +7716,18 @@ export class ProjectLinkDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectCreateMutation {
-  private _request: LinearRequest;
-
+export class ProjectCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.ProjectCreateInput) {
-    return this._request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument).then(
-      response => {
-        const data = response?.projectCreate;
-        return data ? new ProjectPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.projectCreate;
+      return data ? new ProjectPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7739,20 +7736,19 @@ export class ProjectCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectUpdateMutation {
-  private _request: LinearRequest;
-
+export class ProjectUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.ProjectUpdateInput, id: string) {
-    return this._request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument).then(
-      response => {
-        const data = response?.projectUpdate;
-        return data ? new ProjectPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
+      const data = response?.projectUpdate;
+      return data ? new ProjectPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7761,20 +7757,18 @@ export class ProjectUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectArchiveMutation {
-  private _request: LinearRequest;
-
+export class ProjectArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument).then(
-      response => {
-        const data = response?.projectArchive;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument, {
+      id,
+    }).then(response => {
+      const data = response?.projectArchive;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7783,19 +7777,20 @@ export class ProjectArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class PushSubscriptionCreateMutation {
-  private _request: LinearRequest;
-
+export class PushSubscriptionCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.PushSubscriptionCreateInput) {
-    return this._request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
-      D.PushSubscriptionCreateDocument
+    return this.request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
+      D.PushSubscriptionCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.pushSubscriptionCreate;
-      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
+      return data ? new PushSubscriptionPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7805,19 +7800,20 @@ export class PushSubscriptionCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class PushSubscriptionDeleteMutation {
-  private _request: LinearRequest;
-
+export class PushSubscriptionDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
-      D.PushSubscriptionDeleteDocument
+    return this.request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
+      D.PushSubscriptionDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.pushSubscriptionDelete;
-      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
+      return data ? new PushSubscriptionPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7827,20 +7823,18 @@ export class PushSubscriptionDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ReactionCreateMutation {
-  private _request: LinearRequest;
-
+export class ReactionCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.ReactionCreateInput) {
-    return this._request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument).then(
-      response => {
-        const data = response?.reactionCreate;
-        return data ? new ReactionPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.reactionCreate;
+      return data ? new ReactionPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7849,20 +7843,18 @@ export class ReactionCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ReactionDeleteMutation {
-  private _request: LinearRequest;
-
+export class ReactionDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument).then(
-      response => {
-        const data = response?.reactionDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.reactionDelete;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -7871,19 +7863,18 @@ export class ReactionDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class CreateCsvExportReportMutation {
-  private _request: LinearRequest;
-
+export class CreateCsvExportReportMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
-      D.CreateCsvExportReportDocument
+    return this.request<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
+      D.CreateCsvExportReportDocument,
+      {}
     ).then(response => {
       const data = response?.createCsvExportReport;
-      return data ? new CreateCsvExportReportPayload(this._request, data) : undefined;
+      return data ? new CreateCsvExportReportPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7893,19 +7884,20 @@ export class CreateCsvExportReportMutation {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionSessionCreateMutation {
-  private _request: LinearRequest;
-
+export class SubscriptionSessionCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(plan: string) {
-    return this._request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
-      D.SubscriptionSessionCreateDocument
+    return this.request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
+      D.SubscriptionSessionCreateDocument,
+      {
+        plan,
+      }
     ).then(response => {
       const data = response?.subscriptionSessionCreate;
-      return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
+      return data ? new SubscriptionSessionPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7915,19 +7907,18 @@ export class SubscriptionSessionCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionUpdateSessionCreateMutation {
-  private _request: LinearRequest;
-
+export class SubscriptionUpdateSessionCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.SubscriptionUpdateSessionCreateMutation, D.SubscriptionUpdateSessionCreateMutationVariables>(
-      D.SubscriptionUpdateSessionCreateDocument
+    return this.request<D.SubscriptionUpdateSessionCreateMutation, D.SubscriptionUpdateSessionCreateMutationVariables>(
+      D.SubscriptionUpdateSessionCreateDocument,
+      {}
     ).then(response => {
       const data = response?.subscriptionUpdateSessionCreate;
-      return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
+      return data ? new SubscriptionSessionPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7937,19 +7928,21 @@ export class SubscriptionUpdateSessionCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionUpdateMutation {
-  private _request: LinearRequest;
-
+export class SubscriptionUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.SubscriptionUpdateInput, id: string) {
-    return this._request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
-      D.SubscriptionUpdateDocument
+    return this.request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
+      D.SubscriptionUpdateDocument,
+      {
+        input,
+        id,
+      }
     ).then(response => {
       const data = response?.subscriptionUpdate;
-      return data ? new SubscriptionPayload(this._request, data) : undefined;
+      return data ? new SubscriptionPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7959,19 +7952,21 @@ export class SubscriptionUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionUpgradeMutation {
-  private _request: LinearRequest;
-
+export class SubscriptionUpgradeMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(type: string, id: string) {
-    return this._request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
-      D.SubscriptionUpgradeDocument
+    return this.request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
+      D.SubscriptionUpgradeDocument,
+      {
+        type,
+        id,
+      }
     ).then(response => {
       const data = response?.subscriptionUpgrade;
-      return data ? new SubscriptionPayload(this._request, data) : undefined;
+      return data ? new SubscriptionPayload(this.request, data) : undefined;
     });
   }
 }
@@ -7981,19 +7976,20 @@ export class SubscriptionUpgradeMutation {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionArchiveMutation {
-  private _request: LinearRequest;
-
+export class SubscriptionArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
-      D.SubscriptionArchiveDocument
+    return this.request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
+      D.SubscriptionArchiveDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.subscriptionArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -8003,19 +7999,20 @@ export class SubscriptionArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TeamMembershipCreateMutation {
-  private _request: LinearRequest;
-
+export class TeamMembershipCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.TeamMembershipCreateInput) {
-    return this._request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
-      D.TeamMembershipCreateDocument
+    return this.request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
+      D.TeamMembershipCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.teamMembershipCreate;
-      return data ? new TeamMembershipPayload(this._request, data) : undefined;
+      return data ? new TeamMembershipPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8025,19 +8022,20 @@ export class TeamMembershipCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TeamMembershipDeleteMutation {
-  private _request: LinearRequest;
-
+export class TeamMembershipDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
-      D.TeamMembershipDeleteDocument
+    return this.request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
+      D.TeamMembershipDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.teamMembershipDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -8047,17 +8045,18 @@ export class TeamMembershipDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TeamCreateMutation {
-  private _request: LinearRequest;
-
+export class TeamCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.TeamCreateInput, vars?: Omit<D.TeamCreateMutationVariables, "input">) {
-    return this._request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument).then(response => {
+    return this.request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument, {
+      input,
+      ...vars,
+    }).then(response => {
       const data = response?.teamCreate;
-      return data ? new TeamPayload(this._request, data) : undefined;
+      return data ? new TeamPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8067,17 +8066,18 @@ export class TeamCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TeamUpdateMutation {
-  private _request: LinearRequest;
-
+export class TeamUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.TeamUpdateInput, id: string) {
-    return this._request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument).then(response => {
+    return this.request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
       const data = response?.teamUpdate;
-      return data ? new TeamPayload(this._request, data) : undefined;
+      return data ? new TeamPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8087,20 +8087,18 @@ export class TeamUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TeamArchiveMutation {
-  private _request: LinearRequest;
-
+export class TeamArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument).then(
-      response => {
-        const data = response?.teamArchive;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument, {
+      id,
+    }).then(response => {
+      const data = response?.teamArchive;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -8109,17 +8107,17 @@ export class TeamArchiveMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TeamDeleteMutation {
-  private _request: LinearRequest;
-
+export class TeamDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument).then(response => {
+    return this.request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument, {
+      id,
+    }).then(response => {
       const data = response?.teamDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -8129,20 +8127,18 @@ export class TeamDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TemplateCreateMutation {
-  private _request: LinearRequest;
-
+export class TemplateCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.TemplateCreateInput) {
-    return this._request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument).then(
-      response => {
-        const data = response?.templateCreate;
-        return data ? new TemplatePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.templateCreate;
+      return data ? new TemplatePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -8151,20 +8147,19 @@ export class TemplateCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TemplateUpdateMutation {
-  private _request: LinearRequest;
-
+export class TemplateUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.TemplateUpdateInput, id: string) {
-    return this._request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument).then(
-      response => {
-        const data = response?.templateUpdate;
-        return data ? new TemplatePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
+      const data = response?.templateUpdate;
+      return data ? new TemplatePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -8173,20 +8168,18 @@ export class TemplateUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class TemplateDeleteMutation {
-  private _request: LinearRequest;
-
+export class TemplateDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument).then(
-      response => {
-        const data = response?.templateDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.templateDelete;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -8195,19 +8188,21 @@ export class TemplateDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserSettingsUpdateMutation {
-  private _request: LinearRequest;
-
+export class UserSettingsUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.UserSettingsUpdateInput, id: string) {
-    return this._request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
-      D.UserSettingsUpdateDocument
+    return this.request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
+      D.UserSettingsUpdateDocument,
+      {
+        input,
+        id,
+      }
     ).then(response => {
       const data = response?.userSettingsUpdate;
-      return data ? new UserSettingsPayload(this._request, data) : undefined;
+      return data ? new UserSettingsPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8217,19 +8212,20 @@ export class UserSettingsUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserSettingsFlagIncrementMutation {
-  private _request: LinearRequest;
-
+export class UserSettingsFlagIncrementMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(flag: string) {
-    return this._request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
-      D.UserSettingsFlagIncrementDocument
+    return this.request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
+      D.UserSettingsFlagIncrementDocument,
+      {
+        flag,
+      }
     ).then(response => {
       const data = response?.userSettingsFlagIncrement;
-      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
+      return data ? new UserSettingsFlagPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8239,19 +8235,18 @@ export class UserSettingsFlagIncrementMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserSettingsFlagsResetMutation {
-  private _request: LinearRequest;
-
+export class UserSettingsFlagsResetMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
-      D.UserSettingsFlagsResetDocument
+    return this.request<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
+      D.UserSettingsFlagsResetDocument,
+      {}
     ).then(response => {
       const data = response?.userSettingsFlagsReset;
-      return data ? new UserSettingsFlagsResetPayload(this._request, data) : undefined;
+      return data ? new UserSettingsFlagsResetPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8261,20 +8256,19 @@ export class UserSettingsFlagsResetMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserFlagUpdateMutation {
-  private _request: LinearRequest;
-
+export class UserFlagUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(operation: D.UserFlagUpdateOperation, flag: D.UserFlagType) {
-    return this._request<D.UserFlagUpdateMutation, D.UserFlagUpdateMutationVariables>(D.UserFlagUpdateDocument).then(
-      response => {
-        const data = response?.userFlagUpdate;
-        return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.UserFlagUpdateMutation, D.UserFlagUpdateMutationVariables>(D.UserFlagUpdateDocument, {
+      operation,
+      flag,
+    }).then(response => {
+      const data = response?.userFlagUpdate;
+      return data ? new UserSettingsFlagPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -8283,19 +8277,18 @@ export class UserFlagUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class UserSubscribeToNewsletterMutation {
-  private _request: LinearRequest;
-
+export class UserSubscribeToNewsletterMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.UserSubscribeToNewsletterMutation, D.UserSubscribeToNewsletterMutationVariables>(
-      D.UserSubscribeToNewsletterDocument
+    return this.request<D.UserSubscribeToNewsletterMutation, D.UserSubscribeToNewsletterMutationVariables>(
+      D.UserSubscribeToNewsletterDocument,
+      {}
     ).then(response => {
       const data = response?.userSubscribeToNewsletter;
-      return data ? new UserSubscribeToNewsletterPayload(this._request, data) : undefined;
+      return data ? new UserSubscribeToNewsletterPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8305,19 +8298,20 @@ export class UserSubscribeToNewsletterMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ViewPreferencesCreateMutation {
-  private _request: LinearRequest;
-
+export class ViewPreferencesCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.ViewPreferencesCreateInput) {
-    return this._request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
-      D.ViewPreferencesCreateDocument
+    return this.request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
+      D.ViewPreferencesCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.viewPreferencesCreate;
-      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
+      return data ? new ViewPreferencesPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8327,19 +8321,21 @@ export class ViewPreferencesCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ViewPreferencesUpdateMutation {
-  private _request: LinearRequest;
-
+export class ViewPreferencesUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.ViewPreferencesUpdateInput, id: string) {
-    return this._request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
-      D.ViewPreferencesUpdateDocument
+    return this.request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
+      D.ViewPreferencesUpdateDocument,
+      {
+        input,
+        id,
+      }
     ).then(response => {
       const data = response?.viewPreferencesUpdate;
-      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
+      return data ? new ViewPreferencesPayload(this.request, data) : undefined;
     });
   }
 }
@@ -8349,19 +8345,20 @@ export class ViewPreferencesUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class ViewPreferencesDeleteMutation {
-  private _request: LinearRequest;
-
+export class ViewPreferencesDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
-      D.ViewPreferencesDeleteDocument
+    return this.request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
+      D.ViewPreferencesDeleteDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.viewPreferencesDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -8371,20 +8368,18 @@ export class ViewPreferencesDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class WebhookCreateMutation {
-  private _request: LinearRequest;
-
+export class WebhookCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.WebhookCreateInput) {
-    return this._request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument).then(
-      response => {
-        const data = response?.webhookCreate;
-        return data ? new WebhookPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.webhookCreate;
+      return data ? new WebhookPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -8393,20 +8388,19 @@ export class WebhookCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class WebhookUpdateMutation {
-  private _request: LinearRequest;
-
+export class WebhookUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.WebhookUpdateInput, id: string) {
-    return this._request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument).then(
-      response => {
-        const data = response?.webhookUpdate;
-        return data ? new WebhookPayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument, {
+      input,
+      id,
+    }).then(response => {
+      const data = response?.webhookUpdate;
+      return data ? new WebhookPayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -8415,20 +8409,18 @@ export class WebhookUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class WebhookDeleteMutation {
-  private _request: LinearRequest;
-
+export class WebhookDeleteMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument).then(
-      response => {
-        const data = response?.webhookDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this.request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.webhookDelete;
+      return data ? new ArchivePayload(this.request, data) : undefined;
+    });
   }
 }
 
@@ -8437,19 +8429,20 @@ export class WebhookDeleteMutation {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStateCreateMutation {
-  private _request: LinearRequest;
-
+export class WorkflowStateCreateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.WorkflowStateCreateInput) {
-    return this._request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
-      D.WorkflowStateCreateDocument
+    return this.request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
+      D.WorkflowStateCreateDocument,
+      {
+        input,
+      }
     ).then(response => {
       const data = response?.workflowStateCreate;
-      return data ? new WorkflowStatePayload(this._request, data) : undefined;
+      return data ? new WorkflowStatePayload(this.request, data) : undefined;
     });
   }
 }
@@ -8459,19 +8452,21 @@ export class WorkflowStateCreateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStateUpdateMutation {
-  private _request: LinearRequest;
-
+export class WorkflowStateUpdateMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(input: D.WorkflowStateUpdateInput, id: string) {
-    return this._request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
-      D.WorkflowStateUpdateDocument
+    return this.request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
+      D.WorkflowStateUpdateDocument,
+      {
+        input,
+        id,
+      }
     ).then(response => {
       const data = response?.workflowStateUpdate;
-      return data ? new WorkflowStatePayload(this._request, data) : undefined;
+      return data ? new WorkflowStatePayload(this.request, data) : undefined;
     });
   }
 }
@@ -8481,19 +8476,20 @@ export class WorkflowStateUpdateMutation {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStateArchiveMutation {
-  private _request: LinearRequest;
-
+export class WorkflowStateArchiveMutation extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(id: string) {
-    return this._request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
-      D.WorkflowStateArchiveDocument
+    return this.request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
+      D.WorkflowStateArchiveDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.workflowStateArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+      return data ? new ArchivePayload(this.request, data) : undefined;
     });
   }
 }
@@ -8504,17 +8500,16 @@ export class WorkflowStateArchiveMutation {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class User_AssignedIssuesQuery {
-  private _request: LinearRequest;
+export class User_AssignedIssuesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
-    return this._request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
+    return this.request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
       D.User_AssignedIssuesDocument,
       {
         id: this._id,
@@ -8522,7 +8517,7 @@ export class User_AssignedIssuesQuery {
       }
     ).then(response => {
       const data = response?.user?.assignedIssues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8533,22 +8528,21 @@ export class User_AssignedIssuesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class User_CreatedIssuesQuery {
-  private _request: LinearRequest;
+export class User_CreatedIssuesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
-    return this._request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
+    return this.request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.user?.createdIssues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8559,17 +8553,16 @@ export class User_CreatedIssuesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class User_TeamMembershipsQuery {
-  private _request: LinearRequest;
+export class User_TeamMembershipsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
-    return this._request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
+    return this.request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
       D.User_TeamMembershipsDocument,
       {
         id: this._id,
@@ -8577,7 +8570,7 @@ export class User_TeamMembershipsQuery {
       }
     ).then(response => {
       const data = response?.user?.teamMemberships;
-      return data ? new TeamMembershipConnection(this._request, data) : undefined;
+      return data ? new TeamMembershipConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8587,20 +8580,18 @@ export class User_TeamMembershipsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Viewer_AssignedIssuesQuery {
-  private _request: LinearRequest;
-
+export class Viewer_AssignedIssuesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.Viewer_AssignedIssuesQueryVariables) {
-    return this._request<D.Viewer_AssignedIssuesQuery, D.Viewer_AssignedIssuesQueryVariables>(
+    return this.request<D.Viewer_AssignedIssuesQuery, D.Viewer_AssignedIssuesQueryVariables>(
       D.Viewer_AssignedIssuesDocument,
       vars
     ).then(response => {
       const data = response?.viewer?.assignedIssues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8610,20 +8601,18 @@ export class Viewer_AssignedIssuesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Viewer_CreatedIssuesQuery {
-  private _request: LinearRequest;
-
+export class Viewer_CreatedIssuesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.Viewer_CreatedIssuesQueryVariables) {
-    return this._request<D.Viewer_CreatedIssuesQuery, D.Viewer_CreatedIssuesQueryVariables>(
+    return this.request<D.Viewer_CreatedIssuesQuery, D.Viewer_CreatedIssuesQueryVariables>(
       D.Viewer_CreatedIssuesDocument,
       vars
     ).then(response => {
       const data = response?.viewer?.createdIssues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8633,20 +8622,18 @@ export class Viewer_CreatedIssuesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Viewer_TeamMembershipsQuery {
-  private _request: LinearRequest;
-
+export class Viewer_TeamMembershipsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.Viewer_TeamMembershipsQueryVariables) {
-    return this._request<D.Viewer_TeamMembershipsQuery, D.Viewer_TeamMembershipsQueryVariables>(
+    return this.request<D.Viewer_TeamMembershipsQuery, D.Viewer_TeamMembershipsQueryVariables>(
       D.Viewer_TeamMembershipsDocument,
       vars
     ).then(response => {
       const data = response?.viewer?.teamMemberships;
-      return data ? new TeamMembershipConnection(this._request, data) : undefined;
+      return data ? new TeamMembershipConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8656,20 +8643,18 @@ export class Viewer_TeamMembershipsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Organization_UsersQuery {
-  private _request: LinearRequest;
-
+export class Organization_UsersQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.Organization_UsersQueryVariables) {
-    return this._request<D.Organization_UsersQuery, D.Organization_UsersQueryVariables>(
+    return this.request<D.Organization_UsersQuery, D.Organization_UsersQueryVariables>(
       D.Organization_UsersDocument,
       vars
     ).then(response => {
       const data = response?.organization?.users;
-      return data ? new UserConnection(this._request, data) : undefined;
+      return data ? new UserConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8679,20 +8664,18 @@ export class Organization_UsersQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Organization_TeamsQuery {
-  private _request: LinearRequest;
-
+export class Organization_TeamsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.Organization_TeamsQueryVariables) {
-    return this._request<D.Organization_TeamsQuery, D.Organization_TeamsQueryVariables>(
+    return this.request<D.Organization_TeamsQuery, D.Organization_TeamsQueryVariables>(
       D.Organization_TeamsDocument,
       vars
     ).then(response => {
       const data = response?.organization?.teams;
-      return data ? new TeamConnection(this._request, data) : undefined;
+      return data ? new TeamConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8702,20 +8685,18 @@ export class Organization_TeamsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Organization_MilestonesQuery {
-  private _request: LinearRequest;
-
+export class Organization_MilestonesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.Organization_MilestonesQueryVariables) {
-    return this._request<D.Organization_MilestonesQuery, D.Organization_MilestonesQueryVariables>(
+    return this.request<D.Organization_MilestonesQuery, D.Organization_MilestonesQueryVariables>(
       D.Organization_MilestonesDocument,
       vars
     ).then(response => {
       const data = response?.organization?.milestones;
-      return data ? new MilestoneConnection(this._request, data) : undefined;
+      return data ? new MilestoneConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8725,20 +8706,18 @@ export class Organization_MilestonesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Organization_IntegrationsQuery {
-  private _request: LinearRequest;
-
+export class Organization_IntegrationsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.Organization_IntegrationsQueryVariables) {
-    return this._request<D.Organization_IntegrationsQuery, D.Organization_IntegrationsQueryVariables>(
+    return this.request<D.Organization_IntegrationsQuery, D.Organization_IntegrationsQueryVariables>(
       D.Organization_IntegrationsDocument,
       vars
     ).then(response => {
       const data = response?.organization?.integrations;
-      return data ? new IntegrationConnection(this._request, data) : undefined;
+      return data ? new IntegrationConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8748,20 +8727,18 @@ export class Organization_IntegrationsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_UsersQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_UsersQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_UsersQueryVariables) {
-    return this._request<D.AdminUserAccountLookup_UsersQuery, D.AdminUserAccountLookup_UsersQueryVariables>(
+    return this.request<D.AdminUserAccountLookup_UsersQuery, D.AdminUserAccountLookup_UsersQueryVariables>(
       D.AdminUserAccountLookup_UsersDocument,
       vars
     ).then(response => {
       const data = response?.adminUserAccountLookup?.users;
-      return data ? new undefined(this._request, data) : undefined;
+      return data ? new undefined(this.request, data) : undefined;
     });
   }
 }
@@ -8771,20 +8748,18 @@ export class AdminUserAccountLookup_UsersQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_AssignedIssuesQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_AssignedIssuesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_AssignedIssuesQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_AssignedIssuesQuery,
       D.AdminUserAccountLookup_Users_AssignedIssuesQueryVariables
-    >(D.AdminUserAccountLookup_Users_AssignedIssuesDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_AssignedIssuesDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.assignedIssues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8794,20 +8769,18 @@ export class AdminUserAccountLookup_Users_AssignedIssuesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_CreatedIssuesQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_CreatedIssuesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_CreatedIssuesQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_CreatedIssuesQuery,
       D.AdminUserAccountLookup_Users_CreatedIssuesQueryVariables
-    >(D.AdminUserAccountLookup_Users_CreatedIssuesDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_CreatedIssuesDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.createdIssues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8817,20 +8790,18 @@ export class AdminUserAccountLookup_Users_CreatedIssuesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_OrganizationQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_OrganizationQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_OrganizationQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_OrganizationQuery,
       D.AdminUserAccountLookup_Users_OrganizationQueryVariables
-    >(D.AdminUserAccountLookup_Users_OrganizationDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_OrganizationDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.organization;
-      return data ? new OrganizationAdminPrivileged(this._request, data) : undefined;
+      return data ? new OrganizationAdminPrivileged(this.request, data) : undefined;
     });
   }
 }
@@ -8840,20 +8811,18 @@ export class AdminUserAccountLookup_Users_OrganizationQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_TeamMembershipsQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_TeamMembershipsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_TeamMembershipsQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_TeamMembershipsQuery,
       D.AdminUserAccountLookup_Users_TeamMembershipsQueryVariables
-    >(D.AdminUserAccountLookup_Users_TeamMembershipsDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_TeamMembershipsDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.teamMemberships;
-      return data ? new TeamMembershipConnection(this._request, data) : undefined;
+      return data ? new TeamMembershipConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8863,20 +8832,18 @@ export class AdminUserAccountLookup_Users_TeamMembershipsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_UsersQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_Organization_UsersQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_UsersQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_Organization_UsersQuery,
       D.AdminUserAccountLookup_Users_Organization_UsersQueryVariables
-    >(D.AdminUserAccountLookup_Users_Organization_UsersDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_Organization_UsersDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.organization?.users;
-      return data ? new UserConnection(this._request, data) : undefined;
+      return data ? new UserConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8886,20 +8853,18 @@ export class AdminUserAccountLookup_Users_Organization_UsersQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_TeamsQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_Organization_TeamsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_TeamsQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_Organization_TeamsQuery,
       D.AdminUserAccountLookup_Users_Organization_TeamsQueryVariables
-    >(D.AdminUserAccountLookup_Users_Organization_TeamsDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_Organization_TeamsDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.organization?.teams;
-      return data ? new TeamConnection(this._request, data) : undefined;
+      return data ? new TeamConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8909,20 +8874,18 @@ export class AdminUserAccountLookup_Users_Organization_TeamsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_MilestonesQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_Organization_MilestonesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_MilestonesQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_Organization_MilestonesQuery,
       D.AdminUserAccountLookup_Users_Organization_MilestonesQueryVariables
-    >(D.AdminUserAccountLookup_Users_Organization_MilestonesDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_Organization_MilestonesDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.organization?.milestones;
-      return data ? new MilestoneConnection(this._request, data) : undefined;
+      return data ? new MilestoneConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8932,20 +8895,18 @@ export class AdminUserAccountLookup_Users_Organization_MilestonesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_IntegrationsQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_Organization_IntegrationsQuery,
       D.AdminUserAccountLookup_Users_Organization_IntegrationsQueryVariables
-    >(D.AdminUserAccountLookup_Users_Organization_IntegrationsDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_Organization_IntegrationsDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.organization?.integrations;
-      return data ? new IntegrationConnection(this._request, data) : undefined;
+      return data ? new IntegrationConnection(this.request, data) : undefined;
     });
   }
 }
@@ -8955,20 +8916,18 @@ export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery {
-  private _request: LinearRequest;
-
+export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables) {
-    return this._request<
+    return this.request<
       D.AdminUserAccountLookup_Users_Organization_SubscriptionQuery,
       D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables
-    >(D.AdminUserAccountLookup_Users_Organization_SubscriptionDocument).then(response => {
+    >(D.AdminUserAccountLookup_Users_Organization_SubscriptionDocument, vars).then(response => {
       const data = response?.adminUserAccountLookup?.users?.organization?.subscription;
-      return data ? new SubscriptionAdminPrivileged(this._request, data) : undefined;
+      return data ? new SubscriptionAdminPrivileged(this.request, data) : undefined;
     });
   }
 }
@@ -8978,20 +8937,18 @@ export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_UsersQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_UsersQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.AvailableUsers_UsersQuery, D.AvailableUsers_UsersQueryVariables>(
+    return this.request<D.AvailableUsers_UsersQuery, D.AvailableUsers_UsersQueryVariables>(
       D.AvailableUsers_UsersDocument,
       {}
     ).then(response => {
       const data = response?.availableUsers?.users;
-      return data ? new undefined(this._request, data) : undefined;
+      return data ? new undefined(this.request, data) : undefined;
     });
   }
 }
@@ -9001,20 +8958,18 @@ export class AvailableUsers_UsersQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_AvailableOrganizationsQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_AvailableOrganizationsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<
+    return this.request<
       D.AvailableUsers_AvailableOrganizationsQuery,
       D.AvailableUsers_AvailableOrganizationsQueryVariables
     >(D.AvailableUsers_AvailableOrganizationsDocument, {}).then(response => {
       const data = response?.availableUsers?.availableOrganizations;
-      return data ? new undefined(this._request, data) : undefined;
+      return data ? new undefined(this.request, data) : undefined;
     });
   }
 }
@@ -9024,20 +8979,18 @@ export class AvailableUsers_AvailableOrganizationsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_Users_AssignedIssuesQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_Users_AssignedIssuesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AvailableUsers_Users_AssignedIssuesQueryVariables) {
-    return this._request<
+    return this.request<
       D.AvailableUsers_Users_AssignedIssuesQuery,
       D.AvailableUsers_Users_AssignedIssuesQueryVariables
-    >(D.AvailableUsers_Users_AssignedIssuesDocument).then(response => {
+    >(D.AvailableUsers_Users_AssignedIssuesDocument, vars).then(response => {
       const data = response?.availableUsers?.users?.assignedIssues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9047,19 +9000,18 @@ export class AvailableUsers_Users_AssignedIssuesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_Users_CreatedIssuesQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_Users_CreatedIssuesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AvailableUsers_Users_CreatedIssuesQueryVariables) {
-    return this._request<D.AvailableUsers_Users_CreatedIssuesQuery, D.AvailableUsers_Users_CreatedIssuesQueryVariables>(
-      D.AvailableUsers_Users_CreatedIssuesDocument
+    return this.request<D.AvailableUsers_Users_CreatedIssuesQuery, D.AvailableUsers_Users_CreatedIssuesQueryVariables>(
+      D.AvailableUsers_Users_CreatedIssuesDocument,
+      vars
     ).then(response => {
       const data = response?.availableUsers?.users?.createdIssues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9069,20 +9021,18 @@ export class AvailableUsers_Users_CreatedIssuesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_Users_TeamMembershipsQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_Users_TeamMembershipsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AvailableUsers_Users_TeamMembershipsQueryVariables) {
-    return this._request<
+    return this.request<
       D.AvailableUsers_Users_TeamMembershipsQuery,
       D.AvailableUsers_Users_TeamMembershipsQueryVariables
-    >(D.AvailableUsers_Users_TeamMembershipsDocument).then(response => {
+    >(D.AvailableUsers_Users_TeamMembershipsDocument, vars).then(response => {
       const data = response?.availableUsers?.users?.teamMemberships;
-      return data ? new TeamMembershipConnection(this._request, data) : undefined;
+      return data ? new TeamMembershipConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9092,20 +9042,18 @@ export class AvailableUsers_Users_TeamMembershipsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_AvailableOrganizations_UsersQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_AvailableOrganizations_UsersQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_UsersQueryVariables) {
-    return this._request<
+    return this.request<
       D.AvailableUsers_AvailableOrganizations_UsersQuery,
       D.AvailableUsers_AvailableOrganizations_UsersQueryVariables
-    >(D.AvailableUsers_AvailableOrganizations_UsersDocument).then(response => {
+    >(D.AvailableUsers_AvailableOrganizations_UsersDocument, vars).then(response => {
       const data = response?.availableUsers?.availableOrganizations?.users;
-      return data ? new UserConnection(this._request, data) : undefined;
+      return data ? new UserConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9115,20 +9063,18 @@ export class AvailableUsers_AvailableOrganizations_UsersQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_AvailableOrganizations_TeamsQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_AvailableOrganizations_TeamsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_TeamsQueryVariables) {
-    return this._request<
+    return this.request<
       D.AvailableUsers_AvailableOrganizations_TeamsQuery,
       D.AvailableUsers_AvailableOrganizations_TeamsQueryVariables
-    >(D.AvailableUsers_AvailableOrganizations_TeamsDocument).then(response => {
+    >(D.AvailableUsers_AvailableOrganizations_TeamsDocument, vars).then(response => {
       const data = response?.availableUsers?.availableOrganizations?.teams;
-      return data ? new TeamConnection(this._request, data) : undefined;
+      return data ? new TeamConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9138,20 +9084,18 @@ export class AvailableUsers_AvailableOrganizations_TeamsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_AvailableOrganizations_MilestonesQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_AvailableOrganizations_MilestonesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_MilestonesQueryVariables) {
-    return this._request<
+    return this.request<
       D.AvailableUsers_AvailableOrganizations_MilestonesQuery,
       D.AvailableUsers_AvailableOrganizations_MilestonesQueryVariables
-    >(D.AvailableUsers_AvailableOrganizations_MilestonesDocument).then(response => {
+    >(D.AvailableUsers_AvailableOrganizations_MilestonesDocument, vars).then(response => {
       const data = response?.availableUsers?.availableOrganizations?.milestones;
-      return data ? new MilestoneConnection(this._request, data) : undefined;
+      return data ? new MilestoneConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9161,20 +9105,18 @@ export class AvailableUsers_AvailableOrganizations_MilestonesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class AvailableUsers_AvailableOrganizations_IntegrationsQuery {
-  private _request: LinearRequest;
-
+export class AvailableUsers_AvailableOrganizations_IntegrationsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_IntegrationsQueryVariables) {
-    return this._request<
+    return this.request<
       D.AvailableUsers_AvailableOrganizations_IntegrationsQuery,
       D.AvailableUsers_AvailableOrganizations_IntegrationsQueryVariables
-    >(D.AvailableUsers_AvailableOrganizations_IntegrationsDocument).then(response => {
+    >(D.AvailableUsers_AvailableOrganizations_IntegrationsDocument, vars).then(response => {
       const data = response?.availableUsers?.availableOrganizations?.integrations;
-      return data ? new IntegrationConnection(this._request, data) : undefined;
+      return data ? new IntegrationConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9184,20 +9126,18 @@ export class AvailableUsers_AvailableOrganizations_IntegrationsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class BillingDetails_InvoicesQuery {
-  private _request: LinearRequest;
-
+export class BillingDetails_InvoicesQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.BillingDetails_InvoicesQuery, D.BillingDetails_InvoicesQueryVariables>(
+    return this.request<D.BillingDetails_InvoicesQuery, D.BillingDetails_InvoicesQueryVariables>(
       D.BillingDetails_InvoicesDocument,
       {}
     ).then(response => {
       const data = response?.billingDetails?.invoices;
-      return data ? new undefined(this._request, data) : undefined;
+      return data ? new undefined(this.request, data) : undefined;
     });
   }
 }
@@ -9207,20 +9147,18 @@ export class BillingDetails_InvoicesQuery {
  *
  * @param request - function to call the graphql client
  */
-export class BillingDetails_PaymentMethodQuery {
-  private _request: LinearRequest;
-
+export class BillingDetails_PaymentMethodQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.BillingDetails_PaymentMethodQuery, D.BillingDetails_PaymentMethodQueryVariables>(
+    return this.request<D.BillingDetails_PaymentMethodQuery, D.BillingDetails_PaymentMethodQueryVariables>(
       D.BillingDetails_PaymentMethodDocument,
       {}
     ).then(response => {
       const data = response?.billingDetails?.paymentMethod;
-      return data ? new Card(this._request, data) : undefined;
+      return data ? new Card(this.request, data) : undefined;
     });
   }
 }
@@ -9233,21 +9171,20 @@ export class BillingDetails_PaymentMethodQuery {
  * @param issueId - undefined
  * @param version - undefined
  */
-export class CollaborativeDocumentJoin_StepsQuery {
-  private _request: LinearRequest;
+export class CollaborativeDocumentJoin_StepsQuery extends Request {
   private _clientId: string;
   private _issueId: string;
   private _version: number;
 
   public constructor(request: LinearRequest, clientId: string, issueId: string, version: number) {
-    this._request = request;
+    super(request);
     this._clientId = clientId;
     this._issueId = issueId;
     this._version = version;
   }
 
   public async fetch() {
-    return this._request<D.CollaborativeDocumentJoin_StepsQuery, D.CollaborativeDocumentJoin_StepsQueryVariables>(
+    return this.request<D.CollaborativeDocumentJoin_StepsQuery, D.CollaborativeDocumentJoin_StepsQueryVariables>(
       D.CollaborativeDocumentJoin_StepsDocument,
       {
         clientId: this._clientId,
@@ -9256,7 +9193,7 @@ export class CollaborativeDocumentJoin_StepsQuery {
       }
     ).then(response => {
       const data = response?.collaborativeDocumentJoin?.steps;
-      return data ? new StepsResponse(this._request, data) : undefined;
+      return data ? new StepsResponse(this.request, data) : undefined;
     });
   }
 }
@@ -9267,22 +9204,21 @@ export class CollaborativeDocumentJoin_StepsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Cycle_IssuesQuery {
-  private _request: LinearRequest;
+export class Cycle_IssuesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
-    return this._request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
+    return this.request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.cycle?.issues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9293,17 +9229,16 @@ export class Cycle_IssuesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Cycle_UncompletedIssuesUponCloseQuery {
-  private _request: LinearRequest;
+export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
-    return this._request<D.Cycle_UncompletedIssuesUponCloseQuery, D.Cycle_UncompletedIssuesUponCloseQueryVariables>(
+    return this.request<D.Cycle_UncompletedIssuesUponCloseQuery, D.Cycle_UncompletedIssuesUponCloseQueryVariables>(
       D.Cycle_UncompletedIssuesUponCloseDocument,
       {
         id: this._id,
@@ -9311,7 +9246,7 @@ export class Cycle_UncompletedIssuesUponCloseQuery {
       }
     ).then(response => {
       const data = response?.cycle?.uncompletedIssuesUponClose;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9322,17 +9257,16 @@ export class Cycle_UncompletedIssuesUponCloseQuery {
  * @param request - function to call the graphql client
  * @param fileId - undefined
  */
-export class FigmaEmbedInfo_FigmaEmbedQuery {
-  private _request: LinearRequest;
+export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
   private _fileId: string;
 
   public constructor(request: LinearRequest, fileId: string) {
-    this._request = request;
+    super(request);
     this._fileId = fileId;
   }
 
   public async fetch(vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">) {
-    return this._request<D.FigmaEmbedInfo_FigmaEmbedQuery, D.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
+    return this.request<D.FigmaEmbedInfo_FigmaEmbedQuery, D.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       D.FigmaEmbedInfo_FigmaEmbedDocument,
       {
         fileId: this._fileId,
@@ -9340,7 +9274,7 @@ export class FigmaEmbedInfo_FigmaEmbedQuery {
       }
     ).then(response => {
       const data = response?.figmaEmbedInfo?.figmaEmbed;
-      return data ? new FigmaEmbed(this._request, data) : undefined;
+      return data ? new FigmaEmbed(this.request, data) : undefined;
     });
   }
 }
@@ -9351,24 +9285,23 @@ export class FigmaEmbedInfo_FigmaEmbedQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Integration_SettingsQuery {
-  private _request: LinearRequest;
+export class Integration_SettingsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch() {
-    return this._request<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
+    return this.request<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
       D.Integration_SettingsDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integration?.settings;
-      return data ? new IntegrationSettings(this._request, data) : undefined;
+      return data ? new IntegrationSettings(this.request, data) : undefined;
     });
   }
 }
@@ -9378,19 +9311,20 @@ export class Integration_SettingsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Integration_Settings_SlackPostQuery {
-  private _request: LinearRequest;
-
+export class Integration_Settings_SlackPostQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
-      D.Integration_Settings_SlackPostDocument
+    return this.request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
+      D.Integration_Settings_SlackPostDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.integration?.settings?.slackPost;
-      return data ? new SlackPostSettings(this._request, data) : undefined;
+      return data ? new SlackPostSettings(this.request, data) : undefined;
     });
   }
 }
@@ -9400,20 +9334,20 @@ export class Integration_Settings_SlackPostQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Integration_Settings_SlackProjectPostQuery {
-  private _request: LinearRequest;
-
+export class Integration_Settings_SlackProjectPostQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<
+    return this.request<
       D.Integration_Settings_SlackProjectPostQuery,
       D.Integration_Settings_SlackProjectPostQueryVariables
-    >(D.Integration_Settings_SlackProjectPostDocument).then(response => {
+    >(D.Integration_Settings_SlackProjectPostDocument, {
+      id,
+    }).then(response => {
       const data = response?.integration?.settings?.slackProjectPost;
-      return data ? new SlackPostSettings(this._request, data) : undefined;
+      return data ? new SlackPostSettings(this.request, data) : undefined;
     });
   }
 }
@@ -9423,19 +9357,20 @@ export class Integration_Settings_SlackProjectPostQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Integration_Settings_GoogleSheetsQuery {
-  private _request: LinearRequest;
-
+export class Integration_Settings_GoogleSheetsQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
-      D.Integration_Settings_GoogleSheetsDocument
+    return this.request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
+      D.Integration_Settings_GoogleSheetsDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.integration?.settings?.googleSheets;
-      return data ? new GoogleSheetsSettings(this._request, data) : undefined;
+      return data ? new GoogleSheetsSettings(this.request, data) : undefined;
     });
   }
 }
@@ -9445,19 +9380,20 @@ export class Integration_Settings_GoogleSheetsQuery {
  *
  * @param request - function to call the graphql client
  */
-export class Integration_Settings_SentryQuery {
-  private _request: LinearRequest;
-
+export class Integration_Settings_SentryQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
-      D.Integration_Settings_SentryDocument
+    return this.request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
+      D.Integration_Settings_SentryDocument,
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.integration?.settings?.sentry;
-      return data ? new SentrySettings(this._request, data) : undefined;
+      return data ? new SentrySettings(this.request, data) : undefined;
     });
   }
 }
@@ -9468,24 +9404,23 @@ export class Integration_Settings_SentryQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class IntegrationResource_DataQuery {
-  private _request: LinearRequest;
+export class IntegrationResource_DataQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch() {
-    return this._request<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
+    return this.request<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
       D.IntegrationResource_DataDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integrationResource?.data;
-      return data ? new IntegrationResourceData(this._request, data) : undefined;
+      return data ? new IntegrationResourceData(this.request, data) : undefined;
     });
   }
 }
@@ -9496,24 +9431,23 @@ export class IntegrationResource_DataQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class IntegrationResource_PullRequestQuery {
-  private _request: LinearRequest;
+export class IntegrationResource_PullRequestQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch() {
-    return this._request<D.IntegrationResource_PullRequestQuery, D.IntegrationResource_PullRequestQueryVariables>(
+    return this.request<D.IntegrationResource_PullRequestQuery, D.IntegrationResource_PullRequestQueryVariables>(
       D.IntegrationResource_PullRequestDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integrationResource?.pullRequest;
-      return data ? new PullRequestPayload(this._request, data) : undefined;
+      return data ? new PullRequestPayload(this.request, data) : undefined;
     });
   }
 }
@@ -9523,20 +9457,20 @@ export class IntegrationResource_PullRequestQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResource_Data_GithubPullRequestQuery {
-  private _request: LinearRequest;
-
+export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<
+    return this.request<
       D.IntegrationResource_Data_GithubPullRequestQuery,
       D.IntegrationResource_Data_GithubPullRequestQueryVariables
-    >(D.IntegrationResource_Data_GithubPullRequestDocument).then(response => {
+    >(D.IntegrationResource_Data_GithubPullRequestDocument, {
+      id,
+    }).then(response => {
       const data = response?.integrationResource?.data?.githubPullRequest;
-      return data ? new PullRequestPayload(this._request, data) : undefined;
+      return data ? new PullRequestPayload(this.request, data) : undefined;
     });
   }
 }
@@ -9546,20 +9480,20 @@ export class IntegrationResource_Data_GithubPullRequestQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResource_Data_GitlabMergeRequestQuery {
-  private _request: LinearRequest;
-
+export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<
+    return this.request<
       D.IntegrationResource_Data_GitlabMergeRequestQuery,
       D.IntegrationResource_Data_GitlabMergeRequestQueryVariables
-    >(D.IntegrationResource_Data_GitlabMergeRequestDocument).then(response => {
+    >(D.IntegrationResource_Data_GitlabMergeRequestDocument, {
+      id,
+    }).then(response => {
       const data = response?.integrationResource?.data?.gitlabMergeRequest;
-      return data ? new PullRequestPayload(this._request, data) : undefined;
+      return data ? new PullRequestPayload(this.request, data) : undefined;
     });
   }
 }
@@ -9569,20 +9503,20 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResource_Data_GithubCommitQuery {
-  private _request: LinearRequest;
-
+export class IntegrationResource_Data_GithubCommitQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<
+    return this.request<
       D.IntegrationResource_Data_GithubCommitQuery,
       D.IntegrationResource_Data_GithubCommitQueryVariables
-    >(D.IntegrationResource_Data_GithubCommitDocument).then(response => {
+    >(D.IntegrationResource_Data_GithubCommitDocument, {
+      id,
+    }).then(response => {
       const data = response?.integrationResource?.data?.githubCommit;
-      return data ? new CommitPayload(this._request, data) : undefined;
+      return data ? new CommitPayload(this.request, data) : undefined;
     });
   }
 }
@@ -9592,20 +9526,20 @@ export class IntegrationResource_Data_GithubCommitQuery {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResource_Data_SentryIssueQuery {
-  private _request: LinearRequest;
-
+export class IntegrationResource_Data_SentryIssueQuery extends Request {
   public constructor(request: LinearRequest) {
-    this._request = request;
+    super(request);
   }
 
   public async fetch() {
-    return this._request<
+    return this.request<
       D.IntegrationResource_Data_SentryIssueQuery,
       D.IntegrationResource_Data_SentryIssueQueryVariables
-    >(D.IntegrationResource_Data_SentryIssueDocument).then(response => {
+    >(D.IntegrationResource_Data_SentryIssueDocument, {
+      id,
+    }).then(response => {
       const data = response?.integrationResource?.data?.sentryIssue;
-      return data ? new SentryIssuePayload(this._request, data) : undefined;
+      return data ? new SentryIssuePayload(this.request, data) : undefined;
     });
   }
 }
@@ -9616,17 +9550,16 @@ export class IntegrationResource_Data_SentryIssueQuery {
  * @param request - function to call the graphql client
  * @param userHash - undefined
  */
-export class InviteInfo_InviteDataQuery {
-  private _request: LinearRequest;
+export class InviteInfo_InviteDataQuery extends Request {
   private _userHash: string;
 
   public constructor(request: LinearRequest, userHash: string) {
-    this._request = request;
+    super(request);
     this._userHash = userHash;
   }
 
   public async fetch(vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">) {
-    return this._request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
+    return this.request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
       D.InviteInfo_InviteDataDocument,
       {
         userHash: this._userHash,
@@ -9634,7 +9567,7 @@ export class InviteInfo_InviteDataQuery {
       }
     ).then(response => {
       const data = response?.inviteInfo?.inviteData;
-      return data ? new InviteData(this._request, data) : undefined;
+      return data ? new InviteData(this.request, data) : undefined;
     });
   }
 }
@@ -9645,22 +9578,21 @@ export class InviteInfo_InviteDataQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class IssueLabel_IssuesQuery {
-  private _request: LinearRequest;
+export class IssueLabel_IssuesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
-    return this._request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
+    return this.request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issueLabel?.issues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9671,22 +9603,21 @@ export class IssueLabel_IssuesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Issue_SubscribersQuery {
-  private _request: LinearRequest;
+export class Issue_SubscribersQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
-    return this._request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
+    return this.request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.subscribers;
-      return data ? new UserConnection(this._request, data) : undefined;
+      return data ? new UserConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9697,22 +9628,21 @@ export class Issue_SubscribersQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Issue_ChildrenQuery {
-  private _request: LinearRequest;
+export class Issue_ChildrenQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
-    return this._request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
+    return this.request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.children;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9723,22 +9653,21 @@ export class Issue_ChildrenQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Issue_CommentsQuery {
-  private _request: LinearRequest;
+export class Issue_CommentsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">) {
-    return this._request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
+    return this.request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.comments;
-      return data ? new CommentConnection(this._request, data) : undefined;
+      return data ? new CommentConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9749,22 +9678,21 @@ export class Issue_CommentsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Issue_HistoryQuery {
-  private _request: LinearRequest;
+export class Issue_HistoryQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">) {
-    return this._request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
+    return this.request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.history;
-      return data ? new IssueHistoryConnection(this._request, data) : undefined;
+      return data ? new IssueHistoryConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9775,22 +9703,21 @@ export class Issue_HistoryQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Issue_LabelsQuery {
-  private _request: LinearRequest;
+export class Issue_LabelsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">) {
-    return this._request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
+    return this.request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.labels;
-      return data ? new IssueLabelConnection(this._request, data) : undefined;
+      return data ? new IssueLabelConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9801,17 +9728,16 @@ export class Issue_LabelsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Issue_IntegrationResourcesQuery {
-  private _request: LinearRequest;
+export class Issue_IntegrationResourcesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
-    return this._request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
+    return this.request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
       D.Issue_IntegrationResourcesDocument,
       {
         id: this._id,
@@ -9819,7 +9745,7 @@ export class Issue_IntegrationResourcesQuery {
       }
     ).then(response => {
       const data = response?.issue?.integrationResources;
-      return data ? new IntegrationResourceConnection(this._request, data) : undefined;
+      return data ? new IntegrationResourceConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9830,22 +9756,21 @@ export class Issue_IntegrationResourcesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Issue_RelationsQuery {
-  private _request: LinearRequest;
+export class Issue_RelationsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">) {
-    return this._request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
+    return this.request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.relations;
-      return data ? new IssueRelationConnection(this._request, data) : undefined;
+      return data ? new IssueRelationConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9856,17 +9781,16 @@ export class Issue_RelationsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Issue_InverseRelationsQuery {
-  private _request: LinearRequest;
+export class Issue_InverseRelationsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
-    return this._request<D.Issue_InverseRelationsQuery, D.Issue_InverseRelationsQueryVariables>(
+    return this.request<D.Issue_InverseRelationsQuery, D.Issue_InverseRelationsQueryVariables>(
       D.Issue_InverseRelationsDocument,
       {
         id: this._id,
@@ -9874,7 +9798,7 @@ export class Issue_InverseRelationsQuery {
       }
     ).then(response => {
       const data = response?.issue?.inverseRelations;
-      return data ? new IssueRelationConnection(this._request, data) : undefined;
+      return data ? new IssueRelationConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9885,22 +9809,21 @@ export class Issue_InverseRelationsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Milestone_ProjectsQuery {
-  private _request: LinearRequest;
+export class Milestone_ProjectsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
-    return this._request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
+    return this.request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.milestone?.projects;
-      return data ? new ProjectConnection(this._request, data) : undefined;
+      return data ? new ProjectConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9911,17 +9834,16 @@ export class Milestone_ProjectsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class OrganizationInvite_IssuesQuery {
-  private _request: LinearRequest;
+export class OrganizationInvite_IssuesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
-    return this._request<D.OrganizationInvite_IssuesQuery, D.OrganizationInvite_IssuesQueryVariables>(
+    return this.request<D.OrganizationInvite_IssuesQuery, D.OrganizationInvite_IssuesQueryVariables>(
       D.OrganizationInvite_IssuesDocument,
       {
         id: this._id,
@@ -9929,7 +9851,7 @@ export class OrganizationInvite_IssuesQuery {
       }
     ).then(response => {
       const data = response?.organizationInvite?.issues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9940,22 +9862,21 @@ export class OrganizationInvite_IssuesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Project_TeamsQuery {
-  private _request: LinearRequest;
+export class Project_TeamsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">) {
-    return this._request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
+    return this.request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.project?.teams;
-      return data ? new TeamConnection(this._request, data) : undefined;
+      return data ? new TeamConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9966,22 +9887,21 @@ export class Project_TeamsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Project_MembersQuery {
-  private _request: LinearRequest;
+export class Project_MembersQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">) {
-    return this._request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
+    return this.request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.project?.members;
-      return data ? new UserConnection(this._request, data) : undefined;
+      return data ? new UserConnection(this.request, data) : undefined;
     });
   }
 }
@@ -9992,22 +9912,21 @@ export class Project_MembersQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Project_IssuesQuery {
-  private _request: LinearRequest;
+export class Project_IssuesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">) {
-    return this._request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
+    return this.request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.project?.issues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10018,22 +9937,21 @@ export class Project_IssuesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Project_LinksQuery {
-  private _request: LinearRequest;
+export class Project_LinksQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">) {
-    return this._request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
+    return this.request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.project?.links;
-      return data ? new ProjectLinkConnection(this._request, data) : undefined;
+      return data ? new ProjectLinkConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10044,22 +9962,21 @@ export class Project_LinksQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Team_IssuesQuery {
-  private _request: LinearRequest;
+export class Team_IssuesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">) {
-    return this._request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
+    return this.request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.issues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10070,22 +9987,21 @@ export class Team_IssuesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Team_CyclesQuery {
-  private _request: LinearRequest;
+export class Team_CyclesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">) {
-    return this._request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
+    return this.request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.cycles;
-      return data ? new CycleConnection(this._request, data) : undefined;
+      return data ? new CycleConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10096,22 +10012,21 @@ export class Team_CyclesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Team_MembershipsQuery {
-  private _request: LinearRequest;
+export class Team_MembershipsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_MembershipsQueryVariables, "id">) {
-    return this._request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
+    return this.request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.memberships;
-      return data ? new TeamMembershipConnection(this._request, data) : undefined;
+      return data ? new TeamMembershipConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10122,22 +10037,21 @@ export class Team_MembershipsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Team_ProjectsQuery {
-  private _request: LinearRequest;
+export class Team_ProjectsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">) {
-    return this._request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
+    return this.request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.projects;
-      return data ? new ProjectConnection(this._request, data) : undefined;
+      return data ? new ProjectConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10148,22 +10062,21 @@ export class Team_ProjectsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Team_StatesQuery {
-  private _request: LinearRequest;
+export class Team_StatesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">) {
-    return this._request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
+    return this.request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.states;
-      return data ? new WorkflowStateConnection(this._request, data) : undefined;
+      return data ? new WorkflowStateConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10174,22 +10087,21 @@ export class Team_StatesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Team_TemplatesQuery {
-  private _request: LinearRequest;
+export class Team_TemplatesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">) {
-    return this._request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
+    return this.request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.templates;
-      return data ? new TemplateConnection(this._request, data) : undefined;
+      return data ? new TemplateConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10200,22 +10112,21 @@ export class Team_TemplatesQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Team_LabelsQuery {
-  private _request: LinearRequest;
+export class Team_LabelsQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">) {
-    return this._request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
+    return this.request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.labels;
-      return data ? new IssueLabelConnection(this._request, data) : undefined;
+      return data ? new IssueLabelConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10226,22 +10137,21 @@ export class Team_LabelsQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class Team_WebhooksQuery {
-  private _request: LinearRequest;
+export class Team_WebhooksQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">) {
-    return this._request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
+    return this.request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
       id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.webhooks;
-      return data ? new WebhookConnection(this._request, data) : undefined;
+      return data ? new WebhookConnection(this.request, data) : undefined;
     });
   }
 }
@@ -10252,17 +10162,16 @@ export class Team_WebhooksQuery {
  * @param request - function to call the graphql client
  * @param id - undefined
  */
-export class WorkflowState_IssuesQuery {
-  private _request: LinearRequest;
+export class WorkflowState_IssuesQuery extends Request {
   private _id: string;
 
   public constructor(request: LinearRequest, id: string) {
-    this._request = request;
+    super(request);
     this._id = id;
   }
 
   public async fetch(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
-    return this._request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
+    return this.request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
       D.WorkflowState_IssuesDocument,
       {
         id: this._id,
@@ -10270,7 +10179,7 @@ export class WorkflowState_IssuesQuery {
       }
     ).then(response => {
       const data = response?.workflowState?.issues;
-      return data ? new IssueConnection(this._request, data) : undefined;
+      return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
 }
