@@ -14,6 +14,7 @@ import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import c from "./constants";
 import {
+  SdkConnectionField,
   SdkListField,
   SdkModel,
   SdkModelField,
@@ -69,6 +70,8 @@ export class ModelVisitor<C> {
             list: (node.fields?.filter(field => field.__typename === SdkModelFieldType.list) ?? []) as SdkListField[],
             scalarList: (node.fields?.filter(field => field.__typename === SdkModelFieldType.scalarList) ??
               []) as SdkScalarListField[],
+            connection: (node.fields?.filter(field => field.__typename === SdkModelFieldType.connection) ??
+              []) as SdkConnectionField[],
           },
         };
       } else {
@@ -140,14 +143,24 @@ export class ModelVisitor<C> {
 
         /** Identify object fields without queries */
         const object = findObject(this._context, node);
-        if (object && !isConnection(object)) {
-          return {
-            __typename: SdkModelFieldType.object,
-            node,
-            name,
-            type,
-            object,
-          };
+        if (object) {
+          if (isConnection(object)) {
+            return {
+              __typename: SdkModelFieldType.connection,
+              node,
+              name,
+              type,
+              object,
+            };
+          } else {
+            return {
+              __typename: SdkModelFieldType.object,
+              node,
+              name,
+              type,
+              object,
+            };
+          }
         }
 
         logger.trace({ object, node, name, type });

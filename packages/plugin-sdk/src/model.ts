@@ -6,7 +6,6 @@ import {
   printTypescriptType,
   reduceListType,
 } from "@linear/plugin-common";
-import { Kind } from "graphql";
 import c from "./constants";
 import { printNamespaced, printPascal } from "./print";
 import { getRequestArg } from "./request";
@@ -149,37 +148,22 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                 const fieldQueryName = `${printPascal(field.query.name.value)}Query`;
                 const fieldQueryArgs = field.args?.map(arg => `this._${field.name}?.${arg.name}`);
 
-                if (
-                  field.node.type.kind === Kind.LIST_TYPE ||
-                  (field.node.type.kind === Kind.NON_NULL_TYPE && field.node.type.type.kind === Kind.LIST_TYPE)
-                ) {
+                if (fieldQueryArgs.length) {
                   return printModelField(
                     field,
-                    `public get ${field.name}(): ${typeName}[] | undefined {
-                      return this._${field.name}?.map(node => new ${typeName}(
-                        this.${c.REQUEST_NAME}, 
-                        node,
-                      ))
-                    }`
+                    `public get ${field.name}(): Promise<${typeName} | undefined> | undefined {
+                        return ${printList(fieldQueryArgs, " && ")} ? new ${fieldQueryName}(this.${
+                      c.REQUEST_NAME
+                    }).fetch(${printList(fieldQueryArgs, ", ")}) : undefined
+                      }`
                   );
                 } else {
-                  if (fieldQueryArgs.length) {
-                    return printModelField(
-                      field,
-                      `public get ${field.name}(): Promise<${typeName} | undefined> | undefined {
-                        return ${printList(fieldQueryArgs, " && ")} ? new ${fieldQueryName}(this.${
-                        c.REQUEST_NAME
-                      }).fetch(${printList(fieldQueryArgs, ", ")}) : undefined
-                      }`
-                    );
-                  } else {
-                    return printModelField(
-                      field,
-                      `public get ${field.name}(): Promise<${typeName} | undefined> {
+                  return printModelField(
+                    field,
+                    `public get ${field.name}(): Promise<${typeName} | undefined> {
                         return new ${fieldQueryName}(this.${c.REQUEST_NAME}).fetch(${printList(fieldQueryArgs, ", ")})
                       }`
-                    );
-                  }
+                  );
                 }
               }),
               "\n"
@@ -187,6 +171,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           ],
           "\n"
         )}
+        
       }`,
     ],
     "\n"
