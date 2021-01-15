@@ -3,7 +3,7 @@ import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
 import { ContextVisitor, logger, nonNullable, PluginContext, printList } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
-import { printSdkClasses } from "./class";
+import { printOperations } from "./class";
 import c from "./constants";
 import { getSdkDefinitions } from "./definitions";
 import { printModels } from "./model";
@@ -54,7 +54,7 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
 
     /** Print the query return types  */
     logger.info("Generating operations");
-    const printedOperations = printSdkClasses(sdkContext);
+    const printedOperations = printOperations(sdkContext);
 
     // /** Print each api definition  */
     // const printedDefinitions = Object.entries(sdkDefinitions).map(([apiKey, definition]) => {

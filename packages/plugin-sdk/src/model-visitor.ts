@@ -1,25 +1,27 @@
 import {
-  ArgumentTypescriptVisitor,
   findObject,
   findQuery,
   isConnection,
+  isScalarField,
   isValidField,
   OperationType,
   PluginContext,
+  printTypescriptType,
   reduceListType,
-  reduceTypeName,
 } from "@linear/plugin-common";
 import autoBind from "auto-bind";
-import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode, TypeNode, visit } from "graphql";
+import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import c from "./constants";
 import {
   SdkListField,
   SdkModel,
   SdkModelField,
+  SdkModelFieldType,
   SdkModelNode,
   SdkObjectField,
   SdkQueryField,
   SdkScalarField,
+  SdkScalarListField,
 } from "./types";
 
 function isValidModel(model: ObjectTypeDefinitionNode) {
@@ -31,18 +33,12 @@ function isValidModel(model: ObjectTypeDefinitionNode) {
  */
 export class ModelVisitor<C> {
   private _context: PluginContext<C>;
-  private _argVisitor: ArgumentTypescriptVisitor<C>;
 
   /** Initialize the visitor */
   public constructor(context: PluginContext<C>) {
     autoBind(this);
 
     this._context = context;
-    this._argVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
-  }
-
-  private _printType(node: TypeNode) {
-    return visit(node, this._argVisitor);
   }
 
   public Document = {
@@ -62,10 +58,17 @@ export class ModelVisitor<C> {
         return {
           name: node.name.value,
           node,
-          scalarFields: (node.fields?.filter(field => field.__typename === "SdkScalarField") ?? []) as SdkScalarField[],
-          queryFields: (node.fields?.filter(field => field.__typename === "SdkQueryField") ?? []) as SdkQueryField[],
-          objectFields: (node.fields?.filter(field => field.__typename === "SdkObjectField") ?? []) as SdkObjectField[],
-          listFields: (node.fields?.filter(field => field.__typename === "SdkListField") ?? []) as SdkListField[],
+          fields: {
+            scalar: (node.fields?.filter(field => field.__typename === SdkModelFieldType.scalar) ??
+              []) as SdkScalarField[],
+            query: (node.fields?.filter(field => field.__typename === SdkModelFieldType.query) ??
+              []) as SdkQueryField[],
+            object: (node.fields?.filter(field => field.__typename === SdkModelFieldType.object) ??
+              []) as SdkObjectField[],
+            list: (node.fields?.filter(field => field.__typename === SdkModelFieldType.list) ?? []) as SdkListField[],
+            scalarList: (node.fields?.filter(field => field.__typename === SdkModelFieldType.scalarList) ??
+              []) as SdkScalarListField[],
+          },
         };
       } else {
         /** Ignore this object */
@@ -79,7 +82,7 @@ export class ModelVisitor<C> {
     leave: (node: FieldDefinitionNode): SdkModelField | null => {
       if (isValidField(node)) {
         const name = node.name.value;
-        const type = this._printType(node.type);
+        const type = printTypescriptType(this._context, node.type, c.NAMESPACE_DOCUMENT);
         const query = findQuery(this._context, node);
 
         /** Identify query fields */
@@ -87,13 +90,13 @@ export class ModelVisitor<C> {
           const args =
             query.arguments?.map(arg => ({
               name: arg.name.value,
-              type: this._printType(node.type),
+              type: printTypescriptType(this._context, node.type, c.NAMESPACE_DOCUMENT),
               optional: arg.type.kind !== Kind.NON_NULL_TYPE,
               description: `${arg.name.value} to be passed to ${query.name.value}`,
             })) ?? [];
 
           return {
-            __typename: "SdkQueryField",
+            __typename: SdkModelFieldType.query,
             node,
             name,
             type,
@@ -103,9 +106,9 @@ export class ModelVisitor<C> {
         }
 
         /** Identify scalar fields */
-        if (Object.keys(this._context.scalars).includes(reduceTypeName(node.type))) {
+        if (isScalarField(this._context, node)) {
           return {
-            __typename: "SdkScalarField",
+            __typename: SdkModelFieldType.scalar,
             node,
             name,
             type,
@@ -115,20 +118,30 @@ export class ModelVisitor<C> {
         /** Identify list fields */
         const listType = reduceListType(node.type);
         if (listType) {
-          return {
-            __typename: "SdkListField",
-            node,
-            name,
-            type,
-            listType: reduceListType(node.type) as string,
-          };
+          if (Object.keys(this._context.scalars).includes(listType)) {
+            return {
+              __typename: SdkModelFieldType.scalarList,
+              node,
+              name,
+              type,
+              listType: this._context.scalars[listType],
+            };
+          } else {
+            return {
+              __typename: SdkModelFieldType.list,
+              node,
+              name,
+              type,
+              listType,
+            };
+          }
         }
 
         /** Identify object fields without queries */
         const object = findObject(this._context, node);
         if (object && !isConnection(object)) {
           return {
-            __typename: "SdkObjectField",
+            __typename: SdkModelFieldType.object,
             node,
             name,
             type,

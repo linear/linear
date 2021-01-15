@@ -1057,7 +1057,6 @@ type User implements Node {
   Unique hash for the user to be used in invite URLs.
   """
   inviteHash: String!
-  userAccountId: String!
   """
   The settings of the user.
   """
@@ -3726,7 +3725,6 @@ type UserAdminPrivileged implements Node {
   Unique hash for the user to be used in invite URLs.
   """
   inviteHash: String!
-  userAccountId: String!
   """
   The settings of the user.
   """

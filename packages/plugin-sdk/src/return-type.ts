@@ -129,7 +129,7 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
     export class ${o.operationResultType} {
       private _${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}
       ${printList(
-        o.model?.queryFields.map(field =>
+        o.model?.fields.query.map(field =>
           field.args.some(arg => !arg.optional)
             ? printList(
                 [
@@ -154,11 +154,11 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
         )}).then(response => {
           const r = ${printList(["response", ...o.path], "?.")}
           ${printList(
-            o.model?.scalarFields.map(field => `this.${field.name} = r.${field.name} ?? undefined`),
+            o.model?.fields.scalar.map(field => `this.${field.name} = r.${field.name} ?? undefined`),
             "\n"
           )}
           ${printList(
-            o.model?.queryFields.map(field =>
+            o.model?.fields.query.map(field =>
               field.args.some(arg => !arg.optional) ? `this._${field.name} = r.${field.name} ?? undefined` : undefined
             ),
             "\n"
@@ -169,7 +169,7 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
       }
 
       ${printList(
-        o.model?.scalarFields.map(field =>
+        o.model?.fields.scalar.map(field =>
           printList(
             [
               field.node.description?.value ? printComment([field.node.description.value]) : undefined,
@@ -182,7 +182,7 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
       )}
 
       ${printList(
-        o.model?.queryFields.map(field => {
+        o.model?.fields.query.map(field => {
           return `
           ${field.node.description ? printComment([field.node.description?.value]) : undefined}
           public get ${field.name}() {

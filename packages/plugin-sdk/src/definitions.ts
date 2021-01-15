@@ -3,14 +3,13 @@ import { indentMultiline } from "@graphql-codegen/visitor-plugin-common";
 import {
   ArgumentTypescriptVisitor,
   getArgList,
-  logger,
   nonNullable,
   PluginContext,
   printComment,
   printDebug,
   printList,
 } from "@linear/plugin-common";
-import { DocumentNode, Kind, OperationDefinitionNode, visit } from "graphql";
+import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode, visit } from "graphql";
 import c from "./constants";
 import { getParentOperation, printOperation } from "./operation";
 import { printOperationReturnType, printPascal, printSdkFunctionName, printSdkFunctionType } from "./print";
@@ -53,55 +52,82 @@ export function getSdkDefinitions<C>(
     const operationPath = (node.name?.value ?? "").split("_");
     const sdkPath = operationPath.slice(0, operationPath.length - 1);
     const sdkKey = sdkPath.join("_");
-
-    const name = printPascal(node.name?.value);
+    const operationName = printPascal(node.name?.value);
     const operationType = printPascal(node.operation);
+
+    /** Initialise arg visitors */
+    const argVisitor = new ArgumentTypescriptVisitor(context);
+    const argNamespacedVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
 
     /** Find a matching query if it exists */
     const query = context.queries.find(q => q.name.value === node.name?.value);
-    if (query) {
-      logger.trace(visit(query.type, new ArgumentTypescriptVisitor(context)));
-    }
+
+    /** Identify returned fragment */
+    const returnedField = operationPath.reduce<OperationDefinitionNode | FieldNode | undefined>((acc2, name) => {
+      return acc2?.selectionSet?.selections.find(selection => {
+        return selection.kind === Kind.FIELD && selection.name.value === name;
+      }) as FieldNode | undefined;
+    }, node);
+    const fragmentNode = returnedField?.selectionSet?.selections.find(selection => {
+      return selection.kind === Kind.FRAGMENT_SPREAD;
+    }) as FragmentSpreadNode | undefined;
+    const fragment = context.objects.find(object => object.name.value === fragmentNode?.name.value);
+
+    /** Find a matching model */
+    const model = query
+      ? models.find(
+          b =>
+            /** Find model that matches query type */
+            b.name === visit(query.type, argVisitor) ||
+            /** Or the returned fragment type */
+            b.name === fragment?.name.value
+        )
+      : undefined;
+
+    /** Identify the required variables */
+    const requiredVariables = getRequiredVariables(node).reduce(
+      (acc2, v) => ({
+        ...acc2,
+        [v.variable.name.value]: {
+          name: v.variable.name.value,
+          type: visit(v, argNamespacedVisitor),
+          optional: false,
+        },
+      }),
+      {}
+    );
+
+    /** Create the operation */
     const sdkOperation: SdkOperation = {
-      name,
+      name: operationName,
       path: operationPath,
       node,
       query,
-      /** Find a matching object if it exists */
-      model: query ? models.find(b => b.name === visit(query.type, new ArgumentTypescriptVisitor(context))) : undefined,
-      /** The parsed and printed required variables */
-      requiredVariables: getRequiredVariables(node).reduce(
-        (acc2, v) => ({
-          ...acc2,
-          [v.variable.name.value]: {
-            name: v.variable.name.value,
-            type: visit(v, new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT)),
-            optional: false,
-          },
-        }),
-        {}
-      ),
+      model,
+      fragment,
+      requiredVariables,
       /** The name of the generated graphql document */
-      documentVariableName: `${name}Document`,
+      documentVariableName: `${operationName}Document`,
       /** The type of the graphql operation */
       operationType,
       /** The type of the result from the graphql operation */
-      operationResultType: `${name}${operationType}`,
+      operationResultType: `${operationName}${operationType}`,
       /** The type of the variables for the graphql operation */
-      operationVariablesTypes: `${name}${operationType}Variables`,
+      operationVariablesTypes: `${operationName}${operationType}Variables`,
       /** The type returned from this operation */
       returnType: printOperationReturnType(operationType, operationPath),
     };
 
-    const existingDefinition = acc[sdkKey];
-    const sdkDefinition: SdkDefinition = {
-      sdkPath,
-      sdkName: printSdkFunctionName(sdkPath),
-      sdkType: printSdkFunctionType(sdkPath),
-      operations: [...(existingDefinition?.operations ?? []), sdkOperation],
+    /** Return merged operations */
+    return {
+      ...acc,
+      [sdkKey]: {
+        sdkPath,
+        sdkName: printSdkFunctionName(sdkPath),
+        sdkType: printSdkFunctionType(sdkPath),
+        operations: [...(acc[sdkKey]?.operations ?? []), sdkOperation],
+      },
     };
-
-    return { ...acc, [sdkKey]: sdkDefinition };
   }, {});
 }
 

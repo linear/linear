@@ -1,16 +1,16 @@
-import { getArgList, printList } from "@linear/plugin-common";
+import { getArgList, printComment, printDebug, printList } from "@linear/plugin-common";
 import c from "./constants";
 import { getOperationArgs } from "./operation";
-import { printNamespaced, printPascal } from "./print";
-import { printRequesterArgs } from "./requester";
+import { printNamespaced } from "./print";
+import { getRequesterArg, printRequesterArgs } from "./requester";
 import { SdkOperation, SdkPluginContext } from "./types";
 
 /**
  * Print a return type for all operations
  */
-export function printSdkClasses(context: SdkPluginContext): string {
+export function printOperations(context: SdkPluginContext): string {
   const returnTypes = Object.values(context.sdkDefinitions).reduce<string[]>((acc, definition) => {
-    return [...acc, ...definition.operations.map(o => printSdkClass(context, o))];
+    return [...acc, ...definition.operations.map(o => printOperation(context, o))];
   }, []);
 
   return printList(returnTypes, "\n\n");
@@ -19,29 +19,37 @@ export function printSdkClasses(context: SdkPluginContext): string {
 /**
  * Print the exported return type for an sdk operation
  */
-function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
+function printOperation(context: SdkPluginContext, o: SdkOperation): string {
   const requiredVariables = getArgList(getOperationArgs(context, o));
   const variableType = printNamespaced(context, o.operationVariablesTypes);
   const documentName = printNamespaced(context, o.documentVariableName);
   const resultType = printNamespaced(context, o.operationResultType);
+  const fragmentName = o.fragment?.name.value;
+  const args = getArgList([getRequesterArg()]);
 
-  return `
-    export class ${o.operationResultType} {
-      private _${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}
+  return printList(
+    [
+      printComment([`${o.operationType} {@link ${o.documentVariableName}} for {@link ${fragmentName}}`, ...args.jsdoc]),
+      printDebug(o),
+      `export class ${o.operationResultType} {
+        private _${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}
 
-      public constructor(${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}) {
-        this._${c.REQUESTER_NAME} = ${c.REQUESTER_NAME}
+        public constructor(${args.printInput}) {
+          this._${c.REQUESTER_NAME} = ${c.REQUESTER_NAME}
+        }
+
+        public async fetch(${requiredVariables.printInput}) {
+          return ${`this._${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${printList(
+            [documentName, printRequesterArgs(o)],
+            ", "
+          )}).then(response => {
+            const data = ${printList(["response", ...o.path], "?.")}
+            return data ? new ${fragmentName}(this._${c.REQUESTER_NAME}, data) : undefined
+          })`}
+        }
       }
-
-      public async fetch(${requiredVariables.printInput}) {
-        return ${`this._${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${printList(
-          [documentName, printRequesterArgs(o)],
-          ", "
-        )}).then(response => {
-          const data = ${printList(["response", ...o.path], "?.")}
-          return data ? new ${printPascal(o.model?.name)}(this._${c.REQUESTER_NAME}, data) : undefined
-        })`}
-      }
-    }
-  `;
+    `,
+    ],
+    "\n"
+  );
 }
