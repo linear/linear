@@ -8,7 +8,7 @@ import {
   NonNullTypeNode,
 } from "graphql";
 import c from "./constants";
-import { printGraphqlType, printList, printTypescriptType } from "./print";
+import { printGraphqlType, printList } from "./print";
 import { PluginContext } from "./types";
 
 /**
@@ -85,7 +85,7 @@ export function reduceListType(
  * Determine whether the node is a scalar field
  */
 export function isScalarField<C>(context: PluginContext<C>, node: FieldDefinitionNode): boolean {
-  return Object.values(context.scalars).includes(printTypescriptType(context, node.type));
+  return Object.keys(context.scalars).includes(reduceTypeName(node.type));
 }
 
 /**
