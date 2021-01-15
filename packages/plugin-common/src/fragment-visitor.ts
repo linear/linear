@@ -112,14 +112,15 @@ export class FragmentVisitor<C> {
         } else {
           /** Print a matching fragment if no query */
           const fragment = findObject(this._context, node);
+
           if (fragment && !isConnection(fragment)) {
             return printList(
               [
                 printGraphqlDebug(_node),
                 printGraphqlDebug(query),
                 `${node.name} {
-                ...${fragment.name.value}
-              }`,
+                  ...${fragment.name.value}
+                }`,
               ],
               "\n"
             );

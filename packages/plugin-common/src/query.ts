@@ -13,13 +13,13 @@ export function findQuery<C>(
   const type = reduceTypeName(field.type);
   const listType = reduceListType(field.type);
 
-  /** Ignore queries for connections */
-  if (type?.endsWith(c.CONNECTION_TYPE)) {
+  /** Ignore queries for connections and lists */
+  if (listType || type?.endsWith(c.CONNECTION_TYPE)) {
     return undefined;
   }
 
   const match = context.queries.find(q => {
-    return reduceTypeName(q.type) === type && reduceListType(q.type) === listType;
+    return reduceTypeName(q.type) === type;
   });
 
   return match;

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { DocumentNode } from "graphql";
-import { ResultOf } from "@graphql-typed-document-node/core";
 import * as D from "./documents";
 export * from "./documents";
 
@@ -51,11 +50,11 @@ export class User {
   /** Number of issues created. */
   public createdIssueCount?: number;
   /** The settings of the user. */
-  public get settings(): Promise<D.UserSettings | undefined> {
+  public get settings(): Promise<UserSettings | undefined> {
     return new NotificationQuery(this._request).fetch();
   }
   /** Organization in which the user belongs to. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -82,7 +81,7 @@ export class UserSettings {
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom?: string[];
   /** The user to whom this notification was targeted for. */
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -170,31 +169,31 @@ export class Issue {
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers?: string[];
   /** The team that the issue is associated with. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The cycle that the issue is associated with. */
-  public get cycle(): Promise<D.Cycle | undefined> | undefined {
+  public get cycle(): Promise<Cycle | undefined> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The workflow state that the issue is associated with. */
-  public get state(): Promise<D.WorkflowState | undefined> | undefined {
+  public get state(): Promise<WorkflowState | undefined> | undefined {
     return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
   }
   /** The user to whom the issue is assigned to. */
-  public get assignee(): Promise<D.User | undefined> | undefined {
+  public get assignee(): Promise<User | undefined> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
   /** The parent of the issue. */
-  public get parent(): Promise<D.Issue | undefined> | undefined {
+  public get parent(): Promise<Issue | undefined> | undefined {
     return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The project that the issue is associated with. */
-  public get project(): Promise<D.Project | undefined> | undefined {
+  public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The user who created the issue. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
@@ -309,41 +308,41 @@ export class Team {
   /** Calender feed (iCal) for cycles. */
   public cycleCalenderUrl?: string;
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
-  public get draftWorkflowState(): Promise<D.WorkflowState | undefined> | undefined {
+  public get draftWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._draftWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._draftWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been opened. */
-  public get startWorkflowState(): Promise<D.WorkflowState | undefined> | undefined {
+  public get startWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._startWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
-  public get reviewWorkflowState(): Promise<D.WorkflowState | undefined> | undefined {
+  public get reviewWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._reviewWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._reviewWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been merged. */
-  public get mergeWorkflowState(): Promise<D.WorkflowState | undefined> | undefined {
+  public get mergeWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._mergeWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
-  public get markedAsDuplicateWorkflowState(): Promise<D.WorkflowState | undefined> | undefined {
+  public get markedAsDuplicateWorkflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._markedAsDuplicateWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
   }
   /** Team's currently active cycle. */
-  public get activeCycle(): Promise<D.Cycle | undefined> | undefined {
+  public get activeCycle(): Promise<Cycle | undefined> | undefined {
     return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
   }
   /** The organization that the team is associated with. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -382,7 +381,7 @@ export class WorkflowState {
   /** The type of the state. */
   public type?: string;
   /** The team to which this state belongs to. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
@@ -440,7 +439,7 @@ export class Cycle {
   /** The number of completed estimation points after each day. */
   public completedScopeHistory?: number[];
   /** The team that the cycle is associated with. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
@@ -506,11 +505,11 @@ export class TeamMembership {
   /** The unique identifier of the entity. */
   public id?: string;
   /** The user that the membership is associated with. */
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The team that the membership is associated with. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
@@ -596,15 +595,15 @@ export class Project {
   /** The number of completed estimation points after each week. */
   public completedScopeHistory?: number[];
   /** The user who created the project. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The project lead. */
-  public get lead(): Promise<D.User | undefined> | undefined {
+  public get lead(): Promise<User | undefined> | undefined {
     return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
   /** The milestone that this project is associated with. */
-  public get milestone(): Promise<D.Milestone | undefined> | undefined {
+  public get milestone(): Promise<Milestone | undefined> | undefined {
     return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
   }
 }
@@ -632,7 +631,7 @@ export class Milestone {
   /** The sort order for the milestone. */
   public sortOrder?: number;
   /** The organization that the milestone belongs to. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -692,7 +691,7 @@ export class Organization {
   /** Allowed authentication providers, empty array means all are allowed */
   public allowedAuthServices?: string[];
   /** The organization's subscription to a paid plan. */
-  public get subscription(): Promise<D.Subscription | undefined> {
+  public get subscription(): Promise<Subscription | undefined> {
     return new SubscriptionQuery(this._request).fetch();
   }
 }
@@ -791,15 +790,15 @@ export class Integration {
   /** Settings related to the integration. */
   public settings?: IntegrationSettings;
   /** The organization that the integration is associated with. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** The team that the integration is associated with. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user that added the integration. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
@@ -903,11 +902,11 @@ export class Subscription {
   /** The subscription type of a pending change. Null if no change pending. */
   public pendingChangeType?: string;
   /** The creator of the subscription. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -955,11 +954,11 @@ export class ProjectLink {
   /** The link's label. */
   public label?: string;
   /** The user who created the link. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The project that the link is associated with. */
-  public get project(): Promise<D.Project | undefined> | undefined {
+  public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
@@ -987,17 +986,13 @@ export class WorkflowStateConnection {
  * @param data - the initial TemplateConnectionFragment response data
  */
 export class TemplateConnection {
-  private _request: LinearRequest;
-
   public constructor(request: LinearRequest, data: D.TemplateConnectionFragment) {
-    this._request = request;
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Template(request, node)) : undefined;
   }
 
+  public nodes?: Template[];
   public pageInfo?: PageInfo;
-  public get nodes(): Template[] | undefined {
-    return this._nodes?.map(node => new Template(this._request, node));
-  }
 }
 
 /**
@@ -1030,11 +1025,11 @@ export class Template {
   /** Template description. */
   public description?: string;
   /** The team that the template is associated with. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the template. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
@@ -1085,11 +1080,11 @@ export class IssueLabel {
   /** The label's color as a HEX string. */
   public color?: string;
   /** The team to which the label belongs to. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the label. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
@@ -1140,11 +1135,11 @@ export class Webhook {
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
   /** The team that the webhook is associated with. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the webhook. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
@@ -1192,11 +1187,11 @@ export class Comment {
   /** Emoji reactions on the comment. */
   public reactionData?: D.Scalars["JSON"][];
   /** The user who wrote the comment. */
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The issue that the comment is associated with. */
-  public get issue(): Promise<D.Issue | undefined> | undefined {
+  public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
@@ -1301,63 +1296,63 @@ export class IssueHistory {
   /** Changed issue relationships. */
   public relationChanges?: string[];
   /** The issue that was changed. */
-  public get issue(): Promise<D.Issue | undefined> | undefined {
+  public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
-  public get actor(): Promise<D.User | undefined> | undefined {
+  public get actor(): Promise<User | undefined> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The integration that made these changes. If null, possibly means that the change was made by a user. */
-  public get integration(): Promise<D.Integration | undefined> | undefined {
+  public get integration(): Promise<Integration | undefined> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
   /** The user from whom the issue was re-assigned from. */
-  public get fromAssignee(): Promise<D.User | undefined> | undefined {
+  public get fromAssignee(): Promise<User | undefined> | undefined {
     return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
   }
   /** The user to whom the issue was assigned to. */
-  public get toAssignee(): Promise<D.User | undefined> | undefined {
+  public get toAssignee(): Promise<User | undefined> | undefined {
     return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
   }
   /** The team from which the issue was moved from. */
-  public get fromTeam(): Promise<D.Team | undefined> | undefined {
+  public get fromTeam(): Promise<Team | undefined> | undefined {
     return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
   }
   /** The team to which the issue was moved to. */
-  public get toTeam(): Promise<D.Team | undefined> | undefined {
+  public get toTeam(): Promise<Team | undefined> | undefined {
     return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
   }
   /** The previous parent of the issue. */
-  public get fromParent(): Promise<D.Issue | undefined> | undefined {
+  public get fromParent(): Promise<Issue | undefined> | undefined {
     return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
   /** The new parent of the issue. */
-  public get toParent(): Promise<D.Issue | undefined> | undefined {
+  public get toParent(): Promise<Issue | undefined> | undefined {
     return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
   /** The previous workflow state of the issue. */
-  public get fromState(): Promise<D.WorkflowState | undefined> | undefined {
+  public get fromState(): Promise<WorkflowState | undefined> | undefined {
     return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
   }
   /** The new workflow state of the issue. */
-  public get toState(): Promise<D.WorkflowState | undefined> | undefined {
+  public get toState(): Promise<WorkflowState | undefined> | undefined {
     return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
   }
   /** The previous cycle of the issue. */
-  public get fromCycle(): Promise<D.Cycle | undefined> | undefined {
+  public get fromCycle(): Promise<Cycle | undefined> | undefined {
     return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
   }
   /** The new cycle of the issue. */
-  public get toCycle(): Promise<D.Cycle | undefined> | undefined {
+  public get toCycle(): Promise<Cycle | undefined> | undefined {
     return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
   }
   /** The previous project of the issue. */
-  public get fromProject(): Promise<D.Project | undefined> | undefined {
+  public get fromProject(): Promise<Project | undefined> | undefined {
     return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
   }
   /** The new project of the issue. */
-  public get toProject(): Promise<D.Project | undefined> | undefined {
+  public get toProject(): Promise<Project | undefined> | undefined {
     return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
   }
 }
@@ -1411,11 +1406,11 @@ export class IntegrationResource {
   /** Pull request information for GitHub pull requests and GitLab merge requests. */
   public pullRequest?: PullRequestPayload;
   /** The integration that the resource is associated with. */
-  public get integration(): Promise<D.Integration | undefined> | undefined {
+  public get integration(): Promise<Integration | undefined> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
   /** The issue that the resource is associated with. */
-  public get issue(): Promise<D.Issue | undefined> | undefined {
+  public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
@@ -1601,11 +1596,11 @@ export class IssueRelation {
   /** The relationship of the issue with the related issue. */
   public type?: string;
   /** The issue whose relationship is being described. */
-  public get issue(): Promise<D.Issue | undefined> | undefined {
+  public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The related issue. */
-  public get relatedIssue(): Promise<D.Issue | undefined> | undefined {
+  public get relatedIssue(): Promise<Issue | undefined> | undefined {
     return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
   }
 }
@@ -1756,7 +1751,7 @@ export class UserAdminPrivileged {
   /** Organization in which the user belongs to. Super user required. */
   public organization?: OrganizationAdminPrivileged;
   /** The settings of the user. */
-  public get settings(): Promise<D.UserSettings | undefined> {
+  public get settings(): Promise<UserSettings | undefined> {
     return new NotificationQuery(this._request).fetch();
   }
 }
@@ -1854,11 +1849,11 @@ export class SubscriptionAdminPrivileged {
   /** The Stripe status for the subscription. */
   public stripeStatus?: string;
   /** The creator of the subscription. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -2154,15 +2149,15 @@ export class CustomView {
   /** Whether the custom view is shared with everyone in the organization. */
   public shared?: boolean;
   /** The organization of the custom view. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** The team associated with the custom view. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the custom view. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
@@ -2211,11 +2206,11 @@ export class Emoji {
   /** The source of the emoji. */
   public source?: string;
   /** The user who created the emoji. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the emoji belongs to. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -2271,27 +2266,27 @@ export class Favorite {
   /** The order of the item in the favorites list. */
   public sortOrder?: number;
   /** The owner of the favorite. */
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** Favorited issue. */
-  public get issue(): Promise<D.Issue | undefined> | undefined {
+  public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** Favorited project. */
-  public get project(): Promise<D.Project | undefined> | undefined {
+  public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** Favorited project team. */
-  public get projectTeam(): Promise<D.Project | undefined> | undefined {
+  public get projectTeam(): Promise<Project | undefined> | undefined {
     return this._projectTeam?.id ? new ProjectQuery(this._request).fetch(this._projectTeam?.id) : undefined;
   }
   /** Favorited cycle. */
-  public get cycle(): Promise<D.Cycle | undefined> | undefined {
+  public get cycle(): Promise<Cycle | undefined> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** Favorited issue label. */
-  public get label(): Promise<D.IssueLabel | undefined> | undefined {
+  public get label(): Promise<IssueLabel | undefined> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
 }
@@ -2455,19 +2450,19 @@ export class Notification {
   /** Name of the reaction emoji associated with the notification. */
   public reactionEmoji?: string;
   /** The recipient of the notification. */
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The issue that the notification is associated with. */
-  public get issue(): Promise<D.Issue | undefined> | undefined {
+  public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The team which the notification is associated with. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The comment which the notification is associated with. */
-  public get comment(): Promise<D.Comment | undefined> | undefined {
+  public get comment(): Promise<Comment | undefined> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
@@ -2514,15 +2509,15 @@ export class NotificationSubscription {
   /** The type of the subscription. */
   public type?: string;
   /** The user associated with notification subscriptions. */
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** Subscribed team. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** Subscribed project. */
-  public get project(): Promise<D.Project | undefined> | undefined {
+  public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
@@ -2570,15 +2565,15 @@ export class OrganizationInvite {
   /** The invite was sent to external address. */
   public external?: boolean;
   /** The user who created the invitation. */
-  public get inviter(): Promise<D.User | undefined> | undefined {
+  public get inviter(): Promise<User | undefined> | undefined {
     return this._inviter?.id ? new UserQuery(this._request).fetch(this._inviter?.id) : undefined;
   }
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
-  public get invitee(): Promise<D.User | undefined> | undefined {
+  public get invitee(): Promise<User | undefined> | undefined {
     return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
   }
   /** The organization that the invite is associated with. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -2625,11 +2620,11 @@ export class Reaction {
   /** Name of the reaction's emoji. */
   public emoji?: string;
   /** The user who reacted. */
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The comment that the reaction is associated with. */
-  public get comment(): Promise<D.Comment | undefined> | undefined {
+  public get comment(): Promise<Comment | undefined> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
@@ -2709,7 +2704,7 @@ export class UserPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The user that was created or updated. */
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -2749,7 +2744,7 @@ export class OrganizationPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The organization that was created or updated. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -2951,10 +2946,10 @@ export class CreateOrJoinOrganizationResponse {
     this._user = data.user ?? undefined;
   }
 
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
-  public get user(): Promise<D.User | undefined> | undefined {
+  public get user(): Promise<User | undefined> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -2999,7 +2994,7 @@ export class CommentPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The comment that was created or updated. */
-  public get comment(): Promise<D.Comment | undefined> | undefined {
+  public get comment(): Promise<Comment | undefined> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
@@ -3041,7 +3036,7 @@ export class CustomViewPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The custom view that was created or updated. */
-  public get customView(): Promise<D.CustomView | undefined> | undefined {
+  public get customView(): Promise<CustomView | undefined> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
 }
@@ -3068,7 +3063,7 @@ export class CyclePayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The Cycle that was created or updated. */
-  public get cycle(): Promise<D.Cycle | undefined> | undefined {
+  public get cycle(): Promise<Cycle | undefined> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
 }
@@ -3125,7 +3120,7 @@ export class EmojiPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The emoji that was created. */
-  public get emoji(): Promise<D.Emoji | undefined> | undefined {
+  public get emoji(): Promise<Emoji | undefined> | undefined {
     return this._emoji?.id ? new EmojiQuery(this._request).fetch(this._emoji?.id) : undefined;
   }
 }
@@ -3152,7 +3147,7 @@ export class FavoritePayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The object that was added as a favorite. */
-  public get favorite(): Promise<D.Favorite | undefined> | undefined {
+  public get favorite(): Promise<Favorite | undefined> | undefined {
     return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
   }
 }
@@ -3283,7 +3278,7 @@ export class IntegrationPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The integration that was created or updated. */
-  public get integration(): Promise<D.Integration | undefined> | undefined {
+  public get integration(): Promise<Integration | undefined> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
 }
@@ -3310,7 +3305,7 @@ export class IssueLabelPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The label that was created or updated. */
-  public get issueLabel(): Promise<D.IssueLabel | undefined> | undefined {
+  public get issueLabel(): Promise<IssueLabel | undefined> | undefined {
     return this._issueLabel?.id ? new IssueLabelQuery(this._request).fetch(this._issueLabel?.id) : undefined;
   }
 }
@@ -3337,7 +3332,7 @@ export class IssueRelationPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The issue relation that was created or updated. */
-  public get issueRelation(): Promise<D.IssueRelation | undefined> | undefined {
+  public get issueRelation(): Promise<IssueRelation | undefined> | undefined {
     return this._issueRelation?.id ? new IssueRelationQuery(this._request).fetch(this._issueRelation?.id) : undefined;
   }
 }
@@ -3364,7 +3359,7 @@ export class IssuePayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The issue that was created or updated. */
-  public get issue(): Promise<D.Issue | undefined> | undefined {
+  public get issue(): Promise<Issue | undefined> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
@@ -3391,7 +3386,7 @@ export class MilestonePayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The milesteone that was created or updated. */
-  public get milestone(): Promise<D.Milestone | undefined> | undefined {
+  public get milestone(): Promise<Milestone | undefined> | undefined {
     return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
   }
 }
@@ -3584,7 +3579,7 @@ export class OrganizationDomain {
   /** E-mail used to verify this domain */
   public verificationEmail?: string;
   /** The user who added the domain. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
@@ -3634,7 +3629,7 @@ export class ProjectLinkPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The project that was created or updated. */
-  public get projectLink(): Promise<D.ProjectLink | undefined> | undefined {
+  public get projectLink(): Promise<ProjectLink | undefined> | undefined {
     return this._projectLink?.id ? new ProjectLinkQuery(this._request).fetch(this._projectLink?.id) : undefined;
   }
 }
@@ -3661,7 +3656,7 @@ export class ProjectPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The project that was created or updated. */
-  public get project(): Promise<D.Project | undefined> | undefined {
+  public get project(): Promise<Project | undefined> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
@@ -3686,7 +3681,7 @@ export class ReactionPayload {
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
   public success?: boolean;
-  public get reaction(): Promise<D.Reaction | undefined> | undefined {
+  public get reaction(): Promise<Reaction | undefined> | undefined {
     return this._reaction?.id ? new ReactionQuery(this._request).fetch(this._reaction?.id) : undefined;
   }
 }
@@ -3741,7 +3736,7 @@ export class SubscriptionPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The subscription entity being mutated. */
-  public get subscription(): Promise<D.Subscription | undefined> {
+  public get subscription(): Promise<Subscription | undefined> {
     return new SubscriptionQuery(this._request).fetch();
   }
 }
@@ -3768,7 +3763,7 @@ export class TeamMembershipPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The team membership that was created or updated. */
-  public get teamMembership(): Promise<D.TeamMembership | undefined> | undefined {
+  public get teamMembership(): Promise<TeamMembership | undefined> | undefined {
     return this._teamMembership?.id
       ? new TeamMembershipQuery(this._request).fetch(this._teamMembership?.id)
       : undefined;
@@ -3797,7 +3792,7 @@ export class TeamPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The team that was created or updated. */
-  public get team(): Promise<D.Team | undefined> | undefined {
+  public get team(): Promise<Team | undefined> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
@@ -3810,13 +3805,11 @@ export class TeamPayload {
  */
 export class TemplatePayload {
   private _request: LinearRequest;
-  private _template?: D.TemplatePayloadFragment["template"];
 
   public constructor(request: LinearRequest, data: D.TemplatePayloadFragment) {
     this._request = request;
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this._template = data.template ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
@@ -3824,8 +3817,8 @@ export class TemplatePayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The template that was created or updated. */
-  public get template(): Promise<D.Template | undefined> | undefined {
-    return this._template?.id ? new TemplateQuery(this._request).fetch(this._template?.id) : undefined;
+  public get template(): Promise<Template | undefined> {
+    return new TemplatesQuery(this._request).fetch();
   }
 }
 
@@ -3849,7 +3842,7 @@ export class UserSettingsPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The user's settings. */
-  public get userSettings(): Promise<D.UserSettings | undefined> {
+  public get userSettings(): Promise<UserSettings | undefined> {
     return new NotificationQuery(this._request).fetch();
   }
 }
@@ -3954,7 +3947,7 @@ export class WebhookPayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The webhook entity being mutated. */
-  public get webhook(): Promise<D.Webhook | undefined> | undefined {
+  public get webhook(): Promise<Webhook | undefined> | undefined {
     return this._webhook?.id ? new WebhookQuery(this._request).fetch(this._webhook?.id) : undefined;
   }
 }
@@ -3981,7 +3974,7 @@ export class WorkflowStatePayload {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The state that was created or updated. */
-  public get workflowState(): Promise<D.WorkflowState | undefined> | undefined {
+  public get workflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._workflowState?.id ? new WorkflowStateQuery(this._request).fetch(this._workflowState?.id) : undefined;
   }
 }
@@ -4096,11 +4089,11 @@ export class FileUpload {
   /** Size of the uploaded file in bytes. */
   public size?: number;
   /** The user who uploaded the file. */
-  public get creator(): Promise<D.User | undefined> | undefined {
+  public get creator(): Promise<User | undefined> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization the upload belongs to. */
-  public get organization(): Promise<D.Organization | undefined> {
+  public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -4165,7 +4158,7 @@ export class OrganizationDomainSimplePayload {
   public success?: boolean;
 }
 /**
- * Query {@link UserDocument} for {@link User}
+ * Query UserDocument for User
  *
  * @param request - function to call the graphql client
  */
@@ -4177,7 +4170,7 @@ export class UserQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserQuery, D.UserQueryVariables>(D.UserDocument, { id }).then(response => {
+    return this._request<D.UserQuery, D.UserQueryVariables>(D.UserDocument).then(response => {
       const data = response?.user;
       return data ? new User(this._request, data) : undefined;
     });
@@ -4185,7 +4178,7 @@ export class UserQuery {
 }
 
 /**
- * Query {@link ViewerDocument} for {@link User}
+ * Query ViewerDocument for User
  *
  * @param request - function to call the graphql client
  */
@@ -4197,7 +4190,7 @@ export class ViewerQuery {
   }
 
   public async fetch() {
-    return this._request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, {}).then(response => {
+    return this._request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument).then(response => {
       const data = response?.viewer;
       return data ? new User(this._request, data) : undefined;
     });
@@ -4205,7 +4198,7 @@ export class ViewerQuery {
 }
 
 /**
- * Query {@link OrganizationDocument} for {@link Organization}
+ * Query OrganizationDocument for Organization
  *
  * @param request - function to call the graphql client
  */
@@ -4217,17 +4210,15 @@ export class OrganizationQuery {
   }
 
   public async fetch() {
-    return this._request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument, {}).then(
-      response => {
-        const data = response?.organization;
-        return data ? new Organization(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument).then(response => {
+      const data = response?.organization;
+      return data ? new Organization(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link OrganizationExistsDocument} for {@link OrganizationExistsPayload}
+ * Query OrganizationExistsDocument for OrganizationExistsPayload
  *
  * @param request - function to call the graphql client
  */
@@ -4239,9 +4230,9 @@ export class OrganizationExistsQuery {
   }
 
   public async fetch(urlKey: string) {
-    return this._request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(D.OrganizationExistsDocument, {
-      urlKey,
-    }).then(response => {
+    return this._request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(
+      D.OrganizationExistsDocument
+    ).then(response => {
       const data = response?.organizationExists;
       return data ? new OrganizationExistsPayload(this._request, data) : undefined;
     });
@@ -4249,7 +4240,7 @@ export class OrganizationExistsQuery {
 }
 
 /**
- * Query {@link SyncBootstrapDocument} for {@link SyncResponse}
+ * Query SyncBootstrapDocument for SyncResponse
  *
  * @param request - function to call the graphql client
  */
@@ -4261,18 +4252,17 @@ export class SyncBootstrapQuery {
   }
 
   public async fetch(databaseVersion: number, sinceSyncId: number) {
-    return this._request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument, {
-      databaseVersion,
-      sinceSyncId,
-    }).then(response => {
-      const data = response?.syncBootstrap;
-      return data ? new SyncResponse(this._request, data) : undefined;
-    });
+    return this._request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument).then(
+      response => {
+        const data = response?.syncBootstrap;
+        return data ? new SyncResponse(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Query {@link SyncUpdatesDocument} for {@link SyncResponse}
+ * Query SyncUpdatesDocument for SyncResponse
  *
  * @param request - function to call the graphql client
  */
@@ -4284,17 +4274,15 @@ export class SyncUpdatesQuery {
   }
 
   public async fetch(sinceSyncId: number) {
-    return this._request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument, { sinceSyncId }).then(
-      response => {
-        const data = response?.syncUpdates;
-        return data ? new SyncResponse(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument).then(response => {
+      const data = response?.syncUpdates;
+      return data ? new SyncResponse(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link ArchivedModelSyncDocument} for {@link ArchiveResponse}
+ * Query ArchivedModelSyncDocument for ArchiveResponse
  *
  * @param request - function to call the graphql client
  */
@@ -4306,18 +4294,17 @@ export class ArchivedModelSyncQuery {
   }
 
   public async fetch(identifier: string, modelClass: string) {
-    return this._request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument, {
-      identifier,
-      modelClass,
-    }).then(response => {
-      const data = response?.archivedModelSync;
-      return data ? new ArchiveResponse(this._request, data) : undefined;
-    });
+    return this._request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument).then(
+      response => {
+        const data = response?.archivedModelSync;
+        return data ? new ArchiveResponse(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Query {@link ArchivedModelsSyncDocument} for {@link ArchiveResponse}
+ * Query ArchivedModelsSyncDocument for ArchiveResponse
  *
  * @param request - function to call the graphql client
  */
@@ -4333,11 +4320,9 @@ export class ArchivedModelsSyncQuery {
     teamId: string,
     vars?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
   ) {
-    return this._request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(D.ArchivedModelsSyncDocument, {
-      modelClass,
-      teamId,
-      ...vars,
-    }).then(response => {
+    return this._request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(
+      D.ArchivedModelsSyncDocument
+    ).then(response => {
       const data = response?.archivedModelsSync;
       return data ? new ArchiveResponse(this._request, data) : undefined;
     });
@@ -4345,7 +4330,7 @@ export class ArchivedModelsSyncQuery {
 }
 
 /**
- * Query {@link AdminUserAccountLookupDocument} for {@link UserAccountAdminPrivileged}
+ * Query AdminUserAccountLookupDocument for UserAccountAdminPrivileged
  *
  * @param request - function to call the graphql client
  */
@@ -4358,8 +4343,7 @@ export class AdminUserAccountLookupQuery {
 
   public async fetch(vars?: D.AdminUserAccountLookupQueryVariables) {
     return this._request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
-      D.AdminUserAccountLookupDocument,
-      vars
+      D.AdminUserAccountLookupDocument
     ).then(response => {
       const data = response?.adminUserAccountLookup;
       return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
@@ -4368,7 +4352,7 @@ export class AdminUserAccountLookupQuery {
 }
 
 /**
- * Query {@link UsersDocument} for {@link UserConnection}
+ * Query UsersDocument for UserConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4380,7 +4364,7 @@ export class UsersQuery {
   }
 
   public async fetch(vars?: D.UsersQueryVariables) {
-    return this._request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, vars).then(response => {
+    return this._request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument).then(response => {
       const data = response?.users;
       return data ? new UserConnection(this._request, data) : undefined;
     });
@@ -4388,7 +4372,7 @@ export class UsersQuery {
 }
 
 /**
- * Query {@link ApiKeysDocument} for {@link ApiKeyConnection}
+ * Query ApiKeysDocument for ApiKeyConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4400,7 +4384,7 @@ export class ApiKeysQuery {
   }
 
   public async fetch(vars?: D.ApiKeysQueryVariables) {
-    return this._request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, vars).then(response => {
+    return this._request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument).then(response => {
       const data = response?.apiKeys;
       return data ? new ApiKeyConnection(this._request, data) : undefined;
     });
@@ -4408,7 +4392,7 @@ export class ApiKeysQuery {
 }
 
 /**
- * Query {@link ApplicationWithAuthorizationDocument} for {@link UserAuthorizedApplication}
+ * Query ApplicationWithAuthorizationDocument for UserAuthorizedApplication
  *
  * @param request - function to call the graphql client
  */
@@ -4425,8 +4409,7 @@ export class ApplicationWithAuthorizationQuery {
     vars?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
   ) {
     return this._request<D.ApplicationWithAuthorizationQuery, D.ApplicationWithAuthorizationQueryVariables>(
-      D.ApplicationWithAuthorizationDocument,
-      { scope, clientId, ...vars }
+      D.ApplicationWithAuthorizationDocument
     ).then(response => {
       const data = response?.applicationWithAuthorization;
       return data ? new UserAuthorizedApplication(this._request, data) : undefined;
@@ -4435,7 +4418,29 @@ export class ApplicationWithAuthorizationQuery {
 }
 
 /**
- * Query {@link AvailableUsersDocument} for {@link AuthResolverResponse}
+ * Query AuthorizedApplicationsDocument for undefined
+ *
+ * @param request - function to call the graphql client
+ */
+export class AuthorizedApplicationsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch() {
+    return this._request<D.AuthorizedApplicationsQuery, D.AuthorizedApplicationsQueryVariables>(
+      D.AuthorizedApplicationsDocument
+    ).then(response => {
+      const data = response?.authorizedApplications;
+      return data ? new undefined(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsersDocument for AuthResolverResponse
  *
  * @param request - function to call the graphql client
  */
@@ -4447,7 +4452,7 @@ export class AvailableUsersQuery {
   }
 
   public async fetch() {
-    return this._request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument, {}).then(
+    return this._request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument).then(
       response => {
         const data = response?.availableUsers;
         return data ? new AuthResolverResponse(this._request, data) : undefined;
@@ -4457,7 +4462,7 @@ export class AvailableUsersQuery {
 }
 
 /**
- * Query {@link SsoUrlFromEmailDocument} for {@link SsoUrlFromEmailResponse}
+ * Query SsoUrlFromEmailDocument for SsoUrlFromEmailResponse
  *
  * @param request - function to call the graphql client
  */
@@ -4469,18 +4474,17 @@ export class SsoUrlFromEmailQuery {
   }
 
   public async fetch(email: string, vars?: Omit<D.SsoUrlFromEmailQueryVariables, "email">) {
-    return this._request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument, {
-      email,
-      ...vars,
-    }).then(response => {
-      const data = response?.ssoUrlFromEmail;
-      return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
-    });
+    return this._request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument).then(
+      response => {
+        const data = response?.ssoUrlFromEmail;
+        return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Query {@link BillingDetailsDocument} for {@link BillingDetailsPayload}
+ * Query BillingDetailsDocument for BillingDetailsPayload
  *
  * @param request - function to call the graphql client
  */
@@ -4492,7 +4496,7 @@ export class BillingDetailsQuery {
   }
 
   public async fetch() {
-    return this._request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument, {}).then(
+    return this._request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument).then(
       response => {
         const data = response?.billingDetails;
         return data ? new BillingDetailsPayload(this._request, data) : undefined;
@@ -4502,7 +4506,7 @@ export class BillingDetailsQuery {
 }
 
 /**
- * Query {@link CollaborativeDocumentJoinDocument} for {@link CollaborationDocumentUpdatePayload}
+ * Query CollaborativeDocumentJoinDocument for CollaborationDocumentUpdatePayload
  *
  * @param request - function to call the graphql client
  */
@@ -4515,8 +4519,7 @@ export class CollaborativeDocumentJoinQuery {
 
   public async fetch(clientId: string, issueId: string, version: number) {
     return this._request<D.CollaborativeDocumentJoinQuery, D.CollaborativeDocumentJoinQueryVariables>(
-      D.CollaborativeDocumentJoinDocument,
-      { clientId, issueId, version }
+      D.CollaborativeDocumentJoinDocument
     ).then(response => {
       const data = response?.collaborativeDocumentJoin;
       return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
@@ -4525,7 +4528,7 @@ export class CollaborativeDocumentJoinQuery {
 }
 
 /**
- * Query {@link CommentDocument} for {@link Comment}
+ * Query CommentDocument for Comment
  *
  * @param request - function to call the graphql client
  */
@@ -4537,7 +4540,7 @@ export class CommentQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, { id }).then(response => {
+    return this._request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument).then(response => {
       const data = response?.comment;
       return data ? new Comment(this._request, data) : undefined;
     });
@@ -4545,7 +4548,7 @@ export class CommentQuery {
 }
 
 /**
- * Query {@link CommentsDocument} for {@link CommentConnection}
+ * Query CommentsDocument for CommentConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4557,7 +4560,7 @@ export class CommentsQuery {
   }
 
   public async fetch(vars?: D.CommentsQueryVariables) {
-    return this._request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument, vars).then(response => {
+    return this._request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument).then(response => {
       const data = response?.comments;
       return data ? new CommentConnection(this._request, data) : undefined;
     });
@@ -4565,7 +4568,7 @@ export class CommentsQuery {
 }
 
 /**
- * Query {@link CustomViewDocument} for {@link CustomView}
+ * Query CustomViewDocument for CustomView
  *
  * @param request - function to call the graphql client
  */
@@ -4577,7 +4580,7 @@ export class CustomViewQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, { id }).then(response => {
+    return this._request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument).then(response => {
       const data = response?.customView;
       return data ? new CustomView(this._request, data) : undefined;
     });
@@ -4585,7 +4588,7 @@ export class CustomViewQuery {
 }
 
 /**
- * Query {@link CustomViewsDocument} for {@link CustomViewConnection}
+ * Query CustomViewsDocument for CustomViewConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4597,17 +4600,15 @@ export class CustomViewsQuery {
   }
 
   public async fetch(vars?: D.CustomViewsQueryVariables) {
-    return this._request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument, vars).then(
-      response => {
-        const data = response?.customViews;
-        return data ? new CustomViewConnection(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument).then(response => {
+      const data = response?.customViews;
+      return data ? new CustomViewConnection(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link CycleDocument} for {@link Cycle}
+ * Query CycleDocument for Cycle
  *
  * @param request - function to call the graphql client
  */
@@ -4619,7 +4620,7 @@ export class CycleQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, { id }).then(response => {
+    return this._request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument).then(response => {
       const data = response?.cycle;
       return data ? new Cycle(this._request, data) : undefined;
     });
@@ -4627,7 +4628,7 @@ export class CycleQuery {
 }
 
 /**
- * Query {@link CyclesDocument} for {@link CycleConnection}
+ * Query CyclesDocument for CycleConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4639,7 +4640,7 @@ export class CyclesQuery {
   }
 
   public async fetch(vars?: D.CyclesQueryVariables) {
-    return this._request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument, vars).then(response => {
+    return this._request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument).then(response => {
       const data = response?.cycles;
       return data ? new CycleConnection(this._request, data) : undefined;
     });
@@ -4647,7 +4648,7 @@ export class CyclesQuery {
 }
 
 /**
- * Query {@link EmojiDocument} for {@link Emoji}
+ * Query EmojiDocument for Emoji
  *
  * @param request - function to call the graphql client
  */
@@ -4659,7 +4660,7 @@ export class EmojiQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, { id }).then(response => {
+    return this._request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument).then(response => {
       const data = response?.emoji;
       return data ? new Emoji(this._request, data) : undefined;
     });
@@ -4667,7 +4668,7 @@ export class EmojiQuery {
 }
 
 /**
- * Query {@link EmojisDocument} for {@link EmojiConnection}
+ * Query EmojisDocument for EmojiConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4679,7 +4680,7 @@ export class EmojisQuery {
   }
 
   public async fetch(vars?: D.EmojisQueryVariables) {
-    return this._request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument, vars).then(response => {
+    return this._request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument).then(response => {
       const data = response?.emojis;
       return data ? new EmojiConnection(this._request, data) : undefined;
     });
@@ -4687,7 +4688,7 @@ export class EmojisQuery {
 }
 
 /**
- * Query {@link FavoriteDocument} for {@link Favorite}
+ * Query FavoriteDocument for Favorite
  *
  * @param request - function to call the graphql client
  */
@@ -4699,7 +4700,7 @@ export class FavoriteQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, { id }).then(response => {
+    return this._request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument).then(response => {
       const data = response?.favorite;
       return data ? new Favorite(this._request, data) : undefined;
     });
@@ -4707,7 +4708,7 @@ export class FavoriteQuery {
 }
 
 /**
- * Query {@link FavoritesDocument} for {@link FavoriteConnection}
+ * Query FavoritesDocument for FavoriteConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4719,7 +4720,7 @@ export class FavoritesQuery {
   }
 
   public async fetch(vars?: D.FavoritesQueryVariables) {
-    return this._request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument, vars).then(response => {
+    return this._request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument).then(response => {
       const data = response?.favorites;
       return data ? new FavoriteConnection(this._request, data) : undefined;
     });
@@ -4727,7 +4728,7 @@ export class FavoritesQuery {
 }
 
 /**
- * Query {@link FigmaEmbedInfoDocument} for {@link FigmaEmbedPayload}
+ * Query FigmaEmbedInfoDocument for FigmaEmbedPayload
  *
  * @param request - function to call the graphql client
  */
@@ -4739,18 +4740,17 @@ export class FigmaEmbedInfoQuery {
   }
 
   public async fetch(fileId: string, vars?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">) {
-    return this._request<D.FigmaEmbedInfoQuery, D.FigmaEmbedInfoQueryVariables>(D.FigmaEmbedInfoDocument, {
-      fileId,
-      ...vars,
-    }).then(response => {
-      const data = response?.figmaEmbedInfo;
-      return data ? new FigmaEmbedPayload(this._request, data) : undefined;
-    });
+    return this._request<D.FigmaEmbedInfoQuery, D.FigmaEmbedInfoQueryVariables>(D.FigmaEmbedInfoDocument).then(
+      response => {
+        const data = response?.figmaEmbedInfo;
+        return data ? new FigmaEmbedPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Query {@link IntegrationDocument} for {@link Integration}
+ * Query IntegrationDocument for Integration
  *
  * @param request - function to call the graphql client
  */
@@ -4762,17 +4762,15 @@ export class IntegrationQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument, { id }).then(
-      response => {
-        const data = response?.integration;
-        return data ? new Integration(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument).then(response => {
+      const data = response?.integration;
+      return data ? new Integration(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link IntegrationsDocument} for {@link IntegrationConnection}
+ * Query IntegrationsDocument for IntegrationConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4784,17 +4782,15 @@ export class IntegrationsQuery {
   }
 
   public async fetch(vars?: D.IntegrationsQueryVariables) {
-    return this._request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument, vars).then(
-      response => {
-        const data = response?.integrations;
-        return data ? new IntegrationConnection(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument).then(response => {
+      const data = response?.integrations;
+      return data ? new IntegrationConnection(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link IntegrationResourceDocument} for {@link IntegrationResource}
+ * Query IntegrationResourceDocument for IntegrationResource
  *
  * @param request - function to call the graphql client
  */
@@ -4807,8 +4803,7 @@ export class IntegrationResourceQuery {
 
   public async fetch(id: string) {
     return this._request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
-      D.IntegrationResourceDocument,
-      { id }
+      D.IntegrationResourceDocument
     ).then(response => {
       const data = response?.integrationResource;
       return data ? new IntegrationResource(this._request, data) : undefined;
@@ -4817,7 +4812,7 @@ export class IntegrationResourceQuery {
 }
 
 /**
- * Query {@link IntegrationResourcesDocument} for {@link IntegrationResourceConnection}
+ * Query IntegrationResourcesDocument for IntegrationResourceConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4830,8 +4825,7 @@ export class IntegrationResourcesQuery {
 
   public async fetch(vars?: D.IntegrationResourcesQueryVariables) {
     return this._request<D.IntegrationResourcesQuery, D.IntegrationResourcesQueryVariables>(
-      D.IntegrationResourcesDocument,
-      vars
+      D.IntegrationResourcesDocument
     ).then(response => {
       const data = response?.integrationResources;
       return data ? new IntegrationResourceConnection(this._request, data) : undefined;
@@ -4840,7 +4834,7 @@ export class IntegrationResourcesQuery {
 }
 
 /**
- * Query {@link InviteInfoDocument} for {@link InvitePagePayload}
+ * Query InviteInfoDocument for InvitePagePayload
  *
  * @param request - function to call the graphql client
  */
@@ -4852,10 +4846,7 @@ export class InviteInfoQuery {
   }
 
   public async fetch(userHash: string, vars?: Omit<D.InviteInfoQueryVariables, "userHash">) {
-    return this._request<D.InviteInfoQuery, D.InviteInfoQueryVariables>(D.InviteInfoDocument, {
-      userHash,
-      ...vars,
-    }).then(response => {
+    return this._request<D.InviteInfoQuery, D.InviteInfoQueryVariables>(D.InviteInfoDocument).then(response => {
       const data = response?.inviteInfo;
       return data ? new InvitePagePayload(this._request, data) : undefined;
     });
@@ -4863,7 +4854,7 @@ export class InviteInfoQuery {
 }
 
 /**
- * Query {@link IssueLabelDocument} for {@link IssueLabel}
+ * Query IssueLabelDocument for IssueLabel
  *
  * @param request - function to call the graphql client
  */
@@ -4875,7 +4866,7 @@ export class IssueLabelQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, { id }).then(response => {
+    return this._request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument).then(response => {
       const data = response?.issueLabel;
       return data ? new IssueLabel(this._request, data) : undefined;
     });
@@ -4883,7 +4874,7 @@ export class IssueLabelQuery {
 }
 
 /**
- * Query {@link IssueLabelsDocument} for {@link IssueLabelConnection}
+ * Query IssueLabelsDocument for IssueLabelConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4895,17 +4886,15 @@ export class IssueLabelsQuery {
   }
 
   public async fetch(vars?: D.IssueLabelsQueryVariables) {
-    return this._request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument, vars).then(
-      response => {
-        const data = response?.issueLabels;
-        return data ? new IssueLabelConnection(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument).then(response => {
+      const data = response?.issueLabels;
+      return data ? new IssueLabelConnection(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link IssueRelationDocument} for {@link IssueRelation}
+ * Query IssueRelationDocument for IssueRelation
  *
  * @param request - function to call the graphql client
  */
@@ -4917,7 +4906,7 @@ export class IssueRelationQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, { id }).then(
+    return this._request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument).then(
       response => {
         const data = response?.issueRelation;
         return data ? new IssueRelation(this._request, data) : undefined;
@@ -4927,7 +4916,7 @@ export class IssueRelationQuery {
 }
 
 /**
- * Query {@link IssueRelationsDocument} for {@link IssueRelationConnection}
+ * Query IssueRelationsDocument for IssueRelationConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4939,7 +4928,7 @@ export class IssueRelationsQuery {
   }
 
   public async fetch(vars?: D.IssueRelationsQueryVariables) {
-    return this._request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(D.IssueRelationsDocument, vars).then(
+    return this._request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(D.IssueRelationsDocument).then(
       response => {
         const data = response?.issueRelations;
         return data ? new IssueRelationConnection(this._request, data) : undefined;
@@ -4949,7 +4938,7 @@ export class IssueRelationsQuery {
 }
 
 /**
- * Query {@link IssueDocument} for {@link Issue}
+ * Query IssueDocument for Issue
  *
  * @param request - function to call the graphql client
  */
@@ -4961,7 +4950,7 @@ export class IssueQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, { id }).then(response => {
+    return this._request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument).then(response => {
       const data = response?.issue;
       return data ? new Issue(this._request, data) : undefined;
     });
@@ -4969,7 +4958,7 @@ export class IssueQuery {
 }
 
 /**
- * Query {@link IssueSearchDocument} for {@link IssueConnection}
+ * Query IssueSearchDocument for IssueConnection
  *
  * @param request - function to call the graphql client
  */
@@ -4981,10 +4970,7 @@ export class IssueSearchQuery {
   }
 
   public async fetch(query: string, vars?: Omit<D.IssueSearchQueryVariables, "query">) {
-    return this._request<D.IssueSearchQuery, D.IssueSearchQueryVariables>(D.IssueSearchDocument, {
-      query,
-      ...vars,
-    }).then(response => {
+    return this._request<D.IssueSearchQuery, D.IssueSearchQueryVariables>(D.IssueSearchDocument).then(response => {
       const data = response?.issueSearch;
       return data ? new IssueConnection(this._request, data) : undefined;
     });
@@ -4992,7 +4978,7 @@ export class IssueSearchQuery {
 }
 
 /**
- * Query {@link IssuesDocument} for {@link IssueConnection}
+ * Query IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5004,7 +4990,7 @@ export class IssuesQuery {
   }
 
   public async fetch(vars?: D.IssuesQueryVariables) {
-    return this._request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, vars).then(response => {
+    return this._request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument).then(response => {
       const data = response?.issues;
       return data ? new IssueConnection(this._request, data) : undefined;
     });
@@ -5012,7 +4998,7 @@ export class IssuesQuery {
 }
 
 /**
- * Query {@link MilestoneDocument} for {@link Milestone}
+ * Query MilestoneDocument for Milestone
  *
  * @param request - function to call the graphql client
  */
@@ -5024,7 +5010,7 @@ export class MilestoneQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, { id }).then(response => {
+    return this._request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument).then(response => {
       const data = response?.milestone;
       return data ? new Milestone(this._request, data) : undefined;
     });
@@ -5032,7 +5018,7 @@ export class MilestoneQuery {
 }
 
 /**
- * Query {@link MilestonesDocument} for {@link MilestoneConnection}
+ * Query MilestonesDocument for MilestoneConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5044,7 +5030,7 @@ export class MilestonesQuery {
   }
 
   public async fetch(vars?: D.MilestonesQueryVariables) {
-    return this._request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument, vars).then(response => {
+    return this._request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument).then(response => {
       const data = response?.milestones;
       return data ? new MilestoneConnection(this._request, data) : undefined;
     });
@@ -5052,7 +5038,7 @@ export class MilestonesQuery {
 }
 
 /**
- * Query {@link NotificationDocument} for {@link UserSettings}
+ * Query NotificationDocument for UserSettings
  *
  * @param request - function to call the graphql client
  */
@@ -5064,17 +5050,15 @@ export class NotificationQuery {
   }
 
   public async fetch() {
-    return this._request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument, {}).then(
-      response => {
-        const data = response?.notification;
-        return data ? new UserSettings(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument).then(response => {
+      const data = response?.notification;
+      return data ? new UserSettings(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link NotificationsDocument} for {@link NotificationConnection}
+ * Query NotificationsDocument for NotificationConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5086,7 +5070,7 @@ export class NotificationsQuery {
   }
 
   public async fetch(vars?: D.NotificationsQueryVariables) {
-    return this._request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument, vars).then(
+    return this._request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument).then(
       response => {
         const data = response?.notifications;
         return data ? new NotificationConnection(this._request, data) : undefined;
@@ -5096,7 +5080,7 @@ export class NotificationsQuery {
 }
 
 /**
- * Query {@link NotificationSubscriptionDocument} for {@link NotificationSubscriptionConnection}
+ * Query NotificationSubscriptionDocument for NotificationSubscriptionConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5109,8 +5093,7 @@ export class NotificationSubscriptionQuery {
 
   public async fetch(vars?: D.NotificationSubscriptionQueryVariables) {
     return this._request<D.NotificationSubscriptionQuery, D.NotificationSubscriptionQueryVariables>(
-      D.NotificationSubscriptionDocument,
-      vars
+      D.NotificationSubscriptionDocument
     ).then(response => {
       const data = response?.notificationSubscription;
       return data ? new NotificationSubscriptionConnection(this._request, data) : undefined;
@@ -5119,7 +5102,7 @@ export class NotificationSubscriptionQuery {
 }
 
 /**
- * Query {@link OrganizationInviteDocument} for {@link IssueLabel}
+ * Query OrganizationInviteDocument for IssueLabel
  *
  * @param request - function to call the graphql client
  */
@@ -5131,9 +5114,9 @@ export class OrganizationInviteQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(D.OrganizationInviteDocument, {
-      id,
-    }).then(response => {
+    return this._request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(
+      D.OrganizationInviteDocument
+    ).then(response => {
       const data = response?.organizationInvite;
       return data ? new IssueLabel(this._request, data) : undefined;
     });
@@ -5141,7 +5124,7 @@ export class OrganizationInviteQuery {
 }
 
 /**
- * Query {@link OrganizationInvitesDocument} for {@link OrganizationInviteConnection}
+ * Query OrganizationInvitesDocument for OrganizationInviteConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5154,8 +5137,7 @@ export class OrganizationInvitesQuery {
 
   public async fetch(vars?: D.OrganizationInvitesQueryVariables) {
     return this._request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
-      D.OrganizationInvitesDocument,
-      vars
+      D.OrganizationInvitesDocument
     ).then(response => {
       const data = response?.organizationInvites;
       return data ? new OrganizationInviteConnection(this._request, data) : undefined;
@@ -5164,7 +5146,7 @@ export class OrganizationInvitesQuery {
 }
 
 /**
- * Query {@link ProjectLinkDocument} for {@link ProjectLink}
+ * Query ProjectLinkDocument for ProjectLink
  *
  * @param request - function to call the graphql client
  */
@@ -5176,17 +5158,15 @@ export class ProjectLinkQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, { id }).then(
-      response => {
-        const data = response?.projectLink;
-        return data ? new ProjectLink(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument).then(response => {
+      const data = response?.projectLink;
+      return data ? new ProjectLink(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link ProjectLinksDocument} for {@link ProjectLinkConnection}
+ * Query ProjectLinksDocument for ProjectLinkConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5198,17 +5178,15 @@ export class ProjectLinksQuery {
   }
 
   public async fetch(vars?: D.ProjectLinksQueryVariables) {
-    return this._request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
-      response => {
-        const data = response?.ProjectLinks;
-        return data ? new ProjectLinkConnection(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument).then(response => {
+      const data = response?.ProjectLinks;
+      return data ? new ProjectLinkConnection(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link ProjectDocument} for {@link Project}
+ * Query ProjectDocument for Project
  *
  * @param request - function to call the graphql client
  */
@@ -5220,7 +5198,7 @@ export class ProjectQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, { id }).then(response => {
+    return this._request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument).then(response => {
       const data = response?.project;
       return data ? new Project(this._request, data) : undefined;
     });
@@ -5228,7 +5206,7 @@ export class ProjectQuery {
 }
 
 /**
- * Query {@link ProjectsDocument} for {@link ProjectConnection}
+ * Query ProjectsDocument for ProjectConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5240,7 +5218,7 @@ export class ProjectsQuery {
   }
 
   public async fetch(vars?: D.ProjectsQueryVariables) {
-    return this._request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars).then(response => {
+    return this._request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument).then(response => {
       const data = response?.projects;
       return data ? new ProjectConnection(this._request, data) : undefined;
     });
@@ -5248,7 +5226,7 @@ export class ProjectsQuery {
 }
 
 /**
- * Query {@link PushSubscriptionTestDocument} for {@link PushSubscriptionPayload}
+ * Query PushSubscriptionTestDocument for PushSubscriptionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5261,8 +5239,7 @@ export class PushSubscriptionTestQuery {
 
   public async fetch() {
     return this._request<D.PushSubscriptionTestQuery, D.PushSubscriptionTestQueryVariables>(
-      D.PushSubscriptionTestDocument,
-      {}
+      D.PushSubscriptionTestDocument
     ).then(response => {
       const data = response?.pushSubscriptionTest;
       return data ? new PushSubscriptionPayload(this._request, data) : undefined;
@@ -5271,7 +5248,7 @@ export class PushSubscriptionTestQuery {
 }
 
 /**
- * Query {@link ReactionDocument} for {@link Reaction}
+ * Query ReactionDocument for Reaction
  *
  * @param request - function to call the graphql client
  */
@@ -5283,7 +5260,7 @@ export class ReactionQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, { id }).then(response => {
+    return this._request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument).then(response => {
       const data = response?.reaction;
       return data ? new Reaction(this._request, data) : undefined;
     });
@@ -5291,7 +5268,7 @@ export class ReactionQuery {
 }
 
 /**
- * Query {@link ReactionsDocument} for {@link ReactionConnection}
+ * Query ReactionsDocument for ReactionConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5303,7 +5280,7 @@ export class ReactionsQuery {
   }
 
   public async fetch(vars?: D.ReactionsQueryVariables) {
-    return this._request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, vars).then(response => {
+    return this._request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument).then(response => {
       const data = response?.reactions;
       return data ? new ReactionConnection(this._request, data) : undefined;
     });
@@ -5311,7 +5288,7 @@ export class ReactionsQuery {
 }
 
 /**
- * Query {@link SubscriptionDocument} for {@link Subscription}
+ * Query SubscriptionDocument for Subscription
  *
  * @param request - function to call the graphql client
  */
@@ -5323,17 +5300,15 @@ export class SubscriptionQuery {
   }
 
   public async fetch() {
-    return this._request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument, {}).then(
-      response => {
-        const data = response?.subscription;
-        return data ? new Subscription(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument).then(response => {
+      const data = response?.subscription;
+      return data ? new Subscription(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link TeamMembershipDocument} for {@link TeamMembership}
+ * Query TeamMembershipDocument for TeamMembership
  *
  * @param request - function to call the graphql client
  */
@@ -5345,7 +5320,7 @@ export class TeamMembershipQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument, { id }).then(
+    return this._request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument).then(
       response => {
         const data = response?.teamMembership;
         return data ? new TeamMembership(this._request, data) : undefined;
@@ -5355,7 +5330,7 @@ export class TeamMembershipQuery {
 }
 
 /**
- * Query {@link TeamMembershipsDocument} for {@link TeamMembershipConnection}
+ * Query TeamMembershipsDocument for TeamMembershipConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5367,7 +5342,7 @@ export class TeamMembershipsQuery {
   }
 
   public async fetch(vars?: D.TeamMembershipsQueryVariables) {
-    return this._request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(D.TeamMembershipsDocument, vars).then(
+    return this._request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(D.TeamMembershipsDocument).then(
       response => {
         const data = response?.teamMemberships;
         return data ? new TeamMembershipConnection(this._request, data) : undefined;
@@ -5377,7 +5352,7 @@ export class TeamMembershipsQuery {
 }
 
 /**
- * Query {@link TeamDocument} for {@link Team}
+ * Query TeamDocument for Team
  *
  * @param request - function to call the graphql client
  */
@@ -5389,7 +5364,7 @@ export class TeamQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, { id }).then(response => {
+    return this._request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument).then(response => {
       const data = response?.team;
       return data ? new Team(this._request, data) : undefined;
     });
@@ -5397,7 +5372,7 @@ export class TeamQuery {
 }
 
 /**
- * Query {@link TeamsDocument} for {@link TeamConnection}
+ * Query TeamsDocument for TeamConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5409,7 +5384,7 @@ export class TeamsQuery {
   }
 
   public async fetch(vars?: D.TeamsQueryVariables) {
-    return this._request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars).then(response => {
+    return this._request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument).then(response => {
       const data = response?.teams;
       return data ? new TeamConnection(this._request, data) : undefined;
     });
@@ -5417,7 +5392,27 @@ export class TeamsQuery {
 }
 
 /**
- * Query {@link TemplateDocument} for {@link Template}
+ * Query TemplatesDocument for undefined
+ *
+ * @param request - function to call the graphql client
+ */
+export class TemplatesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch() {
+    return this._request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument).then(response => {
+      const data = response?.templates;
+      return data ? new undefined(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query TemplateDocument for Template
  *
  * @param request - function to call the graphql client
  */
@@ -5429,7 +5424,7 @@ export class TemplateQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, { id }).then(response => {
+    return this._request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument).then(response => {
       const data = response?.template;
       return data ? new Template(this._request, data) : undefined;
     });
@@ -5437,7 +5432,7 @@ export class TemplateQuery {
 }
 
 /**
- * Query {@link ViewPreferencesDocument} for {@link ViewPreferencesConnection}
+ * Query ViewPreferencesDocument for ViewPreferencesConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5449,7 +5444,7 @@ export class ViewPreferencesQuery {
   }
 
   public async fetch(vars?: D.ViewPreferencesQueryVariables) {
-    return this._request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument, vars).then(
+    return this._request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument).then(
       response => {
         const data = response?.viewPreferences;
         return data ? new ViewPreferencesConnection(this._request, data) : undefined;
@@ -5459,7 +5454,7 @@ export class ViewPreferencesQuery {
 }
 
 /**
- * Query {@link WebhookDocument} for {@link Webhook}
+ * Query WebhookDocument for Webhook
  *
  * @param request - function to call the graphql client
  */
@@ -5471,7 +5466,7 @@ export class WebhookQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, { id }).then(response => {
+    return this._request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument).then(response => {
       const data = response?.webhook;
       return data ? new Webhook(this._request, data) : undefined;
     });
@@ -5479,7 +5474,7 @@ export class WebhookQuery {
 }
 
 /**
- * Query {@link WebhooksDocument} for {@link WebhookConnection}
+ * Query WebhooksDocument for WebhookConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5491,7 +5486,7 @@ export class WebhooksQuery {
   }
 
   public async fetch(vars?: D.WebhooksQueryVariables) {
-    return this._request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, vars).then(response => {
+    return this._request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument).then(response => {
       const data = response?.webhooks;
       return data ? new WebhookConnection(this._request, data) : undefined;
     });
@@ -5499,7 +5494,7 @@ export class WebhooksQuery {
 }
 
 /**
- * Query {@link WorkflowStateDocument} for {@link WorkflowState}
+ * Query WorkflowStateDocument for WorkflowState
  *
  * @param request - function to call the graphql client
  */
@@ -5511,7 +5506,7 @@ export class WorkflowStateQuery {
   }
 
   public async fetch(id: string) {
-    return this._request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, { id }).then(
+    return this._request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument).then(
       response => {
         const data = response?.workflowState;
         return data ? new WorkflowState(this._request, data) : undefined;
@@ -5521,7 +5516,7 @@ export class WorkflowStateQuery {
 }
 
 /**
- * Query {@link WorkflowStatesDocument} for {@link WorkflowStateConnection}
+ * Query WorkflowStatesDocument for WorkflowStateConnection
  *
  * @param request - function to call the graphql client
  */
@@ -5533,7 +5528,7 @@ export class WorkflowStatesQuery {
   }
 
   public async fetch(vars?: D.WorkflowStatesQueryVariables) {
-    return this._request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(D.WorkflowStatesDocument, vars).then(
+    return this._request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(D.WorkflowStatesDocument).then(
       response => {
         const data = response?.workflowStates;
         return data ? new WorkflowStateConnection(this._request, data) : undefined;
@@ -5543,7 +5538,7 @@ export class WorkflowStatesQuery {
 }
 
 /**
- * Mutation {@link UserUpdateDocument} for {@link UserPayload}
+ * Mutation UserUpdateDocument for UserPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5555,17 +5550,15 @@ export class UserUpdateMutation {
   }
 
   public async fetch(input: D.UpdateUserInput, id: string) {
-    return this._request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument, { input, id }).then(
-      response => {
-        const data = response?.userUpdate;
-        return data ? new UserPayload(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument).then(response => {
+      const data = response?.userUpdate;
+      return data ? new UserPayload(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Mutation {@link UserPromoteAdminDocument} for {@link UserAdminPayload}
+ * Mutation UserPromoteAdminDocument for UserAdminPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5577,9 +5570,9 @@ export class UserPromoteAdminMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(D.UserPromoteAdminDocument, {
-      id,
-    }).then(response => {
+    return this._request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(
+      D.UserPromoteAdminDocument
+    ).then(response => {
       const data = response?.userPromoteAdmin;
       return data ? new UserAdminPayload(this._request, data) : undefined;
     });
@@ -5587,7 +5580,7 @@ export class UserPromoteAdminMutation {
 }
 
 /**
- * Mutation {@link UserDemoteAdminDocument} for {@link UserAdminPayload}
+ * Mutation UserDemoteAdminDocument for UserAdminPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5599,17 +5592,17 @@ export class UserDemoteAdminMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument, {
-      id,
-    }).then(response => {
-      const data = response?.userDemoteAdmin;
-      return data ? new UserAdminPayload(this._request, data) : undefined;
-    });
+    return this._request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument).then(
+      response => {
+        const data = response?.userDemoteAdmin;
+        return data ? new UserAdminPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link UserSuspendDocument} for {@link UserAdminPayload}
+ * Mutation UserSuspendDocument for UserAdminPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5621,7 +5614,7 @@ export class UserSuspendMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, { id }).then(
+    return this._request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument).then(
       response => {
         const data = response?.userSuspend;
         return data ? new UserAdminPayload(this._request, data) : undefined;
@@ -5631,7 +5624,7 @@ export class UserSuspendMutation {
 }
 
 /**
- * Mutation {@link UserUnsuspendDocument} for {@link UserAdminPayload}
+ * Mutation UserUnsuspendDocument for UserAdminPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5643,17 +5636,17 @@ export class UserUnsuspendMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument, {
-      id,
-    }).then(response => {
-      const data = response?.userUnsuspend;
-      return data ? new UserAdminPayload(this._request, data) : undefined;
-    });
+    return this._request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument).then(
+      response => {
+        const data = response?.userUnsuspend;
+        return data ? new UserAdminPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link OrganizationUpdateDocument} for {@link OrganizationPayload}
+ * Mutation OrganizationUpdateDocument for OrganizationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5666,8 +5659,7 @@ export class OrganizationUpdateMutation {
 
   public async fetch(input: D.UpdateOrganizationInput) {
     return this._request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
-      D.OrganizationUpdateDocument,
-      { input }
+      D.OrganizationUpdateDocument
     ).then(response => {
       const data = response?.organizationUpdate;
       return data ? new OrganizationPayload(this._request, data) : undefined;
@@ -5676,7 +5668,7 @@ export class OrganizationUpdateMutation {
 }
 
 /**
- * Mutation {@link OrganizationDeleteChallengeDocument} for {@link OrganizationDeletePayload}
+ * Mutation OrganizationDeleteChallengeDocument for OrganizationDeletePayload
  *
  * @param request - function to call the graphql client
  */
@@ -5689,8 +5681,7 @@ export class OrganizationDeleteChallengeMutation {
 
   public async fetch() {
     return this._request<D.OrganizationDeleteChallengeMutation, D.OrganizationDeleteChallengeMutationVariables>(
-      D.OrganizationDeleteChallengeDocument,
-      {}
+      D.OrganizationDeleteChallengeDocument
     ).then(response => {
       const data = response?.organizationDeleteChallenge;
       return data ? new OrganizationDeletePayload(this._request, data) : undefined;
@@ -5699,7 +5690,7 @@ export class OrganizationDeleteChallengeMutation {
 }
 
 /**
- * Mutation {@link OrganizationDeleteDocument} for {@link OrganizationDeletePayload}
+ * Mutation OrganizationDeleteDocument for OrganizationDeletePayload
  *
  * @param request - function to call the graphql client
  */
@@ -5712,8 +5703,7 @@ export class OrganizationDeleteMutation {
 
   public async fetch(input: D.DeleteOrganizationInput) {
     return this._request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
-      D.OrganizationDeleteDocument,
-      { input }
+      D.OrganizationDeleteDocument
     ).then(response => {
       const data = response?.organizationDelete;
       return data ? new OrganizationDeletePayload(this._request, data) : undefined;
@@ -5722,7 +5712,7 @@ export class OrganizationDeleteMutation {
 }
 
 /**
- * Mutation {@link AdminDeleteIntegrationDocument} for {@link AdminIntegrationPayload}
+ * Mutation AdminDeleteIntegrationDocument for AdminIntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5735,8 +5725,7 @@ export class AdminDeleteIntegrationMutation {
 
   public async fetch(id: string) {
     return this._request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
-      D.AdminDeleteIntegrationDocument,
-      { id }
+      D.AdminDeleteIntegrationDocument
     ).then(response => {
       const data = response?.adminDeleteIntegration;
       return data ? new AdminIntegrationPayload(this._request, data) : undefined;
@@ -5745,7 +5734,7 @@ export class AdminDeleteIntegrationMutation {
 }
 
 /**
- * Mutation {@link OrganizationToggleAccessDocument} for {@link OrganizationAccessPayload}
+ * Mutation OrganizationToggleAccessDocument for OrganizationAccessPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5758,8 +5747,7 @@ export class OrganizationToggleAccessMutation {
 
   public async fetch(id: string) {
     return this._request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
-      D.OrganizationToggleAccessDocument,
-      { id }
+      D.OrganizationToggleAccessDocument
     ).then(response => {
       const data = response?.organizationToggleAccess;
       return data ? new OrganizationAccessPayload(this._request, data) : undefined;
@@ -5768,7 +5756,7 @@ export class OrganizationToggleAccessMutation {
 }
 
 /**
- * Mutation {@link OrganizationChangeEmailDomainDocument} for {@link OrganizationAccessPayload}
+ * Mutation OrganizationChangeEmailDomainDocument for OrganizationAccessPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5781,8 +5769,7 @@ export class OrganizationChangeEmailDomainMutation {
 
   public async fetch(toDomain: string, fromDomain: string, id: string) {
     return this._request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
-      D.OrganizationChangeEmailDomainDocument,
-      { toDomain, fromDomain, id }
+      D.OrganizationChangeEmailDomainDocument
     ).then(response => {
       const data = response?.organizationChangeEmailDomain;
       return data ? new OrganizationAccessPayload(this._request, data) : undefined;
@@ -5791,7 +5778,7 @@ export class OrganizationChangeEmailDomainMutation {
 }
 
 /**
- * Mutation {@link OrganizationToggleSamlEnabledDocument} for {@link OrganizationSamlConfigurePayload}
+ * Mutation OrganizationToggleSamlEnabledDocument for OrganizationSamlConfigurePayload
  *
  * @param request - function to call the graphql client
  */
@@ -5804,8 +5791,7 @@ export class OrganizationToggleSamlEnabledMutation {
 
   public async fetch(id: string) {
     return this._request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
-      D.OrganizationToggleSamlEnabledDocument,
-      { id }
+      D.OrganizationToggleSamlEnabledDocument
     ).then(response => {
       const data = response?.organizationToggleSamlEnabled;
       return data ? new OrganizationSamlConfigurePayload(this._request, data) : undefined;
@@ -5814,7 +5800,7 @@ export class OrganizationToggleSamlEnabledMutation {
 }
 
 /**
- * Mutation {@link OrganizationConfigureSamlDocument} for {@link OrganizationSamlConfigurePayload}
+ * Mutation OrganizationConfigureSamlDocument for OrganizationSamlConfigurePayload
  *
  * @param request - function to call the graphql client
  */
@@ -5827,8 +5813,7 @@ export class OrganizationConfigureSamlMutation {
 
   public async fetch(samlConfiguration: D.SamlConfigurationInput, id: string) {
     return this._request<D.OrganizationConfigureSamlMutation, D.OrganizationConfigureSamlMutationVariables>(
-      D.OrganizationConfigureSamlDocument,
-      { samlConfiguration, id }
+      D.OrganizationConfigureSamlDocument
     ).then(response => {
       const data = response?.organizationConfigureSaml;
       return data ? new OrganizationSamlConfigurePayload(this._request, data) : undefined;
@@ -5837,7 +5822,7 @@ export class OrganizationConfigureSamlMutation {
 }
 
 /**
- * Mutation {@link AdminCommandDocument} for {@link AdminCommandPayload}
+ * Mutation AdminCommandDocument for AdminCommandPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5849,17 +5834,17 @@ export class AdminCommandMutation {
   }
 
   public async fetch(input: D.AdminCommandInput) {
-    return this._request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument, {
-      input,
-    }).then(response => {
-      const data = response?.adminCommand;
-      return data ? new AdminCommandPayload(this._request, data) : undefined;
-    });
+    return this._request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument).then(
+      response => {
+        const data = response?.adminCommand;
+        return data ? new AdminCommandPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link AdminBulkEmailDocument} for {@link AdminCommandPayload}
+ * Mutation AdminBulkEmailDocument for AdminCommandPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5876,20 +5861,17 @@ export class AdminBulkEmailMutation {
     subject: string,
     vars?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
   ) {
-    return this._request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument, {
-      emails,
-      markdownContent,
-      subject,
-      ...vars,
-    }).then(response => {
-      const data = response?.adminBulkEmail;
-      return data ? new AdminCommandPayload(this._request, data) : undefined;
-    });
+    return this._request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument).then(
+      response => {
+        const data = response?.adminBulkEmail;
+        return data ? new AdminCommandPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link AdminCreateStripeCustomerDocument} for {@link AdminCommandPayload}
+ * Mutation AdminCreateStripeCustomerDocument for AdminCommandPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5902,8 +5884,7 @@ export class AdminCreateStripeCustomerMutation {
 
   public async fetch(organizationId: string) {
     return this._request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
-      D.AdminCreateStripeCustomerDocument,
-      { organizationId }
+      D.AdminCreateStripeCustomerDocument
     ).then(response => {
       const data = response?.adminCreateStripeCustomer;
       return data ? new AdminCommandPayload(this._request, data) : undefined;
@@ -5912,7 +5893,7 @@ export class AdminCreateStripeCustomerMutation {
 }
 
 /**
- * Mutation {@link AdminScheduleAnonymousTaskDocument} for {@link AdminCommandPayload}
+ * Mutation AdminScheduleAnonymousTaskDocument for AdminCommandPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5925,8 +5906,7 @@ export class AdminScheduleAnonymousTaskMutation {
 
   public async fetch(taskName: string) {
     return this._request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
-      D.AdminScheduleAnonymousTaskDocument,
-      { taskName }
+      D.AdminScheduleAnonymousTaskDocument
     ).then(response => {
       const data = response?.adminScheduleAnonymousTask;
       return data ? new AdminCommandPayload(this._request, data) : undefined;
@@ -5935,7 +5915,7 @@ export class AdminScheduleAnonymousTaskMutation {
 }
 
 /**
- * Mutation {@link AdminUserAccountChangeEmailDocument} for {@link UserAccountAdminPrivileged}
+ * Mutation AdminUserAccountChangeEmailDocument for UserAccountAdminPrivileged
  *
  * @param request - function to call the graphql client
  */
@@ -5948,8 +5928,7 @@ export class AdminUserAccountChangeEmailMutation {
 
   public async fetch(newEmail: string, id: string) {
     return this._request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
-      D.AdminUserAccountChangeEmailDocument,
-      { newEmail, id }
+      D.AdminUserAccountChangeEmailDocument
     ).then(response => {
       const data = response?.adminUserAccountChangeEmail;
       return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
@@ -5958,7 +5937,7 @@ export class AdminUserAccountChangeEmailMutation {
 }
 
 /**
- * Mutation {@link EventCreateDocument} for {@link EventPayload}
+ * Mutation EventCreateDocument for EventPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5970,7 +5949,7 @@ export class EventCreateMutation {
   }
 
   public async fetch(input: D.EventCreateInput) {
-    return this._request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument, { input }).then(
+    return this._request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument).then(
       response => {
         const data = response?.eventCreate;
         return data ? new EventPayload(this._request, data) : undefined;
@@ -5980,7 +5959,7 @@ export class EventCreateMutation {
 }
 
 /**
- * Mutation {@link ApiKeyCreateDocument} for {@link ApiKeyPayload}
+ * Mutation ApiKeyCreateDocument for ApiKeyPayload
  *
  * @param request - function to call the graphql client
  */
@@ -5992,17 +5971,17 @@ export class ApiKeyCreateMutation {
   }
 
   public async fetch(input: D.ApiKeyCreateInput) {
-    return this._request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.apiKeyCreate;
-      return data ? new ApiKeyPayload(this._request, data) : undefined;
-    });
+    return this._request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument).then(
+      response => {
+        const data = response?.apiKeyCreate;
+        return data ? new ApiKeyPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link ApiKeyDeleteDocument} for {@link ArchivePayload}
+ * Mutation ApiKeyDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6014,7 +5993,7 @@ export class ApiKeyDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument, { id }).then(
+    return this._request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument).then(
       response => {
         const data = response?.apiKeyDelete;
         return data ? new ArchivePayload(this._request, data) : undefined;
@@ -6024,7 +6003,7 @@ export class ApiKeyDeleteMutation {
 }
 
 /**
- * Mutation {@link EmailUserAccountAuthChallengeDocument} for {@link EmailUserAccountAuthChallengeResponse}
+ * Mutation EmailUserAccountAuthChallengeDocument for EmailUserAccountAuthChallengeResponse
  *
  * @param request - function to call the graphql client
  */
@@ -6037,8 +6016,7 @@ export class EmailUserAccountAuthChallengeMutation {
 
   public async fetch(input: D.EmailUserAccountAuthChallengeInput) {
     return this._request<D.EmailUserAccountAuthChallengeMutation, D.EmailUserAccountAuthChallengeMutationVariables>(
-      D.EmailUserAccountAuthChallengeDocument,
-      { input }
+      D.EmailUserAccountAuthChallengeDocument
     ).then(response => {
       const data = response?.emailUserAccountAuthChallenge;
       return data ? new EmailUserAccountAuthChallengeResponse(this._request, data) : undefined;
@@ -6047,7 +6025,7 @@ export class EmailUserAccountAuthChallengeMutation {
 }
 
 /**
- * Mutation {@link EmailTokenUserAccountAuthDocument} for {@link AuthResolverResponse}
+ * Mutation EmailTokenUserAccountAuthDocument for AuthResolverResponse
  *
  * @param request - function to call the graphql client
  */
@@ -6060,8 +6038,7 @@ export class EmailTokenUserAccountAuthMutation {
 
   public async fetch(input: D.TokenUserAccountAuthInput) {
     return this._request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
-      D.EmailTokenUserAccountAuthDocument,
-      { input }
+      D.EmailTokenUserAccountAuthDocument
     ).then(response => {
       const data = response?.emailTokenUserAccountAuth;
       return data ? new AuthResolverResponse(this._request, data) : undefined;
@@ -6070,7 +6047,7 @@ export class EmailTokenUserAccountAuthMutation {
 }
 
 /**
- * Mutation {@link SamlTokenUserAccountAuthDocument} for {@link AuthResolverResponse}
+ * Mutation SamlTokenUserAccountAuthDocument for AuthResolverResponse
  *
  * @param request - function to call the graphql client
  */
@@ -6083,8 +6060,7 @@ export class SamlTokenUserAccountAuthMutation {
 
   public async fetch(input: D.TokenUserAccountAuthInput) {
     return this._request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
-      D.SamlTokenUserAccountAuthDocument,
-      { input }
+      D.SamlTokenUserAccountAuthDocument
     ).then(response => {
       const data = response?.samlTokenUserAccountAuth;
       return data ? new AuthResolverResponse(this._request, data) : undefined;
@@ -6093,7 +6069,7 @@ export class SamlTokenUserAccountAuthMutation {
 }
 
 /**
- * Mutation {@link GoogleUserAccountAuthDocument} for {@link AuthResolverResponse}
+ * Mutation GoogleUserAccountAuthDocument for AuthResolverResponse
  *
  * @param request - function to call the graphql client
  */
@@ -6106,8 +6082,7 @@ export class GoogleUserAccountAuthMutation {
 
   public async fetch(input: D.GoogleUserAccountAuthInput) {
     return this._request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
-      D.GoogleUserAccountAuthDocument,
-      { input }
+      D.GoogleUserAccountAuthDocument
     ).then(response => {
       const data = response?.googleUserAccountAuth;
       return data ? new AuthResolverResponse(this._request, data) : undefined;
@@ -6116,7 +6091,7 @@ export class GoogleUserAccountAuthMutation {
 }
 
 /**
- * Mutation {@link CreateOrganizationFromOnboardingDocument} for {@link CreateOrJoinOrganizationResponse}
+ * Mutation CreateOrganizationFromOnboardingDocument for CreateOrJoinOrganizationResponse
  *
  * @param request - function to call the graphql client
  */
@@ -6134,7 +6109,7 @@ export class CreateOrganizationFromOnboardingMutation {
     return this._request<
       D.CreateOrganizationFromOnboardingMutation,
       D.CreateOrganizationFromOnboardingMutationVariables
-    >(D.CreateOrganizationFromOnboardingDocument, { input, ...vars }).then(response => {
+    >(D.CreateOrganizationFromOnboardingDocument).then(response => {
       const data = response?.createOrganizationFromOnboarding;
       return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
     });
@@ -6142,7 +6117,7 @@ export class CreateOrganizationFromOnboardingMutation {
 }
 
 /**
- * Mutation {@link JoinOrganizationFromOnboardingDocument} for {@link CreateOrJoinOrganizationResponse}
+ * Mutation JoinOrganizationFromOnboardingDocument for CreateOrJoinOrganizationResponse
  *
  * @param request - function to call the graphql client
  */
@@ -6155,8 +6130,7 @@ export class JoinOrganizationFromOnboardingMutation {
 
   public async fetch(input: D.JoinOrganizationInput) {
     return this._request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
-      D.JoinOrganizationFromOnboardingDocument,
-      { input }
+      D.JoinOrganizationFromOnboardingDocument
     ).then(response => {
       const data = response?.joinOrganizationFromOnboarding;
       return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
@@ -6165,7 +6139,7 @@ export class JoinOrganizationFromOnboardingMutation {
 }
 
 /**
- * Mutation {@link LeaveOrganizationDocument} for {@link CreateOrJoinOrganizationResponse}
+ * Mutation LeaveOrganizationDocument for CreateOrJoinOrganizationResponse
  *
  * @param request - function to call the graphql client
  */
@@ -6178,8 +6152,7 @@ export class LeaveOrganizationMutation {
 
   public async fetch(organizationId: string) {
     return this._request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
-      D.LeaveOrganizationDocument,
-      { organizationId }
+      D.LeaveOrganizationDocument
     ).then(response => {
       const data = response?.leaveOrganization;
       return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
@@ -6188,7 +6161,7 @@ export class LeaveOrganizationMutation {
 }
 
 /**
- * Mutation {@link BillingEmailUpdateDocument} for {@link BillingEmailPayload}
+ * Mutation BillingEmailUpdateDocument for BillingEmailPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6201,8 +6174,7 @@ export class BillingEmailUpdateMutation {
 
   public async fetch(input: D.BillingEmailUpdateInput) {
     return this._request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
-      D.BillingEmailUpdateDocument,
-      { input }
+      D.BillingEmailUpdateDocument
     ).then(response => {
       const data = response?.billingEmailUpdate;
       return data ? new BillingEmailPayload(this._request, data) : undefined;
@@ -6211,7 +6183,7 @@ export class BillingEmailUpdateMutation {
 }
 
 /**
- * Mutation {@link CollaborativeDocumentUpdateDocument} for {@link CollaborationDocumentUpdatePayload}
+ * Mutation CollaborativeDocumentUpdateDocument for CollaborationDocumentUpdatePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6224,8 +6196,7 @@ export class CollaborativeDocumentUpdateMutation {
 
   public async fetch(input: D.CollaborationDocumentUpdateInput) {
     return this._request<D.CollaborativeDocumentUpdateMutation, D.CollaborativeDocumentUpdateMutationVariables>(
-      D.CollaborativeDocumentUpdateDocument,
-      { input }
+      D.CollaborativeDocumentUpdateDocument
     ).then(response => {
       const data = response?.collaborativeDocumentUpdate;
       return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
@@ -6234,7 +6205,7 @@ export class CollaborativeDocumentUpdateMutation {
 }
 
 /**
- * Mutation {@link CommentCreateDocument} for {@link CommentPayload}
+ * Mutation CommentCreateDocument for CommentPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6246,17 +6217,17 @@ export class CommentCreateMutation {
   }
 
   public async fetch(input: D.CommentCreateInput) {
-    return this._request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.commentCreate;
-      return data ? new CommentPayload(this._request, data) : undefined;
-    });
+    return this._request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument).then(
+      response => {
+        const data = response?.commentCreate;
+        return data ? new CommentPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link CommentUpdateDocument} for {@link CommentPayload}
+ * Mutation CommentUpdateDocument for CommentPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6268,18 +6239,17 @@ export class CommentUpdateMutation {
   }
 
   public async fetch(input: D.CommentUpdateInput, id: string) {
-    return this._request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
-      const data = response?.commentUpdate;
-      return data ? new CommentPayload(this._request, data) : undefined;
-    });
+    return this._request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument).then(
+      response => {
+        const data = response?.commentUpdate;
+        return data ? new CommentPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link CommentDeleteDocument} for {@link ArchivePayload}
+ * Mutation CommentDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6291,17 +6261,17 @@ export class CommentDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.commentDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    return this._request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument).then(
+      response => {
+        const data = response?.commentDelete;
+        return data ? new ArchivePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link ContactCreateDocument} for {@link ContactPayload}
+ * Mutation ContactCreateDocument for ContactPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6313,17 +6283,17 @@ export class ContactCreateMutation {
   }
 
   public async fetch(input: D.ContactCreateInput) {
-    return this._request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.contactCreate;
-      return data ? new ContactPayload(this._request, data) : undefined;
-    });
+    return this._request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument).then(
+      response => {
+        const data = response?.contactCreate;
+        return data ? new ContactPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link CustomViewCreateDocument} for {@link CustomViewPayload}
+ * Mutation CustomViewCreateDocument for CustomViewPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6335,9 +6305,9 @@ export class CustomViewCreateMutation {
   }
 
   public async fetch(input: D.CustomViewCreateInput) {
-    return this._request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(D.CustomViewCreateDocument, {
-      input,
-    }).then(response => {
+    return this._request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(
+      D.CustomViewCreateDocument
+    ).then(response => {
       const data = response?.customViewCreate;
       return data ? new CustomViewPayload(this._request, data) : undefined;
     });
@@ -6345,7 +6315,7 @@ export class CustomViewCreateMutation {
 }
 
 /**
- * Mutation {@link CustomViewUpdateDocument} for {@link CustomViewPayload}
+ * Mutation CustomViewUpdateDocument for CustomViewPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6357,10 +6327,9 @@ export class CustomViewUpdateMutation {
   }
 
   public async fetch(input: D.CustomViewUpdateInput, id: string) {
-    return this._request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(D.CustomViewUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
+    return this._request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(
+      D.CustomViewUpdateDocument
+    ).then(response => {
       const data = response?.customViewUpdate;
       return data ? new CustomViewPayload(this._request, data) : undefined;
     });
@@ -6368,7 +6337,7 @@ export class CustomViewUpdateMutation {
 }
 
 /**
- * Mutation {@link CustomViewDeleteDocument} for {@link ArchivePayload}
+ * Mutation CustomViewDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6380,9 +6349,9 @@ export class CustomViewDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(D.CustomViewDeleteDocument, {
-      id,
-    }).then(response => {
+    return this._request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(
+      D.CustomViewDeleteDocument
+    ).then(response => {
       const data = response?.customViewDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
     });
@@ -6390,7 +6359,7 @@ export class CustomViewDeleteMutation {
 }
 
 /**
- * Mutation {@link CycleCreateDocument} for {@link CyclePayload}
+ * Mutation CycleCreateDocument for CyclePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6402,7 +6371,7 @@ export class CycleCreateMutation {
   }
 
   public async fetch(input: D.CycleCreateInput) {
-    return this._request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument, { input }).then(
+    return this._request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument).then(
       response => {
         const data = response?.cycleCreate;
         return data ? new CyclePayload(this._request, data) : undefined;
@@ -6412,7 +6381,7 @@ export class CycleCreateMutation {
 }
 
 /**
- * Mutation {@link CycleUpdateDocument} for {@link CyclePayload}
+ * Mutation CycleUpdateDocument for CyclePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6424,18 +6393,17 @@ export class CycleUpdateMutation {
   }
 
   public async fetch(input: D.CycleUpdateInput, id: string) {
-    return this._request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
-      const data = response?.cycleUpdate;
-      return data ? new CyclePayload(this._request, data) : undefined;
-    });
+    return this._request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument).then(
+      response => {
+        const data = response?.cycleUpdate;
+        return data ? new CyclePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link CycleArchiveDocument} for {@link ArchivePayload}
+ * Mutation CycleArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6447,7 +6415,7 @@ export class CycleArchiveMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument, { id }).then(
+    return this._request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument).then(
       response => {
         const data = response?.cycleArchive;
         return data ? new ArchivePayload(this._request, data) : undefined;
@@ -6457,7 +6425,7 @@ export class CycleArchiveMutation {
 }
 
 /**
- * Mutation {@link DebugFailWithInternalErrorDocument} for {@link DebugPayload}
+ * Mutation DebugFailWithInternalErrorDocument for DebugPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6470,8 +6438,7 @@ export class DebugFailWithInternalErrorMutation {
 
   public async fetch() {
     return this._request<D.DebugFailWithInternalErrorMutation, D.DebugFailWithInternalErrorMutationVariables>(
-      D.DebugFailWithInternalErrorDocument,
-      {}
+      D.DebugFailWithInternalErrorDocument
     ).then(response => {
       const data = response?.debugFailWithInternalError;
       return data ? new DebugPayload(this._request, data) : undefined;
@@ -6480,7 +6447,7 @@ export class DebugFailWithInternalErrorMutation {
 }
 
 /**
- * Mutation {@link DebugFailWithWarningDocument} for {@link DebugPayload}
+ * Mutation DebugFailWithWarningDocument for DebugPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6493,8 +6460,7 @@ export class DebugFailWithWarningMutation {
 
   public async fetch() {
     return this._request<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
-      D.DebugFailWithWarningDocument,
-      {}
+      D.DebugFailWithWarningDocument
     ).then(response => {
       const data = response?.debugFailWithWarning;
       return data ? new DebugPayload(this._request, data) : undefined;
@@ -6503,7 +6469,7 @@ export class DebugFailWithWarningMutation {
 }
 
 /**
- * Mutation {@link DebugCreateSamlOrgDocument} for {@link DebugPayload}
+ * Mutation DebugCreateSamlOrgDocument for DebugPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6516,8 +6482,7 @@ export class DebugCreateSamlOrgMutation {
 
   public async fetch() {
     return this._request<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
-      D.DebugCreateSamlOrgDocument,
-      {}
+      D.DebugCreateSamlOrgDocument
     ).then(response => {
       const data = response?.debugCreateSAMLOrg;
       return data ? new DebugPayload(this._request, data) : undefined;
@@ -6526,7 +6491,7 @@ export class DebugCreateSamlOrgMutation {
 }
 
 /**
- * Mutation {@link EmailUnsubscribeDocument} for {@link EmailUnsubscribePayload}
+ * Mutation EmailUnsubscribeDocument for EmailUnsubscribePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6538,9 +6503,9 @@ export class EmailUnsubscribeMutation {
   }
 
   public async fetch(input: D.EmailUnsubscribeInput) {
-    return this._request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(D.EmailUnsubscribeDocument, {
-      input,
-    }).then(response => {
+    return this._request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(
+      D.EmailUnsubscribeDocument
+    ).then(response => {
       const data = response?.emailUnsubscribe;
       return data ? new EmailUnsubscribePayload(this._request, data) : undefined;
     });
@@ -6548,7 +6513,7 @@ export class EmailUnsubscribeMutation {
 }
 
 /**
- * Mutation {@link EmojiCreateDocument} for {@link EmojiPayload}
+ * Mutation EmojiCreateDocument for EmojiPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6560,7 +6525,7 @@ export class EmojiCreateMutation {
   }
 
   public async fetch(input: D.EmojiCreateInput) {
-    return this._request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument, { input }).then(
+    return this._request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument).then(
       response => {
         const data = response?.emojiCreate;
         return data ? new EmojiPayload(this._request, data) : undefined;
@@ -6570,7 +6535,7 @@ export class EmojiCreateMutation {
 }
 
 /**
- * Mutation {@link EmojiDeleteDocument} for {@link ArchivePayload}
+ * Mutation EmojiDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6582,7 +6547,7 @@ export class EmojiDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument, { id }).then(
+    return this._request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument).then(
       response => {
         const data = response?.emojiDelete;
         return data ? new ArchivePayload(this._request, data) : undefined;
@@ -6592,7 +6557,7 @@ export class EmojiDeleteMutation {
 }
 
 /**
- * Mutation {@link FavoriteCreateDocument} for {@link FavoritePayload}
+ * Mutation FavoriteCreateDocument for FavoritePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6604,17 +6569,17 @@ export class FavoriteCreateMutation {
   }
 
   public async fetch(input: D.FavoriteCreateInput) {
-    return this._request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.favoriteCreate;
-      return data ? new FavoritePayload(this._request, data) : undefined;
-    });
+    return this._request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument).then(
+      response => {
+        const data = response?.favoriteCreate;
+        return data ? new FavoritePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link FavoriteUpdateDocument} for {@link FavoritePayload}
+ * Mutation FavoriteUpdateDocument for FavoritePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6626,18 +6591,17 @@ export class FavoriteUpdateMutation {
   }
 
   public async fetch(input: D.FavoriteUpdateInput, id: string) {
-    return this._request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
-      const data = response?.favoriteUpdate;
-      return data ? new FavoritePayload(this._request, data) : undefined;
-    });
+    return this._request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument).then(
+      response => {
+        const data = response?.favoriteUpdate;
+        return data ? new FavoritePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link FavoriteDeleteDocument} for {@link ArchivePayload}
+ * Mutation FavoriteDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -6649,17 +6613,17 @@ export class FavoriteDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.favoriteDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    return this._request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument).then(
+      response => {
+        const data = response?.favoriteDelete;
+        return data ? new ArchivePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link FeedbackCreateDocument} for {@link FeedbackPayload}
+ * Mutation FeedbackCreateDocument for FeedbackPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6671,17 +6635,17 @@ export class FeedbackCreateMutation {
   }
 
   public async fetch(input: D.FeedbackCreateInput) {
-    return this._request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.feedbackCreate;
-      return data ? new FeedbackPayload(this._request, data) : undefined;
-    });
+    return this._request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument).then(
+      response => {
+        const data = response?.feedbackCreate;
+        return data ? new FeedbackPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link FileUploadDocument} for {@link UploadPayload}
+ * Mutation FileUploadDocument for UploadPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6698,12 +6662,7 @@ export class FileUploadMutation {
     filename: string,
     vars?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
   ) {
-    return this._request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument, {
-      size,
-      contentType,
-      filename,
-      ...vars,
-    }).then(response => {
+    return this._request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument).then(response => {
       const data = response?.fileUpload;
       return data ? new UploadPayload(this._request, data) : undefined;
     });
@@ -6711,7 +6670,7 @@ export class FileUploadMutation {
 }
 
 /**
- * Mutation {@link ImageUploadFromUrlDocument} for {@link ImageUploadFromUrlPayload}
+ * Mutation ImageUploadFromUrlDocument for ImageUploadFromUrlPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6724,8 +6683,7 @@ export class ImageUploadFromUrlMutation {
 
   public async fetch(url: string) {
     return this._request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
-      D.ImageUploadFromUrlDocument,
-      { url }
+      D.ImageUploadFromUrlDocument
     ).then(response => {
       const data = response?.imageUploadFromUrl;
       return data ? new ImageUploadFromUrlPayload(this._request, data) : undefined;
@@ -6734,7 +6692,7 @@ export class ImageUploadFromUrlMutation {
 }
 
 /**
- * Mutation {@link IntegrationGithubConnectDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationGithubConnectDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6747,8 +6705,7 @@ export class IntegrationGithubConnectMutation {
 
   public async fetch(installationId: string) {
     return this._request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
-      D.IntegrationGithubConnectDocument,
-      { installationId }
+      D.IntegrationGithubConnectDocument
     ).then(response => {
       const data = response?.integrationGithubConnect;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6757,7 +6714,7 @@ export class IntegrationGithubConnectMutation {
 }
 
 /**
- * Mutation {@link IntegrationGitlabConnectDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationGitlabConnectDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6770,8 +6727,7 @@ export class IntegrationGitlabConnectMutation {
 
   public async fetch(gitlabUrl: string, accessToken: string) {
     return this._request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
-      D.IntegrationGitlabConnectDocument,
-      { gitlabUrl, accessToken }
+      D.IntegrationGitlabConnectDocument
     ).then(response => {
       const data = response?.integrationGitlabConnect;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6780,7 +6736,7 @@ export class IntegrationGitlabConnectMutation {
 }
 
 /**
- * Mutation {@link IntegrationSlackDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationSlackDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6796,11 +6752,9 @@ export class IntegrationSlackMutation {
     code: string,
     vars?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
   ) {
-    return this._request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(D.IntegrationSlackDocument, {
-      redirectUri,
-      code,
-      ...vars,
-    }).then(response => {
+    return this._request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(
+      D.IntegrationSlackDocument
+    ).then(response => {
       const data = response?.integrationSlack;
       return data ? new IntegrationPayload(this._request, data) : undefined;
     });
@@ -6808,7 +6762,7 @@ export class IntegrationSlackMutation {
 }
 
 /**
- * Mutation {@link IntegrationSlackPersonalDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationSlackPersonalDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6821,8 +6775,7 @@ export class IntegrationSlackPersonalMutation {
 
   public async fetch(redirectUri: string, code: string) {
     return this._request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
-      D.IntegrationSlackPersonalDocument,
-      { redirectUri, code }
+      D.IntegrationSlackPersonalDocument
     ).then(response => {
       const data = response?.integrationSlackPersonal;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6831,7 +6784,7 @@ export class IntegrationSlackPersonalMutation {
 }
 
 /**
- * Mutation {@link IntegrationSlackPostDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationSlackPostDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6849,8 +6802,7 @@ export class IntegrationSlackPostMutation {
     vars?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
   ) {
     return this._request<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
-      D.IntegrationSlackPostDocument,
-      { redirectUri, teamId, code, ...vars }
+      D.IntegrationSlackPostDocument
     ).then(response => {
       const data = response?.integrationSlackPost;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6859,7 +6811,7 @@ export class IntegrationSlackPostMutation {
 }
 
 /**
- * Mutation {@link IntegrationSlackProjectPostDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationSlackProjectPostDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6872,8 +6824,7 @@ export class IntegrationSlackProjectPostMutation {
 
   public async fetch(redirectUri: string, projectId: string, code: string) {
     return this._request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
-      D.IntegrationSlackProjectPostDocument,
-      { redirectUri, projectId, code }
+      D.IntegrationSlackProjectPostDocument
     ).then(response => {
       const data = response?.integrationSlackProjectPost;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6882,7 +6833,7 @@ export class IntegrationSlackProjectPostMutation {
 }
 
 /**
- * Mutation {@link IntegrationSlackImportEmojisDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationSlackImportEmojisDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6895,8 +6846,7 @@ export class IntegrationSlackImportEmojisMutation {
 
   public async fetch(redirectUri: string, code: string) {
     return this._request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
-      D.IntegrationSlackImportEmojisDocument,
-      { redirectUri, code }
+      D.IntegrationSlackImportEmojisDocument
     ).then(response => {
       const data = response?.integrationSlackImportEmojis;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6905,7 +6855,7 @@ export class IntegrationSlackImportEmojisMutation {
 }
 
 /**
- * Mutation {@link IntegrationFigmaDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationFigmaDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6917,10 +6867,9 @@ export class IntegrationFigmaMutation {
   }
 
   public async fetch(redirectUri: string, code: string) {
-    return this._request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(D.IntegrationFigmaDocument, {
-      redirectUri,
-      code,
-    }).then(response => {
+    return this._request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(
+      D.IntegrationFigmaDocument
+    ).then(response => {
       const data = response?.integrationFigma;
       return data ? new IntegrationPayload(this._request, data) : undefined;
     });
@@ -6928,7 +6877,7 @@ export class IntegrationFigmaMutation {
 }
 
 /**
- * Mutation {@link IntegrationGoogleSheetsDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationGoogleSheetsDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6941,8 +6890,7 @@ export class IntegrationGoogleSheetsMutation {
 
   public async fetch(code: string) {
     return this._request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
-      D.IntegrationGoogleSheetsDocument,
-      { code }
+      D.IntegrationGoogleSheetsDocument
     ).then(response => {
       const data = response?.integrationGoogleSheets;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6951,7 +6899,7 @@ export class IntegrationGoogleSheetsMutation {
 }
 
 /**
- * Mutation {@link RefreshGoogleSheetsDataDocument} for {@link IntegrationPayload}
+ * Mutation RefreshGoogleSheetsDataDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6964,8 +6912,7 @@ export class RefreshGoogleSheetsDataMutation {
 
   public async fetch(id: string) {
     return this._request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
-      D.RefreshGoogleSheetsDataDocument,
-      { id }
+      D.RefreshGoogleSheetsDataDocument
     ).then(response => {
       const data = response?.refreshGoogleSheetsData;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6974,7 +6921,7 @@ export class RefreshGoogleSheetsDataMutation {
 }
 
 /**
- * Mutation {@link IntegrationSentryConnectDocument} for {@link IntegrationPayload}
+ * Mutation IntegrationSentryConnectDocument for IntegrationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -6987,8 +6934,7 @@ export class IntegrationSentryConnectMutation {
 
   public async fetch(organizationSlug: string, code: string, installationId: string) {
     return this._request<D.IntegrationSentryConnectMutation, D.IntegrationSentryConnectMutationVariables>(
-      D.IntegrationSentryConnectDocument,
-      { organizationSlug, code, installationId }
+      D.IntegrationSentryConnectDocument
     ).then(response => {
       const data = response?.integrationSentryConnect;
       return data ? new IntegrationPayload(this._request, data) : undefined;
@@ -6997,7 +6943,7 @@ export class IntegrationSentryConnectMutation {
 }
 
 /**
- * Mutation {@link IntegrationDeleteDocument} for {@link ArchivePayload}
+ * Mutation IntegrationDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7010,8 +6956,7 @@ export class IntegrationDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
-      D.IntegrationDeleteDocument,
-      { id }
+      D.IntegrationDeleteDocument
     ).then(response => {
       const data = response?.integrationDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7020,7 +6965,7 @@ export class IntegrationDeleteMutation {
 }
 
 /**
- * Mutation {@link IntegrationResourceArchiveDocument} for {@link ArchivePayload}
+ * Mutation IntegrationResourceArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7033,8 +6978,7 @@ export class IntegrationResourceArchiveMutation {
 
   public async fetch(id: string) {
     return this._request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
-      D.IntegrationResourceArchiveDocument,
-      { id }
+      D.IntegrationResourceArchiveDocument
     ).then(response => {
       const data = response?.integrationResourceArchive;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7043,7 +6987,7 @@ export class IntegrationResourceArchiveMutation {
 }
 
 /**
- * Mutation {@link IssueLabelCreateDocument} for {@link IssueLabelPayload}
+ * Mutation IssueLabelCreateDocument for IssueLabelPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7055,9 +6999,9 @@ export class IssueLabelCreateMutation {
   }
 
   public async fetch(input: D.IssueLabelCreateInput) {
-    return this._request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(D.IssueLabelCreateDocument, {
-      input,
-    }).then(response => {
+    return this._request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(
+      D.IssueLabelCreateDocument
+    ).then(response => {
       const data = response?.issueLabelCreate;
       return data ? new IssueLabelPayload(this._request, data) : undefined;
     });
@@ -7065,7 +7009,7 @@ export class IssueLabelCreateMutation {
 }
 
 /**
- * Mutation {@link IssueLabelUpdateDocument} for {@link IssueLabelPayload}
+ * Mutation IssueLabelUpdateDocument for IssueLabelPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7077,10 +7021,9 @@ export class IssueLabelUpdateMutation {
   }
 
   public async fetch(input: D.IssueLabelUpdateInput, id: string) {
-    return this._request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(D.IssueLabelUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
+    return this._request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(
+      D.IssueLabelUpdateDocument
+    ).then(response => {
       const data = response?.issueLabelUpdate;
       return data ? new IssueLabelPayload(this._request, data) : undefined;
     });
@@ -7088,7 +7031,7 @@ export class IssueLabelUpdateMutation {
 }
 
 /**
- * Mutation {@link IssueLabelArchiveDocument} for {@link ArchivePayload}
+ * Mutation IssueLabelArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7101,8 +7044,7 @@ export class IssueLabelArchiveMutation {
 
   public async fetch(id: string) {
     return this._request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
-      D.IssueLabelArchiveDocument,
-      { id }
+      D.IssueLabelArchiveDocument
     ).then(response => {
       const data = response?.issueLabelArchive;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7111,7 +7053,7 @@ export class IssueLabelArchiveMutation {
 }
 
 /**
- * Mutation {@link IssueRelationCreateDocument} for {@link IssueRelationPayload}
+ * Mutation IssueRelationCreateDocument for IssueRelationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7124,8 +7066,7 @@ export class IssueRelationCreateMutation {
 
   public async fetch(input: D.IssueRelationCreateInput) {
     return this._request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
-      D.IssueRelationCreateDocument,
-      { input }
+      D.IssueRelationCreateDocument
     ).then(response => {
       const data = response?.issueRelationCreate;
       return data ? new IssueRelationPayload(this._request, data) : undefined;
@@ -7134,7 +7075,7 @@ export class IssueRelationCreateMutation {
 }
 
 /**
- * Mutation {@link IssueRelationUpdateDocument} for {@link IssueRelationPayload}
+ * Mutation IssueRelationUpdateDocument for IssueRelationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7147,8 +7088,7 @@ export class IssueRelationUpdateMutation {
 
   public async fetch(input: D.IssueRelationUpdateInput, id: string) {
     return this._request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
-      D.IssueRelationUpdateDocument,
-      { input, id }
+      D.IssueRelationUpdateDocument
     ).then(response => {
       const data = response?.issueRelationUpdate;
       return data ? new IssueRelationPayload(this._request, data) : undefined;
@@ -7157,7 +7097,7 @@ export class IssueRelationUpdateMutation {
 }
 
 /**
- * Mutation {@link IssueRelationDeleteDocument} for {@link ArchivePayload}
+ * Mutation IssueRelationDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7170,8 +7110,7 @@ export class IssueRelationDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
-      D.IssueRelationDeleteDocument,
-      { id }
+      D.IssueRelationDeleteDocument
     ).then(response => {
       const data = response?.issueRelationDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7180,7 +7119,7 @@ export class IssueRelationDeleteMutation {
 }
 
 /**
- * Mutation {@link IssueCreateDocument} for {@link IssuePayload}
+ * Mutation IssueCreateDocument for IssuePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7192,7 +7131,7 @@ export class IssueCreateMutation {
   }
 
   public async fetch(input: D.IssueCreateInput) {
-    return this._request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument, { input }).then(
+    return this._request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument).then(
       response => {
         const data = response?.issueCreate;
         return data ? new IssuePayload(this._request, data) : undefined;
@@ -7202,7 +7141,7 @@ export class IssueCreateMutation {
 }
 
 /**
- * Mutation {@link IssueUpdateDocument} for {@link IssuePayload}
+ * Mutation IssueUpdateDocument for IssuePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7214,18 +7153,17 @@ export class IssueUpdateMutation {
   }
 
   public async fetch(input: D.IssueUpdateInput, id: string) {
-    return this._request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
-      const data = response?.issueUpdate;
-      return data ? new IssuePayload(this._request, data) : undefined;
-    });
+    return this._request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument).then(
+      response => {
+        const data = response?.issueUpdate;
+        return data ? new IssuePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link IssueArchiveDocument} for {@link ArchivePayload}
+ * Mutation IssueArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7237,7 +7175,7 @@ export class IssueArchiveMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument, { id }).then(
+    return this._request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument).then(
       response => {
         const data = response?.issueArchive;
         return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7247,7 +7185,7 @@ export class IssueArchiveMutation {
 }
 
 /**
- * Mutation {@link IssueUnarchiveDocument} for {@link ArchivePayload}
+ * Mutation IssueUnarchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7259,17 +7197,17 @@ export class IssueUnarchiveMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument, {
-      id,
-    }).then(response => {
-      const data = response?.issueUnarchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    return this._request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument).then(
+      response => {
+        const data = response?.issueUnarchive;
+        return data ? new ArchivePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link MilestoneCreateDocument} for {@link MilestonePayload}
+ * Mutation MilestoneCreateDocument for MilestonePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7281,17 +7219,17 @@ export class MilestoneCreateMutation {
   }
 
   public async fetch(input: D.MilestoneCreateInput) {
-    return this._request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.milestoneCreate;
-      return data ? new MilestonePayload(this._request, data) : undefined;
-    });
+    return this._request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument).then(
+      response => {
+        const data = response?.milestoneCreate;
+        return data ? new MilestonePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link MilestoneUpdateDocument} for {@link MilestonePayload}
+ * Mutation MilestoneUpdateDocument for MilestonePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7303,18 +7241,17 @@ export class MilestoneUpdateMutation {
   }
 
   public async fetch(input: D.MilestoneUpdateInput, id: string) {
-    return this._request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
-      const data = response?.milestoneUpdate;
-      return data ? new MilestonePayload(this._request, data) : undefined;
-    });
+    return this._request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument).then(
+      response => {
+        const data = response?.milestoneUpdate;
+        return data ? new MilestonePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link MilestoneDeleteDocument} for {@link ArchivePayload}
+ * Mutation MilestoneDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7326,17 +7263,17 @@ export class MilestoneDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.milestoneDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    return this._request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument).then(
+      response => {
+        const data = response?.milestoneDelete;
+        return data ? new ArchivePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link NotificationCreateDocument} for {@link NotificationPayload}
+ * Mutation NotificationCreateDocument for NotificationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7349,8 +7286,7 @@ export class NotificationCreateMutation {
 
   public async fetch(input: D.NotificationUpdateInput, id: string) {
     return this._request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
-      D.NotificationCreateDocument,
-      { input, id }
+      D.NotificationCreateDocument
     ).then(response => {
       const data = response?.notificationCreate;
       return data ? new NotificationPayload(this._request, data) : undefined;
@@ -7359,7 +7295,7 @@ export class NotificationCreateMutation {
 }
 
 /**
- * Mutation {@link NotificationUpdateDocument} for {@link NotificationPayload}
+ * Mutation NotificationUpdateDocument for NotificationPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7372,8 +7308,7 @@ export class NotificationUpdateMutation {
 
   public async fetch(input: D.NotificationUpdateInput, id: string) {
     return this._request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
-      D.NotificationUpdateDocument,
-      { input, id }
+      D.NotificationUpdateDocument
     ).then(response => {
       const data = response?.notificationUpdate;
       return data ? new NotificationPayload(this._request, data) : undefined;
@@ -7382,7 +7317,7 @@ export class NotificationUpdateMutation {
 }
 
 /**
- * Mutation {@link NotificationDeleteDocument} for {@link ArchivePayload}
+ * Mutation NotificationDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7395,8 +7330,7 @@ export class NotificationDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
-      D.NotificationDeleteDocument,
-      { id }
+      D.NotificationDeleteDocument
     ).then(response => {
       const data = response?.notificationDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7405,7 +7339,7 @@ export class NotificationDeleteMutation {
 }
 
 /**
- * Mutation {@link NotificationArchiveDocument} for {@link ArchivePayload}
+ * Mutation NotificationArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7418,8 +7352,7 @@ export class NotificationArchiveMutation {
 
   public async fetch(id: string) {
     return this._request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
-      D.NotificationArchiveDocument,
-      { id }
+      D.NotificationArchiveDocument
     ).then(response => {
       const data = response?.notificationArchive;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7428,7 +7361,7 @@ export class NotificationArchiveMutation {
 }
 
 /**
- * Mutation {@link NotificationUnarchiveDocument} for {@link ArchivePayload}
+ * Mutation NotificationUnarchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7441,8 +7374,7 @@ export class NotificationUnarchiveMutation {
 
   public async fetch(id: string) {
     return this._request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
-      D.NotificationUnarchiveDocument,
-      { id }
+      D.NotificationUnarchiveDocument
     ).then(response => {
       const data = response?.notificationUnarchive;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7451,7 +7383,7 @@ export class NotificationUnarchiveMutation {
 }
 
 /**
- * Mutation {@link NotificationSubscriptionCreateDocument} for {@link NotificationSubscriptionPayload}
+ * Mutation NotificationSubscriptionCreateDocument for NotificationSubscriptionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7464,8 +7396,7 @@ export class NotificationSubscriptionCreateMutation {
 
   public async fetch(input: D.NotificationSubscriptionCreateInput) {
     return this._request<D.NotificationSubscriptionCreateMutation, D.NotificationSubscriptionCreateMutationVariables>(
-      D.NotificationSubscriptionCreateDocument,
-      { input }
+      D.NotificationSubscriptionCreateDocument
     ).then(response => {
       const data = response?.notificationSubscriptionCreate;
       return data ? new NotificationSubscriptionPayload(this._request, data) : undefined;
@@ -7474,7 +7405,7 @@ export class NotificationSubscriptionCreateMutation {
 }
 
 /**
- * Mutation {@link NotificationSubscriptionDeleteDocument} for {@link ArchivePayload}
+ * Mutation NotificationSubscriptionDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7487,8 +7418,7 @@ export class NotificationSubscriptionDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
-      D.NotificationSubscriptionDeleteDocument,
-      { id }
+      D.NotificationSubscriptionDeleteDocument
     ).then(response => {
       const data = response?.notificationSubscriptionDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7497,7 +7427,7 @@ export class NotificationSubscriptionDeleteMutation {
 }
 
 /**
- * Mutation {@link OauthClientCreateDocument} for {@link OauthClientPayload}
+ * Mutation OauthClientCreateDocument for OauthClientPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7510,8 +7440,7 @@ export class OauthClientCreateMutation {
 
   public async fetch(input: D.OauthClientCreateInput) {
     return this._request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
-      D.OauthClientCreateDocument,
-      { input }
+      D.OauthClientCreateDocument
     ).then(response => {
       const data = response?.oauthClientCreate;
       return data ? new OauthClientPayload(this._request, data) : undefined;
@@ -7520,7 +7449,7 @@ export class OauthClientCreateMutation {
 }
 
 /**
- * Mutation {@link OauthClientUpdateDocument} for {@link OauthClientPayload}
+ * Mutation OauthClientUpdateDocument for OauthClientPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7533,8 +7462,7 @@ export class OauthClientUpdateMutation {
 
   public async fetch(input: D.OauthClientUpdateInput, id: string) {
     return this._request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
-      D.OauthClientUpdateDocument,
-      { input, id }
+      D.OauthClientUpdateDocument
     ).then(response => {
       const data = response?.oauthClientUpdate;
       return data ? new OauthClientPayload(this._request, data) : undefined;
@@ -7543,7 +7471,7 @@ export class OauthClientUpdateMutation {
 }
 
 /**
- * Mutation {@link OauthClientArchiveDocument} for {@link ArchivePayload}
+ * Mutation OauthClientArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7556,8 +7484,7 @@ export class OauthClientArchiveMutation {
 
   public async fetch(id: string) {
     return this._request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
-      D.OauthClientArchiveDocument,
-      { id }
+      D.OauthClientArchiveDocument
     ).then(response => {
       const data = response?.oauthClientArchive;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7566,7 +7493,7 @@ export class OauthClientArchiveMutation {
 }
 
 /**
- * Mutation {@link OauthClientRotateSecretDocument} for {@link RotateSecretPayload}
+ * Mutation OauthClientRotateSecretDocument for RotateSecretPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7579,8 +7506,7 @@ export class OauthClientRotateSecretMutation {
 
   public async fetch(id: string) {
     return this._request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
-      D.OauthClientRotateSecretDocument,
-      { id }
+      D.OauthClientRotateSecretDocument
     ).then(response => {
       const data = response?.oauthClientRotateSecret;
       return data ? new RotateSecretPayload(this._request, data) : undefined;
@@ -7589,7 +7515,7 @@ export class OauthClientRotateSecretMutation {
 }
 
 /**
- * Mutation {@link OauthTokenRevokeDocument} for {@link OauthTokenRevokePayload}
+ * Mutation OauthTokenRevokeDocument for OauthTokenRevokePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7601,10 +7527,9 @@ export class OauthTokenRevokeMutation {
   }
 
   public async fetch(scope: string[], appId: string) {
-    return this._request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(D.OauthTokenRevokeDocument, {
-      scope,
-      appId,
-    }).then(response => {
+    return this._request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(
+      D.OauthTokenRevokeDocument
+    ).then(response => {
       const data = response?.oauthTokenRevoke;
       return data ? new OauthTokenRevokePayload(this._request, data) : undefined;
     });
@@ -7612,7 +7537,7 @@ export class OauthTokenRevokeMutation {
 }
 
 /**
- * Mutation {@link OrganizationDomainVerifyDocument} for {@link OrganizationDomainPayload}
+ * Mutation OrganizationDomainVerifyDocument for OrganizationDomainPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7625,8 +7550,7 @@ export class OrganizationDomainVerifyMutation {
 
   public async fetch(input: D.OrganizationDomainVerificationInput) {
     return this._request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
-      D.OrganizationDomainVerifyDocument,
-      { input }
+      D.OrganizationDomainVerifyDocument
     ).then(response => {
       const data = response?.organizationDomainVerify;
       return data ? new OrganizationDomainPayload(this._request, data) : undefined;
@@ -7635,7 +7559,7 @@ export class OrganizationDomainVerifyMutation {
 }
 
 /**
- * Mutation {@link OrganizationDomainCreateDocument} for {@link OrganizationDomainPayload}
+ * Mutation OrganizationDomainCreateDocument for OrganizationDomainPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7648,8 +7572,7 @@ export class OrganizationDomainCreateMutation {
 
   public async fetch(input: D.OrganizationDomainCreateInput) {
     return this._request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
-      D.OrganizationDomainCreateDocument,
-      { input }
+      D.OrganizationDomainCreateDocument
     ).then(response => {
       const data = response?.organizationDomainCreate;
       return data ? new OrganizationDomainPayload(this._request, data) : undefined;
@@ -7658,7 +7581,7 @@ export class OrganizationDomainCreateMutation {
 }
 
 /**
- * Mutation {@link OrganizationDomainDeleteDocument} for {@link ArchivePayload}
+ * Mutation OrganizationDomainDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7671,8 +7594,7 @@ export class OrganizationDomainDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
-      D.OrganizationDomainDeleteDocument,
-      { id }
+      D.OrganizationDomainDeleteDocument
     ).then(response => {
       const data = response?.organizationDomainDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7681,7 +7603,7 @@ export class OrganizationDomainDeleteMutation {
 }
 
 /**
- * Mutation {@link OrganizationInviteCreateDocument} for {@link OrganizationInvitePayload}
+ * Mutation OrganizationInviteCreateDocument for OrganizationInvitePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7694,8 +7616,7 @@ export class OrganizationInviteCreateMutation {
 
   public async fetch(input: D.OrganizationInviteCreateInput) {
     return this._request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
-      D.OrganizationInviteCreateDocument,
-      { input }
+      D.OrganizationInviteCreateDocument
     ).then(response => {
       const data = response?.organizationInviteCreate;
       return data ? new OrganizationInvitePayload(this._request, data) : undefined;
@@ -7704,7 +7625,7 @@ export class OrganizationInviteCreateMutation {
 }
 
 /**
- * Mutation {@link ResentOrganizationInviteDocument} for {@link ArchivePayload}
+ * Mutation ResentOrganizationInviteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7717,8 +7638,7 @@ export class ResentOrganizationInviteMutation {
 
   public async fetch(id: string) {
     return this._request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
-      D.ResentOrganizationInviteDocument,
-      { id }
+      D.ResentOrganizationInviteDocument
     ).then(response => {
       const data = response?.resentOrganizationInvite;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7727,7 +7647,7 @@ export class ResentOrganizationInviteMutation {
 }
 
 /**
- * Mutation {@link OrganizationInviteDeleteDocument} for {@link ArchivePayload}
+ * Mutation OrganizationInviteDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7740,8 +7660,7 @@ export class OrganizationInviteDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
-      D.OrganizationInviteDeleteDocument,
-      { id }
+      D.OrganizationInviteDeleteDocument
     ).then(response => {
       const data = response?.organizationInviteDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7750,7 +7669,7 @@ export class OrganizationInviteDeleteMutation {
 }
 
 /**
- * Mutation {@link ProjectLinkCreateDocument} for {@link ProjectLinkPayload}
+ * Mutation ProjectLinkCreateDocument for ProjectLinkPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7763,8 +7682,7 @@ export class ProjectLinkCreateMutation {
 
   public async fetch(input: D.ProjectLinkCreateInput) {
     return this._request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
-      D.ProjectLinkCreateDocument,
-      { input }
+      D.ProjectLinkCreateDocument
     ).then(response => {
       const data = response?.projectLinkCreate;
       return data ? new ProjectLinkPayload(this._request, data) : undefined;
@@ -7773,7 +7691,7 @@ export class ProjectLinkCreateMutation {
 }
 
 /**
- * Mutation {@link ProjectLinkDeleteDocument} for {@link ArchivePayload}
+ * Mutation ProjectLinkDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7786,8 +7704,7 @@ export class ProjectLinkDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
-      D.ProjectLinkDeleteDocument,
-      { id }
+      D.ProjectLinkDeleteDocument
     ).then(response => {
       const data = response?.projectLinkDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -7796,7 +7713,7 @@ export class ProjectLinkDeleteMutation {
 }
 
 /**
- * Mutation {@link ProjectCreateDocument} for {@link ProjectPayload}
+ * Mutation ProjectCreateDocument for ProjectPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7808,17 +7725,17 @@ export class ProjectCreateMutation {
   }
 
   public async fetch(input: D.ProjectCreateInput) {
-    return this._request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.projectCreate;
-      return data ? new ProjectPayload(this._request, data) : undefined;
-    });
+    return this._request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument).then(
+      response => {
+        const data = response?.projectCreate;
+        return data ? new ProjectPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link ProjectUpdateDocument} for {@link ProjectPayload}
+ * Mutation ProjectUpdateDocument for ProjectPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7830,18 +7747,17 @@ export class ProjectUpdateMutation {
   }
 
   public async fetch(input: D.ProjectUpdateInput, id: string) {
-    return this._request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
-      const data = response?.projectUpdate;
-      return data ? new ProjectPayload(this._request, data) : undefined;
-    });
+    return this._request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument).then(
+      response => {
+        const data = response?.projectUpdate;
+        return data ? new ProjectPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link ProjectArchiveDocument} for {@link ArchivePayload}
+ * Mutation ProjectArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7853,17 +7769,17 @@ export class ProjectArchiveMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument, {
-      id,
-    }).then(response => {
-      const data = response?.projectArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    return this._request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument).then(
+      response => {
+        const data = response?.projectArchive;
+        return data ? new ArchivePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link PushSubscriptionCreateDocument} for {@link PushSubscriptionPayload}
+ * Mutation PushSubscriptionCreateDocument for PushSubscriptionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7876,8 +7792,7 @@ export class PushSubscriptionCreateMutation {
 
   public async fetch(input: D.PushSubscriptionCreateInput) {
     return this._request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
-      D.PushSubscriptionCreateDocument,
-      { input }
+      D.PushSubscriptionCreateDocument
     ).then(response => {
       const data = response?.pushSubscriptionCreate;
       return data ? new PushSubscriptionPayload(this._request, data) : undefined;
@@ -7886,7 +7801,7 @@ export class PushSubscriptionCreateMutation {
 }
 
 /**
- * Mutation {@link PushSubscriptionDeleteDocument} for {@link PushSubscriptionPayload}
+ * Mutation PushSubscriptionDeleteDocument for PushSubscriptionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7899,8 +7814,7 @@ export class PushSubscriptionDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
-      D.PushSubscriptionDeleteDocument,
-      { id }
+      D.PushSubscriptionDeleteDocument
     ).then(response => {
       const data = response?.pushSubscriptionDelete;
       return data ? new PushSubscriptionPayload(this._request, data) : undefined;
@@ -7909,7 +7823,7 @@ export class PushSubscriptionDeleteMutation {
 }
 
 /**
- * Mutation {@link ReactionCreateDocument} for {@link ReactionPayload}
+ * Mutation ReactionCreateDocument for ReactionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7921,17 +7835,17 @@ export class ReactionCreateMutation {
   }
 
   public async fetch(input: D.ReactionCreateInput) {
-    return this._request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.reactionCreate;
-      return data ? new ReactionPayload(this._request, data) : undefined;
-    });
+    return this._request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument).then(
+      response => {
+        const data = response?.reactionCreate;
+        return data ? new ReactionPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link ReactionDeleteDocument} for {@link ArchivePayload}
+ * Mutation ReactionDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -7943,17 +7857,17 @@ export class ReactionDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.reactionDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    return this._request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument).then(
+      response => {
+        const data = response?.reactionDelete;
+        return data ? new ArchivePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link CreateCsvExportReportDocument} for {@link CreateCsvExportReportPayload}
+ * Mutation CreateCsvExportReportDocument for CreateCsvExportReportPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7966,8 +7880,7 @@ export class CreateCsvExportReportMutation {
 
   public async fetch() {
     return this._request<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
-      D.CreateCsvExportReportDocument,
-      {}
+      D.CreateCsvExportReportDocument
     ).then(response => {
       const data = response?.createCsvExportReport;
       return data ? new CreateCsvExportReportPayload(this._request, data) : undefined;
@@ -7976,7 +7889,7 @@ export class CreateCsvExportReportMutation {
 }
 
 /**
- * Mutation {@link SubscriptionSessionCreateDocument} for {@link SubscriptionSessionPayload}
+ * Mutation SubscriptionSessionCreateDocument for SubscriptionSessionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -7989,8 +7902,7 @@ export class SubscriptionSessionCreateMutation {
 
   public async fetch(plan: string) {
     return this._request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
-      D.SubscriptionSessionCreateDocument,
-      { plan }
+      D.SubscriptionSessionCreateDocument
     ).then(response => {
       const data = response?.subscriptionSessionCreate;
       return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
@@ -7999,7 +7911,7 @@ export class SubscriptionSessionCreateMutation {
 }
 
 /**
- * Mutation {@link SubscriptionUpdateSessionCreateDocument} for {@link SubscriptionSessionPayload}
+ * Mutation SubscriptionUpdateSessionCreateDocument for SubscriptionSessionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8012,8 +7924,7 @@ export class SubscriptionUpdateSessionCreateMutation {
 
   public async fetch() {
     return this._request<D.SubscriptionUpdateSessionCreateMutation, D.SubscriptionUpdateSessionCreateMutationVariables>(
-      D.SubscriptionUpdateSessionCreateDocument,
-      {}
+      D.SubscriptionUpdateSessionCreateDocument
     ).then(response => {
       const data = response?.subscriptionUpdateSessionCreate;
       return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
@@ -8022,7 +7933,7 @@ export class SubscriptionUpdateSessionCreateMutation {
 }
 
 /**
- * Mutation {@link SubscriptionUpdateDocument} for {@link SubscriptionPayload}
+ * Mutation SubscriptionUpdateDocument for SubscriptionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8035,8 +7946,7 @@ export class SubscriptionUpdateMutation {
 
   public async fetch(input: D.SubscriptionUpdateInput, id: string) {
     return this._request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
-      D.SubscriptionUpdateDocument,
-      { input, id }
+      D.SubscriptionUpdateDocument
     ).then(response => {
       const data = response?.subscriptionUpdate;
       return data ? new SubscriptionPayload(this._request, data) : undefined;
@@ -8045,7 +7955,7 @@ export class SubscriptionUpdateMutation {
 }
 
 /**
- * Mutation {@link SubscriptionUpgradeDocument} for {@link SubscriptionPayload}
+ * Mutation SubscriptionUpgradeDocument for SubscriptionPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8058,8 +7968,7 @@ export class SubscriptionUpgradeMutation {
 
   public async fetch(type: string, id: string) {
     return this._request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
-      D.SubscriptionUpgradeDocument,
-      { type, id }
+      D.SubscriptionUpgradeDocument
     ).then(response => {
       const data = response?.subscriptionUpgrade;
       return data ? new SubscriptionPayload(this._request, data) : undefined;
@@ -8068,7 +7977,7 @@ export class SubscriptionUpgradeMutation {
 }
 
 /**
- * Mutation {@link SubscriptionArchiveDocument} for {@link ArchivePayload}
+ * Mutation SubscriptionArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8081,8 +7990,7 @@ export class SubscriptionArchiveMutation {
 
   public async fetch(id: string) {
     return this._request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
-      D.SubscriptionArchiveDocument,
-      { id }
+      D.SubscriptionArchiveDocument
     ).then(response => {
       const data = response?.subscriptionArchive;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -8091,7 +7999,7 @@ export class SubscriptionArchiveMutation {
 }
 
 /**
- * Mutation {@link TeamMembershipCreateDocument} for {@link TeamMembershipPayload}
+ * Mutation TeamMembershipCreateDocument for TeamMembershipPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8104,8 +8012,7 @@ export class TeamMembershipCreateMutation {
 
   public async fetch(input: D.TeamMembershipCreateInput) {
     return this._request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
-      D.TeamMembershipCreateDocument,
-      { input }
+      D.TeamMembershipCreateDocument
     ).then(response => {
       const data = response?.teamMembershipCreate;
       return data ? new TeamMembershipPayload(this._request, data) : undefined;
@@ -8114,7 +8021,7 @@ export class TeamMembershipCreateMutation {
 }
 
 /**
- * Mutation {@link TeamMembershipDeleteDocument} for {@link ArchivePayload}
+ * Mutation TeamMembershipDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8127,8 +8034,7 @@ export class TeamMembershipDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
-      D.TeamMembershipDeleteDocument,
-      { id }
+      D.TeamMembershipDeleteDocument
     ).then(response => {
       const data = response?.teamMembershipDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -8137,7 +8043,7 @@ export class TeamMembershipDeleteMutation {
 }
 
 /**
- * Mutation {@link TeamCreateDocument} for {@link TeamPayload}
+ * Mutation TeamCreateDocument for TeamPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8149,10 +8055,7 @@ export class TeamCreateMutation {
   }
 
   public async fetch(input: D.TeamCreateInput, vars?: Omit<D.TeamCreateMutationVariables, "input">) {
-    return this._request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument, {
-      input,
-      ...vars,
-    }).then(response => {
+    return this._request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument).then(response => {
       const data = response?.teamCreate;
       return data ? new TeamPayload(this._request, data) : undefined;
     });
@@ -8160,7 +8063,7 @@ export class TeamCreateMutation {
 }
 
 /**
- * Mutation {@link TeamUpdateDocument} for {@link TeamPayload}
+ * Mutation TeamUpdateDocument for TeamPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8172,17 +8075,15 @@ export class TeamUpdateMutation {
   }
 
   public async fetch(input: D.TeamUpdateInput, id: string) {
-    return this._request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument, { input, id }).then(
-      response => {
-        const data = response?.teamUpdate;
-        return data ? new TeamPayload(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument).then(response => {
+      const data = response?.teamUpdate;
+      return data ? new TeamPayload(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Mutation {@link TeamArchiveDocument} for {@link ArchivePayload}
+ * Mutation TeamArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8194,7 +8095,7 @@ export class TeamArchiveMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument, { id }).then(
+    return this._request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument).then(
       response => {
         const data = response?.teamArchive;
         return data ? new ArchivePayload(this._request, data) : undefined;
@@ -8204,7 +8105,7 @@ export class TeamArchiveMutation {
 }
 
 /**
- * Mutation {@link TeamDeleteDocument} for {@link ArchivePayload}
+ * Mutation TeamDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8216,17 +8117,15 @@ export class TeamDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument, { id }).then(
-      response => {
-        const data = response?.teamDelete;
-        return data ? new ArchivePayload(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument).then(response => {
+      const data = response?.teamDelete;
+      return data ? new ArchivePayload(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Mutation {@link TemplateCreateDocument} for {@link TemplatePayload}
+ * Mutation TemplateCreateDocument for TemplatePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8238,17 +8137,17 @@ export class TemplateCreateMutation {
   }
 
   public async fetch(input: D.TemplateCreateInput) {
-    return this._request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.templateCreate;
-      return data ? new TemplatePayload(this._request, data) : undefined;
-    });
+    return this._request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument).then(
+      response => {
+        const data = response?.templateCreate;
+        return data ? new TemplatePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link TemplateUpdateDocument} for {@link TemplatePayload}
+ * Mutation TemplateUpdateDocument for TemplatePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8260,18 +8159,17 @@ export class TemplateUpdateMutation {
   }
 
   public async fetch(input: D.TemplateUpdateInput, id: string) {
-    return this._request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
-      const data = response?.templateUpdate;
-      return data ? new TemplatePayload(this._request, data) : undefined;
-    });
+    return this._request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument).then(
+      response => {
+        const data = response?.templateUpdate;
+        return data ? new TemplatePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link TemplateDeleteDocument} for {@link ArchivePayload}
+ * Mutation TemplateDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8283,17 +8181,17 @@ export class TemplateDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.templateDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    return this._request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument).then(
+      response => {
+        const data = response?.templateDelete;
+        return data ? new ArchivePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link UserSettingsUpdateDocument} for {@link UserSettingsPayload}
+ * Mutation UserSettingsUpdateDocument for UserSettingsPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8306,8 +8204,7 @@ export class UserSettingsUpdateMutation {
 
   public async fetch(input: D.UserSettingsUpdateInput, id: string) {
     return this._request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
-      D.UserSettingsUpdateDocument,
-      { input, id }
+      D.UserSettingsUpdateDocument
     ).then(response => {
       const data = response?.userSettingsUpdate;
       return data ? new UserSettingsPayload(this._request, data) : undefined;
@@ -8316,7 +8213,7 @@ export class UserSettingsUpdateMutation {
 }
 
 /**
- * Mutation {@link UserSettingsFlagIncrementDocument} for {@link UserSettingsFlagPayload}
+ * Mutation UserSettingsFlagIncrementDocument for UserSettingsFlagPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8329,8 +8226,7 @@ export class UserSettingsFlagIncrementMutation {
 
   public async fetch(flag: string) {
     return this._request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
-      D.UserSettingsFlagIncrementDocument,
-      { flag }
+      D.UserSettingsFlagIncrementDocument
     ).then(response => {
       const data = response?.userSettingsFlagIncrement;
       return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
@@ -8339,7 +8235,7 @@ export class UserSettingsFlagIncrementMutation {
 }
 
 /**
- * Mutation {@link UserSettingsFlagsResetDocument} for {@link UserSettingsFlagsResetPayload}
+ * Mutation UserSettingsFlagsResetDocument for UserSettingsFlagsResetPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8352,8 +8248,7 @@ export class UserSettingsFlagsResetMutation {
 
   public async fetch() {
     return this._request<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
-      D.UserSettingsFlagsResetDocument,
-      {}
+      D.UserSettingsFlagsResetDocument
     ).then(response => {
       const data = response?.userSettingsFlagsReset;
       return data ? new UserSettingsFlagsResetPayload(this._request, data) : undefined;
@@ -8362,7 +8257,7 @@ export class UserSettingsFlagsResetMutation {
 }
 
 /**
- * Mutation {@link UserFlagUpdateDocument} for {@link UserSettingsFlagPayload}
+ * Mutation UserFlagUpdateDocument for UserSettingsFlagPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8374,18 +8269,17 @@ export class UserFlagUpdateMutation {
   }
 
   public async fetch(operation: D.UserFlagUpdateOperation, flag: D.UserFlagType) {
-    return this._request<D.UserFlagUpdateMutation, D.UserFlagUpdateMutationVariables>(D.UserFlagUpdateDocument, {
-      operation,
-      flag,
-    }).then(response => {
-      const data = response?.userFlagUpdate;
-      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
-    });
+    return this._request<D.UserFlagUpdateMutation, D.UserFlagUpdateMutationVariables>(D.UserFlagUpdateDocument).then(
+      response => {
+        const data = response?.userFlagUpdate;
+        return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link UserSubscribeToNewsletterDocument} for {@link UserSubscribeToNewsletterPayload}
+ * Mutation UserSubscribeToNewsletterDocument for UserSubscribeToNewsletterPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8398,8 +8292,7 @@ export class UserSubscribeToNewsletterMutation {
 
   public async fetch() {
     return this._request<D.UserSubscribeToNewsletterMutation, D.UserSubscribeToNewsletterMutationVariables>(
-      D.UserSubscribeToNewsletterDocument,
-      {}
+      D.UserSubscribeToNewsletterDocument
     ).then(response => {
       const data = response?.userSubscribeToNewsletter;
       return data ? new UserSubscribeToNewsletterPayload(this._request, data) : undefined;
@@ -8408,7 +8301,7 @@ export class UserSubscribeToNewsletterMutation {
 }
 
 /**
- * Mutation {@link ViewPreferencesCreateDocument} for {@link ViewPreferencesPayload}
+ * Mutation ViewPreferencesCreateDocument for ViewPreferencesPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8421,8 +8314,7 @@ export class ViewPreferencesCreateMutation {
 
   public async fetch(input: D.ViewPreferencesCreateInput) {
     return this._request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
-      D.ViewPreferencesCreateDocument,
-      { input }
+      D.ViewPreferencesCreateDocument
     ).then(response => {
       const data = response?.viewPreferencesCreate;
       return data ? new ViewPreferencesPayload(this._request, data) : undefined;
@@ -8431,7 +8323,7 @@ export class ViewPreferencesCreateMutation {
 }
 
 /**
- * Mutation {@link ViewPreferencesUpdateDocument} for {@link ViewPreferencesPayload}
+ * Mutation ViewPreferencesUpdateDocument for ViewPreferencesPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8444,8 +8336,7 @@ export class ViewPreferencesUpdateMutation {
 
   public async fetch(input: D.ViewPreferencesUpdateInput, id: string) {
     return this._request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
-      D.ViewPreferencesUpdateDocument,
-      { input, id }
+      D.ViewPreferencesUpdateDocument
     ).then(response => {
       const data = response?.viewPreferencesUpdate;
       return data ? new ViewPreferencesPayload(this._request, data) : undefined;
@@ -8454,7 +8345,7 @@ export class ViewPreferencesUpdateMutation {
 }
 
 /**
- * Mutation {@link ViewPreferencesDeleteDocument} for {@link ArchivePayload}
+ * Mutation ViewPreferencesDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8467,8 +8358,7 @@ export class ViewPreferencesDeleteMutation {
 
   public async fetch(id: string) {
     return this._request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
-      D.ViewPreferencesDeleteDocument,
-      { id }
+      D.ViewPreferencesDeleteDocument
     ).then(response => {
       const data = response?.viewPreferencesDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -8477,7 +8367,7 @@ export class ViewPreferencesDeleteMutation {
 }
 
 /**
- * Mutation {@link WebhookCreateDocument} for {@link WebhookPayload}
+ * Mutation WebhookCreateDocument for WebhookPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8489,17 +8379,17 @@ export class WebhookCreateMutation {
   }
 
   public async fetch(input: D.WebhookCreateInput) {
-    return this._request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.webhookCreate;
-      return data ? new WebhookPayload(this._request, data) : undefined;
-    });
+    return this._request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument).then(
+      response => {
+        const data = response?.webhookCreate;
+        return data ? new WebhookPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link WebhookUpdateDocument} for {@link WebhookPayload}
+ * Mutation WebhookUpdateDocument for WebhookPayload
  *
  * @param request - function to call the graphql client
  */
@@ -8511,18 +8401,17 @@ export class WebhookUpdateMutation {
   }
 
   public async fetch(input: D.WebhookUpdateInput, id: string) {
-    return this._request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument, {
-      input,
-      id,
-    }).then(response => {
-      const data = response?.webhookUpdate;
-      return data ? new WebhookPayload(this._request, data) : undefined;
-    });
+    return this._request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument).then(
+      response => {
+        const data = response?.webhookUpdate;
+        return data ? new WebhookPayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link WebhookDeleteDocument} for {@link ArchivePayload}
+ * Mutation WebhookDeleteDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8534,17 +8423,17 @@ export class WebhookDeleteMutation {
   }
 
   public async fetch(id: string) {
-    return this._request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.webhookDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    return this._request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument).then(
+      response => {
+        const data = response?.webhookDelete;
+        return data ? new ArchivePayload(this._request, data) : undefined;
+      }
+    );
   }
 }
 
 /**
- * Mutation {@link WorkflowStateCreateDocument} for {@link WorkflowStatePayload}
+ * Mutation WorkflowStateCreateDocument for WorkflowStatePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8557,8 +8446,7 @@ export class WorkflowStateCreateMutation {
 
   public async fetch(input: D.WorkflowStateCreateInput) {
     return this._request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
-      D.WorkflowStateCreateDocument,
-      { input }
+      D.WorkflowStateCreateDocument
     ).then(response => {
       const data = response?.workflowStateCreate;
       return data ? new WorkflowStatePayload(this._request, data) : undefined;
@@ -8567,7 +8455,7 @@ export class WorkflowStateCreateMutation {
 }
 
 /**
- * Mutation {@link WorkflowStateUpdateDocument} for {@link WorkflowStatePayload}
+ * Mutation WorkflowStateUpdateDocument for WorkflowStatePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8580,8 +8468,7 @@ export class WorkflowStateUpdateMutation {
 
   public async fetch(input: D.WorkflowStateUpdateInput, id: string) {
     return this._request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
-      D.WorkflowStateUpdateDocument,
-      { input, id }
+      D.WorkflowStateUpdateDocument
     ).then(response => {
       const data = response?.workflowStateUpdate;
       return data ? new WorkflowStatePayload(this._request, data) : undefined;
@@ -8590,7 +8477,7 @@ export class WorkflowStateUpdateMutation {
 }
 
 /**
- * Mutation {@link WorkflowStateArchiveDocument} for {@link ArchivePayload}
+ * Mutation WorkflowStateArchiveDocument for ArchivePayload
  *
  * @param request - function to call the graphql client
  */
@@ -8603,8 +8490,7 @@ export class WorkflowStateArchiveMutation {
 
   public async fetch(id: string) {
     return this._request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
-      D.WorkflowStateArchiveDocument,
-      { id }
+      D.WorkflowStateArchiveDocument
     ).then(response => {
       const data = response?.workflowStateArchive;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -8613,21 +8499,27 @@ export class WorkflowStateArchiveMutation {
 }
 
 /**
- * Query {@link User_AssignedIssuesDocument} for {@link IssueConnection}
+ * Query User_AssignedIssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class User_AssignedIssuesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
     return this._request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
       D.User_AssignedIssuesDocument,
-      { id, ...vars }
+      {
+        id: this._id,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.user?.assignedIssues;
       return data ? new IssueConnection(this._request, data) : undefined;
@@ -8636,20 +8528,23 @@ export class User_AssignedIssuesQuery {
 }
 
 /**
- * Query {@link User_CreatedIssuesDocument} for {@link IssueConnection}
+ * Query User_CreatedIssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class User_CreatedIssuesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
     return this._request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.user?.createdIssues;
@@ -8659,21 +8554,27 @@ export class User_CreatedIssuesQuery {
 }
 
 /**
- * Query {@link User_TeamMembershipsDocument} for {@link TeamMembershipConnection}
+ * Query User_TeamMembershipsDocument for TeamMembershipConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class User_TeamMembershipsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
     return this._request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
       D.User_TeamMembershipsDocument,
-      { id, ...vars }
+      {
+        id: this._id,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.user?.teamMemberships;
       return data ? new TeamMembershipConnection(this._request, data) : undefined;
@@ -8682,7 +8583,7 @@ export class User_TeamMembershipsQuery {
 }
 
 /**
- * Query {@link Viewer_AssignedIssuesDocument} for {@link IssueConnection}
+ * Query Viewer_AssignedIssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
  */
@@ -8705,7 +8606,7 @@ export class Viewer_AssignedIssuesQuery {
 }
 
 /**
- * Query {@link Viewer_CreatedIssuesDocument} for {@link IssueConnection}
+ * Query Viewer_CreatedIssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
  */
@@ -8728,7 +8629,7 @@ export class Viewer_CreatedIssuesQuery {
 }
 
 /**
- * Query {@link Viewer_TeamMembershipsDocument} for {@link TeamMembershipConnection}
+ * Query Viewer_TeamMembershipsDocument for TeamMembershipConnection
  *
  * @param request - function to call the graphql client
  */
@@ -8751,7 +8652,7 @@ export class Viewer_TeamMembershipsQuery {
 }
 
 /**
- * Query {@link Organization_UsersDocument} for {@link UserConnection}
+ * Query Organization_UsersDocument for UserConnection
  *
  * @param request - function to call the graphql client
  */
@@ -8774,7 +8675,7 @@ export class Organization_UsersQuery {
 }
 
 /**
- * Query {@link Organization_TeamsDocument} for {@link TeamConnection}
+ * Query Organization_TeamsDocument for TeamConnection
  *
  * @param request - function to call the graphql client
  */
@@ -8797,7 +8698,7 @@ export class Organization_TeamsQuery {
 }
 
 /**
- * Query {@link Organization_MilestonesDocument} for {@link MilestoneConnection}
+ * Query Organization_MilestonesDocument for MilestoneConnection
  *
  * @param request - function to call the graphql client
  */
@@ -8820,7 +8721,7 @@ export class Organization_MilestonesQuery {
 }
 
 /**
- * Query {@link Organization_IntegrationsDocument} for {@link IntegrationConnection}
+ * Query Organization_IntegrationsDocument for IntegrationConnection
  *
  * @param request - function to call the graphql client
  */
@@ -8843,7 +8744,466 @@ export class Organization_IntegrationsQuery {
 }
 
 /**
- * Query {@link BillingDetails_PaymentMethodDocument} for {@link Card}
+ * Query AdminUserAccountLookup_UsersDocument for undefined
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_UsersQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_UsersQueryVariables) {
+    return this._request<D.AdminUserAccountLookup_UsersQuery, D.AdminUserAccountLookup_UsersQueryVariables>(
+      D.AdminUserAccountLookup_UsersDocument,
+      vars
+    ).then(response => {
+      const data = response?.adminUserAccountLookup?.users;
+      return data ? new undefined(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_AssignedIssuesDocument for IssueConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_AssignedIssuesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_AssignedIssuesQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_AssignedIssuesQuery,
+      D.AdminUserAccountLookup_Users_AssignedIssuesQueryVariables
+    >(D.AdminUserAccountLookup_Users_AssignedIssuesDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.assignedIssues;
+      return data ? new IssueConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_CreatedIssuesDocument for IssueConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_CreatedIssuesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_CreatedIssuesQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_CreatedIssuesQuery,
+      D.AdminUserAccountLookup_Users_CreatedIssuesQueryVariables
+    >(D.AdminUserAccountLookup_Users_CreatedIssuesDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.createdIssues;
+      return data ? new IssueConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_OrganizationDocument for OrganizationAdminPrivileged
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_OrganizationQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_OrganizationQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_OrganizationQuery,
+      D.AdminUserAccountLookup_Users_OrganizationQueryVariables
+    >(D.AdminUserAccountLookup_Users_OrganizationDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.organization;
+      return data ? new OrganizationAdminPrivileged(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_TeamMembershipsDocument for TeamMembershipConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_TeamMembershipsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_TeamMembershipsQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_TeamMembershipsQuery,
+      D.AdminUserAccountLookup_Users_TeamMembershipsQueryVariables
+    >(D.AdminUserAccountLookup_Users_TeamMembershipsDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.teamMemberships;
+      return data ? new TeamMembershipConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_Organization_UsersDocument for UserConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_Organization_UsersQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_UsersQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_Organization_UsersQuery,
+      D.AdminUserAccountLookup_Users_Organization_UsersQueryVariables
+    >(D.AdminUserAccountLookup_Users_Organization_UsersDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.organization?.users;
+      return data ? new UserConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_Organization_TeamsDocument for TeamConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_Organization_TeamsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_TeamsQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_Organization_TeamsQuery,
+      D.AdminUserAccountLookup_Users_Organization_TeamsQueryVariables
+    >(D.AdminUserAccountLookup_Users_Organization_TeamsDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.organization?.teams;
+      return data ? new TeamConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_Organization_MilestonesDocument for MilestoneConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_Organization_MilestonesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_MilestonesQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_Organization_MilestonesQuery,
+      D.AdminUserAccountLookup_Users_Organization_MilestonesQueryVariables
+    >(D.AdminUserAccountLookup_Users_Organization_MilestonesDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.organization?.milestones;
+      return data ? new MilestoneConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_Organization_IntegrationsDocument for IntegrationConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_IntegrationsQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_Organization_IntegrationsQuery,
+      D.AdminUserAccountLookup_Users_Organization_IntegrationsQueryVariables
+    >(D.AdminUserAccountLookup_Users_Organization_IntegrationsDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.organization?.integrations;
+      return data ? new IntegrationConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AdminUserAccountLookup_Users_Organization_SubscriptionDocument for SubscriptionAdminPrivileged
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables) {
+    return this._request<
+      D.AdminUserAccountLookup_Users_Organization_SubscriptionQuery,
+      D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables
+    >(D.AdminUserAccountLookup_Users_Organization_SubscriptionDocument).then(response => {
+      const data = response?.adminUserAccountLookup?.users?.organization?.subscription;
+      return data ? new SubscriptionAdminPrivileged(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_UsersDocument for undefined
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_UsersQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch() {
+    return this._request<D.AvailableUsers_UsersQuery, D.AvailableUsers_UsersQueryVariables>(
+      D.AvailableUsers_UsersDocument,
+      {}
+    ).then(response => {
+      const data = response?.availableUsers?.users;
+      return data ? new undefined(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_AvailableOrganizationsDocument for undefined
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_AvailableOrganizationsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch() {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizationsQuery,
+      D.AvailableUsers_AvailableOrganizationsQueryVariables
+    >(D.AvailableUsers_AvailableOrganizationsDocument, {}).then(response => {
+      const data = response?.availableUsers?.availableOrganizations;
+      return data ? new undefined(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_Users_AssignedIssuesDocument for IssueConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_Users_AssignedIssuesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_Users_AssignedIssuesQueryVariables) {
+    return this._request<
+      D.AvailableUsers_Users_AssignedIssuesQuery,
+      D.AvailableUsers_Users_AssignedIssuesQueryVariables
+    >(D.AvailableUsers_Users_AssignedIssuesDocument).then(response => {
+      const data = response?.availableUsers?.users?.assignedIssues;
+      return data ? new IssueConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_Users_CreatedIssuesDocument for IssueConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_Users_CreatedIssuesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_Users_CreatedIssuesQueryVariables) {
+    return this._request<D.AvailableUsers_Users_CreatedIssuesQuery, D.AvailableUsers_Users_CreatedIssuesQueryVariables>(
+      D.AvailableUsers_Users_CreatedIssuesDocument
+    ).then(response => {
+      const data = response?.availableUsers?.users?.createdIssues;
+      return data ? new IssueConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_Users_TeamMembershipsDocument for TeamMembershipConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_Users_TeamMembershipsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_Users_TeamMembershipsQueryVariables) {
+    return this._request<
+      D.AvailableUsers_Users_TeamMembershipsQuery,
+      D.AvailableUsers_Users_TeamMembershipsQueryVariables
+    >(D.AvailableUsers_Users_TeamMembershipsDocument).then(response => {
+      const data = response?.availableUsers?.users?.teamMemberships;
+      return data ? new TeamMembershipConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_AvailableOrganizations_UsersDocument for UserConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_AvailableOrganizations_UsersQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_UsersQueryVariables) {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizations_UsersQuery,
+      D.AvailableUsers_AvailableOrganizations_UsersQueryVariables
+    >(D.AvailableUsers_AvailableOrganizations_UsersDocument).then(response => {
+      const data = response?.availableUsers?.availableOrganizations?.users;
+      return data ? new UserConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_AvailableOrganizations_TeamsDocument for TeamConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_AvailableOrganizations_TeamsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_TeamsQueryVariables) {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizations_TeamsQuery,
+      D.AvailableUsers_AvailableOrganizations_TeamsQueryVariables
+    >(D.AvailableUsers_AvailableOrganizations_TeamsDocument).then(response => {
+      const data = response?.availableUsers?.availableOrganizations?.teams;
+      return data ? new TeamConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_AvailableOrganizations_MilestonesDocument for MilestoneConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_AvailableOrganizations_MilestonesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_MilestonesQueryVariables) {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizations_MilestonesQuery,
+      D.AvailableUsers_AvailableOrganizations_MilestonesQueryVariables
+    >(D.AvailableUsers_AvailableOrganizations_MilestonesDocument).then(response => {
+      const data = response?.availableUsers?.availableOrganizations?.milestones;
+      return data ? new MilestoneConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query AvailableUsers_AvailableOrganizations_IntegrationsDocument for IntegrationConnection
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsers_AvailableOrganizations_IntegrationsQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch(vars?: D.AvailableUsers_AvailableOrganizations_IntegrationsQueryVariables) {
+    return this._request<
+      D.AvailableUsers_AvailableOrganizations_IntegrationsQuery,
+      D.AvailableUsers_AvailableOrganizations_IntegrationsQueryVariables
+    >(D.AvailableUsers_AvailableOrganizations_IntegrationsDocument).then(response => {
+      const data = response?.availableUsers?.availableOrganizations?.integrations;
+      return data ? new IntegrationConnection(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query BillingDetails_InvoicesDocument for undefined
+ *
+ * @param request - function to call the graphql client
+ */
+export class BillingDetails_InvoicesQuery {
+  private _request: LinearRequest;
+
+  public constructor(request: LinearRequest) {
+    this._request = request;
+  }
+
+  public async fetch() {
+    return this._request<D.BillingDetails_InvoicesQuery, D.BillingDetails_InvoicesQueryVariables>(
+      D.BillingDetails_InvoicesDocument,
+      {}
+    ).then(response => {
+      const data = response?.billingDetails?.invoices;
+      return data ? new undefined(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * Query BillingDetails_PaymentMethodDocument for Card
  *
  * @param request - function to call the graphql client
  */
@@ -8866,21 +9226,34 @@ export class BillingDetails_PaymentMethodQuery {
 }
 
 /**
- * Query {@link CollaborativeDocumentJoin_StepsDocument} for {@link StepsResponse}
+ * Query CollaborativeDocumentJoin_StepsDocument for StepsResponse
  *
  * @param request - function to call the graphql client
+ * @param clientId - undefined
+ * @param issueId - undefined
+ * @param version - undefined
  */
 export class CollaborativeDocumentJoin_StepsQuery {
   private _request: LinearRequest;
+  private _clientId: string;
+  private _issueId: string;
+  private _version: number;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, clientId: string, issueId: string, version: number) {
     this._request = request;
+    this._clientId = clientId;
+    this._issueId = issueId;
+    this._version = version;
   }
 
   public async fetch() {
     return this._request<D.CollaborativeDocumentJoin_StepsQuery, D.CollaborativeDocumentJoin_StepsQueryVariables>(
       D.CollaborativeDocumentJoin_StepsDocument,
-      { clientId, issueId, version }
+      {
+        clientId: this._clientId,
+        issueId: this._issueId,
+        version: this._version,
+      }
     ).then(response => {
       const data = response?.collaborativeDocumentJoin?.steps;
       return data ? new StepsResponse(this._request, data) : undefined;
@@ -8889,20 +9262,23 @@ export class CollaborativeDocumentJoin_StepsQuery {
 }
 
 /**
- * Query {@link Cycle_IssuesDocument} for {@link IssueConnection}
+ * Query Cycle_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Cycle_IssuesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
     return this._request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.cycle?.issues;
@@ -8912,21 +9288,27 @@ export class Cycle_IssuesQuery {
 }
 
 /**
- * Query {@link Cycle_UncompletedIssuesUponCloseDocument} for {@link IssueConnection}
+ * Query Cycle_UncompletedIssuesUponCloseDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Cycle_UncompletedIssuesUponCloseQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
     return this._request<D.Cycle_UncompletedIssuesUponCloseQuery, D.Cycle_UncompletedIssuesUponCloseQueryVariables>(
       D.Cycle_UncompletedIssuesUponCloseDocument,
-      { id, ...vars }
+      {
+        id: this._id,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.cycle?.uncompletedIssuesUponClose;
       return data ? new IssueConnection(this._request, data) : undefined;
@@ -8935,21 +9317,27 @@ export class Cycle_UncompletedIssuesUponCloseQuery {
 }
 
 /**
- * Query {@link FigmaEmbedInfo_FigmaEmbedDocument} for {@link FigmaEmbed}
+ * Query FigmaEmbedInfo_FigmaEmbedDocument for FigmaEmbed
  *
  * @param request - function to call the graphql client
+ * @param fileId - undefined
  */
 export class FigmaEmbedInfo_FigmaEmbedQuery {
   private _request: LinearRequest;
+  private _fileId: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, fileId: string) {
     this._request = request;
+    this._fileId = fileId;
   }
 
   public async fetch(vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">) {
     return this._request<D.FigmaEmbedInfo_FigmaEmbedQuery, D.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       D.FigmaEmbedInfo_FigmaEmbedDocument,
-      { fileId, ...vars }
+      {
+        fileId: this._fileId,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.figmaEmbedInfo?.figmaEmbed;
       return data ? new FigmaEmbed(this._request, data) : undefined;
@@ -8958,21 +9346,26 @@ export class FigmaEmbedInfo_FigmaEmbedQuery {
 }
 
 /**
- * Query {@link Integration_SettingsDocument} for {@link IntegrationSettings}
+ * Query Integration_SettingsDocument for IntegrationSettings
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Integration_SettingsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch() {
     return this._request<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
       D.Integration_SettingsDocument,
-      { id }
+      {
+        id: this._id,
+      }
     ).then(response => {
       const data = response?.integration?.settings;
       return data ? new IntegrationSettings(this._request, data) : undefined;
@@ -8981,7 +9374,7 @@ export class Integration_SettingsQuery {
 }
 
 /**
- * Query {@link Integration_Settings_SlackPostDocument} for {@link SlackPostSettings}
+ * Query Integration_Settings_SlackPostDocument for SlackPostSettings
  *
  * @param request - function to call the graphql client
  */
@@ -8994,8 +9387,7 @@ export class Integration_Settings_SlackPostQuery {
 
   public async fetch() {
     return this._request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
-      D.Integration_Settings_SlackPostDocument,
-      { id }
+      D.Integration_Settings_SlackPostDocument
     ).then(response => {
       const data = response?.integration?.settings?.slackPost;
       return data ? new SlackPostSettings(this._request, data) : undefined;
@@ -9004,7 +9396,7 @@ export class Integration_Settings_SlackPostQuery {
 }
 
 /**
- * Query {@link Integration_Settings_SlackProjectPostDocument} for {@link SlackPostSettings}
+ * Query Integration_Settings_SlackProjectPostDocument for SlackPostSettings
  *
  * @param request - function to call the graphql client
  */
@@ -9019,7 +9411,7 @@ export class Integration_Settings_SlackProjectPostQuery {
     return this._request<
       D.Integration_Settings_SlackProjectPostQuery,
       D.Integration_Settings_SlackProjectPostQueryVariables
-    >(D.Integration_Settings_SlackProjectPostDocument, { id }).then(response => {
+    >(D.Integration_Settings_SlackProjectPostDocument).then(response => {
       const data = response?.integration?.settings?.slackProjectPost;
       return data ? new SlackPostSettings(this._request, data) : undefined;
     });
@@ -9027,7 +9419,7 @@ export class Integration_Settings_SlackProjectPostQuery {
 }
 
 /**
- * Query {@link Integration_Settings_GoogleSheetsDocument} for {@link GoogleSheetsSettings}
+ * Query Integration_Settings_GoogleSheetsDocument for GoogleSheetsSettings
  *
  * @param request - function to call the graphql client
  */
@@ -9040,8 +9432,7 @@ export class Integration_Settings_GoogleSheetsQuery {
 
   public async fetch() {
     return this._request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
-      D.Integration_Settings_GoogleSheetsDocument,
-      { id }
+      D.Integration_Settings_GoogleSheetsDocument
     ).then(response => {
       const data = response?.integration?.settings?.googleSheets;
       return data ? new GoogleSheetsSettings(this._request, data) : undefined;
@@ -9050,7 +9441,7 @@ export class Integration_Settings_GoogleSheetsQuery {
 }
 
 /**
- * Query {@link Integration_Settings_SentryDocument} for {@link SentrySettings}
+ * Query Integration_Settings_SentryDocument for SentrySettings
  *
  * @param request - function to call the graphql client
  */
@@ -9063,8 +9454,7 @@ export class Integration_Settings_SentryQuery {
 
   public async fetch() {
     return this._request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
-      D.Integration_Settings_SentryDocument,
-      { id }
+      D.Integration_Settings_SentryDocument
     ).then(response => {
       const data = response?.integration?.settings?.sentry;
       return data ? new SentrySettings(this._request, data) : undefined;
@@ -9073,21 +9463,26 @@ export class Integration_Settings_SentryQuery {
 }
 
 /**
- * Query {@link IntegrationResource_DataDocument} for {@link IntegrationResourceData}
+ * Query IntegrationResource_DataDocument for IntegrationResourceData
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class IntegrationResource_DataQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch() {
     return this._request<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
       D.IntegrationResource_DataDocument,
-      { id }
+      {
+        id: this._id,
+      }
     ).then(response => {
       const data = response?.integrationResource?.data;
       return data ? new IntegrationResourceData(this._request, data) : undefined;
@@ -9096,21 +9491,26 @@ export class IntegrationResource_DataQuery {
 }
 
 /**
- * Query {@link IntegrationResource_PullRequestDocument} for {@link PullRequestPayload}
+ * Query IntegrationResource_PullRequestDocument for PullRequestPayload
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class IntegrationResource_PullRequestQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch() {
     return this._request<D.IntegrationResource_PullRequestQuery, D.IntegrationResource_PullRequestQueryVariables>(
       D.IntegrationResource_PullRequestDocument,
-      { id }
+      {
+        id: this._id,
+      }
     ).then(response => {
       const data = response?.integrationResource?.pullRequest;
       return data ? new PullRequestPayload(this._request, data) : undefined;
@@ -9119,7 +9519,7 @@ export class IntegrationResource_PullRequestQuery {
 }
 
 /**
- * Query {@link IntegrationResource_Data_GithubPullRequestDocument} for {@link PullRequestPayload}
+ * Query IntegrationResource_Data_GithubPullRequestDocument for PullRequestPayload
  *
  * @param request - function to call the graphql client
  */
@@ -9134,7 +9534,7 @@ export class IntegrationResource_Data_GithubPullRequestQuery {
     return this._request<
       D.IntegrationResource_Data_GithubPullRequestQuery,
       D.IntegrationResource_Data_GithubPullRequestQueryVariables
-    >(D.IntegrationResource_Data_GithubPullRequestDocument, { id }).then(response => {
+    >(D.IntegrationResource_Data_GithubPullRequestDocument).then(response => {
       const data = response?.integrationResource?.data?.githubPullRequest;
       return data ? new PullRequestPayload(this._request, data) : undefined;
     });
@@ -9142,7 +9542,7 @@ export class IntegrationResource_Data_GithubPullRequestQuery {
 }
 
 /**
- * Query {@link IntegrationResource_Data_GitlabMergeRequestDocument} for {@link PullRequestPayload}
+ * Query IntegrationResource_Data_GitlabMergeRequestDocument for PullRequestPayload
  *
  * @param request - function to call the graphql client
  */
@@ -9157,7 +9557,7 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery {
     return this._request<
       D.IntegrationResource_Data_GitlabMergeRequestQuery,
       D.IntegrationResource_Data_GitlabMergeRequestQueryVariables
-    >(D.IntegrationResource_Data_GitlabMergeRequestDocument, { id }).then(response => {
+    >(D.IntegrationResource_Data_GitlabMergeRequestDocument).then(response => {
       const data = response?.integrationResource?.data?.gitlabMergeRequest;
       return data ? new PullRequestPayload(this._request, data) : undefined;
     });
@@ -9165,7 +9565,7 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery {
 }
 
 /**
- * Query {@link IntegrationResource_Data_GithubCommitDocument} for {@link CommitPayload}
+ * Query IntegrationResource_Data_GithubCommitDocument for CommitPayload
  *
  * @param request - function to call the graphql client
  */
@@ -9180,7 +9580,7 @@ export class IntegrationResource_Data_GithubCommitQuery {
     return this._request<
       D.IntegrationResource_Data_GithubCommitQuery,
       D.IntegrationResource_Data_GithubCommitQueryVariables
-    >(D.IntegrationResource_Data_GithubCommitDocument, { id }).then(response => {
+    >(D.IntegrationResource_Data_GithubCommitDocument).then(response => {
       const data = response?.integrationResource?.data?.githubCommit;
       return data ? new CommitPayload(this._request, data) : undefined;
     });
@@ -9188,7 +9588,7 @@ export class IntegrationResource_Data_GithubCommitQuery {
 }
 
 /**
- * Query {@link IntegrationResource_Data_SentryIssueDocument} for {@link SentryIssuePayload}
+ * Query IntegrationResource_Data_SentryIssueDocument for SentryIssuePayload
  *
  * @param request - function to call the graphql client
  */
@@ -9203,7 +9603,7 @@ export class IntegrationResource_Data_SentryIssueQuery {
     return this._request<
       D.IntegrationResource_Data_SentryIssueQuery,
       D.IntegrationResource_Data_SentryIssueQueryVariables
-    >(D.IntegrationResource_Data_SentryIssueDocument, { id }).then(response => {
+    >(D.IntegrationResource_Data_SentryIssueDocument).then(response => {
       const data = response?.integrationResource?.data?.sentryIssue;
       return data ? new SentryIssuePayload(this._request, data) : undefined;
     });
@@ -9211,21 +9611,27 @@ export class IntegrationResource_Data_SentryIssueQuery {
 }
 
 /**
- * Query {@link InviteInfo_InviteDataDocument} for {@link InviteData}
+ * Query InviteInfo_InviteDataDocument for InviteData
  *
  * @param request - function to call the graphql client
+ * @param userHash - undefined
  */
 export class InviteInfo_InviteDataQuery {
   private _request: LinearRequest;
+  private _userHash: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, userHash: string) {
     this._request = request;
+    this._userHash = userHash;
   }
 
   public async fetch(vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">) {
     return this._request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
       D.InviteInfo_InviteDataDocument,
-      { userHash, ...vars }
+      {
+        userHash: this._userHash,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.inviteInfo?.inviteData;
       return data ? new InviteData(this._request, data) : undefined;
@@ -9234,20 +9640,23 @@ export class InviteInfo_InviteDataQuery {
 }
 
 /**
- * Query {@link IssueLabel_IssuesDocument} for {@link IssueConnection}
+ * Query IssueLabel_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class IssueLabel_IssuesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
     return this._request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issueLabel?.issues;
@@ -9257,20 +9666,23 @@ export class IssueLabel_IssuesQuery {
 }
 
 /**
- * Query {@link Issue_SubscribersDocument} for {@link UserConnection}
+ * Query Issue_SubscribersDocument for UserConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Issue_SubscribersQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
     return this._request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.subscribers;
@@ -9280,20 +9692,23 @@ export class Issue_SubscribersQuery {
 }
 
 /**
- * Query {@link Issue_ChildrenDocument} for {@link IssueConnection}
+ * Query Issue_ChildrenDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Issue_ChildrenQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
     return this._request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.children;
@@ -9303,20 +9718,23 @@ export class Issue_ChildrenQuery {
 }
 
 /**
- * Query {@link Issue_CommentsDocument} for {@link CommentConnection}
+ * Query Issue_CommentsDocument for CommentConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Issue_CommentsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">) {
     return this._request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.comments;
@@ -9326,20 +9744,23 @@ export class Issue_CommentsQuery {
 }
 
 /**
- * Query {@link Issue_HistoryDocument} for {@link IssueHistoryConnection}
+ * Query Issue_HistoryDocument for IssueHistoryConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Issue_HistoryQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">) {
     return this._request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.history;
@@ -9349,20 +9770,23 @@ export class Issue_HistoryQuery {
 }
 
 /**
- * Query {@link Issue_LabelsDocument} for {@link IssueLabelConnection}
+ * Query Issue_LabelsDocument for IssueLabelConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Issue_LabelsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">) {
     return this._request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.labels;
@@ -9372,21 +9796,27 @@ export class Issue_LabelsQuery {
 }
 
 /**
- * Query {@link Issue_IntegrationResourcesDocument} for {@link IntegrationResourceConnection}
+ * Query Issue_IntegrationResourcesDocument for IntegrationResourceConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Issue_IntegrationResourcesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
     return this._request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
       D.Issue_IntegrationResourcesDocument,
-      { id, ...vars }
+      {
+        id: this._id,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.issue?.integrationResources;
       return data ? new IntegrationResourceConnection(this._request, data) : undefined;
@@ -9395,20 +9825,23 @@ export class Issue_IntegrationResourcesQuery {
 }
 
 /**
- * Query {@link Issue_RelationsDocument} for {@link IssueRelationConnection}
+ * Query Issue_RelationsDocument for IssueRelationConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Issue_RelationsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">) {
     return this._request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.issue?.relations;
@@ -9418,21 +9851,27 @@ export class Issue_RelationsQuery {
 }
 
 /**
- * Query {@link Issue_InverseRelationsDocument} for {@link IssueRelationConnection}
+ * Query Issue_InverseRelationsDocument for IssueRelationConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Issue_InverseRelationsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
     return this._request<D.Issue_InverseRelationsQuery, D.Issue_InverseRelationsQueryVariables>(
       D.Issue_InverseRelationsDocument,
-      { id, ...vars }
+      {
+        id: this._id,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.issue?.inverseRelations;
       return data ? new IssueRelationConnection(this._request, data) : undefined;
@@ -9441,20 +9880,23 @@ export class Issue_InverseRelationsQuery {
 }
 
 /**
- * Query {@link Milestone_ProjectsDocument} for {@link ProjectConnection}
+ * Query Milestone_ProjectsDocument for ProjectConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Milestone_ProjectsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
     return this._request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.milestone?.projects;
@@ -9464,21 +9906,27 @@ export class Milestone_ProjectsQuery {
 }
 
 /**
- * Query {@link OrganizationInvite_IssuesDocument} for {@link IssueConnection}
+ * Query OrganizationInvite_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class OrganizationInvite_IssuesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
     return this._request<D.OrganizationInvite_IssuesQuery, D.OrganizationInvite_IssuesQueryVariables>(
       D.OrganizationInvite_IssuesDocument,
-      { id, ...vars }
+      {
+        id: this._id,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.organizationInvite?.issues;
       return data ? new IssueConnection(this._request, data) : undefined;
@@ -9487,20 +9935,23 @@ export class OrganizationInvite_IssuesQuery {
 }
 
 /**
- * Query {@link Project_TeamsDocument} for {@link TeamConnection}
+ * Query Project_TeamsDocument for TeamConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Project_TeamsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">) {
     return this._request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.project?.teams;
@@ -9510,20 +9961,23 @@ export class Project_TeamsQuery {
 }
 
 /**
- * Query {@link Project_MembersDocument} for {@link UserConnection}
+ * Query Project_MembersDocument for UserConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Project_MembersQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">) {
     return this._request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.project?.members;
@@ -9533,20 +9987,23 @@ export class Project_MembersQuery {
 }
 
 /**
- * Query {@link Project_IssuesDocument} for {@link IssueConnection}
+ * Query Project_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Project_IssuesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">) {
     return this._request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.project?.issues;
@@ -9556,20 +10013,23 @@ export class Project_IssuesQuery {
 }
 
 /**
- * Query {@link Project_LinksDocument} for {@link ProjectLinkConnection}
+ * Query Project_LinksDocument for ProjectLinkConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Project_LinksQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">) {
     return this._request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.project?.links;
@@ -9579,64 +10039,75 @@ export class Project_LinksQuery {
 }
 
 /**
- * Query {@link Team_IssuesDocument} for {@link IssueConnection}
+ * Query Team_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Team_IssuesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">) {
-    return this._request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, { id, ...vars }).then(
-      response => {
-        const data = response?.team?.issues;
-        return data ? new IssueConnection(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
+      id: this._id,
+      ...vars,
+    }).then(response => {
+      const data = response?.team?.issues;
+      return data ? new IssueConnection(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link Team_CyclesDocument} for {@link CycleConnection}
+ * Query Team_CyclesDocument for CycleConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Team_CyclesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">) {
-    return this._request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, { id, ...vars }).then(
-      response => {
-        const data = response?.team?.cycles;
-        return data ? new CycleConnection(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
+      id: this._id,
+      ...vars,
+    }).then(response => {
+      const data = response?.team?.cycles;
+      return data ? new CycleConnection(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link Team_MembershipsDocument} for {@link TeamMembershipConnection}
+ * Query Team_MembershipsDocument for TeamMembershipConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Team_MembershipsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_MembershipsQueryVariables, "id">) {
     return this._request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.memberships;
@@ -9646,20 +10117,23 @@ export class Team_MembershipsQuery {
 }
 
 /**
- * Query {@link Team_ProjectsDocument} for {@link ProjectConnection}
+ * Query Team_ProjectsDocument for ProjectConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Team_ProjectsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">) {
     return this._request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.projects;
@@ -9669,42 +10143,49 @@ export class Team_ProjectsQuery {
 }
 
 /**
- * Query {@link Team_StatesDocument} for {@link WorkflowStateConnection}
+ * Query Team_StatesDocument for WorkflowStateConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Team_StatesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">) {
-    return this._request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, { id, ...vars }).then(
-      response => {
-        const data = response?.team?.states;
-        return data ? new WorkflowStateConnection(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
+      id: this._id,
+      ...vars,
+    }).then(response => {
+      const data = response?.team?.states;
+      return data ? new WorkflowStateConnection(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link Team_TemplatesDocument} for {@link TemplateConnection}
+ * Query Team_TemplatesDocument for TemplateConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Team_TemplatesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">) {
     return this._request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.templates;
@@ -9714,42 +10195,49 @@ export class Team_TemplatesQuery {
 }
 
 /**
- * Query {@link Team_LabelsDocument} for {@link IssueLabelConnection}
+ * Query Team_LabelsDocument for IssueLabelConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Team_LabelsQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">) {
-    return this._request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, { id, ...vars }).then(
-      response => {
-        const data = response?.team?.labels;
-        return data ? new IssueLabelConnection(this._request, data) : undefined;
-      }
-    );
+    return this._request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
+      id: this._id,
+      ...vars,
+    }).then(response => {
+      const data = response?.team?.labels;
+      return data ? new IssueLabelConnection(this._request, data) : undefined;
+    });
   }
 }
 
 /**
- * Query {@link Team_WebhooksDocument} for {@link WebhookConnection}
+ * Query Team_WebhooksDocument for WebhookConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class Team_WebhooksQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">) {
     return this._request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
-      id,
+      id: this._id,
       ...vars,
     }).then(response => {
       const data = response?.team?.webhooks;
@@ -9759,21 +10247,27 @@ export class Team_WebhooksQuery {
 }
 
 /**
- * Query {@link WorkflowState_IssuesDocument} for {@link IssueConnection}
+ * Query WorkflowState_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
+ * @param id - undefined
  */
 export class WorkflowState_IssuesQuery {
   private _request: LinearRequest;
+  private _id: string;
 
-  public constructor(request: LinearRequest) {
+  public constructor(request: LinearRequest, id: string) {
     this._request = request;
+    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
     return this._request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
       D.WorkflowState_IssuesDocument,
-      { id, ...vars }
+      {
+        id: this._id,
+        ...vars,
+      }
     ).then(response => {
       const data = response?.workflowState?.issues;
       return data ? new IssueConnection(this._request, data) : undefined;
