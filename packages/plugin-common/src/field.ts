@@ -1,4 +1,3 @@
-import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import {
   FieldDefinitionNode,
   InputValueDefinitionNode,
@@ -7,20 +6,17 @@ import {
   NamedTypeNode,
   NameNode,
   NonNullTypeNode,
-  visit,
 } from "graphql";
-import { ArgumentGraphqlVisitor } from "./argument-graphql-visitor";
 import c from "./constants";
-import { printList } from "./print";
-
-const argVisitor = new ArgumentGraphqlVisitor();
+import { printGraphqlType, printList, printTypescriptType } from "./print";
+import { PluginContext } from "./types";
 
 /**
  * Print the arg for passing into the operation input
  */
 function printInputArg(node?: InputValueDefinitionNode): string {
   if (node) {
-    const arg = visit(node.type, argVisitor);
+    const arg = printGraphqlType(node.type);
     return `$${node.name.value}: ${arg}`;
   } else {
     return "";
@@ -88,8 +84,8 @@ export function reduceListType(
 /**
  * Determine whether the node is a scalar field
  */
-export function isScalarField(scalars: typeof DEFAULT_SCALARS, node: FieldDefinitionNode): boolean {
-  return Object.keys(scalars).includes(reduceTypeName(node.type));
+export function isScalarField<C>(context: PluginContext<C>, node: FieldDefinitionNode): boolean {
+  return Object.values(context.scalars).includes(printTypescriptType(context, node.type));
 }
 
 /**

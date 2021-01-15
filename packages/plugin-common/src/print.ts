@@ -1,3 +1,10 @@
+import { ASTNode, visit } from "graphql";
+import { ArgumentGraphqlVisitor } from "./argument-graphql-visitor";
+import { ArgumentTypescriptVisitor } from "./argument-typescript-visitor";
+import { PluginContext } from "./types";
+
+const argGraphqlVisitor = new ArgumentGraphqlVisitor();
+
 /**
  * Filter a list of strings and join into a single string
  */
@@ -88,7 +95,22 @@ export function printGraphqlComment(lines: string[]): string {
  * Return a comment block containing the arg object if in dev mode
  */
 export function printGraphqlDebug<T>(obj: T): string {
-  return process.env.NODE_ENV === "development"
+  return process.env.NODE_ENV === "development" && obj
     ? printGraphqlComment(JSON.stringify(cleanNode(obj), null, 2).split("\n"))
     : "";
+}
+
+/**
+ * Return the printed graphql type
+ */
+export function printGraphqlType(node?: ASTNode | string): string {
+  return node ? (typeof node === "string" ? node : visit(node, argGraphqlVisitor)) : "";
+}
+
+/**
+ * Return the printed typescript type
+ */
+export function printTypescriptType<C>(context: PluginContext<C>, node?: ASTNode | string, namespace?: string): string {
+  const argTypescriptVisitor = new ArgumentTypescriptVisitor(context, namespace);
+  return node ? (typeof node === "string" ? node : visit(node, argTypescriptVisitor)) : "";
 }

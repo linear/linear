@@ -11,8 +11,7 @@ import {
 import { getRequiredArgs } from "./args";
 import c from "./constants";
 import { reduceTypeName } from "./field";
-import { findFragment, isValidFragment } from "./fragment";
-import { logger } from "./logger";
+import { isValidFragment } from "./fragment";
 import { findObject, isConnection } from "./object";
 import { printGraphqlDebug, printGraphqlDescription, printList } from "./print";
 import { findQuery } from "./query";
@@ -80,15 +79,16 @@ export class FragmentVisitor<C> {
 
   public FieldDefinition = {
     leave: (_node: FieldDefinitionNode): string | null => {
+      const type = reduceTypeName(_node.type);
+
       /** Skip objects defined in constants */
-      if (!c.SKIP_OBJECTS.includes(reduceTypeName(_node.type))) {
+      if (!c.SKIP_OBJECTS.includes(type)) {
         const node = (_node as unknown) as Named<FieldDefinitionNode>;
 
         /** Print field name if it is a scalar */
-        if (Object.values(this._context.scalars).includes(reduceTypeName(node.type))) {
+        if (Object.values(this._context.scalars).includes(type)) {
           return printList([printGraphqlDebug(_node), node.name], "\n");
         }
-        logger.trace({ node, query: findQuery(this._context, node), fragment: findFragment(this._context, node) });
 
         /** Print all fields required for matching query */
         const query = findQuery(this._context, node);

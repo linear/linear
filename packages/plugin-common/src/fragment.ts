@@ -1,6 +1,6 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode, OperationTypeDefinitionNode } from "graphql";
-import { reduceListType, reduceTypeName } from "./field";
 import { isEdge, isOperationRoot } from "./object";
+import { printTypescriptType } from "./print";
 import { Named, NamedFields, PluginContext } from "./types";
 
 /**
@@ -10,9 +10,11 @@ export function findFragment<C>(
   context: PluginContext<C>,
   field?: OperationTypeDefinitionNode | FieldDefinitionNode | Named<FieldDefinitionNode>
 ): NamedFields<ObjectTypeDefinitionNode> | undefined {
-  return field && !reduceListType(field.type)
-    ? context.fragments.find(o => o.name === reduceTypeName(field.type))
-    : undefined;
+  if (field) {
+    const type = printTypescriptType(context, field.type);
+    return context.fragments.find(o => o.name === type);
+  }
+  return undefined;
 }
 
 /**

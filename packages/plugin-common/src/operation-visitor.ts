@@ -51,7 +51,7 @@ export class OperationVisitor<C> {
   public FieldDefinition = {
     /** Filter for non scalar fields only */
     enter: (node: FieldDefinitionNode): (FieldDefinitionNode & { nullable: boolean }) | null => {
-      if (isScalarField(this._context.scalars, node)) {
+      if (isScalarField(this._context, node)) {
         return null;
       } else {
         return { ...node, nullable: node.type.kind !== Kind.NON_NULL_TYPE };

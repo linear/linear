@@ -1,8 +1,8 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
-import { isScalarField, isValidField, printInputArgs, printResponseArgs, reduceTypeName } from "./field";
+import { isScalarField, isValidField, printInputArgs, printResponseArgs } from "./field";
 import { findFragment } from "./fragment";
 import { findObject } from "./object";
-import { printGraphqlDebug, printGraphqlDescription, printList } from "./print";
+import { printGraphqlDebug, printGraphqlDescription, printGraphqlType, printList } from "./print";
 import { findQuery } from "./query";
 import { OperationType, PluginContext } from "./types";
 import { getLast } from "./utils";
@@ -141,9 +141,9 @@ export function printOperations<C>(
       const fieldOperations = (object?.fields ?? [])?.map(field => {
         if (
           /** No need to go further than scalar fields */
-          isScalarField(context.scalars, field) ||
+          isScalarField(context, field) ||
           /** No need to go further if the field returns one of the parent fields */
-          fields.map(f => reduceTypeName(f.type)).includes(reduceTypeName(field.type)) ||
+          fields.map(f => printGraphqlType(f.type)).includes(printGraphqlType(field.type)) ||
           /** No need to go further if the field is a connection */
           ["pageInfo", "nodes"].includes(field.name.value) ||
           /** No need to go further if we can get this field from a root query */
