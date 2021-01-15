@@ -4,6 +4,7 @@ import {
   isConnection,
   isScalarField,
   isValidField,
+  logger,
   OperationType,
   PluginContext,
   printTypescriptType,
@@ -148,6 +149,8 @@ export class ModelVisitor<C> {
             object,
           };
         }
+
+        logger.trace({ object, node, name, type });
       }
 
       /** Ignore the field */

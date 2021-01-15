@@ -44,6 +44,9 @@ export function printOperationArgs(o: SdkOperation, parentVariables: Record<stri
   return optionalVariables.length ? c.VARIABLE_NAME : "{}";
 }
 
+/**
+ * Loop through the sdk path and merge all required variables in parent scope
+ */
 function getOperationParentVariables(context: SdkPluginContext, o: SdkOperation): Record<string, ArgDefinition> {
   return o.sdkPath.reduce((acc, _, i) => {
     const sdkKey = o.sdkPath.slice(0, i).join("_");
