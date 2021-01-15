@@ -9,7 +9,7 @@ import {
 import { Kind } from "graphql";
 import c from "./constants";
 import { printNamespaced, printPascal } from "./print";
-import { getRequesterArg } from "./requester";
+import { getRequestArg } from "./request";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
 
 /**
@@ -34,10 +34,9 @@ function printModelField(field: SdkModelField, content: string): string {
  * Print the exported return type for an sdk operation
  */
 function printModel(context: SdkPluginContext, model: SdkModel): string {
-  const hasRequester = Boolean(model.fields.query.length);
   const dataType = `${printNamespaced(context, model.name)}Fragment`;
   const args = getArgList([
-    getRequesterArg(),
+    getRequestArg(),
     {
       name: "data",
       optional: false,
@@ -50,10 +49,9 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
     [
       printDebug(model),
       printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
-      `export class ${model.name} {
+      `export class ${model.name} extends ${c.REQUEST_CLASS} {
         ${printList(
           [
-            hasRequester ? `private _${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}` : "",
             printDebug("fields.query"),
             printList(
               model.fields.query.map(field =>
@@ -68,9 +66,9 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
         )}
 
         public constructor(${args.printInput}) {
+          super(${c.REQUEST_NAME})
           ${printList(
             [
-              hasRequester ? `this._${c.REQUESTER_NAME} = ${c.REQUESTER_NAME}` : "",
               printDebug("fields.scalar"),
               printList(
                 model.fields.scalar.map(field => `this.${field.name} = data.${field.name} ?? undefined`),
@@ -86,7 +84,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                 model.fields.object.map(
                   field =>
                     `this.${field.name} = data.${field.name} 
-                      ? new ${field.object.name.value}(${c.REQUESTER_NAME}, data.${field.name}) 
+                      ? new ${field.object.name.value}(${c.REQUEST_NAME}, data.${field.name}) 
                       : undefined`
                 ),
                 "\n"
@@ -96,7 +94,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                 model.fields.list.map(
                   field =>
                     `this.${field.name} = data.${field.name}
-                      ? data.${field.name}.map(node => new ${field.listType}(${c.REQUESTER_NAME}, node))
+                      ? data.${field.name}.map(node => new ${field.listType}(${c.REQUEST_NAME}, node))
                       : undefined`
                 ),
                 "\n"
@@ -159,7 +157,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                     field,
                     `public get ${field.name}(): ${typeName}[] | undefined {
                       return this._${field.name}?.map(node => new ${typeName}(
-                        this._${c.REQUESTER_NAME}, 
+                        this.${c.REQUEST_NAME}, 
                         node,
                       ))
                     }`
@@ -169,8 +167,8 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                     return printModelField(
                       field,
                       `public get ${field.name}(): Promise<${typeName} | undefined> | undefined {
-                        return ${printList(fieldQueryArgs, " && ")} ? new ${fieldQueryName}(this._${
-                        c.REQUESTER_NAME
+                        return ${printList(fieldQueryArgs, " && ")} ? new ${fieldQueryName}(this.${
+                        c.REQUEST_NAME
                       }).fetch(${printList(fieldQueryArgs, ", ")}) : undefined
                       }`
                     );
@@ -178,10 +176,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                     return printModelField(
                       field,
                       `public get ${field.name}(): Promise<${typeName} | undefined> {
-                        return new ${fieldQueryName}(this._${c.REQUESTER_NAME}).fetch(${printList(
-                        fieldQueryArgs,
-                        ", "
-                      )})
+                        return new ${fieldQueryName}(this.${c.REQUEST_NAME}).fetch(${printList(fieldQueryArgs, ", ")})
                       }`
                     );
                   }

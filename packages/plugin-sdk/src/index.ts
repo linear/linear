@@ -8,7 +8,7 @@ import c from "./constants";
 import { getSdkDefinitions } from "./definitions";
 import { printModels } from "./model";
 import { ModelVisitor } from "./model-visitor";
-import { printRequesterType } from "./requester";
+import { printRequest } from "./request";
 import { RawSdkPluginConfig, SdkModel, SdkPluginContext } from "./types";
 
 /**
@@ -78,7 +78,8 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
           `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
           `export * from '${config.documentFile}'\n`,
           /** Print the requester function */
-          ...printRequesterType(config),
+          printRequest(config),
+          "\n",
           /** Print the query return types */
           printedModels,
           printedOperations,

@@ -13,7 +13,7 @@ import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionN
 import c from "./constants";
 import { getParentOperation, printOperation } from "./operation";
 import { printOperationReturnType, printPascal, printSdkFunctionName, printSdkFunctionType } from "./print";
-import { getRequesterArg } from "./requester";
+import { getRequestArg } from "./request";
 import { SdkDefinition, SdkDefinitions, SdkModel, SdkOperation, SdkPluginContext } from "./types";
 import { getRequiredVariables } from "./variable";
 
@@ -141,7 +141,7 @@ export function printSdkDefinition(context: SdkPluginContext, definition: SdkDef
 
   const args = getArgList([
     /** The requester function arg */
-    getRequesterArg(),
+    getRequestArg(),
     /** Args required by the parent operations */
     ...Object.values(parentOperation?.requiredVariables ?? {}).map(({ name, type }) => ({
       name,
