@@ -1,4 +1,9 @@
-import { filterJoin } from "./utils";
+/**
+ * Filter a list of strings and join into a single string
+ */
+export function printList(a: (string | undefined)[] = [], joinString = ""): string {
+  return a.filter(Boolean).join(joinString);
+}
 
 /**
  * Properties to remove when cleaning nodes for debug output
@@ -36,8 +41,10 @@ export function wrapString(s: string, length = 100): string {
 /**
  * Return a jsdoc formatted block
  */
-export function printComment(lines: string[]): string {
-  const parsed = lines.filter(t => t && t !== "").reduce((prev, t) => [...prev, ...t.split("\n")], [] as string[]);
+export function printComment(lines: (string | undefined)[]): string {
+  const parsed = lines
+    .filter(t => t && t !== "")
+    .reduce((prev, t) => [...prev, ...(t as string).split("\n")], [] as string[]);
 
   return parsed.length > 1 ? ["/**", ...parsed.map(line => ` * ${line}`), " */"].join("\n") : `/** ${parsed[0]} */`;
 }
@@ -56,7 +63,7 @@ export function printDebug<T>(obj: T): string {
  */
 export function printGraphqlDescription(description?: string): string | undefined {
   return description
-    ? filterJoin(
+    ? printList(
         wrapString(description)
           .split("\n")
           .map(s => `# ${s.trim()}`),

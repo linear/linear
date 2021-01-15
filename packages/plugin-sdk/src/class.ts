@@ -1,4 +1,4 @@
-import { filterJoin, getArgList } from "@linear/plugin-common";
+import { getArgList, printList } from "@linear/plugin-common";
 import c from "./constants";
 import { getOperationArgs } from "./operation";
 import { printNamespaced, printPascal } from "./print";
@@ -13,7 +13,7 @@ export function printSdkClasses(context: SdkPluginContext): string {
     return [...acc, ...definition.operations.map(o => printSdkClass(context, o))];
   }, []);
 
-  return filterJoin(returnTypes, "\n\n");
+  return printList(returnTypes, "\n\n");
 }
 
 /**
@@ -34,11 +34,11 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
       }
 
       public async fetch(${requiredVariables.printInput}) {
-        return ${`this._${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${filterJoin(
+        return ${`this._${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${printList(
           [documentName, printRequesterArgs(o)],
           ", "
         )}).then(response => {
-          const data = ${filterJoin(["response", ...o.path], "?.")}
+          const data = ${printList(["response", ...o.path], "?.")}
           return data ? new ${printPascal(o.model?.name)}(this._${c.REQUESTER_NAME}, data) : undefined
         })`}
       }

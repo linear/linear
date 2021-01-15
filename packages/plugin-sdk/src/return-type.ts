@@ -1,4 +1,4 @@
-import { filterJoin, getArgList, printComment } from "@linear/plugin-common";
+import { getArgList, printComment, printList } from "@linear/plugin-common";
 import c from "./constants";
 import { getOperationArgs, getOperationObjects } from "./operation";
 import { printNamespaced, printOperationReturnType, printSdkFunctionType } from "./print";
@@ -12,13 +12,11 @@ export function printSdkReturnTypes(context: SdkPluginContext): string {
   const returnTypes = Object.values(context.sdkDefinitions).reduce<string[]>((acc, definition) => {
     return [
       ...acc,
-      ...definition.operations.map(o =>
-        filterJoin([printSdkReturnType(context, o), printSdkClass(context, o)], "\n\n")
-      ),
+      ...definition.operations.map(o => printList([printSdkReturnType(context, o), printSdkClass(context, o)], "\n\n")),
     ];
   }, []);
 
-  return filterJoin(returnTypes, "\n\n");
+  return printList(returnTypes, "\n\n");
 }
 
 /**
@@ -40,11 +38,11 @@ function printSdkReturnType(context: SdkPluginContext, o: SdkOperation): string 
   const operationSdkType = getReturnOperations(context, o) ? printSdkFunctionType(o.path) : undefined;
 
   /** Result type from api */
-  const resultType = filterJoin([documentResultType, ...o.path.map(key => `['${key}']`)], "");
+  const resultType = printList([documentResultType, ...o.path.map(key => `['${key}']`)], "");
 
   /** Override any properties that will have functions attached */
   const omittedResultType = operationObjects.length
-    ? `Omit<${resultType}, ${filterJoin(
+    ? `Omit<${resultType}, ${printList(
         operationObjects.map(({ field }) => `'${field.name.value}'`),
         " | "
       )}>`
@@ -102,19 +100,19 @@ function printSdkReturnType(context: SdkPluginContext, o: SdkOperation): string 
 
   if (objectSdkTypes.length) {
     /** Export an interface if possible */
-    const extendsType = filterJoin([operationSdkType, omittedResultType], ", ");
-    return filterJoin(
+    const extendsType = printList([operationSdkType, omittedResultType], ", ");
+    return printList(
       [
         comment,
         `export interface ${o.returnType} extends ${extendsType} {
-          ${filterJoin(objectSdkTypes, ",\n")}
+          ${printList(objectSdkTypes, ",\n")}
         }`,
       ],
       "\n"
     );
   } else {
-    const returnType = filterJoin([operationSdkType, omittedResultType], " & ");
-    return filterJoin([comment, `export type ${o.returnType} = ${returnType}`], "\n");
+    const returnType = printList([operationSdkType, omittedResultType], " & ");
+    return printList([comment, `export type ${o.returnType} = ${returnType}`], "\n");
   }
 }
 
@@ -130,10 +128,10 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
   return `
     export class ${o.operationResultType} {
       private _${c.REQUESTER_NAME}: ${c.REQUESTER_TYPE}
-      ${filterJoin(
+      ${printList(
         o.model?.queryFields.map(field =>
           field.args.some(arg => !arg.optional)
-            ? filterJoin(
+            ? printList(
                 [
                   field.node.description?.value ? printComment([field.node.description.value]) : undefined,
                   `private _${field.name}?: { ${getArgList(field.args).printOutput} }`,
@@ -150,16 +148,16 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
       }
 
       public async fetch(${requiredVariables.printInput}) {
-        await ${`this._${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${filterJoin(
+        await ${`this._${c.REQUESTER_NAME}<${resultType}, ${variableType}>(${printList(
           [documentName, printRequesterArgs(o)],
           ", "
         )}).then(response => {
-          const r = ${filterJoin(["response", ...o.path], "?.")}
-          ${filterJoin(
+          const r = ${printList(["response", ...o.path], "?.")}
+          ${printList(
             o.model?.scalarFields.map(field => `this.${field.name} = r.${field.name} ?? undefined`),
             "\n"
           )}
-          ${filterJoin(
+          ${printList(
             o.model?.queryFields.map(field =>
               field.args.some(arg => !arg.optional) ? `this._${field.name} = r.${field.name} ?? undefined` : undefined
             ),
@@ -170,9 +168,9 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
         return this
       }
 
-      ${filterJoin(
+      ${printList(
         o.model?.scalarFields.map(field =>
-          filterJoin(
+          printList(
             [
               field.node.description?.value ? printComment([field.node.description.value]) : undefined,
               `public ${field.name}?: ${field.type}`,
@@ -183,7 +181,7 @@ function printSdkClass(context: SdkPluginContext, o: SdkOperation): string {
         "\n"
       )}
 
-      ${filterJoin(
+      ${printList(
         o.model?.queryFields.map(field => {
           return `
           ${field.node.description ? printComment([field.node.description?.value]) : undefined}

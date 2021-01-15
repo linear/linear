@@ -9,12 +9,15 @@ import {
   ObjectTypeDefinitionNode,
 } from "graphql";
 import { getRequiredArgs } from "./args";
-import { getTypeName } from "./field";
-import { isValidFragment } from "./fragment";
-import { printGraphqlDebug, printGraphqlDescription } from "./print";
+import c from "./constants";
+import { reduceTypeName } from "./field";
+import { findFragment, isValidFragment } from "./fragment";
+import { logger } from "./logger";
+import { findObject, isConnection } from "./object";
+import { printGraphqlDebug, printGraphqlDescription, printList } from "./print";
 import { findQuery } from "./query";
 import { Named, NamedFields, PluginContext } from "./types";
-import { filterJoin, nonNullable } from "./utils";
+import { nonNullable } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
@@ -39,7 +42,7 @@ export class FragmentVisitor<C> {
   public Document = {
     /** Join all string definitions */
     leave: (node: DocumentNode): string => {
-      return filterJoin(
+      return printList(
         (node.definitions ?? []).map(x => (typeof x === "string" ? x : ``)),
         "\n"
       );
@@ -57,12 +60,12 @@ export class FragmentVisitor<C> {
         this._context.fragments = [...this._context.fragments, node];
 
         /** Print fragment */
-        return filterJoin(
+        return printList(
           [
             printGraphqlDescription(node.description?.value),
             printGraphqlDebug(node),
             `fragment ${node.name} on ${node.name} {
-              ${filterJoin(node.fields, "\n")}
+              ${printList(node.fields, "\n")}
             }`,
             " ",
           ],
@@ -77,33 +80,51 @@ export class FragmentVisitor<C> {
 
   public FieldDefinition = {
     leave: (_node: FieldDefinitionNode): string | null => {
-      const node = (_node as unknown) as Named<FieldDefinitionNode>;
+      /** Skip objects defined in constants */
+      if (!c.SKIP_OBJECTS.includes(reduceTypeName(_node.type))) {
+        const node = (_node as unknown) as Named<FieldDefinitionNode>;
 
-      /** Print field name if it is a scalar */
-      if (Object.values(this._context.scalars).includes(getTypeName(node.type))) {
-        return filterJoin([printGraphqlDebug(_node), node.name], "\n");
-      }
+        /** Print field name if it is a scalar */
+        if (Object.values(this._context.scalars).includes(reduceTypeName(node.type))) {
+          return printList([printGraphqlDebug(_node), node.name], "\n");
+        }
+        logger.trace({ node, query: findQuery(this._context, node), fragment: findFragment(this._context, node) });
 
-      /** Find a query that can return this field */
-      const query = findQuery(this._context, node);
+        /** Print all fields required for matching query */
+        const query = findQuery(this._context, node);
+        if (query) {
+          const queryRequiredArgs = getRequiredArgs(query.arguments).map(a => a.name.value);
 
-      /** Specifically exclude UserSettings until NotificationQuery returns a different type */
-      if (query && getTypeName(node.type) !== "UserSettings") {
-        /** Get all fields required for query arguments */
-        const queryRequiredArgs = getRequiredArgs(query.arguments).map(a => a.name.value);
-
-        return filterJoin(
-          [
-            printGraphqlDebug(_node),
-            printGraphqlDebug(query),
-            queryRequiredArgs.length
-              ? `${node.name} {
-                ${filterJoin(queryRequiredArgs, "\n")}
-              }`
-              : "",
-          ],
-          "\n"
-        );
+          if (queryRequiredArgs.length) {
+            return printList(
+              [
+                printGraphqlDebug(_node),
+                printGraphqlDebug(query),
+                queryRequiredArgs.length
+                  ? `${node.name} {
+                      ${printList(queryRequiredArgs, "\n")}
+                    }`
+                  : "",
+              ],
+              "\n"
+            );
+          }
+        } else {
+          /** Print a matching fragment if no query */
+          const fragment = findObject(this._context, node);
+          if (fragment && !isConnection(fragment)) {
+            return printList(
+              [
+                printGraphqlDebug(_node),
+                printGraphqlDebug(query),
+                `${node.name} {
+                ...${fragment.name.value}
+              }`,
+              ],
+              "\n"
+            );
+          }
+        }
       }
 
       /** Ignore this field */

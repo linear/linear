@@ -6102,6 +6102,10 @@ input UpdateOrganizationInput {
   Linear Preview feature flags
   """
   linearPreviewFlags: JSONObject
+  """
+  List of services that are allowed to be used for login.
+  """
+  allowedAuthServices: [String!]
 }
 type OrganizationPayload {
   """

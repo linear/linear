@@ -1,11 +1,11 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
-import { getTypeName, isScalarField, isValidField, printInputArgs, printResponseArgs } from "./field";
-import { findFragment, printOperationFragment } from "./fragment";
+import { isScalarField, isValidField, printInputArgs, printResponseArgs, reduceTypeName } from "./field";
+import { findFragment } from "./fragment";
 import { findObject } from "./object";
-import { printGraphqlDebug, printGraphqlDescription } from "./print";
+import { printGraphqlDebug, printGraphqlDescription, printList } from "./print";
 import { findQuery } from "./query";
 import { OperationType, PluginContext } from "./types";
-import { filterJoin, getLast } from "./utils";
+import { getLast } from "./utils";
 
 /**
  * Print the operation wrapper
@@ -14,12 +14,12 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
   const lastField = getLast(fields);
 
   if (isValidField(lastField)) {
-    const operationName = filterJoin(
+    const operationName = printList(
       fields.map(field => field.name.value),
       "_"
     );
 
-    return filterJoin(
+    return printList(
       [
         /** The operation description */
         printGraphqlDescription(lastField.description?.value),
@@ -54,13 +54,13 @@ function printOperationFields<C>(
 ): string {
   const lastField = getLast(fields);
   return isValidField(lastField)
-    ? filterJoin(
+    ? printList(
         object.fields?.map(field => {
           if (isValidField(field)) {
             const operation = printOperationBody(context, [field]);
 
             return operation
-              ? filterJoin(
+              ? printList(
                   [
                     /** The field description */
                     printGraphqlDescription(field.description?.value),
@@ -92,13 +92,13 @@ export function printOperationBody<C>(context: PluginContext<C>, fields: FieldDe
 
   if (isValidField(lastField)) {
     /** Spread the fragment if found */
-    const fragment = findFragment(context.fragments, lastField);
+    const fragment = findFragment(context, lastField);
     if (fragment) {
-      return printOperationFragment(fragment);
+      return `...${fragment.name}`;
     }
 
     /** Print each field if a matching object exists */
-    const object = findObject(context.objects, lastField);
+    const object = findObject(context, lastField);
     if (object) {
       return printOperationFields(context, fields, object);
     }
@@ -136,14 +136,14 @@ export function printOperations<C>(
 
     if (type === OperationType.query) {
       /** Find an object matching the type of this query */
-      const object = findObject(context.objects, lastField);
+      const object = findObject(context, lastField);
 
       const fieldOperations = (object?.fields ?? [])?.map(field => {
         if (
           /** No need to go further than scalar fields */
           isScalarField(context.scalars, field) ||
           /** No need to go further if the field returns one of the parent fields */
-          fields.map(f => getTypeName(f.type)).includes(getTypeName(field.type)) ||
+          fields.map(f => reduceTypeName(f.type)).includes(reduceTypeName(field.type)) ||
           /** No need to go further if the field is a connection */
           ["pageInfo", "nodes"].includes(field.name.value) ||
           /** No need to go further if we can get this field from a root query */
@@ -157,7 +157,7 @@ export function printOperations<C>(
       });
 
       /** Return operation for this node as well as any nested field operations */
-      return filterJoin([nodeOperation, ...fieldOperations], "\n");
+      return printList([nodeOperation, ...fieldOperations], "\n");
     } else {
       /** Do not nest mutations */
       return nodeOperation;

@@ -99,7 +99,7 @@ export interface SdkPluginContext extends PluginContext<RawSdkPluginConfig> {
 }
 
 /**
- * A wrapped scalar field node
+ * A field with scalar type
  */
 export interface SdkScalarField {
   __typename: "SdkScalarField";
@@ -112,7 +112,7 @@ export interface SdkScalarField {
 }
 
 /**
- * A wrapped field node with query detail
+ * A field with object type and a matching query
  */
 export interface SdkQueryField extends Omit<SdkScalarField, "__typename"> {
   __typename: "SdkQueryField";
@@ -123,11 +123,35 @@ export interface SdkQueryField extends Omit<SdkScalarField, "__typename"> {
 }
 
 /**
+ * A field with object type
+ */
+export interface SdkObjectField extends Omit<SdkScalarField, "__typename"> {
+  __typename: "SdkObjectField";
+  /** The object matching this field */
+  object: ObjectTypeDefinitionNode;
+}
+
+/**
+ * A field with list type
+ */
+export interface SdkListField extends Omit<SdkScalarField, "__typename"> {
+  __typename: "SdkListField";
+  /** The type of the list */
+  listType: string;
+}
+
+/**
+ * One of the model field types
+ */
+
+export type SdkModelField = SdkScalarField | SdkQueryField | SdkObjectField | SdkListField;
+
+/**
  * The processed sdk model node
  */
 export interface SdkModelNode extends Omit<ObjectTypeDefinitionNode, "fields"> {
   /** The processed field nodes */
-  fields?: (SdkScalarField | SdkQueryField)[];
+  fields?: SdkModelField[];
 }
 
 /**
@@ -142,4 +166,8 @@ export interface SdkModel {
   scalarFields: SdkScalarField[];
   /** The list of fields with queries */
   queryFields: SdkQueryField[];
+  /** The list of fields with objects */
+  objectFields: SdkObjectField[];
+  /** The list of list fields */
+  listFields: SdkListField[];
 }

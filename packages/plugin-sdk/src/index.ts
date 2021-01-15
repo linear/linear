@@ -1,12 +1,12 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
 import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
-import { ContextVisitor, filterJoin, logger, nonNullable, PluginContext } from "@linear/plugin-common";
+import { ContextVisitor, logger, nonNullable, PluginContext, printList } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
 import { printSdkClasses } from "./class";
 import c from "./constants";
 import { getSdkDefinitions } from "./definitions";
-import { printSdkModels } from "./model";
+import { printModels } from "./model";
 import { ModelVisitor } from "./model-visitor";
 import { printRequesterType } from "./requester";
 import { RawSdkPluginConfig, SdkModel, SdkPluginContext } from "./types";
@@ -50,7 +50,7 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
 
     /** Print the models  */
     logger.info("Generating models");
-    const printedModels = printSdkModels(sdkContext);
+    const printedModels = printModels(sdkContext);
 
     /** Print the query return types  */
     logger.info("Generating operations");
@@ -74,7 +74,7 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
         /** Import ResultOf util for document return types */
         `import { ResultOf } from '@graphql-typed-document-node/core'`,
       ].filter(nonNullable),
-      content: filterJoin(
+      content: printList(
         [
           /** Import and export documents */
           `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,

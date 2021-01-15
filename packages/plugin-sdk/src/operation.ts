@@ -1,4 +1,4 @@
-import { ArgDefinition, filterJoin, getArgList, nonNullable, printComment, printDebug } from "@linear/plugin-common";
+import { ArgDefinition, getArgList, nonNullable, printComment, printDebug, printList } from "@linear/plugin-common";
 import { FieldNode, FragmentSpreadNode, Kind } from "graphql";
 import c from "./constants";
 import { printNamespaced, printSdkFunctionName, printSdkOperationName } from "./print";
@@ -39,8 +39,8 @@ export function getOperationArgs(context: SdkPluginContext, o: SdkOperation): Ar
     ? {
         name: c.VARIABLE_NAME,
         optional: true,
-        type: `Omit<${variableType}, ${filterJoin(requiredVariableNames, " | ")}>`,
-        description: `variables without ${filterJoin(requiredVariableNames, ", ")} to pass into the ${
+        type: `Omit<${variableType}, ${printList(requiredVariableNames, " | ")}>`,
+        description: `variables without ${printList(requiredVariableNames, ", ")} to pass into the ${
           o.operationResultType
         }`,
       }
@@ -66,7 +66,7 @@ export function getOperationResultField(o: SdkOperation): FieldNode | undefined 
     if (field) {
       return field;
     } else {
-      throw new Error(`No selection set found on operation with nested keys: ${filterJoin(o.path, ", ")}`);
+      throw new Error(`No selection set found on operation with nested keys: ${printList(o.path, ", ")}`);
     }
   }, (o.node as unknown) as FieldNode);
 }
@@ -119,12 +119,12 @@ function printOperationObjects(context: SdkPluginContext, o: SdkOperation): (str
 
       if (requiredVariables.length) {
         const requiredVariableNames = requiredVariables.map(v =>
-          filterJoin(["response", ...o.path, field.name.value, v.name], "?.")
+          printList(["response", ...o.path, field.name.value, v.name], "?.")
         );
         const castVariableNames = requiredVariables.map(
-          v => `${filterJoin(["response", ...o.path, field.name.value, v.name], "?.")} as ${v.type}`
+          v => `${printList(["response", ...o.path, field.name.value, v.name], "?.")} as ${v.type}`
         );
-        return `${field.name.value}: ${filterJoin(requiredVariableNames, " && ")} ? ${queryToCall}(${filterJoin(
+        return `${field.name.value}: ${printList(requiredVariableNames, " && ")} ? ${queryToCall}(${printList(
           castVariableNames,
           ", "
         )}) : undefined,`;
@@ -164,7 +164,7 @@ function printOperationList(context: SdkPluginContext, o: SdkOperation): string 
  * Print the response from the api drilled down by the operation path
  */
 function printOperationResponse(o: SdkOperation): string {
-  return filterJoin(["response", ...o.path], "?.");
+  return printList(["response", ...o.path], "?.");
 }
 
 /**
@@ -194,7 +194,7 @@ function printOperationBody(context: SdkPluginContext, o: SdkOperation): string 
 
     /** Return an object if required */
     if (operationApi || operationObjects.length || operationList) {
-      return filterJoin(
+      return printList(
         [
           `return {`,
           /** If the first field is the operation drill down for a nicer api */
@@ -203,7 +203,7 @@ function printOperationBody(context: SdkPluginContext, o: SdkOperation): string 
           operationList,
           /** Add the child sdk to the response */
           operationApi
-            ? `...${printSdkFunctionName(o.path)}(${filterJoin(
+            ? `...${printSdkFunctionName(o.path)}(${printList(
                 [c.REQUESTER_NAME, ...requiredVariables.map(v => v.variable.name?.value)],
                 ", "
               )}),`
@@ -213,7 +213,7 @@ function printOperationBody(context: SdkPluginContext, o: SdkOperation): string 
         "\n"
       );
     } else {
-      return filterJoin([`return ${extractedResponse}`], "\n");
+      return printList([`return ${extractedResponse}`], "\n");
     }
   } else {
     return undefined;
@@ -229,7 +229,7 @@ export function printOperation(context: SdkPluginContext, definition: SdkDefinit
   const args = getArgList(getOperationArgs(context, o));
 
   /** Build a function for this graphql operation */
-  return filterJoin(
+  return printList(
     [
       printComment([
         `Call the Linear api with the ${operationName}`,

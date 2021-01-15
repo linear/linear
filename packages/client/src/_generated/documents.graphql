@@ -32,7 +32,10 @@ fragment UserSettings on UserSettings {
 
 fragment IssueConnection on IssueConnection {
   nodes {
-    id
+    ...Issue
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -155,7 +158,10 @@ fragment WorkflowState on WorkflowState {
 
 fragment CycleConnection on CycleConnection {
   nodes {
-    id
+    ...Cycle
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -188,7 +194,10 @@ fragment PageInfo on PageInfo {
 
 fragment TeamMembershipConnection on TeamMembershipConnection {
   nodes {
-    id
+    ...TeamMembership
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -208,7 +217,10 @@ fragment TeamMembership on TeamMembership {
 
 fragment ProjectConnection on ProjectConnection {
   nodes {
-    id
+    ...Project
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -280,25 +292,37 @@ fragment Organization on Organization {
 
 fragment UserConnection on UserConnection {
   nodes {
-    id
+    ...User
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
 fragment TeamConnection on TeamConnection {
   nodes {
-    id
+    ...Team
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
 fragment MilestoneConnection on MilestoneConnection {
   nodes {
-    id
+    ...Milestone
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
 fragment IntegrationConnection on IntegrationConnection {
   nodes {
-    id
+    ...Integration
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -310,11 +334,30 @@ fragment Integration on Integration {
   archivedAt
   service
   serviceId
+  settings {
+    ...IntegrationSettings
+  }
   team {
     id
   }
   creator {
     id
+  }
+}
+
+# The integration resource's settings
+fragment IntegrationSettings on IntegrationSettings {
+  slackPost {
+    ...SlackPostSettings
+  }
+  slackProjectPost {
+    ...SlackPostSettings
+  }
+  googleSheets {
+    ...GoogleSheetsSettings
+  }
+  sentry {
+    ...SentrySettings
   }
 }
 
@@ -355,7 +398,10 @@ fragment Subscription on Subscription {
 
 fragment ProjectLinkConnection on ProjectLinkConnection {
   nodes {
-    id
+    ...ProjectLink
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -377,7 +423,19 @@ fragment ProjectLink on ProjectLink {
 
 fragment WorkflowStateConnection on WorkflowStateConnection {
   nodes {
-    id
+    ...WorkflowState
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment TemplateConnection on TemplateConnection {
+  nodes {
+    ...Template
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -401,7 +459,10 @@ fragment Template on Template {
 
 fragment IssueLabelConnection on IssueLabelConnection {
   nodes {
-    id
+    ...IssueLabel
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -424,7 +485,10 @@ fragment IssueLabel on IssueLabel {
 
 fragment WebhookConnection on WebhookConnection {
   nodes {
-    id
+    ...Webhook
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -447,7 +511,10 @@ fragment Webhook on Webhook {
 
 fragment CommentConnection on CommentConnection {
   nodes {
-    id
+    ...Comment
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -466,6 +533,15 @@ fragment Comment on Comment {
   }
   issue {
     id
+  }
+}
+
+fragment IssueHistoryConnection on IssueHistoryConnection {
+  nodes {
+    ...IssueHistory
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -539,7 +615,10 @@ fragment IssueHistory on IssueHistory {
 
 fragment IntegrationResourceConnection on IntegrationResourceConnection {
   nodes {
-    id
+    ...IntegrationResource
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -551,11 +630,33 @@ fragment IntegrationResource on IntegrationResource {
   archivedAt
   resourceType
   resourceId
+  data {
+    ...IntegrationResourceData
+  }
   integration {
     id
   }
   issue {
     id
+  }
+  pullRequest {
+    ...PullRequestPayload
+  }
+}
+
+# Integration resource's payload
+fragment IntegrationResourceData on IntegrationResourceData {
+  githubPullRequest {
+    ...PullRequestPayload
+  }
+  gitlabMergeRequest {
+    ...PullRequestPayload
+  }
+  githubCommit {
+    ...CommitPayload
+  }
+  sentryIssue {
+    ...SentryIssuePayload
   }
 }
 
@@ -606,7 +707,10 @@ fragment SentryIssuePayload on SentryIssuePayload {
 
 fragment IssueRelationConnection on IssueRelationConnection {
   nodes {
-    id
+    ...IssueRelation
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -656,6 +760,9 @@ fragment UserAccountAdminPrivileged on UserAccountAdminPrivileged {
   name
   email
   service
+  users {
+    ...UserAdminPrivileged
+  }
 }
 
 # A user that has access to the the resources of an organization. Super user required.
@@ -674,6 +781,9 @@ fragment UserAdminPrivileged on UserAdminPrivileged {
   lastSeen
   admin
   active
+  organization {
+    ...OrganizationAdminPrivileged
+  }
   createdIssueCount
 }
 
@@ -694,6 +804,9 @@ fragment OrganizationAdminPrivileged on OrganizationAdminPrivileged {
   roadmapEnabled
   samlEnabled
   allowedAuthServices
+  subscription {
+    ...SubscriptionAdminPrivileged
+  }
   userCount
   createdIssueCount
   stripeCustomerId
@@ -714,6 +827,15 @@ fragment SubscriptionAdminPrivileged on SubscriptionAdminPrivileged {
   pendingChangeType
   stripeSubscriptionId
   stripeStatus
+}
+
+fragment ApiKeyConnection on ApiKeyConnection {
+  nodes {
+    ...ApiKey
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 # An API key. Grants access to the user's resources.
@@ -755,7 +877,10 @@ fragment AuthResolverResponse on AuthResolverResponse {
   email
   allowDomainAccess
   users {
-    id
+    ...User
+  }
+  availableOrganizations {
+    ...Organization
   }
 }
 
@@ -767,6 +892,12 @@ fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
 fragment BillingDetailsPayload on BillingDetailsPayload {
   success
   email
+  invoices {
+    ...Invoice
+  }
+  paymentMethod {
+    ...Card
+  }
 }
 
 fragment Invoice on Invoice {
@@ -783,6 +914,9 @@ fragment Card on Card {
 }
 
 fragment CollaborationDocumentUpdatePayload on CollaborationDocumentUpdatePayload {
+  steps {
+    ...StepsResponse
+  }
   success
 }
 
@@ -814,7 +948,10 @@ fragment CustomView on CustomView {
 
 fragment CustomViewConnection on CustomViewConnection {
   nodes {
-    id
+    ...CustomView
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -834,7 +971,10 @@ fragment Emoji on Emoji {
 
 fragment EmojiConnection on EmojiConnection {
   nodes {
-    id
+    ...Emoji
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -868,12 +1008,18 @@ fragment Favorite on Favorite {
 
 fragment FavoriteConnection on FavoriteConnection {
   nodes {
-    id
+    ...Favorite
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
 fragment FigmaEmbedPayload on FigmaEmbedPayload {
   lastSyncId
+  figmaEmbed {
+    ...FigmaEmbed
+  }
   success
 }
 
@@ -886,6 +1032,9 @@ fragment FigmaEmbed on FigmaEmbed {
 }
 
 fragment InvitePagePayload on InvitePagePayload {
+  inviteData {
+    ...InviteData
+  }
   success
 }
 
@@ -898,6 +1047,15 @@ fragment InviteData on InviteData {
   organizationDomain
   organizationLogoUrl
   userCount
+}
+
+fragment NotificationConnection on NotificationConnection {
+  nodes {
+    ...Notification
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 # A notification sent to a user.
@@ -924,6 +1082,15 @@ fragment Notification on Notification {
   }
 }
 
+fragment NotificationSubscriptionConnection on NotificationSubscriptionConnection {
+  nodes {
+    ...NotificationSubscription
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 # Notification subscriptions for models.
 fragment NotificationSubscription on NotificationSubscription {
   id
@@ -939,6 +1106,15 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   project {
     id
+  }
+}
+
+fragment OrganizationInviteConnection on OrganizationInviteConnection {
+  nodes {
+    ...OrganizationInvite
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -982,7 +1158,19 @@ fragment Reaction on Reaction {
 
 fragment ReactionConnection on ReactionConnection {
   nodes {
-    id
+    ...Reaction
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ViewPreferencesConnection on ViewPreferencesConnection {
+  nodes {
+    ...ViewPreferences
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -1027,6 +1215,9 @@ fragment OrganizationAccessPayload on OrganizationAccessPayload {
 
 fragment OrganizationSamlConfigurePayload on OrganizationSamlConfigurePayload {
   success
+  samlConfiguration {
+    ...SamlConfiguration
+  }
   samlEnabled
 }
 
@@ -1049,6 +1240,9 @@ fragment EventPayload on EventPayload {
 
 fragment ApiKeyPayload on ApiKeyPayload {
   lastSyncId
+  apiKey {
+    ...ApiKey
+  }
   success
 }
 
@@ -1131,6 +1325,9 @@ fragment FeedbackPayload on FeedbackPayload {
 
 fragment UploadPayload on UploadPayload {
   lastSyncId
+  uploadFile {
+    ...UploadFile
+  }
   success
 }
 
@@ -1142,6 +1339,9 @@ fragment UploadFile on UploadFile {
   uploadUrl
   assetUrl
   metaData
+  headers {
+    ...UploadFileHeader
+  }
 }
 
 fragment UploadFileHeader on UploadFileHeader {
@@ -1197,16 +1397,25 @@ fragment MilestonePayload on MilestonePayload {
 
 fragment NotificationPayload on NotificationPayload {
   lastSyncId
+  notification {
+    ...Notification
+  }
   success
 }
 
 fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
   lastSyncId
+  notificationSubscription {
+    ...NotificationSubscription
+  }
   success
 }
 
 fragment OauthClientPayload on OauthClientPayload {
   lastSyncId
+  oauthClient {
+    ...OauthClient
+  }
   success
 }
 
@@ -1237,6 +1446,9 @@ fragment OauthTokenRevokePayload on OauthTokenRevokePayload {
 
 fragment OrganizationDomainPayload on OrganizationDomainPayload {
   lastSyncId
+  organizationDomain {
+    ...OrganizationDomain
+  }
   success
 }
 
@@ -1256,6 +1468,9 @@ fragment OrganizationDomain on OrganizationDomain {
 
 fragment OrganizationInvitePayload on OrganizationInvitePayload {
   lastSyncId
+  organizationInvite {
+    ...OrganizationInvite
+  }
   success
 }
 
@@ -1341,6 +1556,9 @@ fragment UserSubscribeToNewsletterPayload on UserSubscribeToNewsletterPayload {
 
 fragment ViewPreferencesPayload on ViewPreferencesPayload {
   lastSyncId
+  viewPreferences {
+    ...ViewPreferences
+  }
   success
 }
 
@@ -1379,6 +1597,15 @@ fragment PushSubscription on PushSubscription {
   archivedAt
 }
 
+fragment PushSubscriptionConnection on PushSubscriptionConnection {
+  nodes {
+    ...PushSubscription
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 # A user account.
 fragment UserAccount on UserAccount {
   id
@@ -1389,7 +1616,7 @@ fragment UserAccount on UserAccount {
   email
   service
   users {
-    id
+    ...User
   }
 }
 
@@ -1712,7 +1939,41 @@ query adminUserAccountLookup($email: String, $id: String) {
 query adminUserAccountLookup_users($email: String, $id: String) {
   adminUserAccountLookup(email: $email, id: $id) {
     users {
-      ...UserAdminPrivileged
+      id
+      createdAt
+      updatedAt
+      archivedAt
+      name
+      displayName
+      email
+      avatarUrl
+      disableReason
+      inviteHash
+      userAccountId
+      # The settings of the user.
+      settings {
+        ...UserSettings
+      }
+      lastSeen
+      admin
+      active
+      # Issues assigned to the user.
+      assignedIssues {
+        ...IssueConnection
+      }
+      # Issues created by the user.
+      createdIssues {
+        ...IssueConnection
+      }
+      # Organization in which the user belongs to. Super user required.
+      organization {
+        ...OrganizationAdminPrivileged
+      }
+      createdIssueCount
+      # Memberships associated with the user.
+      teamMemberships {
+        ...TeamMembershipConnection
+      }
     }
   }
 }
@@ -1855,12 +2116,7 @@ query apiKeys(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...ApiKey
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...ApiKeyConnection
   }
 }
 
@@ -1874,7 +2130,14 @@ query applicationWithAuthorization($redirectUri: String, $scope: [String!]!, $cl
 # Get all authorized applications for a user
 query authorizedApplications {
   authorizedApplications {
-    ...AuthorizedApplication
+    clientId
+    name
+    description
+    developer
+    developerUrl
+    imageUrl
+    scope
+    appId
   }
 }
 
@@ -1882,6 +2145,260 @@ query authorizedApplications {
 query availableUsers {
   availableUsers {
     ...AuthResolverResponse
+  }
+}
+# Users belonging to this account.
+query availableUsers_users {
+  availableUsers {
+    users {
+      id
+      createdAt
+      updatedAt
+      archivedAt
+      name
+      displayName
+      email
+      avatarUrl
+      disableReason
+      inviteHash
+      userAccountId
+      # The settings of the user.
+      settings {
+        ...UserSettings
+      }
+      lastSeen
+      admin
+      active
+      # Issues assigned to the user.
+      assignedIssues {
+        ...IssueConnection
+      }
+      # Issues created by the user.
+      createdIssues {
+        ...IssueConnection
+      }
+      # Organization in which the user belongs to.
+      organization {
+        ...Organization
+      }
+      createdIssueCount
+      # Memberships associated with the user.
+      teamMemberships {
+        ...TeamMembershipConnection
+      }
+    }
+  }
+}
+# Issues assigned to the user.
+query availableUsers_users_assignedIssues(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  availableUsers {
+    users {
+      assignedIssues(
+        before: $before
+        after: $after
+        first: $first
+        last: $last
+        includeArchived: $includeArchived
+        orderBy: $orderBy
+      ) {
+        ...IssueConnection
+      }
+    }
+  }
+}
+# Issues created by the user.
+query availableUsers_users_createdIssues(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  availableUsers {
+    users {
+      createdIssues(
+        before: $before
+        after: $after
+        first: $first
+        last: $last
+        includeArchived: $includeArchived
+        orderBy: $orderBy
+      ) {
+        ...IssueConnection
+      }
+    }
+  }
+}
+# Memberships associated with the user.
+query availableUsers_users_teamMemberships(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  availableUsers {
+    users {
+      teamMemberships(
+        before: $before
+        after: $after
+        first: $first
+        last: $last
+        includeArchived: $includeArchived
+        orderBy: $orderBy
+      ) {
+        ...TeamMembershipConnection
+      }
+    }
+  }
+}
+# Organizations this account has access to, but is not yet a member.
+query availableUsers_availableOrganizations {
+  availableUsers {
+    availableOrganizations {
+      id
+      createdAt
+      updatedAt
+      archivedAt
+      name
+      urlKey
+      logoUrl
+      upgradeThresholdExceeded
+      periodUploadVolume
+      gitBranchFormat
+      gitLinkbackMessagesEnabled
+      gitPublicLinkbackMessagesEnabled
+      roadmapEnabled
+      samlEnabled
+      allowedAuthServices
+      # Users associated with the organization.
+      users {
+        ...UserConnection
+      }
+      # Teams associated with the organization.
+      teams {
+        ...TeamConnection
+      }
+      # Milestones associated with the organization.
+      milestones {
+        ...MilestoneConnection
+      }
+      # Integrations associated with the organization.
+      integrations {
+        ...IntegrationConnection
+      }
+      # The organization's subscription to a paid plan.
+      subscription {
+        ...Subscription
+      }
+      userCount
+      createdIssueCount
+    }
+  }
+}
+# Users associated with the organization.
+query availableUsers_availableOrganizations_users(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  availableUsers {
+    availableOrganizations {
+      users(
+        before: $before
+        after: $after
+        first: $first
+        last: $last
+        includeArchived: $includeArchived
+        orderBy: $orderBy
+      ) {
+        ...UserConnection
+      }
+    }
+  }
+}
+# Teams associated with the organization.
+query availableUsers_availableOrganizations_teams(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  availableUsers {
+    availableOrganizations {
+      teams(
+        before: $before
+        after: $after
+        first: $first
+        last: $last
+        includeArchived: $includeArchived
+        orderBy: $orderBy
+      ) {
+        ...TeamConnection
+      }
+    }
+  }
+}
+# Milestones associated with the organization.
+query availableUsers_availableOrganizations_milestones(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  availableUsers {
+    availableOrganizations {
+      milestones(
+        before: $before
+        after: $after
+        first: $first
+        last: $last
+        includeArchived: $includeArchived
+        orderBy: $orderBy
+      ) {
+        ...MilestoneConnection
+      }
+    }
+  }
+}
+# Integrations associated with the organization.
+query availableUsers_availableOrganizations_integrations(
+  $before: String
+  $after: String
+  $first: Int
+  $last: Int
+  $includeArchived: Boolean
+  $orderBy: PaginationOrderBy
+) {
+  availableUsers {
+    availableOrganizations {
+      integrations(
+        before: $before
+        after: $after
+        first: $first
+        last: $last
+        includeArchived: $includeArchived
+        orderBy: $orderBy
+      ) {
+        ...IntegrationConnection
+      }
+    }
   }
 }
 
@@ -1902,7 +2419,11 @@ query billingDetails {
 query billingDetails_invoices {
   billingDetails {
     invoices {
-      ...Invoice
+      url
+      created
+      dueDate
+      status
+      total
     }
   }
 }
@@ -2138,18 +2659,7 @@ query integration($id: String!) {
 query integration_settings($id: String!) {
   integration(id: $id) {
     settings {
-      slackPost {
-        ...SlackPostSettings
-      }
-      slackProjectPost {
-        ...SlackPostSettings
-      }
-      googleSheets {
-        ...GoogleSheetsSettings
-      }
-      sentry {
-        ...SentrySettings
-      }
+      ...IntegrationSettings
     }
   }
 }
@@ -2221,22 +2731,7 @@ query integrationResource($id: String!) {
 query integrationResource_data($id: String!) {
   integrationResource(id: $id) {
     data {
-      # The payload for an IntegrationResource of type 'githubPullRequest'
-      githubPullRequest {
-        ...PullRequestPayload
-      }
-      # The payload for an IntegrationResource of type 'gitlabMergeRequest'
-      gitlabMergeRequest {
-        ...PullRequestPayload
-      }
-      # The payload for an IntegrationResource of type 'githubCommit'
-      githubCommit {
-        ...CommitPayload
-      }
-      # The payload for an IntegrationResource of type 'sentryIssue'
-      sentryIssue {
-        ...SentryIssuePayload
-      }
+      ...IntegrationResourceData
     }
   }
 }
@@ -2497,12 +2992,7 @@ query issue_history(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...IssueHistory
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...IssueHistoryConnection
     }
   }
 }
@@ -2717,12 +3207,7 @@ query notifications(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...Notification
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...NotificationConnection
   }
 }
 
@@ -2743,12 +3228,7 @@ query notificationSubscription(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...NotificationSubscription
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...NotificationSubscriptionConnection
   }
 }
 
@@ -2799,12 +3279,7 @@ query organizationInvites(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...OrganizationInvite
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...OrganizationInviteConnection
   }
 }
 
@@ -3165,12 +3640,7 @@ query team_templates(
       includeArchived: $includeArchived
       orderBy: $orderBy
     ) {
-      nodes {
-        ...Template
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...TemplateConnection
     }
   }
 }
@@ -3245,7 +3715,22 @@ query teams(
 # All templates from all users.
 query templates {
   templates {
-    ...Template
+    id
+    createdAt
+    updatedAt
+    archivedAt
+    type
+    name
+    description
+    templateData
+    # The team that the template is associated with.
+    team {
+      ...Team
+    }
+    # The user who created the template.
+    creator {
+      ...User
+    }
   }
 }
 
@@ -3273,12 +3758,7 @@ query viewPreferences(
     includeArchived: $includeArchived
     orderBy: $orderBy
   ) {
-    nodes {
-      ...ViewPreferences
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...ViewPreferencesConnection
   }
 }
 

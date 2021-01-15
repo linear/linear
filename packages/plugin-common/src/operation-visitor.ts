@@ -2,8 +2,9 @@ import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { isScalarField } from "./field";
 import { printOperations } from "./operation";
+import { printList } from "./print";
 import { OperationType, PluginContext } from "./types";
-import { filterJoin, getKeyByValue } from "./utils";
+import { getKeyByValue } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating operations
@@ -21,7 +22,7 @@ export class OperationVisitor<C> {
   public Document = {
     /** Join all string definitions */
     leave: (node: DocumentNode): string => {
-      return filterJoin(
+      return printList(
         (node.definitions ?? []).map(x => (typeof x === "string" ? x : "")),
         "\n"
       );
@@ -38,7 +39,7 @@ export class OperationVisitor<C> {
     /** Print all field operations */
     leave: (_node: ObjectTypeDefinitionNode): string | null => {
       const node = (_node as unknown) as ObjectTypeDefinitionNode & { operationType: OperationType };
-      return filterJoin(
+      return printList(
         node.fields?.map(field => {
           return field ? printOperations(this._context, node.operationType, [field]) : undefined;
         }),
