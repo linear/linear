@@ -120,7 +120,7 @@ export class FragmentVisitor<C> {
               [
                 description,
                 printGraphqlDebug(_node),
-                printGraphqlDebug(query),
+                printGraphqlDebug(fragment),
                 `${node.name} {
                   ...${fragment.name.value}
                 }`,
