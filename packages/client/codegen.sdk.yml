@@ -25,11 +25,11 @@ generates:
         # - "adminDeleteIntegration"
         # - "userPromoteAdmin"
         # - "userDemoteAdmin"
-        - "availableUsers"
+        # - "availableUsers"
         # - "integrationResource"
         # - "organizationInviteCreate"
       skipObjects:
-        - "UserSettings"
+        # - "UserSettings"
       skipDirectives:
         - "skipSdk"
         - "deprecated"
