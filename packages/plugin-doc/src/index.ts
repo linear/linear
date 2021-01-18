@@ -51,7 +51,7 @@ export const validate: PluginValidateFn = async (
 ) => {
   const packageName = "@linear/plugin-doc";
   logger.info(`Validating ${packageName}`);
-  logger.info({ config });
+  logger.info(config);
 
   const prefix = `Plugin "${packageName}" config requires`;
 

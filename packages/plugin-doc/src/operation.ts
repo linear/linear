@@ -5,6 +5,7 @@ import {
   getLast,
   isScalarField,
   isValidField,
+  logger,
   OperationType,
   PluginContext,
   printGraphqlDebug,
@@ -12,6 +13,7 @@ import {
   printGraphqlInputArgs,
   printGraphqlResponseArgs,
   printList,
+  reduceListType,
 } from "@linear/plugin-common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 
@@ -63,14 +65,20 @@ function printOperationWrapper(
 function printOperationFields(
   context: PluginContext,
   fields: FieldDefinitionNode[],
-  object: ObjectTypeDefinitionNode
+  object: ObjectTypeDefinitionNode,
+  i = 0
 ): string {
   const lastField = getLast(fields);
   return isValidField(context, lastField)
     ? printList(
         object.fields?.map(field => {
           if (isValidField(context, field)) {
-            const operation = printOperationBody(context, [field]);
+            if (i > 9) {
+              logger.fatal([...fields, field, object]);
+              throw new Error("printOperationFields called over 10 times recursively");
+            }
+
+            const operation = printOperationBody(context, [field], i + 1);
 
             return operation
               ? printList(
@@ -100,7 +108,7 @@ function printOperationFields(
 /**
  * Print the body of the operation
  */
-function printOperationBody(context: PluginContext, fields: FieldDefinitionNode[]): string | undefined {
+function printOperationBody(context: PluginContext, fields: FieldDefinitionNode[], i = 0): string | undefined {
   const lastField = getLast(fields);
 
   if (isValidField(context, lastField)) {
@@ -113,7 +121,7 @@ function printOperationBody(context: PluginContext, fields: FieldDefinitionNode[
     /** Print each field if a matching object exists */
     const object = findObject(context, lastField);
     if (object) {
-      return printOperationFields(context, fields, object);
+      return printOperationFields(context, fields, object, i);
     }
   }
 
@@ -155,8 +163,10 @@ export function printOperations(
         if (
           /** No need to go further than scalar fields */
           isScalarField(context, field) ||
-          /** No need to go further if the field is a connection */
+          /** No need to go further if the field is within a connection */
           ["pageInfo", "nodes"].includes(field.name.value) ||
+          /** No need to go further if this returns a list */
+          reduceListType(field.type) ||
           /** No need to go further if we can get this field from a root query */
           findQuery(context, field)
         ) {

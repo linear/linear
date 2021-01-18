@@ -21,7 +21,6 @@ export function findFragment(
  * Check whether this fragment has valid content and is not a connection, edge or root
  */
 export function isValidFragment(context: PluginContext, fragment: NamedFields<ObjectTypeDefinitionNode>): boolean {
-  const hasFields = (fragment.fields ?? []).filter(x => Boolean(x && x !== "cursor")).length;
-
+  const hasFields = (fragment.fields ?? []).filter(Boolean).length;
   return Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment));
 }
