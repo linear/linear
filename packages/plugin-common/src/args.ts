@@ -13,9 +13,10 @@ export function getRequiredArgs(args: readonly InputValueDefinitionNode[] = []):
 /**
  * Transform a list of arg strings into the jsdoc and printed output
  */
-export function getArgList(args: (ArgDefinition | undefined)[]): ArgList {
+export function getArgList(_args: (ArgDefinition | undefined)[]): ArgList {
+  const args = _args.filter(nonNullable);
   return {
-    args: args.filter(nonNullable),
+    args,
     jsdoc: [
       " ",
       ...args.filter(nonNullable).map(({ name, description }) => {

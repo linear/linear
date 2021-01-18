@@ -36,7 +36,7 @@ export function printSdk(context: SdkPluginContext): string {
  */
 export function printSdkOperation(context: SdkPluginContext, o: SdkOperation): string {
   return printList(
-    [printDebug(o), `public ${o.node.name?.value} = new ${o.operationResultType}(this.${c.REQUEST_NAME}).fetch`],
+    [printDebug(o), `public ${o.node.name?.value} = new ${o.print.response}(this.${c.REQUEST_NAME}).fetch`],
     "\n"
   );
 }

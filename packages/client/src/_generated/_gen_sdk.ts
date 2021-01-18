@@ -10,7 +10,7 @@ export type Request = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
  *
  * @param request - function to call the graphql client
  */
-export class LinearRequest {
+class LinearRequest {
   public constructor(request: Request) {
     this.request = request;
   }
@@ -83,15 +83,15 @@ class User extends LinearRequest {
     return new OrganizationQuery(this.request).fetch();
   }
   /** Issues assigned to the user. */
-  public assignedIssues(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
+  public assignedIssues(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id" | "id">) {
     return this.id ? new User_AssignedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Issues created by the user. */
-  public createdIssues(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
+  public createdIssues(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id" | "id">) {
     return this.id ? new User_CreatedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Memberships associated with the user. */
-  public teamMemberships(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
+  public teamMemberships(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id" | "id">) {
     return this.id ? new User_TeamMembershipsQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -281,35 +281,35 @@ class Issue extends LinearRequest {
     return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** Users who are subscribed to the issue. */
-  public subscribers(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
+  public subscribers(vars?: Omit<D.Issue_SubscribersQueryVariables, "id" | "id">) {
     return this.id ? new Issue_SubscribersQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Children of the issue. */
-  public children(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
+  public children(vars?: Omit<D.Issue_ChildrenQueryVariables, "id" | "id">) {
     return this.id ? new Issue_ChildrenQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Comments associated with the issue. */
-  public comments(vars?: Omit<D.Issue_CommentsQueryVariables, "id">) {
+  public comments(vars?: Omit<D.Issue_CommentsQueryVariables, "id" | "id">) {
     return this.id ? new Issue_CommentsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** History entries associated with the issue. */
-  public history(vars?: Omit<D.Issue_HistoryQueryVariables, "id">) {
+  public history(vars?: Omit<D.Issue_HistoryQueryVariables, "id" | "id">) {
     return this.id ? new Issue_HistoryQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Labels associated with this issue. */
-  public labels(vars?: Omit<D.Issue_LabelsQueryVariables, "id">) {
+  public labels(vars?: Omit<D.Issue_LabelsQueryVariables, "id" | "id">) {
     return this.id ? new Issue_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Integration resources for this issue. */
-  public integrationResources(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
+  public integrationResources(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id" | "id">) {
     return this.id ? new Issue_IntegrationResourcesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Relations associated with this issue. */
-  public relations(vars?: Omit<D.Issue_RelationsQueryVariables, "id">) {
+  public relations(vars?: Omit<D.Issue_RelationsQueryVariables, "id" | "id">) {
     return this.id ? new Issue_RelationsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Inverse relations associated with this issue. */
-  public inverseRelations(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
+  public inverseRelations(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id" | "id">) {
     return this.id ? new Issue_InverseRelationsQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -473,35 +473,35 @@ class Team extends LinearRequest {
     return new OrganizationQuery(this.request).fetch();
   }
   /** Issues associated with the team. */
-  public issues(vars?: Omit<D.Team_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.Team_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new Team_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Cycles associated with the team. */
-  public cycles(vars?: Omit<D.Team_CyclesQueryVariables, "id">) {
+  public cycles(vars?: Omit<D.Team_CyclesQueryVariables, "id" | "id">) {
     return this.id ? new Team_CyclesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Memberships associated with the team. */
-  public memberships(vars?: Omit<D.Team_MembershipsQueryVariables, "id">) {
+  public memberships(vars?: Omit<D.Team_MembershipsQueryVariables, "id" | "id">) {
     return this.id ? new Team_MembershipsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Projects associated with the team. */
-  public projects(vars?: Omit<D.Team_ProjectsQueryVariables, "id">) {
+  public projects(vars?: Omit<D.Team_ProjectsQueryVariables, "id" | "id">) {
     return this.id ? new Team_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** The states that define the workflow associated with the team. */
-  public states(vars?: Omit<D.Team_StatesQueryVariables, "id">) {
+  public states(vars?: Omit<D.Team_StatesQueryVariables, "id" | "id">) {
     return this.id ? new Team_StatesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Templates associated with the team. */
-  public templates(vars?: Omit<D.Team_TemplatesQueryVariables, "id">) {
+  public templates(vars?: Omit<D.Team_TemplatesQueryVariables, "id" | "id">) {
     return this.id ? new Team_TemplatesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Labels associated with the team. */
-  public labels(vars?: Omit<D.Team_LabelsQueryVariables, "id">) {
+  public labels(vars?: Omit<D.Team_LabelsQueryVariables, "id" | "id">) {
     return this.id ? new Team_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Webhooks associated with the team. */
-  public webhooks(vars?: Omit<D.Team_WebhooksQueryVariables, "id">) {
+  public webhooks(vars?: Omit<D.Team_WebhooksQueryVariables, "id" | "id">) {
     return this.id ? new Team_WebhooksQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -555,7 +555,7 @@ class WorkflowState extends LinearRequest {
     return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** Issues belonging in this state. */
-  public issues(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new WorkflowState_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -638,11 +638,11 @@ class Cycle extends LinearRequest {
     return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** Issues associated with the cycle. */
-  public issues(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.Cycle_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new Cycle_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Issues that weren't completed when the cycle was closed. */
-  public uncompletedIssuesUponClose(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
+  public uncompletedIssuesUponClose(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id" | "id">) {
     return this.id ? new Cycle_UncompletedIssuesUponCloseQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -847,19 +847,19 @@ class Project extends LinearRequest {
     return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
   }
   /** Teams associated with this project. */
-  public teams(vars?: Omit<D.Project_TeamsQueryVariables, "id">) {
+  public teams(vars?: Omit<D.Project_TeamsQueryVariables, "id" | "id">) {
     return this.id ? new Project_TeamsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Users that are members of the project. */
-  public members(vars?: Omit<D.Project_MembersQueryVariables, "id">) {
+  public members(vars?: Omit<D.Project_MembersQueryVariables, "id" | "id">) {
     return this.id ? new Project_MembersQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Issues associated with the project. */
-  public issues(vars?: Omit<D.Project_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.Project_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new Project_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Links associated with the project. */
-  public links(vars?: Omit<D.Project_LinksQueryVariables, "id">) {
+  public links(vars?: Omit<D.Project_LinksQueryVariables, "id" | "id">) {
     return this.id ? new Project_LinksQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -901,7 +901,7 @@ class Milestone extends LinearRequest {
     return new OrganizationQuery(this.request).fetch();
   }
   /** Projects associated with the milestone. */
-  public projects(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
+  public projects(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id" | "id">) {
     return this.id ? new Milestone_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -1461,7 +1461,7 @@ class IssueLabel extends LinearRequest {
     return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** Issues associated with the label. */
-  public issues(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new IssueLabel_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -3211,7 +3211,7 @@ class OrganizationInvite extends LinearRequest {
     return new OrganizationQuery(this.request).fetch();
   }
   /** undefined */
-  public issues(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new OrganizationInvite_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -4917,7 +4917,7 @@ class UserQuery extends LinearRequest {
   /**
    * Call the User Query and return a User
    *
-   * @param id - id to pass into the UserQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<User | undefined> {
     return this.request<D.UserQuery, D.UserQueryVariables>(D.UserDocument, {
@@ -4988,7 +4988,7 @@ class OrganizationExistsQuery extends LinearRequest {
   /**
    * Call the OrganizationExists Query and return a OrganizationExistsPayload
    *
-   * @param urlKey - urlKey to pass into the OrganizationExistsQuery
+   * @param urlKey - required urlKey variable to set the  scope
    */
   public async fetch(urlKey: string): Promise<OrganizationExistsPayload | undefined> {
     return this.request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(D.OrganizationExistsDocument, {
@@ -5013,8 +5013,8 @@ class SyncBootstrapQuery extends LinearRequest {
   /**
    * Call the SyncBootstrap Query and return a SyncResponse
    *
-   * @param databaseVersion - databaseVersion to pass into the SyncBootstrapQuery
-   * @param sinceSyncId - sinceSyncId to pass into the SyncBootstrapQuery
+   * @param databaseVersion - required databaseVersion variable to set the  scope
+   * @param sinceSyncId - required sinceSyncId variable to set the  scope
    */
   public async fetch(databaseVersion: number, sinceSyncId: number): Promise<SyncResponse | undefined> {
     return this.request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument, {
@@ -5040,7 +5040,7 @@ class SyncUpdatesQuery extends LinearRequest {
   /**
    * Call the SyncUpdates Query and return a SyncResponse
    *
-   * @param sinceSyncId - sinceSyncId to pass into the SyncUpdatesQuery
+   * @param sinceSyncId - required sinceSyncId variable to set the  scope
    */
   public async fetch(sinceSyncId: number): Promise<SyncResponse | undefined> {
     return this.request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument, {
@@ -5065,8 +5065,8 @@ class ArchivedModelSyncQuery extends LinearRequest {
   /**
    * Call the ArchivedModelSync Query and return a ArchiveResponse
    *
-   * @param identifier - identifier to pass into the ArchivedModelSyncQuery
-   * @param modelClass - modelClass to pass into the ArchivedModelSyncQuery
+   * @param identifier - required identifier variable to set the  scope
+   * @param modelClass - required modelClass variable to set the  scope
    */
   public async fetch(identifier: string, modelClass: string): Promise<ArchiveResponse | undefined> {
     return this.request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument, {
@@ -5092,8 +5092,8 @@ class ArchivedModelsSyncQuery extends LinearRequest {
   /**
    * Call the ArchivedModelsSync Query and return a ArchiveResponse
    *
-   * @param modelClass - modelClass to pass into the ArchivedModelsSyncQuery
-   * @param teamId - teamId to pass into the ArchivedModelsSyncQuery
+   * @param modelClass - required modelClass variable to set the  scope
+   * @param teamId - required teamId variable to set the  scope
    * @param vars - variables without 'modelClass', 'teamId' to pass into the ArchivedModelsSyncQuery
    */
   public async fetch(
@@ -5197,8 +5197,8 @@ class ApplicationWithAuthorizationQuery extends LinearRequest {
   /**
    * Call the ApplicationWithAuthorization Query and return a UserAuthorizedApplication
    *
-   * @param scope - scope to pass into the ApplicationWithAuthorizationQuery
-   * @param clientId - clientId to pass into the ApplicationWithAuthorizationQuery
+   * @param scope - required scope variable to set the  scope
+   * @param clientId - required clientId variable to set the  scope
    * @param vars - variables without 'scope', 'clientId' to pass into the ApplicationWithAuthorizationQuery
    */
   public async fetch(
@@ -5258,7 +5258,7 @@ class SsoUrlFromEmailQuery extends LinearRequest {
   /**
    * Call the SsoUrlFromEmail Query and return a SsoUrlFromEmailResponse
    *
-   * @param email - email to pass into the SsoUrlFromEmailQuery
+   * @param email - required email variable to set the  scope
    * @param vars - variables without 'email' to pass into the SsoUrlFromEmailQuery
    */
   public async fetch(
@@ -5312,9 +5312,9 @@ class CollaborativeDocumentJoinQuery extends LinearRequest {
   /**
    * Call the CollaborativeDocumentJoin Query and return a CollaborationDocumentUpdatePayload
    *
-   * @param clientId - clientId to pass into the CollaborativeDocumentJoinQuery
-   * @param issueId - issueId to pass into the CollaborativeDocumentJoinQuery
-   * @param version - version to pass into the CollaborativeDocumentJoinQuery
+   * @param clientId - required clientId variable to set the  scope
+   * @param issueId - required issueId variable to set the  scope
+   * @param version - required version variable to set the  scope
    */
   public async fetch(
     clientId: string,
@@ -5348,7 +5348,7 @@ class CommentQuery extends LinearRequest {
   /**
    * Call the Comment Query and return a Comment
    *
-   * @param id - id to pass into the CommentQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Comment | undefined> {
     return this.request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, {
@@ -5396,7 +5396,7 @@ class CustomViewQuery extends LinearRequest {
   /**
    * Call the CustomView Query and return a CustomView
    *
-   * @param id - id to pass into the CustomViewQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<CustomView | undefined> {
     return this.request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, {
@@ -5444,7 +5444,7 @@ class CycleQuery extends LinearRequest {
   /**
    * Call the Cycle Query and return a Cycle
    *
-   * @param id - id to pass into the CycleQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Cycle | undefined> {
     return this.request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, {
@@ -5492,7 +5492,7 @@ class EmojiQuery extends LinearRequest {
   /**
    * Call the Emoji Query and return a Emoji
    *
-   * @param id - id to pass into the EmojiQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Emoji | undefined> {
     return this.request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, {
@@ -5540,7 +5540,7 @@ class FavoriteQuery extends LinearRequest {
   /**
    * Call the Favorite Query and return a Favorite
    *
-   * @param id - id to pass into the FavoriteQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Favorite | undefined> {
     return this.request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, {
@@ -5588,7 +5588,7 @@ class FigmaEmbedInfoQuery extends LinearRequest {
   /**
    * Call the FigmaEmbedInfo Query and return a FigmaEmbedPayload
    *
-   * @param fileId - fileId to pass into the FigmaEmbedInfoQuery
+   * @param fileId - required fileId variable to set the  scope
    * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
    */
   public async fetch(
@@ -5618,7 +5618,7 @@ class IntegrationQuery extends LinearRequest {
   /**
    * Call the Integration Query and return a Integration
    *
-   * @param id - id to pass into the IntegrationQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Integration | undefined> {
     return this.request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument, {
@@ -5668,7 +5668,7 @@ class IntegrationResourceQuery extends LinearRequest {
   /**
    * Call the IntegrationResource Query and return a IntegrationResource
    *
-   * @param id - id to pass into the IntegrationResourceQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<IntegrationResource | undefined> {
     return this.request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
@@ -5722,7 +5722,7 @@ class InviteInfoQuery extends LinearRequest {
   /**
    * Call the InviteInfo Query and return a InvitePagePayload
    *
-   * @param userHash - userHash to pass into the InviteInfoQuery
+   * @param userHash - required userHash variable to set the  scope
    * @param vars - variables without 'userHash' to pass into the InviteInfoQuery
    */
   public async fetch(
@@ -5752,7 +5752,7 @@ class IssueLabelQuery extends LinearRequest {
   /**
    * Call the IssueLabel Query and return a IssueLabel
    *
-   * @param id - id to pass into the IssueLabelQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<IssueLabel | undefined> {
     return this.request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, {
@@ -5800,7 +5800,7 @@ class IssueRelationQuery extends LinearRequest {
   /**
    * Call the IssueRelation Query and return a IssueRelation
    *
-   * @param id - id to pass into the IssueRelationQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<IssueRelation | undefined> {
     return this.request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, {
@@ -5850,7 +5850,7 @@ class IssueQuery extends LinearRequest {
   /**
    * Call the Issue Query and return a Issue
    *
-   * @param id - id to pass into the IssueQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Issue | undefined> {
     return this.request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, {
@@ -5875,7 +5875,7 @@ class IssueSearchQuery extends LinearRequest {
   /**
    * Call the IssueSearch Query and return a IssueConnection
    *
-   * @param query - query to pass into the IssueSearchQuery
+   * @param query - required query variable to set the  scope
    * @param vars - variables without 'query' to pass into the IssueSearchQuery
    */
   public async fetch(
@@ -5928,7 +5928,7 @@ class MilestoneQuery extends LinearRequest {
   /**
    * Call the Milestone Query and return a Milestone
    *
-   * @param id - id to pass into the MilestoneQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Milestone | undefined> {
     return this.request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, {
@@ -6053,7 +6053,7 @@ class OrganizationInviteQuery extends LinearRequest {
   /**
    * Call the OrganizationInvite Query and return a IssueLabel
    *
-   * @param id - id to pass into the OrganizationInviteQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<IssueLabel | undefined> {
     return this.request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(D.OrganizationInviteDocument, {
@@ -6104,7 +6104,7 @@ class ProjectLinkQuery extends LinearRequest {
   /**
    * Call the ProjectLink Query and return a ProjectLink
    *
-   * @param id - id to pass into the ProjectLinkQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ProjectLink | undefined> {
     return this.request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
@@ -6154,7 +6154,7 @@ class ProjectQuery extends LinearRequest {
   /**
    * Call the Project Query and return a Project
    *
-   * @param id - id to pass into the ProjectQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Project | undefined> {
     return this.request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
@@ -6227,7 +6227,7 @@ class ReactionQuery extends LinearRequest {
   /**
    * Call the Reaction Query and return a Reaction
    *
-   * @param id - id to pass into the ReactionQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Reaction | undefined> {
     return this.request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, {
@@ -6299,7 +6299,7 @@ class TeamMembershipQuery extends LinearRequest {
   /**
    * Call the TeamMembership Query and return a TeamMembership
    *
-   * @param id - id to pass into the TeamMembershipQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<TeamMembership | undefined> {
     return this.request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument, {
@@ -6349,7 +6349,7 @@ class TeamQuery extends LinearRequest {
   /**
    * Call the Team Query and return a Team
    *
-   * @param id - id to pass into the TeamQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Team | undefined> {
     return this.request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
@@ -6419,7 +6419,7 @@ class TemplateQuery extends LinearRequest {
   /**
    * Call the Template Query and return a Template
    *
-   * @param id - id to pass into the TemplateQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Template | undefined> {
     return this.request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, {
@@ -6469,7 +6469,7 @@ class WebhookQuery extends LinearRequest {
   /**
    * Call the Webhook Query and return a Webhook
    *
-   * @param id - id to pass into the WebhookQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<Webhook | undefined> {
     return this.request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, {
@@ -6517,7 +6517,7 @@ class WorkflowStateQuery extends LinearRequest {
   /**
    * Call the WorkflowState Query and return a WorkflowState
    *
-   * @param id - id to pass into the WorkflowStateQuery
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<WorkflowState | undefined> {
     return this.request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, {
@@ -6567,8 +6567,8 @@ class UserUpdateMutation extends LinearRequest {
   /**
    * Call the UserUpdate Mutation and return a UserPayload
    *
-   * @param input - input to pass into the UserUpdateMutation
-   * @param id - id to pass into the UserUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.UpdateUserInput, id: string): Promise<UserPayload | undefined> {
     return this.request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument, {
@@ -6594,7 +6594,7 @@ class UserPromoteAdminMutation extends LinearRequest {
   /**
    * Call the UserPromoteAdmin Mutation and return a UserAdminPayload
    *
-   * @param id - id to pass into the UserPromoteAdminMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(D.UserPromoteAdminDocument, {
@@ -6619,7 +6619,7 @@ class UserDemoteAdminMutation extends LinearRequest {
   /**
    * Call the UserDemoteAdmin Mutation and return a UserAdminPayload
    *
-   * @param id - id to pass into the UserDemoteAdminMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument, {
@@ -6644,7 +6644,7 @@ class UserSuspendMutation extends LinearRequest {
   /**
    * Call the UserSuspend Mutation and return a UserAdminPayload
    *
-   * @param id - id to pass into the UserSuspendMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, {
@@ -6669,7 +6669,7 @@ class UserUnsuspendMutation extends LinearRequest {
   /**
    * Call the UserUnsuspend Mutation and return a UserAdminPayload
    *
-   * @param id - id to pass into the UserUnsuspendMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument, {
@@ -6694,7 +6694,7 @@ class OrganizationUpdateMutation extends LinearRequest {
   /**
    * Call the OrganizationUpdate Mutation and return a OrganizationPayload
    *
-   * @param input - input to pass into the OrganizationUpdateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.UpdateOrganizationInput): Promise<OrganizationPayload | undefined> {
     return this.request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
@@ -6747,7 +6747,7 @@ class OrganizationDeleteMutation extends LinearRequest {
   /**
    * Call the OrganizationDelete Mutation and return a OrganizationDeletePayload
    *
-   * @param input - input to pass into the OrganizationDeleteMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.DeleteOrganizationInput): Promise<OrganizationDeletePayload | undefined> {
     return this.request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
@@ -6775,7 +6775,7 @@ class AdminDeleteIntegrationMutation extends LinearRequest {
   /**
    * Call the AdminDeleteIntegration Mutation and return a AdminIntegrationPayload
    *
-   * @param id - id to pass into the AdminDeleteIntegrationMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<AdminIntegrationPayload | undefined> {
     return this.request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
@@ -6803,7 +6803,7 @@ class OrganizationToggleAccessMutation extends LinearRequest {
   /**
    * Call the OrganizationToggleAccess Mutation and return a OrganizationAccessPayload
    *
-   * @param id - id to pass into the OrganizationToggleAccessMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<OrganizationAccessPayload | undefined> {
     return this.request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
@@ -6831,9 +6831,9 @@ class OrganizationChangeEmailDomainMutation extends LinearRequest {
   /**
    * Call the OrganizationChangeEmailDomain Mutation and return a OrganizationAccessPayload
    *
-   * @param toDomain - toDomain to pass into the OrganizationChangeEmailDomainMutation
-   * @param fromDomain - fromDomain to pass into the OrganizationChangeEmailDomainMutation
-   * @param id - id to pass into the OrganizationChangeEmailDomainMutation
+   * @param toDomain - required toDomain variable to set the  scope
+   * @param fromDomain - required fromDomain variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(toDomain: string, fromDomain: string, id: string): Promise<OrganizationAccessPayload | undefined> {
     return this.request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
@@ -6863,7 +6863,7 @@ class OrganizationToggleSamlEnabledMutation extends LinearRequest {
   /**
    * Call the OrganizationToggleSamlEnabled Mutation and return a OrganizationSamlConfigurePayload
    *
-   * @param id - id to pass into the OrganizationToggleSamlEnabledMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<OrganizationSamlConfigurePayload | undefined> {
     return this.request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
@@ -6891,8 +6891,8 @@ class OrganizationConfigureSamlMutation extends LinearRequest {
   /**
    * Call the OrganizationConfigureSaml Mutation and return a OrganizationSamlConfigurePayload
    *
-   * @param samlConfiguration - samlConfiguration to pass into the OrganizationConfigureSamlMutation
-   * @param id - id to pass into the OrganizationConfigureSamlMutation
+   * @param samlConfiguration - required samlConfiguration variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(
     samlConfiguration: D.SamlConfigurationInput,
@@ -6924,7 +6924,7 @@ class AdminCommandMutation extends LinearRequest {
   /**
    * Call the AdminCommand Mutation and return a AdminCommandPayload
    *
-   * @param input - input to pass into the AdminCommandMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.AdminCommandInput): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument, {
@@ -6949,9 +6949,9 @@ class AdminBulkEmailMutation extends LinearRequest {
   /**
    * Call the AdminBulkEmail Mutation and return a AdminCommandPayload
    *
-   * @param emails - emails to pass into the AdminBulkEmailMutation
-   * @param markdownContent - markdownContent to pass into the AdminBulkEmailMutation
-   * @param subject - subject to pass into the AdminBulkEmailMutation
+   * @param emails - required emails variable to set the  scope
+   * @param markdownContent - required markdownContent variable to set the  scope
+   * @param subject - required subject variable to set the  scope
    * @param vars - variables without 'emails', 'markdownContent', 'subject' to pass into the AdminBulkEmailMutation
    */
   public async fetch(
@@ -6985,7 +6985,7 @@ class AdminCreateStripeCustomerMutation extends LinearRequest {
   /**
    * Call the AdminCreateStripeCustomer Mutation and return a AdminCommandPayload
    *
-   * @param organizationId - organizationId to pass into the AdminCreateStripeCustomerMutation
+   * @param organizationId - required organizationId variable to set the  scope
    */
   public async fetch(organizationId: string): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
@@ -7013,7 +7013,7 @@ class AdminScheduleAnonymousTaskMutation extends LinearRequest {
   /**
    * Call the AdminScheduleAnonymousTask Mutation and return a AdminCommandPayload
    *
-   * @param taskName - taskName to pass into the AdminScheduleAnonymousTaskMutation
+   * @param taskName - required taskName variable to set the  scope
    */
   public async fetch(taskName: string): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
@@ -7041,8 +7041,8 @@ class AdminUserAccountChangeEmailMutation extends LinearRequest {
   /**
    * Call the AdminUserAccountChangeEmail Mutation and return a UserAccountAdminPrivileged
    *
-   * @param newEmail - newEmail to pass into the AdminUserAccountChangeEmailMutation
-   * @param id - id to pass into the AdminUserAccountChangeEmailMutation
+   * @param newEmail - required newEmail variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(newEmail: string, id: string): Promise<UserAccountAdminPrivileged | undefined> {
     return this.request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
@@ -7071,7 +7071,7 @@ class EventCreateMutation extends LinearRequest {
   /**
    * Call the EventCreate Mutation and return a EventPayload
    *
-   * @param input - input to pass into the EventCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.EventCreateInput): Promise<EventPayload | undefined> {
     return this.request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument, {
@@ -7096,7 +7096,7 @@ class ApiKeyCreateMutation extends LinearRequest {
   /**
    * Call the ApiKeyCreate Mutation and return a ApiKeyPayload
    *
-   * @param input - input to pass into the ApiKeyCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.ApiKeyCreateInput): Promise<ApiKeyPayload | undefined> {
     return this.request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument, {
@@ -7121,7 +7121,7 @@ class ApiKeyDeleteMutation extends LinearRequest {
   /**
    * Call the ApiKeyDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the ApiKeyDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument, {
@@ -7146,7 +7146,7 @@ class EmailUserAccountAuthChallengeMutation extends LinearRequest {
   /**
    * Call the EmailUserAccountAuthChallenge Mutation and return a EmailUserAccountAuthChallengeResponse
    *
-   * @param input - input to pass into the EmailUserAccountAuthChallengeMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(
     input: D.EmailUserAccountAuthChallengeInput
@@ -7176,7 +7176,7 @@ class EmailTokenUserAccountAuthMutation extends LinearRequest {
   /**
    * Call the EmailTokenUserAccountAuth Mutation and return a AuthResolverResponse
    *
-   * @param input - input to pass into the EmailTokenUserAccountAuthMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
@@ -7204,7 +7204,7 @@ class SamlTokenUserAccountAuthMutation extends LinearRequest {
   /**
    * Call the SamlTokenUserAccountAuth Mutation and return a AuthResolverResponse
    *
-   * @param input - input to pass into the SamlTokenUserAccountAuthMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
@@ -7232,7 +7232,7 @@ class GoogleUserAccountAuthMutation extends LinearRequest {
   /**
    * Call the GoogleUserAccountAuth Mutation and return a AuthResolverResponse
    *
-   * @param input - input to pass into the GoogleUserAccountAuthMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.GoogleUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
@@ -7260,7 +7260,7 @@ class CreateOrganizationFromOnboardingMutation extends LinearRequest {
   /**
    * Call the CreateOrganizationFromOnboarding Mutation and return a CreateOrJoinOrganizationResponse
    *
-   * @param input - input to pass into the CreateOrganizationFromOnboardingMutation
+   * @param input - required input variable to set the  scope
    * @param vars - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
    */
   public async fetch(
@@ -7293,7 +7293,7 @@ class JoinOrganizationFromOnboardingMutation extends LinearRequest {
   /**
    * Call the JoinOrganizationFromOnboarding Mutation and return a CreateOrJoinOrganizationResponse
    *
-   * @param input - input to pass into the JoinOrganizationFromOnboardingMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.JoinOrganizationInput): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
@@ -7321,7 +7321,7 @@ class LeaveOrganizationMutation extends LinearRequest {
   /**
    * Call the LeaveOrganization Mutation and return a CreateOrJoinOrganizationResponse
    *
-   * @param organizationId - organizationId to pass into the LeaveOrganizationMutation
+   * @param organizationId - required organizationId variable to set the  scope
    */
   public async fetch(organizationId: string): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
@@ -7349,7 +7349,7 @@ class BillingEmailUpdateMutation extends LinearRequest {
   /**
    * Call the BillingEmailUpdate Mutation and return a BillingEmailPayload
    *
-   * @param input - input to pass into the BillingEmailUpdateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.BillingEmailUpdateInput): Promise<BillingEmailPayload | undefined> {
     return this.request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
@@ -7377,7 +7377,7 @@ class CollaborativeDocumentUpdateMutation extends LinearRequest {
   /**
    * Call the CollaborativeDocumentUpdate Mutation and return a CollaborationDocumentUpdatePayload
    *
-   * @param input - input to pass into the CollaborativeDocumentUpdateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(
     input: D.CollaborationDocumentUpdateInput
@@ -7407,7 +7407,7 @@ class CommentCreateMutation extends LinearRequest {
   /**
    * Call the CommentCreate Mutation and return a CommentPayload
    *
-   * @param input - input to pass into the CommentCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.CommentCreateInput): Promise<CommentPayload | undefined> {
     return this.request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument, {
@@ -7432,8 +7432,8 @@ class CommentUpdateMutation extends LinearRequest {
   /**
    * Call the CommentUpdate Mutation and return a CommentPayload
    *
-   * @param input - input to pass into the CommentUpdateMutation
-   * @param id - id to pass into the CommentUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.CommentUpdateInput, id: string): Promise<CommentPayload | undefined> {
     return this.request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument, {
@@ -7459,7 +7459,7 @@ class CommentDeleteMutation extends LinearRequest {
   /**
    * Call the CommentDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the CommentDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument, {
@@ -7484,7 +7484,7 @@ class ContactCreateMutation extends LinearRequest {
   /**
    * Call the ContactCreate Mutation and return a ContactPayload
    *
-   * @param input - input to pass into the ContactCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.ContactCreateInput): Promise<ContactPayload | undefined> {
     return this.request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument, {
@@ -7509,7 +7509,7 @@ class CustomViewCreateMutation extends LinearRequest {
   /**
    * Call the CustomViewCreate Mutation and return a CustomViewPayload
    *
-   * @param input - input to pass into the CustomViewCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.CustomViewCreateInput): Promise<CustomViewPayload | undefined> {
     return this.request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(D.CustomViewCreateDocument, {
@@ -7534,8 +7534,8 @@ class CustomViewUpdateMutation extends LinearRequest {
   /**
    * Call the CustomViewUpdate Mutation and return a CustomViewPayload
    *
-   * @param input - input to pass into the CustomViewUpdateMutation
-   * @param id - id to pass into the CustomViewUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.CustomViewUpdateInput, id: string): Promise<CustomViewPayload | undefined> {
     return this.request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(D.CustomViewUpdateDocument, {
@@ -7561,7 +7561,7 @@ class CustomViewDeleteMutation extends LinearRequest {
   /**
    * Call the CustomViewDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the CustomViewDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(D.CustomViewDeleteDocument, {
@@ -7586,7 +7586,7 @@ class CycleCreateMutation extends LinearRequest {
   /**
    * Call the CycleCreate Mutation and return a CyclePayload
    *
-   * @param input - input to pass into the CycleCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.CycleCreateInput): Promise<CyclePayload | undefined> {
     return this.request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument, {
@@ -7611,8 +7611,8 @@ class CycleUpdateMutation extends LinearRequest {
   /**
    * Call the CycleUpdate Mutation and return a CyclePayload
    *
-   * @param input - input to pass into the CycleUpdateMutation
-   * @param id - id to pass into the CycleUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.CycleUpdateInput, id: string): Promise<CyclePayload | undefined> {
     return this.request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument, {
@@ -7638,7 +7638,7 @@ class CycleArchiveMutation extends LinearRequest {
   /**
    * Call the CycleArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the CycleArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument, {
@@ -7738,7 +7738,7 @@ class EmailUnsubscribeMutation extends LinearRequest {
   /**
    * Call the EmailUnsubscribe Mutation and return a EmailUnsubscribePayload
    *
-   * @param input - input to pass into the EmailUnsubscribeMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload | undefined> {
     return this.request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(D.EmailUnsubscribeDocument, {
@@ -7763,7 +7763,7 @@ class EmojiCreateMutation extends LinearRequest {
   /**
    * Call the EmojiCreate Mutation and return a EmojiPayload
    *
-   * @param input - input to pass into the EmojiCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.EmojiCreateInput): Promise<EmojiPayload | undefined> {
     return this.request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument, {
@@ -7788,7 +7788,7 @@ class EmojiDeleteMutation extends LinearRequest {
   /**
    * Call the EmojiDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the EmojiDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument, {
@@ -7813,7 +7813,7 @@ class FavoriteCreateMutation extends LinearRequest {
   /**
    * Call the FavoriteCreate Mutation and return a FavoritePayload
    *
-   * @param input - input to pass into the FavoriteCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.FavoriteCreateInput): Promise<FavoritePayload | undefined> {
     return this.request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument, {
@@ -7838,8 +7838,8 @@ class FavoriteUpdateMutation extends LinearRequest {
   /**
    * Call the FavoriteUpdate Mutation and return a FavoritePayload
    *
-   * @param input - input to pass into the FavoriteUpdateMutation
-   * @param id - id to pass into the FavoriteUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.FavoriteUpdateInput, id: string): Promise<FavoritePayload | undefined> {
     return this.request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument, {
@@ -7865,7 +7865,7 @@ class FavoriteDeleteMutation extends LinearRequest {
   /**
    * Call the FavoriteDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the FavoriteDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument, {
@@ -7890,7 +7890,7 @@ class FeedbackCreateMutation extends LinearRequest {
   /**
    * Call the FeedbackCreate Mutation and return a FeedbackPayload
    *
-   * @param input - input to pass into the FeedbackCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.FeedbackCreateInput): Promise<FeedbackPayload | undefined> {
     return this.request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument, {
@@ -7915,9 +7915,9 @@ class FileUploadMutation extends LinearRequest {
   /**
    * Call the FileUpload Mutation and return a UploadPayload
    *
-   * @param size - size to pass into the FileUploadMutation
-   * @param contentType - contentType to pass into the FileUploadMutation
-   * @param filename - filename to pass into the FileUploadMutation
+   * @param size - required size variable to set the  scope
+   * @param contentType - required contentType variable to set the  scope
+   * @param filename - required filename variable to set the  scope
    * @param vars - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
    */
   public async fetch(
@@ -7951,7 +7951,7 @@ class ImageUploadFromUrlMutation extends LinearRequest {
   /**
    * Call the ImageUploadFromUrl Mutation and return a ImageUploadFromUrlPayload
    *
-   * @param url - url to pass into the ImageUploadFromUrlMutation
+   * @param url - required url variable to set the  scope
    */
   public async fetch(url: string): Promise<ImageUploadFromUrlPayload | undefined> {
     return this.request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
@@ -7979,7 +7979,7 @@ class IntegrationGithubConnectMutation extends LinearRequest {
   /**
    * Call the IntegrationGithubConnect Mutation and return a IntegrationPayload
    *
-   * @param installationId - installationId to pass into the IntegrationGithubConnectMutation
+   * @param installationId - required installationId variable to set the  scope
    */
   public async fetch(installationId: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
@@ -8007,8 +8007,8 @@ class IntegrationGitlabConnectMutation extends LinearRequest {
   /**
    * Call the IntegrationGitlabConnect Mutation and return a IntegrationPayload
    *
-   * @param gitlabUrl - gitlabUrl to pass into the IntegrationGitlabConnectMutation
-   * @param accessToken - accessToken to pass into the IntegrationGitlabConnectMutation
+   * @param gitlabUrl - required gitlabUrl variable to set the  scope
+   * @param accessToken - required accessToken variable to set the  scope
    */
   public async fetch(gitlabUrl: string, accessToken: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
@@ -8037,8 +8037,8 @@ class IntegrationSlackMutation extends LinearRequest {
   /**
    * Call the IntegrationSlack Mutation and return a IntegrationPayload
    *
-   * @param redirectUri - redirectUri to pass into the IntegrationSlackMutation
-   * @param code - code to pass into the IntegrationSlackMutation
+   * @param redirectUri - required redirectUri variable to set the  scope
+   * @param code - required code variable to set the  scope
    * @param vars - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
    */
   public async fetch(
@@ -8070,8 +8070,8 @@ class IntegrationSlackPersonalMutation extends LinearRequest {
   /**
    * Call the IntegrationSlackPersonal Mutation and return a IntegrationPayload
    *
-   * @param redirectUri - redirectUri to pass into the IntegrationSlackPersonalMutation
-   * @param code - code to pass into the IntegrationSlackPersonalMutation
+   * @param redirectUri - required redirectUri variable to set the  scope
+   * @param code - required code variable to set the  scope
    */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
@@ -8100,9 +8100,9 @@ class IntegrationSlackPostMutation extends LinearRequest {
   /**
    * Call the IntegrationSlackPost Mutation and return a IntegrationPayload
    *
-   * @param redirectUri - redirectUri to pass into the IntegrationSlackPostMutation
-   * @param teamId - teamId to pass into the IntegrationSlackPostMutation
-   * @param code - code to pass into the IntegrationSlackPostMutation
+   * @param redirectUri - required redirectUri variable to set the  scope
+   * @param teamId - required teamId variable to set the  scope
+   * @param code - required code variable to set the  scope
    * @param vars - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
    */
   public async fetch(
@@ -8139,9 +8139,9 @@ class IntegrationSlackProjectPostMutation extends LinearRequest {
   /**
    * Call the IntegrationSlackProjectPost Mutation and return a IntegrationPayload
    *
-   * @param redirectUri - redirectUri to pass into the IntegrationSlackProjectPostMutation
-   * @param projectId - projectId to pass into the IntegrationSlackProjectPostMutation
-   * @param code - code to pass into the IntegrationSlackProjectPostMutation
+   * @param redirectUri - required redirectUri variable to set the  scope
+   * @param projectId - required projectId variable to set the  scope
+   * @param code - required code variable to set the  scope
    */
   public async fetch(redirectUri: string, projectId: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
@@ -8171,8 +8171,8 @@ class IntegrationSlackImportEmojisMutation extends LinearRequest {
   /**
    * Call the IntegrationSlackImportEmojis Mutation and return a IntegrationPayload
    *
-   * @param redirectUri - redirectUri to pass into the IntegrationSlackImportEmojisMutation
-   * @param code - code to pass into the IntegrationSlackImportEmojisMutation
+   * @param redirectUri - required redirectUri variable to set the  scope
+   * @param code - required code variable to set the  scope
    */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
@@ -8201,8 +8201,8 @@ class IntegrationFigmaMutation extends LinearRequest {
   /**
    * Call the IntegrationFigma Mutation and return a IntegrationPayload
    *
-   * @param redirectUri - redirectUri to pass into the IntegrationFigmaMutation
-   * @param code - code to pass into the IntegrationFigmaMutation
+   * @param redirectUri - required redirectUri variable to set the  scope
+   * @param code - required code variable to set the  scope
    */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(D.IntegrationFigmaDocument, {
@@ -8228,7 +8228,7 @@ class IntegrationGoogleSheetsMutation extends LinearRequest {
   /**
    * Call the IntegrationGoogleSheets Mutation and return a IntegrationPayload
    *
-   * @param code - code to pass into the IntegrationGoogleSheetsMutation
+   * @param code - required code variable to set the  scope
    */
   public async fetch(code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
@@ -8256,7 +8256,7 @@ class RefreshGoogleSheetsDataMutation extends LinearRequest {
   /**
    * Call the RefreshGoogleSheetsData Mutation and return a IntegrationPayload
    *
-   * @param id - id to pass into the RefreshGoogleSheetsDataMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
@@ -8284,9 +8284,9 @@ class IntegrationSentryConnectMutation extends LinearRequest {
   /**
    * Call the IntegrationSentryConnect Mutation and return a IntegrationPayload
    *
-   * @param organizationSlug - organizationSlug to pass into the IntegrationSentryConnectMutation
-   * @param code - code to pass into the IntegrationSentryConnectMutation
-   * @param installationId - installationId to pass into the IntegrationSentryConnectMutation
+   * @param organizationSlug - required organizationSlug variable to set the  scope
+   * @param code - required code variable to set the  scope
+   * @param installationId - required installationId variable to set the  scope
    */
   public async fetch(
     organizationSlug: string,
@@ -8320,7 +8320,7 @@ class IntegrationDeleteMutation extends LinearRequest {
   /**
    * Call the IntegrationDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the IntegrationDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
@@ -8348,7 +8348,7 @@ class IntegrationResourceArchiveMutation extends LinearRequest {
   /**
    * Call the IntegrationResourceArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the IntegrationResourceArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
@@ -8376,7 +8376,7 @@ class IssueLabelCreateMutation extends LinearRequest {
   /**
    * Call the IssueLabelCreate Mutation and return a IssueLabelPayload
    *
-   * @param input - input to pass into the IssueLabelCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.IssueLabelCreateInput): Promise<IssueLabelPayload | undefined> {
     return this.request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(D.IssueLabelCreateDocument, {
@@ -8401,8 +8401,8 @@ class IssueLabelUpdateMutation extends LinearRequest {
   /**
    * Call the IssueLabelUpdate Mutation and return a IssueLabelPayload
    *
-   * @param input - input to pass into the IssueLabelUpdateMutation
-   * @param id - id to pass into the IssueLabelUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.IssueLabelUpdateInput, id: string): Promise<IssueLabelPayload | undefined> {
     return this.request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(D.IssueLabelUpdateDocument, {
@@ -8428,7 +8428,7 @@ class IssueLabelArchiveMutation extends LinearRequest {
   /**
    * Call the IssueLabelArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the IssueLabelArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
@@ -8456,7 +8456,7 @@ class IssueRelationCreateMutation extends LinearRequest {
   /**
    * Call the IssueRelationCreate Mutation and return a IssueRelationPayload
    *
-   * @param input - input to pass into the IssueRelationCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.IssueRelationCreateInput): Promise<IssueRelationPayload | undefined> {
     return this.request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
@@ -8484,8 +8484,8 @@ class IssueRelationUpdateMutation extends LinearRequest {
   /**
    * Call the IssueRelationUpdate Mutation and return a IssueRelationPayload
    *
-   * @param input - input to pass into the IssueRelationUpdateMutation
-   * @param id - id to pass into the IssueRelationUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.IssueRelationUpdateInput, id: string): Promise<IssueRelationPayload | undefined> {
     return this.request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
@@ -8514,7 +8514,7 @@ class IssueRelationDeleteMutation extends LinearRequest {
   /**
    * Call the IssueRelationDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the IssueRelationDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
@@ -8542,7 +8542,7 @@ class IssueCreateMutation extends LinearRequest {
   /**
    * Call the IssueCreate Mutation and return a IssuePayload
    *
-   * @param input - input to pass into the IssueCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.IssueCreateInput): Promise<IssuePayload | undefined> {
     return this.request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument, {
@@ -8567,8 +8567,8 @@ class IssueUpdateMutation extends LinearRequest {
   /**
    * Call the IssueUpdate Mutation and return a IssuePayload
    *
-   * @param input - input to pass into the IssueUpdateMutation
-   * @param id - id to pass into the IssueUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.IssueUpdateInput, id: string): Promise<IssuePayload | undefined> {
     return this.request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument, {
@@ -8594,7 +8594,7 @@ class IssueArchiveMutation extends LinearRequest {
   /**
    * Call the IssueArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the IssueArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument, {
@@ -8619,7 +8619,7 @@ class IssueUnarchiveMutation extends LinearRequest {
   /**
    * Call the IssueUnarchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the IssueUnarchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument, {
@@ -8644,7 +8644,7 @@ class MilestoneCreateMutation extends LinearRequest {
   /**
    * Call the MilestoneCreate Mutation and return a MilestonePayload
    *
-   * @param input - input to pass into the MilestoneCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.MilestoneCreateInput): Promise<MilestonePayload | undefined> {
     return this.request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument, {
@@ -8669,8 +8669,8 @@ class MilestoneUpdateMutation extends LinearRequest {
   /**
    * Call the MilestoneUpdate Mutation and return a MilestonePayload
    *
-   * @param input - input to pass into the MilestoneUpdateMutation
-   * @param id - id to pass into the MilestoneUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.MilestoneUpdateInput, id: string): Promise<MilestonePayload | undefined> {
     return this.request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument, {
@@ -8696,7 +8696,7 @@ class MilestoneDeleteMutation extends LinearRequest {
   /**
    * Call the MilestoneDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the MilestoneDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument, {
@@ -8721,8 +8721,8 @@ class NotificationCreateMutation extends LinearRequest {
   /**
    * Call the NotificationCreate Mutation and return a NotificationPayload
    *
-   * @param input - input to pass into the NotificationCreateMutation
-   * @param id - id to pass into the NotificationCreateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return this.request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
@@ -8751,8 +8751,8 @@ class NotificationUpdateMutation extends LinearRequest {
   /**
    * Call the NotificationUpdate Mutation and return a NotificationPayload
    *
-   * @param input - input to pass into the NotificationUpdateMutation
-   * @param id - id to pass into the NotificationUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return this.request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
@@ -8781,7 +8781,7 @@ class NotificationDeleteMutation extends LinearRequest {
   /**
    * Call the NotificationDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the NotificationDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
@@ -8809,7 +8809,7 @@ class NotificationArchiveMutation extends LinearRequest {
   /**
    * Call the NotificationArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the NotificationArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
@@ -8837,7 +8837,7 @@ class NotificationUnarchiveMutation extends LinearRequest {
   /**
    * Call the NotificationUnarchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the NotificationUnarchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
@@ -8865,7 +8865,7 @@ class NotificationSubscriptionCreateMutation extends LinearRequest {
   /**
    * Call the NotificationSubscriptionCreate Mutation and return a NotificationSubscriptionPayload
    *
-   * @param input - input to pass into the NotificationSubscriptionCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(
     input: D.NotificationSubscriptionCreateInput
@@ -8895,7 +8895,7 @@ class NotificationSubscriptionDeleteMutation extends LinearRequest {
   /**
    * Call the NotificationSubscriptionDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the NotificationSubscriptionDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
@@ -8923,7 +8923,7 @@ class OauthClientCreateMutation extends LinearRequest {
   /**
    * Call the OauthClientCreate Mutation and return a OauthClientPayload
    *
-   * @param input - input to pass into the OauthClientCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.OauthClientCreateInput): Promise<OauthClientPayload | undefined> {
     return this.request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
@@ -8951,8 +8951,8 @@ class OauthClientUpdateMutation extends LinearRequest {
   /**
    * Call the OauthClientUpdate Mutation and return a OauthClientPayload
    *
-   * @param input - input to pass into the OauthClientUpdateMutation
-   * @param id - id to pass into the OauthClientUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.OauthClientUpdateInput, id: string): Promise<OauthClientPayload | undefined> {
     return this.request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
@@ -8981,7 +8981,7 @@ class OauthClientArchiveMutation extends LinearRequest {
   /**
    * Call the OauthClientArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the OauthClientArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
@@ -9009,7 +9009,7 @@ class OauthClientRotateSecretMutation extends LinearRequest {
   /**
    * Call the OauthClientRotateSecret Mutation and return a RotateSecretPayload
    *
-   * @param id - id to pass into the OauthClientRotateSecretMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<RotateSecretPayload | undefined> {
     return this.request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
@@ -9037,8 +9037,8 @@ class OauthTokenRevokeMutation extends LinearRequest {
   /**
    * Call the OauthTokenRevoke Mutation and return a OauthTokenRevokePayload
    *
-   * @param scope - scope to pass into the OauthTokenRevokeMutation
-   * @param appId - appId to pass into the OauthTokenRevokeMutation
+   * @param scope - required scope variable to set the  scope
+   * @param appId - required appId variable to set the  scope
    */
   public async fetch(scope: string[], appId: string): Promise<OauthTokenRevokePayload | undefined> {
     return this.request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(D.OauthTokenRevokeDocument, {
@@ -9064,7 +9064,7 @@ class OrganizationDomainVerifyMutation extends LinearRequest {
   /**
    * Call the OrganizationDomainVerify Mutation and return a OrganizationDomainPayload
    *
-   * @param input - input to pass into the OrganizationDomainVerifyMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.OrganizationDomainVerificationInput): Promise<OrganizationDomainPayload | undefined> {
     return this.request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
@@ -9092,7 +9092,7 @@ class OrganizationDomainCreateMutation extends LinearRequest {
   /**
    * Call the OrganizationDomainCreate Mutation and return a OrganizationDomainPayload
    *
-   * @param input - input to pass into the OrganizationDomainCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.OrganizationDomainCreateInput): Promise<OrganizationDomainPayload | undefined> {
     return this.request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
@@ -9120,7 +9120,7 @@ class OrganizationDomainDeleteMutation extends LinearRequest {
   /**
    * Call the OrganizationDomainDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the OrganizationDomainDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
@@ -9148,7 +9148,7 @@ class OrganizationInviteCreateMutation extends LinearRequest {
   /**
    * Call the OrganizationInviteCreate Mutation and return a OrganizationInvitePayload
    *
-   * @param input - input to pass into the OrganizationInviteCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.OrganizationInviteCreateInput): Promise<OrganizationInvitePayload | undefined> {
     return this.request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
@@ -9176,7 +9176,7 @@ class ResentOrganizationInviteMutation extends LinearRequest {
   /**
    * Call the ResentOrganizationInvite Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the ResentOrganizationInviteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
@@ -9204,7 +9204,7 @@ class OrganizationInviteDeleteMutation extends LinearRequest {
   /**
    * Call the OrganizationInviteDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the OrganizationInviteDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
@@ -9232,7 +9232,7 @@ class ProjectLinkCreateMutation extends LinearRequest {
   /**
    * Call the ProjectLinkCreate Mutation and return a ProjectLinkPayload
    *
-   * @param input - input to pass into the ProjectLinkCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.ProjectLinkCreateInput): Promise<ProjectLinkPayload | undefined> {
     return this.request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
@@ -9260,7 +9260,7 @@ class ProjectLinkDeleteMutation extends LinearRequest {
   /**
    * Call the ProjectLinkDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the ProjectLinkDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
@@ -9288,7 +9288,7 @@ class ProjectCreateMutation extends LinearRequest {
   /**
    * Call the ProjectCreate Mutation and return a ProjectPayload
    *
-   * @param input - input to pass into the ProjectCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.ProjectCreateInput): Promise<ProjectPayload | undefined> {
     return this.request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument, {
@@ -9313,8 +9313,8 @@ class ProjectUpdateMutation extends LinearRequest {
   /**
    * Call the ProjectUpdate Mutation and return a ProjectPayload
    *
-   * @param input - input to pass into the ProjectUpdateMutation
-   * @param id - id to pass into the ProjectUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.ProjectUpdateInput, id: string): Promise<ProjectPayload | undefined> {
     return this.request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument, {
@@ -9340,7 +9340,7 @@ class ProjectArchiveMutation extends LinearRequest {
   /**
    * Call the ProjectArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the ProjectArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument, {
@@ -9365,7 +9365,7 @@ class PushSubscriptionCreateMutation extends LinearRequest {
   /**
    * Call the PushSubscriptionCreate Mutation and return a PushSubscriptionPayload
    *
-   * @param input - input to pass into the PushSubscriptionCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
@@ -9393,7 +9393,7 @@ class PushSubscriptionDeleteMutation extends LinearRequest {
   /**
    * Call the PushSubscriptionDelete Mutation and return a PushSubscriptionPayload
    *
-   * @param id - id to pass into the PushSubscriptionDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
@@ -9421,7 +9421,7 @@ class ReactionCreateMutation extends LinearRequest {
   /**
    * Call the ReactionCreate Mutation and return a ReactionPayload
    *
-   * @param input - input to pass into the ReactionCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.ReactionCreateInput): Promise<ReactionPayload | undefined> {
     return this.request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument, {
@@ -9446,7 +9446,7 @@ class ReactionDeleteMutation extends LinearRequest {
   /**
    * Call the ReactionDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the ReactionDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument, {
@@ -9496,7 +9496,7 @@ class SubscriptionSessionCreateMutation extends LinearRequest {
   /**
    * Call the SubscriptionSessionCreate Mutation and return a SubscriptionSessionPayload
    *
-   * @param plan - plan to pass into the SubscriptionSessionCreateMutation
+   * @param plan - required plan variable to set the  scope
    */
   public async fetch(plan: string): Promise<SubscriptionSessionPayload | undefined> {
     return this.request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
@@ -9549,8 +9549,8 @@ class SubscriptionUpdateMutation extends LinearRequest {
   /**
    * Call the SubscriptionUpdate Mutation and return a SubscriptionPayload
    *
-   * @param input - input to pass into the SubscriptionUpdateMutation
-   * @param id - id to pass into the SubscriptionUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.SubscriptionUpdateInput, id: string): Promise<SubscriptionPayload | undefined> {
     return this.request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
@@ -9579,8 +9579,8 @@ class SubscriptionUpgradeMutation extends LinearRequest {
   /**
    * Call the SubscriptionUpgrade Mutation and return a SubscriptionPayload
    *
-   * @param type - type to pass into the SubscriptionUpgradeMutation
-   * @param id - id to pass into the SubscriptionUpgradeMutation
+   * @param type - required type variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(type: string, id: string): Promise<SubscriptionPayload | undefined> {
     return this.request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
@@ -9609,7 +9609,7 @@ class SubscriptionArchiveMutation extends LinearRequest {
   /**
    * Call the SubscriptionArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the SubscriptionArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
@@ -9637,7 +9637,7 @@ class TeamMembershipCreateMutation extends LinearRequest {
   /**
    * Call the TeamMembershipCreate Mutation and return a TeamMembershipPayload
    *
-   * @param input - input to pass into the TeamMembershipCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.TeamMembershipCreateInput): Promise<TeamMembershipPayload | undefined> {
     return this.request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
@@ -9665,7 +9665,7 @@ class TeamMembershipDeleteMutation extends LinearRequest {
   /**
    * Call the TeamMembershipDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the TeamMembershipDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
@@ -9693,7 +9693,7 @@ class TeamCreateMutation extends LinearRequest {
   /**
    * Call the TeamCreate Mutation and return a TeamPayload
    *
-   * @param input - input to pass into the TeamCreateMutation
+   * @param input - required input variable to set the  scope
    * @param vars - variables without 'input' to pass into the TeamCreateMutation
    */
   public async fetch(
@@ -9723,8 +9723,8 @@ class TeamUpdateMutation extends LinearRequest {
   /**
    * Call the TeamUpdate Mutation and return a TeamPayload
    *
-   * @param input - input to pass into the TeamUpdateMutation
-   * @param id - id to pass into the TeamUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.TeamUpdateInput, id: string): Promise<TeamPayload | undefined> {
     return this.request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument, {
@@ -9750,7 +9750,7 @@ class TeamArchiveMutation extends LinearRequest {
   /**
    * Call the TeamArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the TeamArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument, {
@@ -9775,7 +9775,7 @@ class TeamDeleteMutation extends LinearRequest {
   /**
    * Call the TeamDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the TeamDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument, {
@@ -9800,7 +9800,7 @@ class TemplateCreateMutation extends LinearRequest {
   /**
    * Call the TemplateCreate Mutation and return a TemplatePayload
    *
-   * @param input - input to pass into the TemplateCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.TemplateCreateInput): Promise<TemplatePayload | undefined> {
     return this.request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument, {
@@ -9825,8 +9825,8 @@ class TemplateUpdateMutation extends LinearRequest {
   /**
    * Call the TemplateUpdate Mutation and return a TemplatePayload
    *
-   * @param input - input to pass into the TemplateUpdateMutation
-   * @param id - id to pass into the TemplateUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.TemplateUpdateInput, id: string): Promise<TemplatePayload | undefined> {
     return this.request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument, {
@@ -9852,7 +9852,7 @@ class TemplateDeleteMutation extends LinearRequest {
   /**
    * Call the TemplateDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the TemplateDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument, {
@@ -9877,8 +9877,8 @@ class UserSettingsUpdateMutation extends LinearRequest {
   /**
    * Call the UserSettingsUpdate Mutation and return a UserSettingsPayload
    *
-   * @param input - input to pass into the UserSettingsUpdateMutation
-   * @param id - id to pass into the UserSettingsUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.UserSettingsUpdateInput, id: string): Promise<UserSettingsPayload | undefined> {
     return this.request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
@@ -9907,7 +9907,7 @@ class UserSettingsFlagIncrementMutation extends LinearRequest {
   /**
    * Call the UserSettingsFlagIncrement Mutation and return a UserSettingsFlagPayload
    *
-   * @param flag - flag to pass into the UserSettingsFlagIncrementMutation
+   * @param flag - required flag variable to set the  scope
    */
   public async fetch(flag: string): Promise<UserSettingsFlagPayload | undefined> {
     return this.request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
@@ -9960,8 +9960,8 @@ class UserFlagUpdateMutation extends LinearRequest {
   /**
    * Call the UserFlagUpdate Mutation and return a UserSettingsFlagPayload
    *
-   * @param operation - operation to pass into the UserFlagUpdateMutation
-   * @param flag - flag to pass into the UserFlagUpdateMutation
+   * @param operation - required operation variable to set the  scope
+   * @param flag - required flag variable to set the  scope
    */
   public async fetch(
     operation: D.UserFlagUpdateOperation,
@@ -10015,7 +10015,7 @@ class ViewPreferencesCreateMutation extends LinearRequest {
   /**
    * Call the ViewPreferencesCreate Mutation and return a ViewPreferencesPayload
    *
-   * @param input - input to pass into the ViewPreferencesCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload | undefined> {
     return this.request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
@@ -10043,8 +10043,8 @@ class ViewPreferencesUpdateMutation extends LinearRequest {
   /**
    * Call the ViewPreferencesUpdate Mutation and return a ViewPreferencesPayload
    *
-   * @param input - input to pass into the ViewPreferencesUpdateMutation
-   * @param id - id to pass into the ViewPreferencesUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.ViewPreferencesUpdateInput, id: string): Promise<ViewPreferencesPayload | undefined> {
     return this.request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
@@ -10073,7 +10073,7 @@ class ViewPreferencesDeleteMutation extends LinearRequest {
   /**
    * Call the ViewPreferencesDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the ViewPreferencesDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
@@ -10101,7 +10101,7 @@ class WebhookCreateMutation extends LinearRequest {
   /**
    * Call the WebhookCreate Mutation and return a WebhookPayload
    *
-   * @param input - input to pass into the WebhookCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.WebhookCreateInput): Promise<WebhookPayload | undefined> {
     return this.request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
@@ -10126,8 +10126,8 @@ class WebhookUpdateMutation extends LinearRequest {
   /**
    * Call the WebhookUpdate Mutation and return a WebhookPayload
    *
-   * @param input - input to pass into the WebhookUpdateMutation
-   * @param id - id to pass into the WebhookUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.WebhookUpdateInput, id: string): Promise<WebhookPayload | undefined> {
     return this.request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument, {
@@ -10153,7 +10153,7 @@ class WebhookDeleteMutation extends LinearRequest {
   /**
    * Call the WebhookDelete Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the WebhookDeleteMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument, {
@@ -10178,7 +10178,7 @@ class WorkflowStateCreateMutation extends LinearRequest {
   /**
    * Call the WorkflowStateCreate Mutation and return a WorkflowStatePayload
    *
-   * @param input - input to pass into the WorkflowStateCreateMutation
+   * @param input - required input variable to set the  scope
    */
   public async fetch(input: D.WorkflowStateCreateInput): Promise<WorkflowStatePayload | undefined> {
     return this.request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
@@ -10206,8 +10206,8 @@ class WorkflowStateUpdateMutation extends LinearRequest {
   /**
    * Call the WorkflowStateUpdate Mutation and return a WorkflowStatePayload
    *
-   * @param input - input to pass into the WorkflowStateUpdateMutation
-   * @param id - id to pass into the WorkflowStateUpdateMutation
+   * @param input - required input variable to set the  scope
+   * @param id - required id variable to set the  scope
    */
   public async fetch(input: D.WorkflowStateUpdateInput, id: string): Promise<WorkflowStatePayload | undefined> {
     return this.request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
@@ -10236,7 +10236,7 @@ class WorkflowStateArchiveMutation extends LinearRequest {
   /**
    * Call the WorkflowStateArchive Mutation and return a ArchivePayload
    *
-   * @param id - id to pass into the WorkflowStateArchiveMutation
+   * @param id - required id variable to set the  scope
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
@@ -10255,7 +10255,7 @@ class WorkflowStateArchiveMutation extends LinearRequest {
  * A fetchable User_AssignedIssues Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the user scope
+ * @param id - required id variable to set the  scope
  */
 class User_AssignedIssuesQuery extends LinearRequest {
   private _id: string;
@@ -10268,9 +10268,11 @@ class User_AssignedIssuesQuery extends LinearRequest {
   /**
    * Call the User_AssignedIssues Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the User_AssignedIssuesQuery
+   * @param vars - variables without 'id', 'id' to pass into the User_AssignedIssuesQuery
    */
-  public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.User_AssignedIssuesQueryVariables, "id" | "id">
+  ): Promise<IssueConnection | undefined> {
     return this.request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
       D.User_AssignedIssuesDocument,
       {
@@ -10288,7 +10290,7 @@ class User_AssignedIssuesQuery extends LinearRequest {
  * A fetchable User_CreatedIssues Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the user scope
+ * @param id - required id variable to set the  scope
  */
 class User_CreatedIssuesQuery extends LinearRequest {
   private _id: string;
@@ -10301,9 +10303,11 @@ class User_CreatedIssuesQuery extends LinearRequest {
   /**
    * Call the User_CreatedIssues Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the User_CreatedIssuesQuery
+   * @param vars - variables without 'id', 'id' to pass into the User_CreatedIssuesQuery
    */
-  public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.User_CreatedIssuesQueryVariables, "id" | "id">
+  ): Promise<IssueConnection | undefined> {
     return this.request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
       id: this._id,
       ...vars,
@@ -10318,7 +10322,7 @@ class User_CreatedIssuesQuery extends LinearRequest {
  * A fetchable User_TeamMemberships Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the user scope
+ * @param id - required id variable to set the  scope
  */
 class User_TeamMembershipsQuery extends LinearRequest {
   private _id: string;
@@ -10331,10 +10335,10 @@ class User_TeamMembershipsQuery extends LinearRequest {
   /**
    * Call the User_TeamMemberships Query and return a TeamMembershipConnection
    *
-   * @param vars - variables without 'id' to pass into the User_TeamMembershipsQuery
+   * @param vars - variables without 'id', 'id' to pass into the User_TeamMembershipsQuery
    */
   public async fetch(
-    vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">
+    vars?: Omit<D.User_TeamMembershipsQueryVariables, "id" | "id">
   ): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
       D.User_TeamMembershipsDocument,
@@ -10560,9 +10564,9 @@ class BillingDetails_PaymentMethodQuery extends LinearRequest {
  * A fetchable CollaborativeDocumentJoin_Steps Query
  *
  * @param request - function to call the graphql client
- * @param clientId - required clientId variable to set the collaborativeDocumentJoin scope
- * @param issueId - required issueId variable to set the collaborativeDocumentJoin scope
- * @param version - required version variable to set the collaborativeDocumentJoin scope
+ * @param clientId - required clientId variable to set the  scope
+ * @param issueId - required issueId variable to set the  scope
+ * @param version - required version variable to set the  scope
  */
 class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
   private _clientId: string;
@@ -10599,7 +10603,7 @@ class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
  * A fetchable Cycle_Issues Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the cycle scope
+ * @param id - required id variable to set the  scope
  */
 class Cycle_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -10612,9 +10616,9 @@ class Cycle_IssuesQuery extends LinearRequest {
   /**
    * Call the Cycle_Issues Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Cycle_IssuesQuery
+   * @param vars - variables without 'id', 'id' to pass into the Cycle_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
+  public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id" | "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
       id: this._id,
       ...vars,
@@ -10629,7 +10633,7 @@ class Cycle_IssuesQuery extends LinearRequest {
  * A fetchable Cycle_UncompletedIssuesUponClose Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the cycle scope
+ * @param id - required id variable to set the  scope
  */
 class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
   private _id: string;
@@ -10642,10 +10646,10 @@ class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
   /**
    * Call the Cycle_UncompletedIssuesUponClose Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Cycle_UncompletedIssuesUponCloseQuery
+   * @param vars - variables without 'id', 'id' to pass into the Cycle_UncompletedIssuesUponCloseQuery
    */
   public async fetch(
-    vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
+    vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id" | "id">
   ): Promise<IssueConnection | undefined> {
     return this.request<D.Cycle_UncompletedIssuesUponCloseQuery, D.Cycle_UncompletedIssuesUponCloseQueryVariables>(
       D.Cycle_UncompletedIssuesUponCloseDocument,
@@ -10664,7 +10668,7 @@ class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
  * A fetchable FigmaEmbedInfo_FigmaEmbed Query
  *
  * @param request - function to call the graphql client
- * @param fileId - required fileId variable to set the figmaEmbedInfo scope
+ * @param fileId - required fileId variable to set the  scope
  */
 class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
   private _fileId: string;
@@ -10677,10 +10681,10 @@ class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
   /**
    * Call the FigmaEmbedInfo_FigmaEmbed Query and return a FigmaEmbed
    *
-   * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfo_FigmaEmbedQuery
+   * @param vars - variables without 'fileId', 'fileId' to pass into the FigmaEmbedInfo_FigmaEmbedQuery
    */
   public async fetch(
-    vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
+    vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId" | "fileId">
   ): Promise<FigmaEmbed | undefined> {
     return this.request<D.FigmaEmbedInfo_FigmaEmbedQuery, D.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       D.FigmaEmbedInfo_FigmaEmbedDocument,
@@ -10699,7 +10703,7 @@ class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
  * A fetchable Integration_Settings Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration scope
+ * @param id - required id variable to set the  scope
  */
 class Integration_SettingsQuery extends LinearRequest {
   private _id: string;
@@ -10730,7 +10734,7 @@ class Integration_SettingsQuery extends LinearRequest {
  * A fetchable Integration_Settings_SlackPost Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration settings scope
+ * @param id - required id variable to set the integration scope
  */
 class Integration_Settings_SlackPostQuery extends LinearRequest {
   private _id: string;
@@ -10761,7 +10765,7 @@ class Integration_Settings_SlackPostQuery extends LinearRequest {
  * A fetchable Integration_Settings_SlackProjectPost Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration settings scope
+ * @param id - required id variable to set the integration scope
  */
 class Integration_Settings_SlackProjectPostQuery extends LinearRequest {
   private _id: string;
@@ -10792,7 +10796,7 @@ class Integration_Settings_SlackProjectPostQuery extends LinearRequest {
  * A fetchable Integration_Settings_GoogleSheets Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration settings scope
+ * @param id - required id variable to set the integration scope
  */
 class Integration_Settings_GoogleSheetsQuery extends LinearRequest {
   private _id: string;
@@ -10823,7 +10827,7 @@ class Integration_Settings_GoogleSheetsQuery extends LinearRequest {
  * A fetchable Integration_Settings_Sentry Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration settings scope
+ * @param id - required id variable to set the integration scope
  */
 class Integration_Settings_SentryQuery extends LinearRequest {
   private _id: string;
@@ -10854,7 +10858,7 @@ class Integration_Settings_SentryQuery extends LinearRequest {
  * A fetchable IntegrationResource_Data Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource scope
+ * @param id - required id variable to set the  scope
  */
 class IntegrationResource_DataQuery extends LinearRequest {
   private _id: string;
@@ -10885,7 +10889,7 @@ class IntegrationResource_DataQuery extends LinearRequest {
  * A fetchable IntegrationResource_PullRequest Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource scope
+ * @param id - required id variable to set the  scope
  */
 class IntegrationResource_PullRequestQuery extends LinearRequest {
   private _id: string;
@@ -10916,7 +10920,7 @@ class IntegrationResource_PullRequestQuery extends LinearRequest {
  * A fetchable IntegrationResource_Data_GithubPullRequest Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource data scope
+ * @param id - required id variable to set the integrationResource scope
  */
 class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
   private _id: string;
@@ -10947,7 +10951,7 @@ class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
  * A fetchable IntegrationResource_Data_GitlabMergeRequest Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource data scope
+ * @param id - required id variable to set the integrationResource scope
  */
 class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
   private _id: string;
@@ -10978,7 +10982,7 @@ class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
  * A fetchable IntegrationResource_Data_GithubCommit Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource data scope
+ * @param id - required id variable to set the integrationResource scope
  */
 class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
   private _id: string;
@@ -11009,7 +11013,7 @@ class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
  * A fetchable IntegrationResource_Data_SentryIssue Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource data scope
+ * @param id - required id variable to set the integrationResource scope
  */
 class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
   private _id: string;
@@ -11040,7 +11044,7 @@ class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
  * A fetchable InviteInfo_InviteData Query
  *
  * @param request - function to call the graphql client
- * @param userHash - required userHash variable to set the inviteInfo scope
+ * @param userHash - required userHash variable to set the  scope
  */
 class InviteInfo_InviteDataQuery extends LinearRequest {
   private _userHash: string;
@@ -11053,9 +11057,11 @@ class InviteInfo_InviteDataQuery extends LinearRequest {
   /**
    * Call the InviteInfo_InviteData Query and return a InviteData
    *
-   * @param vars - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
+   * @param vars - variables without 'userHash', 'userHash' to pass into the InviteInfo_InviteDataQuery
    */
-  public async fetch(vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">): Promise<InviteData | undefined> {
+  public async fetch(
+    vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash" | "userHash">
+  ): Promise<InviteData | undefined> {
     return this.request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
       D.InviteInfo_InviteDataDocument,
       {
@@ -11073,7 +11079,7 @@ class InviteInfo_InviteDataQuery extends LinearRequest {
  * A fetchable IssueLabel_Issues Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issueLabel scope
+ * @param id - required id variable to set the  scope
  */
 class IssueLabel_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -11086,9 +11092,11 @@ class IssueLabel_IssuesQuery extends LinearRequest {
   /**
    * Call the IssueLabel_Issues Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the IssueLabel_IssuesQuery
+   * @param vars - variables without 'id', 'id' to pass into the IssueLabel_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id" | "id">
+  ): Promise<IssueConnection | undefined> {
     return this.request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
       id: this._id,
       ...vars,
@@ -11103,7 +11111,7 @@ class IssueLabel_IssuesQuery extends LinearRequest {
  * A fetchable Issue_Subscribers Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_SubscribersQuery extends LinearRequest {
   private _id: string;
@@ -11116,9 +11124,9 @@ class Issue_SubscribersQuery extends LinearRequest {
   /**
    * Call the Issue_Subscribers Query and return a UserConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_SubscribersQuery
+   * @param vars - variables without 'id', 'id' to pass into the Issue_SubscribersQuery
    */
-  public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">): Promise<UserConnection | undefined> {
+  public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id" | "id">): Promise<UserConnection | undefined> {
     return this.request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
       id: this._id,
       ...vars,
@@ -11133,7 +11141,7 @@ class Issue_SubscribersQuery extends LinearRequest {
  * A fetchable Issue_Children Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_ChildrenQuery extends LinearRequest {
   private _id: string;
@@ -11146,9 +11154,9 @@ class Issue_ChildrenQuery extends LinearRequest {
   /**
    * Call the Issue_Children Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_ChildrenQuery
+   * @param vars - variables without 'id', 'id' to pass into the Issue_ChildrenQuery
    */
-  public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">): Promise<IssueConnection | undefined> {
+  public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id" | "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
       id: this._id,
       ...vars,
@@ -11163,7 +11171,7 @@ class Issue_ChildrenQuery extends LinearRequest {
  * A fetchable Issue_Comments Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_CommentsQuery extends LinearRequest {
   private _id: string;
@@ -11176,9 +11184,9 @@ class Issue_CommentsQuery extends LinearRequest {
   /**
    * Call the Issue_Comments Query and return a CommentConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_CommentsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Issue_CommentsQuery
    */
-  public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">): Promise<CommentConnection | undefined> {
+  public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id" | "id">): Promise<CommentConnection | undefined> {
     return this.request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
       id: this._id,
       ...vars,
@@ -11193,7 +11201,7 @@ class Issue_CommentsQuery extends LinearRequest {
  * A fetchable Issue_History Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_HistoryQuery extends LinearRequest {
   private _id: string;
@@ -11206,9 +11214,11 @@ class Issue_HistoryQuery extends LinearRequest {
   /**
    * Call the Issue_History Query and return a IssueHistoryConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_HistoryQuery
+   * @param vars - variables without 'id', 'id' to pass into the Issue_HistoryQuery
    */
-  public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">): Promise<IssueHistoryConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.Issue_HistoryQueryVariables, "id" | "id">
+  ): Promise<IssueHistoryConnection | undefined> {
     return this.request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
       id: this._id,
       ...vars,
@@ -11223,7 +11233,7 @@ class Issue_HistoryQuery extends LinearRequest {
  * A fetchable Issue_Labels Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_LabelsQuery extends LinearRequest {
   private _id: string;
@@ -11236,9 +11246,11 @@ class Issue_LabelsQuery extends LinearRequest {
   /**
    * Call the Issue_Labels Query and return a IssueLabelConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_LabelsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Issue_LabelsQuery
    */
-  public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.Issue_LabelsQueryVariables, "id" | "id">
+  ): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
       id: this._id,
       ...vars,
@@ -11253,7 +11265,7 @@ class Issue_LabelsQuery extends LinearRequest {
  * A fetchable Issue_IntegrationResources Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_IntegrationResourcesQuery extends LinearRequest {
   private _id: string;
@@ -11266,10 +11278,10 @@ class Issue_IntegrationResourcesQuery extends LinearRequest {
   /**
    * Call the Issue_IntegrationResources Query and return a IntegrationResourceConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_IntegrationResourcesQuery
+   * @param vars - variables without 'id', 'id' to pass into the Issue_IntegrationResourcesQuery
    */
   public async fetch(
-    vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
+    vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id" | "id">
   ): Promise<IntegrationResourceConnection | undefined> {
     return this.request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
       D.Issue_IntegrationResourcesDocument,
@@ -11288,7 +11300,7 @@ class Issue_IntegrationResourcesQuery extends LinearRequest {
  * A fetchable Issue_Relations Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_RelationsQuery extends LinearRequest {
   private _id: string;
@@ -11301,9 +11313,11 @@ class Issue_RelationsQuery extends LinearRequest {
   /**
    * Call the Issue_Relations Query and return a IssueRelationConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_RelationsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Issue_RelationsQuery
    */
-  public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">): Promise<IssueRelationConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.Issue_RelationsQueryVariables, "id" | "id">
+  ): Promise<IssueRelationConnection | undefined> {
     return this.request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
       id: this._id,
       ...vars,
@@ -11318,7 +11332,7 @@ class Issue_RelationsQuery extends LinearRequest {
  * A fetchable Issue_InverseRelations Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_InverseRelationsQuery extends LinearRequest {
   private _id: string;
@@ -11331,10 +11345,10 @@ class Issue_InverseRelationsQuery extends LinearRequest {
   /**
    * Call the Issue_InverseRelations Query and return a IssueRelationConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_InverseRelationsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Issue_InverseRelationsQuery
    */
   public async fetch(
-    vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">
+    vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id" | "id">
   ): Promise<IssueRelationConnection | undefined> {
     return this.request<D.Issue_InverseRelationsQuery, D.Issue_InverseRelationsQueryVariables>(
       D.Issue_InverseRelationsDocument,
@@ -11353,7 +11367,7 @@ class Issue_InverseRelationsQuery extends LinearRequest {
  * A fetchable Milestone_Projects Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the milestone scope
+ * @param id - required id variable to set the  scope
  */
 class Milestone_ProjectsQuery extends LinearRequest {
   private _id: string;
@@ -11366,9 +11380,11 @@ class Milestone_ProjectsQuery extends LinearRequest {
   /**
    * Call the Milestone_Projects Query and return a ProjectConnection
    *
-   * @param vars - variables without 'id' to pass into the Milestone_ProjectsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Milestone_ProjectsQuery
    */
-  public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.Milestone_ProjectsQueryVariables, "id" | "id">
+  ): Promise<ProjectConnection | undefined> {
     return this.request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
       id: this._id,
       ...vars,
@@ -11383,7 +11399,7 @@ class Milestone_ProjectsQuery extends LinearRequest {
  * A fetchable OrganizationInvite_Issues Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the organizationInvite scope
+ * @param id - required id variable to set the  scope
  */
 class OrganizationInvite_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -11396,10 +11412,10 @@ class OrganizationInvite_IssuesQuery extends LinearRequest {
   /**
    * Call the OrganizationInvite_Issues Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
+   * @param vars - variables without 'id', 'id' to pass into the OrganizationInvite_IssuesQuery
    */
   public async fetch(
-    vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">
+    vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id" | "id">
   ): Promise<IssueConnection | undefined> {
     return this.request<D.OrganizationInvite_IssuesQuery, D.OrganizationInvite_IssuesQueryVariables>(
       D.OrganizationInvite_IssuesDocument,
@@ -11418,7 +11434,7 @@ class OrganizationInvite_IssuesQuery extends LinearRequest {
  * A fetchable Project_Teams Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the project scope
+ * @param id - required id variable to set the  scope
  */
 class Project_TeamsQuery extends LinearRequest {
   private _id: string;
@@ -11431,9 +11447,9 @@ class Project_TeamsQuery extends LinearRequest {
   /**
    * Call the Project_Teams Query and return a TeamConnection
    *
-   * @param vars - variables without 'id' to pass into the Project_TeamsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Project_TeamsQuery
    */
-  public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">): Promise<TeamConnection | undefined> {
+  public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id" | "id">): Promise<TeamConnection | undefined> {
     return this.request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
       id: this._id,
       ...vars,
@@ -11448,7 +11464,7 @@ class Project_TeamsQuery extends LinearRequest {
  * A fetchable Project_Members Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the project scope
+ * @param id - required id variable to set the  scope
  */
 class Project_MembersQuery extends LinearRequest {
   private _id: string;
@@ -11461,9 +11477,9 @@ class Project_MembersQuery extends LinearRequest {
   /**
    * Call the Project_Members Query and return a UserConnection
    *
-   * @param vars - variables without 'id' to pass into the Project_MembersQuery
+   * @param vars - variables without 'id', 'id' to pass into the Project_MembersQuery
    */
-  public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">): Promise<UserConnection | undefined> {
+  public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id" | "id">): Promise<UserConnection | undefined> {
     return this.request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
       id: this._id,
       ...vars,
@@ -11478,7 +11494,7 @@ class Project_MembersQuery extends LinearRequest {
  * A fetchable Project_Issues Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the project scope
+ * @param id - required id variable to set the  scope
  */
 class Project_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -11491,9 +11507,9 @@ class Project_IssuesQuery extends LinearRequest {
   /**
    * Call the Project_Issues Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Project_IssuesQuery
+   * @param vars - variables without 'id', 'id' to pass into the Project_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
+  public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id" | "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
       id: this._id,
       ...vars,
@@ -11508,7 +11524,7 @@ class Project_IssuesQuery extends LinearRequest {
  * A fetchable Project_Links Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the project scope
+ * @param id - required id variable to set the  scope
  */
 class Project_LinksQuery extends LinearRequest {
   private _id: string;
@@ -11521,9 +11537,11 @@ class Project_LinksQuery extends LinearRequest {
   /**
    * Call the Project_Links Query and return a ProjectLinkConnection
    *
-   * @param vars - variables without 'id' to pass into the Project_LinksQuery
+   * @param vars - variables without 'id', 'id' to pass into the Project_LinksQuery
    */
-  public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">): Promise<ProjectLinkConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.Project_LinksQueryVariables, "id" | "id">
+  ): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
       id: this._id,
       ...vars,
@@ -11538,7 +11556,7 @@ class Project_LinksQuery extends LinearRequest {
  * A fetchable Team_Issues Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -11551,9 +11569,9 @@ class Team_IssuesQuery extends LinearRequest {
   /**
    * Call the Team_Issues Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_IssuesQuery
+   * @param vars - variables without 'id', 'id' to pass into the Team_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
+  public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id" | "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
       id: this._id,
       ...vars,
@@ -11568,7 +11586,7 @@ class Team_IssuesQuery extends LinearRequest {
  * A fetchable Team_Cycles Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_CyclesQuery extends LinearRequest {
   private _id: string;
@@ -11581,9 +11599,9 @@ class Team_CyclesQuery extends LinearRequest {
   /**
    * Call the Team_Cycles Query and return a CycleConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_CyclesQuery
+   * @param vars - variables without 'id', 'id' to pass into the Team_CyclesQuery
    */
-  public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">): Promise<CycleConnection | undefined> {
+  public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id" | "id">): Promise<CycleConnection | undefined> {
     return this.request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
       id: this._id,
       ...vars,
@@ -11598,7 +11616,7 @@ class Team_CyclesQuery extends LinearRequest {
  * A fetchable Team_Memberships Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_MembershipsQuery extends LinearRequest {
   private _id: string;
@@ -11611,10 +11629,10 @@ class Team_MembershipsQuery extends LinearRequest {
   /**
    * Call the Team_Memberships Query and return a TeamMembershipConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_MembershipsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Team_MembershipsQuery
    */
   public async fetch(
-    vars?: Omit<D.Team_MembershipsQueryVariables, "id">
+    vars?: Omit<D.Team_MembershipsQueryVariables, "id" | "id">
   ): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
       id: this._id,
@@ -11630,7 +11648,7 @@ class Team_MembershipsQuery extends LinearRequest {
  * A fetchable Team_Projects Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_ProjectsQuery extends LinearRequest {
   private _id: string;
@@ -11643,9 +11661,9 @@ class Team_ProjectsQuery extends LinearRequest {
   /**
    * Call the Team_Projects Query and return a ProjectConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_ProjectsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Team_ProjectsQuery
    */
-  public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
+  public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id" | "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
       id: this._id,
       ...vars,
@@ -11660,7 +11678,7 @@ class Team_ProjectsQuery extends LinearRequest {
  * A fetchable Team_States Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_StatesQuery extends LinearRequest {
   private _id: string;
@@ -11673,9 +11691,11 @@ class Team_StatesQuery extends LinearRequest {
   /**
    * Call the Team_States Query and return a WorkflowStateConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_StatesQuery
+   * @param vars - variables without 'id', 'id' to pass into the Team_StatesQuery
    */
-  public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">): Promise<WorkflowStateConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.Team_StatesQueryVariables, "id" | "id">
+  ): Promise<WorkflowStateConnection | undefined> {
     return this.request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
       id: this._id,
       ...vars,
@@ -11690,7 +11710,7 @@ class Team_StatesQuery extends LinearRequest {
  * A fetchable Team_Templates Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_TemplatesQuery extends LinearRequest {
   private _id: string;
@@ -11703,9 +11723,11 @@ class Team_TemplatesQuery extends LinearRequest {
   /**
    * Call the Team_Templates Query and return a TemplateConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_TemplatesQuery
+   * @param vars - variables without 'id', 'id' to pass into the Team_TemplatesQuery
    */
-  public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">): Promise<TemplateConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.Team_TemplatesQueryVariables, "id" | "id">
+  ): Promise<TemplateConnection | undefined> {
     return this.request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
       id: this._id,
       ...vars,
@@ -11720,7 +11742,7 @@ class Team_TemplatesQuery extends LinearRequest {
  * A fetchable Team_Labels Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_LabelsQuery extends LinearRequest {
   private _id: string;
@@ -11733,9 +11755,9 @@ class Team_LabelsQuery extends LinearRequest {
   /**
    * Call the Team_Labels Query and return a IssueLabelConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_LabelsQuery
+   * @param vars - variables without 'id', 'id' to pass into the Team_LabelsQuery
    */
-  public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
+  public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id" | "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
       id: this._id,
       ...vars,
@@ -11750,7 +11772,7 @@ class Team_LabelsQuery extends LinearRequest {
  * A fetchable Team_Webhooks Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_WebhooksQuery extends LinearRequest {
   private _id: string;
@@ -11763,9 +11785,9 @@ class Team_WebhooksQuery extends LinearRequest {
   /**
    * Call the Team_Webhooks Query and return a WebhookConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_WebhooksQuery
+   * @param vars - variables without 'id', 'id' to pass into the Team_WebhooksQuery
    */
-  public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">): Promise<WebhookConnection | undefined> {
+  public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id" | "id">): Promise<WebhookConnection | undefined> {
     return this.request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
       id: this._id,
       ...vars,
@@ -11780,7 +11802,7 @@ class Team_WebhooksQuery extends LinearRequest {
  * A fetchable WorkflowState_Issues Query
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the workflowState scope
+ * @param id - required id variable to set the  scope
  */
 class WorkflowState_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -11793,9 +11815,11 @@ class WorkflowState_IssuesQuery extends LinearRequest {
   /**
    * Call the WorkflowState_Issues Query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the WorkflowState_IssuesQuery
+   * @param vars - variables without 'id', 'id' to pass into the WorkflowState_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
+  public async fetch(
+    vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id" | "id">
+  ): Promise<IssueConnection | undefined> {
     return this.request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
       D.WorkflowState_IssuesDocument,
       {
