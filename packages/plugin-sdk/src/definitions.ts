@@ -92,6 +92,7 @@ export function getSdkDefinitions<C>(
           name: v.variable.name.value,
           type: visit(v, argNamespacedVisitor),
           optional: false,
+          description: `required ${v.variable.name.value} variable to set the ${operationPath.join(" ")} scope`,
         },
       }),
       {}

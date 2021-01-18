@@ -8,7 +8,7 @@ import {
   NonNullTypeNode,
 } from "graphql";
 import c from "./constants";
-import { printGraphqlType, printList } from "./print";
+import { printGraphqlComment, printGraphqlType, printList } from "./print";
 import { PluginContext } from "./types";
 
 /**
@@ -17,7 +17,8 @@ import { PluginContext } from "./types";
 function printInputArg(node?: InputValueDefinitionNode): string {
   if (node) {
     const arg = printGraphqlType(node.type);
-    return `$${node.name.value}: ${arg}`;
+    const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
+    return printList([description, `$${node.name.value}: ${arg}`], "\n");
   } else {
     return "";
   }

@@ -13,7 +13,7 @@ import c from "./constants";
 import { reduceTypeName } from "./field";
 import { isValidFragment } from "./fragment";
 import { findObject, isConnection } from "./object";
-import { printGraphqlDebug, printGraphqlDescription, printList } from "./print";
+import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printList } from "./print";
 import { findQuery } from "./query";
 import { Named, NamedFields, PluginContext } from "./types";
 import { nonNullable } from "./utils";
@@ -84,10 +84,11 @@ export class FragmentVisitor<C> {
       /** Skip objects defined in constants */
       if (!c.SKIP_OBJECTS.includes(type)) {
         const node = (_node as unknown) as Named<FieldDefinitionNode>;
+        const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
 
         /** Print field name if it is a scalar */
         if (Object.values(this._context.scalars).includes(type)) {
-          return printList([printGraphqlDebug(_node), node.name], "\n");
+          return printList([description, printGraphqlDebug(_node), node.name], "\n");
         }
 
         /** Print all fields required for matching query */
@@ -98,6 +99,7 @@ export class FragmentVisitor<C> {
           if (queryRequiredArgs.length) {
             return printList(
               [
+                description,
                 printGraphqlDebug(_node),
                 printGraphqlDebug(query),
                 queryRequiredArgs.length
@@ -116,6 +118,7 @@ export class FragmentVisitor<C> {
           if (fragment && !isConnection(fragment)) {
             return printList(
               [
+                description,
                 printGraphqlDebug(_node),
                 printGraphqlDebug(query),
                 `${node.name} {
