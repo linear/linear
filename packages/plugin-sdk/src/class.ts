@@ -1,4 +1,12 @@
-import { ArgDefinition, getArgList, printComment, printDebug, printList } from "@linear/plugin-common";
+import {
+  ArgDefinition,
+  getArgList,
+  printComment,
+  printDebug,
+  printList,
+  reduceListType,
+  reduceTypeName,
+} from "@linear/plugin-common";
 import c from "./constants";
 import { getOperationArgs } from "./operation";
 import { printNamespaced } from "./print";
@@ -66,13 +74,18 @@ function printOperation(context: SdkPluginContext, o: SdkOperation): string {
   const variableType = printNamespaced(context, o.operationVariablesTypes);
   const documentName = printNamespaced(context, o.documentVariableName);
   const resultType = printNamespaced(context, o.operationResultType);
-  const fragmentName = o.fragment?.name.value;
+  const modelType = o.query ? reduceTypeName(o.query.type) : o.fragment?.name.value;
+  const listModelType = o.query ? reduceListType(o.query.type) : undefined;
   const parentVariables = getOperationParentVariables(context, o);
   const parentArgs = getArgList([getRequestArg(), ...Object.values(parentVariables ?? {})]);
+  const fetchReturnType = `Promise<${modelType}${listModelType ? "[]" : ""} | undefined>`;
 
   return printList(
     [
-      printComment([`${o.operationType} ${o.documentVariableName} for ${fragmentName}`, ...parentArgs.jsdoc]),
+      printComment([
+        `${o.operationType} ${o.documentVariableName} for ${modelType}${listModelType ? "s" : ""}`,
+        ...parentArgs.jsdoc,
+      ]),
       printDebug(o),
       `export class ${o.operationResultType} extends ${c.REQUEST_CLASS} {
         ${printList(
@@ -88,13 +101,19 @@ function printOperation(context: SdkPluginContext, o: SdkOperation): string {
           )}
         }
 
-        public async fetch(${requiredVariables.printInput}): Promise<${fragmentName} | undefined> {
+        public async fetch(${requiredVariables.printInput}): ${fetchReturnType} {
           return ${`this.${c.REQUEST_NAME}<${resultType}, ${variableType}>(${printList(
             [documentName, printOperationArgs(o, parentVariables)],
             ", "
           )}).then(response => {
             const data = ${printList(["response", ...o.path], "?.")}
-            return data ? new ${fragmentName}(this.${c.REQUEST_NAME}, data) : undefined
+            return data 
+              ? ${
+                listModelType
+                  ? `data.map(node => new ${modelType}(this.${c.REQUEST_NAME}, node))`
+                  : `new ${modelType}(this.${c.REQUEST_NAME}, data)`
+              }  
+              : undefined
           })`}
         }
       }
