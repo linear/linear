@@ -4,7 +4,7 @@ import { RequestInit } from "graphql-request/dist/types.dom";
 import { serializeUserAgent } from "./utils";
 import { LinearSdk } from "./_generated/sdk";
 
-export * from "./_generated/documents";
+export * as Types from "./_generated/documents";
 export * from "./_generated/sdk";
 
 /**
