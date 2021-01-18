@@ -1,6 +1,14 @@
-import { getArgList, getLast, printComment, printDebug, printList, printTypescriptType } from "@linear/plugin-common";
+import {
+  getArgList,
+  getLast,
+  printComment,
+  printDebug,
+  printList,
+  printPascal,
+  printTypescriptType,
+} from "@linear/plugin-common";
 import c from "./constants";
-import { printNamespaced, printPascal } from "./print";
+import { printNamespaced } from "./print";
 import { getRequestArg } from "./request";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
 import { getOptionalVariables } from "./variable";

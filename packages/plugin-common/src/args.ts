@@ -1,5 +1,5 @@
-import { InputValueDefinitionNode, Kind } from "graphql";
-import { printList } from "./print";
+import { FieldDefinitionNode, InputValueDefinitionNode, Kind } from "graphql";
+import { printGraphqlComment, printGraphqlType, printList } from "./print";
 import { ArgDefinition, ArgList } from "./types";
 import { nonNullable } from "./utils";
 
@@ -35,4 +35,39 @@ export function getArgList(args: (ArgDefinition | undefined)[]): ArgList {
       ", "
     ),
   };
+}
+
+/**
+ * Print the arg for passing into the operation input
+ */
+function printGraphqlInputArg(node?: InputValueDefinitionNode): string {
+  if (node) {
+    const arg = printGraphqlType(node.type);
+    const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
+    return printList([description, `$${node.name.value}: ${arg}`], "\n");
+  } else {
+    return "";
+  }
+}
+
+/**
+ * Print the args list for passing into the operation input
+ */
+export function printGraphqlInputArgs(fields: FieldDefinitionNode[]): string {
+  const args = fields.flatMap(field => field.arguments);
+  return args?.length ? printList(["(", ...args.map(printGraphqlInputArg), ")"], "\n") : "";
+}
+
+/**
+ * Print the arg for passing into the operation response
+ */
+function printGraphqlResponseArg(node: InputValueDefinitionNode): string {
+  return `${node.name.value}: $${node.name.value}`;
+}
+
+/**
+ * Print the args list for passing into the operation response
+ */
+export function printGraphqlResponseArgs(field: FieldDefinitionNode): string {
+  return field.arguments?.length ? printList(["(", ...field.arguments.map(printGraphqlResponseArg), ")"], "\n") : "";
 }

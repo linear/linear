@@ -1,32 +1,21 @@
-import { ClientSideBasePluginConfig, RawClientSideBasePluginConfig } from "@graphql-codegen/visitor-plugin-common";
-import { ArgDefinition, PluginContext } from "@linear/plugin-common";
+import { ArgDefinition, PluginConfig, PluginContext } from "@linear/plugin-common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode, OperationDefinitionNode } from "graphql";
 
-export interface RawSdkPluginConfig extends RawClientSideBasePluginConfig {
-  /**
-   * @description The relative filepath to generated documents
-   *
-   * @exampleMarkdown
-   * ```yml
-   * documents: "./src/documents/**"
-   * generates:
-   *   sdk-documents.ts:
-   *     plugins:
-   *       - typescript
-   *       - typescript-operations
-   *       - typed-document-node
-   *   output-file.ts:
-   *     plugins:
-   *       - @linear/plugin-sdk
-   *     config:
-   *       documentFile: "./sdk-documents"
-   * ```
-   */
+/**
+ * Parsed sdk plugin config
+ */
+export interface SdkPluginConfig extends PluginConfig {
   documentFile: string;
 }
 
-export interface SdkPluginConfig extends ClientSideBasePluginConfig {
-  documentFile: string;
+/**
+ * The plugin context specific to the sdk plugin config
+ */
+export interface SdkPluginContext extends PluginContext<SdkPluginConfig> {
+  /** Processed models for output */
+  models: SdkModel[];
+  /** All definitions for the sdk */
+  sdkDefinitions: SdkDefinitions;
 }
 
 /**
@@ -79,10 +68,6 @@ export interface SdkOperationObject {
 export interface SdkDefinition {
   /** The api keys by which to nest operations */
   sdkPath: string[];
-  /** The name of the sdk function */
-  sdkName: string;
-  /** The name of the sdk function type */
-  sdkType: string;
   /** The operations to generate */
   operations: SdkOperation[];
 }
@@ -91,16 +76,6 @@ export interface SdkDefinition {
  * A map from api key to each sdk definition
  */
 export type SdkDefinitions = Record<string, SdkDefinition>;
-
-/**
- * The plugin context specific to the sdk plugin config
- */
-export interface SdkPluginContext extends PluginContext<RawSdkPluginConfig> {
-  /** Processed models for output */
-  models: SdkModel[];
-  /** All definitions for the sdk */
-  sdkDefinitions: SdkDefinitions;
-}
 
 /**
  * Available field types

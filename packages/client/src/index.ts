@@ -2,10 +2,10 @@ import { DocumentNode, print } from "graphql";
 import { GraphQLClient } from "graphql-request";
 import { RequestInit } from "graphql-request/dist/types.dom";
 import { serializeUserAgent } from "./utils";
-import { LinearSdk } from "./_generated/sdk";
+import { LinearSdk } from "./_generated/_gen_sdk";
 
-export * as Types from "./_generated/documents";
-export * from "./_generated/sdk";
+export * as Types from "./_generated/_gen_documents";
+export * from "./_generated/_gen_sdk";
 
 /**
  * Input options for creating a Linear sdk with graphql-request

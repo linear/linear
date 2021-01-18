@@ -19,7 +19,7 @@ export function printSdk(context: SdkPluginContext): string {
   return printList(
     [
       printComment(["The SDK class containing all root operations", ...args.jsdoc]),
-      `export class ${c.SDK_TYPE} extends ${c.REQUEST_CLASS} {
+      `export class ${c.SDK_CLASS} extends ${c.REQUEST_CLASS} {
         public constructor(${args.printInput}) {
           super(${c.REQUEST_NAME})
         }

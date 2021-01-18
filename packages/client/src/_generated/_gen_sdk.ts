@@ -1,23 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { DocumentNode } from "graphql";
-import * as D from "./documents";
-
-export * from "./documents";
-
+import * as D from "./_gen_documents";
 /** The function type for calling the graphql client */
-export type LinearRequest = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
+export type Request = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
 
 /**
  * Base class to provide a request function
  *
  * @param request - function to call the graphql client
  */
-export class Request {
-  public constructor(request: LinearRequest) {
+export class LinearRequest {
+  public constructor(request: Request) {
     this.request = request;
   }
 
-  protected request: LinearRequest;
+  protected request: Request;
 }
 
 /**
@@ -26,8 +23,8 @@ export class Request {
  * @param request - function to call the graphql client
  * @param data - UserFragment response data
  */
-export class User extends Request {
-  public constructor(request: LinearRequest, data: D.UserFragment) {
+export class User extends LinearRequest {
+  public constructor(request: Request, data: D.UserFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -104,10 +101,10 @@ export class User extends Request {
  * @param request - function to call the graphql client
  * @param data - UserSettingsFragment response data
  */
-export class UserSettings extends Request {
+export class UserSettings extends LinearRequest {
   private _user?: D.UserSettingsFragment["user"];
 
-  public constructor(request: LinearRequest, data: D.UserSettingsFragment) {
+  public constructor(request: Request, data: D.UserSettingsFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -145,8 +142,8 @@ export class UserSettings extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueConnectionFragment response data
  */
-export class IssueConnection extends Request {
-  public constructor(request: LinearRequest, data: D.IssueConnectionFragment) {
+export class IssueConnection extends LinearRequest {
+  public constructor(request: Request, data: D.IssueConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Issue(request, node)) : undefined;
@@ -162,7 +159,7 @@ export class IssueConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueFragment response data
  */
-export class Issue extends Request {
+export class Issue extends LinearRequest {
   private _team?: D.IssueFragment["team"];
   private _cycle?: D.IssueFragment["cycle"];
   private _state?: D.IssueFragment["state"];
@@ -171,7 +168,7 @@ export class Issue extends Request {
   private _project?: D.IssueFragment["project"];
   private _creator?: D.IssueFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.IssueFragment) {
+  public constructor(request: Request, data: D.IssueFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -322,7 +319,7 @@ export class Issue extends Request {
  * @param request - function to call the graphql client
  * @param data - TeamFragment response data
  */
-export class Team extends Request {
+export class Team extends LinearRequest {
   private _draftWorkflowState?: D.TeamFragment["draftWorkflowState"];
   private _startWorkflowState?: D.TeamFragment["startWorkflowState"];
   private _reviewWorkflowState?: D.TeamFragment["reviewWorkflowState"];
@@ -330,7 +327,7 @@ export class Team extends Request {
   private _markedAsDuplicateWorkflowState?: D.TeamFragment["markedAsDuplicateWorkflowState"];
   private _activeCycle?: D.TeamFragment["activeCycle"];
 
-  public constructor(request: LinearRequest, data: D.TeamFragment) {
+  public constructor(request: Request, data: D.TeamFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -514,10 +511,10 @@ export class Team extends Request {
  * @param request - function to call the graphql client
  * @param data - WorkflowStateFragment response data
  */
-export class WorkflowState extends Request {
+export class WorkflowState extends LinearRequest {
   private _team?: D.WorkflowStateFragment["team"];
 
-  public constructor(request: LinearRequest, data: D.WorkflowStateFragment) {
+  public constructor(request: Request, data: D.WorkflowStateFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -564,8 +561,8 @@ export class WorkflowState extends Request {
  * @param request - function to call the graphql client
  * @param data - CycleConnectionFragment response data
  */
-export class CycleConnection extends Request {
-  public constructor(request: LinearRequest, data: D.CycleConnectionFragment) {
+export class CycleConnection extends LinearRequest {
+  public constructor(request: Request, data: D.CycleConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Cycle(request, node)) : undefined;
@@ -581,10 +578,10 @@ export class CycleConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - CycleFragment response data
  */
-export class Cycle extends Request {
+export class Cycle extends LinearRequest {
   private _team?: D.CycleFragment["team"];
 
-  public constructor(request: LinearRequest, data: D.CycleFragment) {
+  public constructor(request: Request, data: D.CycleFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -651,8 +648,8 @@ export class Cycle extends Request {
  * @param request - function to call the graphql client
  * @param data - PageInfoFragment response data
  */
-export class PageInfo extends Request {
-  public constructor(request: LinearRequest, data: D.PageInfoFragment) {
+export class PageInfo extends LinearRequest {
+  public constructor(request: Request, data: D.PageInfoFragment) {
     super(request);
     this.hasPreviousPage = data.hasPreviousPage ?? undefined;
     this.hasNextPage = data.hasNextPage ?? undefined;
@@ -676,8 +673,8 @@ export class PageInfo extends Request {
  * @param request - function to call the graphql client
  * @param data - TeamMembershipConnectionFragment response data
  */
-export class TeamMembershipConnection extends Request {
-  public constructor(request: LinearRequest, data: D.TeamMembershipConnectionFragment) {
+export class TeamMembershipConnection extends LinearRequest {
+  public constructor(request: Request, data: D.TeamMembershipConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new TeamMembership(request, node)) : undefined;
@@ -693,11 +690,11 @@ export class TeamMembershipConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - TeamMembershipFragment response data
  */
-export class TeamMembership extends Request {
+export class TeamMembership extends LinearRequest {
   private _user?: D.TeamMembershipFragment["user"];
   private _team?: D.TeamMembershipFragment["team"];
 
-  public constructor(request: LinearRequest, data: D.TeamMembershipFragment) {
+  public constructor(request: Request, data: D.TeamMembershipFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -734,8 +731,8 @@ export class TeamMembership extends Request {
  * @param request - function to call the graphql client
  * @param data - ProjectConnectionFragment response data
  */
-export class ProjectConnection extends Request {
-  public constructor(request: LinearRequest, data: D.ProjectConnectionFragment) {
+export class ProjectConnection extends LinearRequest {
+  public constructor(request: Request, data: D.ProjectConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Project(request, node)) : undefined;
@@ -751,12 +748,12 @@ export class ProjectConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - ProjectFragment response data
  */
-export class Project extends Request {
+export class Project extends LinearRequest {
   private _creator?: D.ProjectFragment["creator"];
   private _lead?: D.ProjectFragment["lead"];
   private _milestone?: D.ProjectFragment["milestone"];
 
-  public constructor(request: LinearRequest, data: D.ProjectFragment) {
+  public constructor(request: Request, data: D.ProjectFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -868,8 +865,8 @@ export class Project extends Request {
  * @param request - function to call the graphql client
  * @param data - MilestoneFragment response data
  */
-export class Milestone extends Request {
-  public constructor(request: LinearRequest, data: D.MilestoneFragment) {
+export class Milestone extends LinearRequest {
+  public constructor(request: Request, data: D.MilestoneFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -910,8 +907,8 @@ export class Milestone extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationFragment response data
  */
-export class Organization extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationFragment) {
+export class Organization extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -996,8 +993,8 @@ export class Organization extends Request {
  * @param request - function to call the graphql client
  * @param data - UserConnectionFragment response data
  */
-export class UserConnection extends Request {
-  public constructor(request: LinearRequest, data: D.UserConnectionFragment) {
+export class UserConnection extends LinearRequest {
+  public constructor(request: Request, data: D.UserConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new User(request, node)) : undefined;
@@ -1013,8 +1010,8 @@ export class UserConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - TeamConnectionFragment response data
  */
-export class TeamConnection extends Request {
-  public constructor(request: LinearRequest, data: D.TeamConnectionFragment) {
+export class TeamConnection extends LinearRequest {
+  public constructor(request: Request, data: D.TeamConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Team(request, node)) : undefined;
@@ -1030,8 +1027,8 @@ export class TeamConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - MilestoneConnectionFragment response data
  */
-export class MilestoneConnection extends Request {
-  public constructor(request: LinearRequest, data: D.MilestoneConnectionFragment) {
+export class MilestoneConnection extends LinearRequest {
+  public constructor(request: Request, data: D.MilestoneConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Milestone(request, node)) : undefined;
@@ -1047,8 +1044,8 @@ export class MilestoneConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - IntegrationConnectionFragment response data
  */
-export class IntegrationConnection extends Request {
-  public constructor(request: LinearRequest, data: D.IntegrationConnectionFragment) {
+export class IntegrationConnection extends LinearRequest {
+  public constructor(request: Request, data: D.IntegrationConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Integration(request, node)) : undefined;
@@ -1064,11 +1061,11 @@ export class IntegrationConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - IntegrationFragment response data
  */
-export class Integration extends Request {
+export class Integration extends LinearRequest {
   private _team?: D.IntegrationFragment["team"];
   private _creator?: D.IntegrationFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.IntegrationFragment) {
+  public constructor(request: Request, data: D.IntegrationFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1122,8 +1119,8 @@ export class Integration extends Request {
  * @param request - function to call the graphql client
  * @param data - IntegrationSettingsFragment response data
  */
-export class IntegrationSettings extends Request {
-  public constructor(request: LinearRequest, data: D.IntegrationSettingsFragment) {
+export class IntegrationSettings extends LinearRequest {
+  public constructor(request: Request, data: D.IntegrationSettingsFragment) {
     super(request);
     this.slackPost = data.slackPost ? new SlackPostSettings(request, data.slackPost) : undefined;
     this.slackProjectPost = data.slackProjectPost ? new SlackPostSettings(request, data.slackProjectPost) : undefined;
@@ -1143,8 +1140,8 @@ export class IntegrationSettings extends Request {
  * @param request - function to call the graphql client
  * @param data - SlackPostSettingsFragment response data
  */
-export class SlackPostSettings extends Request {
-  public constructor(request: LinearRequest, data: D.SlackPostSettingsFragment) {
+export class SlackPostSettings extends LinearRequest {
+  public constructor(request: Request, data: D.SlackPostSettingsFragment) {
     super(request);
     this.channel = data.channel ?? undefined;
     this.channelId = data.channelId ?? undefined;
@@ -1162,8 +1159,8 @@ export class SlackPostSettings extends Request {
  * @param request - function to call the graphql client
  * @param data - GoogleSheetsSettingsFragment response data
  */
-export class GoogleSheetsSettings extends Request {
-  public constructor(request: LinearRequest, data: D.GoogleSheetsSettingsFragment) {
+export class GoogleSheetsSettings extends LinearRequest {
+  public constructor(request: Request, data: D.GoogleSheetsSettingsFragment) {
     super(request);
     this.spreadsheetId = data.spreadsheetId ?? undefined;
     this.spreadsheetUrl = data.spreadsheetUrl ?? undefined;
@@ -1183,8 +1180,8 @@ export class GoogleSheetsSettings extends Request {
  * @param request - function to call the graphql client
  * @param data - SentrySettingsFragment response data
  */
-export class SentrySettings extends Request {
-  public constructor(request: LinearRequest, data: D.SentrySettingsFragment) {
+export class SentrySettings extends LinearRequest {
+  public constructor(request: Request, data: D.SentrySettingsFragment) {
     super(request);
     this.organizationSlug = data.organizationSlug ?? undefined;
   }
@@ -1199,10 +1196,10 @@ export class SentrySettings extends Request {
  * @param request - function to call the graphql client
  * @param data - SubscriptionFragment response data
  */
-export class Subscription extends Request {
+export class Subscription extends LinearRequest {
   private _creator?: D.SubscriptionFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.SubscriptionFragment) {
+  public constructor(request: Request, data: D.SubscriptionFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1250,8 +1247,8 @@ export class Subscription extends Request {
  * @param request - function to call the graphql client
  * @param data - ProjectLinkConnectionFragment response data
  */
-export class ProjectLinkConnection extends Request {
-  public constructor(request: LinearRequest, data: D.ProjectLinkConnectionFragment) {
+export class ProjectLinkConnection extends LinearRequest {
+  public constructor(request: Request, data: D.ProjectLinkConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new ProjectLink(request, node)) : undefined;
@@ -1267,11 +1264,11 @@ export class ProjectLinkConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - ProjectLinkFragment response data
  */
-export class ProjectLink extends Request {
+export class ProjectLink extends LinearRequest {
   private _creator?: D.ProjectLinkFragment["creator"];
   private _project?: D.ProjectLinkFragment["project"];
 
-  public constructor(request: LinearRequest, data: D.ProjectLinkFragment) {
+  public constructor(request: Request, data: D.ProjectLinkFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1314,8 +1311,8 @@ export class ProjectLink extends Request {
  * @param request - function to call the graphql client
  * @param data - WorkflowStateConnectionFragment response data
  */
-export class WorkflowStateConnection extends Request {
-  public constructor(request: LinearRequest, data: D.WorkflowStateConnectionFragment) {
+export class WorkflowStateConnection extends LinearRequest {
+  public constructor(request: Request, data: D.WorkflowStateConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new WorkflowState(request, node)) : undefined;
@@ -1331,8 +1328,8 @@ export class WorkflowStateConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - TemplateConnectionFragment response data
  */
-export class TemplateConnection extends Request {
-  public constructor(request: LinearRequest, data: D.TemplateConnectionFragment) {
+export class TemplateConnection extends LinearRequest {
+  public constructor(request: Request, data: D.TemplateConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
   }
@@ -1349,11 +1346,11 @@ export class TemplateConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - TemplateFragment response data
  */
-export class Template extends Request {
+export class Template extends LinearRequest {
   private _team?: D.TemplateFragment["team"];
   private _creator?: D.TemplateFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.TemplateFragment) {
+  public constructor(request: Request, data: D.TemplateFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1402,8 +1399,8 @@ export class Template extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueLabelConnectionFragment response data
  */
-export class IssueLabelConnection extends Request {
-  public constructor(request: LinearRequest, data: D.IssueLabelConnectionFragment) {
+export class IssueLabelConnection extends LinearRequest {
+  public constructor(request: Request, data: D.IssueLabelConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueLabel(request, node)) : undefined;
@@ -1419,11 +1416,11 @@ export class IssueLabelConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueLabelFragment response data
  */
-export class IssueLabel extends Request {
+export class IssueLabel extends LinearRequest {
   private _team?: D.IssueLabelFragment["team"];
   private _creator?: D.IssueLabelFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.IssueLabelFragment) {
+  public constructor(request: Request, data: D.IssueLabelFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1469,8 +1466,8 @@ export class IssueLabel extends Request {
  * @param request - function to call the graphql client
  * @param data - WebhookConnectionFragment response data
  */
-export class WebhookConnection extends Request {
-  public constructor(request: LinearRequest, data: D.WebhookConnectionFragment) {
+export class WebhookConnection extends LinearRequest {
+  public constructor(request: Request, data: D.WebhookConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Webhook(request, node)) : undefined;
@@ -1486,11 +1483,11 @@ export class WebhookConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - WebhookFragment response data
  */
-export class Webhook extends Request {
+export class Webhook extends LinearRequest {
   private _team?: D.WebhookFragment["team"];
   private _creator?: D.WebhookFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.WebhookFragment) {
+  public constructor(request: Request, data: D.WebhookFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1536,8 +1533,8 @@ export class Webhook extends Request {
  * @param request - function to call the graphql client
  * @param data - CommentConnectionFragment response data
  */
-export class CommentConnection extends Request {
-  public constructor(request: LinearRequest, data: D.CommentConnectionFragment) {
+export class CommentConnection extends LinearRequest {
+  public constructor(request: Request, data: D.CommentConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Comment(request, node)) : undefined;
@@ -1553,11 +1550,11 @@ export class CommentConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - CommentFragment response data
  */
-export class Comment extends Request {
+export class Comment extends LinearRequest {
   private _user?: D.CommentFragment["user"];
   private _issue?: D.CommentFragment["issue"];
 
-  public constructor(request: LinearRequest, data: D.CommentFragment) {
+  public constructor(request: Request, data: D.CommentFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1606,8 +1603,8 @@ export class Comment extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueHistoryConnectionFragment response data
  */
-export class IssueHistoryConnection extends Request {
-  public constructor(request: LinearRequest, data: D.IssueHistoryConnectionFragment) {
+export class IssueHistoryConnection extends LinearRequest {
+  public constructor(request: Request, data: D.IssueHistoryConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueHistory(request, node)) : undefined;
@@ -1623,7 +1620,7 @@ export class IssueHistoryConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueHistoryFragment response data
  */
-export class IssueHistory extends Request {
+export class IssueHistory extends LinearRequest {
   private _issue?: D.IssueHistoryFragment["issue"];
   private _actor?: D.IssueHistoryFragment["actor"];
   private _integration?: D.IssueHistoryFragment["integration"];
@@ -1640,7 +1637,7 @@ export class IssueHistory extends Request {
   private _fromProject?: D.IssueHistoryFragment["fromProject"];
   private _toProject?: D.IssueHistoryFragment["toProject"];
 
-  public constructor(request: LinearRequest, data: D.IssueHistoryFragment) {
+  public constructor(request: Request, data: D.IssueHistoryFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1785,8 +1782,8 @@ export class IssueHistory extends Request {
  * @param request - function to call the graphql client
  * @param data - IntegrationResourceConnectionFragment response data
  */
-export class IntegrationResourceConnection extends Request {
-  public constructor(request: LinearRequest, data: D.IntegrationResourceConnectionFragment) {
+export class IntegrationResourceConnection extends LinearRequest {
+  public constructor(request: Request, data: D.IntegrationResourceConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IntegrationResource(request, node)) : undefined;
@@ -1802,11 +1799,11 @@ export class IntegrationResourceConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - IntegrationResourceFragment response data
  */
-export class IntegrationResource extends Request {
+export class IntegrationResource extends LinearRequest {
   private _integration?: D.IntegrationResourceFragment["integration"];
   private _issue?: D.IntegrationResourceFragment["issue"];
 
-  public constructor(request: LinearRequest, data: D.IntegrationResourceFragment) {
+  public constructor(request: Request, data: D.IntegrationResourceFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -1855,8 +1852,8 @@ export class IntegrationResource extends Request {
  * @param request - function to call the graphql client
  * @param data - IntegrationResourceDataFragment response data
  */
-export class IntegrationResourceData extends Request {
-  public constructor(request: LinearRequest, data: D.IntegrationResourceDataFragment) {
+export class IntegrationResourceData extends LinearRequest {
+  public constructor(request: Request, data: D.IntegrationResourceDataFragment) {
     super(request);
     this.githubPullRequest = data.githubPullRequest
       ? new PullRequestPayload(request, data.githubPullRequest)
@@ -1884,8 +1881,8 @@ export class IntegrationResourceData extends Request {
  * @param request - function to call the graphql client
  * @param data - PullRequestPayloadFragment response data
  */
-export class PullRequestPayload extends Request {
-  public constructor(request: LinearRequest, data: D.PullRequestPayloadFragment) {
+export class PullRequestPayload extends LinearRequest {
+  public constructor(request: Request, data: D.PullRequestPayloadFragment) {
     super(request);
     this.status = data.status ?? undefined;
     this.number = data.number ?? undefined;
@@ -1927,8 +1924,8 @@ export class PullRequestPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - CommitPayloadFragment response data
  */
-export class CommitPayload extends Request {
-  public constructor(request: LinearRequest, data: D.CommitPayloadFragment) {
+export class CommitPayload extends LinearRequest {
+  public constructor(request: Request, data: D.CommitPayloadFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.message = data.message ?? undefined;
@@ -1954,8 +1951,8 @@ export class CommitPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - SentryIssuePayloadFragment response data
  */
-export class SentryIssuePayload extends Request {
-  public constructor(request: LinearRequest, data: D.SentryIssuePayloadFragment) {
+export class SentryIssuePayload extends LinearRequest {
+  public constructor(request: Request, data: D.SentryIssuePayloadFragment) {
     super(request);
     this.issueId = data.issueId ?? undefined;
     this.webUrl = data.webUrl ?? undefined;
@@ -2000,8 +1997,8 @@ export class SentryIssuePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueRelationConnectionFragment response data
  */
-export class IssueRelationConnection extends Request {
-  public constructor(request: LinearRequest, data: D.IssueRelationConnectionFragment) {
+export class IssueRelationConnection extends LinearRequest {
+  public constructor(request: Request, data: D.IssueRelationConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueRelation(request, node)) : undefined;
@@ -2017,11 +2014,11 @@ export class IssueRelationConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueRelationFragment response data
  */
-export class IssueRelation extends Request {
+export class IssueRelation extends LinearRequest {
   private _issue?: D.IssueRelationFragment["issue"];
   private _relatedIssue?: D.IssueRelationFragment["relatedIssue"];
 
-  public constructor(request: LinearRequest, data: D.IssueRelationFragment) {
+  public constructor(request: Request, data: D.IssueRelationFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2061,8 +2058,8 @@ export class IssueRelation extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationExistsPayloadFragment response data
  */
-export class OrganizationExistsPayload extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationExistsPayloadFragment) {
+export class OrganizationExistsPayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationExistsPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
     this.exists = data.exists ?? undefined;
@@ -2081,8 +2078,8 @@ export class OrganizationExistsPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - SyncResponseFragment response data
  */
-export class SyncResponse extends Request {
-  public constructor(request: LinearRequest, data: D.SyncResponseFragment) {
+export class SyncResponse extends LinearRequest {
+  public constructor(request: Request, data: D.SyncResponseFragment) {
     super(request);
     this.state = data.state ?? undefined;
     this.delta = data.delta ?? undefined;
@@ -2115,8 +2112,8 @@ export class SyncResponse extends Request {
  * @param request - function to call the graphql client
  * @param data - ArchiveResponseFragment response data
  */
-export class ArchiveResponse extends Request {
-  public constructor(request: LinearRequest, data: D.ArchiveResponseFragment) {
+export class ArchiveResponse extends LinearRequest {
+  public constructor(request: Request, data: D.ArchiveResponseFragment) {
     super(request);
     this.archive = data.archive ?? undefined;
     this.totalCount = data.totalCount ?? undefined;
@@ -2137,8 +2134,8 @@ export class ArchiveResponse extends Request {
  * @param request - function to call the graphql client
  * @param data - UserAccountAdminPrivilegedFragment response data
  */
-export class UserAccountAdminPrivileged extends Request {
-  public constructor(request: LinearRequest, data: D.UserAccountAdminPrivilegedFragment) {
+export class UserAccountAdminPrivileged extends LinearRequest {
+  public constructor(request: Request, data: D.UserAccountAdminPrivilegedFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2173,8 +2170,8 @@ export class UserAccountAdminPrivileged extends Request {
  * @param request - function to call the graphql client
  * @param data - UserAdminPrivilegedFragment response data
  */
-export class UserAdminPrivileged extends Request {
-  public constructor(request: LinearRequest, data: D.UserAdminPrivilegedFragment) {
+export class UserAdminPrivileged extends LinearRequest {
+  public constructor(request: Request, data: D.UserAdminPrivilegedFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2238,8 +2235,8 @@ export class UserAdminPrivileged extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationAdminPrivilegedFragment response data
  */
-export class OrganizationAdminPrivileged extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationAdminPrivilegedFragment) {
+export class OrganizationAdminPrivileged extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationAdminPrivilegedFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2310,10 +2307,10 @@ export class OrganizationAdminPrivileged extends Request {
  * @param request - function to call the graphql client
  * @param data - SubscriptionAdminPrivilegedFragment response data
  */
-export class SubscriptionAdminPrivileged extends Request {
+export class SubscriptionAdminPrivileged extends LinearRequest {
   private _creator?: D.SubscriptionAdminPrivilegedFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.SubscriptionAdminPrivilegedFragment) {
+  public constructor(request: Request, data: D.SubscriptionAdminPrivilegedFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2367,8 +2364,8 @@ export class SubscriptionAdminPrivileged extends Request {
  * @param request - function to call the graphql client
  * @param data - ApiKeyConnectionFragment response data
  */
-export class ApiKeyConnection extends Request {
-  public constructor(request: LinearRequest, data: D.ApiKeyConnectionFragment) {
+export class ApiKeyConnection extends LinearRequest {
+  public constructor(request: Request, data: D.ApiKeyConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined;
@@ -2384,8 +2381,8 @@ export class ApiKeyConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - ApiKeyFragment response data
  */
-export class ApiKey extends Request {
-  public constructor(request: LinearRequest, data: D.ApiKeyFragment) {
+export class ApiKey extends LinearRequest {
+  public constructor(request: Request, data: D.ApiKeyFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2415,8 +2412,8 @@ export class ApiKey extends Request {
  * @param request - function to call the graphql client
  * @param data - UserAuthorizedApplicationFragment response data
  */
-export class UserAuthorizedApplication extends Request {
-  public constructor(request: LinearRequest, data: D.UserAuthorizedApplicationFragment) {
+export class UserAuthorizedApplication extends LinearRequest {
+  public constructor(request: Request, data: D.UserAuthorizedApplicationFragment) {
     super(request);
     this.clientId = data.clientId ?? undefined;
     this.name = data.name ?? undefined;
@@ -2449,8 +2446,8 @@ export class UserAuthorizedApplication extends Request {
  * @param request - function to call the graphql client
  * @param data - AuthorizedApplicationFragment response data
  */
-export class AuthorizedApplication extends Request {
-  public constructor(request: LinearRequest, data: D.AuthorizedApplicationFragment) {
+export class AuthorizedApplication extends LinearRequest {
+  public constructor(request: Request, data: D.AuthorizedApplicationFragment) {
     super(request);
     this.clientId = data.clientId ?? undefined;
     this.name = data.name ?? undefined;
@@ -2486,8 +2483,8 @@ export class AuthorizedApplication extends Request {
  * @param request - function to call the graphql client
  * @param data - AuthResolverResponseFragment response data
  */
-export class AuthResolverResponse extends Request {
-  public constructor(request: LinearRequest, data: D.AuthResolverResponseFragment) {
+export class AuthResolverResponse extends LinearRequest {
+  public constructor(request: Request, data: D.AuthResolverResponseFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.token = data.token ?? undefined;
@@ -2519,8 +2516,8 @@ export class AuthResolverResponse extends Request {
  * @param request - function to call the graphql client
  * @param data - SsoUrlFromEmailResponseFragment response data
  */
-export class SsoUrlFromEmailResponse extends Request {
-  public constructor(request: LinearRequest, data: D.SsoUrlFromEmailResponseFragment) {
+export class SsoUrlFromEmailResponse extends LinearRequest {
+  public constructor(request: Request, data: D.SsoUrlFromEmailResponseFragment) {
     super(request);
     this.success = data.success ?? undefined;
     this.samlSsoUrl = data.samlSsoUrl ?? undefined;
@@ -2538,8 +2535,8 @@ export class SsoUrlFromEmailResponse extends Request {
  * @param request - function to call the graphql client
  * @param data - BillingDetailsPayloadFragment response data
  */
-export class BillingDetailsPayload extends Request {
-  public constructor(request: LinearRequest, data: D.BillingDetailsPayloadFragment) {
+export class BillingDetailsPayload extends LinearRequest {
+  public constructor(request: Request, data: D.BillingDetailsPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
     this.email = data.email ?? undefined;
@@ -2563,8 +2560,8 @@ export class BillingDetailsPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - InvoiceFragment response data
  */
-export class Invoice extends Request {
-  public constructor(request: LinearRequest, data: D.InvoiceFragment) {
+export class Invoice extends LinearRequest {
+  public constructor(request: Request, data: D.InvoiceFragment) {
     super(request);
     this.url = data.url ?? undefined;
     this.created = data.created ?? undefined;
@@ -2591,8 +2588,8 @@ export class Invoice extends Request {
  * @param request - function to call the graphql client
  * @param data - CardFragment response data
  */
-export class Card extends Request {
-  public constructor(request: LinearRequest, data: D.CardFragment) {
+export class Card extends LinearRequest {
+  public constructor(request: Request, data: D.CardFragment) {
     super(request);
     this.brand = data.brand ?? undefined;
     this.last4 = data.last4 ?? undefined;
@@ -2610,8 +2607,8 @@ export class Card extends Request {
  * @param request - function to call the graphql client
  * @param data - CollaborationDocumentUpdatePayloadFragment response data
  */
-export class CollaborationDocumentUpdatePayload extends Request {
-  public constructor(request: LinearRequest, data: D.CollaborationDocumentUpdatePayloadFragment) {
+export class CollaborationDocumentUpdatePayload extends LinearRequest {
+  public constructor(request: Request, data: D.CollaborationDocumentUpdatePayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
     this.steps = data.steps ? new StepsResponse(request, data.steps) : undefined;
@@ -2629,8 +2626,8 @@ export class CollaborationDocumentUpdatePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - StepsResponseFragment response data
  */
-export class StepsResponse extends Request {
-  public constructor(request: LinearRequest, data: D.StepsResponseFragment) {
+export class StepsResponse extends LinearRequest {
+  public constructor(request: Request, data: D.StepsResponseFragment) {
     super(request);
     this.version = data.version ?? undefined;
     this.steps = data.steps ?? undefined;
@@ -2651,11 +2648,11 @@ export class StepsResponse extends Request {
  * @param request - function to call the graphql client
  * @param data - CustomViewFragment response data
  */
-export class CustomView extends Request {
+export class CustomView extends LinearRequest {
   private _team?: D.CustomViewFragment["team"];
   private _creator?: D.CustomViewFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.CustomViewFragment) {
+  public constructor(request: Request, data: D.CustomViewFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2714,8 +2711,8 @@ export class CustomView extends Request {
  * @param request - function to call the graphql client
  * @param data - CustomViewConnectionFragment response data
  */
-export class CustomViewConnection extends Request {
-  public constructor(request: LinearRequest, data: D.CustomViewConnectionFragment) {
+export class CustomViewConnection extends LinearRequest {
+  public constructor(request: Request, data: D.CustomViewConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined;
@@ -2731,10 +2728,10 @@ export class CustomViewConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - EmojiFragment response data
  */
-export class Emoji extends Request {
+export class Emoji extends LinearRequest {
   private _creator?: D.EmojiFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.EmojiFragment) {
+  public constructor(request: Request, data: D.EmojiFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2779,8 +2776,8 @@ export class Emoji extends Request {
  * @param request - function to call the graphql client
  * @param data - EmojiConnectionFragment response data
  */
-export class EmojiConnection extends Request {
-  public constructor(request: LinearRequest, data: D.EmojiConnectionFragment) {
+export class EmojiConnection extends LinearRequest {
+  public constructor(request: Request, data: D.EmojiConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
@@ -2796,7 +2793,7 @@ export class EmojiConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - FavoriteFragment response data
  */
-export class Favorite extends Request {
+export class Favorite extends LinearRequest {
   private _user?: D.FavoriteFragment["user"];
   private _issue?: D.FavoriteFragment["issue"];
   private _project?: D.FavoriteFragment["project"];
@@ -2804,7 +2801,7 @@ export class Favorite extends Request {
   private _cycle?: D.FavoriteFragment["cycle"];
   private _label?: D.FavoriteFragment["label"];
 
-  public constructor(request: LinearRequest, data: D.FavoriteFragment) {
+  public constructor(request: Request, data: D.FavoriteFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -2867,8 +2864,8 @@ export class Favorite extends Request {
  * @param request - function to call the graphql client
  * @param data - FavoriteConnectionFragment response data
  */
-export class FavoriteConnection extends Request {
-  public constructor(request: LinearRequest, data: D.FavoriteConnectionFragment) {
+export class FavoriteConnection extends LinearRequest {
+  public constructor(request: Request, data: D.FavoriteConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
@@ -2884,8 +2881,8 @@ export class FavoriteConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - FigmaEmbedPayloadFragment response data
  */
-export class FigmaEmbedPayload extends Request {
-  public constructor(request: LinearRequest, data: D.FigmaEmbedPayloadFragment) {
+export class FigmaEmbedPayload extends LinearRequest {
+  public constructor(request: Request, data: D.FigmaEmbedPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -2906,8 +2903,8 @@ export class FigmaEmbedPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - FigmaEmbedFragment response data
  */
-export class FigmaEmbed extends Request {
-  public constructor(request: LinearRequest, data: D.FigmaEmbedFragment) {
+export class FigmaEmbed extends LinearRequest {
+  public constructor(request: Request, data: D.FigmaEmbedFragment) {
     super(request);
     this.name = data.name ?? undefined;
     this.lastModified = data.lastModified ?? undefined;
@@ -2931,8 +2928,8 @@ export class FigmaEmbed extends Request {
  * @param request - function to call the graphql client
  * @param data - InvitePagePayloadFragment response data
  */
-export class InvitePagePayload extends Request {
-  public constructor(request: LinearRequest, data: D.InvitePagePayloadFragment) {
+export class InvitePagePayload extends LinearRequest {
+  public constructor(request: Request, data: D.InvitePagePayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
     this.inviteData = data.inviteData ? new InviteData(request, data.inviteData) : undefined;
@@ -2950,8 +2947,8 @@ export class InvitePagePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - InviteDataFragment response data
  */
-export class InviteData extends Request {
-  public constructor(request: LinearRequest, data: D.InviteDataFragment) {
+export class InviteData extends LinearRequest {
+  public constructor(request: Request, data: D.InviteDataFragment) {
     super(request);
     this.inviterName = data.inviterName ?? undefined;
     this.avatarURLs = data.avatarURLs ?? undefined;
@@ -2987,8 +2984,8 @@ export class InviteData extends Request {
  * @param request - function to call the graphql client
  * @param data - NotificationConnectionFragment response data
  */
-export class NotificationConnection extends Request {
-  public constructor(request: LinearRequest, data: D.NotificationConnectionFragment) {
+export class NotificationConnection extends LinearRequest {
+  public constructor(request: Request, data: D.NotificationConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined;
@@ -3004,13 +3001,13 @@ export class NotificationConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - NotificationFragment response data
  */
-export class Notification extends Request {
+export class Notification extends LinearRequest {
   private _user?: D.NotificationFragment["user"];
   private _issue?: D.NotificationFragment["issue"];
   private _team?: D.NotificationFragment["team"];
   private _comment?: D.NotificationFragment["comment"];
 
-  public constructor(request: LinearRequest, data: D.NotificationFragment) {
+  public constructor(request: Request, data: D.NotificationFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -3072,8 +3069,8 @@ export class Notification extends Request {
  * @param request - function to call the graphql client
  * @param data - NotificationSubscriptionConnectionFragment response data
  */
-export class NotificationSubscriptionConnection extends Request {
-  public constructor(request: LinearRequest, data: D.NotificationSubscriptionConnectionFragment) {
+export class NotificationSubscriptionConnection extends LinearRequest {
+  public constructor(request: Request, data: D.NotificationSubscriptionConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined;
@@ -3089,12 +3086,12 @@ export class NotificationSubscriptionConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - NotificationSubscriptionFragment response data
  */
-export class NotificationSubscription extends Request {
+export class NotificationSubscription extends LinearRequest {
   private _user?: D.NotificationSubscriptionFragment["user"];
   private _team?: D.NotificationSubscriptionFragment["team"];
   private _project?: D.NotificationSubscriptionFragment["project"];
 
-  public constructor(request: LinearRequest, data: D.NotificationSubscriptionFragment) {
+  public constructor(request: Request, data: D.NotificationSubscriptionFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -3139,8 +3136,8 @@ export class NotificationSubscription extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationInviteConnectionFragment response data
  */
-export class OrganizationInviteConnection extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationInviteConnectionFragment) {
+export class OrganizationInviteConnection extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationInviteConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined;
@@ -3156,11 +3153,11 @@ export class OrganizationInviteConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationInviteFragment response data
  */
-export class OrganizationInvite extends Request {
+export class OrganizationInvite extends LinearRequest {
   private _inviter?: D.OrganizationInviteFragment["inviter"];
   private _invitee?: D.OrganizationInviteFragment["invitee"];
 
-  public constructor(request: LinearRequest, data: D.OrganizationInviteFragment) {
+  public constructor(request: Request, data: D.OrganizationInviteFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -3213,8 +3210,8 @@ export class OrganizationInvite extends Request {
  * @param request - function to call the graphql client
  * @param data - PushSubscriptionPayloadFragment response data
  */
-export class PushSubscriptionPayload extends Request {
-  public constructor(request: LinearRequest, data: D.PushSubscriptionPayloadFragment) {
+export class PushSubscriptionPayload extends LinearRequest {
+  public constructor(request: Request, data: D.PushSubscriptionPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3232,11 +3229,11 @@ export class PushSubscriptionPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ReactionFragment response data
  */
-export class Reaction extends Request {
+export class Reaction extends LinearRequest {
   private _user?: D.ReactionFragment["user"];
   private _comment?: D.ReactionFragment["comment"];
 
-  public constructor(request: LinearRequest, data: D.ReactionFragment) {
+  public constructor(request: Request, data: D.ReactionFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -3276,8 +3273,8 @@ export class Reaction extends Request {
  * @param request - function to call the graphql client
  * @param data - ReactionConnectionFragment response data
  */
-export class ReactionConnection extends Request {
-  public constructor(request: LinearRequest, data: D.ReactionConnectionFragment) {
+export class ReactionConnection extends LinearRequest {
+  public constructor(request: Request, data: D.ReactionConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined;
@@ -3293,8 +3290,8 @@ export class ReactionConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - ViewPreferencesConnectionFragment response data
  */
-export class ViewPreferencesConnection extends Request {
-  public constructor(request: LinearRequest, data: D.ViewPreferencesConnectionFragment) {
+export class ViewPreferencesConnection extends LinearRequest {
+  public constructor(request: Request, data: D.ViewPreferencesConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new ViewPreferences(request, node)) : undefined;
@@ -3310,8 +3307,8 @@ export class ViewPreferencesConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - ViewPreferencesFragment response data
  */
-export class ViewPreferences extends Request {
-  public constructor(request: LinearRequest, data: D.ViewPreferencesFragment) {
+export class ViewPreferences extends LinearRequest {
+  public constructor(request: Request, data: D.ViewPreferencesFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -3344,10 +3341,10 @@ export class ViewPreferences extends Request {
  * @param request - function to call the graphql client
  * @param data - UserPayloadFragment response data
  */
-export class UserPayload extends Request {
+export class UserPayload extends LinearRequest {
   private _user?: D.UserPayloadFragment["user"];
 
-  public constructor(request: LinearRequest, data: D.UserPayloadFragment) {
+  public constructor(request: Request, data: D.UserPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3370,8 +3367,8 @@ export class UserPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - UserAdminPayloadFragment response data
  */
-export class UserAdminPayload extends Request {
-  public constructor(request: LinearRequest, data: D.UserAdminPayloadFragment) {
+export class UserAdminPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserAdminPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3386,8 +3383,8 @@ export class UserAdminPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationPayloadFragment response data
  */
-export class OrganizationPayload extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationPayloadFragment) {
+export class OrganizationPayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3409,8 +3406,8 @@ export class OrganizationPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationDeletePayloadFragment response data
  */
-export class OrganizationDeletePayload extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationDeletePayloadFragment) {
+export class OrganizationDeletePayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationDeletePayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3425,8 +3422,8 @@ export class OrganizationDeletePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - AdminIntegrationPayloadFragment response data
  */
-export class AdminIntegrationPayload extends Request {
-  public constructor(request: LinearRequest, data: D.AdminIntegrationPayloadFragment) {
+export class AdminIntegrationPayload extends LinearRequest {
+  public constructor(request: Request, data: D.AdminIntegrationPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3441,8 +3438,8 @@ export class AdminIntegrationPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationAccessPayloadFragment response data
  */
-export class OrganizationAccessPayload extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationAccessPayloadFragment) {
+export class OrganizationAccessPayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationAccessPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3457,8 +3454,8 @@ export class OrganizationAccessPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationSamlConfigurePayloadFragment response data
  */
-export class OrganizationSamlConfigurePayload extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationSamlConfigurePayloadFragment) {
+export class OrganizationSamlConfigurePayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationSamlConfigurePayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
     this.samlEnabled = data.samlEnabled ?? undefined;
@@ -3481,8 +3478,8 @@ export class OrganizationSamlConfigurePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - SamlConfigurationFragment response data
  */
-export class SamlConfiguration extends Request {
-  public constructor(request: LinearRequest, data: D.SamlConfigurationFragment) {
+export class SamlConfiguration extends LinearRequest {
+  public constructor(request: Request, data: D.SamlConfigurationFragment) {
     super(request);
     this.ssoSigningCert = data.ssoSigningCert ?? undefined;
     this.ssoEndpoint = data.ssoEndpoint ?? undefined;
@@ -3509,8 +3506,8 @@ export class SamlConfiguration extends Request {
  * @param request - function to call the graphql client
  * @param data - AdminCommandPayloadFragment response data
  */
-export class AdminCommandPayload extends Request {
-  public constructor(request: LinearRequest, data: D.AdminCommandPayloadFragment) {
+export class AdminCommandPayload extends LinearRequest {
+  public constructor(request: Request, data: D.AdminCommandPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3525,8 +3522,8 @@ export class AdminCommandPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - EventPayloadFragment response data
  */
-export class EventPayload extends Request {
-  public constructor(request: LinearRequest, data: D.EventPayloadFragment) {
+export class EventPayload extends LinearRequest {
+  public constructor(request: Request, data: D.EventPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3541,8 +3538,8 @@ export class EventPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ApiKeyPayloadFragment response data
  */
-export class ApiKeyPayload extends Request {
-  public constructor(request: LinearRequest, data: D.ApiKeyPayloadFragment) {
+export class ApiKeyPayload extends LinearRequest {
+  public constructor(request: Request, data: D.ApiKeyPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3563,8 +3560,8 @@ export class ApiKeyPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ArchivePayloadFragment response data
  */
-export class ArchivePayload extends Request {
-  public constructor(request: LinearRequest, data: D.ArchivePayloadFragment) {
+export class ArchivePayload extends LinearRequest {
+  public constructor(request: Request, data: D.ArchivePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3582,8 +3579,8 @@ export class ArchivePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - EmailUserAccountAuthChallengeResponseFragment response data
  */
-export class EmailUserAccountAuthChallengeResponse extends Request {
-  public constructor(request: LinearRequest, data: D.EmailUserAccountAuthChallengeResponseFragment) {
+export class EmailUserAccountAuthChallengeResponse extends LinearRequest {
+  public constructor(request: Request, data: D.EmailUserAccountAuthChallengeResponseFragment) {
     super(request);
     this.success = data.success ?? undefined;
     this.authType = data.authType ?? undefined;
@@ -3601,10 +3598,10 @@ export class EmailUserAccountAuthChallengeResponse extends Request {
  * @param request - function to call the graphql client
  * @param data - CreateOrJoinOrganizationResponseFragment response data
  */
-export class CreateOrJoinOrganizationResponse extends Request {
+export class CreateOrJoinOrganizationResponse extends LinearRequest {
   private _user?: D.CreateOrJoinOrganizationResponseFragment["user"];
 
-  public constructor(request: LinearRequest, data: D.CreateOrJoinOrganizationResponseFragment) {
+  public constructor(request: Request, data: D.CreateOrJoinOrganizationResponseFragment) {
     super(request);
     this._user = data.user ?? undefined;
   }
@@ -3623,8 +3620,8 @@ export class CreateOrJoinOrganizationResponse extends Request {
  * @param request - function to call the graphql client
  * @param data - BillingEmailPayloadFragment response data
  */
-export class BillingEmailPayload extends Request {
-  public constructor(request: LinearRequest, data: D.BillingEmailPayloadFragment) {
+export class BillingEmailPayload extends LinearRequest {
+  public constructor(request: Request, data: D.BillingEmailPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
     this.email = data.email ?? undefined;
@@ -3642,10 +3639,10 @@ export class BillingEmailPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - CommentPayloadFragment response data
  */
-export class CommentPayload extends Request {
+export class CommentPayload extends LinearRequest {
   private _comment?: D.CommentPayloadFragment["comment"];
 
-  public constructor(request: LinearRequest, data: D.CommentPayloadFragment) {
+  public constructor(request: Request, data: D.CommentPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3668,8 +3665,8 @@ export class CommentPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ContactPayloadFragment response data
  */
-export class ContactPayload extends Request {
-  public constructor(request: LinearRequest, data: D.ContactPayloadFragment) {
+export class ContactPayload extends LinearRequest {
+  public constructor(request: Request, data: D.ContactPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3684,10 +3681,10 @@ export class ContactPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - CustomViewPayloadFragment response data
  */
-export class CustomViewPayload extends Request {
+export class CustomViewPayload extends LinearRequest {
   private _customView?: D.CustomViewPayloadFragment["customView"];
 
-  public constructor(request: LinearRequest, data: D.CustomViewPayloadFragment) {
+  public constructor(request: Request, data: D.CustomViewPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3710,10 +3707,10 @@ export class CustomViewPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - CyclePayloadFragment response data
  */
-export class CyclePayload extends Request {
+export class CyclePayload extends LinearRequest {
   private _cycle?: D.CyclePayloadFragment["cycle"];
 
-  public constructor(request: LinearRequest, data: D.CyclePayloadFragment) {
+  public constructor(request: Request, data: D.CyclePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3736,8 +3733,8 @@ export class CyclePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - DebugPayloadFragment response data
  */
-export class DebugPayload extends Request {
-  public constructor(request: LinearRequest, data: D.DebugPayloadFragment) {
+export class DebugPayload extends LinearRequest {
+  public constructor(request: Request, data: D.DebugPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3752,8 +3749,8 @@ export class DebugPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - EmailUnsubscribePayloadFragment response data
  */
-export class EmailUnsubscribePayload extends Request {
-  public constructor(request: LinearRequest, data: D.EmailUnsubscribePayloadFragment) {
+export class EmailUnsubscribePayload extends LinearRequest {
+  public constructor(request: Request, data: D.EmailUnsubscribePayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3768,10 +3765,10 @@ export class EmailUnsubscribePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - EmojiPayloadFragment response data
  */
-export class EmojiPayload extends Request {
+export class EmojiPayload extends LinearRequest {
   private _emoji?: D.EmojiPayloadFragment["emoji"];
 
-  public constructor(request: LinearRequest, data: D.EmojiPayloadFragment) {
+  public constructor(request: Request, data: D.EmojiPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3794,10 +3791,10 @@ export class EmojiPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - FavoritePayloadFragment response data
  */
-export class FavoritePayload extends Request {
+export class FavoritePayload extends LinearRequest {
   private _favorite?: D.FavoritePayloadFragment["favorite"];
 
-  public constructor(request: LinearRequest, data: D.FavoritePayloadFragment) {
+  public constructor(request: Request, data: D.FavoritePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3820,8 +3817,8 @@ export class FavoritePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - FeedbackPayloadFragment response data
  */
-export class FeedbackPayload extends Request {
-  public constructor(request: LinearRequest, data: D.FeedbackPayloadFragment) {
+export class FeedbackPayload extends LinearRequest {
+  public constructor(request: Request, data: D.FeedbackPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -3836,8 +3833,8 @@ export class FeedbackPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - UploadPayloadFragment response data
  */
-export class UploadPayload extends Request {
-  public constructor(request: LinearRequest, data: D.UploadPayloadFragment) {
+export class UploadPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UploadPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3858,8 +3855,8 @@ export class UploadPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - UploadFileFragment response data
  */
-export class UploadFile extends Request {
-  public constructor(request: LinearRequest, data: D.UploadFileFragment) {
+export class UploadFile extends LinearRequest {
+  public constructor(request: Request, data: D.UploadFileFragment) {
     super(request);
     this.filename = data.filename ?? undefined;
     this.contentType = data.contentType ?? undefined;
@@ -3890,8 +3887,8 @@ export class UploadFile extends Request {
  * @param request - function to call the graphql client
  * @param data - UploadFileHeaderFragment response data
  */
-export class UploadFileHeader extends Request {
-  public constructor(request: LinearRequest, data: D.UploadFileHeaderFragment) {
+export class UploadFileHeader extends LinearRequest {
+  public constructor(request: Request, data: D.UploadFileHeaderFragment) {
     super(request);
     this.key = data.key ?? undefined;
     this.value = data.value ?? undefined;
@@ -3909,8 +3906,8 @@ export class UploadFileHeader extends Request {
  * @param request - function to call the graphql client
  * @param data - ImageUploadFromUrlPayloadFragment response data
  */
-export class ImageUploadFromUrlPayload extends Request {
-  public constructor(request: LinearRequest, data: D.ImageUploadFromUrlPayloadFragment) {
+export class ImageUploadFromUrlPayload extends LinearRequest {
+  public constructor(request: Request, data: D.ImageUploadFromUrlPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.url = data.url ?? undefined;
@@ -3931,10 +3928,10 @@ export class ImageUploadFromUrlPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - IntegrationPayloadFragment response data
  */
-export class IntegrationPayload extends Request {
+export class IntegrationPayload extends LinearRequest {
   private _integration?: D.IntegrationPayloadFragment["integration"];
 
-  public constructor(request: LinearRequest, data: D.IntegrationPayloadFragment) {
+  public constructor(request: Request, data: D.IntegrationPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3957,10 +3954,10 @@ export class IntegrationPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueLabelPayloadFragment response data
  */
-export class IssueLabelPayload extends Request {
+export class IssueLabelPayload extends LinearRequest {
   private _issueLabel?: D.IssueLabelPayloadFragment["issueLabel"];
 
-  public constructor(request: LinearRequest, data: D.IssueLabelPayloadFragment) {
+  public constructor(request: Request, data: D.IssueLabelPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -3983,10 +3980,10 @@ export class IssueLabelPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - IssueRelationPayloadFragment response data
  */
-export class IssueRelationPayload extends Request {
+export class IssueRelationPayload extends LinearRequest {
   private _issueRelation?: D.IssueRelationPayloadFragment["issueRelation"];
 
-  public constructor(request: LinearRequest, data: D.IssueRelationPayloadFragment) {
+  public constructor(request: Request, data: D.IssueRelationPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4009,10 +4006,10 @@ export class IssueRelationPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - IssuePayloadFragment response data
  */
-export class IssuePayload extends Request {
+export class IssuePayload extends LinearRequest {
   private _issue?: D.IssuePayloadFragment["issue"];
 
-  public constructor(request: LinearRequest, data: D.IssuePayloadFragment) {
+  public constructor(request: Request, data: D.IssuePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4035,10 +4032,10 @@ export class IssuePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - MilestonePayloadFragment response data
  */
-export class MilestonePayload extends Request {
+export class MilestonePayload extends LinearRequest {
   private _milestone?: D.MilestonePayloadFragment["milestone"];
 
-  public constructor(request: LinearRequest, data: D.MilestonePayloadFragment) {
+  public constructor(request: Request, data: D.MilestonePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4061,8 +4058,8 @@ export class MilestonePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - NotificationPayloadFragment response data
  */
-export class NotificationPayload extends Request {
-  public constructor(request: LinearRequest, data: D.NotificationPayloadFragment) {
+export class NotificationPayload extends LinearRequest {
+  public constructor(request: Request, data: D.NotificationPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4083,8 +4080,8 @@ export class NotificationPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - NotificationSubscriptionPayloadFragment response data
  */
-export class NotificationSubscriptionPayload extends Request {
-  public constructor(request: LinearRequest, data: D.NotificationSubscriptionPayloadFragment) {
+export class NotificationSubscriptionPayload extends LinearRequest {
+  public constructor(request: Request, data: D.NotificationSubscriptionPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4107,8 +4104,8 @@ export class NotificationSubscriptionPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OauthClientPayloadFragment response data
  */
-export class OauthClientPayload extends Request {
-  public constructor(request: LinearRequest, data: D.OauthClientPayloadFragment) {
+export class OauthClientPayload extends LinearRequest {
+  public constructor(request: Request, data: D.OauthClientPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4129,8 +4126,8 @@ export class OauthClientPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OauthClientFragment response data
  */
-export class OauthClient extends Request {
-  public constructor(request: LinearRequest, data: D.OauthClientFragment) {
+export class OauthClient extends LinearRequest {
+  public constructor(request: Request, data: D.OauthClientFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -4181,8 +4178,8 @@ export class OauthClient extends Request {
  * @param request - function to call the graphql client
  * @param data - RotateSecretPayloadFragment response data
  */
-export class RotateSecretPayload extends Request {
-  public constructor(request: LinearRequest, data: D.RotateSecretPayloadFragment) {
+export class RotateSecretPayload extends LinearRequest {
+  public constructor(request: Request, data: D.RotateSecretPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4200,8 +4197,8 @@ export class RotateSecretPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OauthTokenRevokePayloadFragment response data
  */
-export class OauthTokenRevokePayload extends Request {
-  public constructor(request: LinearRequest, data: D.OauthTokenRevokePayloadFragment) {
+export class OauthTokenRevokePayload extends LinearRequest {
+  public constructor(request: Request, data: D.OauthTokenRevokePayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -4216,8 +4213,8 @@ export class OauthTokenRevokePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationDomainPayloadFragment response data
  */
-export class OrganizationDomainPayload extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationDomainPayloadFragment) {
+export class OrganizationDomainPayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationDomainPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4240,10 +4237,10 @@ export class OrganizationDomainPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationDomainFragment response data
  */
-export class OrganizationDomain extends Request {
+export class OrganizationDomain extends LinearRequest {
   private _creator?: D.OrganizationDomainFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.OrganizationDomainFragment) {
+  public constructor(request: Request, data: D.OrganizationDomainFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -4284,8 +4281,8 @@ export class OrganizationDomain extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationInvitePayloadFragment response data
  */
-export class OrganizationInvitePayload extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationInvitePayloadFragment) {
+export class OrganizationInvitePayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationInvitePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4308,10 +4305,10 @@ export class OrganizationInvitePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ProjectLinkPayloadFragment response data
  */
-export class ProjectLinkPayload extends Request {
+export class ProjectLinkPayload extends LinearRequest {
   private _projectLink?: D.ProjectLinkPayloadFragment["projectLink"];
 
-  public constructor(request: LinearRequest, data: D.ProjectLinkPayloadFragment) {
+  public constructor(request: Request, data: D.ProjectLinkPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4334,10 +4331,10 @@ export class ProjectLinkPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ProjectPayloadFragment response data
  */
-export class ProjectPayload extends Request {
+export class ProjectPayload extends LinearRequest {
   private _project?: D.ProjectPayloadFragment["project"];
 
-  public constructor(request: LinearRequest, data: D.ProjectPayloadFragment) {
+  public constructor(request: Request, data: D.ProjectPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4360,10 +4357,10 @@ export class ProjectPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ReactionPayloadFragment response data
  */
-export class ReactionPayload extends Request {
+export class ReactionPayload extends LinearRequest {
   private _reaction?: D.ReactionPayloadFragment["reaction"];
 
-  public constructor(request: LinearRequest, data: D.ReactionPayloadFragment) {
+  public constructor(request: Request, data: D.ReactionPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4384,8 +4381,8 @@ export class ReactionPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - CreateCsvExportReportPayloadFragment response data
  */
-export class CreateCsvExportReportPayload extends Request {
-  public constructor(request: LinearRequest, data: D.CreateCsvExportReportPayloadFragment) {
+export class CreateCsvExportReportPayload extends LinearRequest {
+  public constructor(request: Request, data: D.CreateCsvExportReportPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -4400,8 +4397,8 @@ export class CreateCsvExportReportPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - SubscriptionSessionPayloadFragment response data
  */
-export class SubscriptionSessionPayload extends Request {
-  public constructor(request: LinearRequest, data: D.SubscriptionSessionPayloadFragment) {
+export class SubscriptionSessionPayload extends LinearRequest {
+  public constructor(request: Request, data: D.SubscriptionSessionPayloadFragment) {
     super(request);
     this.session = data.session ?? undefined;
   }
@@ -4416,8 +4413,8 @@ export class SubscriptionSessionPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - SubscriptionPayloadFragment response data
  */
-export class SubscriptionPayload extends Request {
-  public constructor(request: LinearRequest, data: D.SubscriptionPayloadFragment) {
+export class SubscriptionPayload extends LinearRequest {
+  public constructor(request: Request, data: D.SubscriptionPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.canceledAt = data.canceledAt ?? undefined;
@@ -4442,10 +4439,10 @@ export class SubscriptionPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - TeamMembershipPayloadFragment response data
  */
-export class TeamMembershipPayload extends Request {
+export class TeamMembershipPayload extends LinearRequest {
   private _teamMembership?: D.TeamMembershipPayloadFragment["teamMembership"];
 
-  public constructor(request: LinearRequest, data: D.TeamMembershipPayloadFragment) {
+  public constructor(request: Request, data: D.TeamMembershipPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4468,10 +4465,10 @@ export class TeamMembershipPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - TeamPayloadFragment response data
  */
-export class TeamPayload extends Request {
+export class TeamPayload extends LinearRequest {
   private _team?: D.TeamPayloadFragment["team"];
 
-  public constructor(request: LinearRequest, data: D.TeamPayloadFragment) {
+  public constructor(request: Request, data: D.TeamPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4494,10 +4491,10 @@ export class TeamPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - TemplatePayloadFragment response data
  */
-export class TemplatePayload extends Request {
+export class TemplatePayload extends LinearRequest {
   private _template?: D.TemplatePayloadFragment["template"];
 
-  public constructor(request: LinearRequest, data: D.TemplatePayloadFragment) {
+  public constructor(request: Request, data: D.TemplatePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4520,8 +4517,8 @@ export class TemplatePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - UserSettingsPayloadFragment response data
  */
-export class UserSettingsPayload extends Request {
-  public constructor(request: LinearRequest, data: D.UserSettingsPayloadFragment) {
+export class UserSettingsPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserSettingsPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4543,8 +4540,8 @@ export class UserSettingsPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - UserSettingsFlagPayloadFragment response data
  */
-export class UserSettingsFlagPayload extends Request {
-  public constructor(request: LinearRequest, data: D.UserSettingsFlagPayloadFragment) {
+export class UserSettingsFlagPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserSettingsFlagPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.flag = data.flag ?? undefined;
@@ -4568,8 +4565,8 @@ export class UserSettingsFlagPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - UserSettingsFlagsResetPayloadFragment response data
  */
-export class UserSettingsFlagsResetPayload extends Request {
-  public constructor(request: LinearRequest, data: D.UserSettingsFlagsResetPayloadFragment) {
+export class UserSettingsFlagsResetPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserSettingsFlagsResetPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4587,8 +4584,8 @@ export class UserSettingsFlagsResetPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - UserSubscribeToNewsletterPayloadFragment response data
  */
-export class UserSubscribeToNewsletterPayload extends Request {
-  public constructor(request: LinearRequest, data: D.UserSubscribeToNewsletterPayloadFragment) {
+export class UserSubscribeToNewsletterPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserSubscribeToNewsletterPayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -4603,8 +4600,8 @@ export class UserSubscribeToNewsletterPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ViewPreferencesPayloadFragment response data
  */
-export class ViewPreferencesPayload extends Request {
-  public constructor(request: LinearRequest, data: D.ViewPreferencesPayloadFragment) {
+export class ViewPreferencesPayload extends LinearRequest {
+  public constructor(request: Request, data: D.ViewPreferencesPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4625,10 +4622,10 @@ export class ViewPreferencesPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - WebhookPayloadFragment response data
  */
-export class WebhookPayload extends Request {
+export class WebhookPayload extends LinearRequest {
   private _webhook?: D.WebhookPayloadFragment["webhook"];
 
-  public constructor(request: LinearRequest, data: D.WebhookPayloadFragment) {
+  public constructor(request: Request, data: D.WebhookPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4651,10 +4648,10 @@ export class WebhookPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - WorkflowStatePayloadFragment response data
  */
-export class WorkflowStatePayload extends Request {
+export class WorkflowStatePayload extends LinearRequest {
   private _workflowState?: D.WorkflowStatePayloadFragment["workflowState"];
 
-  public constructor(request: LinearRequest, data: D.WorkflowStatePayloadFragment) {
+  public constructor(request: Request, data: D.WorkflowStatePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4677,8 +4674,8 @@ export class WorkflowStatePayload extends Request {
  * @param request - function to call the graphql client
  * @param data - DocumentStepFragment response data
  */
-export class DocumentStep extends Request {
-  public constructor(request: LinearRequest, data: D.DocumentStepFragment) {
+export class DocumentStep extends LinearRequest {
+  public constructor(request: Request, data: D.DocumentStepFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -4714,8 +4711,8 @@ export class DocumentStep extends Request {
  * @param request - function to call the graphql client
  * @param data - PushSubscriptionFragment response data
  */
-export class PushSubscription extends Request {
-  public constructor(request: LinearRequest, data: D.PushSubscriptionFragment) {
+export class PushSubscription extends LinearRequest {
+  public constructor(request: Request, data: D.PushSubscriptionFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -4742,8 +4739,8 @@ export class PushSubscription extends Request {
  * @param request - function to call the graphql client
  * @param data - PushSubscriptionConnectionFragment response data
  */
-export class PushSubscriptionConnection extends Request {
-  public constructor(request: LinearRequest, data: D.PushSubscriptionConnectionFragment) {
+export class PushSubscriptionConnection extends LinearRequest {
+  public constructor(request: Request, data: D.PushSubscriptionConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new PushSubscription(request, node)) : undefined;
@@ -4759,8 +4756,8 @@ export class PushSubscriptionConnection extends Request {
  * @param request - function to call the graphql client
  * @param data - UserAccountFragment response data
  */
-export class UserAccount extends Request {
-  public constructor(request: LinearRequest, data: D.UserAccountFragment) {
+export class UserAccount extends LinearRequest {
+  public constructor(request: Request, data: D.UserAccountFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
@@ -4796,10 +4793,10 @@ export class UserAccount extends Request {
  * @param request - function to call the graphql client
  * @param data - FileUploadFragment response data
  */
-export class FileUpload extends Request {
+export class FileUpload extends LinearRequest {
   private _creator?: D.FileUploadFragment["creator"];
 
-  public constructor(request: LinearRequest, data: D.FileUploadFragment) {
+  public constructor(request: Request, data: D.FileUploadFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.assetUrl = data.assetUrl ?? undefined;
@@ -4838,8 +4835,8 @@ export class FileUpload extends Request {
  * @param request - function to call the graphql client
  * @param data - SynchronizedPayloadFragment response data
  */
-export class SynchronizedPayload extends Request {
-  public constructor(request: LinearRequest, data: D.SynchronizedPayloadFragment) {
+export class SynchronizedPayload extends LinearRequest {
+  public constructor(request: Request, data: D.SynchronizedPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
   }
@@ -4854,8 +4851,8 @@ export class SynchronizedPayload extends Request {
  * @param request - function to call the graphql client
  * @param data - ApplicationFragment response data
  */
-export class Application extends Request {
-  public constructor(request: LinearRequest, data: D.ApplicationFragment) {
+export class Application extends LinearRequest {
+  public constructor(request: Request, data: D.ApplicationFragment) {
     super(request);
     this.clientId = data.clientId ?? undefined;
     this.name = data.name ?? undefined;
@@ -4885,8 +4882,8 @@ export class Application extends Request {
  * @param request - function to call the graphql client
  * @param data - OrganizationDomainSimplePayloadFragment response data
  */
-export class OrganizationDomainSimplePayload extends Request {
-  public constructor(request: LinearRequest, data: D.OrganizationDomainSimplePayloadFragment) {
+export class OrganizationDomainSimplePayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationDomainSimplePayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -4900,8 +4897,8 @@ export class OrganizationDomainSimplePayload extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class UserQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -4925,8 +4922,8 @@ export class UserQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ViewerQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ViewerQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -4947,8 +4944,8 @@ export class ViewerQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -4971,8 +4968,8 @@ export class OrganizationQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationExistsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationExistsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -4996,8 +4993,8 @@ export class OrganizationExistsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SyncBootstrapQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class SyncBootstrapQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5023,8 +5020,8 @@ export class SyncBootstrapQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SyncUpdatesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class SyncUpdatesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5048,8 +5045,8 @@ export class SyncUpdatesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ArchivedModelSyncQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ArchivedModelSyncQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5075,8 +5072,8 @@ export class ArchivedModelSyncQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ArchivedModelsSyncQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ArchivedModelsSyncQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5108,8 +5105,8 @@ export class ArchivedModelsSyncQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookupQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookupQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5134,8 +5131,8 @@ export class AdminUserAccountLookupQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UsersQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class UsersQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5157,8 +5154,8 @@ export class UsersQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ApiKeysQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ApiKeysQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5180,8 +5177,8 @@ export class ApiKeysQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ApplicationWithAuthorizationQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ApplicationWithAuthorizationQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5216,8 +5213,8 @@ export class ApplicationWithAuthorizationQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AuthorizedApplicationsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AuthorizedApplicationsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5241,8 +5238,8 @@ export class AuthorizedApplicationsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SsoUrlFromEmailQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class SsoUrlFromEmailQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5271,8 +5268,8 @@ export class SsoUrlFromEmailQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class BillingDetailsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class BillingDetailsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5295,8 +5292,8 @@ export class BillingDetailsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CollaborativeDocumentJoinQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class CollaborativeDocumentJoinQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5331,8 +5328,8 @@ export class CollaborativeDocumentJoinQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CommentQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class CommentQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5356,8 +5353,8 @@ export class CommentQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CommentsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class CommentsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5379,8 +5376,8 @@ export class CommentsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class CustomViewQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5404,8 +5401,8 @@ export class CustomViewQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class CustomViewsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5427,8 +5424,8 @@ export class CustomViewsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CycleQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class CycleQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5452,8 +5449,8 @@ export class CycleQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CyclesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class CyclesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5475,8 +5472,8 @@ export class CyclesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class EmojiQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class EmojiQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5500,8 +5497,8 @@ export class EmojiQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class EmojisQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class EmojisQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5523,8 +5520,8 @@ export class EmojisQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class FavoriteQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class FavoriteQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5548,8 +5545,8 @@ export class FavoriteQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class FavoritesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class FavoritesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5571,8 +5568,8 @@ export class FavoritesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class FigmaEmbedInfoQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class FigmaEmbedInfoQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5601,8 +5598,8 @@ export class FigmaEmbedInfoQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5626,8 +5623,8 @@ export class IntegrationQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5651,8 +5648,8 @@ export class IntegrationsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResourceQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationResourceQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5679,8 +5676,8 @@ export class IntegrationResourceQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResourcesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationResourcesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5705,8 +5702,8 @@ export class IntegrationResourcesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class InviteInfoQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class InviteInfoQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5735,8 +5732,8 @@ export class InviteInfoQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueLabelQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5760,8 +5757,8 @@ export class IssueLabelQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueLabelsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5783,8 +5780,8 @@ export class IssueLabelsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueRelationQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5808,8 +5805,8 @@ export class IssueRelationQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueRelationsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5833,8 +5830,8 @@ export class IssueRelationsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5858,8 +5855,8 @@ export class IssueQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueSearchQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueSearchQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5888,8 +5885,8 @@ export class IssueSearchQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class IssuesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5911,8 +5908,8 @@ export class IssuesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class MilestoneQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class MilestoneQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5936,8 +5933,8 @@ export class MilestoneQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class MilestonesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class MilestonesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5959,8 +5956,8 @@ export class MilestonesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -5983,8 +5980,8 @@ export class NotificationQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6008,8 +6005,8 @@ export class NotificationsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationSubscriptionQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationSubscriptionQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6036,8 +6033,8 @@ export class NotificationSubscriptionQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationInviteQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationInviteQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6061,8 +6058,8 @@ export class OrganizationInviteQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationInvitesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationInvitesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6087,8 +6084,8 @@ export class OrganizationInvitesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectLinkQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectLinkQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6112,8 +6109,8 @@ export class ProjectLinkQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectLinksQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectLinksQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6137,8 +6134,8 @@ export class ProjectLinksQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6162,8 +6159,8 @@ export class ProjectQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6185,8 +6182,8 @@ export class ProjectsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class PushSubscriptionTestQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class PushSubscriptionTestQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6210,8 +6207,8 @@ export class PushSubscriptionTestQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ReactionQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ReactionQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6235,8 +6232,8 @@ export class ReactionQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ReactionsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ReactionsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6258,8 +6255,8 @@ export class ReactionsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class SubscriptionQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6282,8 +6279,8 @@ export class SubscriptionQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamMembershipQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamMembershipQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6307,8 +6304,8 @@ export class TeamMembershipQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamMembershipsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamMembershipsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6332,8 +6329,8 @@ export class TeamMembershipsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6357,8 +6354,8 @@ export class TeamQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6380,8 +6377,8 @@ export class TeamsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TemplatesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class TemplatesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6402,8 +6399,8 @@ export class TemplatesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TemplateQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class TemplateQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6427,8 +6424,8 @@ export class TemplateQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ViewPreferencesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class ViewPreferencesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6452,8 +6449,8 @@ export class ViewPreferencesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WebhookQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class WebhookQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6477,8 +6474,8 @@ export class WebhookQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WebhooksQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class WebhooksQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6500,8 +6497,8 @@ export class WebhooksQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStateQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class WorkflowStateQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6525,8 +6522,8 @@ export class WorkflowStateQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStatesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class WorkflowStatesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6550,8 +6547,8 @@ export class WorkflowStatesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6577,8 +6574,8 @@ export class UserUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserPromoteAdminMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserPromoteAdminMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6602,8 +6599,8 @@ export class UserPromoteAdminMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserDemoteAdminMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserDemoteAdminMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6627,8 +6624,8 @@ export class UserDemoteAdminMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserSuspendMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserSuspendMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6652,8 +6649,8 @@ export class UserSuspendMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserUnsuspendMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserUnsuspendMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6677,8 +6674,8 @@ export class UserUnsuspendMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6705,8 +6702,8 @@ export class OrganizationUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDeleteChallengeMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationDeleteChallengeMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6730,8 +6727,8 @@ export class OrganizationDeleteChallengeMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6758,8 +6755,8 @@ export class OrganizationDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminDeleteIntegrationMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminDeleteIntegrationMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6786,8 +6783,8 @@ export class AdminDeleteIntegrationMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationToggleAccessMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationToggleAccessMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6814,8 +6811,8 @@ export class OrganizationToggleAccessMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationChangeEmailDomainMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationChangeEmailDomainMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6846,8 +6843,8 @@ export class OrganizationChangeEmailDomainMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationToggleSamlEnabledMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationToggleSamlEnabledMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6874,8 +6871,8 @@ export class OrganizationToggleSamlEnabledMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationConfigureSamlMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationConfigureSamlMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6907,8 +6904,8 @@ export class OrganizationConfigureSamlMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminCommandMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminCommandMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6932,8 +6929,8 @@ export class AdminCommandMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminBulkEmailMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminBulkEmailMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6968,8 +6965,8 @@ export class AdminBulkEmailMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminCreateStripeCustomerMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminCreateStripeCustomerMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -6996,8 +6993,8 @@ export class AdminCreateStripeCustomerMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminScheduleAnonymousTaskMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminScheduleAnonymousTaskMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7024,8 +7021,8 @@ export class AdminScheduleAnonymousTaskMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountChangeEmailMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountChangeEmailMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7054,8 +7051,8 @@ export class AdminUserAccountChangeEmailMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class EventCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class EventCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7079,8 +7076,8 @@ export class EventCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ApiKeyCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ApiKeyCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7104,8 +7101,8 @@ export class ApiKeyCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ApiKeyDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ApiKeyDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7129,8 +7126,8 @@ export class ApiKeyDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class EmailUserAccountAuthChallengeMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class EmailUserAccountAuthChallengeMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7159,8 +7156,8 @@ export class EmailUserAccountAuthChallengeMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class EmailTokenUserAccountAuthMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class EmailTokenUserAccountAuthMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7187,8 +7184,8 @@ export class EmailTokenUserAccountAuthMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SamlTokenUserAccountAuthMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class SamlTokenUserAccountAuthMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7215,8 +7212,8 @@ export class SamlTokenUserAccountAuthMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class GoogleUserAccountAuthMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class GoogleUserAccountAuthMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7243,8 +7240,8 @@ export class GoogleUserAccountAuthMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CreateOrganizationFromOnboardingMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CreateOrganizationFromOnboardingMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7276,8 +7273,8 @@ export class CreateOrganizationFromOnboardingMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class JoinOrganizationFromOnboardingMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class JoinOrganizationFromOnboardingMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7304,8 +7301,8 @@ export class JoinOrganizationFromOnboardingMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class LeaveOrganizationMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class LeaveOrganizationMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7332,8 +7329,8 @@ export class LeaveOrganizationMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class BillingEmailUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class BillingEmailUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7360,8 +7357,8 @@ export class BillingEmailUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CollaborativeDocumentUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CollaborativeDocumentUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7390,8 +7387,8 @@ export class CollaborativeDocumentUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CommentCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CommentCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7415,8 +7412,8 @@ export class CommentCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CommentUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CommentUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7442,8 +7439,8 @@ export class CommentUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CommentDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CommentDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7467,8 +7464,8 @@ export class CommentDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ContactCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ContactCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7492,8 +7489,8 @@ export class ContactCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CustomViewCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7517,8 +7514,8 @@ export class CustomViewCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CustomViewUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7544,8 +7541,8 @@ export class CustomViewUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CustomViewDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CustomViewDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7569,8 +7566,8 @@ export class CustomViewDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CycleCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CycleCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7594,8 +7591,8 @@ export class CycleCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CycleUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CycleUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7621,8 +7618,8 @@ export class CycleUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CycleArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CycleArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7646,8 +7643,8 @@ export class CycleArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class DebugFailWithInternalErrorMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class DebugFailWithInternalErrorMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7671,8 +7668,8 @@ export class DebugFailWithInternalErrorMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class DebugFailWithWarningMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class DebugFailWithWarningMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7696,8 +7693,8 @@ export class DebugFailWithWarningMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class DebugCreateSamlOrgMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class DebugCreateSamlOrgMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7721,8 +7718,8 @@ export class DebugCreateSamlOrgMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class EmailUnsubscribeMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class EmailUnsubscribeMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7746,8 +7743,8 @@ export class EmailUnsubscribeMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class EmojiCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class EmojiCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7771,8 +7768,8 @@ export class EmojiCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class EmojiDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class EmojiDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7796,8 +7793,8 @@ export class EmojiDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class FavoriteCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class FavoriteCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7821,8 +7818,8 @@ export class FavoriteCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class FavoriteUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class FavoriteUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7848,8 +7845,8 @@ export class FavoriteUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class FavoriteDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class FavoriteDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7873,8 +7870,8 @@ export class FavoriteDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class FeedbackCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class FeedbackCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7898,8 +7895,8 @@ export class FeedbackCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class FileUploadMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class FileUploadMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7934,8 +7931,8 @@ export class FileUploadMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ImageUploadFromUrlMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ImageUploadFromUrlMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7962,8 +7959,8 @@ export class ImageUploadFromUrlMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationGithubConnectMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationGithubConnectMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -7990,8 +7987,8 @@ export class IntegrationGithubConnectMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationGitlabConnectMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationGitlabConnectMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8020,8 +8017,8 @@ export class IntegrationGitlabConnectMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationSlackMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8053,8 +8050,8 @@ export class IntegrationSlackMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackPersonalMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationSlackPersonalMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8083,8 +8080,8 @@ export class IntegrationSlackPersonalMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackPostMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationSlackPostMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8122,8 +8119,8 @@ export class IntegrationSlackPostMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackProjectPostMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationSlackProjectPostMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8154,8 +8151,8 @@ export class IntegrationSlackProjectPostMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSlackImportEmojisMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationSlackImportEmojisMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8184,8 +8181,8 @@ export class IntegrationSlackImportEmojisMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationFigmaMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationFigmaMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8211,8 +8208,8 @@ export class IntegrationFigmaMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationGoogleSheetsMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationGoogleSheetsMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8239,8 +8236,8 @@ export class IntegrationGoogleSheetsMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class RefreshGoogleSheetsDataMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class RefreshGoogleSheetsDataMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8267,8 +8264,8 @@ export class RefreshGoogleSheetsDataMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationSentryConnectMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationSentryConnectMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8303,8 +8300,8 @@ export class IntegrationSentryConnectMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8331,8 +8328,8 @@ export class IntegrationDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationResourceArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IntegrationResourceArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8359,8 +8356,8 @@ export class IntegrationResourceArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueLabelCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8384,8 +8381,8 @@ export class IssueLabelCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueLabelUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8411,8 +8408,8 @@ export class IssueLabelUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueLabelArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueLabelArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8439,8 +8436,8 @@ export class IssueLabelArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueRelationCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8467,8 +8464,8 @@ export class IssueRelationCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueRelationUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8497,8 +8494,8 @@ export class IssueRelationUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueRelationDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueRelationDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8525,8 +8522,8 @@ export class IssueRelationDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8550,8 +8547,8 @@ export class IssueCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8577,8 +8574,8 @@ export class IssueUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8602,8 +8599,8 @@ export class IssueArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class IssueUnarchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class IssueUnarchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8627,8 +8624,8 @@ export class IssueUnarchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class MilestoneCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class MilestoneCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8652,8 +8649,8 @@ export class MilestoneCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class MilestoneUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class MilestoneUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8679,8 +8676,8 @@ export class MilestoneUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class MilestoneDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class MilestoneDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8704,8 +8701,8 @@ export class MilestoneDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8734,8 +8731,8 @@ export class NotificationCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8764,8 +8761,8 @@ export class NotificationUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8792,8 +8789,8 @@ export class NotificationDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8820,8 +8817,8 @@ export class NotificationArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationUnarchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationUnarchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8848,8 +8845,8 @@ export class NotificationUnarchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationSubscriptionCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationSubscriptionCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8878,8 +8875,8 @@ export class NotificationSubscriptionCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class NotificationSubscriptionDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class NotificationSubscriptionDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8906,8 +8903,8 @@ export class NotificationSubscriptionDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OauthClientCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OauthClientCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8934,8 +8931,8 @@ export class OauthClientCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OauthClientUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OauthClientUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8964,8 +8961,8 @@ export class OauthClientUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OauthClientArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OauthClientArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -8992,8 +8989,8 @@ export class OauthClientArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OauthClientRotateSecretMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OauthClientRotateSecretMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9020,8 +9017,8 @@ export class OauthClientRotateSecretMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OauthTokenRevokeMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OauthTokenRevokeMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9047,8 +9044,8 @@ export class OauthTokenRevokeMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDomainVerifyMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationDomainVerifyMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9075,8 +9072,8 @@ export class OrganizationDomainVerifyMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDomainCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationDomainCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9103,8 +9100,8 @@ export class OrganizationDomainCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationDomainDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationDomainDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9131,8 +9128,8 @@ export class OrganizationDomainDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationInviteCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationInviteCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9159,8 +9156,8 @@ export class OrganizationInviteCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ResentOrganizationInviteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ResentOrganizationInviteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9187,8 +9184,8 @@ export class ResentOrganizationInviteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationInviteDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class OrganizationInviteDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9215,8 +9212,8 @@ export class OrganizationInviteDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectLinkCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectLinkCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9243,8 +9240,8 @@ export class ProjectLinkCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectLinkDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectLinkDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9271,8 +9268,8 @@ export class ProjectLinkDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9296,8 +9293,8 @@ export class ProjectCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9323,8 +9320,8 @@ export class ProjectUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ProjectArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ProjectArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9348,8 +9345,8 @@ export class ProjectArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class PushSubscriptionCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class PushSubscriptionCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9376,8 +9373,8 @@ export class PushSubscriptionCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class PushSubscriptionDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class PushSubscriptionDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9404,8 +9401,8 @@ export class PushSubscriptionDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ReactionCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ReactionCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9429,8 +9426,8 @@ export class ReactionCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ReactionDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ReactionDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9454,8 +9451,8 @@ export class ReactionDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class CreateCsvExportReportMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class CreateCsvExportReportMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9479,8 +9476,8 @@ export class CreateCsvExportReportMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionSessionCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class SubscriptionSessionCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9507,8 +9504,8 @@ export class SubscriptionSessionCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionUpdateSessionCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class SubscriptionUpdateSessionCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9532,8 +9529,8 @@ export class SubscriptionUpdateSessionCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class SubscriptionUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9562,8 +9559,8 @@ export class SubscriptionUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionUpgradeMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class SubscriptionUpgradeMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9592,8 +9589,8 @@ export class SubscriptionUpgradeMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class SubscriptionArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class SubscriptionArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9620,8 +9617,8 @@ export class SubscriptionArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamMembershipCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamMembershipCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9648,8 +9645,8 @@ export class TeamMembershipCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamMembershipDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamMembershipDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9676,8 +9673,8 @@ export class TeamMembershipDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9706,8 +9703,8 @@ export class TeamCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9733,8 +9730,8 @@ export class TeamUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9758,8 +9755,8 @@ export class TeamArchiveMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TeamDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TeamDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9783,8 +9780,8 @@ export class TeamDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TemplateCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TemplateCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9808,8 +9805,8 @@ export class TemplateCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TemplateUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TemplateUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9835,8 +9832,8 @@ export class TemplateUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class TemplateDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class TemplateDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9860,8 +9857,8 @@ export class TemplateDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserSettingsUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserSettingsUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9890,8 +9887,8 @@ export class UserSettingsUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserSettingsFlagIncrementMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserSettingsFlagIncrementMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9918,8 +9915,8 @@ export class UserSettingsFlagIncrementMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserSettingsFlagsResetMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserSettingsFlagsResetMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9943,8 +9940,8 @@ export class UserSettingsFlagsResetMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserFlagUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserFlagUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9973,8 +9970,8 @@ export class UserFlagUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class UserSubscribeToNewsletterMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class UserSubscribeToNewsletterMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -9998,8 +9995,8 @@ export class UserSubscribeToNewsletterMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ViewPreferencesCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ViewPreferencesCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10026,8 +10023,8 @@ export class ViewPreferencesCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ViewPreferencesUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ViewPreferencesUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10056,8 +10053,8 @@ export class ViewPreferencesUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class ViewPreferencesDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class ViewPreferencesDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10084,8 +10081,8 @@ export class ViewPreferencesDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WebhookCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class WebhookCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10109,8 +10106,8 @@ export class WebhookCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WebhookUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class WebhookUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10136,8 +10133,8 @@ export class WebhookUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WebhookDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class WebhookDeleteMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10161,8 +10158,8 @@ export class WebhookDeleteMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStateCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class WorkflowStateCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10189,8 +10186,8 @@ export class WorkflowStateCreateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStateUpdateMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class WorkflowStateUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10219,8 +10216,8 @@ export class WorkflowStateUpdateMutation extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class WorkflowStateArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
+export class WorkflowStateArchiveMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10248,10 +10245,10 @@ export class WorkflowStateArchiveMutation extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the user scope
  */
-export class User_AssignedIssuesQuery extends Request {
+export class User_AssignedIssuesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -10281,10 +10278,10 @@ export class User_AssignedIssuesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the user scope
  */
-export class User_CreatedIssuesQuery extends Request {
+export class User_CreatedIssuesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -10311,10 +10308,10 @@ export class User_CreatedIssuesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the user scope
  */
-export class User_TeamMembershipsQuery extends Request {
+export class User_TeamMembershipsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -10345,8 +10342,8 @@ export class User_TeamMembershipsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class Viewer_AssignedIssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class Viewer_AssignedIssuesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10371,8 +10368,8 @@ export class Viewer_AssignedIssuesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class Viewer_CreatedIssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class Viewer_CreatedIssuesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10397,8 +10394,8 @@ export class Viewer_CreatedIssuesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class Viewer_TeamMembershipsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class Viewer_TeamMembershipsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10423,8 +10420,8 @@ export class Viewer_TeamMembershipsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class Organization_UsersQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class Organization_UsersQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10449,8 +10446,8 @@ export class Organization_UsersQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class Organization_TeamsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class Organization_TeamsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10475,8 +10472,8 @@ export class Organization_TeamsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class Organization_MilestonesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class Organization_MilestonesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10501,8 +10498,8 @@ export class Organization_MilestonesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class Organization_IntegrationsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class Organization_IntegrationsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10527,8 +10524,8 @@ export class Organization_IntegrationsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_UsersQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_UsersQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10553,8 +10550,8 @@ export class AdminUserAccountLookup_UsersQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_AssignedIssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_AssignedIssuesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10581,8 +10578,8 @@ export class AdminUserAccountLookup_Users_AssignedIssuesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_CreatedIssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_CreatedIssuesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10609,8 +10606,8 @@ export class AdminUserAccountLookup_Users_CreatedIssuesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_OrganizationQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_OrganizationQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10637,8 +10634,8 @@ export class AdminUserAccountLookup_Users_OrganizationQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_TeamMembershipsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_TeamMembershipsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10665,8 +10662,8 @@ export class AdminUserAccountLookup_Users_TeamMembershipsQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_UsersQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_Organization_UsersQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10693,8 +10690,8 @@ export class AdminUserAccountLookup_Users_Organization_UsersQuery extends Reques
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_TeamsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_Organization_TeamsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10721,8 +10718,8 @@ export class AdminUserAccountLookup_Users_Organization_TeamsQuery extends Reques
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_MilestonesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_Organization_MilestonesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10749,8 +10746,8 @@ export class AdminUserAccountLookup_Users_Organization_MilestonesQuery extends R
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10777,8 +10774,8 @@ export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery extends
  *
  * @param request - function to call the graphql client
  */
-export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10805,8 +10802,8 @@ export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery extends
  *
  * @param request - function to call the graphql client
  */
-export class BillingDetails_InvoicesQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class BillingDetails_InvoicesQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10830,8 +10827,8 @@ export class BillingDetails_InvoicesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class BillingDetails_PaymentMethodQuery extends Request {
-  public constructor(request: LinearRequest) {
+export class BillingDetails_PaymentMethodQuery extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 
@@ -10858,12 +10855,12 @@ export class BillingDetails_PaymentMethodQuery extends Request {
  * @param issueId - required issueId variable to set the collaborativeDocumentJoin scope
  * @param version - required version variable to set the collaborativeDocumentJoin scope
  */
-export class CollaborativeDocumentJoin_StepsQuery extends Request {
+export class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
   private _clientId: string;
   private _issueId: string;
   private _version: number;
 
-  public constructor(request: LinearRequest, clientId: string, issueId: string, version: number) {
+  public constructor(request: Request, clientId: string, issueId: string, version: number) {
     super(request);
     this._clientId = clientId;
     this._issueId = issueId;
@@ -10895,10 +10892,10 @@ export class CollaborativeDocumentJoin_StepsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the cycle scope
  */
-export class Cycle_IssuesQuery extends Request {
+export class Cycle_IssuesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -10925,10 +10922,10 @@ export class Cycle_IssuesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the cycle scope
  */
-export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
+export class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -10960,10 +10957,10 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
  * @param request - function to call the graphql client
  * @param fileId - required fileId variable to set the figmaEmbedInfo scope
  */
-export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
+export class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
   private _fileId: string;
 
-  public constructor(request: LinearRequest, fileId: string) {
+  public constructor(request: Request, fileId: string) {
     super(request);
     this._fileId = fileId;
   }
@@ -10995,10 +10992,10 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration scope
  */
-export class Integration_SettingsQuery extends Request {
+export class Integration_SettingsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11026,10 +11023,10 @@ export class Integration_SettingsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration settings scope
  */
-export class Integration_Settings_SlackPostQuery extends Request {
+export class Integration_Settings_SlackPostQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11057,10 +11054,10 @@ export class Integration_Settings_SlackPostQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration settings scope
  */
-export class Integration_Settings_SlackProjectPostQuery extends Request {
+export class Integration_Settings_SlackProjectPostQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11088,10 +11085,10 @@ export class Integration_Settings_SlackProjectPostQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration settings scope
  */
-export class Integration_Settings_GoogleSheetsQuery extends Request {
+export class Integration_Settings_GoogleSheetsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11119,10 +11116,10 @@ export class Integration_Settings_GoogleSheetsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration settings scope
  */
-export class Integration_Settings_SentryQuery extends Request {
+export class Integration_Settings_SentryQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11150,10 +11147,10 @@ export class Integration_Settings_SentryQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource scope
  */
-export class IntegrationResource_DataQuery extends Request {
+export class IntegrationResource_DataQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11181,10 +11178,10 @@ export class IntegrationResource_DataQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource scope
  */
-export class IntegrationResource_PullRequestQuery extends Request {
+export class IntegrationResource_PullRequestQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11212,10 +11209,10 @@ export class IntegrationResource_PullRequestQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource data scope
  */
-export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
+export class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11243,10 +11240,10 @@ export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource data scope
  */
-export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
+export class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11274,10 +11271,10 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource data scope
  */
-export class IntegrationResource_Data_GithubCommitQuery extends Request {
+export class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11305,10 +11302,10 @@ export class IntegrationResource_Data_GithubCommitQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource data scope
  */
-export class IntegrationResource_Data_SentryIssueQuery extends Request {
+export class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11336,10 +11333,10 @@ export class IntegrationResource_Data_SentryIssueQuery extends Request {
  * @param request - function to call the graphql client
  * @param userHash - required userHash variable to set the inviteInfo scope
  */
-export class InviteInfo_InviteDataQuery extends Request {
+export class InviteInfo_InviteDataQuery extends LinearRequest {
   private _userHash: string;
 
-  public constructor(request: LinearRequest, userHash: string) {
+  public constructor(request: Request, userHash: string) {
     super(request);
     this._userHash = userHash;
   }
@@ -11369,10 +11366,10 @@ export class InviteInfo_InviteDataQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issueLabel scope
  */
-export class IssueLabel_IssuesQuery extends Request {
+export class IssueLabel_IssuesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11399,10 +11396,10 @@ export class IssueLabel_IssuesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
  */
-export class Issue_SubscribersQuery extends Request {
+export class Issue_SubscribersQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11429,10 +11426,10 @@ export class Issue_SubscribersQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
  */
-export class Issue_ChildrenQuery extends Request {
+export class Issue_ChildrenQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11459,10 +11456,10 @@ export class Issue_ChildrenQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
  */
-export class Issue_CommentsQuery extends Request {
+export class Issue_CommentsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11489,10 +11486,10 @@ export class Issue_CommentsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
  */
-export class Issue_HistoryQuery extends Request {
+export class Issue_HistoryQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11519,10 +11516,10 @@ export class Issue_HistoryQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
  */
-export class Issue_LabelsQuery extends Request {
+export class Issue_LabelsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11549,10 +11546,10 @@ export class Issue_LabelsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
  */
-export class Issue_IntegrationResourcesQuery extends Request {
+export class Issue_IntegrationResourcesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11584,10 +11581,10 @@ export class Issue_IntegrationResourcesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
  */
-export class Issue_RelationsQuery extends Request {
+export class Issue_RelationsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11614,10 +11611,10 @@ export class Issue_RelationsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
  */
-export class Issue_InverseRelationsQuery extends Request {
+export class Issue_InverseRelationsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11649,10 +11646,10 @@ export class Issue_InverseRelationsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the milestone scope
  */
-export class Milestone_ProjectsQuery extends Request {
+export class Milestone_ProjectsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11679,10 +11676,10 @@ export class Milestone_ProjectsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the organizationInvite scope
  */
-export class OrganizationInvite_IssuesQuery extends Request {
+export class OrganizationInvite_IssuesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11714,10 +11711,10 @@ export class OrganizationInvite_IssuesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the project scope
  */
-export class Project_TeamsQuery extends Request {
+export class Project_TeamsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11744,10 +11741,10 @@ export class Project_TeamsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the project scope
  */
-export class Project_MembersQuery extends Request {
+export class Project_MembersQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11774,10 +11771,10 @@ export class Project_MembersQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the project scope
  */
-export class Project_IssuesQuery extends Request {
+export class Project_IssuesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11804,10 +11801,10 @@ export class Project_IssuesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the project scope
  */
-export class Project_LinksQuery extends Request {
+export class Project_LinksQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11834,10 +11831,10 @@ export class Project_LinksQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
  */
-export class Team_IssuesQuery extends Request {
+export class Team_IssuesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11864,10 +11861,10 @@ export class Team_IssuesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
  */
-export class Team_CyclesQuery extends Request {
+export class Team_CyclesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11894,10 +11891,10 @@ export class Team_CyclesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
  */
-export class Team_MembershipsQuery extends Request {
+export class Team_MembershipsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11926,10 +11923,10 @@ export class Team_MembershipsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
  */
-export class Team_ProjectsQuery extends Request {
+export class Team_ProjectsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11956,10 +11953,10 @@ export class Team_ProjectsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
  */
-export class Team_StatesQuery extends Request {
+export class Team_StatesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -11986,10 +11983,10 @@ export class Team_StatesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
  */
-export class Team_TemplatesQuery extends Request {
+export class Team_TemplatesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -12016,10 +12013,10 @@ export class Team_TemplatesQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
  */
-export class Team_LabelsQuery extends Request {
+export class Team_LabelsQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -12046,10 +12043,10 @@ export class Team_LabelsQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
  */
-export class Team_WebhooksQuery extends Request {
+export class Team_WebhooksQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -12076,10 +12073,10 @@ export class Team_WebhooksQuery extends Request {
  * @param request - function to call the graphql client
  * @param id - required id variable to set the workflowState scope
  */
-export class WorkflowState_IssuesQuery extends Request {
+export class WorkflowState_IssuesQuery extends LinearRequest {
   private _id: string;
 
-  public constructor(request: LinearRequest, id: string) {
+  public constructor(request: Request, id: string) {
     super(request);
     this._id = id;
   }
@@ -12108,8 +12105,8 @@ export class WorkflowState_IssuesQuery extends Request {
  *
  * @param request - function to call the graphql client
  */
-export class LinearSdk extends Request {
-  public constructor(request: LinearRequest) {
+export class LinearSdk extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
   }
 

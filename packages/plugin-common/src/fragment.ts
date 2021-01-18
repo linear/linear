@@ -6,8 +6,8 @@ import { Named, NamedFields, PluginContext } from "./types";
 /**
  * Get the fragment object type matching the name arg
  */
-export function findFragment<C>(
-  context: PluginContext<C>,
+export function findFragment(
+  context: PluginContext,
   field?: OperationTypeDefinitionNode | FieldDefinitionNode | Named<FieldDefinitionNode>
 ): NamedFields<ObjectTypeDefinitionNode> | undefined {
   if (field) {
@@ -20,10 +20,7 @@ export function findFragment<C>(
 /**
  * Check whether this fragment has valid content and is not a connection, edge or root
  */
-export function isValidFragment<C>(
-  context: PluginContext<C>,
-  fragment: NamedFields<ObjectTypeDefinitionNode>
-): boolean {
+export function isValidFragment(context: PluginContext, fragment: NamedFields<ObjectTypeDefinitionNode>): boolean {
   const hasFields = (fragment.fields ?? []).filter(x => Boolean(x && x !== "cursor")).length;
 
   return Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment));

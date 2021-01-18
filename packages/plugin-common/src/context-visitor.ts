@@ -1,13 +1,12 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
 import { FieldDefinitionNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode } from "graphql";
-import c from "./constants";
-import { OperationType, PluginContext } from "./types";
+import { OperationType, PluginConfig, PluginContext } from "./types";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
-export class ContextVisitor<C> {
+export class ContextVisitor<C extends PluginConfig> {
   private _schema: GraphQLSchema;
   private _config: C;
   private _scalars: typeof DEFAULT_SCALARS = DEFAULT_SCALARS;
@@ -50,7 +49,7 @@ export class ContextVisitor<C> {
   public ObjectTypeDefinition = {
     /** Record all object types */
     enter: (node: ObjectTypeDefinitionNode): ObjectTypeDefinitionNode => {
-      if (!node.name.value.endsWith(c.EDGE_TYPE)) {
+      if (!node.name.value.endsWith("Edge")) {
         this._objects = [...this._objects, node];
       }
 

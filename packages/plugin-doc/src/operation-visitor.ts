@@ -1,19 +1,16 @@
+import { getKeyByValue, isScalarField, OperationType, PluginContext, printList } from "@linear/plugin-common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
-import { isScalarField } from "./field";
 import { printOperations } from "./operation";
-import { printList } from "./print";
-import { OperationType, PluginContext } from "./types";
-import { getKeyByValue } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating operations
  */
-export class OperationVisitor<C> {
-  private _context: PluginContext<C>;
+export class OperationVisitor {
+  private _context: PluginContext;
 
   /** Initialize the visitor */
-  public constructor(context: PluginContext<C>) {
+  public constructor(context: PluginContext) {
     autoBind(this);
 
     this._context = context;
