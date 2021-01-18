@@ -1051,7 +1051,6 @@ fragment OrganizationExistsPayload on OrganizationExistsPayload {
 }
 
 # Contains either the full serialized state of the application or delta packets that the requester can
-#
 # apply to the local data set in order to be up-to-date.
 fragment SyncResponse on SyncResponse {
   # The full state of the organization as a serialized JSON object.

@@ -178,6 +178,7 @@ export interface SdkModel {
   node: SdkModelNode;
   /** The map of fields keyed by type */
   fields: {
+    all: SdkModelField[];
     scalar: SdkScalarField[];
     query: SdkQueryField[];
     object: SdkObjectField[];

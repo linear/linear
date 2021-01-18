@@ -4,6 +4,7 @@ import {
   isConnection,
   isScalarField,
   isValidField,
+  lowerFirst,
   OperationType,
   PluginContext,
   printTypescriptType,
@@ -26,7 +27,7 @@ import {
 } from "./types";
 
 function isValidModel(model: ObjectTypeDefinitionNode) {
-  return !Object.keys(OperationType).includes(model.name.value.toLowerCase()) && !model.name.value.endsWith("Edge");
+  return !Object.keys(OperationType).includes(lowerFirst(model.name.value)) && !model.name.value.endsWith("Edge");
 }
 
 /**
@@ -60,6 +61,7 @@ export class ModelVisitor {
           name: node.name.value,
           node,
           fields: {
+            all: node.fields ?? [],
             scalar: (node.fields?.filter(field => field.__typename === SdkModelFieldType.scalar) ??
               []) as SdkScalarField[],
             query: (node.fields?.filter(field => field.__typename === SdkModelFieldType.query) ??
