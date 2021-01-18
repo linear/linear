@@ -1,4 +1,4 @@
-import { LinearSdk, TeamDocument } from "../index";
+import { LinearSdk, Types } from "../index";
 
 function resolveWithData(data: unknown) {
   return () => {
@@ -14,7 +14,7 @@ describe("LinearSdk", () => {
     const id = "asd";
     await sdk.team(id);
 
-    expect(requester).toHaveBeenCalledWith(TeamDocument, { id });
+    expect(requester).toHaveBeenCalledWith(Types.TeamDocument, { id });
   });
 
   it("returns data", async () => {
