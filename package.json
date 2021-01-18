@@ -23,7 +23,7 @@
     "dev:plugin:sdk": "lerna run dev:plugin:sdk && lerna run generate:sdk",
     "dev:client": "lerna run dev:client",
     "dev:import": "lerna run dev:import",
-    "build": "run-s schema build:common build:plugin:common build:plugin build:client build:import",
+    "build": "run-s schema build:common build:plugin:common build:plugin build:client",
     "build:common": "lerna run build:common",
     "build:plugin:common": "lerna run build:plugin:common",
     "build:plugin": "lerna run build:plugin",

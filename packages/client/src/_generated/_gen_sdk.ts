@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* tslint:disable:no-unused-variable */
 import { DocumentNode } from "graphql";
 import * as D from "./_gen_documents";
 
@@ -4687,7 +4686,6 @@ class WorkflowStatePayload extends LinearRequest {
  * @param request - function to call the graphql client
  * @param data - DocumentStepFragment response data
  */
-/* tslint:disable:no-unused-variable */
 class DocumentStep extends LinearRequest {
   public constructor(request: Request, data: D.DocumentStepFragment) {
     super(request);
