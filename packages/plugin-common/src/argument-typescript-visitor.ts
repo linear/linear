@@ -14,12 +14,12 @@ import { Named, PluginContext } from "./types";
 /**
  * Graphql-codegen visitor for printing a typescript argument
  */
-export class ArgumentTypescriptVisitor<C> {
-  private _context: PluginContext<C>;
+export class ArgumentTypescriptVisitor {
+  private _context: PluginContext;
   private _namespace?: string;
 
   /** Initialize the visitor */
-  public constructor(context: PluginContext<C>, namespace?: string) {
+  public constructor(context: PluginContext, namespace?: string) {
     autoBind(this);
 
     this._context = context;

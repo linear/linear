@@ -29,10 +29,64 @@ export enum OperationType {
  */
 export type Fragment = NamedFields<ObjectTypeDefinitionNode>;
 
+export interface PluginConfig {
+  /**
+   * @description A list of object names to omit
+   *
+   * @exampleMarkdown
+   * ```yml
+   * schema: ./src/schema.graphql
+   * generates:
+   *   src/_gen_documents.graphql:
+   *     plugins:
+   *       - "@linear/plugin-doc"
+   *     config:
+   *       skipObjects:
+   *         - "UserSettings"
+   *
+   * ```
+   */
+  skipObjects?: string[];
+  /**
+   * @description A list of field names to omit
+   *
+   * @exampleMarkdown
+   * ```yml
+   * schema: ./src/schema.graphql
+   * generates:
+   *   src/_gen_documents.graphql:
+   *     plugins:
+   *       - "@linear/plugin-doc"
+   *     config:
+   *       skipFields:
+   *         - "adminCommand"
+   *
+   * ```
+   */
+  skipFields?: string[];
+  /**
+   * @description A list of directives to omit
+   *
+   * @exampleMarkdown
+   * ```yml
+   * schema: ./src/schema.graphql
+   * generates:
+   *   src/_gen_documents.graphql:
+   *     plugins:
+   *       - "@linear/plugin-doc"
+   *     config:
+   *       skipDirectives:
+   *         - "deprecated"
+   *
+   * ```
+   */
+  skipDirectives?: string[];
+}
+
 /**
  * Stateful context for document building information
  */
-export interface PluginContext<C> {
+export interface PluginContext<C extends PluginConfig = PluginConfig> {
   /** The whole graphql schema */
   schema: GraphQLSchema;
   /** All scalars including custom */

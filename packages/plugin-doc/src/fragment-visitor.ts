@@ -1,3 +1,19 @@
+import {
+  findObject,
+  findQuery,
+  getRequiredArgs,
+  isConnection,
+  isValidFragment,
+  Named,
+  NamedFields,
+  nonNullable,
+  PluginContext,
+  printGraphqlComment,
+  printGraphqlDebug,
+  printGraphqlDescription,
+  printList,
+  reduceTypeName,
+} from "@linear/plugin-common";
 import autoBind from "auto-bind";
 import {
   DocumentNode,
@@ -8,24 +24,15 @@ import {
   NonNullTypeNode,
   ObjectTypeDefinitionNode,
 } from "graphql";
-import { getRequiredArgs } from "./args";
-import c from "./constants";
-import { reduceTypeName } from "./field";
-import { isValidFragment } from "./fragment";
-import { findObject, isConnection } from "./object";
-import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printList } from "./print";
-import { findQuery } from "./query";
-import { Named, NamedFields, PluginContext } from "./types";
-import { nonNullable } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
-export class FragmentVisitor<C> {
-  private _context: PluginContext<C>;
+export class FragmentVisitor {
+  private _context: PluginContext;
 
   /** Initialize the visitor */
-  public constructor(context: Omit<PluginContext<C>, "fragments">) {
+  public constructor(context: Omit<PluginContext, "fragments">) {
     autoBind(this);
 
     this._context = { ...context, fragments: [] };
@@ -34,7 +41,7 @@ export class FragmentVisitor<C> {
   /**
    * Return the plugin context with fragments
    */
-  public get context(): PluginContext<C> {
+  public get context(): PluginContext {
     return this._context;
   }
 
@@ -82,7 +89,7 @@ export class FragmentVisitor<C> {
       const type = reduceTypeName(_node.type);
 
       /** Skip objects defined in constants */
-      if (!c.SKIP_OBJECTS.includes(type)) {
+      if (!this._context.config.skipObjects?.includes(type)) {
         const node = (_node as unknown) as Named<FieldDefinitionNode>;
         const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
 

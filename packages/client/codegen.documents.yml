@@ -4,6 +4,25 @@ hooks:
   afterOneFileWrite:
     - prettier --write
 generates:
-  src/_generated/documents.graphql:
+  src/_generated/_gen_documents.graphql:
     plugins:
       - "@linear/plugin-doc"
+    config:
+      skipFields:
+        # - "adminUserAccountLookup"
+        # - "adminCommand"
+        # - "adminBulkEmail"
+        # - "adminCreateStripeCustomer"
+        # - "adminScheduleAnonymousTask"
+        # - "adminUserAccountChangeEmail"
+        # - "adminDeleteIntegration"
+        # - "userPromoteAdmin"
+        # - "userDemoteAdmin"
+        - "availableUsers"
+        # - "integrationResource"
+        # - "organizationInviteCreate"
+      skipObjects:
+        - "UserSettings"
+      skipDirectives:
+        - "skipSdk"
+        - "deprecated"

@@ -32,11 +32,11 @@ function isValidModel(model: ObjectTypeDefinitionNode) {
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
-export class ModelVisitor<C> {
-  private _context: PluginContext<C>;
+export class ModelVisitor {
+  private _context: PluginContext;
 
   /** Initialize the visitor */
-  public constructor(context: PluginContext<C>) {
+  public constructor(context: PluginContext) {
     autoBind(this);
 
     this._context = context;
@@ -83,7 +83,7 @@ export class ModelVisitor<C> {
   public FieldDefinition = {
     /** Process fields for use in the model output */
     leave: (node: FieldDefinitionNode): SdkModelField | null => {
-      if (isValidField(node)) {
+      if (isValidField(this._context, node)) {
         const name = node.name.value;
         const type = printTypescriptType(this._context, node.type, c.NAMESPACE_DOCUMENT);
         const query = findQuery(this._context, node);

@@ -1,4 +1,5 @@
 import { ASTNode, visit } from "graphql";
+import { pascalCase } from "pascal-case";
 import { ArgumentGraphqlVisitor } from "./argument-graphql-visitor";
 import { ArgumentTypescriptVisitor } from "./argument-typescript-visitor";
 import { PluginContext } from "./types";
@@ -110,7 +111,17 @@ export function printGraphqlType(node?: ASTNode | string): string {
 /**
  * Return the printed typescript type
  */
-export function printTypescriptType<C>(context: PluginContext<C>, node?: ASTNode | string, namespace?: string): string {
+export function printTypescriptType(context: PluginContext, node?: ASTNode | string, namespace?: string): string {
   const argTypescriptVisitor = new ArgumentTypescriptVisitor(context, namespace);
   return node ? (typeof node === "string" ? node : visit(node, argTypescriptVisitor)) : "";
+}
+
+/**
+ * Return the name in pascal case with underscores still remaining
+ */
+export function printPascal(str?: string): string {
+  return (str ?? "")
+    .split("_")
+    .map(s => pascalCase(s))
+    .join("_");
 }

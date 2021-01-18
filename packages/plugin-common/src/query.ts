@@ -1,20 +1,19 @@
 import { FieldDefinitionNode } from "graphql";
-import c from "./constants";
-import { reduceListType, reduceTypeName } from "./field";
 import { Named, PluginContext } from "./types";
+import { reduceListType, reduceTypeName } from "./utils";
 
 /**
  * Find a query that can return this field
  * */
-export function findQuery<C>(
-  context: PluginContext<C>,
+export function findQuery(
+  context: PluginContext,
   field: Named<FieldDefinitionNode> | FieldDefinitionNode
 ): FieldDefinitionNode | undefined {
   const type = reduceTypeName(field.type);
   const listType = reduceListType(field.type);
 
   /** Ignore queries for connections and lists */
-  if (type?.endsWith(c.CONNECTION_TYPE)) {
+  if (type?.endsWith("Connection")) {
     return undefined;
   }
 

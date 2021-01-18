@@ -1,19 +1,33 @@
+import {
+  findFragment,
+  findObject,
+  findQuery,
+  getLast,
+  isScalarField,
+  isValidField,
+  OperationType,
+  PluginContext,
+  printGraphqlDebug,
+  printGraphqlDescription,
+  printGraphqlInputArgs,
+  printGraphqlResponseArgs,
+  printGraphqlType,
+  printList,
+} from "@linear/plugin-common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
-import { isScalarField, isValidField, printInputArgs, printResponseArgs } from "./field";
-import { findFragment } from "./fragment";
-import { findObject } from "./object";
-import { printGraphqlDebug, printGraphqlDescription, printGraphqlType, printList } from "./print";
-import { findQuery } from "./query";
-import { OperationType, PluginContext } from "./types";
-import { getLast } from "./utils";
 
 /**
  * Print the operation wrapper
  */
-export function printOperationWrapper(type: OperationType, fields: FieldDefinitionNode[], body: string): string {
+function printOperationWrapper(
+  context: PluginContext,
+  type: OperationType,
+  fields: FieldDefinitionNode[],
+  body: string
+): string {
   const lastField = getLast(fields);
 
-  if (isValidField(lastField)) {
+  if (isValidField(context, lastField)) {
     const operationName = printList(
       fields.map(field => field.name.value),
       "_"
@@ -25,13 +39,13 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
         printGraphqlDescription(lastField.description?.value),
         printGraphqlDebug({ type, operationName, field: lastField }),
         /** The operation definition */
-        `${type} ${operationName}${printInputArgs(fields)} {`,
+        `${type} ${operationName}${printGraphqlInputArgs(fields)} {`,
         /** Each field and its required content */
         fields
           .slice()
           .reverse()
           .reduce((acc, field) => {
-            return `${field.name.value}${printResponseArgs(field)} {
+            return `${field.name.value}${printGraphqlResponseArgs(field)} {
               ${acc === "" ? body : acc}
             }`;
           }, ""),
@@ -47,16 +61,16 @@ export function printOperationWrapper(type: OperationType, fields: FieldDefiniti
 /**
  * Nest the objects until a fragment or scalar is found
  */
-function printOperationFields<C>(
-  context: PluginContext<C>,
+function printOperationFields(
+  context: PluginContext,
   fields: FieldDefinitionNode[],
   object: ObjectTypeDefinitionNode
 ): string {
   const lastField = getLast(fields);
-  return isValidField(lastField)
+  return isValidField(context, lastField)
     ? printList(
         object.fields?.map(field => {
-          if (isValidField(field)) {
+          if (isValidField(context, field)) {
             const operation = printOperationBody(context, [field]);
 
             return operation
@@ -87,10 +101,10 @@ function printOperationFields<C>(
 /**
  * Print the body of the operation
  */
-export function printOperationBody<C>(context: PluginContext<C>, fields: FieldDefinitionNode[]): string | undefined {
+function printOperationBody(context: PluginContext, fields: FieldDefinitionNode[]): string | undefined {
   const lastField = getLast(fields);
 
-  if (isValidField(lastField)) {
+  if (isValidField(context, lastField)) {
     /** Spread the fragment if found */
     const fragment = findFragment(context, lastField);
     if (fragment) {
@@ -107,13 +121,13 @@ export function printOperationBody<C>(context: PluginContext<C>, fields: FieldDe
   return undefined;
 }
 
-export function printFieldOperation<C>(
-  context: PluginContext<C>,
+function printFieldOperation(
+  context: PluginContext,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {
   const body = printOperationBody(context, fields);
-  return body ? printOperationWrapper(type, fields, body) : undefined;
+  return body ? printOperationWrapper(context, type, fields, body) : undefined;
 }
 
 /**
@@ -123,14 +137,14 @@ export function printFieldOperation<C>(
  * @param type either a query or a mutation
  * @param fields a list of fields by which to nest the query
  */
-export function printOperations<C>(
-  context: PluginContext<C>,
+export function printOperations(
+  context: PluginContext,
   type: OperationType,
   fields: FieldDefinitionNode[]
 ): string | undefined {
   const lastField = getLast(fields);
 
-  if (isValidField(lastField)) {
+  if (isValidField(context, lastField)) {
     /** Print the operation for the latest field */
     const nodeOperation = printFieldOperation(context, type, fields);
 

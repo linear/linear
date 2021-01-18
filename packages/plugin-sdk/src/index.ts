@@ -1,32 +1,31 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { DocumentMode } from "@graphql-codegen/visitor-plugin-common";
 import { ContextVisitor, logger, nonNullable, PluginContext, printList } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
-import { printOperations } from "./class";
 import c from "./constants";
-import { getSdkDefinitions } from "./definitions";
 import { printModels } from "./model";
 import { ModelVisitor } from "./model-visitor";
+import { printOperations } from "./operation";
+import { parseOperations as parseDocuments } from "./parse";
 import { printRequest } from "./request";
 import { RawSdkPluginConfig, SdkModel, SdkPluginContext } from "./types";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear sdk
  */
-export const plugin: PluginFunction<RawSdkPluginConfig> = async (
+export const plugin: PluginFunction<SdkPluginConfig> = async (
   schema: GraphQLSchema,
   documents: Types.DocumentFile[],
-  config: RawSdkPluginConfig
+  config: SdkPluginConfig
 ) => {
   try {
     logger.info("Parsing schema");
     const ast = parse(printSchema(schema));
 
     logger.info("Collecting context");
-    const contextVisitor = new ContextVisitor(schema, config);
+    const contextVisitor = new ContextVisitor<SdkPluginConfig>(schema, config);
     visit(ast, contextVisitor);
-    const context: PluginContext<RawSdkPluginConfig> = {
+    const context: PluginContext<SdkPluginConfig> = {
       ...contextVisitor.context,
       fragments: [],
     };
@@ -36,7 +35,7 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
     const models = visit(ast, modelVisitor) as SdkModel[];
 
     logger.info("Processing documents");
-    const sdkDefinitions = getSdkDefinitions(context, documents, models);
+    const sdkDefinitions = parseDocuments(context, documents, models);
     const sdkContext: SdkPluginContext = {
       ...context,
       models,
@@ -58,12 +57,11 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
 
     logger.info("Printing api");
     return {
-      /** Add any initial imports */
       prepend: [
         /** Ignore unused variables */
         "/* eslint-disable @typescript-eslint/no-unused-vars */",
-        /** Import DocumentNode if required */
-        config.documentMode !== DocumentMode.string ? `import { DocumentNode } from 'graphql'` : undefined,
+        /** Import DocumentNode */
+        "import { DocumentNode } from 'graphql'",
         /** Import document namespace */
         `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
       ].filter(nonNullable),
@@ -92,7 +90,7 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
 export const validate: PluginValidateFn = async (
   schema: GraphQLSchema,
   documents: Types.DocumentFile[],
-  config: RawSdkPluginConfig,
+  config: SdkPluginConfig,
   outputFile: string
 ) => {
   const packageName = "@linear/plugin-sdk";

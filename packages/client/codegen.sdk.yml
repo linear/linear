@@ -5,13 +5,31 @@ hooks:
   afterOneFileWrite:
     - prettier --write
 generates:
-  src/_generated/documents.ts:
+  src/_generated/_gen_documents.ts:
     plugins:
       - typescript
       - typescript-operations
       - typed-document-node
-  src/_generated/sdk.ts:
+  src/_generated/_gen_sdk.ts:
     plugins:
       - "@linear/plugin-sdk"
     config:
-      documentFile: ./documents
+      documentFile: ./_gen_documents
+      skipFields:
+        # - "adminUserAccountLookup"
+        # - "adminCommand"
+        # - "adminBulkEmail"
+        # - "adminCreateStripeCustomer"
+        # - "adminScheduleAnonymousTask"
+        # - "adminUserAccountChangeEmail"
+        # - "adminDeleteIntegration"
+        # - "userPromoteAdmin"
+        # - "userDemoteAdmin"
+        - "availableUsers"
+        # - "integrationResource"
+        # - "organizationInviteCreate"
+      skipObjects:
+        - "UserSettings"
+      skipDirectives:
+        - "skipSdk"
+        - "deprecated"
