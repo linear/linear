@@ -48,7 +48,7 @@ export function printRequest(): string {
   return printList(
     [
       "\n",
-      printComment([`The function type for calling the graphql client`]),
+      printComment([`The function for calling the graphql client`]),
       `export type ${c.REQUEST_TYPE} = <R, V>(doc: DocumentNode, ${c.VARIABLE_NAME}?: V) => Promise<R>`,
       "\n",
       printComment(["Base class to provide a request function", ...args.jsdoc]),
