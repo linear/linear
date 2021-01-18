@@ -38,6 +38,7 @@ export function printSdkOperation(o: SdkOperation): string {
         `${o.print.type} ${o.print.field} for ${o.print.model}${o.print.list ? "s" : ""}`,
         o.query?.description?.value ?? "",
         ...o.args.jsdoc,
+        `@returns ${o.print.model}${o.print.list ? "[]" : ""}`,
       ]),
       printDebug(o),
       `public ${o.args.args.length ? "" : "get"} ${o.print.field}(${o.args.printInput}): ${o.print.promise} {

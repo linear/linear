@@ -4915,9 +4915,10 @@ class UserQuery extends LinearRequest {
   }
 
   /**
-   * Call the User Query and return a User
+   * Call the User query and return a User
    *
    * @param id - required id to pass to user
+   * @returns parsed response from UserQuery
    */
   public async fetch(id: string): Promise<User | undefined> {
     return this.request<D.UserQuery, D.UserQueryVariables>(D.UserDocument, {
@@ -4940,8 +4941,9 @@ class ViewerQuery extends LinearRequest {
   }
 
   /**
-   * Call the Viewer Query and return a User
+   * Call the Viewer query and return a User
    *
+   * @returns parsed response from ViewerQuery
    */
   public async fetch(): Promise<User | undefined> {
     return this.request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, {}).then(response => {
@@ -4962,8 +4964,9 @@ class OrganizationQuery extends LinearRequest {
   }
 
   /**
-   * Call the Organization Query and return a Organization
+   * Call the Organization query and return a Organization
    *
+   * @returns parsed response from OrganizationQuery
    */
   public async fetch(): Promise<Organization | undefined> {
     return this.request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument, {}).then(
@@ -4986,9 +4989,10 @@ class OrganizationExistsQuery extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationExists Query and return a OrganizationExistsPayload
+   * Call the OrganizationExists query and return a OrganizationExistsPayload
    *
    * @param urlKey - required urlKey to pass to organizationExists
+   * @returns parsed response from OrganizationExistsQuery
    */
   public async fetch(urlKey: string): Promise<OrganizationExistsPayload | undefined> {
     return this.request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(D.OrganizationExistsDocument, {
@@ -5011,10 +5015,11 @@ class SyncBootstrapQuery extends LinearRequest {
   }
 
   /**
-   * Call the SyncBootstrap Query and return a SyncResponse
+   * Call the SyncBootstrap query and return a SyncResponse
    *
    * @param databaseVersion - required databaseVersion to pass to syncBootstrap
    * @param sinceSyncId - required sinceSyncId to pass to syncBootstrap
+   * @returns parsed response from SyncBootstrapQuery
    */
   public async fetch(databaseVersion: number, sinceSyncId: number): Promise<SyncResponse | undefined> {
     return this.request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument, {
@@ -5038,9 +5043,10 @@ class SyncUpdatesQuery extends LinearRequest {
   }
 
   /**
-   * Call the SyncUpdates Query and return a SyncResponse
+   * Call the SyncUpdates query and return a SyncResponse
    *
    * @param sinceSyncId - required sinceSyncId to pass to syncUpdates
+   * @returns parsed response from SyncUpdatesQuery
    */
   public async fetch(sinceSyncId: number): Promise<SyncResponse | undefined> {
     return this.request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument, {
@@ -5063,10 +5069,11 @@ class ArchivedModelSyncQuery extends LinearRequest {
   }
 
   /**
-   * Call the ArchivedModelSync Query and return a ArchiveResponse
+   * Call the ArchivedModelSync query and return a ArchiveResponse
    *
    * @param identifier - required identifier to pass to archivedModelSync
    * @param modelClass - required modelClass to pass to archivedModelSync
+   * @returns parsed response from ArchivedModelSyncQuery
    */
   public async fetch(identifier: string, modelClass: string): Promise<ArchiveResponse | undefined> {
     return this.request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument, {
@@ -5090,11 +5097,12 @@ class ArchivedModelsSyncQuery extends LinearRequest {
   }
 
   /**
-   * Call the ArchivedModelsSync Query and return a ArchiveResponse
+   * Call the ArchivedModelsSync query and return a ArchiveResponse
    *
    * @param modelClass - required modelClass to pass to archivedModelsSync
    * @param teamId - required teamId to pass to archivedModelsSync
    * @param vars - variables without 'modelClass', 'teamId' to pass into the ArchivedModelsSyncQuery
+   * @returns parsed response from ArchivedModelsSyncQuery
    */
   public async fetch(
     modelClass: string,
@@ -5123,9 +5131,10 @@ class AdminUserAccountLookupQuery extends LinearRequest {
   }
 
   /**
-   * Call the AdminUserAccountLookup Query and return a UserAccountAdminPrivileged
+   * Call the AdminUserAccountLookup query and return a UserAccountAdminPrivileged
    *
    * @param vars - variables to pass into the AdminUserAccountLookupQuery
+   * @returns parsed response from AdminUserAccountLookupQuery
    */
   public async fetch(vars?: D.AdminUserAccountLookupQueryVariables): Promise<UserAccountAdminPrivileged | undefined> {
     return this.request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
@@ -5149,9 +5158,10 @@ class UsersQuery extends LinearRequest {
   }
 
   /**
-   * Call the Users Query and return a UserConnection
+   * Call the Users query and return a UserConnection
    *
    * @param vars - variables to pass into the UsersQuery
+   * @returns parsed response from UsersQuery
    */
   public async fetch(vars?: D.UsersQueryVariables): Promise<UserConnection | undefined> {
     return this.request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, vars).then(response => {
@@ -5172,9 +5182,10 @@ class ApiKeysQuery extends LinearRequest {
   }
 
   /**
-   * Call the ApiKeys Query and return a ApiKeyConnection
+   * Call the ApiKeys query and return a ApiKeyConnection
    *
    * @param vars - variables to pass into the ApiKeysQuery
+   * @returns parsed response from ApiKeysQuery
    */
   public async fetch(vars?: D.ApiKeysQueryVariables): Promise<ApiKeyConnection | undefined> {
     return this.request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, vars).then(response => {
@@ -5195,11 +5206,12 @@ class ApplicationWithAuthorizationQuery extends LinearRequest {
   }
 
   /**
-   * Call the ApplicationWithAuthorization Query and return a UserAuthorizedApplication
+   * Call the ApplicationWithAuthorization query and return a UserAuthorizedApplication
    *
    * @param scope - required scope to pass to applicationWithAuthorization
    * @param clientId - required clientId to pass to applicationWithAuthorization
    * @param vars - variables without 'scope', 'clientId' to pass into the ApplicationWithAuthorizationQuery
+   * @returns parsed response from ApplicationWithAuthorizationQuery
    */
   public async fetch(
     scope: string[],
@@ -5231,8 +5243,9 @@ class AuthorizedApplicationsQuery extends LinearRequest {
   }
 
   /**
-   * Call the AuthorizedApplications Query and return a AuthorizedApplication list
+   * Call the AuthorizedApplications query and return a AuthorizedApplication list
    *
+   * @returns parsed response from AuthorizedApplicationsQuery
    */
   public async fetch(): Promise<AuthorizedApplication[] | undefined> {
     return this.request<D.AuthorizedApplicationsQuery, D.AuthorizedApplicationsQueryVariables>(
@@ -5256,8 +5269,9 @@ class AvailableUsersQuery extends LinearRequest {
   }
 
   /**
-   * Call the AvailableUsers Query and return a AuthResolverResponse
+   * Call the AvailableUsers query and return a AuthResolverResponse
    *
+   * @returns parsed response from AvailableUsersQuery
    */
   public async fetch(): Promise<AuthResolverResponse | undefined> {
     return this.request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument, {}).then(
@@ -5280,10 +5294,11 @@ class SsoUrlFromEmailQuery extends LinearRequest {
   }
 
   /**
-   * Call the SsoUrlFromEmail Query and return a SsoUrlFromEmailResponse
+   * Call the SsoUrlFromEmail query and return a SsoUrlFromEmailResponse
    *
    * @param email - required email to pass to ssoUrlFromEmail
    * @param vars - variables without 'email' to pass into the SsoUrlFromEmailQuery
+   * @returns parsed response from SsoUrlFromEmailQuery
    */
   public async fetch(
     email: string,
@@ -5310,8 +5325,9 @@ class BillingDetailsQuery extends LinearRequest {
   }
 
   /**
-   * Call the BillingDetails Query and return a BillingDetailsPayload
+   * Call the BillingDetails query and return a BillingDetailsPayload
    *
+   * @returns parsed response from BillingDetailsQuery
    */
   public async fetch(): Promise<BillingDetailsPayload | undefined> {
     return this.request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument, {}).then(
@@ -5334,11 +5350,12 @@ class CollaborativeDocumentJoinQuery extends LinearRequest {
   }
 
   /**
-   * Call the CollaborativeDocumentJoin Query and return a CollaborationDocumentUpdatePayload
+   * Call the CollaborativeDocumentJoin query and return a CollaborationDocumentUpdatePayload
    *
    * @param clientId - required clientId to pass to collaborativeDocumentJoin
    * @param issueId - required issueId to pass to collaborativeDocumentJoin
    * @param version - required version to pass to collaborativeDocumentJoin
+   * @returns parsed response from CollaborativeDocumentJoinQuery
    */
   public async fetch(
     clientId: string,
@@ -5370,9 +5387,10 @@ class CommentQuery extends LinearRequest {
   }
 
   /**
-   * Call the Comment Query and return a Comment
+   * Call the Comment query and return a Comment
    *
    * @param id - required id to pass to comment
+   * @returns parsed response from CommentQuery
    */
   public async fetch(id: string): Promise<Comment | undefined> {
     return this.request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, {
@@ -5395,9 +5413,10 @@ class CommentsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Comments Query and return a CommentConnection
+   * Call the Comments query and return a CommentConnection
    *
    * @param vars - variables to pass into the CommentsQuery
+   * @returns parsed response from CommentsQuery
    */
   public async fetch(vars?: D.CommentsQueryVariables): Promise<CommentConnection | undefined> {
     return this.request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument, vars).then(response => {
@@ -5418,9 +5437,10 @@ class CustomViewQuery extends LinearRequest {
   }
 
   /**
-   * Call the CustomView Query and return a CustomView
+   * Call the CustomView query and return a CustomView
    *
    * @param id - required id to pass to customView
+   * @returns parsed response from CustomViewQuery
    */
   public async fetch(id: string): Promise<CustomView | undefined> {
     return this.request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, {
@@ -5443,9 +5463,10 @@ class CustomViewsQuery extends LinearRequest {
   }
 
   /**
-   * Call the CustomViews Query and return a CustomViewConnection
+   * Call the CustomViews query and return a CustomViewConnection
    *
    * @param vars - variables to pass into the CustomViewsQuery
+   * @returns parsed response from CustomViewsQuery
    */
   public async fetch(vars?: D.CustomViewsQueryVariables): Promise<CustomViewConnection | undefined> {
     return this.request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument, vars).then(response => {
@@ -5466,9 +5487,10 @@ class CycleQuery extends LinearRequest {
   }
 
   /**
-   * Call the Cycle Query and return a Cycle
+   * Call the Cycle query and return a Cycle
    *
    * @param id - required id to pass to cycle
+   * @returns parsed response from CycleQuery
    */
   public async fetch(id: string): Promise<Cycle | undefined> {
     return this.request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, {
@@ -5491,9 +5513,10 @@ class CyclesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Cycles Query and return a CycleConnection
+   * Call the Cycles query and return a CycleConnection
    *
    * @param vars - variables to pass into the CyclesQuery
+   * @returns parsed response from CyclesQuery
    */
   public async fetch(vars?: D.CyclesQueryVariables): Promise<CycleConnection | undefined> {
     return this.request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument, vars).then(response => {
@@ -5514,9 +5537,10 @@ class EmojiQuery extends LinearRequest {
   }
 
   /**
-   * Call the Emoji Query and return a Emoji
+   * Call the Emoji query and return a Emoji
    *
    * @param id - required id to pass to emoji
+   * @returns parsed response from EmojiQuery
    */
   public async fetch(id: string): Promise<Emoji | undefined> {
     return this.request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, {
@@ -5539,9 +5563,10 @@ class EmojisQuery extends LinearRequest {
   }
 
   /**
-   * Call the Emojis Query and return a EmojiConnection
+   * Call the Emojis query and return a EmojiConnection
    *
    * @param vars - variables to pass into the EmojisQuery
+   * @returns parsed response from EmojisQuery
    */
   public async fetch(vars?: D.EmojisQueryVariables): Promise<EmojiConnection | undefined> {
     return this.request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument, vars).then(response => {
@@ -5562,9 +5587,10 @@ class FavoriteQuery extends LinearRequest {
   }
 
   /**
-   * Call the Favorite Query and return a Favorite
+   * Call the Favorite query and return a Favorite
    *
    * @param id - required id to pass to favorite
+   * @returns parsed response from FavoriteQuery
    */
   public async fetch(id: string): Promise<Favorite | undefined> {
     return this.request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, {
@@ -5587,9 +5613,10 @@ class FavoritesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Favorites Query and return a FavoriteConnection
+   * Call the Favorites query and return a FavoriteConnection
    *
    * @param vars - variables to pass into the FavoritesQuery
+   * @returns parsed response from FavoritesQuery
    */
   public async fetch(vars?: D.FavoritesQueryVariables): Promise<FavoriteConnection | undefined> {
     return this.request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument, vars).then(response => {
@@ -5610,10 +5637,11 @@ class FigmaEmbedInfoQuery extends LinearRequest {
   }
 
   /**
-   * Call the FigmaEmbedInfo Query and return a FigmaEmbedPayload
+   * Call the FigmaEmbedInfo query and return a FigmaEmbedPayload
    *
    * @param fileId - required fileId to pass to figmaEmbedInfo
    * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
+   * @returns parsed response from FigmaEmbedInfoQuery
    */
   public async fetch(
     fileId: string,
@@ -5640,9 +5668,10 @@ class IntegrationQuery extends LinearRequest {
   }
 
   /**
-   * Call the Integration Query and return a Integration
+   * Call the Integration query and return a Integration
    *
    * @param id - required id to pass to integration
+   * @returns parsed response from IntegrationQuery
    */
   public async fetch(id: string): Promise<Integration | undefined> {
     return this.request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument, {
@@ -5665,9 +5694,10 @@ class IntegrationsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Integrations Query and return a IntegrationConnection
+   * Call the Integrations query and return a IntegrationConnection
    *
    * @param vars - variables to pass into the IntegrationsQuery
+   * @returns parsed response from IntegrationsQuery
    */
   public async fetch(vars?: D.IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
     return this.request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument, vars).then(
@@ -5690,9 +5720,10 @@ class IntegrationResourceQuery extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResource Query and return a IntegrationResource
+   * Call the IntegrationResource query and return a IntegrationResource
    *
    * @param id - required id to pass to integrationResource
+   * @returns parsed response from IntegrationResourceQuery
    */
   public async fetch(id: string): Promise<IntegrationResource | undefined> {
     return this.request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
@@ -5718,9 +5749,10 @@ class IntegrationResourcesQuery extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResources Query and return a IntegrationResourceConnection
+   * Call the IntegrationResources query and return a IntegrationResourceConnection
    *
    * @param vars - variables to pass into the IntegrationResourcesQuery
+   * @returns parsed response from IntegrationResourcesQuery
    */
   public async fetch(vars?: D.IntegrationResourcesQueryVariables): Promise<IntegrationResourceConnection | undefined> {
     return this.request<D.IntegrationResourcesQuery, D.IntegrationResourcesQueryVariables>(
@@ -5744,10 +5776,11 @@ class InviteInfoQuery extends LinearRequest {
   }
 
   /**
-   * Call the InviteInfo Query and return a InvitePagePayload
+   * Call the InviteInfo query and return a InvitePagePayload
    *
    * @param userHash - required userHash to pass to inviteInfo
    * @param vars - variables without 'userHash' to pass into the InviteInfoQuery
+   * @returns parsed response from InviteInfoQuery
    */
   public async fetch(
     userHash: string,
@@ -5774,9 +5807,10 @@ class IssueLabelQuery extends LinearRequest {
   }
 
   /**
-   * Call the IssueLabel Query and return a IssueLabel
+   * Call the IssueLabel query and return a IssueLabel
    *
    * @param id - required id to pass to issueLabel
+   * @returns parsed response from IssueLabelQuery
    */
   public async fetch(id: string): Promise<IssueLabel | undefined> {
     return this.request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, {
@@ -5799,9 +5833,10 @@ class IssueLabelsQuery extends LinearRequest {
   }
 
   /**
-   * Call the IssueLabels Query and return a IssueLabelConnection
+   * Call the IssueLabels query and return a IssueLabelConnection
    *
    * @param vars - variables to pass into the IssueLabelsQuery
+   * @returns parsed response from IssueLabelsQuery
    */
   public async fetch(vars?: D.IssueLabelsQueryVariables): Promise<IssueLabelConnection | undefined> {
     return this.request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument, vars).then(response => {
@@ -5822,9 +5857,10 @@ class IssueRelationQuery extends LinearRequest {
   }
 
   /**
-   * Call the IssueRelation Query and return a IssueRelation
+   * Call the IssueRelation query and return a IssueRelation
    *
    * @param id - required id to pass to issueRelation
+   * @returns parsed response from IssueRelationQuery
    */
   public async fetch(id: string): Promise<IssueRelation | undefined> {
     return this.request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, {
@@ -5847,9 +5883,10 @@ class IssueRelationsQuery extends LinearRequest {
   }
 
   /**
-   * Call the IssueRelations Query and return a IssueRelationConnection
+   * Call the IssueRelations query and return a IssueRelationConnection
    *
    * @param vars - variables to pass into the IssueRelationsQuery
+   * @returns parsed response from IssueRelationsQuery
    */
   public async fetch(vars?: D.IssueRelationsQueryVariables): Promise<IssueRelationConnection | undefined> {
     return this.request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(D.IssueRelationsDocument, vars).then(
@@ -5872,9 +5909,10 @@ class IssueQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue Query and return a Issue
+   * Call the Issue query and return a Issue
    *
    * @param id - required id to pass to issue
+   * @returns parsed response from IssueQuery
    */
   public async fetch(id: string): Promise<Issue | undefined> {
     return this.request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, {
@@ -5897,10 +5935,11 @@ class IssueSearchQuery extends LinearRequest {
   }
 
   /**
-   * Call the IssueSearch Query and return a IssueConnection
+   * Call the IssueSearch query and return a IssueConnection
    *
    * @param query - required query to pass to issueSearch
    * @param vars - variables without 'query' to pass into the IssueSearchQuery
+   * @returns parsed response from IssueSearchQuery
    */
   public async fetch(
     query: string,
@@ -5927,9 +5966,10 @@ class IssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issues Query and return a IssueConnection
+   * Call the Issues query and return a IssueConnection
    *
    * @param vars - variables to pass into the IssuesQuery
+   * @returns parsed response from IssuesQuery
    */
   public async fetch(vars?: D.IssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, vars).then(response => {
@@ -5950,9 +5990,10 @@ class MilestoneQuery extends LinearRequest {
   }
 
   /**
-   * Call the Milestone Query and return a Milestone
+   * Call the Milestone query and return a Milestone
    *
    * @param id - required id to pass to milestone
+   * @returns parsed response from MilestoneQuery
    */
   public async fetch(id: string): Promise<Milestone | undefined> {
     return this.request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, {
@@ -5975,9 +6016,10 @@ class MilestonesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Milestones Query and return a MilestoneConnection
+   * Call the Milestones query and return a MilestoneConnection
    *
    * @param vars - variables to pass into the MilestonesQuery
+   * @returns parsed response from MilestonesQuery
    */
   public async fetch(vars?: D.MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
     return this.request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument, vars).then(response => {
@@ -5998,8 +6040,9 @@ class NotificationQuery extends LinearRequest {
   }
 
   /**
-   * Call the Notification Query and return a UserSettings
+   * Call the Notification query and return a UserSettings
    *
+   * @returns parsed response from NotificationQuery
    */
   public async fetch(): Promise<UserSettings | undefined> {
     return this.request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument, {}).then(
@@ -6022,9 +6065,10 @@ class NotificationsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Notifications Query and return a NotificationConnection
+   * Call the Notifications query and return a NotificationConnection
    *
    * @param vars - variables to pass into the NotificationsQuery
+   * @returns parsed response from NotificationsQuery
    */
   public async fetch(vars?: D.NotificationsQueryVariables): Promise<NotificationConnection | undefined> {
     return this.request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument, vars).then(
@@ -6047,9 +6091,10 @@ class NotificationSubscriptionQuery extends LinearRequest {
   }
 
   /**
-   * Call the NotificationSubscription Query and return a NotificationSubscriptionConnection
+   * Call the NotificationSubscription query and return a NotificationSubscriptionConnection
    *
    * @param vars - variables to pass into the NotificationSubscriptionQuery
+   * @returns parsed response from NotificationSubscriptionQuery
    */
   public async fetch(
     vars?: D.NotificationSubscriptionQueryVariables
@@ -6075,9 +6120,10 @@ class OrganizationInviteQuery extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationInvite Query and return a IssueLabel
+   * Call the OrganizationInvite query and return a IssueLabel
    *
    * @param id - required id to pass to organizationInvite
+   * @returns parsed response from OrganizationInviteQuery
    */
   public async fetch(id: string): Promise<IssueLabel | undefined> {
     return this.request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(D.OrganizationInviteDocument, {
@@ -6100,9 +6146,10 @@ class OrganizationInvitesQuery extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationInvites Query and return a OrganizationInviteConnection
+   * Call the OrganizationInvites query and return a OrganizationInviteConnection
    *
    * @param vars - variables to pass into the OrganizationInvitesQuery
+   * @returns parsed response from OrganizationInvitesQuery
    */
   public async fetch(vars?: D.OrganizationInvitesQueryVariables): Promise<OrganizationInviteConnection | undefined> {
     return this.request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
@@ -6126,9 +6173,10 @@ class ProjectLinkQuery extends LinearRequest {
   }
 
   /**
-   * Call the ProjectLink Query and return a ProjectLink
+   * Call the ProjectLink query and return a ProjectLink
    *
    * @param id - required id to pass to projectLink
+   * @returns parsed response from ProjectLinkQuery
    */
   public async fetch(id: string): Promise<ProjectLink | undefined> {
     return this.request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
@@ -6151,9 +6199,10 @@ class ProjectLinksQuery extends LinearRequest {
   }
 
   /**
-   * Call the ProjectLinks Query and return a ProjectLinkConnection
+   * Call the ProjectLinks query and return a ProjectLinkConnection
    *
    * @param vars - variables to pass into the ProjectLinksQuery
+   * @returns parsed response from ProjectLinksQuery
    */
   public async fetch(vars?: D.ProjectLinksQueryVariables): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
@@ -6176,9 +6225,10 @@ class ProjectQuery extends LinearRequest {
   }
 
   /**
-   * Call the Project Query and return a Project
+   * Call the Project query and return a Project
    *
    * @param id - required id to pass to project
+   * @returns parsed response from ProjectQuery
    */
   public async fetch(id: string): Promise<Project | undefined> {
     return this.request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
@@ -6201,9 +6251,10 @@ class ProjectsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Projects Query and return a ProjectConnection
+   * Call the Projects query and return a ProjectConnection
    *
    * @param vars - variables to pass into the ProjectsQuery
+   * @returns parsed response from ProjectsQuery
    */
   public async fetch(vars?: D.ProjectsQueryVariables): Promise<ProjectConnection | undefined> {
     return this.request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars).then(response => {
@@ -6224,8 +6275,9 @@ class PushSubscriptionTestQuery extends LinearRequest {
   }
 
   /**
-   * Call the PushSubscriptionTest Query and return a PushSubscriptionPayload
+   * Call the PushSubscriptionTest query and return a PushSubscriptionPayload
    *
+   * @returns parsed response from PushSubscriptionTestQuery
    */
   public async fetch(): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionTestQuery, D.PushSubscriptionTestQueryVariables>(
@@ -6249,9 +6301,10 @@ class ReactionQuery extends LinearRequest {
   }
 
   /**
-   * Call the Reaction Query and return a Reaction
+   * Call the Reaction query and return a Reaction
    *
    * @param id - required id to pass to reaction
+   * @returns parsed response from ReactionQuery
    */
   public async fetch(id: string): Promise<Reaction | undefined> {
     return this.request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, {
@@ -6274,9 +6327,10 @@ class ReactionsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Reactions Query and return a ReactionConnection
+   * Call the Reactions query and return a ReactionConnection
    *
    * @param vars - variables to pass into the ReactionsQuery
+   * @returns parsed response from ReactionsQuery
    */
   public async fetch(vars?: D.ReactionsQueryVariables): Promise<ReactionConnection | undefined> {
     return this.request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, vars).then(response => {
@@ -6297,8 +6351,9 @@ class SubscriptionQuery extends LinearRequest {
   }
 
   /**
-   * Call the Subscription Query and return a Subscription
+   * Call the Subscription query and return a Subscription
    *
+   * @returns parsed response from SubscriptionQuery
    */
   public async fetch(): Promise<Subscription | undefined> {
     return this.request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument, {}).then(
@@ -6321,9 +6376,10 @@ class TeamMembershipQuery extends LinearRequest {
   }
 
   /**
-   * Call the TeamMembership Query and return a TeamMembership
+   * Call the TeamMembership query and return a TeamMembership
    *
    * @param id - required id to pass to teamMembership
+   * @returns parsed response from TeamMembershipQuery
    */
   public async fetch(id: string): Promise<TeamMembership | undefined> {
     return this.request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument, {
@@ -6346,9 +6402,10 @@ class TeamMembershipsQuery extends LinearRequest {
   }
 
   /**
-   * Call the TeamMemberships Query and return a TeamMembershipConnection
+   * Call the TeamMemberships query and return a TeamMembershipConnection
    *
    * @param vars - variables to pass into the TeamMembershipsQuery
+   * @returns parsed response from TeamMembershipsQuery
    */
   public async fetch(vars?: D.TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(D.TeamMembershipsDocument, vars).then(
@@ -6371,9 +6428,10 @@ class TeamQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team Query and return a Team
+   * Call the Team query and return a Team
    *
    * @param id - required id to pass to team
+   * @returns parsed response from TeamQuery
    */
   public async fetch(id: string): Promise<Team | undefined> {
     return this.request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
@@ -6396,9 +6454,10 @@ class TeamsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Teams Query and return a TeamConnection
+   * Call the Teams query and return a TeamConnection
    *
    * @param vars - variables to pass into the TeamsQuery
+   * @returns parsed response from TeamsQuery
    */
   public async fetch(vars?: D.TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return this.request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars).then(response => {
@@ -6419,8 +6478,9 @@ class TemplatesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Templates Query and return a Template list
+   * Call the Templates query and return a Template list
    *
+   * @returns parsed response from TemplatesQuery
    */
   public async fetch(): Promise<Template[] | undefined> {
     return this.request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument, {}).then(response => {
@@ -6441,9 +6501,10 @@ class TemplateQuery extends LinearRequest {
   }
 
   /**
-   * Call the Template Query and return a Template
+   * Call the Template query and return a Template
    *
    * @param id - required id to pass to template
+   * @returns parsed response from TemplateQuery
    */
   public async fetch(id: string): Promise<Template | undefined> {
     return this.request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, {
@@ -6466,9 +6527,10 @@ class ViewPreferencesQuery extends LinearRequest {
   }
 
   /**
-   * Call the ViewPreferences Query and return a ViewPreferencesConnection
+   * Call the ViewPreferences query and return a ViewPreferencesConnection
    *
    * @param vars - variables to pass into the ViewPreferencesQuery
+   * @returns parsed response from ViewPreferencesQuery
    */
   public async fetch(vars?: D.ViewPreferencesQueryVariables): Promise<ViewPreferencesConnection | undefined> {
     return this.request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument, vars).then(
@@ -6491,9 +6553,10 @@ class WebhookQuery extends LinearRequest {
   }
 
   /**
-   * Call the Webhook Query and return a Webhook
+   * Call the Webhook query and return a Webhook
    *
    * @param id - required id to pass to webhook
+   * @returns parsed response from WebhookQuery
    */
   public async fetch(id: string): Promise<Webhook | undefined> {
     return this.request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, {
@@ -6516,9 +6579,10 @@ class WebhooksQuery extends LinearRequest {
   }
 
   /**
-   * Call the Webhooks Query and return a WebhookConnection
+   * Call the Webhooks query and return a WebhookConnection
    *
    * @param vars - variables to pass into the WebhooksQuery
+   * @returns parsed response from WebhooksQuery
    */
   public async fetch(vars?: D.WebhooksQueryVariables): Promise<WebhookConnection | undefined> {
     return this.request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, vars).then(response => {
@@ -6539,9 +6603,10 @@ class WorkflowStateQuery extends LinearRequest {
   }
 
   /**
-   * Call the WorkflowState Query and return a WorkflowState
+   * Call the WorkflowState query and return a WorkflowState
    *
    * @param id - required id to pass to workflowState
+   * @returns parsed response from WorkflowStateQuery
    */
   public async fetch(id: string): Promise<WorkflowState | undefined> {
     return this.request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, {
@@ -6564,9 +6629,10 @@ class WorkflowStatesQuery extends LinearRequest {
   }
 
   /**
-   * Call the WorkflowStates Query and return a WorkflowStateConnection
+   * Call the WorkflowStates query and return a WorkflowStateConnection
    *
    * @param vars - variables to pass into the WorkflowStatesQuery
+   * @returns parsed response from WorkflowStatesQuery
    */
   public async fetch(vars?: D.WorkflowStatesQueryVariables): Promise<WorkflowStateConnection | undefined> {
     return this.request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(D.WorkflowStatesDocument, vars).then(
@@ -6589,10 +6655,11 @@ class UserUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserUpdate Mutation and return a UserPayload
+   * Call the UserUpdate mutation and return a UserPayload
    *
    * @param input - required input to pass to userUpdate
    * @param id - required id to pass to userUpdate
+   * @returns parsed response from UserUpdateMutation
    */
   public async fetch(input: D.UpdateUserInput, id: string): Promise<UserPayload | undefined> {
     return this.request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument, {
@@ -6616,9 +6683,10 @@ class UserPromoteAdminMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserPromoteAdmin Mutation and return a UserAdminPayload
+   * Call the UserPromoteAdmin mutation and return a UserAdminPayload
    *
    * @param id - required id to pass to userPromoteAdmin
+   * @returns parsed response from UserPromoteAdminMutation
    */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(D.UserPromoteAdminDocument, {
@@ -6641,9 +6709,10 @@ class UserDemoteAdminMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserDemoteAdmin Mutation and return a UserAdminPayload
+   * Call the UserDemoteAdmin mutation and return a UserAdminPayload
    *
    * @param id - required id to pass to userDemoteAdmin
+   * @returns parsed response from UserDemoteAdminMutation
    */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument, {
@@ -6666,9 +6735,10 @@ class UserSuspendMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserSuspend Mutation and return a UserAdminPayload
+   * Call the UserSuspend mutation and return a UserAdminPayload
    *
    * @param id - required id to pass to userSuspend
+   * @returns parsed response from UserSuspendMutation
    */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, {
@@ -6691,9 +6761,10 @@ class UserUnsuspendMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserUnsuspend Mutation and return a UserAdminPayload
+   * Call the UserUnsuspend mutation and return a UserAdminPayload
    *
    * @param id - required id to pass to userUnsuspend
+   * @returns parsed response from UserUnsuspendMutation
    */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument, {
@@ -6716,9 +6787,10 @@ class OrganizationUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationUpdate Mutation and return a OrganizationPayload
+   * Call the OrganizationUpdate mutation and return a OrganizationPayload
    *
    * @param input - required input to pass to organizationUpdate
+   * @returns parsed response from OrganizationUpdateMutation
    */
   public async fetch(input: D.UpdateOrganizationInput): Promise<OrganizationPayload | undefined> {
     return this.request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
@@ -6744,8 +6816,9 @@ class OrganizationDeleteChallengeMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationDeleteChallenge Mutation and return a OrganizationDeletePayload
+   * Call the OrganizationDeleteChallenge mutation and return a OrganizationDeletePayload
    *
+   * @returns parsed response from OrganizationDeleteChallengeMutation
    */
   public async fetch(): Promise<OrganizationDeletePayload | undefined> {
     return this.request<D.OrganizationDeleteChallengeMutation, D.OrganizationDeleteChallengeMutationVariables>(
@@ -6769,9 +6842,10 @@ class OrganizationDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationDelete Mutation and return a OrganizationDeletePayload
+   * Call the OrganizationDelete mutation and return a OrganizationDeletePayload
    *
    * @param input - required input to pass to organizationDelete
+   * @returns parsed response from OrganizationDeleteMutation
    */
   public async fetch(input: D.DeleteOrganizationInput): Promise<OrganizationDeletePayload | undefined> {
     return this.request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
@@ -6797,9 +6871,10 @@ class AdminDeleteIntegrationMutation extends LinearRequest {
   }
 
   /**
-   * Call the AdminDeleteIntegration Mutation and return a AdminIntegrationPayload
+   * Call the AdminDeleteIntegration mutation and return a AdminIntegrationPayload
    *
    * @param id - required id to pass to adminDeleteIntegration
+   * @returns parsed response from AdminDeleteIntegrationMutation
    */
   public async fetch(id: string): Promise<AdminIntegrationPayload | undefined> {
     return this.request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
@@ -6825,9 +6900,10 @@ class OrganizationToggleAccessMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationToggleAccess Mutation and return a OrganizationAccessPayload
+   * Call the OrganizationToggleAccess mutation and return a OrganizationAccessPayload
    *
    * @param id - required id to pass to organizationToggleAccess
+   * @returns parsed response from OrganizationToggleAccessMutation
    */
   public async fetch(id: string): Promise<OrganizationAccessPayload | undefined> {
     return this.request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
@@ -6853,11 +6929,12 @@ class OrganizationChangeEmailDomainMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationChangeEmailDomain Mutation and return a OrganizationAccessPayload
+   * Call the OrganizationChangeEmailDomain mutation and return a OrganizationAccessPayload
    *
    * @param toDomain - required toDomain to pass to organizationChangeEmailDomain
    * @param fromDomain - required fromDomain to pass to organizationChangeEmailDomain
    * @param id - required id to pass to organizationChangeEmailDomain
+   * @returns parsed response from OrganizationChangeEmailDomainMutation
    */
   public async fetch(toDomain: string, fromDomain: string, id: string): Promise<OrganizationAccessPayload | undefined> {
     return this.request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
@@ -6885,9 +6962,10 @@ class OrganizationToggleSamlEnabledMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationToggleSamlEnabled Mutation and return a OrganizationSamlConfigurePayload
+   * Call the OrganizationToggleSamlEnabled mutation and return a OrganizationSamlConfigurePayload
    *
    * @param id - required id to pass to organizationToggleSamlEnabled
+   * @returns parsed response from OrganizationToggleSamlEnabledMutation
    */
   public async fetch(id: string): Promise<OrganizationSamlConfigurePayload | undefined> {
     return this.request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
@@ -6913,10 +6991,11 @@ class OrganizationConfigureSamlMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationConfigureSaml Mutation and return a OrganizationSamlConfigurePayload
+   * Call the OrganizationConfigureSaml mutation and return a OrganizationSamlConfigurePayload
    *
    * @param samlConfiguration - required samlConfiguration to pass to organizationConfigureSaml
    * @param id - required id to pass to organizationConfigureSaml
+   * @returns parsed response from OrganizationConfigureSamlMutation
    */
   public async fetch(
     samlConfiguration: D.SamlConfigurationInput,
@@ -6946,9 +7025,10 @@ class AdminCommandMutation extends LinearRequest {
   }
 
   /**
-   * Call the AdminCommand Mutation and return a AdminCommandPayload
+   * Call the AdminCommand mutation and return a AdminCommandPayload
    *
    * @param input - required input to pass to adminCommand
+   * @returns parsed response from AdminCommandMutation
    */
   public async fetch(input: D.AdminCommandInput): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument, {
@@ -6971,12 +7051,13 @@ class AdminBulkEmailMutation extends LinearRequest {
   }
 
   /**
-   * Call the AdminBulkEmail Mutation and return a AdminCommandPayload
+   * Call the AdminBulkEmail mutation and return a AdminCommandPayload
    *
    * @param emails - required emails to pass to adminBulkEmail
    * @param markdownContent - required markdownContent to pass to adminBulkEmail
    * @param subject - required subject to pass to adminBulkEmail
    * @param vars - variables without 'emails', 'markdownContent', 'subject' to pass into the AdminBulkEmailMutation
+   * @returns parsed response from AdminBulkEmailMutation
    */
   public async fetch(
     emails: string[],
@@ -7007,9 +7088,10 @@ class AdminCreateStripeCustomerMutation extends LinearRequest {
   }
 
   /**
-   * Call the AdminCreateStripeCustomer Mutation and return a AdminCommandPayload
+   * Call the AdminCreateStripeCustomer mutation and return a AdminCommandPayload
    *
    * @param organizationId - required organizationId to pass to adminCreateStripeCustomer
+   * @returns parsed response from AdminCreateStripeCustomerMutation
    */
   public async fetch(organizationId: string): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
@@ -7035,9 +7117,10 @@ class AdminScheduleAnonymousTaskMutation extends LinearRequest {
   }
 
   /**
-   * Call the AdminScheduleAnonymousTask Mutation and return a AdminCommandPayload
+   * Call the AdminScheduleAnonymousTask mutation and return a AdminCommandPayload
    *
    * @param taskName - required taskName to pass to adminScheduleAnonymousTask
+   * @returns parsed response from AdminScheduleAnonymousTaskMutation
    */
   public async fetch(taskName: string): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
@@ -7063,10 +7146,11 @@ class AdminUserAccountChangeEmailMutation extends LinearRequest {
   }
 
   /**
-   * Call the AdminUserAccountChangeEmail Mutation and return a UserAccountAdminPrivileged
+   * Call the AdminUserAccountChangeEmail mutation and return a UserAccountAdminPrivileged
    *
    * @param newEmail - required newEmail to pass to adminUserAccountChangeEmail
    * @param id - required id to pass to adminUserAccountChangeEmail
+   * @returns parsed response from AdminUserAccountChangeEmailMutation
    */
   public async fetch(newEmail: string, id: string): Promise<UserAccountAdminPrivileged | undefined> {
     return this.request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
@@ -7093,9 +7177,10 @@ class EventCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the EventCreate Mutation and return a EventPayload
+   * Call the EventCreate mutation and return a EventPayload
    *
    * @param input - required input to pass to eventCreate
+   * @returns parsed response from EventCreateMutation
    */
   public async fetch(input: D.EventCreateInput): Promise<EventPayload | undefined> {
     return this.request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument, {
@@ -7118,9 +7203,10 @@ class ApiKeyCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the ApiKeyCreate Mutation and return a ApiKeyPayload
+   * Call the ApiKeyCreate mutation and return a ApiKeyPayload
    *
    * @param input - required input to pass to apiKeyCreate
+   * @returns parsed response from ApiKeyCreateMutation
    */
   public async fetch(input: D.ApiKeyCreateInput): Promise<ApiKeyPayload | undefined> {
     return this.request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument, {
@@ -7143,9 +7229,10 @@ class ApiKeyDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the ApiKeyDelete Mutation and return a ArchivePayload
+   * Call the ApiKeyDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to apiKeyDelete
+   * @returns parsed response from ApiKeyDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument, {
@@ -7168,9 +7255,10 @@ class EmailUserAccountAuthChallengeMutation extends LinearRequest {
   }
 
   /**
-   * Call the EmailUserAccountAuthChallenge Mutation and return a EmailUserAccountAuthChallengeResponse
+   * Call the EmailUserAccountAuthChallenge mutation and return a EmailUserAccountAuthChallengeResponse
    *
    * @param input - required input to pass to emailUserAccountAuthChallenge
+   * @returns parsed response from EmailUserAccountAuthChallengeMutation
    */
   public async fetch(
     input: D.EmailUserAccountAuthChallengeInput
@@ -7198,9 +7286,10 @@ class EmailTokenUserAccountAuthMutation extends LinearRequest {
   }
 
   /**
-   * Call the EmailTokenUserAccountAuth Mutation and return a AuthResolverResponse
+   * Call the EmailTokenUserAccountAuth mutation and return a AuthResolverResponse
    *
    * @param input - required input to pass to emailTokenUserAccountAuth
+   * @returns parsed response from EmailTokenUserAccountAuthMutation
    */
   public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
@@ -7226,9 +7315,10 @@ class SamlTokenUserAccountAuthMutation extends LinearRequest {
   }
 
   /**
-   * Call the SamlTokenUserAccountAuth Mutation and return a AuthResolverResponse
+   * Call the SamlTokenUserAccountAuth mutation and return a AuthResolverResponse
    *
    * @param input - required input to pass to samlTokenUserAccountAuth
+   * @returns parsed response from SamlTokenUserAccountAuthMutation
    */
   public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
@@ -7254,9 +7344,10 @@ class GoogleUserAccountAuthMutation extends LinearRequest {
   }
 
   /**
-   * Call the GoogleUserAccountAuth Mutation and return a AuthResolverResponse
+   * Call the GoogleUserAccountAuth mutation and return a AuthResolverResponse
    *
    * @param input - required input to pass to googleUserAccountAuth
+   * @returns parsed response from GoogleUserAccountAuthMutation
    */
   public async fetch(input: D.GoogleUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
@@ -7282,10 +7373,11 @@ class CreateOrganizationFromOnboardingMutation extends LinearRequest {
   }
 
   /**
-   * Call the CreateOrganizationFromOnboarding Mutation and return a CreateOrJoinOrganizationResponse
+   * Call the CreateOrganizationFromOnboarding mutation and return a CreateOrJoinOrganizationResponse
    *
    * @param input - required input to pass to createOrganizationFromOnboarding
    * @param vars - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
+   * @returns parsed response from CreateOrganizationFromOnboardingMutation
    */
   public async fetch(
     input: D.CreateOrganizationInput,
@@ -7315,9 +7407,10 @@ class JoinOrganizationFromOnboardingMutation extends LinearRequest {
   }
 
   /**
-   * Call the JoinOrganizationFromOnboarding Mutation and return a CreateOrJoinOrganizationResponse
+   * Call the JoinOrganizationFromOnboarding mutation and return a CreateOrJoinOrganizationResponse
    *
    * @param input - required input to pass to joinOrganizationFromOnboarding
+   * @returns parsed response from JoinOrganizationFromOnboardingMutation
    */
   public async fetch(input: D.JoinOrganizationInput): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
@@ -7343,9 +7436,10 @@ class LeaveOrganizationMutation extends LinearRequest {
   }
 
   /**
-   * Call the LeaveOrganization Mutation and return a CreateOrJoinOrganizationResponse
+   * Call the LeaveOrganization mutation and return a CreateOrJoinOrganizationResponse
    *
    * @param organizationId - required organizationId to pass to leaveOrganization
+   * @returns parsed response from LeaveOrganizationMutation
    */
   public async fetch(organizationId: string): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
@@ -7371,9 +7465,10 @@ class BillingEmailUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the BillingEmailUpdate Mutation and return a BillingEmailPayload
+   * Call the BillingEmailUpdate mutation and return a BillingEmailPayload
    *
    * @param input - required input to pass to billingEmailUpdate
+   * @returns parsed response from BillingEmailUpdateMutation
    */
   public async fetch(input: D.BillingEmailUpdateInput): Promise<BillingEmailPayload | undefined> {
     return this.request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
@@ -7399,9 +7494,10 @@ class CollaborativeDocumentUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the CollaborativeDocumentUpdate Mutation and return a CollaborationDocumentUpdatePayload
+   * Call the CollaborativeDocumentUpdate mutation and return a CollaborationDocumentUpdatePayload
    *
    * @param input - required input to pass to collaborativeDocumentUpdate
+   * @returns parsed response from CollaborativeDocumentUpdateMutation
    */
   public async fetch(
     input: D.CollaborationDocumentUpdateInput
@@ -7429,9 +7525,10 @@ class CommentCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the CommentCreate Mutation and return a CommentPayload
+   * Call the CommentCreate mutation and return a CommentPayload
    *
    * @param input - required input to pass to commentCreate
+   * @returns parsed response from CommentCreateMutation
    */
   public async fetch(input: D.CommentCreateInput): Promise<CommentPayload | undefined> {
     return this.request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument, {
@@ -7454,10 +7551,11 @@ class CommentUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the CommentUpdate Mutation and return a CommentPayload
+   * Call the CommentUpdate mutation and return a CommentPayload
    *
    * @param input - required input to pass to commentUpdate
    * @param id - required id to pass to commentUpdate
+   * @returns parsed response from CommentUpdateMutation
    */
   public async fetch(input: D.CommentUpdateInput, id: string): Promise<CommentPayload | undefined> {
     return this.request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument, {
@@ -7481,9 +7579,10 @@ class CommentDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the CommentDelete Mutation and return a ArchivePayload
+   * Call the CommentDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to commentDelete
+   * @returns parsed response from CommentDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument, {
@@ -7506,9 +7605,10 @@ class ContactCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the ContactCreate Mutation and return a ContactPayload
+   * Call the ContactCreate mutation and return a ContactPayload
    *
    * @param input - required input to pass to contactCreate
+   * @returns parsed response from ContactCreateMutation
    */
   public async fetch(input: D.ContactCreateInput): Promise<ContactPayload | undefined> {
     return this.request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument, {
@@ -7531,9 +7631,10 @@ class CustomViewCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the CustomViewCreate Mutation and return a CustomViewPayload
+   * Call the CustomViewCreate mutation and return a CustomViewPayload
    *
    * @param input - required input to pass to customViewCreate
+   * @returns parsed response from CustomViewCreateMutation
    */
   public async fetch(input: D.CustomViewCreateInput): Promise<CustomViewPayload | undefined> {
     return this.request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(D.CustomViewCreateDocument, {
@@ -7556,10 +7657,11 @@ class CustomViewUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the CustomViewUpdate Mutation and return a CustomViewPayload
+   * Call the CustomViewUpdate mutation and return a CustomViewPayload
    *
    * @param input - required input to pass to customViewUpdate
    * @param id - required id to pass to customViewUpdate
+   * @returns parsed response from CustomViewUpdateMutation
    */
   public async fetch(input: D.CustomViewUpdateInput, id: string): Promise<CustomViewPayload | undefined> {
     return this.request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(D.CustomViewUpdateDocument, {
@@ -7583,9 +7685,10 @@ class CustomViewDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the CustomViewDelete Mutation and return a ArchivePayload
+   * Call the CustomViewDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to customViewDelete
+   * @returns parsed response from CustomViewDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(D.CustomViewDeleteDocument, {
@@ -7608,9 +7711,10 @@ class CycleCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the CycleCreate Mutation and return a CyclePayload
+   * Call the CycleCreate mutation and return a CyclePayload
    *
    * @param input - required input to pass to cycleCreate
+   * @returns parsed response from CycleCreateMutation
    */
   public async fetch(input: D.CycleCreateInput): Promise<CyclePayload | undefined> {
     return this.request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument, {
@@ -7633,10 +7737,11 @@ class CycleUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the CycleUpdate Mutation and return a CyclePayload
+   * Call the CycleUpdate mutation and return a CyclePayload
    *
    * @param input - required input to pass to cycleUpdate
    * @param id - required id to pass to cycleUpdate
+   * @returns parsed response from CycleUpdateMutation
    */
   public async fetch(input: D.CycleUpdateInput, id: string): Promise<CyclePayload | undefined> {
     return this.request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument, {
@@ -7660,9 +7765,10 @@ class CycleArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the CycleArchive Mutation and return a ArchivePayload
+   * Call the CycleArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to cycleArchive
+   * @returns parsed response from CycleArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument, {
@@ -7685,8 +7791,9 @@ class DebugFailWithInternalErrorMutation extends LinearRequest {
   }
 
   /**
-   * Call the DebugFailWithInternalError Mutation and return a DebugPayload
+   * Call the DebugFailWithInternalError mutation and return a DebugPayload
    *
+   * @returns parsed response from DebugFailWithInternalErrorMutation
    */
   public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugFailWithInternalErrorMutation, D.DebugFailWithInternalErrorMutationVariables>(
@@ -7710,8 +7817,9 @@ class DebugFailWithWarningMutation extends LinearRequest {
   }
 
   /**
-   * Call the DebugFailWithWarning Mutation and return a DebugPayload
+   * Call the DebugFailWithWarning mutation and return a DebugPayload
    *
+   * @returns parsed response from DebugFailWithWarningMutation
    */
   public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
@@ -7735,8 +7843,9 @@ class DebugCreateSamlOrgMutation extends LinearRequest {
   }
 
   /**
-   * Call the DebugCreateSamlOrg Mutation and return a DebugPayload
+   * Call the DebugCreateSamlOrg mutation and return a DebugPayload
    *
+   * @returns parsed response from DebugCreateSamlOrgMutation
    */
   public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
@@ -7760,9 +7869,10 @@ class EmailUnsubscribeMutation extends LinearRequest {
   }
 
   /**
-   * Call the EmailUnsubscribe Mutation and return a EmailUnsubscribePayload
+   * Call the EmailUnsubscribe mutation and return a EmailUnsubscribePayload
    *
    * @param input - required input to pass to emailUnsubscribe
+   * @returns parsed response from EmailUnsubscribeMutation
    */
   public async fetch(input: D.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload | undefined> {
     return this.request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(D.EmailUnsubscribeDocument, {
@@ -7785,9 +7895,10 @@ class EmojiCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the EmojiCreate Mutation and return a EmojiPayload
+   * Call the EmojiCreate mutation and return a EmojiPayload
    *
    * @param input - required input to pass to emojiCreate
+   * @returns parsed response from EmojiCreateMutation
    */
   public async fetch(input: D.EmojiCreateInput): Promise<EmojiPayload | undefined> {
     return this.request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument, {
@@ -7810,9 +7921,10 @@ class EmojiDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the EmojiDelete Mutation and return a ArchivePayload
+   * Call the EmojiDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to emojiDelete
+   * @returns parsed response from EmojiDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument, {
@@ -7835,9 +7947,10 @@ class FavoriteCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the FavoriteCreate Mutation and return a FavoritePayload
+   * Call the FavoriteCreate mutation and return a FavoritePayload
    *
    * @param input - required input to pass to favoriteCreate
+   * @returns parsed response from FavoriteCreateMutation
    */
   public async fetch(input: D.FavoriteCreateInput): Promise<FavoritePayload | undefined> {
     return this.request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument, {
@@ -7860,10 +7973,11 @@ class FavoriteUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the FavoriteUpdate Mutation and return a FavoritePayload
+   * Call the FavoriteUpdate mutation and return a FavoritePayload
    *
    * @param input - required input to pass to favoriteUpdate
    * @param id - required id to pass to favoriteUpdate
+   * @returns parsed response from FavoriteUpdateMutation
    */
   public async fetch(input: D.FavoriteUpdateInput, id: string): Promise<FavoritePayload | undefined> {
     return this.request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument, {
@@ -7887,9 +8001,10 @@ class FavoriteDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the FavoriteDelete Mutation and return a ArchivePayload
+   * Call the FavoriteDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to favoriteDelete
+   * @returns parsed response from FavoriteDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument, {
@@ -7912,9 +8027,10 @@ class FeedbackCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the FeedbackCreate Mutation and return a FeedbackPayload
+   * Call the FeedbackCreate mutation and return a FeedbackPayload
    *
    * @param input - required input to pass to feedbackCreate
+   * @returns parsed response from FeedbackCreateMutation
    */
   public async fetch(input: D.FeedbackCreateInput): Promise<FeedbackPayload | undefined> {
     return this.request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument, {
@@ -7937,12 +8053,13 @@ class FileUploadMutation extends LinearRequest {
   }
 
   /**
-   * Call the FileUpload Mutation and return a UploadPayload
+   * Call the FileUpload mutation and return a UploadPayload
    *
    * @param size - required size to pass to fileUpload
    * @param contentType - required contentType to pass to fileUpload
    * @param filename - required filename to pass to fileUpload
    * @param vars - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
+   * @returns parsed response from FileUploadMutation
    */
   public async fetch(
     size: number,
@@ -7973,9 +8090,10 @@ class ImageUploadFromUrlMutation extends LinearRequest {
   }
 
   /**
-   * Call the ImageUploadFromUrl Mutation and return a ImageUploadFromUrlPayload
+   * Call the ImageUploadFromUrl mutation and return a ImageUploadFromUrlPayload
    *
    * @param url - required url to pass to imageUploadFromUrl
+   * @returns parsed response from ImageUploadFromUrlMutation
    */
   public async fetch(url: string): Promise<ImageUploadFromUrlPayload | undefined> {
     return this.request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
@@ -8001,9 +8119,10 @@ class IntegrationGithubConnectMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationGithubConnect Mutation and return a IntegrationPayload
+   * Call the IntegrationGithubConnect mutation and return a IntegrationPayload
    *
    * @param installationId - required installationId to pass to integrationGithubConnect
+   * @returns parsed response from IntegrationGithubConnectMutation
    */
   public async fetch(installationId: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
@@ -8029,10 +8148,11 @@ class IntegrationGitlabConnectMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationGitlabConnect Mutation and return a IntegrationPayload
+   * Call the IntegrationGitlabConnect mutation and return a IntegrationPayload
    *
    * @param gitlabUrl - required gitlabUrl to pass to integrationGitlabConnect
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
+   * @returns parsed response from IntegrationGitlabConnectMutation
    */
   public async fetch(gitlabUrl: string, accessToken: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
@@ -8059,11 +8179,12 @@ class IntegrationSlackMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationSlack Mutation and return a IntegrationPayload
+   * Call the IntegrationSlack mutation and return a IntegrationPayload
    *
    * @param redirectUri - required redirectUri to pass to integrationSlack
    * @param code - required code to pass to integrationSlack
    * @param vars - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
+   * @returns parsed response from IntegrationSlackMutation
    */
   public async fetch(
     redirectUri: string,
@@ -8092,10 +8213,11 @@ class IntegrationSlackPersonalMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationSlackPersonal Mutation and return a IntegrationPayload
+   * Call the IntegrationSlackPersonal mutation and return a IntegrationPayload
    *
    * @param redirectUri - required redirectUri to pass to integrationSlackPersonal
    * @param code - required code to pass to integrationSlackPersonal
+   * @returns parsed response from IntegrationSlackPersonalMutation
    */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
@@ -8122,12 +8244,13 @@ class IntegrationSlackPostMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationSlackPost Mutation and return a IntegrationPayload
+   * Call the IntegrationSlackPost mutation and return a IntegrationPayload
    *
    * @param redirectUri - required redirectUri to pass to integrationSlackPost
    * @param teamId - required teamId to pass to integrationSlackPost
    * @param code - required code to pass to integrationSlackPost
    * @param vars - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
+   * @returns parsed response from IntegrationSlackPostMutation
    */
   public async fetch(
     redirectUri: string,
@@ -8161,11 +8284,12 @@ class IntegrationSlackProjectPostMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationSlackProjectPost Mutation and return a IntegrationPayload
+   * Call the IntegrationSlackProjectPost mutation and return a IntegrationPayload
    *
    * @param redirectUri - required redirectUri to pass to integrationSlackProjectPost
    * @param projectId - required projectId to pass to integrationSlackProjectPost
    * @param code - required code to pass to integrationSlackProjectPost
+   * @returns parsed response from IntegrationSlackProjectPostMutation
    */
   public async fetch(redirectUri: string, projectId: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
@@ -8193,10 +8317,11 @@ class IntegrationSlackImportEmojisMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationSlackImportEmojis Mutation and return a IntegrationPayload
+   * Call the IntegrationSlackImportEmojis mutation and return a IntegrationPayload
    *
    * @param redirectUri - required redirectUri to pass to integrationSlackImportEmojis
    * @param code - required code to pass to integrationSlackImportEmojis
+   * @returns parsed response from IntegrationSlackImportEmojisMutation
    */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
@@ -8223,10 +8348,11 @@ class IntegrationFigmaMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationFigma Mutation and return a IntegrationPayload
+   * Call the IntegrationFigma mutation and return a IntegrationPayload
    *
    * @param redirectUri - required redirectUri to pass to integrationFigma
    * @param code - required code to pass to integrationFigma
+   * @returns parsed response from IntegrationFigmaMutation
    */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(D.IntegrationFigmaDocument, {
@@ -8250,9 +8376,10 @@ class IntegrationGoogleSheetsMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationGoogleSheets Mutation and return a IntegrationPayload
+   * Call the IntegrationGoogleSheets mutation and return a IntegrationPayload
    *
    * @param code - required code to pass to integrationGoogleSheets
+   * @returns parsed response from IntegrationGoogleSheetsMutation
    */
   public async fetch(code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
@@ -8278,9 +8405,10 @@ class RefreshGoogleSheetsDataMutation extends LinearRequest {
   }
 
   /**
-   * Call the RefreshGoogleSheetsData Mutation and return a IntegrationPayload
+   * Call the RefreshGoogleSheetsData mutation and return a IntegrationPayload
    *
    * @param id - required id to pass to refreshGoogleSheetsData
+   * @returns parsed response from RefreshGoogleSheetsDataMutation
    */
   public async fetch(id: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
@@ -8306,11 +8434,12 @@ class IntegrationSentryConnectMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationSentryConnect Mutation and return a IntegrationPayload
+   * Call the IntegrationSentryConnect mutation and return a IntegrationPayload
    *
    * @param organizationSlug - required organizationSlug to pass to integrationSentryConnect
    * @param code - required code to pass to integrationSentryConnect
    * @param installationId - required installationId to pass to integrationSentryConnect
+   * @returns parsed response from IntegrationSentryConnectMutation
    */
   public async fetch(
     organizationSlug: string,
@@ -8342,9 +8471,10 @@ class IntegrationDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationDelete Mutation and return a ArchivePayload
+   * Call the IntegrationDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to integrationDelete
+   * @returns parsed response from IntegrationDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
@@ -8370,9 +8500,10 @@ class IntegrationResourceArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResourceArchive Mutation and return a ArchivePayload
+   * Call the IntegrationResourceArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to integrationResourceArchive
+   * @returns parsed response from IntegrationResourceArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
@@ -8398,9 +8529,10 @@ class IssueLabelCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueLabelCreate Mutation and return a IssueLabelPayload
+   * Call the IssueLabelCreate mutation and return a IssueLabelPayload
    *
    * @param input - required input to pass to issueLabelCreate
+   * @returns parsed response from IssueLabelCreateMutation
    */
   public async fetch(input: D.IssueLabelCreateInput): Promise<IssueLabelPayload | undefined> {
     return this.request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(D.IssueLabelCreateDocument, {
@@ -8423,10 +8555,11 @@ class IssueLabelUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueLabelUpdate Mutation and return a IssueLabelPayload
+   * Call the IssueLabelUpdate mutation and return a IssueLabelPayload
    *
    * @param input - required input to pass to issueLabelUpdate
    * @param id - required id to pass to issueLabelUpdate
+   * @returns parsed response from IssueLabelUpdateMutation
    */
   public async fetch(input: D.IssueLabelUpdateInput, id: string): Promise<IssueLabelPayload | undefined> {
     return this.request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(D.IssueLabelUpdateDocument, {
@@ -8450,9 +8583,10 @@ class IssueLabelArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueLabelArchive Mutation and return a ArchivePayload
+   * Call the IssueLabelArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to issueLabelArchive
+   * @returns parsed response from IssueLabelArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
@@ -8478,9 +8612,10 @@ class IssueRelationCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueRelationCreate Mutation and return a IssueRelationPayload
+   * Call the IssueRelationCreate mutation and return a IssueRelationPayload
    *
    * @param input - required input to pass to issueRelationCreate
+   * @returns parsed response from IssueRelationCreateMutation
    */
   public async fetch(input: D.IssueRelationCreateInput): Promise<IssueRelationPayload | undefined> {
     return this.request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
@@ -8506,10 +8641,11 @@ class IssueRelationUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueRelationUpdate Mutation and return a IssueRelationPayload
+   * Call the IssueRelationUpdate mutation and return a IssueRelationPayload
    *
    * @param input - required input to pass to issueRelationUpdate
    * @param id - required id to pass to issueRelationUpdate
+   * @returns parsed response from IssueRelationUpdateMutation
    */
   public async fetch(input: D.IssueRelationUpdateInput, id: string): Promise<IssueRelationPayload | undefined> {
     return this.request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
@@ -8536,9 +8672,10 @@ class IssueRelationDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueRelationDelete Mutation and return a ArchivePayload
+   * Call the IssueRelationDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to issueRelationDelete
+   * @returns parsed response from IssueRelationDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
@@ -8564,9 +8701,10 @@ class IssueCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueCreate Mutation and return a IssuePayload
+   * Call the IssueCreate mutation and return a IssuePayload
    *
    * @param input - required input to pass to issueCreate
+   * @returns parsed response from IssueCreateMutation
    */
   public async fetch(input: D.IssueCreateInput): Promise<IssuePayload | undefined> {
     return this.request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument, {
@@ -8589,10 +8727,11 @@ class IssueUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueUpdate Mutation and return a IssuePayload
+   * Call the IssueUpdate mutation and return a IssuePayload
    *
    * @param input - required input to pass to issueUpdate
    * @param id - required id to pass to issueUpdate
+   * @returns parsed response from IssueUpdateMutation
    */
   public async fetch(input: D.IssueUpdateInput, id: string): Promise<IssuePayload | undefined> {
     return this.request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument, {
@@ -8616,9 +8755,10 @@ class IssueArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueArchive Mutation and return a ArchivePayload
+   * Call the IssueArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to issueArchive
+   * @returns parsed response from IssueArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument, {
@@ -8641,9 +8781,10 @@ class IssueUnarchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the IssueUnarchive Mutation and return a ArchivePayload
+   * Call the IssueUnarchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to issueUnarchive
+   * @returns parsed response from IssueUnarchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument, {
@@ -8666,9 +8807,10 @@ class MilestoneCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the MilestoneCreate Mutation and return a MilestonePayload
+   * Call the MilestoneCreate mutation and return a MilestonePayload
    *
    * @param input - required input to pass to milestoneCreate
+   * @returns parsed response from MilestoneCreateMutation
    */
   public async fetch(input: D.MilestoneCreateInput): Promise<MilestonePayload | undefined> {
     return this.request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument, {
@@ -8691,10 +8833,11 @@ class MilestoneUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the MilestoneUpdate Mutation and return a MilestonePayload
+   * Call the MilestoneUpdate mutation and return a MilestonePayload
    *
    * @param input - required input to pass to milestoneUpdate
    * @param id - required id to pass to milestoneUpdate
+   * @returns parsed response from MilestoneUpdateMutation
    */
   public async fetch(input: D.MilestoneUpdateInput, id: string): Promise<MilestonePayload | undefined> {
     return this.request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument, {
@@ -8718,9 +8861,10 @@ class MilestoneDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the MilestoneDelete Mutation and return a ArchivePayload
+   * Call the MilestoneDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to milestoneDelete
+   * @returns parsed response from MilestoneDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument, {
@@ -8743,10 +8887,11 @@ class NotificationCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the NotificationCreate Mutation and return a NotificationPayload
+   * Call the NotificationCreate mutation and return a NotificationPayload
    *
    * @param input - required input to pass to notificationCreate
    * @param id - required id to pass to notificationCreate
+   * @returns parsed response from NotificationCreateMutation
    */
   public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return this.request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
@@ -8773,10 +8918,11 @@ class NotificationUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the NotificationUpdate Mutation and return a NotificationPayload
+   * Call the NotificationUpdate mutation and return a NotificationPayload
    *
    * @param input - required input to pass to notificationUpdate
    * @param id - required id to pass to notificationUpdate
+   * @returns parsed response from NotificationUpdateMutation
    */
   public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return this.request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
@@ -8803,9 +8949,10 @@ class NotificationDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the NotificationDelete Mutation and return a ArchivePayload
+   * Call the NotificationDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to notificationDelete
+   * @returns parsed response from NotificationDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
@@ -8831,9 +8978,10 @@ class NotificationArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the NotificationArchive Mutation and return a ArchivePayload
+   * Call the NotificationArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to notificationArchive
+   * @returns parsed response from NotificationArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
@@ -8859,9 +9007,10 @@ class NotificationUnarchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the NotificationUnarchive Mutation and return a ArchivePayload
+   * Call the NotificationUnarchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to notificationUnarchive
+   * @returns parsed response from NotificationUnarchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
@@ -8887,9 +9036,10 @@ class NotificationSubscriptionCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the NotificationSubscriptionCreate Mutation and return a NotificationSubscriptionPayload
+   * Call the NotificationSubscriptionCreate mutation and return a NotificationSubscriptionPayload
    *
    * @param input - required input to pass to notificationSubscriptionCreate
+   * @returns parsed response from NotificationSubscriptionCreateMutation
    */
   public async fetch(
     input: D.NotificationSubscriptionCreateInput
@@ -8917,9 +9067,10 @@ class NotificationSubscriptionDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the NotificationSubscriptionDelete Mutation and return a ArchivePayload
+   * Call the NotificationSubscriptionDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to notificationSubscriptionDelete
+   * @returns parsed response from NotificationSubscriptionDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
@@ -8945,9 +9096,10 @@ class OauthClientCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the OauthClientCreate Mutation and return a OauthClientPayload
+   * Call the OauthClientCreate mutation and return a OauthClientPayload
    *
    * @param input - required input to pass to oauthClientCreate
+   * @returns parsed response from OauthClientCreateMutation
    */
   public async fetch(input: D.OauthClientCreateInput): Promise<OauthClientPayload | undefined> {
     return this.request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
@@ -8973,10 +9125,11 @@ class OauthClientUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the OauthClientUpdate Mutation and return a OauthClientPayload
+   * Call the OauthClientUpdate mutation and return a OauthClientPayload
    *
    * @param input - required input to pass to oauthClientUpdate
    * @param id - required id to pass to oauthClientUpdate
+   * @returns parsed response from OauthClientUpdateMutation
    */
   public async fetch(input: D.OauthClientUpdateInput, id: string): Promise<OauthClientPayload | undefined> {
     return this.request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
@@ -9003,9 +9156,10 @@ class OauthClientArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the OauthClientArchive Mutation and return a ArchivePayload
+   * Call the OauthClientArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to oauthClientArchive
+   * @returns parsed response from OauthClientArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
@@ -9031,9 +9185,10 @@ class OauthClientRotateSecretMutation extends LinearRequest {
   }
 
   /**
-   * Call the OauthClientRotateSecret Mutation and return a RotateSecretPayload
+   * Call the OauthClientRotateSecret mutation and return a RotateSecretPayload
    *
    * @param id - required id to pass to oauthClientRotateSecret
+   * @returns parsed response from OauthClientRotateSecretMutation
    */
   public async fetch(id: string): Promise<RotateSecretPayload | undefined> {
     return this.request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
@@ -9059,10 +9214,11 @@ class OauthTokenRevokeMutation extends LinearRequest {
   }
 
   /**
-   * Call the OauthTokenRevoke Mutation and return a OauthTokenRevokePayload
+   * Call the OauthTokenRevoke mutation and return a OauthTokenRevokePayload
    *
    * @param scope - required scope to pass to oauthTokenRevoke
    * @param appId - required appId to pass to oauthTokenRevoke
+   * @returns parsed response from OauthTokenRevokeMutation
    */
   public async fetch(scope: string[], appId: string): Promise<OauthTokenRevokePayload | undefined> {
     return this.request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(D.OauthTokenRevokeDocument, {
@@ -9086,9 +9242,10 @@ class OrganizationDomainVerifyMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationDomainVerify Mutation and return a OrganizationDomainPayload
+   * Call the OrganizationDomainVerify mutation and return a OrganizationDomainPayload
    *
    * @param input - required input to pass to organizationDomainVerify
+   * @returns parsed response from OrganizationDomainVerifyMutation
    */
   public async fetch(input: D.OrganizationDomainVerificationInput): Promise<OrganizationDomainPayload | undefined> {
     return this.request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
@@ -9114,9 +9271,10 @@ class OrganizationDomainCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationDomainCreate Mutation and return a OrganizationDomainPayload
+   * Call the OrganizationDomainCreate mutation and return a OrganizationDomainPayload
    *
    * @param input - required input to pass to organizationDomainCreate
+   * @returns parsed response from OrganizationDomainCreateMutation
    */
   public async fetch(input: D.OrganizationDomainCreateInput): Promise<OrganizationDomainPayload | undefined> {
     return this.request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
@@ -9142,9 +9300,10 @@ class OrganizationDomainDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationDomainDelete Mutation and return a ArchivePayload
+   * Call the OrganizationDomainDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to organizationDomainDelete
+   * @returns parsed response from OrganizationDomainDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
@@ -9170,9 +9329,10 @@ class OrganizationInviteCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationInviteCreate Mutation and return a OrganizationInvitePayload
+   * Call the OrganizationInviteCreate mutation and return a OrganizationInvitePayload
    *
    * @param input - required input to pass to organizationInviteCreate
+   * @returns parsed response from OrganizationInviteCreateMutation
    */
   public async fetch(input: D.OrganizationInviteCreateInput): Promise<OrganizationInvitePayload | undefined> {
     return this.request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
@@ -9198,9 +9358,10 @@ class ResentOrganizationInviteMutation extends LinearRequest {
   }
 
   /**
-   * Call the ResentOrganizationInvite Mutation and return a ArchivePayload
+   * Call the ResentOrganizationInvite mutation and return a ArchivePayload
    *
    * @param id - required id to pass to resentOrganizationInvite
+   * @returns parsed response from ResentOrganizationInviteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
@@ -9226,9 +9387,10 @@ class OrganizationInviteDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationInviteDelete Mutation and return a ArchivePayload
+   * Call the OrganizationInviteDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to organizationInviteDelete
+   * @returns parsed response from OrganizationInviteDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
@@ -9254,9 +9416,10 @@ class ProjectLinkCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the ProjectLinkCreate Mutation and return a ProjectLinkPayload
+   * Call the ProjectLinkCreate mutation and return a ProjectLinkPayload
    *
    * @param input - required input to pass to projectLinkCreate
+   * @returns parsed response from ProjectLinkCreateMutation
    */
   public async fetch(input: D.ProjectLinkCreateInput): Promise<ProjectLinkPayload | undefined> {
     return this.request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
@@ -9282,9 +9445,10 @@ class ProjectLinkDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the ProjectLinkDelete Mutation and return a ArchivePayload
+   * Call the ProjectLinkDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to projectLinkDelete
+   * @returns parsed response from ProjectLinkDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
@@ -9310,9 +9474,10 @@ class ProjectCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the ProjectCreate Mutation and return a ProjectPayload
+   * Call the ProjectCreate mutation and return a ProjectPayload
    *
    * @param input - required input to pass to projectCreate
+   * @returns parsed response from ProjectCreateMutation
    */
   public async fetch(input: D.ProjectCreateInput): Promise<ProjectPayload | undefined> {
     return this.request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument, {
@@ -9335,10 +9500,11 @@ class ProjectUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the ProjectUpdate Mutation and return a ProjectPayload
+   * Call the ProjectUpdate mutation and return a ProjectPayload
    *
    * @param input - required input to pass to projectUpdate
    * @param id - required id to pass to projectUpdate
+   * @returns parsed response from ProjectUpdateMutation
    */
   public async fetch(input: D.ProjectUpdateInput, id: string): Promise<ProjectPayload | undefined> {
     return this.request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument, {
@@ -9362,9 +9528,10 @@ class ProjectArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the ProjectArchive Mutation and return a ArchivePayload
+   * Call the ProjectArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to projectArchive
+   * @returns parsed response from ProjectArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument, {
@@ -9387,9 +9554,10 @@ class PushSubscriptionCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the PushSubscriptionCreate Mutation and return a PushSubscriptionPayload
+   * Call the PushSubscriptionCreate mutation and return a PushSubscriptionPayload
    *
    * @param input - required input to pass to pushSubscriptionCreate
+   * @returns parsed response from PushSubscriptionCreateMutation
    */
   public async fetch(input: D.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
@@ -9415,9 +9583,10 @@ class PushSubscriptionDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the PushSubscriptionDelete Mutation and return a PushSubscriptionPayload
+   * Call the PushSubscriptionDelete mutation and return a PushSubscriptionPayload
    *
    * @param id - required id to pass to pushSubscriptionDelete
+   * @returns parsed response from PushSubscriptionDeleteMutation
    */
   public async fetch(id: string): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
@@ -9443,9 +9612,10 @@ class ReactionCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the ReactionCreate Mutation and return a ReactionPayload
+   * Call the ReactionCreate mutation and return a ReactionPayload
    *
    * @param input - required input to pass to reactionCreate
+   * @returns parsed response from ReactionCreateMutation
    */
   public async fetch(input: D.ReactionCreateInput): Promise<ReactionPayload | undefined> {
     return this.request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument, {
@@ -9468,9 +9638,10 @@ class ReactionDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the ReactionDelete Mutation and return a ArchivePayload
+   * Call the ReactionDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to reactionDelete
+   * @returns parsed response from ReactionDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument, {
@@ -9493,8 +9664,9 @@ class CreateCsvExportReportMutation extends LinearRequest {
   }
 
   /**
-   * Call the CreateCsvExportReport Mutation and return a CreateCsvExportReportPayload
+   * Call the CreateCsvExportReport mutation and return a CreateCsvExportReportPayload
    *
+   * @returns parsed response from CreateCsvExportReportMutation
    */
   public async fetch(): Promise<CreateCsvExportReportPayload | undefined> {
     return this.request<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
@@ -9518,9 +9690,10 @@ class SubscriptionSessionCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the SubscriptionSessionCreate Mutation and return a SubscriptionSessionPayload
+   * Call the SubscriptionSessionCreate mutation and return a SubscriptionSessionPayload
    *
    * @param plan - required plan to pass to subscriptionSessionCreate
+   * @returns parsed response from SubscriptionSessionCreateMutation
    */
   public async fetch(plan: string): Promise<SubscriptionSessionPayload | undefined> {
     return this.request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
@@ -9546,8 +9719,9 @@ class SubscriptionUpdateSessionCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the SubscriptionUpdateSessionCreate Mutation and return a SubscriptionSessionPayload
+   * Call the SubscriptionUpdateSessionCreate mutation and return a SubscriptionSessionPayload
    *
+   * @returns parsed response from SubscriptionUpdateSessionCreateMutation
    */
   public async fetch(): Promise<SubscriptionSessionPayload | undefined> {
     return this.request<D.SubscriptionUpdateSessionCreateMutation, D.SubscriptionUpdateSessionCreateMutationVariables>(
@@ -9571,10 +9745,11 @@ class SubscriptionUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the SubscriptionUpdate Mutation and return a SubscriptionPayload
+   * Call the SubscriptionUpdate mutation and return a SubscriptionPayload
    *
    * @param input - required input to pass to subscriptionUpdate
    * @param id - required id to pass to subscriptionUpdate
+   * @returns parsed response from SubscriptionUpdateMutation
    */
   public async fetch(input: D.SubscriptionUpdateInput, id: string): Promise<SubscriptionPayload | undefined> {
     return this.request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
@@ -9601,10 +9776,11 @@ class SubscriptionUpgradeMutation extends LinearRequest {
   }
 
   /**
-   * Call the SubscriptionUpgrade Mutation and return a SubscriptionPayload
+   * Call the SubscriptionUpgrade mutation and return a SubscriptionPayload
    *
    * @param type - required type to pass to subscriptionUpgrade
    * @param id - required id to pass to subscriptionUpgrade
+   * @returns parsed response from SubscriptionUpgradeMutation
    */
   public async fetch(type: string, id: string): Promise<SubscriptionPayload | undefined> {
     return this.request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
@@ -9631,9 +9807,10 @@ class SubscriptionArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the SubscriptionArchive Mutation and return a ArchivePayload
+   * Call the SubscriptionArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to subscriptionArchive
+   * @returns parsed response from SubscriptionArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
@@ -9659,9 +9836,10 @@ class TeamMembershipCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the TeamMembershipCreate Mutation and return a TeamMembershipPayload
+   * Call the TeamMembershipCreate mutation and return a TeamMembershipPayload
    *
    * @param input - required input to pass to teamMembershipCreate
+   * @returns parsed response from TeamMembershipCreateMutation
    */
   public async fetch(input: D.TeamMembershipCreateInput): Promise<TeamMembershipPayload | undefined> {
     return this.request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
@@ -9687,9 +9865,10 @@ class TeamMembershipDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the TeamMembershipDelete Mutation and return a ArchivePayload
+   * Call the TeamMembershipDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to teamMembershipDelete
+   * @returns parsed response from TeamMembershipDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
@@ -9715,10 +9894,11 @@ class TeamCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the TeamCreate Mutation and return a TeamPayload
+   * Call the TeamCreate mutation and return a TeamPayload
    *
    * @param input - required input to pass to teamCreate
    * @param vars - variables without 'input' to pass into the TeamCreateMutation
+   * @returns parsed response from TeamCreateMutation
    */
   public async fetch(
     input: D.TeamCreateInput,
@@ -9745,10 +9925,11 @@ class TeamUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the TeamUpdate Mutation and return a TeamPayload
+   * Call the TeamUpdate mutation and return a TeamPayload
    *
    * @param input - required input to pass to teamUpdate
    * @param id - required id to pass to teamUpdate
+   * @returns parsed response from TeamUpdateMutation
    */
   public async fetch(input: D.TeamUpdateInput, id: string): Promise<TeamPayload | undefined> {
     return this.request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument, {
@@ -9772,9 +9953,10 @@ class TeamArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the TeamArchive Mutation and return a ArchivePayload
+   * Call the TeamArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to teamArchive
+   * @returns parsed response from TeamArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument, {
@@ -9797,9 +9979,10 @@ class TeamDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the TeamDelete Mutation and return a ArchivePayload
+   * Call the TeamDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to teamDelete
+   * @returns parsed response from TeamDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument, {
@@ -9822,9 +10005,10 @@ class TemplateCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the TemplateCreate Mutation and return a TemplatePayload
+   * Call the TemplateCreate mutation and return a TemplatePayload
    *
    * @param input - required input to pass to templateCreate
+   * @returns parsed response from TemplateCreateMutation
    */
   public async fetch(input: D.TemplateCreateInput): Promise<TemplatePayload | undefined> {
     return this.request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument, {
@@ -9847,10 +10031,11 @@ class TemplateUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the TemplateUpdate Mutation and return a TemplatePayload
+   * Call the TemplateUpdate mutation and return a TemplatePayload
    *
    * @param input - required input to pass to templateUpdate
    * @param id - required id to pass to templateUpdate
+   * @returns parsed response from TemplateUpdateMutation
    */
   public async fetch(input: D.TemplateUpdateInput, id: string): Promise<TemplatePayload | undefined> {
     return this.request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument, {
@@ -9874,9 +10059,10 @@ class TemplateDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the TemplateDelete Mutation and return a ArchivePayload
+   * Call the TemplateDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to templateDelete
+   * @returns parsed response from TemplateDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument, {
@@ -9899,10 +10085,11 @@ class UserSettingsUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserSettingsUpdate Mutation and return a UserSettingsPayload
+   * Call the UserSettingsUpdate mutation and return a UserSettingsPayload
    *
    * @param input - required input to pass to userSettingsUpdate
    * @param id - required id to pass to userSettingsUpdate
+   * @returns parsed response from UserSettingsUpdateMutation
    */
   public async fetch(input: D.UserSettingsUpdateInput, id: string): Promise<UserSettingsPayload | undefined> {
     return this.request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
@@ -9929,9 +10116,10 @@ class UserSettingsFlagIncrementMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserSettingsFlagIncrement Mutation and return a UserSettingsFlagPayload
+   * Call the UserSettingsFlagIncrement mutation and return a UserSettingsFlagPayload
    *
    * @param flag - required flag to pass to userSettingsFlagIncrement
+   * @returns parsed response from UserSettingsFlagIncrementMutation
    */
   public async fetch(flag: string): Promise<UserSettingsFlagPayload | undefined> {
     return this.request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
@@ -9957,8 +10145,9 @@ class UserSettingsFlagsResetMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserSettingsFlagsReset Mutation and return a UserSettingsFlagsResetPayload
+   * Call the UserSettingsFlagsReset mutation and return a UserSettingsFlagsResetPayload
    *
+   * @returns parsed response from UserSettingsFlagsResetMutation
    */
   public async fetch(): Promise<UserSettingsFlagsResetPayload | undefined> {
     return this.request<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
@@ -9982,10 +10171,11 @@ class UserFlagUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserFlagUpdate Mutation and return a UserSettingsFlagPayload
+   * Call the UserFlagUpdate mutation and return a UserSettingsFlagPayload
    *
    * @param operation - required operation to pass to userFlagUpdate
    * @param flag - required flag to pass to userFlagUpdate
+   * @returns parsed response from UserFlagUpdateMutation
    */
   public async fetch(
     operation: D.UserFlagUpdateOperation,
@@ -10012,8 +10202,9 @@ class UserSubscribeToNewsletterMutation extends LinearRequest {
   }
 
   /**
-   * Call the UserSubscribeToNewsletter Mutation and return a UserSubscribeToNewsletterPayload
+   * Call the UserSubscribeToNewsletter mutation and return a UserSubscribeToNewsletterPayload
    *
+   * @returns parsed response from UserSubscribeToNewsletterMutation
    */
   public async fetch(): Promise<UserSubscribeToNewsletterPayload | undefined> {
     return this.request<D.UserSubscribeToNewsletterMutation, D.UserSubscribeToNewsletterMutationVariables>(
@@ -10037,9 +10228,10 @@ class ViewPreferencesCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the ViewPreferencesCreate Mutation and return a ViewPreferencesPayload
+   * Call the ViewPreferencesCreate mutation and return a ViewPreferencesPayload
    *
    * @param input - required input to pass to viewPreferencesCreate
+   * @returns parsed response from ViewPreferencesCreateMutation
    */
   public async fetch(input: D.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload | undefined> {
     return this.request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
@@ -10065,10 +10257,11 @@ class ViewPreferencesUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the ViewPreferencesUpdate Mutation and return a ViewPreferencesPayload
+   * Call the ViewPreferencesUpdate mutation and return a ViewPreferencesPayload
    *
    * @param input - required input to pass to viewPreferencesUpdate
    * @param id - required id to pass to viewPreferencesUpdate
+   * @returns parsed response from ViewPreferencesUpdateMutation
    */
   public async fetch(input: D.ViewPreferencesUpdateInput, id: string): Promise<ViewPreferencesPayload | undefined> {
     return this.request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
@@ -10095,9 +10288,10 @@ class ViewPreferencesDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the ViewPreferencesDelete Mutation and return a ArchivePayload
+   * Call the ViewPreferencesDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to viewPreferencesDelete
+   * @returns parsed response from ViewPreferencesDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
@@ -10123,9 +10317,10 @@ class WebhookCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the WebhookCreate Mutation and return a WebhookPayload
+   * Call the WebhookCreate mutation and return a WebhookPayload
    *
    * @param input - required input to pass to webhookCreate
+   * @returns parsed response from WebhookCreateMutation
    */
   public async fetch(input: D.WebhookCreateInput): Promise<WebhookPayload | undefined> {
     return this.request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
@@ -10148,10 +10343,11 @@ class WebhookUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the WebhookUpdate Mutation and return a WebhookPayload
+   * Call the WebhookUpdate mutation and return a WebhookPayload
    *
    * @param input - required input to pass to webhookUpdate
    * @param id - required id to pass to webhookUpdate
+   * @returns parsed response from WebhookUpdateMutation
    */
   public async fetch(input: D.WebhookUpdateInput, id: string): Promise<WebhookPayload | undefined> {
     return this.request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument, {
@@ -10175,9 +10371,10 @@ class WebhookDeleteMutation extends LinearRequest {
   }
 
   /**
-   * Call the WebhookDelete Mutation and return a ArchivePayload
+   * Call the WebhookDelete mutation and return a ArchivePayload
    *
    * @param id - required id to pass to webhookDelete
+   * @returns parsed response from WebhookDeleteMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument, {
@@ -10200,9 +10397,10 @@ class WorkflowStateCreateMutation extends LinearRequest {
   }
 
   /**
-   * Call the WorkflowStateCreate Mutation and return a WorkflowStatePayload
+   * Call the WorkflowStateCreate mutation and return a WorkflowStatePayload
    *
    * @param input - required input to pass to workflowStateCreate
+   * @returns parsed response from WorkflowStateCreateMutation
    */
   public async fetch(input: D.WorkflowStateCreateInput): Promise<WorkflowStatePayload | undefined> {
     return this.request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
@@ -10228,10 +10426,11 @@ class WorkflowStateUpdateMutation extends LinearRequest {
   }
 
   /**
-   * Call the WorkflowStateUpdate Mutation and return a WorkflowStatePayload
+   * Call the WorkflowStateUpdate mutation and return a WorkflowStatePayload
    *
    * @param input - required input to pass to workflowStateUpdate
    * @param id - required id to pass to workflowStateUpdate
+   * @returns parsed response from WorkflowStateUpdateMutation
    */
   public async fetch(input: D.WorkflowStateUpdateInput, id: string): Promise<WorkflowStatePayload | undefined> {
     return this.request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
@@ -10258,9 +10457,10 @@ class WorkflowStateArchiveMutation extends LinearRequest {
   }
 
   /**
-   * Call the WorkflowStateArchive Mutation and return a ArchivePayload
+   * Call the WorkflowStateArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to workflowStateArchive
+   * @returns parsed response from WorkflowStateArchiveMutation
    */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
@@ -10290,9 +10490,10 @@ class User_AssignedIssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the User_AssignedIssues Query and return a IssueConnection
+   * Call the User_AssignedIssues query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the User_AssignedIssuesQuery
+   * @returns parsed response from User_AssignedIssuesQuery
    */
   public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
@@ -10323,9 +10524,10 @@ class User_CreatedIssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the User_CreatedIssues Query and return a IssueConnection
+   * Call the User_CreatedIssues query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the User_CreatedIssuesQuery
+   * @returns parsed response from User_CreatedIssuesQuery
    */
   public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
@@ -10353,9 +10555,10 @@ class User_TeamMembershipsQuery extends LinearRequest {
   }
 
   /**
-   * Call the User_TeamMemberships Query and return a TeamMembershipConnection
+   * Call the User_TeamMemberships query and return a TeamMembershipConnection
    *
    * @param vars - variables without 'id' to pass into the User_TeamMembershipsQuery
+   * @returns parsed response from User_TeamMembershipsQuery
    */
   public async fetch(
     vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">
@@ -10384,9 +10587,10 @@ class Viewer_AssignedIssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Viewer_AssignedIssues Query and return a IssueConnection
+   * Call the Viewer_AssignedIssues query and return a IssueConnection
    *
    * @param vars - variables to pass into the Viewer_AssignedIssuesQuery
+   * @returns parsed response from Viewer_AssignedIssuesQuery
    */
   public async fetch(vars?: D.Viewer_AssignedIssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.Viewer_AssignedIssuesQuery, D.Viewer_AssignedIssuesQueryVariables>(
@@ -10410,9 +10614,10 @@ class Viewer_CreatedIssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Viewer_CreatedIssues Query and return a IssueConnection
+   * Call the Viewer_CreatedIssues query and return a IssueConnection
    *
    * @param vars - variables to pass into the Viewer_CreatedIssuesQuery
+   * @returns parsed response from Viewer_CreatedIssuesQuery
    */
   public async fetch(vars?: D.Viewer_CreatedIssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.Viewer_CreatedIssuesQuery, D.Viewer_CreatedIssuesQueryVariables>(
@@ -10436,9 +10641,10 @@ class Viewer_TeamMembershipsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Viewer_TeamMemberships Query and return a TeamMembershipConnection
+   * Call the Viewer_TeamMemberships query and return a TeamMembershipConnection
    *
    * @param vars - variables to pass into the Viewer_TeamMembershipsQuery
+   * @returns parsed response from Viewer_TeamMembershipsQuery
    */
   public async fetch(vars?: D.Viewer_TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.Viewer_TeamMembershipsQuery, D.Viewer_TeamMembershipsQueryVariables>(
@@ -10462,9 +10668,10 @@ class Organization_UsersQuery extends LinearRequest {
   }
 
   /**
-   * Call the Organization_Users Query and return a UserConnection
+   * Call the Organization_Users query and return a UserConnection
    *
    * @param vars - variables to pass into the Organization_UsersQuery
+   * @returns parsed response from Organization_UsersQuery
    */
   public async fetch(vars?: D.Organization_UsersQueryVariables): Promise<UserConnection | undefined> {
     return this.request<D.Organization_UsersQuery, D.Organization_UsersQueryVariables>(
@@ -10488,9 +10695,10 @@ class Organization_TeamsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Organization_Teams Query and return a TeamConnection
+   * Call the Organization_Teams query and return a TeamConnection
    *
    * @param vars - variables to pass into the Organization_TeamsQuery
+   * @returns parsed response from Organization_TeamsQuery
    */
   public async fetch(vars?: D.Organization_TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return this.request<D.Organization_TeamsQuery, D.Organization_TeamsQueryVariables>(
@@ -10514,9 +10722,10 @@ class Organization_MilestonesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Organization_Milestones Query and return a MilestoneConnection
+   * Call the Organization_Milestones query and return a MilestoneConnection
    *
    * @param vars - variables to pass into the Organization_MilestonesQuery
+   * @returns parsed response from Organization_MilestonesQuery
    */
   public async fetch(vars?: D.Organization_MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
     return this.request<D.Organization_MilestonesQuery, D.Organization_MilestonesQueryVariables>(
@@ -10540,9 +10749,10 @@ class Organization_IntegrationsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Organization_Integrations Query and return a IntegrationConnection
+   * Call the Organization_Integrations query and return a IntegrationConnection
    *
    * @param vars - variables to pass into the Organization_IntegrationsQuery
+   * @returns parsed response from Organization_IntegrationsQuery
    */
   public async fetch(vars?: D.Organization_IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
     return this.request<D.Organization_IntegrationsQuery, D.Organization_IntegrationsQueryVariables>(
@@ -10566,8 +10776,9 @@ class BillingDetails_PaymentMethodQuery extends LinearRequest {
   }
 
   /**
-   * Call the BillingDetails_PaymentMethod Query and return a Card
+   * Call the BillingDetails_PaymentMethod query and return a Card
    *
+   * @returns parsed response from BillingDetails_PaymentMethodQuery
    */
   public async fetch(): Promise<Card | undefined> {
     return this.request<D.BillingDetails_PaymentMethodQuery, D.BillingDetails_PaymentMethodQueryVariables>(
@@ -10601,8 +10812,9 @@ class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
   }
 
   /**
-   * Call the CollaborativeDocumentJoin_Steps Query and return a StepsResponse
+   * Call the CollaborativeDocumentJoin_Steps query and return a StepsResponse
    *
+   * @returns parsed response from CollaborativeDocumentJoin_StepsQuery
    */
   public async fetch(): Promise<StepsResponse | undefined> {
     return this.request<D.CollaborativeDocumentJoin_StepsQuery, D.CollaborativeDocumentJoin_StepsQueryVariables>(
@@ -10634,9 +10846,10 @@ class Cycle_IssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Cycle_Issues Query and return a IssueConnection
+   * Call the Cycle_Issues query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the Cycle_IssuesQuery
+   * @returns parsed response from Cycle_IssuesQuery
    */
   public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
@@ -10664,9 +10877,10 @@ class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
   }
 
   /**
-   * Call the Cycle_UncompletedIssuesUponClose Query and return a IssueConnection
+   * Call the Cycle_UncompletedIssuesUponClose query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the Cycle_UncompletedIssuesUponCloseQuery
+   * @returns parsed response from Cycle_UncompletedIssuesUponCloseQuery
    */
   public async fetch(
     vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
@@ -10699,9 +10913,10 @@ class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
   }
 
   /**
-   * Call the FigmaEmbedInfo_FigmaEmbed Query and return a FigmaEmbed
+   * Call the FigmaEmbedInfo_FigmaEmbed query and return a FigmaEmbed
    *
    * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfo_FigmaEmbedQuery
+   * @returns parsed response from FigmaEmbedInfo_FigmaEmbedQuery
    */
   public async fetch(
     vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
@@ -10734,8 +10949,9 @@ class Integration_SettingsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Integration_Settings Query and return a IntegrationSettings
+   * Call the Integration_Settings query and return a IntegrationSettings
    *
+   * @returns parsed response from Integration_SettingsQuery
    */
   public async fetch(): Promise<IntegrationSettings | undefined> {
     return this.request<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
@@ -10765,8 +10981,9 @@ class Integration_Settings_SlackPostQuery extends LinearRequest {
   }
 
   /**
-   * Call the Integration_Settings_SlackPost Query and return a SlackPostSettings
+   * Call the Integration_Settings_SlackPost query and return a SlackPostSettings
    *
+   * @returns parsed response from Integration_Settings_SlackPostQuery
    */
   public async fetch(): Promise<SlackPostSettings | undefined> {
     return this.request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
@@ -10796,8 +11013,9 @@ class Integration_Settings_SlackProjectPostQuery extends LinearRequest {
   }
 
   /**
-   * Call the Integration_Settings_SlackProjectPost Query and return a SlackPostSettings
+   * Call the Integration_Settings_SlackProjectPost query and return a SlackPostSettings
    *
+   * @returns parsed response from Integration_Settings_SlackProjectPostQuery
    */
   public async fetch(): Promise<SlackPostSettings | undefined> {
     return this.request<
@@ -10827,8 +11045,9 @@ class Integration_Settings_GoogleSheetsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Integration_Settings_GoogleSheets Query and return a GoogleSheetsSettings
+   * Call the Integration_Settings_GoogleSheets query and return a GoogleSheetsSettings
    *
+   * @returns parsed response from Integration_Settings_GoogleSheetsQuery
    */
   public async fetch(): Promise<GoogleSheetsSettings | undefined> {
     return this.request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
@@ -10858,8 +11077,9 @@ class Integration_Settings_SentryQuery extends LinearRequest {
   }
 
   /**
-   * Call the Integration_Settings_Sentry Query and return a SentrySettings
+   * Call the Integration_Settings_Sentry query and return a SentrySettings
    *
+   * @returns parsed response from Integration_Settings_SentryQuery
    */
   public async fetch(): Promise<SentrySettings | undefined> {
     return this.request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
@@ -10889,8 +11109,9 @@ class IntegrationResource_DataQuery extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResource_Data Query and return a IntegrationResourceData
+   * Call the IntegrationResource_Data query and return a IntegrationResourceData
    *
+   * @returns parsed response from IntegrationResource_DataQuery
    */
   public async fetch(): Promise<IntegrationResourceData | undefined> {
     return this.request<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
@@ -10920,8 +11141,9 @@ class IntegrationResource_PullRequestQuery extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResource_PullRequest Query and return a PullRequestPayload
+   * Call the IntegrationResource_PullRequest query and return a PullRequestPayload
    *
+   * @returns parsed response from IntegrationResource_PullRequestQuery
    */
   public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<D.IntegrationResource_PullRequestQuery, D.IntegrationResource_PullRequestQueryVariables>(
@@ -10951,8 +11173,9 @@ class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResource_Data_GithubPullRequest Query and return a PullRequestPayload
+   * Call the IntegrationResource_Data_GithubPullRequest query and return a PullRequestPayload
    *
+   * @returns parsed response from IntegrationResource_Data_GithubPullRequestQuery
    */
   public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<
@@ -10982,8 +11205,9 @@ class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResource_Data_GitlabMergeRequest Query and return a PullRequestPayload
+   * Call the IntegrationResource_Data_GitlabMergeRequest query and return a PullRequestPayload
    *
+   * @returns parsed response from IntegrationResource_Data_GitlabMergeRequestQuery
    */
   public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<
@@ -11013,8 +11237,9 @@ class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResource_Data_GithubCommit Query and return a CommitPayload
+   * Call the IntegrationResource_Data_GithubCommit query and return a CommitPayload
    *
+   * @returns parsed response from IntegrationResource_Data_GithubCommitQuery
    */
   public async fetch(): Promise<CommitPayload | undefined> {
     return this.request<
@@ -11044,8 +11269,9 @@ class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
   }
 
   /**
-   * Call the IntegrationResource_Data_SentryIssue Query and return a SentryIssuePayload
+   * Call the IntegrationResource_Data_SentryIssue query and return a SentryIssuePayload
    *
+   * @returns parsed response from IntegrationResource_Data_SentryIssueQuery
    */
   public async fetch(): Promise<SentryIssuePayload | undefined> {
     return this.request<
@@ -11075,9 +11301,10 @@ class InviteInfo_InviteDataQuery extends LinearRequest {
   }
 
   /**
-   * Call the InviteInfo_InviteData Query and return a InviteData
+   * Call the InviteInfo_InviteData query and return a InviteData
    *
    * @param vars - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
+   * @returns parsed response from InviteInfo_InviteDataQuery
    */
   public async fetch(vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">): Promise<InviteData | undefined> {
     return this.request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
@@ -11108,9 +11335,10 @@ class IssueLabel_IssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the IssueLabel_Issues Query and return a IssueConnection
+   * Call the IssueLabel_Issues query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the IssueLabel_IssuesQuery
+   * @returns parsed response from IssueLabel_IssuesQuery
    */
   public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
@@ -11138,9 +11366,10 @@ class Issue_SubscribersQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue_Subscribers Query and return a UserConnection
+   * Call the Issue_Subscribers query and return a UserConnection
    *
    * @param vars - variables without 'id' to pass into the Issue_SubscribersQuery
+   * @returns parsed response from Issue_SubscribersQuery
    */
   public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">): Promise<UserConnection | undefined> {
     return this.request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
@@ -11168,9 +11397,10 @@ class Issue_ChildrenQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue_Children Query and return a IssueConnection
+   * Call the Issue_Children query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the Issue_ChildrenQuery
+   * @returns parsed response from Issue_ChildrenQuery
    */
   public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
@@ -11198,9 +11428,10 @@ class Issue_CommentsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue_Comments Query and return a CommentConnection
+   * Call the Issue_Comments query and return a CommentConnection
    *
    * @param vars - variables without 'id' to pass into the Issue_CommentsQuery
+   * @returns parsed response from Issue_CommentsQuery
    */
   public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">): Promise<CommentConnection | undefined> {
     return this.request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
@@ -11228,9 +11459,10 @@ class Issue_HistoryQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue_History Query and return a IssueHistoryConnection
+   * Call the Issue_History query and return a IssueHistoryConnection
    *
    * @param vars - variables without 'id' to pass into the Issue_HistoryQuery
+   * @returns parsed response from Issue_HistoryQuery
    */
   public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">): Promise<IssueHistoryConnection | undefined> {
     return this.request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
@@ -11258,9 +11490,10 @@ class Issue_LabelsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue_Labels Query and return a IssueLabelConnection
+   * Call the Issue_Labels query and return a IssueLabelConnection
    *
    * @param vars - variables without 'id' to pass into the Issue_LabelsQuery
+   * @returns parsed response from Issue_LabelsQuery
    */
   public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
@@ -11288,9 +11521,10 @@ class Issue_IntegrationResourcesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue_IntegrationResources Query and return a IntegrationResourceConnection
+   * Call the Issue_IntegrationResources query and return a IntegrationResourceConnection
    *
    * @param vars - variables without 'id' to pass into the Issue_IntegrationResourcesQuery
+   * @returns parsed response from Issue_IntegrationResourcesQuery
    */
   public async fetch(
     vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
@@ -11323,9 +11557,10 @@ class Issue_RelationsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue_Relations Query and return a IssueRelationConnection
+   * Call the Issue_Relations query and return a IssueRelationConnection
    *
    * @param vars - variables without 'id' to pass into the Issue_RelationsQuery
+   * @returns parsed response from Issue_RelationsQuery
    */
   public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">): Promise<IssueRelationConnection | undefined> {
     return this.request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
@@ -11353,9 +11588,10 @@ class Issue_InverseRelationsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Issue_InverseRelations Query and return a IssueRelationConnection
+   * Call the Issue_InverseRelations query and return a IssueRelationConnection
    *
    * @param vars - variables without 'id' to pass into the Issue_InverseRelationsQuery
+   * @returns parsed response from Issue_InverseRelationsQuery
    */
   public async fetch(
     vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">
@@ -11388,9 +11624,10 @@ class Milestone_ProjectsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Milestone_Projects Query and return a ProjectConnection
+   * Call the Milestone_Projects query and return a ProjectConnection
    *
    * @param vars - variables without 'id' to pass into the Milestone_ProjectsQuery
+   * @returns parsed response from Milestone_ProjectsQuery
    */
   public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
@@ -11418,9 +11655,10 @@ class OrganizationInvite_IssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the OrganizationInvite_Issues Query and return a IssueConnection
+   * Call the OrganizationInvite_Issues query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
+   * @returns parsed response from OrganizationInvite_IssuesQuery
    */
   public async fetch(
     vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">
@@ -11453,9 +11691,10 @@ class Project_TeamsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Project_Teams Query and return a TeamConnection
+   * Call the Project_Teams query and return a TeamConnection
    *
    * @param vars - variables without 'id' to pass into the Project_TeamsQuery
+   * @returns parsed response from Project_TeamsQuery
    */
   public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">): Promise<TeamConnection | undefined> {
     return this.request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
@@ -11483,9 +11722,10 @@ class Project_MembersQuery extends LinearRequest {
   }
 
   /**
-   * Call the Project_Members Query and return a UserConnection
+   * Call the Project_Members query and return a UserConnection
    *
    * @param vars - variables without 'id' to pass into the Project_MembersQuery
+   * @returns parsed response from Project_MembersQuery
    */
   public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">): Promise<UserConnection | undefined> {
     return this.request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
@@ -11513,9 +11753,10 @@ class Project_IssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Project_Issues Query and return a IssueConnection
+   * Call the Project_Issues query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the Project_IssuesQuery
+   * @returns parsed response from Project_IssuesQuery
    */
   public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
@@ -11543,9 +11784,10 @@ class Project_LinksQuery extends LinearRequest {
   }
 
   /**
-   * Call the Project_Links Query and return a ProjectLinkConnection
+   * Call the Project_Links query and return a ProjectLinkConnection
    *
    * @param vars - variables without 'id' to pass into the Project_LinksQuery
+   * @returns parsed response from Project_LinksQuery
    */
   public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
@@ -11573,9 +11815,10 @@ class Team_IssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team_Issues Query and return a IssueConnection
+   * Call the Team_Issues query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the Team_IssuesQuery
+   * @returns parsed response from Team_IssuesQuery
    */
   public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
@@ -11603,9 +11846,10 @@ class Team_CyclesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team_Cycles Query and return a CycleConnection
+   * Call the Team_Cycles query and return a CycleConnection
    *
    * @param vars - variables without 'id' to pass into the Team_CyclesQuery
+   * @returns parsed response from Team_CyclesQuery
    */
   public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">): Promise<CycleConnection | undefined> {
     return this.request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
@@ -11633,9 +11877,10 @@ class Team_MembershipsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team_Memberships Query and return a TeamMembershipConnection
+   * Call the Team_Memberships query and return a TeamMembershipConnection
    *
    * @param vars - variables without 'id' to pass into the Team_MembershipsQuery
+   * @returns parsed response from Team_MembershipsQuery
    */
   public async fetch(
     vars?: Omit<D.Team_MembershipsQueryVariables, "id">
@@ -11665,9 +11910,10 @@ class Team_ProjectsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team_Projects Query and return a ProjectConnection
+   * Call the Team_Projects query and return a ProjectConnection
    *
    * @param vars - variables without 'id' to pass into the Team_ProjectsQuery
+   * @returns parsed response from Team_ProjectsQuery
    */
   public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
@@ -11695,9 +11941,10 @@ class Team_StatesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team_States Query and return a WorkflowStateConnection
+   * Call the Team_States query and return a WorkflowStateConnection
    *
    * @param vars - variables without 'id' to pass into the Team_StatesQuery
+   * @returns parsed response from Team_StatesQuery
    */
   public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">): Promise<WorkflowStateConnection | undefined> {
     return this.request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
@@ -11725,9 +11972,10 @@ class Team_TemplatesQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team_Templates Query and return a TemplateConnection
+   * Call the Team_Templates query and return a TemplateConnection
    *
    * @param vars - variables without 'id' to pass into the Team_TemplatesQuery
+   * @returns parsed response from Team_TemplatesQuery
    */
   public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">): Promise<TemplateConnection | undefined> {
     return this.request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
@@ -11755,9 +12003,10 @@ class Team_LabelsQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team_Labels Query and return a IssueLabelConnection
+   * Call the Team_Labels query and return a IssueLabelConnection
    *
    * @param vars - variables without 'id' to pass into the Team_LabelsQuery
+   * @returns parsed response from Team_LabelsQuery
    */
   public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
@@ -11785,9 +12034,10 @@ class Team_WebhooksQuery extends LinearRequest {
   }
 
   /**
-   * Call the Team_Webhooks Query and return a WebhookConnection
+   * Call the Team_Webhooks query and return a WebhookConnection
    *
    * @param vars - variables without 'id' to pass into the Team_WebhooksQuery
+   * @returns parsed response from Team_WebhooksQuery
    */
   public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">): Promise<WebhookConnection | undefined> {
     return this.request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
@@ -11815,9 +12065,10 @@ class WorkflowState_IssuesQuery extends LinearRequest {
   }
 
   /**
-   * Call the WorkflowState_Issues Query and return a IssueConnection
+   * Call the WorkflowState_Issues query and return a IssueConnection
    *
    * @param vars - variables without 'id' to pass into the WorkflowState_IssuesQuery
+   * @returns parsed response from WorkflowState_IssuesQuery
    */
   public async fetch(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
@@ -11848,6 +12099,7 @@ export class LinearSdk extends LinearRequest {
    * One specific user.
    *
    * @param id - required id to pass to user
+   * @returns User
    */
   public user(id: string): Promise<User | undefined> {
     return new UserQuery(this.request).fetch(id);
@@ -11856,6 +12108,7 @@ export class LinearSdk extends LinearRequest {
    * Query viewer for User
    * The currently authenticated user.
    *
+   * @returns User
    */
   public get viewer(): Promise<User | undefined> {
     return new ViewerQuery(this.request).fetch();
@@ -11864,6 +12117,7 @@ export class LinearSdk extends LinearRequest {
    * Query organization for Organization
    * The user's organization.
    *
+   * @returns Organization
    */
   public get organization(): Promise<Organization | undefined> {
     return new OrganizationQuery(this.request).fetch();
@@ -11873,6 +12127,7 @@ export class LinearSdk extends LinearRequest {
    * Does the organization exist.
    *
    * @param urlKey - required urlKey to pass to organizationExists
+   * @returns OrganizationExistsPayload
    */
   public organizationExists(urlKey: string): Promise<OrganizationExistsPayload | undefined> {
     return new OrganizationExistsQuery(this.request).fetch(urlKey);
@@ -11883,6 +12138,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param databaseVersion - required databaseVersion to pass to syncBootstrap
    * @param sinceSyncId - required sinceSyncId to pass to syncBootstrap
+   * @returns SyncResponse
    */
   public syncBootstrap(databaseVersion: number, sinceSyncId: number): Promise<SyncResponse | undefined> {
     return new SyncBootstrapQuery(this.request).fetch(databaseVersion, sinceSyncId);
@@ -11892,6 +12148,7 @@ export class LinearSdk extends LinearRequest {
    * Fetches delta packets to catch up the user to the current state of the world.
    *
    * @param sinceSyncId - required sinceSyncId to pass to syncUpdates
+   * @returns SyncResponse
    */
   public syncUpdates(sinceSyncId: number): Promise<SyncResponse | undefined> {
     return new SyncUpdatesQuery(this.request).fetch(sinceSyncId);
@@ -11902,6 +12159,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param identifier - required identifier to pass to archivedModelSync
    * @param modelClass - required modelClass to pass to archivedModelSync
+   * @returns ArchiveResponse
    */
   public archivedModelSync(identifier: string, modelClass: string): Promise<ArchiveResponse | undefined> {
     return new ArchivedModelSyncQuery(this.request).fetch(identifier, modelClass);
@@ -11913,6 +12171,7 @@ export class LinearSdk extends LinearRequest {
    * @param modelClass - required modelClass to pass to archivedModelsSync
    * @param teamId - required teamId to pass to archivedModelsSync
    * @param vars - variables without 'modelClass', 'teamId' to pass into the ArchivedModelsSyncQuery
+   * @returns ArchiveResponse
    */
   public archivedModelsSync(
     modelClass: string,
@@ -11926,6 +12185,7 @@ export class LinearSdk extends LinearRequest {
    * Finds a user account by email or identifier. Super user required.
    *
    * @param vars - variables to pass into the AdminUserAccountLookupQuery
+   * @returns UserAccountAdminPrivileged
    */
   public adminUserAccountLookup(
     vars?: D.AdminUserAccountLookupQueryVariables
@@ -11937,6 +12197,7 @@ export class LinearSdk extends LinearRequest {
    * All users of the organization.
    *
    * @param vars - variables to pass into the UsersQuery
+   * @returns UserConnection
    */
   public users(vars?: D.UsersQueryVariables): Promise<UserConnection | undefined> {
     return new UsersQuery(this.request).fetch(vars);
@@ -11946,6 +12207,7 @@ export class LinearSdk extends LinearRequest {
    * All API keys for the user.
    *
    * @param vars - variables to pass into the ApiKeysQuery
+   * @returns ApiKeyConnection
    */
   public apiKeys(vars?: D.ApiKeysQueryVariables): Promise<ApiKeyConnection | undefined> {
     return new ApiKeysQuery(this.request).fetch(vars);
@@ -11957,6 +12219,7 @@ export class LinearSdk extends LinearRequest {
    * @param scope - required scope to pass to applicationWithAuthorization
    * @param clientId - required clientId to pass to applicationWithAuthorization
    * @param vars - variables without 'scope', 'clientId' to pass into the ApplicationWithAuthorizationQuery
+   * @returns UserAuthorizedApplication
    */
   public applicationWithAuthorization(
     scope: string[],
@@ -11969,6 +12232,7 @@ export class LinearSdk extends LinearRequest {
    * Query authorizedApplications for AuthorizedApplications
    * Get all authorized applications for a user
    *
+   * @returns AuthorizedApplication[]
    */
   public get authorizedApplications(): Promise<AuthorizedApplication[] | undefined> {
     return new AuthorizedApplicationsQuery(this.request).fetch();
@@ -11977,6 +12241,7 @@ export class LinearSdk extends LinearRequest {
    * Query availableUsers for AuthResolverResponse
    * Fetch users belonging to this user account.
    *
+   * @returns AuthResolverResponse
    */
   public get availableUsers(): Promise<AuthResolverResponse | undefined> {
     return new AvailableUsersQuery(this.request).fetch();
@@ -11987,6 +12252,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param email - required email to pass to ssoUrlFromEmail
    * @param vars - variables without 'email' to pass into the SsoUrlFromEmailQuery
+   * @returns SsoUrlFromEmailResponse
    */
   public ssoUrlFromEmail(
     email: string,
@@ -11998,6 +12264,7 @@ export class LinearSdk extends LinearRequest {
    * Query billingDetails for BillingDetailsPayload
    * Billing details for the customer.
    *
+   * @returns BillingDetailsPayload
    */
   public get billingDetails(): Promise<BillingDetailsPayload | undefined> {
     return new BillingDetailsQuery(this.request).fetch();
@@ -12009,6 +12276,7 @@ export class LinearSdk extends LinearRequest {
    * @param clientId - required clientId to pass to collaborativeDocumentJoin
    * @param issueId - required issueId to pass to collaborativeDocumentJoin
    * @param version - required version to pass to collaborativeDocumentJoin
+   * @returns CollaborationDocumentUpdatePayload
    */
   public collaborativeDocumentJoin(
     clientId: string,
@@ -12022,6 +12290,7 @@ export class LinearSdk extends LinearRequest {
    * A specific comment.
    *
    * @param id - required id to pass to comment
+   * @returns Comment
    */
   public comment(id: string): Promise<Comment | undefined> {
     return new CommentQuery(this.request).fetch(id);
@@ -12030,6 +12299,7 @@ export class LinearSdk extends LinearRequest {
    * Query comments for CommentConnection
    *
    * @param vars - variables to pass into the CommentsQuery
+   * @returns CommentConnection
    */
   public comments(vars?: D.CommentsQueryVariables): Promise<CommentConnection | undefined> {
     return new CommentsQuery(this.request).fetch(vars);
@@ -12039,6 +12309,7 @@ export class LinearSdk extends LinearRequest {
    * One specific custom view.
    *
    * @param id - required id to pass to customView
+   * @returns CustomView
    */
   public customView(id: string): Promise<CustomView | undefined> {
     return new CustomViewQuery(this.request).fetch(id);
@@ -12047,6 +12318,7 @@ export class LinearSdk extends LinearRequest {
    * Query customViews for CustomViewConnection
    *
    * @param vars - variables to pass into the CustomViewsQuery
+   * @returns CustomViewConnection
    */
   public customViews(vars?: D.CustomViewsQueryVariables): Promise<CustomViewConnection | undefined> {
     return new CustomViewsQuery(this.request).fetch(vars);
@@ -12056,6 +12328,7 @@ export class LinearSdk extends LinearRequest {
    * One specific cycle.
    *
    * @param id - required id to pass to cycle
+   * @returns Cycle
    */
   public cycle(id: string): Promise<Cycle | undefined> {
     return new CycleQuery(this.request).fetch(id);
@@ -12065,6 +12338,7 @@ export class LinearSdk extends LinearRequest {
    * All cycles.
    *
    * @param vars - variables to pass into the CyclesQuery
+   * @returns CycleConnection
    */
   public cycles(vars?: D.CyclesQueryVariables): Promise<CycleConnection | undefined> {
     return new CyclesQuery(this.request).fetch(vars);
@@ -12074,6 +12348,7 @@ export class LinearSdk extends LinearRequest {
    * A specific emoji.
    *
    * @param id - required id to pass to emoji
+   * @returns Emoji
    */
   public emoji(id: string): Promise<Emoji | undefined> {
     return new EmojiQuery(this.request).fetch(id);
@@ -12082,6 +12357,7 @@ export class LinearSdk extends LinearRequest {
    * Query emojis for EmojiConnection
    *
    * @param vars - variables to pass into the EmojisQuery
+   * @returns EmojiConnection
    */
   public emojis(vars?: D.EmojisQueryVariables): Promise<EmojiConnection | undefined> {
     return new EmojisQuery(this.request).fetch(vars);
@@ -12091,6 +12367,7 @@ export class LinearSdk extends LinearRequest {
    * One specific favorite.
    *
    * @param id - required id to pass to favorite
+   * @returns Favorite
    */
   public favorite(id: string): Promise<Favorite | undefined> {
     return new FavoriteQuery(this.request).fetch(id);
@@ -12100,6 +12377,7 @@ export class LinearSdk extends LinearRequest {
    * The user's favorites.
    *
    * @param vars - variables to pass into the FavoritesQuery
+   * @returns FavoriteConnection
    */
   public favorites(vars?: D.FavoritesQueryVariables): Promise<FavoriteConnection | undefined> {
     return new FavoritesQuery(this.request).fetch(vars);
@@ -12110,6 +12388,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param fileId - required fileId to pass to figmaEmbedInfo
    * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
+   * @returns FigmaEmbedPayload
    */
   public figmaEmbedInfo(
     fileId: string,
@@ -12122,6 +12401,7 @@ export class LinearSdk extends LinearRequest {
    * One specific integration.
    *
    * @param id - required id to pass to integration
+   * @returns Integration
    */
   public integration(id: string): Promise<Integration | undefined> {
     return new IntegrationQuery(this.request).fetch(id);
@@ -12131,6 +12411,7 @@ export class LinearSdk extends LinearRequest {
    * All integrations.
    *
    * @param vars - variables to pass into the IntegrationsQuery
+   * @returns IntegrationConnection
    */
   public integrations(vars?: D.IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
     return new IntegrationsQuery(this.request).fetch(vars);
@@ -12140,6 +12421,7 @@ export class LinearSdk extends LinearRequest {
    * One specific integration resource. (e.g. linked GitHub pull requests for an issue)
    *
    * @param id - required id to pass to integrationResource
+   * @returns IntegrationResource
    */
   public integrationResource(id: string): Promise<IntegrationResource | undefined> {
     return new IntegrationResourceQuery(this.request).fetch(id);
@@ -12149,6 +12431,7 @@ export class LinearSdk extends LinearRequest {
    * All integrations resources (e.g. linked GitHub pull requests for issues).
    *
    * @param vars - variables to pass into the IntegrationResourcesQuery
+   * @returns IntegrationResourceConnection
    */
   public integrationResources(
     vars?: D.IntegrationResourcesQueryVariables
@@ -12161,6 +12444,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param userHash - required userHash to pass to inviteInfo
    * @param vars - variables without 'userHash' to pass into the InviteInfoQuery
+   * @returns InvitePagePayload
    */
   public inviteInfo(
     userHash: string,
@@ -12173,6 +12457,7 @@ export class LinearSdk extends LinearRequest {
    * One specific label.
    *
    * @param id - required id to pass to issueLabel
+   * @returns IssueLabel
    */
   public issueLabel(id: string): Promise<IssueLabel | undefined> {
     return new IssueLabelQuery(this.request).fetch(id);
@@ -12182,6 +12467,7 @@ export class LinearSdk extends LinearRequest {
    * All labels.
    *
    * @param vars - variables to pass into the IssueLabelsQuery
+   * @returns IssueLabelConnection
    */
   public issueLabels(vars?: D.IssueLabelsQueryVariables): Promise<IssueLabelConnection | undefined> {
     return new IssueLabelsQuery(this.request).fetch(vars);
@@ -12191,6 +12477,7 @@ export class LinearSdk extends LinearRequest {
    * One specific issue relation.
    *
    * @param id - required id to pass to issueRelation
+   * @returns IssueRelation
    */
   public issueRelation(id: string): Promise<IssueRelation | undefined> {
     return new IssueRelationQuery(this.request).fetch(id);
@@ -12199,6 +12486,7 @@ export class LinearSdk extends LinearRequest {
    * Query issueRelations for IssueRelationConnection
    *
    * @param vars - variables to pass into the IssueRelationsQuery
+   * @returns IssueRelationConnection
    */
   public issueRelations(vars?: D.IssueRelationsQueryVariables): Promise<IssueRelationConnection | undefined> {
     return new IssueRelationsQuery(this.request).fetch(vars);
@@ -12208,6 +12496,7 @@ export class LinearSdk extends LinearRequest {
    * One specific issue.
    *
    * @param id - required id to pass to issue
+   * @returns Issue
    */
   public issue(id: string): Promise<Issue | undefined> {
     return new IssueQuery(this.request).fetch(id);
@@ -12218,6 +12507,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param query - required query to pass to issueSearch
    * @param vars - variables without 'query' to pass into the IssueSearchQuery
+   * @returns IssueConnection
    */
   public issueSearch(
     query: string,
@@ -12229,6 +12519,7 @@ export class LinearSdk extends LinearRequest {
    * Query issues for IssueConnection
    *
    * @param vars - variables to pass into the IssuesQuery
+   * @returns IssueConnection
    */
   public issues(vars?: D.IssuesQueryVariables): Promise<IssueConnection | undefined> {
     return new IssuesQuery(this.request).fetch(vars);
@@ -12238,6 +12529,7 @@ export class LinearSdk extends LinearRequest {
    * One specific milestone.
    *
    * @param id - required id to pass to milestone
+   * @returns Milestone
    */
   public milestone(id: string): Promise<Milestone | undefined> {
     return new MilestoneQuery(this.request).fetch(id);
@@ -12247,6 +12539,7 @@ export class LinearSdk extends LinearRequest {
    * All milestones.
    *
    * @param vars - variables to pass into the MilestonesQuery
+   * @returns MilestoneConnection
    */
   public milestones(vars?: D.MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
     return new MilestonesQuery(this.request).fetch(vars);
@@ -12255,6 +12548,7 @@ export class LinearSdk extends LinearRequest {
    * Query notification for UserSettings
    * The user's settings.
    *
+   * @returns UserSettings
    */
   public get notification(): Promise<UserSettings | undefined> {
     return new NotificationQuery(this.request).fetch();
@@ -12264,6 +12558,7 @@ export class LinearSdk extends LinearRequest {
    * All notifications.
    *
    * @param vars - variables to pass into the NotificationsQuery
+   * @returns NotificationConnection
    */
   public notifications(vars?: D.NotificationsQueryVariables): Promise<NotificationConnection | undefined> {
     return new NotificationsQuery(this.request).fetch(vars);
@@ -12273,6 +12568,7 @@ export class LinearSdk extends LinearRequest {
    * The user's notification subscriptions.
    *
    * @param vars - variables to pass into the NotificationSubscriptionQuery
+   * @returns NotificationSubscriptionConnection
    */
   public notificationSubscription(
     vars?: D.NotificationSubscriptionQueryVariables
@@ -12284,6 +12580,7 @@ export class LinearSdk extends LinearRequest {
    * One specific organization invite.
    *
    * @param id - required id to pass to organizationInvite
+   * @returns IssueLabel
    */
   public organizationInvite(id: string): Promise<IssueLabel | undefined> {
     return new OrganizationInviteQuery(this.request).fetch(id);
@@ -12293,6 +12590,7 @@ export class LinearSdk extends LinearRequest {
    * All invites for the organization.
    *
    * @param vars - variables to pass into the OrganizationInvitesQuery
+   * @returns OrganizationInviteConnection
    */
   public organizationInvites(
     vars?: D.OrganizationInvitesQueryVariables
@@ -12304,6 +12602,7 @@ export class LinearSdk extends LinearRequest {
    * One specific project link.
    *
    * @param id - required id to pass to projectLink
+   * @returns ProjectLink
    */
   public projectLink(id: string): Promise<ProjectLink | undefined> {
     return new ProjectLinkQuery(this.request).fetch(id);
@@ -12313,6 +12612,7 @@ export class LinearSdk extends LinearRequest {
    * All links for the project.
    *
    * @param vars - variables to pass into the ProjectLinksQuery
+   * @returns ProjectLinkConnection
    */
   public ProjectLinks(vars?: D.ProjectLinksQueryVariables): Promise<ProjectLinkConnection | undefined> {
     return new ProjectLinksQuery(this.request).fetch(vars);
@@ -12322,6 +12622,7 @@ export class LinearSdk extends LinearRequest {
    * One specific project.
    *
    * @param id - required id to pass to project
+   * @returns Project
    */
   public project(id: string): Promise<Project | undefined> {
     return new ProjectQuery(this.request).fetch(id);
@@ -12331,6 +12632,7 @@ export class LinearSdk extends LinearRequest {
    * All projects.
    *
    * @param vars - variables to pass into the ProjectsQuery
+   * @returns ProjectConnection
    */
   public projects(vars?: D.ProjectsQueryVariables): Promise<ProjectConnection | undefined> {
     return new ProjectsQuery(this.request).fetch(vars);
@@ -12339,6 +12641,7 @@ export class LinearSdk extends LinearRequest {
    * Query pushSubscriptionTest for PushSubscriptionPayload
    * Sends a test push message.
    *
+   * @returns PushSubscriptionPayload
    */
   public get pushSubscriptionTest(): Promise<PushSubscriptionPayload | undefined> {
     return new PushSubscriptionTestQuery(this.request).fetch();
@@ -12348,6 +12651,7 @@ export class LinearSdk extends LinearRequest {
    * A specific reaction.
    *
    * @param id - required id to pass to reaction
+   * @returns Reaction
    */
   public reaction(id: string): Promise<Reaction | undefined> {
     return new ReactionQuery(this.request).fetch(id);
@@ -12356,6 +12660,7 @@ export class LinearSdk extends LinearRequest {
    * Query reactions for ReactionConnection
    *
    * @param vars - variables to pass into the ReactionsQuery
+   * @returns ReactionConnection
    */
   public reactions(vars?: D.ReactionsQueryVariables): Promise<ReactionConnection | undefined> {
     return new ReactionsQuery(this.request).fetch(vars);
@@ -12364,6 +12669,7 @@ export class LinearSdk extends LinearRequest {
    * Query subscription for Subscription
    * The organization's subscription.
    *
+   * @returns Subscription
    */
   public get subscription(): Promise<Subscription | undefined> {
     return new SubscriptionQuery(this.request).fetch();
@@ -12373,6 +12679,7 @@ export class LinearSdk extends LinearRequest {
    * One specific team membership.
    *
    * @param id - required id to pass to teamMembership
+   * @returns TeamMembership
    */
   public teamMembership(id: string): Promise<TeamMembership | undefined> {
     return new TeamMembershipQuery(this.request).fetch(id);
@@ -12382,6 +12689,7 @@ export class LinearSdk extends LinearRequest {
    * All team memberships.
    *
    * @param vars - variables to pass into the TeamMembershipsQuery
+   * @returns TeamMembershipConnection
    */
   public teamMemberships(vars?: D.TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
     return new TeamMembershipsQuery(this.request).fetch(vars);
@@ -12391,6 +12699,7 @@ export class LinearSdk extends LinearRequest {
    * One specific team.
    *
    * @param id - required id to pass to team
+   * @returns Team
    */
   public team(id: string): Promise<Team | undefined> {
     return new TeamQuery(this.request).fetch(id);
@@ -12400,6 +12709,7 @@ export class LinearSdk extends LinearRequest {
    * All teams.
    *
    * @param vars - variables to pass into the TeamsQuery
+   * @returns TeamConnection
    */
   public teams(vars?: D.TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return new TeamsQuery(this.request).fetch(vars);
@@ -12408,6 +12718,7 @@ export class LinearSdk extends LinearRequest {
    * Query templates for Templates
    * All templates from all users.
    *
+   * @returns Template[]
    */
   public get templates(): Promise<Template[] | undefined> {
     return new TemplatesQuery(this.request).fetch();
@@ -12417,6 +12728,7 @@ export class LinearSdk extends LinearRequest {
    * A specific template.
    *
    * @param id - required id to pass to template
+   * @returns Template
    */
   public template(id: string): Promise<Template | undefined> {
     return new TemplateQuery(this.request).fetch(id);
@@ -12426,6 +12738,7 @@ export class LinearSdk extends LinearRequest {
    * All view preferences.
    *
    * @param vars - variables to pass into the ViewPreferencesQuery
+   * @returns ViewPreferencesConnection
    */
   public viewPreferences(vars?: D.ViewPreferencesQueryVariables): Promise<ViewPreferencesConnection | undefined> {
     return new ViewPreferencesQuery(this.request).fetch(vars);
@@ -12435,6 +12748,7 @@ export class LinearSdk extends LinearRequest {
    * A specific webhook.
    *
    * @param id - required id to pass to webhook
+   * @returns Webhook
    */
   public webhook(id: string): Promise<Webhook | undefined> {
     return new WebhookQuery(this.request).fetch(id);
@@ -12444,6 +12758,7 @@ export class LinearSdk extends LinearRequest {
    * All webhooks.
    *
    * @param vars - variables to pass into the WebhooksQuery
+   * @returns WebhookConnection
    */
   public webhooks(vars?: D.WebhooksQueryVariables): Promise<WebhookConnection | undefined> {
     return new WebhooksQuery(this.request).fetch(vars);
@@ -12453,6 +12768,7 @@ export class LinearSdk extends LinearRequest {
    * One specific state.
    *
    * @param id - required id to pass to workflowState
+   * @returns WorkflowState
    */
   public workflowState(id: string): Promise<WorkflowState | undefined> {
     return new WorkflowStateQuery(this.request).fetch(id);
@@ -12462,6 +12778,7 @@ export class LinearSdk extends LinearRequest {
    * All states.
    *
    * @param vars - variables to pass into the WorkflowStatesQuery
+   * @returns WorkflowStateConnection
    */
   public workflowStates(vars?: D.WorkflowStatesQueryVariables): Promise<WorkflowStateConnection | undefined> {
     return new WorkflowStatesQuery(this.request).fetch(vars);
@@ -12471,6 +12788,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to userUpdate
    * @param id - required id to pass to userUpdate
+   * @returns UserPayload
    */
   public userUpdate(input: D.UpdateUserInput, id: string): Promise<UserPayload | undefined> {
     return new UserUpdateMutation(this.request).fetch(input, id);
@@ -12479,6 +12797,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation userPromoteAdmin for UserAdminPayload
    *
    * @param id - required id to pass to userPromoteAdmin
+   * @returns UserAdminPayload
    */
   public userPromoteAdmin(id: string): Promise<UserAdminPayload | undefined> {
     return new UserPromoteAdminMutation(this.request).fetch(id);
@@ -12487,6 +12806,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation userDemoteAdmin for UserAdminPayload
    *
    * @param id - required id to pass to userDemoteAdmin
+   * @returns UserAdminPayload
    */
   public userDemoteAdmin(id: string): Promise<UserAdminPayload | undefined> {
     return new UserDemoteAdminMutation(this.request).fetch(id);
@@ -12495,6 +12815,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation userSuspend for UserAdminPayload
    *
    * @param id - required id to pass to userSuspend
+   * @returns UserAdminPayload
    */
   public userSuspend(id: string): Promise<UserAdminPayload | undefined> {
     return new UserSuspendMutation(this.request).fetch(id);
@@ -12503,6 +12824,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation userUnsuspend for UserAdminPayload
    *
    * @param id - required id to pass to userUnsuspend
+   * @returns UserAdminPayload
    */
   public userUnsuspend(id: string): Promise<UserAdminPayload | undefined> {
     return new UserUnsuspendMutation(this.request).fetch(id);
@@ -12511,6 +12833,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationUpdate for OrganizationPayload
    *
    * @param input - required input to pass to organizationUpdate
+   * @returns OrganizationPayload
    */
   public organizationUpdate(input: D.UpdateOrganizationInput): Promise<OrganizationPayload | undefined> {
     return new OrganizationUpdateMutation(this.request).fetch(input);
@@ -12518,6 +12841,7 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation organizationDeleteChallenge for OrganizationDeletePayload
    *
+   * @returns OrganizationDeletePayload
    */
   public get organizationDeleteChallenge(): Promise<OrganizationDeletePayload | undefined> {
     return new OrganizationDeleteChallengeMutation(this.request).fetch();
@@ -12526,6 +12850,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationDelete for OrganizationDeletePayload
    *
    * @param input - required input to pass to organizationDelete
+   * @returns OrganizationDeletePayload
    */
   public organizationDelete(input: D.DeleteOrganizationInput): Promise<OrganizationDeletePayload | undefined> {
     return new OrganizationDeleteMutation(this.request).fetch(input);
@@ -12534,6 +12859,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation adminDeleteIntegration for AdminIntegrationPayload
    *
    * @param id - required id to pass to adminDeleteIntegration
+   * @returns AdminIntegrationPayload
    */
   public adminDeleteIntegration(id: string): Promise<AdminIntegrationPayload | undefined> {
     return new AdminDeleteIntegrationMutation(this.request).fetch(id);
@@ -12542,6 +12868,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationToggleAccess for OrganizationAccessPayload
    *
    * @param id - required id to pass to organizationToggleAccess
+   * @returns OrganizationAccessPayload
    */
   public organizationToggleAccess(id: string): Promise<OrganizationAccessPayload | undefined> {
     return new OrganizationToggleAccessMutation(this.request).fetch(id);
@@ -12552,6 +12879,7 @@ export class LinearSdk extends LinearRequest {
    * @param toDomain - required toDomain to pass to organizationChangeEmailDomain
    * @param fromDomain - required fromDomain to pass to organizationChangeEmailDomain
    * @param id - required id to pass to organizationChangeEmailDomain
+   * @returns OrganizationAccessPayload
    */
   public organizationChangeEmailDomain(
     toDomain: string,
@@ -12564,6 +12892,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationToggleSamlEnabled for OrganizationSamlConfigurePayload
    *
    * @param id - required id to pass to organizationToggleSamlEnabled
+   * @returns OrganizationSamlConfigurePayload
    */
   public organizationToggleSamlEnabled(id: string): Promise<OrganizationSamlConfigurePayload | undefined> {
     return new OrganizationToggleSamlEnabledMutation(this.request).fetch(id);
@@ -12573,6 +12902,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param samlConfiguration - required samlConfiguration to pass to organizationConfigureSaml
    * @param id - required id to pass to organizationConfigureSaml
+   * @returns OrganizationSamlConfigurePayload
    */
   public organizationConfigureSaml(
     samlConfiguration: D.SamlConfigurationInput,
@@ -12584,6 +12914,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation adminCommand for AdminCommandPayload
    *
    * @param input - required input to pass to adminCommand
+   * @returns AdminCommandPayload
    */
   public adminCommand(input: D.AdminCommandInput): Promise<AdminCommandPayload | undefined> {
     return new AdminCommandMutation(this.request).fetch(input);
@@ -12595,6 +12926,7 @@ export class LinearSdk extends LinearRequest {
    * @param markdownContent - required markdownContent to pass to adminBulkEmail
    * @param subject - required subject to pass to adminBulkEmail
    * @param vars - variables without 'emails', 'markdownContent', 'subject' to pass into the AdminBulkEmailMutation
+   * @returns AdminCommandPayload
    */
   public adminBulkEmail(
     emails: string[],
@@ -12608,6 +12940,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation adminCreateStripeCustomer for AdminCommandPayload
    *
    * @param organizationId - required organizationId to pass to adminCreateStripeCustomer
+   * @returns AdminCommandPayload
    */
   public adminCreateStripeCustomer(organizationId: string): Promise<AdminCommandPayload | undefined> {
     return new AdminCreateStripeCustomerMutation(this.request).fetch(organizationId);
@@ -12616,6 +12949,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation adminScheduleAnonymousTask for AdminCommandPayload
    *
    * @param taskName - required taskName to pass to adminScheduleAnonymousTask
+   * @returns AdminCommandPayload
    */
   public adminScheduleAnonymousTask(taskName: string): Promise<AdminCommandPayload | undefined> {
     return new AdminScheduleAnonymousTaskMutation(this.request).fetch(taskName);
@@ -12625,6 +12959,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param newEmail - required newEmail to pass to adminUserAccountChangeEmail
    * @param id - required id to pass to adminUserAccountChangeEmail
+   * @returns UserAccountAdminPrivileged
    */
   public adminUserAccountChangeEmail(newEmail: string, id: string): Promise<UserAccountAdminPrivileged | undefined> {
     return new AdminUserAccountChangeEmailMutation(this.request).fetch(newEmail, id);
@@ -12633,6 +12968,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation eventCreate for EventPayload
    *
    * @param input - required input to pass to eventCreate
+   * @returns EventPayload
    */
   public eventCreate(input: D.EventCreateInput): Promise<EventPayload | undefined> {
     return new EventCreateMutation(this.request).fetch(input);
@@ -12641,6 +12977,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation apiKeyCreate for ApiKeyPayload
    *
    * @param input - required input to pass to apiKeyCreate
+   * @returns ApiKeyPayload
    */
   public apiKeyCreate(input: D.ApiKeyCreateInput): Promise<ApiKeyPayload | undefined> {
     return new ApiKeyCreateMutation(this.request).fetch(input);
@@ -12649,6 +12986,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation apiKeyDelete for ArchivePayload
    *
    * @param id - required id to pass to apiKeyDelete
+   * @returns ArchivePayload
    */
   public apiKeyDelete(id: string): Promise<ArchivePayload | undefined> {
     return new ApiKeyDeleteMutation(this.request).fetch(id);
@@ -12657,6 +12995,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation emailUserAccountAuthChallenge for EmailUserAccountAuthChallengeResponse
    *
    * @param input - required input to pass to emailUserAccountAuthChallenge
+   * @returns EmailUserAccountAuthChallengeResponse
    */
   public emailUserAccountAuthChallenge(
     input: D.EmailUserAccountAuthChallengeInput
@@ -12667,6 +13006,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation emailTokenUserAccountAuth for AuthResolverResponse
    *
    * @param input - required input to pass to emailTokenUserAccountAuth
+   * @returns AuthResolverResponse
    */
   public emailTokenUserAccountAuth(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return new EmailTokenUserAccountAuthMutation(this.request).fetch(input);
@@ -12675,6 +13015,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation samlTokenUserAccountAuth for AuthResolverResponse
    *
    * @param input - required input to pass to samlTokenUserAccountAuth
+   * @returns AuthResolverResponse
    */
   public samlTokenUserAccountAuth(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return new SamlTokenUserAccountAuthMutation(this.request).fetch(input);
@@ -12683,6 +13024,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation googleUserAccountAuth for AuthResolverResponse
    *
    * @param input - required input to pass to googleUserAccountAuth
+   * @returns AuthResolverResponse
    */
   public googleUserAccountAuth(input: D.GoogleUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return new GoogleUserAccountAuthMutation(this.request).fetch(input);
@@ -12692,6 +13034,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to createOrganizationFromOnboarding
    * @param vars - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
+   * @returns CreateOrJoinOrganizationResponse
    */
   public createOrganizationFromOnboarding(
     input: D.CreateOrganizationInput,
@@ -12703,6 +13046,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation joinOrganizationFromOnboarding for CreateOrJoinOrganizationResponse
    *
    * @param input - required input to pass to joinOrganizationFromOnboarding
+   * @returns CreateOrJoinOrganizationResponse
    */
   public joinOrganizationFromOnboarding(
     input: D.JoinOrganizationInput
@@ -12713,6 +13057,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation leaveOrganization for CreateOrJoinOrganizationResponse
    *
    * @param organizationId - required organizationId to pass to leaveOrganization
+   * @returns CreateOrJoinOrganizationResponse
    */
   public leaveOrganization(organizationId: string): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return new LeaveOrganizationMutation(this.request).fetch(organizationId);
@@ -12721,6 +13066,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation billingEmailUpdate for BillingEmailPayload
    *
    * @param input - required input to pass to billingEmailUpdate
+   * @returns BillingEmailPayload
    */
   public billingEmailUpdate(input: D.BillingEmailUpdateInput): Promise<BillingEmailPayload | undefined> {
     return new BillingEmailUpdateMutation(this.request).fetch(input);
@@ -12729,6 +13075,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation collaborativeDocumentUpdate for CollaborationDocumentUpdatePayload
    *
    * @param input - required input to pass to collaborativeDocumentUpdate
+   * @returns CollaborationDocumentUpdatePayload
    */
   public collaborativeDocumentUpdate(
     input: D.CollaborationDocumentUpdateInput
@@ -12739,6 +13086,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation commentCreate for CommentPayload
    *
    * @param input - required input to pass to commentCreate
+   * @returns CommentPayload
    */
   public commentCreate(input: D.CommentCreateInput): Promise<CommentPayload | undefined> {
     return new CommentCreateMutation(this.request).fetch(input);
@@ -12748,6 +13096,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to commentUpdate
    * @param id - required id to pass to commentUpdate
+   * @returns CommentPayload
    */
   public commentUpdate(input: D.CommentUpdateInput, id: string): Promise<CommentPayload | undefined> {
     return new CommentUpdateMutation(this.request).fetch(input, id);
@@ -12756,6 +13105,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation commentDelete for ArchivePayload
    *
    * @param id - required id to pass to commentDelete
+   * @returns ArchivePayload
    */
   public commentDelete(id: string): Promise<ArchivePayload | undefined> {
     return new CommentDeleteMutation(this.request).fetch(id);
@@ -12764,6 +13114,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation contactCreate for ContactPayload
    *
    * @param input - required input to pass to contactCreate
+   * @returns ContactPayload
    */
   public contactCreate(input: D.ContactCreateInput): Promise<ContactPayload | undefined> {
     return new ContactCreateMutation(this.request).fetch(input);
@@ -12772,6 +13123,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation customViewCreate for CustomViewPayload
    *
    * @param input - required input to pass to customViewCreate
+   * @returns CustomViewPayload
    */
   public customViewCreate(input: D.CustomViewCreateInput): Promise<CustomViewPayload | undefined> {
     return new CustomViewCreateMutation(this.request).fetch(input);
@@ -12781,6 +13133,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to customViewUpdate
    * @param id - required id to pass to customViewUpdate
+   * @returns CustomViewPayload
    */
   public customViewUpdate(input: D.CustomViewUpdateInput, id: string): Promise<CustomViewPayload | undefined> {
     return new CustomViewUpdateMutation(this.request).fetch(input, id);
@@ -12789,6 +13142,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation customViewDelete for ArchivePayload
    *
    * @param id - required id to pass to customViewDelete
+   * @returns ArchivePayload
    */
   public customViewDelete(id: string): Promise<ArchivePayload | undefined> {
     return new CustomViewDeleteMutation(this.request).fetch(id);
@@ -12797,6 +13151,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation cycleCreate for CyclePayload
    *
    * @param input - required input to pass to cycleCreate
+   * @returns CyclePayload
    */
   public cycleCreate(input: D.CycleCreateInput): Promise<CyclePayload | undefined> {
     return new CycleCreateMutation(this.request).fetch(input);
@@ -12806,6 +13161,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to cycleUpdate
    * @param id - required id to pass to cycleUpdate
+   * @returns CyclePayload
    */
   public cycleUpdate(input: D.CycleUpdateInput, id: string): Promise<CyclePayload | undefined> {
     return new CycleUpdateMutation(this.request).fetch(input, id);
@@ -12814,6 +13170,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation cycleArchive for ArchivePayload
    *
    * @param id - required id to pass to cycleArchive
+   * @returns ArchivePayload
    */
   public cycleArchive(id: string): Promise<ArchivePayload | undefined> {
     return new CycleArchiveMutation(this.request).fetch(id);
@@ -12821,6 +13178,7 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation debugFailWithInternalError for DebugPayload
    *
+   * @returns DebugPayload
    */
   public get debugFailWithInternalError(): Promise<DebugPayload | undefined> {
     return new DebugFailWithInternalErrorMutation(this.request).fetch();
@@ -12828,6 +13186,7 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation debugFailWithWarning for DebugPayload
    *
+   * @returns DebugPayload
    */
   public get debugFailWithWarning(): Promise<DebugPayload | undefined> {
     return new DebugFailWithWarningMutation(this.request).fetch();
@@ -12835,6 +13194,7 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation debugCreateSAMLOrg for DebugPayload
    *
+   * @returns DebugPayload
    */
   public get debugCreateSAMLOrg(): Promise<DebugPayload | undefined> {
     return new DebugCreateSamlOrgMutation(this.request).fetch();
@@ -12843,6 +13203,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation emailUnsubscribe for EmailUnsubscribePayload
    *
    * @param input - required input to pass to emailUnsubscribe
+   * @returns EmailUnsubscribePayload
    */
   public emailUnsubscribe(input: D.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload | undefined> {
     return new EmailUnsubscribeMutation(this.request).fetch(input);
@@ -12851,6 +13212,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation emojiCreate for EmojiPayload
    *
    * @param input - required input to pass to emojiCreate
+   * @returns EmojiPayload
    */
   public emojiCreate(input: D.EmojiCreateInput): Promise<EmojiPayload | undefined> {
     return new EmojiCreateMutation(this.request).fetch(input);
@@ -12859,6 +13221,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation emojiDelete for ArchivePayload
    *
    * @param id - required id to pass to emojiDelete
+   * @returns ArchivePayload
    */
   public emojiDelete(id: string): Promise<ArchivePayload | undefined> {
     return new EmojiDeleteMutation(this.request).fetch(id);
@@ -12867,6 +13230,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation favoriteCreate for FavoritePayload
    *
    * @param input - required input to pass to favoriteCreate
+   * @returns FavoritePayload
    */
   public favoriteCreate(input: D.FavoriteCreateInput): Promise<FavoritePayload | undefined> {
     return new FavoriteCreateMutation(this.request).fetch(input);
@@ -12876,6 +13240,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to favoriteUpdate
    * @param id - required id to pass to favoriteUpdate
+   * @returns FavoritePayload
    */
   public favoriteUpdate(input: D.FavoriteUpdateInput, id: string): Promise<FavoritePayload | undefined> {
     return new FavoriteUpdateMutation(this.request).fetch(input, id);
@@ -12884,6 +13249,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation favoriteDelete for ArchivePayload
    *
    * @param id - required id to pass to favoriteDelete
+   * @returns ArchivePayload
    */
   public favoriteDelete(id: string): Promise<ArchivePayload | undefined> {
     return new FavoriteDeleteMutation(this.request).fetch(id);
@@ -12892,6 +13258,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation feedbackCreate for FeedbackPayload
    *
    * @param input - required input to pass to feedbackCreate
+   * @returns FeedbackPayload
    */
   public feedbackCreate(input: D.FeedbackCreateInput): Promise<FeedbackPayload | undefined> {
     return new FeedbackCreateMutation(this.request).fetch(input);
@@ -12903,6 +13270,7 @@ export class LinearSdk extends LinearRequest {
    * @param contentType - required contentType to pass to fileUpload
    * @param filename - required filename to pass to fileUpload
    * @param vars - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
+   * @returns UploadPayload
    */
   public fileUpload(
     size: number,
@@ -12916,6 +13284,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation imageUploadFromUrl for ImageUploadFromUrlPayload
    *
    * @param url - required url to pass to imageUploadFromUrl
+   * @returns ImageUploadFromUrlPayload
    */
   public imageUploadFromUrl(url: string): Promise<ImageUploadFromUrlPayload | undefined> {
     return new ImageUploadFromUrlMutation(this.request).fetch(url);
@@ -12924,6 +13293,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation integrationGithubConnect for IntegrationPayload
    *
    * @param installationId - required installationId to pass to integrationGithubConnect
+   * @returns IntegrationPayload
    */
   public integrationGithubConnect(installationId: string): Promise<IntegrationPayload | undefined> {
     return new IntegrationGithubConnectMutation(this.request).fetch(installationId);
@@ -12933,6 +13303,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param gitlabUrl - required gitlabUrl to pass to integrationGitlabConnect
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
+   * @returns IntegrationPayload
    */
   public integrationGitlabConnect(gitlabUrl: string, accessToken: string): Promise<IntegrationPayload | undefined> {
     return new IntegrationGitlabConnectMutation(this.request).fetch(gitlabUrl, accessToken);
@@ -12943,6 +13314,7 @@ export class LinearSdk extends LinearRequest {
    * @param redirectUri - required redirectUri to pass to integrationSlack
    * @param code - required code to pass to integrationSlack
    * @param vars - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
+   * @returns IntegrationPayload
    */
   public integrationSlack(
     redirectUri: string,
@@ -12956,6 +13328,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param redirectUri - required redirectUri to pass to integrationSlackPersonal
    * @param code - required code to pass to integrationSlackPersonal
+   * @returns IntegrationPayload
    */
   public integrationSlackPersonal(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return new IntegrationSlackPersonalMutation(this.request).fetch(redirectUri, code);
@@ -12967,6 +13340,7 @@ export class LinearSdk extends LinearRequest {
    * @param teamId - required teamId to pass to integrationSlackPost
    * @param code - required code to pass to integrationSlackPost
    * @param vars - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
+   * @returns IntegrationPayload
    */
   public integrationSlackPost(
     redirectUri: string,
@@ -12982,6 +13356,7 @@ export class LinearSdk extends LinearRequest {
    * @param redirectUri - required redirectUri to pass to integrationSlackProjectPost
    * @param projectId - required projectId to pass to integrationSlackProjectPost
    * @param code - required code to pass to integrationSlackProjectPost
+   * @returns IntegrationPayload
    */
   public integrationSlackProjectPost(
     redirectUri: string,
@@ -12995,6 +13370,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param redirectUri - required redirectUri to pass to integrationSlackImportEmojis
    * @param code - required code to pass to integrationSlackImportEmojis
+   * @returns IntegrationPayload
    */
   public integrationSlackImportEmojis(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return new IntegrationSlackImportEmojisMutation(this.request).fetch(redirectUri, code);
@@ -13004,6 +13380,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param redirectUri - required redirectUri to pass to integrationFigma
    * @param code - required code to pass to integrationFigma
+   * @returns IntegrationPayload
    */
   public integrationFigma(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return new IntegrationFigmaMutation(this.request).fetch(redirectUri, code);
@@ -13012,6 +13389,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation integrationGoogleSheets for IntegrationPayload
    *
    * @param code - required code to pass to integrationGoogleSheets
+   * @returns IntegrationPayload
    */
   public integrationGoogleSheets(code: string): Promise<IntegrationPayload | undefined> {
     return new IntegrationGoogleSheetsMutation(this.request).fetch(code);
@@ -13020,6 +13398,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation refreshGoogleSheetsData for IntegrationPayload
    *
    * @param id - required id to pass to refreshGoogleSheetsData
+   * @returns IntegrationPayload
    */
   public refreshGoogleSheetsData(id: string): Promise<IntegrationPayload | undefined> {
     return new RefreshGoogleSheetsDataMutation(this.request).fetch(id);
@@ -13030,6 +13409,7 @@ export class LinearSdk extends LinearRequest {
    * @param organizationSlug - required organizationSlug to pass to integrationSentryConnect
    * @param code - required code to pass to integrationSentryConnect
    * @param installationId - required installationId to pass to integrationSentryConnect
+   * @returns IntegrationPayload
    */
   public integrationSentryConnect(
     organizationSlug: string,
@@ -13042,6 +13422,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation integrationDelete for ArchivePayload
    *
    * @param id - required id to pass to integrationDelete
+   * @returns ArchivePayload
    */
   public integrationDelete(id: string): Promise<ArchivePayload | undefined> {
     return new IntegrationDeleteMutation(this.request).fetch(id);
@@ -13050,6 +13431,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation integrationResourceArchive for ArchivePayload
    *
    * @param id - required id to pass to integrationResourceArchive
+   * @returns ArchivePayload
    */
   public integrationResourceArchive(id: string): Promise<ArchivePayload | undefined> {
     return new IntegrationResourceArchiveMutation(this.request).fetch(id);
@@ -13058,6 +13440,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation issueLabelCreate for IssueLabelPayload
    *
    * @param input - required input to pass to issueLabelCreate
+   * @returns IssueLabelPayload
    */
   public issueLabelCreate(input: D.IssueLabelCreateInput): Promise<IssueLabelPayload | undefined> {
     return new IssueLabelCreateMutation(this.request).fetch(input);
@@ -13067,6 +13450,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to issueLabelUpdate
    * @param id - required id to pass to issueLabelUpdate
+   * @returns IssueLabelPayload
    */
   public issueLabelUpdate(input: D.IssueLabelUpdateInput, id: string): Promise<IssueLabelPayload | undefined> {
     return new IssueLabelUpdateMutation(this.request).fetch(input, id);
@@ -13075,6 +13459,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation issueLabelArchive for ArchivePayload
    *
    * @param id - required id to pass to issueLabelArchive
+   * @returns ArchivePayload
    */
   public issueLabelArchive(id: string): Promise<ArchivePayload | undefined> {
     return new IssueLabelArchiveMutation(this.request).fetch(id);
@@ -13083,6 +13468,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation issueRelationCreate for IssueRelationPayload
    *
    * @param input - required input to pass to issueRelationCreate
+   * @returns IssueRelationPayload
    */
   public issueRelationCreate(input: D.IssueRelationCreateInput): Promise<IssueRelationPayload | undefined> {
     return new IssueRelationCreateMutation(this.request).fetch(input);
@@ -13092,6 +13478,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to issueRelationUpdate
    * @param id - required id to pass to issueRelationUpdate
+   * @returns IssueRelationPayload
    */
   public issueRelationUpdate(input: D.IssueRelationUpdateInput, id: string): Promise<IssueRelationPayload | undefined> {
     return new IssueRelationUpdateMutation(this.request).fetch(input, id);
@@ -13100,6 +13487,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation issueRelationDelete for ArchivePayload
    *
    * @param id - required id to pass to issueRelationDelete
+   * @returns ArchivePayload
    */
   public issueRelationDelete(id: string): Promise<ArchivePayload | undefined> {
     return new IssueRelationDeleteMutation(this.request).fetch(id);
@@ -13108,6 +13496,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation issueCreate for IssuePayload
    *
    * @param input - required input to pass to issueCreate
+   * @returns IssuePayload
    */
   public issueCreate(input: D.IssueCreateInput): Promise<IssuePayload | undefined> {
     return new IssueCreateMutation(this.request).fetch(input);
@@ -13117,6 +13506,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to issueUpdate
    * @param id - required id to pass to issueUpdate
+   * @returns IssuePayload
    */
   public issueUpdate(input: D.IssueUpdateInput, id: string): Promise<IssuePayload | undefined> {
     return new IssueUpdateMutation(this.request).fetch(input, id);
@@ -13125,6 +13515,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation issueArchive for ArchivePayload
    *
    * @param id - required id to pass to issueArchive
+   * @returns ArchivePayload
    */
   public issueArchive(id: string): Promise<ArchivePayload | undefined> {
     return new IssueArchiveMutation(this.request).fetch(id);
@@ -13133,6 +13524,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation issueUnarchive for ArchivePayload
    *
    * @param id - required id to pass to issueUnarchive
+   * @returns ArchivePayload
    */
   public issueUnarchive(id: string): Promise<ArchivePayload | undefined> {
     return new IssueUnarchiveMutation(this.request).fetch(id);
@@ -13141,6 +13533,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation milestoneCreate for MilestonePayload
    *
    * @param input - required input to pass to milestoneCreate
+   * @returns MilestonePayload
    */
   public milestoneCreate(input: D.MilestoneCreateInput): Promise<MilestonePayload | undefined> {
     return new MilestoneCreateMutation(this.request).fetch(input);
@@ -13150,6 +13543,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to milestoneUpdate
    * @param id - required id to pass to milestoneUpdate
+   * @returns MilestonePayload
    */
   public milestoneUpdate(input: D.MilestoneUpdateInput, id: string): Promise<MilestonePayload | undefined> {
     return new MilestoneUpdateMutation(this.request).fetch(input, id);
@@ -13158,6 +13552,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation milestoneDelete for ArchivePayload
    *
    * @param id - required id to pass to milestoneDelete
+   * @returns ArchivePayload
    */
   public milestoneDelete(id: string): Promise<ArchivePayload | undefined> {
     return new MilestoneDeleteMutation(this.request).fetch(id);
@@ -13167,6 +13562,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to notificationCreate
    * @param id - required id to pass to notificationCreate
+   * @returns NotificationPayload
    */
   public notificationCreate(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return new NotificationCreateMutation(this.request).fetch(input, id);
@@ -13176,6 +13572,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to notificationUpdate
    * @param id - required id to pass to notificationUpdate
+   * @returns NotificationPayload
    */
   public notificationUpdate(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return new NotificationUpdateMutation(this.request).fetch(input, id);
@@ -13184,6 +13581,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation notificationDelete for ArchivePayload
    *
    * @param id - required id to pass to notificationDelete
+   * @returns ArchivePayload
    */
   public notificationDelete(id: string): Promise<ArchivePayload | undefined> {
     return new NotificationDeleteMutation(this.request).fetch(id);
@@ -13192,6 +13590,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation notificationArchive for ArchivePayload
    *
    * @param id - required id to pass to notificationArchive
+   * @returns ArchivePayload
    */
   public notificationArchive(id: string): Promise<ArchivePayload | undefined> {
     return new NotificationArchiveMutation(this.request).fetch(id);
@@ -13200,6 +13599,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation notificationUnarchive for ArchivePayload
    *
    * @param id - required id to pass to notificationUnarchive
+   * @returns ArchivePayload
    */
   public notificationUnarchive(id: string): Promise<ArchivePayload | undefined> {
     return new NotificationUnarchiveMutation(this.request).fetch(id);
@@ -13208,6 +13608,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation notificationSubscriptionCreate for NotificationSubscriptionPayload
    *
    * @param input - required input to pass to notificationSubscriptionCreate
+   * @returns NotificationSubscriptionPayload
    */
   public notificationSubscriptionCreate(
     input: D.NotificationSubscriptionCreateInput
@@ -13218,6 +13619,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation notificationSubscriptionDelete for ArchivePayload
    *
    * @param id - required id to pass to notificationSubscriptionDelete
+   * @returns ArchivePayload
    */
   public notificationSubscriptionDelete(id: string): Promise<ArchivePayload | undefined> {
     return new NotificationSubscriptionDeleteMutation(this.request).fetch(id);
@@ -13226,6 +13628,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation oauthClientCreate for OauthClientPayload
    *
    * @param input - required input to pass to oauthClientCreate
+   * @returns OauthClientPayload
    */
   public oauthClientCreate(input: D.OauthClientCreateInput): Promise<OauthClientPayload | undefined> {
     return new OauthClientCreateMutation(this.request).fetch(input);
@@ -13235,6 +13638,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to oauthClientUpdate
    * @param id - required id to pass to oauthClientUpdate
+   * @returns OauthClientPayload
    */
   public oauthClientUpdate(input: D.OauthClientUpdateInput, id: string): Promise<OauthClientPayload | undefined> {
     return new OauthClientUpdateMutation(this.request).fetch(input, id);
@@ -13243,6 +13647,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation oauthClientArchive for ArchivePayload
    *
    * @param id - required id to pass to oauthClientArchive
+   * @returns ArchivePayload
    */
   public oauthClientArchive(id: string): Promise<ArchivePayload | undefined> {
     return new OauthClientArchiveMutation(this.request).fetch(id);
@@ -13251,6 +13656,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation oauthClientRotateSecret for RotateSecretPayload
    *
    * @param id - required id to pass to oauthClientRotateSecret
+   * @returns RotateSecretPayload
    */
   public oauthClientRotateSecret(id: string): Promise<RotateSecretPayload | undefined> {
     return new OauthClientRotateSecretMutation(this.request).fetch(id);
@@ -13260,6 +13666,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param scope - required scope to pass to oauthTokenRevoke
    * @param appId - required appId to pass to oauthTokenRevoke
+   * @returns OauthTokenRevokePayload
    */
   public oauthTokenRevoke(scope: string[], appId: string): Promise<OauthTokenRevokePayload | undefined> {
     return new OauthTokenRevokeMutation(this.request).fetch(scope, appId);
@@ -13268,6 +13675,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationDomainVerify for OrganizationDomainPayload
    *
    * @param input - required input to pass to organizationDomainVerify
+   * @returns OrganizationDomainPayload
    */
   public organizationDomainVerify(
     input: D.OrganizationDomainVerificationInput
@@ -13278,6 +13686,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationDomainCreate for OrganizationDomainPayload
    *
    * @param input - required input to pass to organizationDomainCreate
+   * @returns OrganizationDomainPayload
    */
   public organizationDomainCreate(
     input: D.OrganizationDomainCreateInput
@@ -13288,6 +13697,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationDomainDelete for ArchivePayload
    *
    * @param id - required id to pass to organizationDomainDelete
+   * @returns ArchivePayload
    */
   public organizationDomainDelete(id: string): Promise<ArchivePayload | undefined> {
     return new OrganizationDomainDeleteMutation(this.request).fetch(id);
@@ -13296,6 +13706,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationInviteCreate for OrganizationInvitePayload
    *
    * @param input - required input to pass to organizationInviteCreate
+   * @returns OrganizationInvitePayload
    */
   public organizationInviteCreate(
     input: D.OrganizationInviteCreateInput
@@ -13306,6 +13717,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation resentOrganizationInvite for ArchivePayload
    *
    * @param id - required id to pass to resentOrganizationInvite
+   * @returns ArchivePayload
    */
   public resentOrganizationInvite(id: string): Promise<ArchivePayload | undefined> {
     return new ResentOrganizationInviteMutation(this.request).fetch(id);
@@ -13314,6 +13726,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation organizationInviteDelete for ArchivePayload
    *
    * @param id - required id to pass to organizationInviteDelete
+   * @returns ArchivePayload
    */
   public organizationInviteDelete(id: string): Promise<ArchivePayload | undefined> {
     return new OrganizationInviteDeleteMutation(this.request).fetch(id);
@@ -13322,6 +13735,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation projectLinkCreate for ProjectLinkPayload
    *
    * @param input - required input to pass to projectLinkCreate
+   * @returns ProjectLinkPayload
    */
   public projectLinkCreate(input: D.ProjectLinkCreateInput): Promise<ProjectLinkPayload | undefined> {
     return new ProjectLinkCreateMutation(this.request).fetch(input);
@@ -13330,6 +13744,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation projectLinkDelete for ArchivePayload
    *
    * @param id - required id to pass to projectLinkDelete
+   * @returns ArchivePayload
    */
   public projectLinkDelete(id: string): Promise<ArchivePayload | undefined> {
     return new ProjectLinkDeleteMutation(this.request).fetch(id);
@@ -13338,6 +13753,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation projectCreate for ProjectPayload
    *
    * @param input - required input to pass to projectCreate
+   * @returns ProjectPayload
    */
   public projectCreate(input: D.ProjectCreateInput): Promise<ProjectPayload | undefined> {
     return new ProjectCreateMutation(this.request).fetch(input);
@@ -13347,6 +13763,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to projectUpdate
    * @param id - required id to pass to projectUpdate
+   * @returns ProjectPayload
    */
   public projectUpdate(input: D.ProjectUpdateInput, id: string): Promise<ProjectPayload | undefined> {
     return new ProjectUpdateMutation(this.request).fetch(input, id);
@@ -13355,6 +13772,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation projectArchive for ArchivePayload
    *
    * @param id - required id to pass to projectArchive
+   * @returns ArchivePayload
    */
   public projectArchive(id: string): Promise<ArchivePayload | undefined> {
     return new ProjectArchiveMutation(this.request).fetch(id);
@@ -13363,6 +13781,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation pushSubscriptionCreate for PushSubscriptionPayload
    *
    * @param input - required input to pass to pushSubscriptionCreate
+   * @returns PushSubscriptionPayload
    */
   public pushSubscriptionCreate(input: D.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload | undefined> {
     return new PushSubscriptionCreateMutation(this.request).fetch(input);
@@ -13371,6 +13790,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation pushSubscriptionDelete for PushSubscriptionPayload
    *
    * @param id - required id to pass to pushSubscriptionDelete
+   * @returns PushSubscriptionPayload
    */
   public pushSubscriptionDelete(id: string): Promise<PushSubscriptionPayload | undefined> {
     return new PushSubscriptionDeleteMutation(this.request).fetch(id);
@@ -13379,6 +13799,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation reactionCreate for ReactionPayload
    *
    * @param input - required input to pass to reactionCreate
+   * @returns ReactionPayload
    */
   public reactionCreate(input: D.ReactionCreateInput): Promise<ReactionPayload | undefined> {
     return new ReactionCreateMutation(this.request).fetch(input);
@@ -13387,6 +13808,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation reactionDelete for ArchivePayload
    *
    * @param id - required id to pass to reactionDelete
+   * @returns ArchivePayload
    */
   public reactionDelete(id: string): Promise<ArchivePayload | undefined> {
     return new ReactionDeleteMutation(this.request).fetch(id);
@@ -13394,6 +13816,7 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation createCsvExportReport for CreateCsvExportReportPayload
    *
+   * @returns CreateCsvExportReportPayload
    */
   public get createCsvExportReport(): Promise<CreateCsvExportReportPayload | undefined> {
     return new CreateCsvExportReportMutation(this.request).fetch();
@@ -13402,6 +13825,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation subscriptionSessionCreate for SubscriptionSessionPayload
    *
    * @param plan - required plan to pass to subscriptionSessionCreate
+   * @returns SubscriptionSessionPayload
    */
   public subscriptionSessionCreate(plan: string): Promise<SubscriptionSessionPayload | undefined> {
     return new SubscriptionSessionCreateMutation(this.request).fetch(plan);
@@ -13409,6 +13833,7 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation subscriptionUpdateSessionCreate for SubscriptionSessionPayload
    *
+   * @returns SubscriptionSessionPayload
    */
   public get subscriptionUpdateSessionCreate(): Promise<SubscriptionSessionPayload | undefined> {
     return new SubscriptionUpdateSessionCreateMutation(this.request).fetch();
@@ -13418,6 +13843,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to subscriptionUpdate
    * @param id - required id to pass to subscriptionUpdate
+   * @returns SubscriptionPayload
    */
   public subscriptionUpdate(input: D.SubscriptionUpdateInput, id: string): Promise<SubscriptionPayload | undefined> {
     return new SubscriptionUpdateMutation(this.request).fetch(input, id);
@@ -13427,6 +13853,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param type - required type to pass to subscriptionUpgrade
    * @param id - required id to pass to subscriptionUpgrade
+   * @returns SubscriptionPayload
    */
   public subscriptionUpgrade(type: string, id: string): Promise<SubscriptionPayload | undefined> {
     return new SubscriptionUpgradeMutation(this.request).fetch(type, id);
@@ -13435,6 +13862,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation subscriptionArchive for ArchivePayload
    *
    * @param id - required id to pass to subscriptionArchive
+   * @returns ArchivePayload
    */
   public subscriptionArchive(id: string): Promise<ArchivePayload | undefined> {
     return new SubscriptionArchiveMutation(this.request).fetch(id);
@@ -13443,6 +13871,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation teamMembershipCreate for TeamMembershipPayload
    *
    * @param input - required input to pass to teamMembershipCreate
+   * @returns TeamMembershipPayload
    */
   public teamMembershipCreate(input: D.TeamMembershipCreateInput): Promise<TeamMembershipPayload | undefined> {
     return new TeamMembershipCreateMutation(this.request).fetch(input);
@@ -13451,6 +13880,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation teamMembershipDelete for ArchivePayload
    *
    * @param id - required id to pass to teamMembershipDelete
+   * @returns ArchivePayload
    */
   public teamMembershipDelete(id: string): Promise<ArchivePayload | undefined> {
     return new TeamMembershipDeleteMutation(this.request).fetch(id);
@@ -13460,6 +13890,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to teamCreate
    * @param vars - variables without 'input' to pass into the TeamCreateMutation
+   * @returns TeamPayload
    */
   public teamCreate(
     input: D.TeamCreateInput,
@@ -13472,6 +13903,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to teamUpdate
    * @param id - required id to pass to teamUpdate
+   * @returns TeamPayload
    */
   public teamUpdate(input: D.TeamUpdateInput, id: string): Promise<TeamPayload | undefined> {
     return new TeamUpdateMutation(this.request).fetch(input, id);
@@ -13480,6 +13912,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation teamArchive for ArchivePayload
    *
    * @param id - required id to pass to teamArchive
+   * @returns ArchivePayload
    */
   public teamArchive(id: string): Promise<ArchivePayload | undefined> {
     return new TeamArchiveMutation(this.request).fetch(id);
@@ -13488,6 +13921,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation teamDelete for ArchivePayload
    *
    * @param id - required id to pass to teamDelete
+   * @returns ArchivePayload
    */
   public teamDelete(id: string): Promise<ArchivePayload | undefined> {
     return new TeamDeleteMutation(this.request).fetch(id);
@@ -13496,6 +13930,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation templateCreate for TemplatePayload
    *
    * @param input - required input to pass to templateCreate
+   * @returns TemplatePayload
    */
   public templateCreate(input: D.TemplateCreateInput): Promise<TemplatePayload | undefined> {
     return new TemplateCreateMutation(this.request).fetch(input);
@@ -13505,6 +13940,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to templateUpdate
    * @param id - required id to pass to templateUpdate
+   * @returns TemplatePayload
    */
   public templateUpdate(input: D.TemplateUpdateInput, id: string): Promise<TemplatePayload | undefined> {
     return new TemplateUpdateMutation(this.request).fetch(input, id);
@@ -13513,6 +13949,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation templateDelete for ArchivePayload
    *
    * @param id - required id to pass to templateDelete
+   * @returns ArchivePayload
    */
   public templateDelete(id: string): Promise<ArchivePayload | undefined> {
     return new TemplateDeleteMutation(this.request).fetch(id);
@@ -13522,6 +13959,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to userSettingsUpdate
    * @param id - required id to pass to userSettingsUpdate
+   * @returns UserSettingsPayload
    */
   public userSettingsUpdate(input: D.UserSettingsUpdateInput, id: string): Promise<UserSettingsPayload | undefined> {
     return new UserSettingsUpdateMutation(this.request).fetch(input, id);
@@ -13530,6 +13968,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation userSettingsFlagIncrement for UserSettingsFlagPayload
    *
    * @param flag - required flag to pass to userSettingsFlagIncrement
+   * @returns UserSettingsFlagPayload
    */
   public userSettingsFlagIncrement(flag: string): Promise<UserSettingsFlagPayload | undefined> {
     return new UserSettingsFlagIncrementMutation(this.request).fetch(flag);
@@ -13537,6 +13976,7 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation userSettingsFlagsReset for UserSettingsFlagsResetPayload
    *
+   * @returns UserSettingsFlagsResetPayload
    */
   public get userSettingsFlagsReset(): Promise<UserSettingsFlagsResetPayload | undefined> {
     return new UserSettingsFlagsResetMutation(this.request).fetch();
@@ -13546,6 +13986,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param operation - required operation to pass to userFlagUpdate
    * @param flag - required flag to pass to userFlagUpdate
+   * @returns UserSettingsFlagPayload
    */
   public userFlagUpdate(
     operation: D.UserFlagUpdateOperation,
@@ -13556,6 +13997,7 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation userSubscribeToNewsletter for UserSubscribeToNewsletterPayload
    *
+   * @returns UserSubscribeToNewsletterPayload
    */
   public get userSubscribeToNewsletter(): Promise<UserSubscribeToNewsletterPayload | undefined> {
     return new UserSubscribeToNewsletterMutation(this.request).fetch();
@@ -13564,6 +14006,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation viewPreferencesCreate for ViewPreferencesPayload
    *
    * @param input - required input to pass to viewPreferencesCreate
+   * @returns ViewPreferencesPayload
    */
   public viewPreferencesCreate(input: D.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload | undefined> {
     return new ViewPreferencesCreateMutation(this.request).fetch(input);
@@ -13573,6 +14016,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to viewPreferencesUpdate
    * @param id - required id to pass to viewPreferencesUpdate
+   * @returns ViewPreferencesPayload
    */
   public viewPreferencesUpdate(
     input: D.ViewPreferencesUpdateInput,
@@ -13584,6 +14028,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation viewPreferencesDelete for ArchivePayload
    *
    * @param id - required id to pass to viewPreferencesDelete
+   * @returns ArchivePayload
    */
   public viewPreferencesDelete(id: string): Promise<ArchivePayload | undefined> {
     return new ViewPreferencesDeleteMutation(this.request).fetch(id);
@@ -13592,6 +14037,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation webhookCreate for WebhookPayload
    *
    * @param input - required input to pass to webhookCreate
+   * @returns WebhookPayload
    */
   public webhookCreate(input: D.WebhookCreateInput): Promise<WebhookPayload | undefined> {
     return new WebhookCreateMutation(this.request).fetch(input);
@@ -13601,6 +14047,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to webhookUpdate
    * @param id - required id to pass to webhookUpdate
+   * @returns WebhookPayload
    */
   public webhookUpdate(input: D.WebhookUpdateInput, id: string): Promise<WebhookPayload | undefined> {
     return new WebhookUpdateMutation(this.request).fetch(input, id);
@@ -13609,6 +14056,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation webhookDelete for ArchivePayload
    *
    * @param id - required id to pass to webhookDelete
+   * @returns ArchivePayload
    */
   public webhookDelete(id: string): Promise<ArchivePayload | undefined> {
     return new WebhookDeleteMutation(this.request).fetch(id);
@@ -13617,6 +14065,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation workflowStateCreate for WorkflowStatePayload
    *
    * @param input - required input to pass to workflowStateCreate
+   * @returns WorkflowStatePayload
    */
   public workflowStateCreate(input: D.WorkflowStateCreateInput): Promise<WorkflowStatePayload | undefined> {
     return new WorkflowStateCreateMutation(this.request).fetch(input);
@@ -13626,6 +14075,7 @@ export class LinearSdk extends LinearRequest {
    *
    * @param input - required input to pass to workflowStateUpdate
    * @param id - required id to pass to workflowStateUpdate
+   * @returns WorkflowStatePayload
    */
   public workflowStateUpdate(input: D.WorkflowStateUpdateInput, id: string): Promise<WorkflowStatePayload | undefined> {
     return new WorkflowStateUpdateMutation(this.request).fetch(input, id);
@@ -13634,6 +14084,7 @@ export class LinearSdk extends LinearRequest {
    * Mutation workflowStateArchive for ArchivePayload
    *
    * @param id - required id to pass to workflowStateArchive
+   * @returns ArchivePayload
    */
   public workflowStateArchive(id: string): Promise<ArchivePayload | undefined> {
     return new WorkflowStateArchiveMutation(this.request).fetch(id);
