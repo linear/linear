@@ -24,6 +24,8 @@ export interface SdkPluginContext extends PluginContext<SdkPluginConfig> {
 export interface SdkOperationPrint {
   /** The name of the operation */
   name: string;
+  /** The name of the operation field */
+  field: string;
   /** The name of the generated graphql document */
   document: string;
   /** The type of the graphql operation */
@@ -64,6 +66,8 @@ export interface SdkOperation {
   fragment?: ObjectTypeDefinitionNode;
   /** The model for this operation */
   model?: SdkModel;
+  /** All args for this operation */
+  args: ArgList;
   /** The required args for this operation */
   requiredArgs: ArgList;
   /** The optional args for this operation */

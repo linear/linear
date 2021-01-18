@@ -26,11 +26,5 @@
     "suppressImplicitAnyIndexErrors": true,
     "target": "es6"
   },
-  "exclude": [
-    "../**/node_modules",
-    "../**/build",
-    "../**/dist",
-    "./**/scripts",
-    "./**/jest"
-  ],
+  "exclude": ["../**/node_modules", "../**/build", "../**/dist", "./**/scripts", "./**/jest"]
 }
