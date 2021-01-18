@@ -21,7 +21,7 @@ describe("LinearClient", () => {
 
   it("makes query to baseUrl", async () => {
     const client = new LinearClient({ apiKey: MOCK_API_KEY, baseUrl: ctx.url });
-    const response = await client.viewer();
+    const response = await client.viewer;
 
     expect(response).toEqual(expect.objectContaining({ id: "viewerId" }));
   });
@@ -41,7 +41,7 @@ describe("LinearClient", () => {
     const client = new LinearClient({ apiKey: "asd", baseUrl: ctx.url });
 
     try {
-      await client.viewer();
+      await client.viewer;
     } catch (error) {
       expect(error.message).toEqual(expect.stringContaining("401"));
     }

@@ -1,4 +1,4 @@
-import { LinearSdk, Types } from "../index";
+import { LinearSdk } from "../index";
 
 function resolveWithData(data: unknown) {
   return () => {
@@ -8,15 +8,6 @@ function resolveWithData(data: unknown) {
 }
 
 describe("LinearSdk", () => {
-  it("calls the requester", async () => {
-    const requester = jest.fn();
-    const sdk = new LinearSdk(requester);
-    const id = "asd";
-    await sdk.team(id);
-
-    expect(requester).toHaveBeenCalledWith(Types.TeamDocument, { id });
-  });
-
   it("returns data", async () => {
     const sdk = new LinearSdk(resolveWithData({ team: { id: "qwe" } }));
     const response = await sdk.team("asd");
@@ -30,7 +21,7 @@ describe("LinearSdk", () => {
     });
 
     try {
-      await sdk.viewer();
+      await sdk.viewer;
     } catch (error) {
       expect(error.message).toEqual(expect.stringContaining("test error"));
     }

@@ -2,7 +2,6 @@ import { Types } from "@graphql-codegen/plugin-helpers";
 import {
   ArgDefinition,
   getArgList,
-  logger,
   nonNullable,
   PluginContext,
   printList,
@@ -76,7 +75,10 @@ export function parseOperations(
     const modelName = query ? reduceTypeName(query.type) : fragment?.name.value ?? "UNKNOWN_MODEL";
     const listName = query ? reduceListType(query.type) : undefined;
     const print: SdkOperationPrint = {
+      /** The name of the operation */
       name: operationName,
+      /** The name of the operation field */
+      field: node.name?.value ?? "UNNAMED_FIELD",
       /** The name of the generated graphql document */
       document: printNamespaced(context, `${operationName}Document`),
       /** The type of the graphql operation */
@@ -109,30 +111,29 @@ export function parseOperations(
     /** Find a parent operation */
     const parentSdkKey = sdkPath.slice(0, -1).join("_");
     const parent = acc[parentSdkKey]?.operations.find(d => d.path.join("_") === sdkKey);
-    if (node.name?.value === "user_assignedIssues") {
-      logger.trace({ acc, sdkKey, node });
-    }
 
     /** Argument definition for each required variable */
     const requiredVariables: ArgDefinition[] = getRequiredVariables(node).map(v => ({
       name: v.variable.name.value,
       type: printTypescriptType(context, v.type, c.NAMESPACE_DOCUMENT),
       optional: false,
-      description: `required ${v.variable.name.value} variable to set the ${sdkPath.join(" ")} scope`,
+      description: `required ${v.variable.name.value} to pass to ${print.field}`,
     }));
 
     /** Single definition for any optional variables */
     const optionalVariables = getOptionalVariables(node);
-    const omittedVariableNames = [
+    const omittedVariableNames = new Set([
       ...(parent?.requiredArgs.args.map(v => `'${v.name}'`) ?? []),
       ...requiredVariables.map(v => `'${v.name}'`),
-    ];
+    ]);
     const optionalArg = requiredVariables.length
       ? {
           name: c.VARIABLE_NAME,
           optional: true,
-          type: `Omit<${print.variables}, ${printList(omittedVariableNames, " | ")}>`,
-          description: `variables without ${printList(omittedVariableNames, ", ")} to pass into the ${print.response}`,
+          type: `Omit<${print.variables}, ${printList([...omittedVariableNames], " | ")}>`,
+          description: `variables without ${printList([...omittedVariableNames], ", ")} to pass into the ${
+            print.response
+          }`,
         }
       : {
           name: c.VARIABLE_NAME,
@@ -160,6 +161,7 @@ export function parseOperations(
       query,
       model,
       fragment,
+      args: getArgList(args),
       requiredArgs: getArgList(args.filter(a => !a.optional)),
       optionalArgs: getArgList(args.filter(a => a.optional)),
       parentArgs: getArgList(parentArgs),

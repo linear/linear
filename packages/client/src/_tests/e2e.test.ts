@@ -69,12 +69,12 @@ if (process.env.E2E_API_KEY) {
     it("throw auth error", async () => {
       const client = new LinearClient({ apiKey: "fake api key" });
 
-      expectError(() => client.viewer(), "authentication failed");
+      expectError(() => client.viewer, "authentication failed");
     });
 
     describe("queries", () => {
       it("query for the viewer", async () => {
-        const viewer = await getClient().viewer();
+        const viewer = await getClient().viewer;
 
         expectSuccess(viewer, { id: expect.stringContaining("") });
       });

@@ -9,10 +9,7 @@ import { SdkOperation, SdkPluginContext } from "./types";
 export function printSdk(context: SdkPluginContext): string {
   const rootOperations = context.sdkDefinitions[""];
 
-  const operations = printList(
-    rootOperations.operations.map(o => printSdkOperation(context, o)),
-    "\n"
-  );
+  const operations = printList(rootOperations.operations.map(printSdkOperation), "\n");
 
   const args = getArgList([getRequestArg()]);
 
@@ -32,11 +29,21 @@ export function printSdk(context: SdkPluginContext): string {
 }
 
 /**
- * Print a sdk root operation
+ * Print an sdk root operation
  */
-export function printSdkOperation(context: SdkPluginContext, o: SdkOperation): string {
+export function printSdkOperation(o: SdkOperation): string {
   return printList(
-    [printDebug(o), `public ${o.node.name?.value} = new ${o.print.response}(this.${c.REQUEST_NAME}).fetch`],
+    [
+      printComment([
+        `${o.print.type} ${o.print.field} for ${o.print.model}${o.print.list ? "s" : ""}`,
+        o.query?.description?.value ?? "",
+        ...o.args.jsdoc,
+      ]),
+      printDebug(o),
+      `public ${o.args.args.length ? "" : "get"} ${o.print.field}(${o.args.printInput}): ${o.print.promise} {
+        return new ${o.print.response}(this.${c.REQUEST_NAME}).fetch(${o.args.printOutput})
+      }`,
+    ],
     "\n"
   );
 }

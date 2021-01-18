@@ -7,19 +7,14 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "es6",
-      "dom",
-      "esnext.asynciterable",
-      "es2019"
-    ],
+    "lib": ["es6", "dom", "esnext.asynciterable", "es2019"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "resolveJsonModule": true,
     "noImplicitThis": false,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
@@ -27,16 +22,8 @@
     "target": "es6",
     "incremental": true,
     "paths": {
-      "@linear/plugin-common": [
-        "../packages/common/src"
-      ]
+      "@linear/plugin-common": ["../packages/common/src"]
     }
   },
-  "exclude": [
-    "../**/node_modules",
-    "../**/build",
-    "../**/dist",
-    "./**/scripts",
-    "./**/jest"
-  ],
+  "exclude": ["../**/node_modules", "../**/build", "../**/dist", "./**/scripts", "./**/jest"]
 }
