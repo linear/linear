@@ -6,13 +6,12 @@ import {
   printDebug,
   printList,
   printPascal,
+  printTernary,
   printTypescriptType,
 } from "@linear/plugin-common";
 import c from "./constants";
-import { printNamespaced } from "./print";
 import { getRequestArg } from "./request";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
-import { getOptionalVariables } from "./variable";
 
 /**
  * Print all models
@@ -36,8 +35,6 @@ function printModelField(field: SdkModelField, content: string): string {
  * Print the exported return type for an sdk operation
  */
 function printModel(context: SdkPluginContext, model: SdkModel): string {
-  const dataType = `${printNamespaced(context, model.name)}Fragment`;
-
   const operations = context.sdkDefinitions[lowerFirst(model.name)]?.operations ?? [];
   const operationFieldNames = operations.map(o => getLast(o.path));
 
@@ -62,7 +59,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             printList(
               model.fields.query.map(field =>
                 field.args.some(arg => !arg.optional)
-                  ? `private _${field.name}?: ${dataType}['${field.name}']`
+                  ? `private _${field.name}?: ${model.fragment}['${field.name}']`
                   : undefined
               ),
               "\n"
@@ -91,19 +88,20 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                   /** Ignore objects returned by an operation */
                   operationFieldNames.includes(field.name)
                     ? undefined
-                    : `this.${field.name} = data.${field.name} 
-                      ? new ${field.object.name.value}(${c.REQUEST_NAME}, data.${field.name}) 
-                      : undefined`
+                    : printTernary(
+                        `this.${field.name} = data.${field.name}`,
+                        `new ${field.object.name.value}(${c.REQUEST_NAME}, data.${field.name}) `
+                      )
                 ),
                 "\n"
               ),
               printDebug("fields.list"),
               printList(
-                model.fields.list.map(
-                  field =>
-                    `this.${field.name} = data.${field.name}
-                      ? data.${field.name}.map(node => new ${field.listType}(${c.REQUEST_NAME}, node))
-                      : undefined`
+                model.fields.list.map(field =>
+                  printTernary(
+                    `this.${field.name} = data.${field.name}`,
+                    `data.${field.name}.map(node => new ${field.listType}(${c.REQUEST_NAME}, node))`
+                  )
                 ),
                 "\n"
               ),
@@ -163,9 +161,10 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                   return printModelField(
                     field,
                     `public get ${field.name}(): Promise<${typeName} | undefined> | undefined {
-                        return ${printList(fieldQueryArgs, " && ")} ? new ${fieldQueryName}(this.${
-                      c.REQUEST_NAME
-                    }).fetch(${printList(fieldQueryArgs, ", ")}) : undefined
+                        return ${printTernary(
+                          printList(fieldQueryArgs, " && "),
+                          `new ${fieldQueryName}(this.${c.REQUEST_NAME}).fetch(${printList(fieldQueryArgs, ", ")})`
+                        )}
                       }`
                   );
                 } else {
@@ -189,41 +188,27 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               operations.map(o => {
                 const fieldName = getLast(o.path);
                 const field = model.fields.all.find(f => f.name === fieldName);
-                const requiredVariableNames = Object.keys(o.requiredVariables).map(v => `'${v}'`);
-                const optionalArgs = getOptionalVariables(o.node);
-                const variableType = printNamespaced(context, o.operationVariablesTypes);
-                const optionalArg = optionalArgs.length
-                  ? getArgList([
-                      {
-                        name: c.VARIABLE_NAME,
-                        optional: true,
-                        type: requiredVariableNames.length
-                          ? `Omit<${variableType}, ${printList(requiredVariableNames, " | ")}>`
-                          : variableType,
-                        description: `variables without ${printList(requiredVariableNames, ", ")} to pass into the ${
-                          o.operationResultType
-                        }`,
-                      },
-                    ])
-                  : undefined;
 
                 const operationArgs = printList(
-                  [`this.${c.REQUEST_NAME}`, ...Object.keys(o.requiredVariables).map(v => `this.${v}`), ,],
+                  [`this.${c.REQUEST_NAME}`, ...o.requiredArgs.args.map(v => `this.${v.name}`), ,],
                   ", "
                 );
-                const variableCheck = printList([...Object.keys(o.requiredVariables).map(v => `this.${v}`), ,], " && ");
-                const operationCall = `new ${o.name}${o.operationType}(${operationArgs}).fetch(${
-                  optionalArg?.printOutput ?? ""
+                const variableCheck = printList(
+                  o.requiredArgs.args.map(v => `this.${v.name}`),
+                  " && "
+                );
+                const operationCall = `new ${o.print.name}${o.print.type}(${operationArgs}).fetch(${
+                  o.optionalArgs.printOutput ?? ""
                 })`;
 
                 return printList(
                   [
                     printComment([field?.node.description?.value]),
                     printDebug(o),
-                    `public ${optionalArg ? "" : "get"} ${fieldName}(${optionalArg?.printInput ?? ""}) {
-                        return ${variableCheck ? `${variableCheck} ?` : ""} ${operationCall} ${
-                      variableCheck ? `: undefined` : ""
-                    }
+                    `public ${o.optionalArgs.args.length ? "" : "get"} ${fieldName}(${
+                      o.optionalArgs?.printInput ?? ""
+                    }) {
+                        return ${printTernary(variableCheck, operationCall)}
                     }`,
                   ],
                   "\n"

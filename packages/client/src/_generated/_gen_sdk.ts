@@ -11,7 +11,7 @@ export type Request = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
  *
  * @param request - function to call the graphql client
  */
-export class LinearRequest {
+class LinearRequest {
   public constructor(request: Request) {
     this.request = request;
   }
@@ -84,15 +84,15 @@ class User extends LinearRequest {
     return new OrganizationQuery(this.request).fetch();
   }
   /** Issues assigned to the user. */
-  public assignedIssues(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
+  public assignedIssues(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id" | "id">) {
     return this.id ? new User_AssignedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Issues created by the user. */
-  public createdIssues(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
+  public createdIssues(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id" | "id">) {
     return this.id ? new User_CreatedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Memberships associated with the user. */
-  public teamMemberships(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
+  public teamMemberships(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id" | "id">) {
     return this.id ? new User_TeamMembershipsQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -282,35 +282,35 @@ class Issue extends LinearRequest {
     return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** Users who are subscribed to the issue. */
-  public subscribers(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
+  public subscribers(vars?: Omit<D.Issue_SubscribersQueryVariables, "id" | "id">) {
     return this.id ? new Issue_SubscribersQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Children of the issue. */
-  public children(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
+  public children(vars?: Omit<D.Issue_ChildrenQueryVariables, "id" | "id">) {
     return this.id ? new Issue_ChildrenQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Comments associated with the issue. */
-  public comments(vars?: Omit<D.Issue_CommentsQueryVariables, "id">) {
+  public comments(vars?: Omit<D.Issue_CommentsQueryVariables, "id" | "id">) {
     return this.id ? new Issue_CommentsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** History entries associated with the issue. */
-  public history(vars?: Omit<D.Issue_HistoryQueryVariables, "id">) {
+  public history(vars?: Omit<D.Issue_HistoryQueryVariables, "id" | "id">) {
     return this.id ? new Issue_HistoryQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Labels associated with this issue. */
-  public labels(vars?: Omit<D.Issue_LabelsQueryVariables, "id">) {
+  public labels(vars?: Omit<D.Issue_LabelsQueryVariables, "id" | "id">) {
     return this.id ? new Issue_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Integration resources for this issue. */
-  public integrationResources(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
+  public integrationResources(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id" | "id">) {
     return this.id ? new Issue_IntegrationResourcesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Relations associated with this issue. */
-  public relations(vars?: Omit<D.Issue_RelationsQueryVariables, "id">) {
+  public relations(vars?: Omit<D.Issue_RelationsQueryVariables, "id" | "id">) {
     return this.id ? new Issue_RelationsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Inverse relations associated with this issue. */
-  public inverseRelations(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
+  public inverseRelations(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id" | "id">) {
     return this.id ? new Issue_InverseRelationsQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -474,35 +474,35 @@ class Team extends LinearRequest {
     return new OrganizationQuery(this.request).fetch();
   }
   /** Issues associated with the team. */
-  public issues(vars?: Omit<D.Team_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.Team_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new Team_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Cycles associated with the team. */
-  public cycles(vars?: Omit<D.Team_CyclesQueryVariables, "id">) {
+  public cycles(vars?: Omit<D.Team_CyclesQueryVariables, "id" | "id">) {
     return this.id ? new Team_CyclesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Memberships associated with the team. */
-  public memberships(vars?: Omit<D.Team_MembershipsQueryVariables, "id">) {
+  public memberships(vars?: Omit<D.Team_MembershipsQueryVariables, "id" | "id">) {
     return this.id ? new Team_MembershipsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Projects associated with the team. */
-  public projects(vars?: Omit<D.Team_ProjectsQueryVariables, "id">) {
+  public projects(vars?: Omit<D.Team_ProjectsQueryVariables, "id" | "id">) {
     return this.id ? new Team_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** The states that define the workflow associated with the team. */
-  public states(vars?: Omit<D.Team_StatesQueryVariables, "id">) {
+  public states(vars?: Omit<D.Team_StatesQueryVariables, "id" | "id">) {
     return this.id ? new Team_StatesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Templates associated with the team. */
-  public templates(vars?: Omit<D.Team_TemplatesQueryVariables, "id">) {
+  public templates(vars?: Omit<D.Team_TemplatesQueryVariables, "id" | "id">) {
     return this.id ? new Team_TemplatesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Labels associated with the team. */
-  public labels(vars?: Omit<D.Team_LabelsQueryVariables, "id">) {
+  public labels(vars?: Omit<D.Team_LabelsQueryVariables, "id" | "id">) {
     return this.id ? new Team_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Webhooks associated with the team. */
-  public webhooks(vars?: Omit<D.Team_WebhooksQueryVariables, "id">) {
+  public webhooks(vars?: Omit<D.Team_WebhooksQueryVariables, "id" | "id">) {
     return this.id ? new Team_WebhooksQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -556,7 +556,7 @@ class WorkflowState extends LinearRequest {
     return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** Issues belonging in this state. */
-  public issues(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new WorkflowState_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -639,11 +639,11 @@ class Cycle extends LinearRequest {
     return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
   }
   /** Issues associated with the cycle. */
-  public issues(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.Cycle_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new Cycle_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Issues that weren't completed when the cycle was closed. */
-  public uncompletedIssuesUponClose(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
+  public uncompletedIssuesUponClose(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id" | "id">) {
     return this.id ? new Cycle_UncompletedIssuesUponCloseQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -848,19 +848,19 @@ class Project extends LinearRequest {
     return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
   }
   /** Teams associated with this project. */
-  public teams(vars?: Omit<D.Project_TeamsQueryVariables, "id">) {
+  public teams(vars?: Omit<D.Project_TeamsQueryVariables, "id" | "id">) {
     return this.id ? new Project_TeamsQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Users that are members of the project. */
-  public members(vars?: Omit<D.Project_MembersQueryVariables, "id">) {
+  public members(vars?: Omit<D.Project_MembersQueryVariables, "id" | "id">) {
     return this.id ? new Project_MembersQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Issues associated with the project. */
-  public issues(vars?: Omit<D.Project_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.Project_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new Project_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
   /** Links associated with the project. */
-  public links(vars?: Omit<D.Project_LinksQueryVariables, "id">) {
+  public links(vars?: Omit<D.Project_LinksQueryVariables, "id" | "id">) {
     return this.id ? new Project_LinksQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -902,7 +902,7 @@ class Milestone extends LinearRequest {
     return new OrganizationQuery(this.request).fetch();
   }
   /** Projects associated with the milestone. */
-  public projects(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
+  public projects(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id" | "id">) {
     return this.id ? new Milestone_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -1462,7 +1462,7 @@ class IssueLabel extends LinearRequest {
     return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
   }
   /** Issues associated with the label. */
-  public issues(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new IssueLabel_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -3212,7 +3212,7 @@ class OrganizationInvite extends LinearRequest {
     return new OrganizationQuery(this.request).fetch();
   }
   /** undefined */
-  public issues(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
+  public issues(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id" | "id">) {
     return this.id ? new OrganizationInvite_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
   }
 }
@@ -9216,7 +9216,7 @@ class WorkflowStateArchiveMutation extends LinearRequest {
  * Query User_AssignedIssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the user scope
+ * @param id - required id variable to set the  scope
  */
 class User_AssignedIssuesQuery extends LinearRequest {
   private _id: string;
@@ -9244,7 +9244,7 @@ class User_AssignedIssuesQuery extends LinearRequest {
  * Query User_CreatedIssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the user scope
+ * @param id - required id variable to set the  scope
  */
 class User_CreatedIssuesQuery extends LinearRequest {
   private _id: string;
@@ -9269,7 +9269,7 @@ class User_CreatedIssuesQuery extends LinearRequest {
  * Query User_TeamMembershipsDocument for TeamMembershipConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the user scope
+ * @param id - required id variable to set the  scope
  */
 class User_TeamMembershipsQuery extends LinearRequest {
   private _id: string;
@@ -9280,7 +9280,7 @@ class User_TeamMembershipsQuery extends LinearRequest {
   }
 
   public async fetch(
-    vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">
+    vars?: Omit<D.User_TeamMembershipsQueryVariables, "id" | "id">
   ): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
       D.User_TeamMembershipsDocument,
@@ -9716,9 +9716,9 @@ class BillingDetails_PaymentMethodQuery extends LinearRequest {
  * Query CollaborativeDocumentJoin_StepsDocument for StepsResponse
  *
  * @param request - function to call the graphql client
- * @param clientId - required clientId variable to set the collaborativeDocumentJoin scope
- * @param issueId - required issueId variable to set the collaborativeDocumentJoin scope
- * @param version - required version variable to set the collaborativeDocumentJoin scope
+ * @param clientId - required clientId variable to set the  scope
+ * @param issueId - required issueId variable to set the  scope
+ * @param version - required version variable to set the  scope
  */
 class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
   private _clientId: string;
@@ -9751,7 +9751,7 @@ class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
  * Query Cycle_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the cycle scope
+ * @param id - required id variable to set the  scope
  */
 class Cycle_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -9776,7 +9776,7 @@ class Cycle_IssuesQuery extends LinearRequest {
  * Query Cycle_UncompletedIssuesUponCloseDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the cycle scope
+ * @param id - required id variable to set the  scope
  */
 class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
   private _id: string;
@@ -9787,7 +9787,7 @@ class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
   }
 
   public async fetch(
-    vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
+    vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id" | "id">
   ): Promise<IssueConnection | undefined> {
     return this.request<D.Cycle_UncompletedIssuesUponCloseQuery, D.Cycle_UncompletedIssuesUponCloseQueryVariables>(
       D.Cycle_UncompletedIssuesUponCloseDocument,
@@ -9806,7 +9806,7 @@ class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
  * Query FigmaEmbedInfo_FigmaEmbedDocument for FigmaEmbed
  *
  * @param request - function to call the graphql client
- * @param fileId - required fileId variable to set the figmaEmbedInfo scope
+ * @param fileId - required fileId variable to set the  scope
  */
 class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
   private _fileId: string;
@@ -9817,7 +9817,7 @@ class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
   }
 
   public async fetch(
-    vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
+    vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId" | "fileId">
   ): Promise<FigmaEmbed | undefined> {
     return this.request<D.FigmaEmbedInfo_FigmaEmbedQuery, D.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       D.FigmaEmbedInfo_FigmaEmbedDocument,
@@ -9836,7 +9836,7 @@ class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
  * Query Integration_SettingsDocument for IntegrationSettings
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration scope
+ * @param id - required id variable to set the  scope
  */
 class Integration_SettingsQuery extends LinearRequest {
   private _id: string;
@@ -9863,7 +9863,7 @@ class Integration_SettingsQuery extends LinearRequest {
  * Query Integration_Settings_SlackPostDocument for SlackPostSettings
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration settings scope
+ * @param id - required id variable to set the integration scope
  */
 class Integration_Settings_SlackPostQuery extends LinearRequest {
   private _id: string;
@@ -9890,7 +9890,7 @@ class Integration_Settings_SlackPostQuery extends LinearRequest {
  * Query Integration_Settings_SlackProjectPostDocument for SlackPostSettings
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration settings scope
+ * @param id - required id variable to set the integration scope
  */
 class Integration_Settings_SlackProjectPostQuery extends LinearRequest {
   private _id: string;
@@ -9917,7 +9917,7 @@ class Integration_Settings_SlackProjectPostQuery extends LinearRequest {
  * Query Integration_Settings_GoogleSheetsDocument for GoogleSheetsSettings
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration settings scope
+ * @param id - required id variable to set the integration scope
  */
 class Integration_Settings_GoogleSheetsQuery extends LinearRequest {
   private _id: string;
@@ -9944,7 +9944,7 @@ class Integration_Settings_GoogleSheetsQuery extends LinearRequest {
  * Query Integration_Settings_SentryDocument for SentrySettings
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integration settings scope
+ * @param id - required id variable to set the integration scope
  */
 class Integration_Settings_SentryQuery extends LinearRequest {
   private _id: string;
@@ -9971,7 +9971,7 @@ class Integration_Settings_SentryQuery extends LinearRequest {
  * Query IntegrationResource_DataDocument for IntegrationResourceData
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource scope
+ * @param id - required id variable to set the  scope
  */
 class IntegrationResource_DataQuery extends LinearRequest {
   private _id: string;
@@ -9998,7 +9998,7 @@ class IntegrationResource_DataQuery extends LinearRequest {
  * Query IntegrationResource_PullRequestDocument for PullRequestPayload
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource scope
+ * @param id - required id variable to set the  scope
  */
 class IntegrationResource_PullRequestQuery extends LinearRequest {
   private _id: string;
@@ -10025,7 +10025,7 @@ class IntegrationResource_PullRequestQuery extends LinearRequest {
  * Query IntegrationResource_Data_GithubPullRequestDocument for PullRequestPayload
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource data scope
+ * @param id - required id variable to set the integrationResource scope
  */
 class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
   private _id: string;
@@ -10052,7 +10052,7 @@ class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
  * Query IntegrationResource_Data_GitlabMergeRequestDocument for PullRequestPayload
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource data scope
+ * @param id - required id variable to set the integrationResource scope
  */
 class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
   private _id: string;
@@ -10079,7 +10079,7 @@ class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
  * Query IntegrationResource_Data_GithubCommitDocument for CommitPayload
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource data scope
+ * @param id - required id variable to set the integrationResource scope
  */
 class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
   private _id: string;
@@ -10106,7 +10106,7 @@ class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
  * Query IntegrationResource_Data_SentryIssueDocument for SentryIssuePayload
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the integrationResource data scope
+ * @param id - required id variable to set the integrationResource scope
  */
 class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
   private _id: string;
@@ -10133,7 +10133,7 @@ class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
  * Query InviteInfo_InviteDataDocument for InviteData
  *
  * @param request - function to call the graphql client
- * @param userHash - required userHash variable to set the inviteInfo scope
+ * @param userHash - required userHash variable to set the  scope
  */
 class InviteInfo_InviteDataQuery extends LinearRequest {
   private _userHash: string;
@@ -10161,7 +10161,7 @@ class InviteInfo_InviteDataQuery extends LinearRequest {
  * Query IssueLabel_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issueLabel scope
+ * @param id - required id variable to set the  scope
  */
 class IssueLabel_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -10186,7 +10186,7 @@ class IssueLabel_IssuesQuery extends LinearRequest {
  * Query Issue_SubscribersDocument for UserConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_SubscribersQuery extends LinearRequest {
   private _id: string;
@@ -10211,7 +10211,7 @@ class Issue_SubscribersQuery extends LinearRequest {
  * Query Issue_ChildrenDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_ChildrenQuery extends LinearRequest {
   private _id: string;
@@ -10236,7 +10236,7 @@ class Issue_ChildrenQuery extends LinearRequest {
  * Query Issue_CommentsDocument for CommentConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_CommentsQuery extends LinearRequest {
   private _id: string;
@@ -10261,7 +10261,7 @@ class Issue_CommentsQuery extends LinearRequest {
  * Query Issue_HistoryDocument for IssueHistoryConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_HistoryQuery extends LinearRequest {
   private _id: string;
@@ -10286,7 +10286,7 @@ class Issue_HistoryQuery extends LinearRequest {
  * Query Issue_LabelsDocument for IssueLabelConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_LabelsQuery extends LinearRequest {
   private _id: string;
@@ -10311,7 +10311,7 @@ class Issue_LabelsQuery extends LinearRequest {
  * Query Issue_IntegrationResourcesDocument for IntegrationResourceConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_IntegrationResourcesQuery extends LinearRequest {
   private _id: string;
@@ -10322,7 +10322,7 @@ class Issue_IntegrationResourcesQuery extends LinearRequest {
   }
 
   public async fetch(
-    vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
+    vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id" | "id">
   ): Promise<IntegrationResourceConnection | undefined> {
     return this.request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
       D.Issue_IntegrationResourcesDocument,
@@ -10341,7 +10341,7 @@ class Issue_IntegrationResourcesQuery extends LinearRequest {
  * Query Issue_RelationsDocument for IssueRelationConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_RelationsQuery extends LinearRequest {
   private _id: string;
@@ -10366,7 +10366,7 @@ class Issue_RelationsQuery extends LinearRequest {
  * Query Issue_InverseRelationsDocument for IssueRelationConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the issue scope
+ * @param id - required id variable to set the  scope
  */
 class Issue_InverseRelationsQuery extends LinearRequest {
   private _id: string;
@@ -10377,7 +10377,7 @@ class Issue_InverseRelationsQuery extends LinearRequest {
   }
 
   public async fetch(
-    vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">
+    vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id" | "id">
   ): Promise<IssueRelationConnection | undefined> {
     return this.request<D.Issue_InverseRelationsQuery, D.Issue_InverseRelationsQueryVariables>(
       D.Issue_InverseRelationsDocument,
@@ -10396,7 +10396,7 @@ class Issue_InverseRelationsQuery extends LinearRequest {
  * Query Milestone_ProjectsDocument for ProjectConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the milestone scope
+ * @param id - required id variable to set the  scope
  */
 class Milestone_ProjectsQuery extends LinearRequest {
   private _id: string;
@@ -10421,7 +10421,7 @@ class Milestone_ProjectsQuery extends LinearRequest {
  * Query OrganizationInvite_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the organizationInvite scope
+ * @param id - required id variable to set the  scope
  */
 class OrganizationInvite_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -10432,7 +10432,7 @@ class OrganizationInvite_IssuesQuery extends LinearRequest {
   }
 
   public async fetch(
-    vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">
+    vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id" | "id">
   ): Promise<IssueConnection | undefined> {
     return this.request<D.OrganizationInvite_IssuesQuery, D.OrganizationInvite_IssuesQueryVariables>(
       D.OrganizationInvite_IssuesDocument,
@@ -10451,7 +10451,7 @@ class OrganizationInvite_IssuesQuery extends LinearRequest {
  * Query Project_TeamsDocument for TeamConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the project scope
+ * @param id - required id variable to set the  scope
  */
 class Project_TeamsQuery extends LinearRequest {
   private _id: string;
@@ -10476,7 +10476,7 @@ class Project_TeamsQuery extends LinearRequest {
  * Query Project_MembersDocument for UserConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the project scope
+ * @param id - required id variable to set the  scope
  */
 class Project_MembersQuery extends LinearRequest {
   private _id: string;
@@ -10501,7 +10501,7 @@ class Project_MembersQuery extends LinearRequest {
  * Query Project_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the project scope
+ * @param id - required id variable to set the  scope
  */
 class Project_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -10526,7 +10526,7 @@ class Project_IssuesQuery extends LinearRequest {
  * Query Project_LinksDocument for ProjectLinkConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the project scope
+ * @param id - required id variable to set the  scope
  */
 class Project_LinksQuery extends LinearRequest {
   private _id: string;
@@ -10551,7 +10551,7 @@ class Project_LinksQuery extends LinearRequest {
  * Query Team_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_IssuesQuery extends LinearRequest {
   private _id: string;
@@ -10576,7 +10576,7 @@ class Team_IssuesQuery extends LinearRequest {
  * Query Team_CyclesDocument for CycleConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_CyclesQuery extends LinearRequest {
   private _id: string;
@@ -10601,7 +10601,7 @@ class Team_CyclesQuery extends LinearRequest {
  * Query Team_MembershipsDocument for TeamMembershipConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_MembershipsQuery extends LinearRequest {
   private _id: string;
@@ -10612,7 +10612,7 @@ class Team_MembershipsQuery extends LinearRequest {
   }
 
   public async fetch(
-    vars?: Omit<D.Team_MembershipsQueryVariables, "id">
+    vars?: Omit<D.Team_MembershipsQueryVariables, "id" | "id">
   ): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
       id: this._id,
@@ -10628,7 +10628,7 @@ class Team_MembershipsQuery extends LinearRequest {
  * Query Team_ProjectsDocument for ProjectConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_ProjectsQuery extends LinearRequest {
   private _id: string;
@@ -10653,7 +10653,7 @@ class Team_ProjectsQuery extends LinearRequest {
  * Query Team_StatesDocument for WorkflowStateConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_StatesQuery extends LinearRequest {
   private _id: string;
@@ -10678,7 +10678,7 @@ class Team_StatesQuery extends LinearRequest {
  * Query Team_TemplatesDocument for TemplateConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_TemplatesQuery extends LinearRequest {
   private _id: string;
@@ -10703,7 +10703,7 @@ class Team_TemplatesQuery extends LinearRequest {
  * Query Team_LabelsDocument for IssueLabelConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_LabelsQuery extends LinearRequest {
   private _id: string;
@@ -10728,7 +10728,7 @@ class Team_LabelsQuery extends LinearRequest {
  * Query Team_WebhooksDocument for WebhookConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the team scope
+ * @param id - required id variable to set the  scope
  */
 class Team_WebhooksQuery extends LinearRequest {
   private _id: string;
@@ -10753,7 +10753,7 @@ class Team_WebhooksQuery extends LinearRequest {
  * Query WorkflowState_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id variable to set the workflowState scope
+ * @param id - required id variable to set the  scope
  */
 class WorkflowState_IssuesQuery extends LinearRequest {
   private _id: string;

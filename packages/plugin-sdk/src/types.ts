@@ -1,4 +1,4 @@
-import { ArgDefinition, PluginConfig, PluginContext } from "@linear/plugin-common";
+import { ArgDefinition, ArgList, PluginConfig, PluginContext } from "@linear/plugin-common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode, OperationDefinitionNode } from "graphql";
 
 /**
@@ -19,6 +19,30 @@ export interface SdkPluginContext extends PluginContext<SdkPluginConfig> {
 }
 
 /**
+ * Parsed names for printing
+ */
+export interface SdkOperationPrint {
+  /** The name of the operation */
+  name: string;
+  /** The name of the generated graphql document */
+  document: string;
+  /** The type of the graphql operation */
+  type: string;
+  /** The type of the result from the graphql operation */
+  response: string;
+  /** The type of the variables for the graphql operation */
+  variables: string;
+  /** The type returned from this operation */
+  return: string;
+  /** The name of the returned model */
+  model: string;
+  /** The name of the model in a list, if a list */
+  list?: string;
+  /** The returned promise result from fetch  */
+  promise: string;
+}
+
+/**
  * Definition for generating an sdk operation
  */
 export interface SdkOperation {
@@ -26,8 +50,12 @@ export interface SdkOperation {
   name: string;
   /** The path through the schema to return this data */
   path: string[];
+  /** The stringified path through the schema to return this data */
+  key: string;
   /** The path through the schema to return the parent operation */
   sdkPath: string[];
+  /** The stringified path through the schema to return the parent operation */
+  sdkKey: string;
   /** The graphql node being processed with chain info added */
   node: OperationDefinitionNode;
   /** The query for this operation */
@@ -36,18 +64,18 @@ export interface SdkOperation {
   fragment?: ObjectTypeDefinitionNode;
   /** The model for this operation */
   model?: SdkModel;
-  /** The parsed and printed required variables */
-  requiredVariables: Record<string, ArgDefinition>;
-  /** The name of the generated graphql document */
-  documentVariableName?: string;
-  /** The type of the graphql operation */
-  operationType?: string;
-  /** The type of the result from the graphql operation */
-  operationResultType?: string;
-  /** The type of the variables for the graphql operation */
-  operationVariablesTypes?: string;
-  /** The type returned from this operation */
-  returnType: string;
+  /** The required args for this operation */
+  requiredArgs: ArgList;
+  /** The optional args for this operation */
+  optionalArgs: ArgList;
+  /** The args for the fetch operation */
+  fetchArgs: ArgList;
+  /** The required args for the parent operation */
+  parentArgs: ArgList;
+  /** The parent operation if it exists */
+  parent?: SdkOperation;
+  /** THe parsed and printed type names required for generation */
+  print: SdkOperationPrint;
 }
 
 /**
@@ -174,6 +202,8 @@ export interface SdkModelNode extends Omit<ObjectTypeDefinitionNode, "fields"> {
 export interface SdkModel {
   /** The name of the object */
   name: string;
+  /** The name of the matching fragment */
+  fragment: string;
   /** The object definition */
   node: SdkModelNode;
   /** The map of fields keyed by type */

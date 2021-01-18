@@ -1,10 +1,22 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
-import { ArgumentTypescriptVisitor, nonNullable, PluginContext, printPascal, upperFirst } from "@linear/plugin-common";
-import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode, visit } from "graphql";
+import {
+  ArgDefinition,
+  getArgList,
+  logger,
+  nonNullable,
+  PluginContext,
+  printList,
+  printPascal,
+  printTypescriptType,
+  reduceListType,
+  reduceTypeName,
+  upperFirst,
+} from "@linear/plugin-common";
+import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode } from "graphql";
 import c from "./constants";
-import {} from "./print";
-import { SdkDefinitions, SdkModel, SdkOperation } from "./types";
-import { getRequiredVariables } from "./variable";
+import { printNamespaced } from "./print";
+import { SdkDefinitions, SdkModel, SdkOperation, SdkOperationPrint, SdkPluginConfig } from "./types";
+import { getOptionalVariables, getRequiredVariables } from "./variable";
 
 /**
  * Get a list of all non null document notes
@@ -33,80 +45,127 @@ function getOperations(documents: Types.DocumentFile[]): OperationDefinitionNode
  * Process the documents and return a definition object for generating the api
  */
 export function parseOperations(
-  context: PluginContext,
+  context: PluginContext<SdkPluginConfig>,
   documents: Types.DocumentFile[],
   models: SdkModel[]
 ): SdkDefinitions {
   return getOperations(documents).reduce<SdkDefinitions>((acc, node) => {
-    const operationPath = (node.name?.value ?? "").split("_");
-    const sdkPath = operationPath.slice(0, operationPath.length - 1);
+    const path = (node.name?.value ?? "").split("_");
+    const sdkPath = path.slice(0, path.length - 1);
     const sdkKey = sdkPath.join("_");
     const operationName = printPascal(node.name?.value);
     const operationType = printPascal(node.operation);
 
-    /** Initialise arg visitors */
-    const argVisitor = new ArgumentTypescriptVisitor(context);
-    const argNamespacedVisitor = new ArgumentTypescriptVisitor(context, c.NAMESPACE_DOCUMENT);
-
     /** Find a matching query if it exists */
     const query = context.queries.find(q => q.name.value === node.name?.value);
 
-    /** Identify returned fragment */
-    const returnedField = operationPath.reduce<OperationDefinitionNode | FieldNode | undefined>((acc2, name) => {
+    /** Identify returned field node */
+    const returnedField = path.reduce<OperationDefinitionNode | FieldNode | undefined>((acc2, name) => {
       return acc2?.selectionSet?.selections.find(selection => {
         return selection.kind === Kind.FIELD && selection.name.value === name;
       }) as FieldNode | undefined;
     }, node);
+
+    /** Identify returned fragment spread */
     const fragmentNode = returnedField?.selectionSet?.selections.find(selection => {
       return selection.kind === Kind.FRAGMENT_SPREAD;
     }) as FragmentSpreadNode | undefined;
     const fragment = context.objects.find(object => object.name.value === fragmentNode?.name.value);
+
+    /** Store printable type names */
+    const modelName = query ? reduceTypeName(query.type) : fragment?.name.value ?? "UNKNOWN_MODEL";
+    const listName = query ? reduceListType(query.type) : undefined;
+    const print: SdkOperationPrint = {
+      name: operationName,
+      /** The name of the generated graphql document */
+      document: printNamespaced(context, `${operationName}Document`),
+      /** The type of the graphql operation */
+      type: operationType,
+      /** The type of the result from the graphql operation */
+      response: `${operationName}${operationType}`,
+      /** The type of the variables for the graphql operation */
+      variables: printNamespaced(context, `${operationName}${operationType}Variables`),
+      /** The type returned from this operation */
+      return: `${path.map(upperFirst).join("_")}${operationType}Response`,
+      /** The name of the returned model */
+      model: modelName,
+      /** The name of the model in a list, if a list */
+      list: listName,
+      /** The returned promise result from fetch  */
+      promise: `Promise<${modelName}${listName ? "[]" : ""} | undefined>`,
+    };
 
     /** Find a matching model */
     const model = query
       ? models.find(
           b =>
             /** Find model that matches query type */
-            b.name === visit(query.type, argVisitor) ||
+            b.name === printTypescriptType(context, query.type) ||
             /** Or the returned fragment type */
             b.name === fragment?.name.value
         )
       : undefined;
 
-    /** Identify the required variables */
-    const requiredVariables = getRequiredVariables(node).reduce(
-      (acc2, v) => ({
-        ...acc2,
-        [v.variable.name.value]: {
-          name: v.variable.name.value,
-          type: visit(v, argNamespacedVisitor),
-          optional: false,
-          description: `required ${v.variable.name.value} variable to set the ${operationPath.join(" ")} scope`,
-        },
-      }),
-      {}
-    );
+    /** Find a parent operation */
+    const parentSdkKey = sdkPath.slice(0, -1).join("_");
+    const parent = acc[parentSdkKey]?.operations.find(d => d.path.join("_") === sdkKey);
+    if (node.name?.value === "user_assignedIssues") {
+      logger.trace({ acc, sdkKey, node });
+    }
+
+    /** Argument definition for each required variable */
+    const requiredVariables: ArgDefinition[] = getRequiredVariables(node).map(v => ({
+      name: v.variable.name.value,
+      type: printTypescriptType(context, v.type, c.NAMESPACE_DOCUMENT),
+      optional: false,
+      description: `required ${v.variable.name.value} variable to set the ${sdkPath.join(" ")} scope`,
+    }));
+
+    /** Single definition for any optional variables */
+    const optionalVariables = getOptionalVariables(node);
+    const omittedVariableNames = [
+      ...(parent?.requiredArgs.args.map(v => `'${v.name}'`) ?? []),
+      ...requiredVariables.map(v => `'${v.name}'`),
+    ];
+    const optionalArg = requiredVariables.length
+      ? {
+          name: c.VARIABLE_NAME,
+          optional: true,
+          type: `Omit<${print.variables}, ${printList(omittedVariableNames, " | ")}>`,
+          description: `variables without ${printList(omittedVariableNames, ", ")} to pass into the ${print.response}`,
+        }
+      : {
+          name: c.VARIABLE_NAME,
+          optional: true,
+          type: print.variables,
+          description: `variables to pass into the ${print.response}`,
+        };
+
+    /** Spread required variables first */
+    const args = [...requiredVariables, optionalVariables.length ? optionalArg : undefined].filter(nonNullable);
+
+    /** Fetch args without parent required args */
+    const parentArgs = parent?.requiredArgs.args ?? [];
+    const parentArgNames = parentArgs.map(a => a.name);
+    const fetchArgs = getArgList(args.filter(a => !parentArgNames.includes(a.name)));
 
     /** Create the operation */
     const sdkOperation: SdkOperation = {
       name: operationName,
-      path: operationPath,
+      path: path,
+      key: path.join("_"),
+      sdkKey,
       sdkPath,
       node,
       query,
       model,
       fragment,
-      requiredVariables,
-      /** The name of the generated graphql document */
-      documentVariableName: `${operationName}Document`,
-      /** The type of the graphql operation */
-      operationType,
-      /** The type of the result from the graphql operation */
-      operationResultType: `${operationName}${operationType}`,
-      /** The type of the variables for the graphql operation */
-      operationVariablesTypes: `${operationName}${operationType}Variables`,
-      /** The type returned from this operation */
-      returnType: `${operationPath.map(upperFirst).join("_")}${operationType}Response`,
+      requiredArgs: getArgList(args.filter(a => !a.optional)),
+      optionalArgs: getArgList(args.filter(a => a.optional)),
+      parentArgs: getArgList(parentArgs),
+      fetchArgs,
+      parent,
+      print,
     };
 
     /** Return merged operations */

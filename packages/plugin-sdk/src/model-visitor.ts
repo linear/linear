@@ -13,6 +13,7 @@ import {
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import c from "./constants";
+import { printNamespaced } from "./print";
 import {
   SdkConnectionField,
   SdkListField,
@@ -21,6 +22,7 @@ import {
   SdkModelFieldType,
   SdkModelNode,
   SdkObjectField,
+  SdkPluginConfig,
   SdkQueryField,
   SdkScalarField,
   SdkScalarListField,
@@ -34,10 +36,10 @@ function isValidModel(model: ObjectTypeDefinitionNode) {
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
 export class ModelVisitor {
-  private _context: PluginContext;
+  private _context: PluginContext<SdkPluginConfig>;
 
   /** Initialize the visitor */
-  public constructor(context: PluginContext) {
+  public constructor(context: PluginContext<SdkPluginConfig>) {
     autoBind(this);
 
     this._context = context;
@@ -57,8 +59,11 @@ export class ModelVisitor {
     leave: (_node: ObjectTypeDefinitionNode): SdkModel | undefined => {
       if (isValidModel(_node) && _node.fields?.length) {
         const node = _node as SdkModelNode;
+        const name = node.name.value;
+
         return {
-          name: node.name.value,
+          name,
+          fragment: `${printNamespaced(this._context, name)}Fragment`,
           node,
           fields: {
             all: node.fields ?? [],
