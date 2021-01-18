@@ -12,33 +12,26 @@ export const plugin: PluginFunction = async (
   config: unknown
 ) => {
   try {
-    /** Get ast from schema */
+    logger.info("Parsing schema");
     const ast = parse(printSchema(schema));
 
-    /** Collect plugin context */
-    logger.info("Gathering context");
+    logger.info("Collecting context");
     const contextVisitor = new ContextVisitor(schema, config);
     visit(ast, contextVisitor);
 
-    /** Generate fragments */
     logger.info("Generating fragments");
     const fragmentVisitor = new FragmentVisitor(contextVisitor.context);
     const fragments = visit(ast, fragmentVisitor);
-    logger.debug({
-      scalars: fragmentVisitor.context.scalars,
-      fragments: fragmentVisitor.context.fragments.map(x => x.name),
-      objects: fragmentVisitor.context.objects.map(x => x.name.value),
-      queries: fragmentVisitor.context.queries.map(x => x.name.value),
-      operationMap: fragmentVisitor.context.operationMap,
-    });
 
-    /** Generate queries */
     logger.info("Generating operations");
     const operations = visit(ast, new OperationVisitor(fragmentVisitor.context));
 
-    /** Print the result */
-    logger.info("Printing fragments and operations");
-    return [fragments, operations].join("\n\n");
+    return [
+      /** Print all fragments */
+      fragments,
+      /** Print all operations */
+      operations,
+    ].join("\n\n");
   } catch (e) {
     logger.fatal(e);
     throw e;
@@ -56,7 +49,7 @@ export const validate: PluginValidateFn = async (
 ) => {
   const packageName = "@linear/plugin-doc";
   logger.info(`Validating ${packageName}`);
-  logger.debug({ config });
+  logger.info({ config });
 
   const prefix = `Plugin "${packageName}" config requires`;
 

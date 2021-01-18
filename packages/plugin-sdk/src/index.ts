@@ -20,11 +20,10 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
   config: RawSdkPluginConfig
 ) => {
   try {
-    /** Get ast from schema */
+    logger.info("Parsing schema");
     const ast = parse(printSchema(schema));
 
-    /** Collect plugin context */
-    logger.info("Gathering context");
+    logger.info("Collecting context");
     const contextVisitor = new ContextVisitor(schema, config);
     visit(ast, contextVisitor);
     const context: PluginContext<RawSdkPluginConfig> = {
@@ -32,28 +31,22 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
       fragments: [],
     };
 
-    /** Print the query return types  */
     logger.info("Generating models");
     const modelVisitor = new ModelVisitor(context);
     const models = visit(ast, modelVisitor) as SdkModel[];
-    logger.debug({ models: models.map(model => model.name) });
 
-    /** Process a list of documents to add information for chaining the api operations */
     logger.info("Processing documents");
     const sdkDefinitions = getSdkDefinitions(context, documents, models);
-    logger.debug(sdkDefinitions);
     const sdkContext: SdkPluginContext = {
       ...context,
       models,
       sdkDefinitions,
     };
 
-    /** Print the models  */
-    logger.info("Generating models");
+    logger.info("Printing models");
     const printedModels = printModels(sdkContext);
 
-    /** Print the query return types  */
-    logger.info("Generating operations");
+    logger.info("Printing operations");
     const printedOperations = printOperations(sdkContext);
 
     // /** Print each api definition  */
@@ -71,17 +64,17 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
         "/* eslint-disable @typescript-eslint/no-unused-vars */",
         /** Import DocumentNode if required */
         config.documentMode !== DocumentMode.string ? `import { DocumentNode } from 'graphql'` : undefined,
+        /** Import document namespace */
+        `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
       ].filter(nonNullable),
       content: printList(
         [
-          /** Import and export documents */
-          `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
-          `export * from '${config.documentFile}'\n`,
           /** Print the requester function */
           printRequest(config),
           "\n",
           /** Print the query return types */
           printedModels,
+          /** Print the api operations */
           printedOperations,
         ],
         "\n"
@@ -104,7 +97,7 @@ export const validate: PluginValidateFn = async (
 ) => {
   const packageName = "@linear/plugin-sdk";
   logger.info(`Validating ${packageName}`);
-  logger.debug({ config });
+  logger.info({ config });
 
   const prefix = `Plugin "${packageName}" config requires`;
 
