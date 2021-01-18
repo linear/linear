@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dotenv from "dotenv";
 import { v4 as uuid } from "uuid";
-import { createLinearClient } from "../index";
+import { LinearClient } from "../index";
 
 dotenv.config();
 
@@ -11,7 +11,7 @@ it("allow no E2E_API_KEY env var", () => undefined);
  * Return a client using the E2E_API_KEY environment variable
  */
 function getClient() {
-  return createLinearClient({ apiKey: process.env.E2E_API_KEY });
+  return new LinearClient({ apiKey: process.env.E2E_API_KEY });
 }
 
 /**
@@ -21,7 +21,7 @@ async function getSomeTeam() {
   const client = getClient();
   const teams = await client.teams();
 
-  const first = teams.nodes[0];
+  const first = teams?.nodes?.[0];
   expect(first).toBeDefined();
 
   const team = await client.team(first?.id ?? "");
@@ -37,7 +37,7 @@ async function getSomeIssue() {
   const client = getClient();
   const issues = await client.issues();
 
-  const first = issues.nodes[0];
+  const first = issues?.nodes?.[0];
   expect(first).toBeDefined();
 
   const issue = await client.issue(first?.id ?? "");
@@ -67,7 +67,7 @@ async function expectError(shouldError: () => any, errorMessage: string) {
 if (process.env.E2E_API_KEY) {
   describe("end-to-end", () => {
     it("throw auth error", async () => {
-      const client = createLinearClient({ apiKey: "fake api key" });
+      const client = new LinearClient({ apiKey: "fake api key" });
 
       expectError(() => client.viewer(), "authentication failed");
     });
@@ -103,18 +103,19 @@ if (process.env.E2E_API_KEY) {
 
         /** Create issue */
         const createdInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
-        const createdIssue = await client.issueCreate({ teamId: team.id ?? "", ...createdInput });
-        expectSuccess(createdIssue, { success: true, issue: expect.objectContaining(createdInput) });
+        const created = await client.issueCreate({ teamId: team?.id ?? "", ...createdInput });
+        expectSuccess(created, { success: true, issue: expect.objectContaining(createdInput) });
 
         /** Query for issue */
-        const createdId = createdIssue.issue?.id ?? "";
+        const createdIssue = await created?.issue;
+        const createdId = createdIssue?.id ?? "";
         const issue = await client.issue(createdId);
         expectSuccess(issue, { id: createdId, ...createdInput, archivedAt: null });
 
         /** Update issue */
         const updatedInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
-        const updatedIssue = await client.issueUpdate(updatedInput, createdId);
-        expectSuccess(updatedIssue, { success: true, issue: expect.objectContaining(updatedInput) });
+        const updated = await client.issueUpdate(updatedInput, createdId);
+        expectSuccess(updated, { success: true, issue: expect.objectContaining(updatedInput) });
 
         /** Archive issue */
         const archivedIssue = await client.issueArchive(createdId);

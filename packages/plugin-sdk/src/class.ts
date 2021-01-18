@@ -82,10 +82,7 @@ function printOperation(context: SdkPluginContext, o: SdkOperation): string {
 
   return printList(
     [
-      printComment([
-        `${o.operationType} ${o.documentVariableName} for ${modelType}${listModelType ? "s" : ""}`,
-        ...parentArgs.jsdoc,
-      ]),
+      printComment([`A fetchable ${o.name} ${o.operationType}`, ...parentArgs.jsdoc]),
       printDebug(o),
       `export class ${o.operationResultType} extends ${c.REQUEST_CLASS} {
         ${printList(
@@ -101,6 +98,10 @@ function printOperation(context: SdkPluginContext, o: SdkOperation): string {
           )}
         }
 
+        ${printComment([
+          `Call the ${o.name} ${o.operationType} and return a ${modelType}${listModelType ? " list" : ""}`,
+          ...requiredVariables.jsdoc,
+        ])}
         public async fetch(${requiredVariables.printInput}): ${fetchReturnType} {
           return ${`this.${c.REQUEST_NAME}<${resultType}, ${variableType}>(${printList(
             [documentName, printOperationArgs(o, parentVariables)],

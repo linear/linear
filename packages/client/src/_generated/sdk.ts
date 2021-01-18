@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { DocumentNode } from "graphql";
 import * as D from "./documents";
+
 export * from "./documents";
 
 /** The function type for calling the graphql client */
@@ -23,7 +24,7 @@ export class Request {
  * A user that has access to the the resources of an organization.
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserFragment response data
+ * @param data - UserFragment response data
  */
 export class User extends Request {
   public constructor(request: LinearRequest, data: D.UserFragment) {
@@ -101,7 +102,7 @@ export class User extends Request {
  * The settings of a user as a JSON object.
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserSettingsFragment response data
+ * @param data - UserSettingsFragment response data
  */
 export class UserSettings extends Request {
   private _user?: D.UserSettingsFragment["user"];
@@ -142,7 +143,7 @@ export class UserSettings extends Request {
  * IssueConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueConnectionFragment response data
+ * @param data - IssueConnectionFragment response data
  */
 export class IssueConnection extends Request {
   public constructor(request: LinearRequest, data: D.IssueConnectionFragment) {
@@ -159,7 +160,7 @@ export class IssueConnection extends Request {
  * An issue.
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueFragment response data
+ * @param data - IssueFragment response data
  */
 export class Issue extends Request {
   private _team?: D.IssueFragment["team"];
@@ -319,7 +320,7 @@ export class Issue extends Request {
  * An organizational unit that contains issues.
  *
  * @param request - function to call the graphql client
- * @param data - the initial TeamFragment response data
+ * @param data - TeamFragment response data
  */
 export class Team extends Request {
   private _draftWorkflowState?: D.TeamFragment["draftWorkflowState"];
@@ -511,7 +512,7 @@ export class Team extends Request {
  * A state in a team workflow.
  *
  * @param request - function to call the graphql client
- * @param data - the initial WorkflowStateFragment response data
+ * @param data - WorkflowStateFragment response data
  */
 export class WorkflowState extends Request {
   private _team?: D.WorkflowStateFragment["team"];
@@ -561,7 +562,7 @@ export class WorkflowState extends Request {
  * CycleConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CycleConnectionFragment response data
+ * @param data - CycleConnectionFragment response data
  */
 export class CycleConnection extends Request {
   public constructor(request: LinearRequest, data: D.CycleConnectionFragment) {
@@ -578,7 +579,7 @@ export class CycleConnection extends Request {
  * A set of issues to be resolved in a specified amount of time.
  *
  * @param request - function to call the graphql client
- * @param data - the initial CycleFragment response data
+ * @param data - CycleFragment response data
  */
 export class Cycle extends Request {
   private _team?: D.CycleFragment["team"];
@@ -648,7 +649,7 @@ export class Cycle extends Request {
  * PageInfo model
  *
  * @param request - function to call the graphql client
- * @param data - the initial PageInfoFragment response data
+ * @param data - PageInfoFragment response data
  */
 export class PageInfo extends Request {
   public constructor(request: LinearRequest, data: D.PageInfoFragment) {
@@ -673,7 +674,7 @@ export class PageInfo extends Request {
  * TeamMembershipConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial TeamMembershipConnectionFragment response data
+ * @param data - TeamMembershipConnectionFragment response data
  */
 export class TeamMembershipConnection extends Request {
   public constructor(request: LinearRequest, data: D.TeamMembershipConnectionFragment) {
@@ -690,7 +691,7 @@ export class TeamMembershipConnection extends Request {
  * Defines the membership of a user to a team.
  *
  * @param request - function to call the graphql client
- * @param data - the initial TeamMembershipFragment response data
+ * @param data - TeamMembershipFragment response data
  */
 export class TeamMembership extends Request {
   private _user?: D.TeamMembershipFragment["user"];
@@ -731,7 +732,7 @@ export class TeamMembership extends Request {
  * ProjectConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ProjectConnectionFragment response data
+ * @param data - ProjectConnectionFragment response data
  */
 export class ProjectConnection extends Request {
   public constructor(request: LinearRequest, data: D.ProjectConnectionFragment) {
@@ -748,7 +749,7 @@ export class ProjectConnection extends Request {
  * A project.
  *
  * @param request - function to call the graphql client
- * @param data - the initial ProjectFragment response data
+ * @param data - ProjectFragment response data
  */
 export class Project extends Request {
   private _creator?: D.ProjectFragment["creator"];
@@ -865,7 +866,7 @@ export class Project extends Request {
  * A milestone that contains projects.
  *
  * @param request - function to call the graphql client
- * @param data - the initial MilestoneFragment response data
+ * @param data - MilestoneFragment response data
  */
 export class Milestone extends Request {
   public constructor(request: LinearRequest, data: D.MilestoneFragment) {
@@ -907,7 +908,7 @@ export class Milestone extends Request {
  * An organization. Organizations are root-level objects that contain user accounts and teams.
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationFragment response data
+ * @param data - OrganizationFragment response data
  */
 export class Organization extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationFragment) {
@@ -993,7 +994,7 @@ export class Organization extends Request {
  * UserConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserConnectionFragment response data
+ * @param data - UserConnectionFragment response data
  */
 export class UserConnection extends Request {
   public constructor(request: LinearRequest, data: D.UserConnectionFragment) {
@@ -1010,7 +1011,7 @@ export class UserConnection extends Request {
  * TeamConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial TeamConnectionFragment response data
+ * @param data - TeamConnectionFragment response data
  */
 export class TeamConnection extends Request {
   public constructor(request: LinearRequest, data: D.TeamConnectionFragment) {
@@ -1027,7 +1028,7 @@ export class TeamConnection extends Request {
  * MilestoneConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial MilestoneConnectionFragment response data
+ * @param data - MilestoneConnectionFragment response data
  */
 export class MilestoneConnection extends Request {
   public constructor(request: LinearRequest, data: D.MilestoneConnectionFragment) {
@@ -1044,7 +1045,7 @@ export class MilestoneConnection extends Request {
  * IntegrationConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IntegrationConnectionFragment response data
+ * @param data - IntegrationConnectionFragment response data
  */
 export class IntegrationConnection extends Request {
   public constructor(request: LinearRequest, data: D.IntegrationConnectionFragment) {
@@ -1061,7 +1062,7 @@ export class IntegrationConnection extends Request {
  * An integration with an external service.
  *
  * @param request - function to call the graphql client
- * @param data - the initial IntegrationFragment response data
+ * @param data - IntegrationFragment response data
  */
 export class Integration extends Request {
   private _team?: D.IntegrationFragment["team"];
@@ -1119,7 +1120,7 @@ export class Integration extends Request {
  * The integration resource's settings
  *
  * @param request - function to call the graphql client
- * @param data - the initial IntegrationSettingsFragment response data
+ * @param data - IntegrationSettingsFragment response data
  */
 export class IntegrationSettings extends Request {
   public constructor(request: LinearRequest, data: D.IntegrationSettingsFragment) {
@@ -1140,7 +1141,7 @@ export class IntegrationSettings extends Request {
  * Slack notification specific settings.
  *
  * @param request - function to call the graphql client
- * @param data - the initial SlackPostSettingsFragment response data
+ * @param data - SlackPostSettingsFragment response data
  */
 export class SlackPostSettings extends Request {
   public constructor(request: LinearRequest, data: D.SlackPostSettingsFragment) {
@@ -1159,7 +1160,7 @@ export class SlackPostSettings extends Request {
  * Google Sheets specific settings.
  *
  * @param request - function to call the graphql client
- * @param data - the initial GoogleSheetsSettingsFragment response data
+ * @param data - GoogleSheetsSettingsFragment response data
  */
 export class GoogleSheetsSettings extends Request {
   public constructor(request: LinearRequest, data: D.GoogleSheetsSettingsFragment) {
@@ -1180,7 +1181,7 @@ export class GoogleSheetsSettings extends Request {
  * Sentry specific settings.
  *
  * @param request - function to call the graphql client
- * @param data - the initial SentrySettingsFragment response data
+ * @param data - SentrySettingsFragment response data
  */
 export class SentrySettings extends Request {
   public constructor(request: LinearRequest, data: D.SentrySettingsFragment) {
@@ -1196,7 +1197,7 @@ export class SentrySettings extends Request {
  * The subscription of an organization.
  *
  * @param request - function to call the graphql client
- * @param data - the initial SubscriptionFragment response data
+ * @param data - SubscriptionFragment response data
  */
 export class Subscription extends Request {
   private _creator?: D.SubscriptionFragment["creator"];
@@ -1247,7 +1248,7 @@ export class Subscription extends Request {
  * ProjectLinkConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ProjectLinkConnectionFragment response data
+ * @param data - ProjectLinkConnectionFragment response data
  */
 export class ProjectLinkConnection extends Request {
   public constructor(request: LinearRequest, data: D.ProjectLinkConnectionFragment) {
@@ -1264,7 +1265,7 @@ export class ProjectLinkConnection extends Request {
  * An external link for a project.
  *
  * @param request - function to call the graphql client
- * @param data - the initial ProjectLinkFragment response data
+ * @param data - ProjectLinkFragment response data
  */
 export class ProjectLink extends Request {
   private _creator?: D.ProjectLinkFragment["creator"];
@@ -1311,7 +1312,7 @@ export class ProjectLink extends Request {
  * WorkflowStateConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial WorkflowStateConnectionFragment response data
+ * @param data - WorkflowStateConnectionFragment response data
  */
 export class WorkflowStateConnection extends Request {
   public constructor(request: LinearRequest, data: D.WorkflowStateConnectionFragment) {
@@ -1328,7 +1329,7 @@ export class WorkflowStateConnection extends Request {
  * TemplateConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial TemplateConnectionFragment response data
+ * @param data - TemplateConnectionFragment response data
  */
 export class TemplateConnection extends Request {
   public constructor(request: LinearRequest, data: D.TemplateConnectionFragment) {
@@ -1346,7 +1347,7 @@ export class TemplateConnection extends Request {
  * A template object used for creating new issues faster.
  *
  * @param request - function to call the graphql client
- * @param data - the initial TemplateFragment response data
+ * @param data - TemplateFragment response data
  */
 export class Template extends Request {
   private _team?: D.TemplateFragment["team"];
@@ -1399,7 +1400,7 @@ export class Template extends Request {
  * IssueLabelConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueLabelConnectionFragment response data
+ * @param data - IssueLabelConnectionFragment response data
  */
 export class IssueLabelConnection extends Request {
   public constructor(request: LinearRequest, data: D.IssueLabelConnectionFragment) {
@@ -1416,7 +1417,7 @@ export class IssueLabelConnection extends Request {
  * Labels that can be associated with issues.
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueLabelFragment response data
+ * @param data - IssueLabelFragment response data
  */
 export class IssueLabel extends Request {
   private _team?: D.IssueLabelFragment["team"];
@@ -1466,7 +1467,7 @@ export class IssueLabel extends Request {
  * WebhookConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial WebhookConnectionFragment response data
+ * @param data - WebhookConnectionFragment response data
  */
 export class WebhookConnection extends Request {
   public constructor(request: LinearRequest, data: D.WebhookConnectionFragment) {
@@ -1483,7 +1484,7 @@ export class WebhookConnection extends Request {
  * A webhook used to send HTTP notifications over data updates
  *
  * @param request - function to call the graphql client
- * @param data - the initial WebhookFragment response data
+ * @param data - WebhookFragment response data
  */
 export class Webhook extends Request {
   private _team?: D.WebhookFragment["team"];
@@ -1533,7 +1534,7 @@ export class Webhook extends Request {
  * CommentConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CommentConnectionFragment response data
+ * @param data - CommentConnectionFragment response data
  */
 export class CommentConnection extends Request {
   public constructor(request: LinearRequest, data: D.CommentConnectionFragment) {
@@ -1550,7 +1551,7 @@ export class CommentConnection extends Request {
  * A comment associated with an issue.
  *
  * @param request - function to call the graphql client
- * @param data - the initial CommentFragment response data
+ * @param data - CommentFragment response data
  */
 export class Comment extends Request {
   private _user?: D.CommentFragment["user"];
@@ -1603,7 +1604,7 @@ export class Comment extends Request {
  * IssueHistoryConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueHistoryConnectionFragment response data
+ * @param data - IssueHistoryConnectionFragment response data
  */
 export class IssueHistoryConnection extends Request {
   public constructor(request: LinearRequest, data: D.IssueHistoryConnectionFragment) {
@@ -1620,7 +1621,7 @@ export class IssueHistoryConnection extends Request {
  * A record of changes to an issue.
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueHistoryFragment response data
+ * @param data - IssueHistoryFragment response data
  */
 export class IssueHistory extends Request {
   private _issue?: D.IssueHistoryFragment["issue"];
@@ -1782,7 +1783,7 @@ export class IssueHistory extends Request {
  * IntegrationResourceConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IntegrationResourceConnectionFragment response data
+ * @param data - IntegrationResourceConnectionFragment response data
  */
 export class IntegrationResourceConnection extends Request {
   public constructor(request: LinearRequest, data: D.IntegrationResourceConnectionFragment) {
@@ -1799,7 +1800,7 @@ export class IntegrationResourceConnection extends Request {
  * An integration resource created by an external service.
  *
  * @param request - function to call the graphql client
- * @param data - the initial IntegrationResourceFragment response data
+ * @param data - IntegrationResourceFragment response data
  */
 export class IntegrationResource extends Request {
   private _integration?: D.IntegrationResourceFragment["integration"];
@@ -1852,7 +1853,7 @@ export class IntegrationResource extends Request {
  * Integration resource's payload
  *
  * @param request - function to call the graphql client
- * @param data - the initial IntegrationResourceDataFragment response data
+ * @param data - IntegrationResourceDataFragment response data
  */
 export class IntegrationResourceData extends Request {
   public constructor(request: LinearRequest, data: D.IntegrationResourceDataFragment) {
@@ -1881,7 +1882,7 @@ export class IntegrationResourceData extends Request {
  * Pull request data
  *
  * @param request - function to call the graphql client
- * @param data - the initial PullRequestPayloadFragment response data
+ * @param data - PullRequestPayloadFragment response data
  */
 export class PullRequestPayload extends Request {
   public constructor(request: LinearRequest, data: D.PullRequestPayloadFragment) {
@@ -1924,7 +1925,7 @@ export class PullRequestPayload extends Request {
  * GitHub's commit data
  *
  * @param request - function to call the graphql client
- * @param data - the initial CommitPayloadFragment response data
+ * @param data - CommitPayloadFragment response data
  */
 export class CommitPayload extends Request {
   public constructor(request: LinearRequest, data: D.CommitPayloadFragment) {
@@ -1951,7 +1952,7 @@ export class CommitPayload extends Request {
  * Sentry issue data
  *
  * @param request - function to call the graphql client
- * @param data - the initial SentryIssuePayloadFragment response data
+ * @param data - SentryIssuePayloadFragment response data
  */
 export class SentryIssuePayload extends Request {
   public constructor(request: LinearRequest, data: D.SentryIssuePayloadFragment) {
@@ -1997,7 +1998,7 @@ export class SentryIssuePayload extends Request {
  * IssueRelationConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueRelationConnectionFragment response data
+ * @param data - IssueRelationConnectionFragment response data
  */
 export class IssueRelationConnection extends Request {
   public constructor(request: LinearRequest, data: D.IssueRelationConnectionFragment) {
@@ -2014,7 +2015,7 @@ export class IssueRelationConnection extends Request {
  * A relation between two issues.
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueRelationFragment response data
+ * @param data - IssueRelationFragment response data
  */
 export class IssueRelation extends Request {
   private _issue?: D.IssueRelationFragment["issue"];
@@ -2058,7 +2059,7 @@ export class IssueRelation extends Request {
  * OrganizationExistsPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationExistsPayloadFragment response data
+ * @param data - OrganizationExistsPayloadFragment response data
  */
 export class OrganizationExistsPayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationExistsPayloadFragment) {
@@ -2078,7 +2079,7 @@ export class OrganizationExistsPayload extends Request {
  *   apply to the local data set in order to be up-to-date.
  *
  * @param request - function to call the graphql client
- * @param data - the initial SyncResponseFragment response data
+ * @param data - SyncResponseFragment response data
  */
 export class SyncResponse extends Request {
   public constructor(request: LinearRequest, data: D.SyncResponseFragment) {
@@ -2112,7 +2113,7 @@ export class SyncResponse extends Request {
  * Contains requested archived model objects.
  *
  * @param request - function to call the graphql client
- * @param data - the initial ArchiveResponseFragment response data
+ * @param data - ArchiveResponseFragment response data
  */
 export class ArchiveResponse extends Request {
   public constructor(request: LinearRequest, data: D.ArchiveResponseFragment) {
@@ -2134,7 +2135,7 @@ export class ArchiveResponse extends Request {
  * A user account. Super user required.
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserAccountAdminPrivilegedFragment response data
+ * @param data - UserAccountAdminPrivilegedFragment response data
  */
 export class UserAccountAdminPrivileged extends Request {
   public constructor(request: LinearRequest, data: D.UserAccountAdminPrivilegedFragment) {
@@ -2170,7 +2171,7 @@ export class UserAccountAdminPrivileged extends Request {
  * A user that has access to the the resources of an organization. Super user required.
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserAdminPrivilegedFragment response data
+ * @param data - UserAdminPrivilegedFragment response data
  */
 export class UserAdminPrivileged extends Request {
   public constructor(request: LinearRequest, data: D.UserAdminPrivilegedFragment) {
@@ -2235,7 +2236,7 @@ export class UserAdminPrivileged extends Request {
  * An organization. Super user required.
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationAdminPrivilegedFragment response data
+ * @param data - OrganizationAdminPrivilegedFragment response data
  */
 export class OrganizationAdminPrivileged extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationAdminPrivilegedFragment) {
@@ -2307,7 +2308,7 @@ export class OrganizationAdminPrivileged extends Request {
  * The subscription of an organization. Super user required.
  *
  * @param request - function to call the graphql client
- * @param data - the initial SubscriptionAdminPrivilegedFragment response data
+ * @param data - SubscriptionAdminPrivilegedFragment response data
  */
 export class SubscriptionAdminPrivileged extends Request {
   private _creator?: D.SubscriptionAdminPrivilegedFragment["creator"];
@@ -2364,7 +2365,7 @@ export class SubscriptionAdminPrivileged extends Request {
  * ApiKeyConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ApiKeyConnectionFragment response data
+ * @param data - ApiKeyConnectionFragment response data
  */
 export class ApiKeyConnection extends Request {
   public constructor(request: LinearRequest, data: D.ApiKeyConnectionFragment) {
@@ -2381,7 +2382,7 @@ export class ApiKeyConnection extends Request {
  * An API key. Grants access to the user's resources.
  *
  * @param request - function to call the graphql client
- * @param data - the initial ApiKeyFragment response data
+ * @param data - ApiKeyFragment response data
  */
 export class ApiKey extends Request {
   public constructor(request: LinearRequest, data: D.ApiKeyFragment) {
@@ -2412,7 +2413,7 @@ export class ApiKey extends Request {
  * Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserAuthorizedApplicationFragment response data
+ * @param data - UserAuthorizedApplicationFragment response data
  */
 export class UserAuthorizedApplication extends Request {
   public constructor(request: LinearRequest, data: D.UserAuthorizedApplicationFragment) {
@@ -2446,7 +2447,7 @@ export class UserAuthorizedApplication extends Request {
  * Public information of the OAuth application, plus the authorized scopes for a given user.
  *
  * @param request - function to call the graphql client
- * @param data - the initial AuthorizedApplicationFragment response data
+ * @param data - AuthorizedApplicationFragment response data
  */
 export class AuthorizedApplication extends Request {
   public constructor(request: LinearRequest, data: D.AuthorizedApplicationFragment) {
@@ -2483,7 +2484,7 @@ export class AuthorizedApplication extends Request {
  * AuthResolverResponse model
  *
  * @param request - function to call the graphql client
- * @param data - the initial AuthResolverResponseFragment response data
+ * @param data - AuthResolverResponseFragment response data
  */
 export class AuthResolverResponse extends Request {
   public constructor(request: LinearRequest, data: D.AuthResolverResponseFragment) {
@@ -2516,7 +2517,7 @@ export class AuthResolverResponse extends Request {
  * SsoUrlFromEmailResponse model
  *
  * @param request - function to call the graphql client
- * @param data - the initial SsoUrlFromEmailResponseFragment response data
+ * @param data - SsoUrlFromEmailResponseFragment response data
  */
 export class SsoUrlFromEmailResponse extends Request {
   public constructor(request: LinearRequest, data: D.SsoUrlFromEmailResponseFragment) {
@@ -2535,7 +2536,7 @@ export class SsoUrlFromEmailResponse extends Request {
  * BillingDetailsPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial BillingDetailsPayloadFragment response data
+ * @param data - BillingDetailsPayloadFragment response data
  */
 export class BillingDetailsPayload extends Request {
   public constructor(request: LinearRequest, data: D.BillingDetailsPayloadFragment) {
@@ -2560,7 +2561,7 @@ export class BillingDetailsPayload extends Request {
  * Invoice model
  *
  * @param request - function to call the graphql client
- * @param data - the initial InvoiceFragment response data
+ * @param data - InvoiceFragment response data
  */
 export class Invoice extends Request {
   public constructor(request: LinearRequest, data: D.InvoiceFragment) {
@@ -2588,7 +2589,7 @@ export class Invoice extends Request {
  * Card model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CardFragment response data
+ * @param data - CardFragment response data
  */
 export class Card extends Request {
   public constructor(request: LinearRequest, data: D.CardFragment) {
@@ -2607,7 +2608,7 @@ export class Card extends Request {
  * CollaborationDocumentUpdatePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CollaborationDocumentUpdatePayloadFragment response data
+ * @param data - CollaborationDocumentUpdatePayloadFragment response data
  */
 export class CollaborationDocumentUpdatePayload extends Request {
   public constructor(request: LinearRequest, data: D.CollaborationDocumentUpdatePayloadFragment) {
@@ -2626,7 +2627,7 @@ export class CollaborationDocumentUpdatePayload extends Request {
  * StepsResponse model
  *
  * @param request - function to call the graphql client
- * @param data - the initial StepsResponseFragment response data
+ * @param data - StepsResponseFragment response data
  */
 export class StepsResponse extends Request {
   public constructor(request: LinearRequest, data: D.StepsResponseFragment) {
@@ -2648,7 +2649,7 @@ export class StepsResponse extends Request {
  * A custom view that has been saved by a user.
  *
  * @param request - function to call the graphql client
- * @param data - the initial CustomViewFragment response data
+ * @param data - CustomViewFragment response data
  */
 export class CustomView extends Request {
   private _team?: D.CustomViewFragment["team"];
@@ -2711,7 +2712,7 @@ export class CustomView extends Request {
  * CustomViewConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CustomViewConnectionFragment response data
+ * @param data - CustomViewConnectionFragment response data
  */
 export class CustomViewConnection extends Request {
   public constructor(request: LinearRequest, data: D.CustomViewConnectionFragment) {
@@ -2728,7 +2729,7 @@ export class CustomViewConnection extends Request {
  * A custom emoji.
  *
  * @param request - function to call the graphql client
- * @param data - the initial EmojiFragment response data
+ * @param data - EmojiFragment response data
  */
 export class Emoji extends Request {
   private _creator?: D.EmojiFragment["creator"];
@@ -2776,7 +2777,7 @@ export class Emoji extends Request {
  * EmojiConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial EmojiConnectionFragment response data
+ * @param data - EmojiConnectionFragment response data
  */
 export class EmojiConnection extends Request {
   public constructor(request: LinearRequest, data: D.EmojiConnectionFragment) {
@@ -2793,7 +2794,7 @@ export class EmojiConnection extends Request {
  * User favorites presented in the sidebar.
  *
  * @param request - function to call the graphql client
- * @param data - the initial FavoriteFragment response data
+ * @param data - FavoriteFragment response data
  */
 export class Favorite extends Request {
   private _user?: D.FavoriteFragment["user"];
@@ -2864,7 +2865,7 @@ export class Favorite extends Request {
  * FavoriteConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial FavoriteConnectionFragment response data
+ * @param data - FavoriteConnectionFragment response data
  */
 export class FavoriteConnection extends Request {
   public constructor(request: LinearRequest, data: D.FavoriteConnectionFragment) {
@@ -2881,7 +2882,7 @@ export class FavoriteConnection extends Request {
  * FigmaEmbedPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial FigmaEmbedPayloadFragment response data
+ * @param data - FigmaEmbedPayloadFragment response data
  */
 export class FigmaEmbedPayload extends Request {
   public constructor(request: LinearRequest, data: D.FigmaEmbedPayloadFragment) {
@@ -2903,7 +2904,7 @@ export class FigmaEmbedPayload extends Request {
  * Object representing Figma preview information.
  *
  * @param request - function to call the graphql client
- * @param data - the initial FigmaEmbedFragment response data
+ * @param data - FigmaEmbedFragment response data
  */
 export class FigmaEmbed extends Request {
   public constructor(request: LinearRequest, data: D.FigmaEmbedFragment) {
@@ -2928,7 +2929,7 @@ export class FigmaEmbed extends Request {
  * InvitePagePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial InvitePagePayloadFragment response data
+ * @param data - InvitePagePayloadFragment response data
  */
 export class InvitePagePayload extends Request {
   public constructor(request: LinearRequest, data: D.InvitePagePayloadFragment) {
@@ -2947,7 +2948,7 @@ export class InvitePagePayload extends Request {
  * InviteData model
  *
  * @param request - function to call the graphql client
- * @param data - the initial InviteDataFragment response data
+ * @param data - InviteDataFragment response data
  */
 export class InviteData extends Request {
   public constructor(request: LinearRequest, data: D.InviteDataFragment) {
@@ -2984,7 +2985,7 @@ export class InviteData extends Request {
  * NotificationConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationConnectionFragment response data
+ * @param data - NotificationConnectionFragment response data
  */
 export class NotificationConnection extends Request {
   public constructor(request: LinearRequest, data: D.NotificationConnectionFragment) {
@@ -3001,7 +3002,7 @@ export class NotificationConnection extends Request {
  * A notification sent to a user.
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationFragment response data
+ * @param data - NotificationFragment response data
  */
 export class Notification extends Request {
   private _user?: D.NotificationFragment["user"];
@@ -3069,7 +3070,7 @@ export class Notification extends Request {
  * NotificationSubscriptionConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationSubscriptionConnectionFragment response data
+ * @param data - NotificationSubscriptionConnectionFragment response data
  */
 export class NotificationSubscriptionConnection extends Request {
   public constructor(request: LinearRequest, data: D.NotificationSubscriptionConnectionFragment) {
@@ -3086,7 +3087,7 @@ export class NotificationSubscriptionConnection extends Request {
  * Notification subscriptions for models.
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationSubscriptionFragment response data
+ * @param data - NotificationSubscriptionFragment response data
  */
 export class NotificationSubscription extends Request {
   private _user?: D.NotificationSubscriptionFragment["user"];
@@ -3136,7 +3137,7 @@ export class NotificationSubscription extends Request {
  * OrganizationInviteConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationInviteConnectionFragment response data
+ * @param data - OrganizationInviteConnectionFragment response data
  */
 export class OrganizationInviteConnection extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationInviteConnectionFragment) {
@@ -3153,7 +3154,7 @@ export class OrganizationInviteConnection extends Request {
  * An invitation to the organization that has been sent via email.
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationInviteFragment response data
+ * @param data - OrganizationInviteFragment response data
  */
 export class OrganizationInvite extends Request {
   private _inviter?: D.OrganizationInviteFragment["inviter"];
@@ -3210,7 +3211,7 @@ export class OrganizationInvite extends Request {
  * PushSubscriptionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial PushSubscriptionPayloadFragment response data
+ * @param data - PushSubscriptionPayloadFragment response data
  */
 export class PushSubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: D.PushSubscriptionPayloadFragment) {
@@ -3229,7 +3230,7 @@ export class PushSubscriptionPayload extends Request {
  * A reaction associated with a comment.
  *
  * @param request - function to call the graphql client
- * @param data - the initial ReactionFragment response data
+ * @param data - ReactionFragment response data
  */
 export class Reaction extends Request {
   private _user?: D.ReactionFragment["user"];
@@ -3273,7 +3274,7 @@ export class Reaction extends Request {
  * ReactionConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ReactionConnectionFragment response data
+ * @param data - ReactionConnectionFragment response data
  */
 export class ReactionConnection extends Request {
   public constructor(request: LinearRequest, data: D.ReactionConnectionFragment) {
@@ -3290,7 +3291,7 @@ export class ReactionConnection extends Request {
  * ViewPreferencesConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ViewPreferencesConnectionFragment response data
+ * @param data - ViewPreferencesConnectionFragment response data
  */
 export class ViewPreferencesConnection extends Request {
   public constructor(request: LinearRequest, data: D.ViewPreferencesConnectionFragment) {
@@ -3307,7 +3308,7 @@ export class ViewPreferencesConnection extends Request {
  * View preferences.
  *
  * @param request - function to call the graphql client
- * @param data - the initial ViewPreferencesFragment response data
+ * @param data - ViewPreferencesFragment response data
  */
 export class ViewPreferences extends Request {
   public constructor(request: LinearRequest, data: D.ViewPreferencesFragment) {
@@ -3341,7 +3342,7 @@ export class ViewPreferences extends Request {
  * UserPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserPayloadFragment response data
+ * @param data - UserPayloadFragment response data
  */
 export class UserPayload extends Request {
   private _user?: D.UserPayloadFragment["user"];
@@ -3367,7 +3368,7 @@ export class UserPayload extends Request {
  * UserAdminPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserAdminPayloadFragment response data
+ * @param data - UserAdminPayloadFragment response data
  */
 export class UserAdminPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserAdminPayloadFragment) {
@@ -3383,7 +3384,7 @@ export class UserAdminPayload extends Request {
  * OrganizationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationPayloadFragment response data
+ * @param data - OrganizationPayloadFragment response data
  */
 export class OrganizationPayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationPayloadFragment) {
@@ -3406,7 +3407,7 @@ export class OrganizationPayload extends Request {
  * OrganizationDeletePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationDeletePayloadFragment response data
+ * @param data - OrganizationDeletePayloadFragment response data
  */
 export class OrganizationDeletePayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationDeletePayloadFragment) {
@@ -3422,7 +3423,7 @@ export class OrganizationDeletePayload extends Request {
  * AdminIntegrationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial AdminIntegrationPayloadFragment response data
+ * @param data - AdminIntegrationPayloadFragment response data
  */
 export class AdminIntegrationPayload extends Request {
   public constructor(request: LinearRequest, data: D.AdminIntegrationPayloadFragment) {
@@ -3438,7 +3439,7 @@ export class AdminIntegrationPayload extends Request {
  * OrganizationAccessPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationAccessPayloadFragment response data
+ * @param data - OrganizationAccessPayloadFragment response data
  */
 export class OrganizationAccessPayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationAccessPayloadFragment) {
@@ -3454,7 +3455,7 @@ export class OrganizationAccessPayload extends Request {
  * OrganizationSamlConfigurePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationSamlConfigurePayloadFragment response data
+ * @param data - OrganizationSamlConfigurePayloadFragment response data
  */
 export class OrganizationSamlConfigurePayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationSamlConfigurePayloadFragment) {
@@ -3478,7 +3479,7 @@ export class OrganizationSamlConfigurePayload extends Request {
  * The integration resource's settings
  *
  * @param request - function to call the graphql client
- * @param data - the initial SamlConfigurationFragment response data
+ * @param data - SamlConfigurationFragment response data
  */
 export class SamlConfiguration extends Request {
   public constructor(request: LinearRequest, data: D.SamlConfigurationFragment) {
@@ -3506,7 +3507,7 @@ export class SamlConfiguration extends Request {
  * AdminCommandPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial AdminCommandPayloadFragment response data
+ * @param data - AdminCommandPayloadFragment response data
  */
 export class AdminCommandPayload extends Request {
   public constructor(request: LinearRequest, data: D.AdminCommandPayloadFragment) {
@@ -3522,7 +3523,7 @@ export class AdminCommandPayload extends Request {
  * EventPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial EventPayloadFragment response data
+ * @param data - EventPayloadFragment response data
  */
 export class EventPayload extends Request {
   public constructor(request: LinearRequest, data: D.EventPayloadFragment) {
@@ -3538,7 +3539,7 @@ export class EventPayload extends Request {
  * ApiKeyPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ApiKeyPayloadFragment response data
+ * @param data - ApiKeyPayloadFragment response data
  */
 export class ApiKeyPayload extends Request {
   public constructor(request: LinearRequest, data: D.ApiKeyPayloadFragment) {
@@ -3560,7 +3561,7 @@ export class ApiKeyPayload extends Request {
  * ArchivePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ArchivePayloadFragment response data
+ * @param data - ArchivePayloadFragment response data
  */
 export class ArchivePayload extends Request {
   public constructor(request: LinearRequest, data: D.ArchivePayloadFragment) {
@@ -3579,7 +3580,7 @@ export class ArchivePayload extends Request {
  * EmailUserAccountAuthChallengeResponse model
  *
  * @param request - function to call the graphql client
- * @param data - the initial EmailUserAccountAuthChallengeResponseFragment response data
+ * @param data - EmailUserAccountAuthChallengeResponseFragment response data
  */
 export class EmailUserAccountAuthChallengeResponse extends Request {
   public constructor(request: LinearRequest, data: D.EmailUserAccountAuthChallengeResponseFragment) {
@@ -3598,7 +3599,7 @@ export class EmailUserAccountAuthChallengeResponse extends Request {
  * CreateOrJoinOrganizationResponse model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CreateOrJoinOrganizationResponseFragment response data
+ * @param data - CreateOrJoinOrganizationResponseFragment response data
  */
 export class CreateOrJoinOrganizationResponse extends Request {
   private _user?: D.CreateOrJoinOrganizationResponseFragment["user"];
@@ -3620,7 +3621,7 @@ export class CreateOrJoinOrganizationResponse extends Request {
  * BillingEmailPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial BillingEmailPayloadFragment response data
+ * @param data - BillingEmailPayloadFragment response data
  */
 export class BillingEmailPayload extends Request {
   public constructor(request: LinearRequest, data: D.BillingEmailPayloadFragment) {
@@ -3639,7 +3640,7 @@ export class BillingEmailPayload extends Request {
  * CommentPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CommentPayloadFragment response data
+ * @param data - CommentPayloadFragment response data
  */
 export class CommentPayload extends Request {
   private _comment?: D.CommentPayloadFragment["comment"];
@@ -3665,7 +3666,7 @@ export class CommentPayload extends Request {
  * ContactPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ContactPayloadFragment response data
+ * @param data - ContactPayloadFragment response data
  */
 export class ContactPayload extends Request {
   public constructor(request: LinearRequest, data: D.ContactPayloadFragment) {
@@ -3681,7 +3682,7 @@ export class ContactPayload extends Request {
  * CustomViewPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CustomViewPayloadFragment response data
+ * @param data - CustomViewPayloadFragment response data
  */
 export class CustomViewPayload extends Request {
   private _customView?: D.CustomViewPayloadFragment["customView"];
@@ -3707,7 +3708,7 @@ export class CustomViewPayload extends Request {
  * CyclePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CyclePayloadFragment response data
+ * @param data - CyclePayloadFragment response data
  */
 export class CyclePayload extends Request {
   private _cycle?: D.CyclePayloadFragment["cycle"];
@@ -3733,7 +3734,7 @@ export class CyclePayload extends Request {
  * DebugPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial DebugPayloadFragment response data
+ * @param data - DebugPayloadFragment response data
  */
 export class DebugPayload extends Request {
   public constructor(request: LinearRequest, data: D.DebugPayloadFragment) {
@@ -3749,7 +3750,7 @@ export class DebugPayload extends Request {
  * EmailUnsubscribePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial EmailUnsubscribePayloadFragment response data
+ * @param data - EmailUnsubscribePayloadFragment response data
  */
 export class EmailUnsubscribePayload extends Request {
   public constructor(request: LinearRequest, data: D.EmailUnsubscribePayloadFragment) {
@@ -3765,7 +3766,7 @@ export class EmailUnsubscribePayload extends Request {
  * EmojiPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial EmojiPayloadFragment response data
+ * @param data - EmojiPayloadFragment response data
  */
 export class EmojiPayload extends Request {
   private _emoji?: D.EmojiPayloadFragment["emoji"];
@@ -3791,7 +3792,7 @@ export class EmojiPayload extends Request {
  * FavoritePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial FavoritePayloadFragment response data
+ * @param data - FavoritePayloadFragment response data
  */
 export class FavoritePayload extends Request {
   private _favorite?: D.FavoritePayloadFragment["favorite"];
@@ -3817,7 +3818,7 @@ export class FavoritePayload extends Request {
  * FeedbackPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial FeedbackPayloadFragment response data
+ * @param data - FeedbackPayloadFragment response data
  */
 export class FeedbackPayload extends Request {
   public constructor(request: LinearRequest, data: D.FeedbackPayloadFragment) {
@@ -3833,7 +3834,7 @@ export class FeedbackPayload extends Request {
  * UploadPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UploadPayloadFragment response data
+ * @param data - UploadPayloadFragment response data
  */
 export class UploadPayload extends Request {
   public constructor(request: LinearRequest, data: D.UploadPayloadFragment) {
@@ -3855,7 +3856,7 @@ export class UploadPayload extends Request {
  * Object representing Google Cloud upload policy, plus additional data.
  *
  * @param request - function to call the graphql client
- * @param data - the initial UploadFileFragment response data
+ * @param data - UploadFileFragment response data
  */
 export class UploadFile extends Request {
   public constructor(request: LinearRequest, data: D.UploadFileFragment) {
@@ -3887,7 +3888,7 @@ export class UploadFile extends Request {
  * UploadFileHeader model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UploadFileHeaderFragment response data
+ * @param data - UploadFileHeaderFragment response data
  */
 export class UploadFileHeader extends Request {
   public constructor(request: LinearRequest, data: D.UploadFileHeaderFragment) {
@@ -3906,7 +3907,7 @@ export class UploadFileHeader extends Request {
  * ImageUploadFromUrlPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ImageUploadFromUrlPayloadFragment response data
+ * @param data - ImageUploadFromUrlPayloadFragment response data
  */
 export class ImageUploadFromUrlPayload extends Request {
   public constructor(request: LinearRequest, data: D.ImageUploadFromUrlPayloadFragment) {
@@ -3928,7 +3929,7 @@ export class ImageUploadFromUrlPayload extends Request {
  * IntegrationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IntegrationPayloadFragment response data
+ * @param data - IntegrationPayloadFragment response data
  */
 export class IntegrationPayload extends Request {
   private _integration?: D.IntegrationPayloadFragment["integration"];
@@ -3954,7 +3955,7 @@ export class IntegrationPayload extends Request {
  * IssueLabelPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueLabelPayloadFragment response data
+ * @param data - IssueLabelPayloadFragment response data
  */
 export class IssueLabelPayload extends Request {
   private _issueLabel?: D.IssueLabelPayloadFragment["issueLabel"];
@@ -3980,7 +3981,7 @@ export class IssueLabelPayload extends Request {
  * IssueRelationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueRelationPayloadFragment response data
+ * @param data - IssueRelationPayloadFragment response data
  */
 export class IssueRelationPayload extends Request {
   private _issueRelation?: D.IssueRelationPayloadFragment["issueRelation"];
@@ -4006,7 +4007,7 @@ export class IssueRelationPayload extends Request {
  * IssuePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssuePayloadFragment response data
+ * @param data - IssuePayloadFragment response data
  */
 export class IssuePayload extends Request {
   private _issue?: D.IssuePayloadFragment["issue"];
@@ -4032,7 +4033,7 @@ export class IssuePayload extends Request {
  * MilestonePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial MilestonePayloadFragment response data
+ * @param data - MilestonePayloadFragment response data
  */
 export class MilestonePayload extends Request {
   private _milestone?: D.MilestonePayloadFragment["milestone"];
@@ -4058,7 +4059,7 @@ export class MilestonePayload extends Request {
  * NotificationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationPayloadFragment response data
+ * @param data - NotificationPayloadFragment response data
  */
 export class NotificationPayload extends Request {
   public constructor(request: LinearRequest, data: D.NotificationPayloadFragment) {
@@ -4080,7 +4081,7 @@ export class NotificationPayload extends Request {
  * NotificationSubscriptionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationSubscriptionPayloadFragment response data
+ * @param data - NotificationSubscriptionPayloadFragment response data
  */
 export class NotificationSubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: D.NotificationSubscriptionPayloadFragment) {
@@ -4104,7 +4105,7 @@ export class NotificationSubscriptionPayload extends Request {
  * OauthClientPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OauthClientPayloadFragment response data
+ * @param data - OauthClientPayloadFragment response data
  */
 export class OauthClientPayload extends Request {
   public constructor(request: LinearRequest, data: D.OauthClientPayloadFragment) {
@@ -4126,7 +4127,7 @@ export class OauthClientPayload extends Request {
  * OAuth2 client application
  *
  * @param request - function to call the graphql client
- * @param data - the initial OauthClientFragment response data
+ * @param data - OauthClientFragment response data
  */
 export class OauthClient extends Request {
   public constructor(request: LinearRequest, data: D.OauthClientFragment) {
@@ -4178,7 +4179,7 @@ export class OauthClient extends Request {
  * RotateSecretPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial RotateSecretPayloadFragment response data
+ * @param data - RotateSecretPayloadFragment response data
  */
 export class RotateSecretPayload extends Request {
   public constructor(request: LinearRequest, data: D.RotateSecretPayloadFragment) {
@@ -4197,7 +4198,7 @@ export class RotateSecretPayload extends Request {
  * OauthTokenRevokePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OauthTokenRevokePayloadFragment response data
+ * @param data - OauthTokenRevokePayloadFragment response data
  */
 export class OauthTokenRevokePayload extends Request {
   public constructor(request: LinearRequest, data: D.OauthTokenRevokePayloadFragment) {
@@ -4213,7 +4214,7 @@ export class OauthTokenRevokePayload extends Request {
  * OrganizationDomainPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationDomainPayloadFragment response data
+ * @param data - OrganizationDomainPayloadFragment response data
  */
 export class OrganizationDomainPayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationDomainPayloadFragment) {
@@ -4237,7 +4238,7 @@ export class OrganizationDomainPayload extends Request {
  * Defines the use of a domain by an organization.
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationDomainFragment response data
+ * @param data - OrganizationDomainFragment response data
  */
 export class OrganizationDomain extends Request {
   private _creator?: D.OrganizationDomainFragment["creator"];
@@ -4281,7 +4282,7 @@ export class OrganizationDomain extends Request {
  * OrganizationInvitePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationInvitePayloadFragment response data
+ * @param data - OrganizationInvitePayloadFragment response data
  */
 export class OrganizationInvitePayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationInvitePayloadFragment) {
@@ -4305,7 +4306,7 @@ export class OrganizationInvitePayload extends Request {
  * ProjectLinkPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ProjectLinkPayloadFragment response data
+ * @param data - ProjectLinkPayloadFragment response data
  */
 export class ProjectLinkPayload extends Request {
   private _projectLink?: D.ProjectLinkPayloadFragment["projectLink"];
@@ -4331,7 +4332,7 @@ export class ProjectLinkPayload extends Request {
  * ProjectPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ProjectPayloadFragment response data
+ * @param data - ProjectPayloadFragment response data
  */
 export class ProjectPayload extends Request {
   private _project?: D.ProjectPayloadFragment["project"];
@@ -4357,7 +4358,7 @@ export class ProjectPayload extends Request {
  * ReactionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ReactionPayloadFragment response data
+ * @param data - ReactionPayloadFragment response data
  */
 export class ReactionPayload extends Request {
   private _reaction?: D.ReactionPayloadFragment["reaction"];
@@ -4381,7 +4382,7 @@ export class ReactionPayload extends Request {
  * CreateCsvExportReportPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CreateCsvExportReportPayloadFragment response data
+ * @param data - CreateCsvExportReportPayloadFragment response data
  */
 export class CreateCsvExportReportPayload extends Request {
   public constructor(request: LinearRequest, data: D.CreateCsvExportReportPayloadFragment) {
@@ -4397,7 +4398,7 @@ export class CreateCsvExportReportPayload extends Request {
  * SubscriptionSessionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial SubscriptionSessionPayloadFragment response data
+ * @param data - SubscriptionSessionPayloadFragment response data
  */
 export class SubscriptionSessionPayload extends Request {
   public constructor(request: LinearRequest, data: D.SubscriptionSessionPayloadFragment) {
@@ -4413,7 +4414,7 @@ export class SubscriptionSessionPayload extends Request {
  * SubscriptionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial SubscriptionPayloadFragment response data
+ * @param data - SubscriptionPayloadFragment response data
  */
 export class SubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: D.SubscriptionPayloadFragment) {
@@ -4439,7 +4440,7 @@ export class SubscriptionPayload extends Request {
  * TeamMembershipPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial TeamMembershipPayloadFragment response data
+ * @param data - TeamMembershipPayloadFragment response data
  */
 export class TeamMembershipPayload extends Request {
   private _teamMembership?: D.TeamMembershipPayloadFragment["teamMembership"];
@@ -4465,7 +4466,7 @@ export class TeamMembershipPayload extends Request {
  * TeamPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial TeamPayloadFragment response data
+ * @param data - TeamPayloadFragment response data
  */
 export class TeamPayload extends Request {
   private _team?: D.TeamPayloadFragment["team"];
@@ -4491,7 +4492,7 @@ export class TeamPayload extends Request {
  * TemplatePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial TemplatePayloadFragment response data
+ * @param data - TemplatePayloadFragment response data
  */
 export class TemplatePayload extends Request {
   private _template?: D.TemplatePayloadFragment["template"];
@@ -4517,7 +4518,7 @@ export class TemplatePayload extends Request {
  * UserSettingsPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserSettingsPayloadFragment response data
+ * @param data - UserSettingsPayloadFragment response data
  */
 export class UserSettingsPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserSettingsPayloadFragment) {
@@ -4540,7 +4541,7 @@ export class UserSettingsPayload extends Request {
  * UserSettingsFlagPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserSettingsFlagPayloadFragment response data
+ * @param data - UserSettingsFlagPayloadFragment response data
  */
 export class UserSettingsFlagPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserSettingsFlagPayloadFragment) {
@@ -4565,7 +4566,7 @@ export class UserSettingsFlagPayload extends Request {
  * UserSettingsFlagsResetPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserSettingsFlagsResetPayloadFragment response data
+ * @param data - UserSettingsFlagsResetPayloadFragment response data
  */
 export class UserSettingsFlagsResetPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserSettingsFlagsResetPayloadFragment) {
@@ -4584,7 +4585,7 @@ export class UserSettingsFlagsResetPayload extends Request {
  * UserSubscribeToNewsletterPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserSubscribeToNewsletterPayloadFragment response data
+ * @param data - UserSubscribeToNewsletterPayloadFragment response data
  */
 export class UserSubscribeToNewsletterPayload extends Request {
   public constructor(request: LinearRequest, data: D.UserSubscribeToNewsletterPayloadFragment) {
@@ -4600,7 +4601,7 @@ export class UserSubscribeToNewsletterPayload extends Request {
  * ViewPreferencesPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ViewPreferencesPayloadFragment response data
+ * @param data - ViewPreferencesPayloadFragment response data
  */
 export class ViewPreferencesPayload extends Request {
   public constructor(request: LinearRequest, data: D.ViewPreferencesPayloadFragment) {
@@ -4622,7 +4623,7 @@ export class ViewPreferencesPayload extends Request {
  * WebhookPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial WebhookPayloadFragment response data
+ * @param data - WebhookPayloadFragment response data
  */
 export class WebhookPayload extends Request {
   private _webhook?: D.WebhookPayloadFragment["webhook"];
@@ -4648,7 +4649,7 @@ export class WebhookPayload extends Request {
  * WorkflowStatePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial WorkflowStatePayloadFragment response data
+ * @param data - WorkflowStatePayloadFragment response data
  */
 export class WorkflowStatePayload extends Request {
   private _workflowState?: D.WorkflowStatePayloadFragment["workflowState"];
@@ -4674,7 +4675,7 @@ export class WorkflowStatePayload extends Request {
  * Collaborative editing steps for documents.
  *
  * @param request - function to call the graphql client
- * @param data - the initial DocumentStepFragment response data
+ * @param data - DocumentStepFragment response data
  */
 export class DocumentStep extends Request {
   public constructor(request: LinearRequest, data: D.DocumentStepFragment) {
@@ -4711,7 +4712,7 @@ export class DocumentStep extends Request {
  * A user's web browser push notification subscription.
  *
  * @param request - function to call the graphql client
- * @param data - the initial PushSubscriptionFragment response data
+ * @param data - PushSubscriptionFragment response data
  */
 export class PushSubscription extends Request {
   public constructor(request: LinearRequest, data: D.PushSubscriptionFragment) {
@@ -4739,7 +4740,7 @@ export class PushSubscription extends Request {
  * PushSubscriptionConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial PushSubscriptionConnectionFragment response data
+ * @param data - PushSubscriptionConnectionFragment response data
  */
 export class PushSubscriptionConnection extends Request {
   public constructor(request: LinearRequest, data: D.PushSubscriptionConnectionFragment) {
@@ -4756,7 +4757,7 @@ export class PushSubscriptionConnection extends Request {
  * A user account.
  *
  * @param request - function to call the graphql client
- * @param data - the initial UserAccountFragment response data
+ * @param data - UserAccountFragment response data
  */
 export class UserAccount extends Request {
   public constructor(request: LinearRequest, data: D.UserAccountFragment) {
@@ -4793,7 +4794,7 @@ export class UserAccount extends Request {
  * A recorded entry of a file uploaded by a user.
  *
  * @param request - function to call the graphql client
- * @param data - the initial FileUploadFragment response data
+ * @param data - FileUploadFragment response data
  */
 export class FileUpload extends Request {
   private _creator?: D.FileUploadFragment["creator"];
@@ -4835,7 +4836,7 @@ export class FileUpload extends Request {
  * SynchronizedPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial SynchronizedPayloadFragment response data
+ * @param data - SynchronizedPayloadFragment response data
  */
 export class SynchronizedPayload extends Request {
   public constructor(request: LinearRequest, data: D.SynchronizedPayloadFragment) {
@@ -4851,7 +4852,7 @@ export class SynchronizedPayload extends Request {
  * Public information of the OAuth application.
  *
  * @param request - function to call the graphql client
- * @param data - the initial ApplicationFragment response data
+ * @param data - ApplicationFragment response data
  */
 export class Application extends Request {
   public constructor(request: LinearRequest, data: D.ApplicationFragment) {
@@ -4882,7 +4883,7 @@ export class Application extends Request {
  * OrganizationDomainSimplePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationDomainSimplePayloadFragment response data
+ * @param data - OrganizationDomainSimplePayloadFragment response data
  */
 export class OrganizationDomainSimplePayload extends Request {
   public constructor(request: LinearRequest, data: D.OrganizationDomainSimplePayloadFragment) {
@@ -4893,8 +4894,9 @@ export class OrganizationDomainSimplePayload extends Request {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
+
 /**
- * Query UserDocument for User
+ * A fetchable User Query
  *
  * @param request - function to call the graphql client
  */
@@ -4903,6 +4905,11 @@ export class UserQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the User Query and return a User
+   *
+   * @param id - id to pass into the UserQuery
+   */
   public async fetch(id: string): Promise<User | undefined> {
     return this.request<D.UserQuery, D.UserQueryVariables>(D.UserDocument, {
       id,
@@ -4914,7 +4921,7 @@ export class UserQuery extends Request {
 }
 
 /**
- * Query ViewerDocument for User
+ * A fetchable Viewer Query
  *
  * @param request - function to call the graphql client
  */
@@ -4923,6 +4930,10 @@ export class ViewerQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Viewer Query and return a User
+   *
+   */
   public async fetch(): Promise<User | undefined> {
     return this.request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, {}).then(response => {
       const data = response?.viewer;
@@ -4932,7 +4943,7 @@ export class ViewerQuery extends Request {
 }
 
 /**
- * Query OrganizationDocument for Organization
+ * A fetchable Organization Query
  *
  * @param request - function to call the graphql client
  */
@@ -4941,6 +4952,10 @@ export class OrganizationQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Organization Query and return a Organization
+   *
+   */
   public async fetch(): Promise<Organization | undefined> {
     return this.request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument, {}).then(
       response => {
@@ -4952,7 +4967,7 @@ export class OrganizationQuery extends Request {
 }
 
 /**
- * Query OrganizationExistsDocument for OrganizationExistsPayload
+ * A fetchable OrganizationExists Query
  *
  * @param request - function to call the graphql client
  */
@@ -4961,6 +4976,11 @@ export class OrganizationExistsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationExists Query and return a OrganizationExistsPayload
+   *
+   * @param urlKey - urlKey to pass into the OrganizationExistsQuery
+   */
   public async fetch(urlKey: string): Promise<OrganizationExistsPayload | undefined> {
     return this.request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(D.OrganizationExistsDocument, {
       urlKey,
@@ -4972,7 +4992,7 @@ export class OrganizationExistsQuery extends Request {
 }
 
 /**
- * Query SyncBootstrapDocument for SyncResponse
+ * A fetchable SyncBootstrap Query
  *
  * @param request - function to call the graphql client
  */
@@ -4981,6 +5001,12 @@ export class SyncBootstrapQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the SyncBootstrap Query and return a SyncResponse
+   *
+   * @param databaseVersion - databaseVersion to pass into the SyncBootstrapQuery
+   * @param sinceSyncId - sinceSyncId to pass into the SyncBootstrapQuery
+   */
   public async fetch(databaseVersion: number, sinceSyncId: number): Promise<SyncResponse | undefined> {
     return this.request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument, {
       databaseVersion,
@@ -4993,7 +5019,7 @@ export class SyncBootstrapQuery extends Request {
 }
 
 /**
- * Query SyncUpdatesDocument for SyncResponse
+ * A fetchable SyncUpdates Query
  *
  * @param request - function to call the graphql client
  */
@@ -5002,6 +5028,11 @@ export class SyncUpdatesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the SyncUpdates Query and return a SyncResponse
+   *
+   * @param sinceSyncId - sinceSyncId to pass into the SyncUpdatesQuery
+   */
   public async fetch(sinceSyncId: number): Promise<SyncResponse | undefined> {
     return this.request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument, {
       sinceSyncId,
@@ -5013,7 +5044,7 @@ export class SyncUpdatesQuery extends Request {
 }
 
 /**
- * Query ArchivedModelSyncDocument for ArchiveResponse
+ * A fetchable ArchivedModelSync Query
  *
  * @param request - function to call the graphql client
  */
@@ -5022,6 +5053,12 @@ export class ArchivedModelSyncQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the ArchivedModelSync Query and return a ArchiveResponse
+   *
+   * @param identifier - identifier to pass into the ArchivedModelSyncQuery
+   * @param modelClass - modelClass to pass into the ArchivedModelSyncQuery
+   */
   public async fetch(identifier: string, modelClass: string): Promise<ArchiveResponse | undefined> {
     return this.request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument, {
       identifier,
@@ -5034,7 +5071,7 @@ export class ArchivedModelSyncQuery extends Request {
 }
 
 /**
- * Query ArchivedModelsSyncDocument for ArchiveResponse
+ * A fetchable ArchivedModelsSync Query
  *
  * @param request - function to call the graphql client
  */
@@ -5043,6 +5080,13 @@ export class ArchivedModelsSyncQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the ArchivedModelsSync Query and return a ArchiveResponse
+   *
+   * @param modelClass - modelClass to pass into the ArchivedModelsSyncQuery
+   * @param teamId - teamId to pass into the ArchivedModelsSyncQuery
+   * @param vars - variables without 'modelClass', 'teamId' to pass into the ArchivedModelsSyncQuery
+   */
   public async fetch(
     modelClass: string,
     teamId: string,
@@ -5060,7 +5104,7 @@ export class ArchivedModelsSyncQuery extends Request {
 }
 
 /**
- * Query AdminUserAccountLookupDocument for UserAccountAdminPrivileged
+ * A fetchable AdminUserAccountLookup Query
  *
  * @param request - function to call the graphql client
  */
@@ -5069,6 +5113,11 @@ export class AdminUserAccountLookupQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup Query and return a UserAccountAdminPrivileged
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookupQuery
+   */
   public async fetch(vars?: D.AdminUserAccountLookupQueryVariables): Promise<UserAccountAdminPrivileged | undefined> {
     return this.request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
       D.AdminUserAccountLookupDocument,
@@ -5081,7 +5130,7 @@ export class AdminUserAccountLookupQuery extends Request {
 }
 
 /**
- * Query UsersDocument for UserConnection
+ * A fetchable Users Query
  *
  * @param request - function to call the graphql client
  */
@@ -5090,6 +5139,11 @@ export class UsersQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Users Query and return a UserConnection
+   *
+   * @param vars - variables to pass into the UsersQuery
+   */
   public async fetch(vars?: D.UsersQueryVariables): Promise<UserConnection | undefined> {
     return this.request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, vars).then(response => {
       const data = response?.users;
@@ -5099,7 +5153,7 @@ export class UsersQuery extends Request {
 }
 
 /**
- * Query ApiKeysDocument for ApiKeyConnection
+ * A fetchable ApiKeys Query
  *
  * @param request - function to call the graphql client
  */
@@ -5108,6 +5162,11 @@ export class ApiKeysQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the ApiKeys Query and return a ApiKeyConnection
+   *
+   * @param vars - variables to pass into the ApiKeysQuery
+   */
   public async fetch(vars?: D.ApiKeysQueryVariables): Promise<ApiKeyConnection | undefined> {
     return this.request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, vars).then(response => {
       const data = response?.apiKeys;
@@ -5117,7 +5176,7 @@ export class ApiKeysQuery extends Request {
 }
 
 /**
- * Query ApplicationWithAuthorizationDocument for UserAuthorizedApplication
+ * A fetchable ApplicationWithAuthorization Query
  *
  * @param request - function to call the graphql client
  */
@@ -5126,6 +5185,13 @@ export class ApplicationWithAuthorizationQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the ApplicationWithAuthorization Query and return a UserAuthorizedApplication
+   *
+   * @param scope - scope to pass into the ApplicationWithAuthorizationQuery
+   * @param clientId - clientId to pass into the ApplicationWithAuthorizationQuery
+   * @param vars - variables without 'scope', 'clientId' to pass into the ApplicationWithAuthorizationQuery
+   */
   public async fetch(
     scope: string[],
     clientId: string,
@@ -5146,7 +5212,7 @@ export class ApplicationWithAuthorizationQuery extends Request {
 }
 
 /**
- * Query AuthorizedApplicationsDocument for AuthorizedApplications
+ * A fetchable AuthorizedApplications Query
  *
  * @param request - function to call the graphql client
  */
@@ -5155,6 +5221,10 @@ export class AuthorizedApplicationsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the AuthorizedApplications Query and return a AuthorizedApplication list
+   *
+   */
   public async fetch(): Promise<AuthorizedApplication[] | undefined> {
     return this.request<D.AuthorizedApplicationsQuery, D.AuthorizedApplicationsQueryVariables>(
       D.AuthorizedApplicationsDocument,
@@ -5167,7 +5237,7 @@ export class AuthorizedApplicationsQuery extends Request {
 }
 
 /**
- * Query SsoUrlFromEmailDocument for SsoUrlFromEmailResponse
+ * A fetchable SsoUrlFromEmail Query
  *
  * @param request - function to call the graphql client
  */
@@ -5176,6 +5246,12 @@ export class SsoUrlFromEmailQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the SsoUrlFromEmail Query and return a SsoUrlFromEmailResponse
+   *
+   * @param email - email to pass into the SsoUrlFromEmailQuery
+   * @param vars - variables without 'email' to pass into the SsoUrlFromEmailQuery
+   */
   public async fetch(
     email: string,
     vars?: Omit<D.SsoUrlFromEmailQueryVariables, "email">
@@ -5191,7 +5267,7 @@ export class SsoUrlFromEmailQuery extends Request {
 }
 
 /**
- * Query BillingDetailsDocument for BillingDetailsPayload
+ * A fetchable BillingDetails Query
  *
  * @param request - function to call the graphql client
  */
@@ -5200,6 +5276,10 @@ export class BillingDetailsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the BillingDetails Query and return a BillingDetailsPayload
+   *
+   */
   public async fetch(): Promise<BillingDetailsPayload | undefined> {
     return this.request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument, {}).then(
       response => {
@@ -5211,7 +5291,7 @@ export class BillingDetailsQuery extends Request {
 }
 
 /**
- * Query CollaborativeDocumentJoinDocument for CollaborationDocumentUpdatePayload
+ * A fetchable CollaborativeDocumentJoin Query
  *
  * @param request - function to call the graphql client
  */
@@ -5220,6 +5300,13 @@ export class CollaborativeDocumentJoinQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the CollaborativeDocumentJoin Query and return a CollaborationDocumentUpdatePayload
+   *
+   * @param clientId - clientId to pass into the CollaborativeDocumentJoinQuery
+   * @param issueId - issueId to pass into the CollaborativeDocumentJoinQuery
+   * @param version - version to pass into the CollaborativeDocumentJoinQuery
+   */
   public async fetch(
     clientId: string,
     issueId: string,
@@ -5240,7 +5327,7 @@ export class CollaborativeDocumentJoinQuery extends Request {
 }
 
 /**
- * Query CommentDocument for Comment
+ * A fetchable Comment Query
  *
  * @param request - function to call the graphql client
  */
@@ -5249,6 +5336,11 @@ export class CommentQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Comment Query and return a Comment
+   *
+   * @param id - id to pass into the CommentQuery
+   */
   public async fetch(id: string): Promise<Comment | undefined> {
     return this.request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, {
       id,
@@ -5260,7 +5352,7 @@ export class CommentQuery extends Request {
 }
 
 /**
- * Query CommentsDocument for CommentConnection
+ * A fetchable Comments Query
  *
  * @param request - function to call the graphql client
  */
@@ -5269,6 +5361,11 @@ export class CommentsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Comments Query and return a CommentConnection
+   *
+   * @param vars - variables to pass into the CommentsQuery
+   */
   public async fetch(vars?: D.CommentsQueryVariables): Promise<CommentConnection | undefined> {
     return this.request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument, vars).then(response => {
       const data = response?.comments;
@@ -5278,7 +5375,7 @@ export class CommentsQuery extends Request {
 }
 
 /**
- * Query CustomViewDocument for CustomView
+ * A fetchable CustomView Query
  *
  * @param request - function to call the graphql client
  */
@@ -5287,6 +5384,11 @@ export class CustomViewQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the CustomView Query and return a CustomView
+   *
+   * @param id - id to pass into the CustomViewQuery
+   */
   public async fetch(id: string): Promise<CustomView | undefined> {
     return this.request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, {
       id,
@@ -5298,7 +5400,7 @@ export class CustomViewQuery extends Request {
 }
 
 /**
- * Query CustomViewsDocument for CustomViewConnection
+ * A fetchable CustomViews Query
  *
  * @param request - function to call the graphql client
  */
@@ -5307,6 +5409,11 @@ export class CustomViewsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the CustomViews Query and return a CustomViewConnection
+   *
+   * @param vars - variables to pass into the CustomViewsQuery
+   */
   public async fetch(vars?: D.CustomViewsQueryVariables): Promise<CustomViewConnection | undefined> {
     return this.request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument, vars).then(response => {
       const data = response?.customViews;
@@ -5316,7 +5423,7 @@ export class CustomViewsQuery extends Request {
 }
 
 /**
- * Query CycleDocument for Cycle
+ * A fetchable Cycle Query
  *
  * @param request - function to call the graphql client
  */
@@ -5325,6 +5432,11 @@ export class CycleQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Cycle Query and return a Cycle
+   *
+   * @param id - id to pass into the CycleQuery
+   */
   public async fetch(id: string): Promise<Cycle | undefined> {
     return this.request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, {
       id,
@@ -5336,7 +5448,7 @@ export class CycleQuery extends Request {
 }
 
 /**
- * Query CyclesDocument for CycleConnection
+ * A fetchable Cycles Query
  *
  * @param request - function to call the graphql client
  */
@@ -5345,6 +5457,11 @@ export class CyclesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Cycles Query and return a CycleConnection
+   *
+   * @param vars - variables to pass into the CyclesQuery
+   */
   public async fetch(vars?: D.CyclesQueryVariables): Promise<CycleConnection | undefined> {
     return this.request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument, vars).then(response => {
       const data = response?.cycles;
@@ -5354,7 +5471,7 @@ export class CyclesQuery extends Request {
 }
 
 /**
- * Query EmojiDocument for Emoji
+ * A fetchable Emoji Query
  *
  * @param request - function to call the graphql client
  */
@@ -5363,6 +5480,11 @@ export class EmojiQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Emoji Query and return a Emoji
+   *
+   * @param id - id to pass into the EmojiQuery
+   */
   public async fetch(id: string): Promise<Emoji | undefined> {
     return this.request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, {
       id,
@@ -5374,7 +5496,7 @@ export class EmojiQuery extends Request {
 }
 
 /**
- * Query EmojisDocument for EmojiConnection
+ * A fetchable Emojis Query
  *
  * @param request - function to call the graphql client
  */
@@ -5383,6 +5505,11 @@ export class EmojisQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Emojis Query and return a EmojiConnection
+   *
+   * @param vars - variables to pass into the EmojisQuery
+   */
   public async fetch(vars?: D.EmojisQueryVariables): Promise<EmojiConnection | undefined> {
     return this.request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument, vars).then(response => {
       const data = response?.emojis;
@@ -5392,7 +5519,7 @@ export class EmojisQuery extends Request {
 }
 
 /**
- * Query FavoriteDocument for Favorite
+ * A fetchable Favorite Query
  *
  * @param request - function to call the graphql client
  */
@@ -5401,6 +5528,11 @@ export class FavoriteQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Favorite Query and return a Favorite
+   *
+   * @param id - id to pass into the FavoriteQuery
+   */
   public async fetch(id: string): Promise<Favorite | undefined> {
     return this.request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, {
       id,
@@ -5412,7 +5544,7 @@ export class FavoriteQuery extends Request {
 }
 
 /**
- * Query FavoritesDocument for FavoriteConnection
+ * A fetchable Favorites Query
  *
  * @param request - function to call the graphql client
  */
@@ -5421,6 +5553,11 @@ export class FavoritesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Favorites Query and return a FavoriteConnection
+   *
+   * @param vars - variables to pass into the FavoritesQuery
+   */
   public async fetch(vars?: D.FavoritesQueryVariables): Promise<FavoriteConnection | undefined> {
     return this.request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument, vars).then(response => {
       const data = response?.favorites;
@@ -5430,7 +5567,7 @@ export class FavoritesQuery extends Request {
 }
 
 /**
- * Query FigmaEmbedInfoDocument for FigmaEmbedPayload
+ * A fetchable FigmaEmbedInfo Query
  *
  * @param request - function to call the graphql client
  */
@@ -5439,6 +5576,12 @@ export class FigmaEmbedInfoQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the FigmaEmbedInfo Query and return a FigmaEmbedPayload
+   *
+   * @param fileId - fileId to pass into the FigmaEmbedInfoQuery
+   * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
+   */
   public async fetch(
     fileId: string,
     vars?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">
@@ -5454,7 +5597,7 @@ export class FigmaEmbedInfoQuery extends Request {
 }
 
 /**
- * Query IntegrationDocument for Integration
+ * A fetchable Integration Query
  *
  * @param request - function to call the graphql client
  */
@@ -5463,6 +5606,11 @@ export class IntegrationQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Integration Query and return a Integration
+   *
+   * @param id - id to pass into the IntegrationQuery
+   */
   public async fetch(id: string): Promise<Integration | undefined> {
     return this.request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument, {
       id,
@@ -5474,7 +5622,7 @@ export class IntegrationQuery extends Request {
 }
 
 /**
- * Query IntegrationsDocument for IntegrationConnection
+ * A fetchable Integrations Query
  *
  * @param request - function to call the graphql client
  */
@@ -5483,6 +5631,11 @@ export class IntegrationsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Integrations Query and return a IntegrationConnection
+   *
+   * @param vars - variables to pass into the IntegrationsQuery
+   */
   public async fetch(vars?: D.IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
     return this.request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument, vars).then(
       response => {
@@ -5494,7 +5647,7 @@ export class IntegrationsQuery extends Request {
 }
 
 /**
- * Query IntegrationResourceDocument for IntegrationResource
+ * A fetchable IntegrationResource Query
  *
  * @param request - function to call the graphql client
  */
@@ -5503,6 +5656,11 @@ export class IntegrationResourceQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationResource Query and return a IntegrationResource
+   *
+   * @param id - id to pass into the IntegrationResourceQuery
+   */
   public async fetch(id: string): Promise<IntegrationResource | undefined> {
     return this.request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
       D.IntegrationResourceDocument,
@@ -5517,7 +5675,7 @@ export class IntegrationResourceQuery extends Request {
 }
 
 /**
- * Query IntegrationResourcesDocument for IntegrationResourceConnection
+ * A fetchable IntegrationResources Query
  *
  * @param request - function to call the graphql client
  */
@@ -5526,6 +5684,11 @@ export class IntegrationResourcesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationResources Query and return a IntegrationResourceConnection
+   *
+   * @param vars - variables to pass into the IntegrationResourcesQuery
+   */
   public async fetch(vars?: D.IntegrationResourcesQueryVariables): Promise<IntegrationResourceConnection | undefined> {
     return this.request<D.IntegrationResourcesQuery, D.IntegrationResourcesQueryVariables>(
       D.IntegrationResourcesDocument,
@@ -5538,7 +5701,7 @@ export class IntegrationResourcesQuery extends Request {
 }
 
 /**
- * Query InviteInfoDocument for InvitePagePayload
+ * A fetchable InviteInfo Query
  *
  * @param request - function to call the graphql client
  */
@@ -5547,6 +5710,12 @@ export class InviteInfoQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the InviteInfo Query and return a InvitePagePayload
+   *
+   * @param userHash - userHash to pass into the InviteInfoQuery
+   * @param vars - variables without 'userHash' to pass into the InviteInfoQuery
+   */
   public async fetch(
     userHash: string,
     vars?: Omit<D.InviteInfoQueryVariables, "userHash">
@@ -5562,7 +5731,7 @@ export class InviteInfoQuery extends Request {
 }
 
 /**
- * Query IssueLabelDocument for IssueLabel
+ * A fetchable IssueLabel Query
  *
  * @param request - function to call the graphql client
  */
@@ -5571,6 +5740,11 @@ export class IssueLabelQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueLabel Query and return a IssueLabel
+   *
+   * @param id - id to pass into the IssueLabelQuery
+   */
   public async fetch(id: string): Promise<IssueLabel | undefined> {
     return this.request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, {
       id,
@@ -5582,7 +5756,7 @@ export class IssueLabelQuery extends Request {
 }
 
 /**
- * Query IssueLabelsDocument for IssueLabelConnection
+ * A fetchable IssueLabels Query
  *
  * @param request - function to call the graphql client
  */
@@ -5591,6 +5765,11 @@ export class IssueLabelsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueLabels Query and return a IssueLabelConnection
+   *
+   * @param vars - variables to pass into the IssueLabelsQuery
+   */
   public async fetch(vars?: D.IssueLabelsQueryVariables): Promise<IssueLabelConnection | undefined> {
     return this.request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument, vars).then(response => {
       const data = response?.issueLabels;
@@ -5600,7 +5779,7 @@ export class IssueLabelsQuery extends Request {
 }
 
 /**
- * Query IssueRelationDocument for IssueRelation
+ * A fetchable IssueRelation Query
  *
  * @param request - function to call the graphql client
  */
@@ -5609,6 +5788,11 @@ export class IssueRelationQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueRelation Query and return a IssueRelation
+   *
+   * @param id - id to pass into the IssueRelationQuery
+   */
   public async fetch(id: string): Promise<IssueRelation | undefined> {
     return this.request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, {
       id,
@@ -5620,7 +5804,7 @@ export class IssueRelationQuery extends Request {
 }
 
 /**
- * Query IssueRelationsDocument for IssueRelationConnection
+ * A fetchable IssueRelations Query
  *
  * @param request - function to call the graphql client
  */
@@ -5629,6 +5813,11 @@ export class IssueRelationsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueRelations Query and return a IssueRelationConnection
+   *
+   * @param vars - variables to pass into the IssueRelationsQuery
+   */
   public async fetch(vars?: D.IssueRelationsQueryVariables): Promise<IssueRelationConnection | undefined> {
     return this.request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(D.IssueRelationsDocument, vars).then(
       response => {
@@ -5640,7 +5829,7 @@ export class IssueRelationsQuery extends Request {
 }
 
 /**
- * Query IssueDocument for Issue
+ * A fetchable Issue Query
  *
  * @param request - function to call the graphql client
  */
@@ -5649,6 +5838,11 @@ export class IssueQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Issue Query and return a Issue
+   *
+   * @param id - id to pass into the IssueQuery
+   */
   public async fetch(id: string): Promise<Issue | undefined> {
     return this.request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, {
       id,
@@ -5660,7 +5854,7 @@ export class IssueQuery extends Request {
 }
 
 /**
- * Query IssueSearchDocument for IssueConnection
+ * A fetchable IssueSearch Query
  *
  * @param request - function to call the graphql client
  */
@@ -5669,6 +5863,12 @@ export class IssueSearchQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueSearch Query and return a IssueConnection
+   *
+   * @param query - query to pass into the IssueSearchQuery
+   * @param vars - variables without 'query' to pass into the IssueSearchQuery
+   */
   public async fetch(
     query: string,
     vars?: Omit<D.IssueSearchQueryVariables, "query">
@@ -5684,7 +5884,7 @@ export class IssueSearchQuery extends Request {
 }
 
 /**
- * Query IssuesDocument for IssueConnection
+ * A fetchable Issues Query
  *
  * @param request - function to call the graphql client
  */
@@ -5693,6 +5893,11 @@ export class IssuesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Issues Query and return a IssueConnection
+   *
+   * @param vars - variables to pass into the IssuesQuery
+   */
   public async fetch(vars?: D.IssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, vars).then(response => {
       const data = response?.issues;
@@ -5702,7 +5907,7 @@ export class IssuesQuery extends Request {
 }
 
 /**
- * Query MilestoneDocument for Milestone
+ * A fetchable Milestone Query
  *
  * @param request - function to call the graphql client
  */
@@ -5711,6 +5916,11 @@ export class MilestoneQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Milestone Query and return a Milestone
+   *
+   * @param id - id to pass into the MilestoneQuery
+   */
   public async fetch(id: string): Promise<Milestone | undefined> {
     return this.request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, {
       id,
@@ -5722,7 +5932,7 @@ export class MilestoneQuery extends Request {
 }
 
 /**
- * Query MilestonesDocument for MilestoneConnection
+ * A fetchable Milestones Query
  *
  * @param request - function to call the graphql client
  */
@@ -5731,6 +5941,11 @@ export class MilestonesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Milestones Query and return a MilestoneConnection
+   *
+   * @param vars - variables to pass into the MilestonesQuery
+   */
   public async fetch(vars?: D.MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
     return this.request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument, vars).then(response => {
       const data = response?.milestones;
@@ -5740,7 +5955,7 @@ export class MilestonesQuery extends Request {
 }
 
 /**
- * Query NotificationDocument for UserSettings
+ * A fetchable Notification Query
  *
  * @param request - function to call the graphql client
  */
@@ -5749,6 +5964,10 @@ export class NotificationQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Notification Query and return a UserSettings
+   *
+   */
   public async fetch(): Promise<UserSettings | undefined> {
     return this.request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument, {}).then(
       response => {
@@ -5760,7 +5979,7 @@ export class NotificationQuery extends Request {
 }
 
 /**
- * Query NotificationsDocument for NotificationConnection
+ * A fetchable Notifications Query
  *
  * @param request - function to call the graphql client
  */
@@ -5769,6 +5988,11 @@ export class NotificationsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Notifications Query and return a NotificationConnection
+   *
+   * @param vars - variables to pass into the NotificationsQuery
+   */
   public async fetch(vars?: D.NotificationsQueryVariables): Promise<NotificationConnection | undefined> {
     return this.request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument, vars).then(
       response => {
@@ -5780,7 +6004,7 @@ export class NotificationsQuery extends Request {
 }
 
 /**
- * Query NotificationSubscriptionDocument for NotificationSubscriptionConnection
+ * A fetchable NotificationSubscription Query
  *
  * @param request - function to call the graphql client
  */
@@ -5789,6 +6013,11 @@ export class NotificationSubscriptionQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the NotificationSubscription Query and return a NotificationSubscriptionConnection
+   *
+   * @param vars - variables to pass into the NotificationSubscriptionQuery
+   */
   public async fetch(
     vars?: D.NotificationSubscriptionQueryVariables
   ): Promise<NotificationSubscriptionConnection | undefined> {
@@ -5803,7 +6032,7 @@ export class NotificationSubscriptionQuery extends Request {
 }
 
 /**
- * Query OrganizationInviteDocument for IssueLabel
+ * A fetchable OrganizationInvite Query
  *
  * @param request - function to call the graphql client
  */
@@ -5812,6 +6041,11 @@ export class OrganizationInviteQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationInvite Query and return a IssueLabel
+   *
+   * @param id - id to pass into the OrganizationInviteQuery
+   */
   public async fetch(id: string): Promise<IssueLabel | undefined> {
     return this.request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(D.OrganizationInviteDocument, {
       id,
@@ -5823,7 +6057,7 @@ export class OrganizationInviteQuery extends Request {
 }
 
 /**
- * Query OrganizationInvitesDocument for OrganizationInviteConnection
+ * A fetchable OrganizationInvites Query
  *
  * @param request - function to call the graphql client
  */
@@ -5832,6 +6066,11 @@ export class OrganizationInvitesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationInvites Query and return a OrganizationInviteConnection
+   *
+   * @param vars - variables to pass into the OrganizationInvitesQuery
+   */
   public async fetch(vars?: D.OrganizationInvitesQueryVariables): Promise<OrganizationInviteConnection | undefined> {
     return this.request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
       D.OrganizationInvitesDocument,
@@ -5844,7 +6083,7 @@ export class OrganizationInvitesQuery extends Request {
 }
 
 /**
- * Query ProjectLinkDocument for ProjectLink
+ * A fetchable ProjectLink Query
  *
  * @param request - function to call the graphql client
  */
@@ -5853,6 +6092,11 @@ export class ProjectLinkQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the ProjectLink Query and return a ProjectLink
+   *
+   * @param id - id to pass into the ProjectLinkQuery
+   */
   public async fetch(id: string): Promise<ProjectLink | undefined> {
     return this.request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
       id,
@@ -5864,7 +6108,7 @@ export class ProjectLinkQuery extends Request {
 }
 
 /**
- * Query ProjectLinksDocument for ProjectLinkConnection
+ * A fetchable ProjectLinks Query
  *
  * @param request - function to call the graphql client
  */
@@ -5873,6 +6117,11 @@ export class ProjectLinksQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the ProjectLinks Query and return a ProjectLinkConnection
+   *
+   * @param vars - variables to pass into the ProjectLinksQuery
+   */
   public async fetch(vars?: D.ProjectLinksQueryVariables): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
       response => {
@@ -5884,7 +6133,7 @@ export class ProjectLinksQuery extends Request {
 }
 
 /**
- * Query ProjectDocument for Project
+ * A fetchable Project Query
  *
  * @param request - function to call the graphql client
  */
@@ -5893,6 +6142,11 @@ export class ProjectQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Project Query and return a Project
+   *
+   * @param id - id to pass into the ProjectQuery
+   */
   public async fetch(id: string): Promise<Project | undefined> {
     return this.request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
       id,
@@ -5904,7 +6158,7 @@ export class ProjectQuery extends Request {
 }
 
 /**
- * Query ProjectsDocument for ProjectConnection
+ * A fetchable Projects Query
  *
  * @param request - function to call the graphql client
  */
@@ -5913,6 +6167,11 @@ export class ProjectsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Projects Query and return a ProjectConnection
+   *
+   * @param vars - variables to pass into the ProjectsQuery
+   */
   public async fetch(vars?: D.ProjectsQueryVariables): Promise<ProjectConnection | undefined> {
     return this.request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars).then(response => {
       const data = response?.projects;
@@ -5922,7 +6181,7 @@ export class ProjectsQuery extends Request {
 }
 
 /**
- * Query PushSubscriptionTestDocument for PushSubscriptionPayload
+ * A fetchable PushSubscriptionTest Query
  *
  * @param request - function to call the graphql client
  */
@@ -5931,6 +6190,10 @@ export class PushSubscriptionTestQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the PushSubscriptionTest Query and return a PushSubscriptionPayload
+   *
+   */
   public async fetch(): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionTestQuery, D.PushSubscriptionTestQueryVariables>(
       D.PushSubscriptionTestDocument,
@@ -5943,7 +6206,7 @@ export class PushSubscriptionTestQuery extends Request {
 }
 
 /**
- * Query ReactionDocument for Reaction
+ * A fetchable Reaction Query
  *
  * @param request - function to call the graphql client
  */
@@ -5952,6 +6215,11 @@ export class ReactionQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Reaction Query and return a Reaction
+   *
+   * @param id - id to pass into the ReactionQuery
+   */
   public async fetch(id: string): Promise<Reaction | undefined> {
     return this.request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, {
       id,
@@ -5963,7 +6231,7 @@ export class ReactionQuery extends Request {
 }
 
 /**
- * Query ReactionsDocument for ReactionConnection
+ * A fetchable Reactions Query
  *
  * @param request - function to call the graphql client
  */
@@ -5972,6 +6240,11 @@ export class ReactionsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Reactions Query and return a ReactionConnection
+   *
+   * @param vars - variables to pass into the ReactionsQuery
+   */
   public async fetch(vars?: D.ReactionsQueryVariables): Promise<ReactionConnection | undefined> {
     return this.request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, vars).then(response => {
       const data = response?.reactions;
@@ -5981,7 +6254,7 @@ export class ReactionsQuery extends Request {
 }
 
 /**
- * Query SubscriptionDocument for Subscription
+ * A fetchable Subscription Query
  *
  * @param request - function to call the graphql client
  */
@@ -5990,6 +6263,10 @@ export class SubscriptionQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Subscription Query and return a Subscription
+   *
+   */
   public async fetch(): Promise<Subscription | undefined> {
     return this.request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument, {}).then(
       response => {
@@ -6001,7 +6278,7 @@ export class SubscriptionQuery extends Request {
 }
 
 /**
- * Query TeamMembershipDocument for TeamMembership
+ * A fetchable TeamMembership Query
  *
  * @param request - function to call the graphql client
  */
@@ -6010,6 +6287,11 @@ export class TeamMembershipQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the TeamMembership Query and return a TeamMembership
+   *
+   * @param id - id to pass into the TeamMembershipQuery
+   */
   public async fetch(id: string): Promise<TeamMembership | undefined> {
     return this.request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument, {
       id,
@@ -6021,7 +6303,7 @@ export class TeamMembershipQuery extends Request {
 }
 
 /**
- * Query TeamMembershipsDocument for TeamMembershipConnection
+ * A fetchable TeamMemberships Query
  *
  * @param request - function to call the graphql client
  */
@@ -6030,6 +6312,11 @@ export class TeamMembershipsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the TeamMemberships Query and return a TeamMembershipConnection
+   *
+   * @param vars - variables to pass into the TeamMembershipsQuery
+   */
   public async fetch(vars?: D.TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(D.TeamMembershipsDocument, vars).then(
       response => {
@@ -6041,7 +6328,7 @@ export class TeamMembershipsQuery extends Request {
 }
 
 /**
- * Query TeamDocument for Team
+ * A fetchable Team Query
  *
  * @param request - function to call the graphql client
  */
@@ -6050,6 +6337,11 @@ export class TeamQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Team Query and return a Team
+   *
+   * @param id - id to pass into the TeamQuery
+   */
   public async fetch(id: string): Promise<Team | undefined> {
     return this.request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
       id,
@@ -6061,7 +6353,7 @@ export class TeamQuery extends Request {
 }
 
 /**
- * Query TeamsDocument for TeamConnection
+ * A fetchable Teams Query
  *
  * @param request - function to call the graphql client
  */
@@ -6070,6 +6362,11 @@ export class TeamsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Teams Query and return a TeamConnection
+   *
+   * @param vars - variables to pass into the TeamsQuery
+   */
   public async fetch(vars?: D.TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return this.request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars).then(response => {
       const data = response?.teams;
@@ -6079,7 +6376,7 @@ export class TeamsQuery extends Request {
 }
 
 /**
- * Query TemplatesDocument for Templates
+ * A fetchable Templates Query
  *
  * @param request - function to call the graphql client
  */
@@ -6088,6 +6385,10 @@ export class TemplatesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Templates Query and return a Template list
+   *
+   */
   public async fetch(): Promise<Template[] | undefined> {
     return this.request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument, {}).then(response => {
       const data = response?.templates;
@@ -6097,7 +6398,7 @@ export class TemplatesQuery extends Request {
 }
 
 /**
- * Query TemplateDocument for Template
+ * A fetchable Template Query
  *
  * @param request - function to call the graphql client
  */
@@ -6106,6 +6407,11 @@ export class TemplateQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Template Query and return a Template
+   *
+   * @param id - id to pass into the TemplateQuery
+   */
   public async fetch(id: string): Promise<Template | undefined> {
     return this.request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, {
       id,
@@ -6117,7 +6423,7 @@ export class TemplateQuery extends Request {
 }
 
 /**
- * Query ViewPreferencesDocument for ViewPreferencesConnection
+ * A fetchable ViewPreferences Query
  *
  * @param request - function to call the graphql client
  */
@@ -6126,6 +6432,11 @@ export class ViewPreferencesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the ViewPreferences Query and return a ViewPreferencesConnection
+   *
+   * @param vars - variables to pass into the ViewPreferencesQuery
+   */
   public async fetch(vars?: D.ViewPreferencesQueryVariables): Promise<ViewPreferencesConnection | undefined> {
     return this.request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument, vars).then(
       response => {
@@ -6137,7 +6448,7 @@ export class ViewPreferencesQuery extends Request {
 }
 
 /**
- * Query WebhookDocument for Webhook
+ * A fetchable Webhook Query
  *
  * @param request - function to call the graphql client
  */
@@ -6146,6 +6457,11 @@ export class WebhookQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Webhook Query and return a Webhook
+   *
+   * @param id - id to pass into the WebhookQuery
+   */
   public async fetch(id: string): Promise<Webhook | undefined> {
     return this.request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, {
       id,
@@ -6157,7 +6473,7 @@ export class WebhookQuery extends Request {
 }
 
 /**
- * Query WebhooksDocument for WebhookConnection
+ * A fetchable Webhooks Query
  *
  * @param request - function to call the graphql client
  */
@@ -6166,6 +6482,11 @@ export class WebhooksQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Webhooks Query and return a WebhookConnection
+   *
+   * @param vars - variables to pass into the WebhooksQuery
+   */
   public async fetch(vars?: D.WebhooksQueryVariables): Promise<WebhookConnection | undefined> {
     return this.request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, vars).then(response => {
       const data = response?.webhooks;
@@ -6175,7 +6496,7 @@ export class WebhooksQuery extends Request {
 }
 
 /**
- * Query WorkflowStateDocument for WorkflowState
+ * A fetchable WorkflowState Query
  *
  * @param request - function to call the graphql client
  */
@@ -6184,6 +6505,11 @@ export class WorkflowStateQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the WorkflowState Query and return a WorkflowState
+   *
+   * @param id - id to pass into the WorkflowStateQuery
+   */
   public async fetch(id: string): Promise<WorkflowState | undefined> {
     return this.request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, {
       id,
@@ -6195,7 +6521,7 @@ export class WorkflowStateQuery extends Request {
 }
 
 /**
- * Query WorkflowStatesDocument for WorkflowStateConnection
+ * A fetchable WorkflowStates Query
  *
  * @param request - function to call the graphql client
  */
@@ -6204,6 +6530,11 @@ export class WorkflowStatesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the WorkflowStates Query and return a WorkflowStateConnection
+   *
+   * @param vars - variables to pass into the WorkflowStatesQuery
+   */
   public async fetch(vars?: D.WorkflowStatesQueryVariables): Promise<WorkflowStateConnection | undefined> {
     return this.request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(D.WorkflowStatesDocument, vars).then(
       response => {
@@ -6215,7 +6546,7 @@ export class WorkflowStatesQuery extends Request {
 }
 
 /**
- * Mutation UserUpdateDocument for UserPayload
+ * A fetchable UserUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6224,6 +6555,12 @@ export class UserUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserUpdate Mutation and return a UserPayload
+   *
+   * @param input - input to pass into the UserUpdateMutation
+   * @param id - id to pass into the UserUpdateMutation
+   */
   public async fetch(input: D.UpdateUserInput, id: string): Promise<UserPayload | undefined> {
     return this.request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument, {
       input,
@@ -6236,7 +6573,7 @@ export class UserUpdateMutation extends Request {
 }
 
 /**
- * Mutation UserPromoteAdminDocument for UserAdminPayload
+ * A fetchable UserPromoteAdmin Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6245,6 +6582,11 @@ export class UserPromoteAdminMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserPromoteAdmin Mutation and return a UserAdminPayload
+   *
+   * @param id - id to pass into the UserPromoteAdminMutation
+   */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(D.UserPromoteAdminDocument, {
       id,
@@ -6256,7 +6598,7 @@ export class UserPromoteAdminMutation extends Request {
 }
 
 /**
- * Mutation UserDemoteAdminDocument for UserAdminPayload
+ * A fetchable UserDemoteAdmin Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6265,6 +6607,11 @@ export class UserDemoteAdminMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserDemoteAdmin Mutation and return a UserAdminPayload
+   *
+   * @param id - id to pass into the UserDemoteAdminMutation
+   */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument, {
       id,
@@ -6276,7 +6623,7 @@ export class UserDemoteAdminMutation extends Request {
 }
 
 /**
- * Mutation UserSuspendDocument for UserAdminPayload
+ * A fetchable UserSuspend Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6285,6 +6632,11 @@ export class UserSuspendMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserSuspend Mutation and return a UserAdminPayload
+   *
+   * @param id - id to pass into the UserSuspendMutation
+   */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, {
       id,
@@ -6296,7 +6648,7 @@ export class UserSuspendMutation extends Request {
 }
 
 /**
- * Mutation UserUnsuspendDocument for UserAdminPayload
+ * A fetchable UserUnsuspend Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6305,6 +6657,11 @@ export class UserUnsuspendMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserUnsuspend Mutation and return a UserAdminPayload
+   *
+   * @param id - id to pass into the UserUnsuspendMutation
+   */
   public async fetch(id: string): Promise<UserAdminPayload | undefined> {
     return this.request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument, {
       id,
@@ -6316,7 +6673,7 @@ export class UserUnsuspendMutation extends Request {
 }
 
 /**
- * Mutation OrganizationUpdateDocument for OrganizationPayload
+ * A fetchable OrganizationUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6325,6 +6682,11 @@ export class OrganizationUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationUpdate Mutation and return a OrganizationPayload
+   *
+   * @param input - input to pass into the OrganizationUpdateMutation
+   */
   public async fetch(input: D.UpdateOrganizationInput): Promise<OrganizationPayload | undefined> {
     return this.request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
       D.OrganizationUpdateDocument,
@@ -6339,7 +6701,7 @@ export class OrganizationUpdateMutation extends Request {
 }
 
 /**
- * Mutation OrganizationDeleteChallengeDocument for OrganizationDeletePayload
+ * A fetchable OrganizationDeleteChallenge Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6348,6 +6710,10 @@ export class OrganizationDeleteChallengeMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationDeleteChallenge Mutation and return a OrganizationDeletePayload
+   *
+   */
   public async fetch(): Promise<OrganizationDeletePayload | undefined> {
     return this.request<D.OrganizationDeleteChallengeMutation, D.OrganizationDeleteChallengeMutationVariables>(
       D.OrganizationDeleteChallengeDocument,
@@ -6360,7 +6726,7 @@ export class OrganizationDeleteChallengeMutation extends Request {
 }
 
 /**
- * Mutation OrganizationDeleteDocument for OrganizationDeletePayload
+ * A fetchable OrganizationDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6369,6 +6735,11 @@ export class OrganizationDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationDelete Mutation and return a OrganizationDeletePayload
+   *
+   * @param input - input to pass into the OrganizationDeleteMutation
+   */
   public async fetch(input: D.DeleteOrganizationInput): Promise<OrganizationDeletePayload | undefined> {
     return this.request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
       D.OrganizationDeleteDocument,
@@ -6383,7 +6754,7 @@ export class OrganizationDeleteMutation extends Request {
 }
 
 /**
- * Mutation AdminDeleteIntegrationDocument for AdminIntegrationPayload
+ * A fetchable AdminDeleteIntegration Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6392,6 +6763,11 @@ export class AdminDeleteIntegrationMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminDeleteIntegration Mutation and return a AdminIntegrationPayload
+   *
+   * @param id - id to pass into the AdminDeleteIntegrationMutation
+   */
   public async fetch(id: string): Promise<AdminIntegrationPayload | undefined> {
     return this.request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
       D.AdminDeleteIntegrationDocument,
@@ -6406,7 +6782,7 @@ export class AdminDeleteIntegrationMutation extends Request {
 }
 
 /**
- * Mutation OrganizationToggleAccessDocument for OrganizationAccessPayload
+ * A fetchable OrganizationToggleAccess Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6415,6 +6791,11 @@ export class OrganizationToggleAccessMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationToggleAccess Mutation and return a OrganizationAccessPayload
+   *
+   * @param id - id to pass into the OrganizationToggleAccessMutation
+   */
   public async fetch(id: string): Promise<OrganizationAccessPayload | undefined> {
     return this.request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
       D.OrganizationToggleAccessDocument,
@@ -6429,7 +6810,7 @@ export class OrganizationToggleAccessMutation extends Request {
 }
 
 /**
- * Mutation OrganizationChangeEmailDomainDocument for OrganizationAccessPayload
+ * A fetchable OrganizationChangeEmailDomain Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6438,6 +6819,13 @@ export class OrganizationChangeEmailDomainMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationChangeEmailDomain Mutation and return a OrganizationAccessPayload
+   *
+   * @param toDomain - toDomain to pass into the OrganizationChangeEmailDomainMutation
+   * @param fromDomain - fromDomain to pass into the OrganizationChangeEmailDomainMutation
+   * @param id - id to pass into the OrganizationChangeEmailDomainMutation
+   */
   public async fetch(toDomain: string, fromDomain: string, id: string): Promise<OrganizationAccessPayload | undefined> {
     return this.request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
       D.OrganizationChangeEmailDomainDocument,
@@ -6454,7 +6842,7 @@ export class OrganizationChangeEmailDomainMutation extends Request {
 }
 
 /**
- * Mutation OrganizationToggleSamlEnabledDocument for OrganizationSamlConfigurePayload
+ * A fetchable OrganizationToggleSamlEnabled Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6463,6 +6851,11 @@ export class OrganizationToggleSamlEnabledMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationToggleSamlEnabled Mutation and return a OrganizationSamlConfigurePayload
+   *
+   * @param id - id to pass into the OrganizationToggleSamlEnabledMutation
+   */
   public async fetch(id: string): Promise<OrganizationSamlConfigurePayload | undefined> {
     return this.request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
       D.OrganizationToggleSamlEnabledDocument,
@@ -6477,7 +6870,7 @@ export class OrganizationToggleSamlEnabledMutation extends Request {
 }
 
 /**
- * Mutation OrganizationConfigureSamlDocument for OrganizationSamlConfigurePayload
+ * A fetchable OrganizationConfigureSaml Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6486,6 +6879,12 @@ export class OrganizationConfigureSamlMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationConfigureSaml Mutation and return a OrganizationSamlConfigurePayload
+   *
+   * @param samlConfiguration - samlConfiguration to pass into the OrganizationConfigureSamlMutation
+   * @param id - id to pass into the OrganizationConfigureSamlMutation
+   */
   public async fetch(
     samlConfiguration: D.SamlConfigurationInput,
     id: string
@@ -6504,7 +6903,7 @@ export class OrganizationConfigureSamlMutation extends Request {
 }
 
 /**
- * Mutation AdminCommandDocument for AdminCommandPayload
+ * A fetchable AdminCommand Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6513,6 +6912,11 @@ export class AdminCommandMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminCommand Mutation and return a AdminCommandPayload
+   *
+   * @param input - input to pass into the AdminCommandMutation
+   */
   public async fetch(input: D.AdminCommandInput): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument, {
       input,
@@ -6524,7 +6928,7 @@ export class AdminCommandMutation extends Request {
 }
 
 /**
- * Mutation AdminBulkEmailDocument for AdminCommandPayload
+ * A fetchable AdminBulkEmail Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6533,6 +6937,14 @@ export class AdminBulkEmailMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminBulkEmail Mutation and return a AdminCommandPayload
+   *
+   * @param emails - emails to pass into the AdminBulkEmailMutation
+   * @param markdownContent - markdownContent to pass into the AdminBulkEmailMutation
+   * @param subject - subject to pass into the AdminBulkEmailMutation
+   * @param vars - variables without 'emails', 'markdownContent', 'subject' to pass into the AdminBulkEmailMutation
+   */
   public async fetch(
     emails: string[],
     markdownContent: string,
@@ -6552,7 +6964,7 @@ export class AdminBulkEmailMutation extends Request {
 }
 
 /**
- * Mutation AdminCreateStripeCustomerDocument for AdminCommandPayload
+ * A fetchable AdminCreateStripeCustomer Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6561,6 +6973,11 @@ export class AdminCreateStripeCustomerMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminCreateStripeCustomer Mutation and return a AdminCommandPayload
+   *
+   * @param organizationId - organizationId to pass into the AdminCreateStripeCustomerMutation
+   */
   public async fetch(organizationId: string): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
       D.AdminCreateStripeCustomerDocument,
@@ -6575,7 +6992,7 @@ export class AdminCreateStripeCustomerMutation extends Request {
 }
 
 /**
- * Mutation AdminScheduleAnonymousTaskDocument for AdminCommandPayload
+ * A fetchable AdminScheduleAnonymousTask Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6584,6 +7001,11 @@ export class AdminScheduleAnonymousTaskMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminScheduleAnonymousTask Mutation and return a AdminCommandPayload
+   *
+   * @param taskName - taskName to pass into the AdminScheduleAnonymousTaskMutation
+   */
   public async fetch(taskName: string): Promise<AdminCommandPayload | undefined> {
     return this.request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
       D.AdminScheduleAnonymousTaskDocument,
@@ -6598,7 +7020,7 @@ export class AdminScheduleAnonymousTaskMutation extends Request {
 }
 
 /**
- * Mutation AdminUserAccountChangeEmailDocument for UserAccountAdminPrivileged
+ * A fetchable AdminUserAccountChangeEmail Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6607,6 +7029,12 @@ export class AdminUserAccountChangeEmailMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountChangeEmail Mutation and return a UserAccountAdminPrivileged
+   *
+   * @param newEmail - newEmail to pass into the AdminUserAccountChangeEmailMutation
+   * @param id - id to pass into the AdminUserAccountChangeEmailMutation
+   */
   public async fetch(newEmail: string, id: string): Promise<UserAccountAdminPrivileged | undefined> {
     return this.request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
       D.AdminUserAccountChangeEmailDocument,
@@ -6622,7 +7050,7 @@ export class AdminUserAccountChangeEmailMutation extends Request {
 }
 
 /**
- * Mutation EventCreateDocument for EventPayload
+ * A fetchable EventCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6631,6 +7059,11 @@ export class EventCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the EventCreate Mutation and return a EventPayload
+   *
+   * @param input - input to pass into the EventCreateMutation
+   */
   public async fetch(input: D.EventCreateInput): Promise<EventPayload | undefined> {
     return this.request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument, {
       input,
@@ -6642,7 +7075,7 @@ export class EventCreateMutation extends Request {
 }
 
 /**
- * Mutation ApiKeyCreateDocument for ApiKeyPayload
+ * A fetchable ApiKeyCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6651,6 +7084,11 @@ export class ApiKeyCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ApiKeyCreate Mutation and return a ApiKeyPayload
+   *
+   * @param input - input to pass into the ApiKeyCreateMutation
+   */
   public async fetch(input: D.ApiKeyCreateInput): Promise<ApiKeyPayload | undefined> {
     return this.request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument, {
       input,
@@ -6662,7 +7100,7 @@ export class ApiKeyCreateMutation extends Request {
 }
 
 /**
- * Mutation ApiKeyDeleteDocument for ArchivePayload
+ * A fetchable ApiKeyDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6671,6 +7109,11 @@ export class ApiKeyDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ApiKeyDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the ApiKeyDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument, {
       id,
@@ -6682,7 +7125,7 @@ export class ApiKeyDeleteMutation extends Request {
 }
 
 /**
- * Mutation EmailUserAccountAuthChallengeDocument for EmailUserAccountAuthChallengeResponse
+ * A fetchable EmailUserAccountAuthChallenge Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6691,6 +7134,11 @@ export class EmailUserAccountAuthChallengeMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the EmailUserAccountAuthChallenge Mutation and return a EmailUserAccountAuthChallengeResponse
+   *
+   * @param input - input to pass into the EmailUserAccountAuthChallengeMutation
+   */
   public async fetch(
     input: D.EmailUserAccountAuthChallengeInput
   ): Promise<EmailUserAccountAuthChallengeResponse | undefined> {
@@ -6707,7 +7155,7 @@ export class EmailUserAccountAuthChallengeMutation extends Request {
 }
 
 /**
- * Mutation EmailTokenUserAccountAuthDocument for AuthResolverResponse
+ * A fetchable EmailTokenUserAccountAuth Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6716,6 +7164,11 @@ export class EmailTokenUserAccountAuthMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the EmailTokenUserAccountAuth Mutation and return a AuthResolverResponse
+   *
+   * @param input - input to pass into the EmailTokenUserAccountAuthMutation
+   */
   public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
       D.EmailTokenUserAccountAuthDocument,
@@ -6730,7 +7183,7 @@ export class EmailTokenUserAccountAuthMutation extends Request {
 }
 
 /**
- * Mutation SamlTokenUserAccountAuthDocument for AuthResolverResponse
+ * A fetchable SamlTokenUserAccountAuth Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6739,6 +7192,11 @@ export class SamlTokenUserAccountAuthMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the SamlTokenUserAccountAuth Mutation and return a AuthResolverResponse
+   *
+   * @param input - input to pass into the SamlTokenUserAccountAuthMutation
+   */
   public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
       D.SamlTokenUserAccountAuthDocument,
@@ -6753,7 +7211,7 @@ export class SamlTokenUserAccountAuthMutation extends Request {
 }
 
 /**
- * Mutation GoogleUserAccountAuthDocument for AuthResolverResponse
+ * A fetchable GoogleUserAccountAuth Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6762,6 +7220,11 @@ export class GoogleUserAccountAuthMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the GoogleUserAccountAuth Mutation and return a AuthResolverResponse
+   *
+   * @param input - input to pass into the GoogleUserAccountAuthMutation
+   */
   public async fetch(input: D.GoogleUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
     return this.request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
       D.GoogleUserAccountAuthDocument,
@@ -6776,7 +7239,7 @@ export class GoogleUserAccountAuthMutation extends Request {
 }
 
 /**
- * Mutation CreateOrganizationFromOnboardingDocument for CreateOrJoinOrganizationResponse
+ * A fetchable CreateOrganizationFromOnboarding Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6785,6 +7248,12 @@ export class CreateOrganizationFromOnboardingMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CreateOrganizationFromOnboarding Mutation and return a CreateOrJoinOrganizationResponse
+   *
+   * @param input - input to pass into the CreateOrganizationFromOnboardingMutation
+   * @param vars - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
+   */
   public async fetch(
     input: D.CreateOrganizationInput,
     vars?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
@@ -6803,7 +7272,7 @@ export class CreateOrganizationFromOnboardingMutation extends Request {
 }
 
 /**
- * Mutation JoinOrganizationFromOnboardingDocument for CreateOrJoinOrganizationResponse
+ * A fetchable JoinOrganizationFromOnboarding Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6812,6 +7281,11 @@ export class JoinOrganizationFromOnboardingMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the JoinOrganizationFromOnboarding Mutation and return a CreateOrJoinOrganizationResponse
+   *
+   * @param input - input to pass into the JoinOrganizationFromOnboardingMutation
+   */
   public async fetch(input: D.JoinOrganizationInput): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
       D.JoinOrganizationFromOnboardingDocument,
@@ -6826,7 +7300,7 @@ export class JoinOrganizationFromOnboardingMutation extends Request {
 }
 
 /**
- * Mutation LeaveOrganizationDocument for CreateOrJoinOrganizationResponse
+ * A fetchable LeaveOrganization Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6835,6 +7309,11 @@ export class LeaveOrganizationMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the LeaveOrganization Mutation and return a CreateOrJoinOrganizationResponse
+   *
+   * @param organizationId - organizationId to pass into the LeaveOrganizationMutation
+   */
   public async fetch(organizationId: string): Promise<CreateOrJoinOrganizationResponse | undefined> {
     return this.request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
       D.LeaveOrganizationDocument,
@@ -6849,7 +7328,7 @@ export class LeaveOrganizationMutation extends Request {
 }
 
 /**
- * Mutation BillingEmailUpdateDocument for BillingEmailPayload
+ * A fetchable BillingEmailUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6858,6 +7337,11 @@ export class BillingEmailUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the BillingEmailUpdate Mutation and return a BillingEmailPayload
+   *
+   * @param input - input to pass into the BillingEmailUpdateMutation
+   */
   public async fetch(input: D.BillingEmailUpdateInput): Promise<BillingEmailPayload | undefined> {
     return this.request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
       D.BillingEmailUpdateDocument,
@@ -6872,7 +7356,7 @@ export class BillingEmailUpdateMutation extends Request {
 }
 
 /**
- * Mutation CollaborativeDocumentUpdateDocument for CollaborationDocumentUpdatePayload
+ * A fetchable CollaborativeDocumentUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6881,6 +7365,11 @@ export class CollaborativeDocumentUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CollaborativeDocumentUpdate Mutation and return a CollaborationDocumentUpdatePayload
+   *
+   * @param input - input to pass into the CollaborativeDocumentUpdateMutation
+   */
   public async fetch(
     input: D.CollaborationDocumentUpdateInput
   ): Promise<CollaborationDocumentUpdatePayload | undefined> {
@@ -6897,7 +7386,7 @@ export class CollaborativeDocumentUpdateMutation extends Request {
 }
 
 /**
- * Mutation CommentCreateDocument for CommentPayload
+ * A fetchable CommentCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6906,6 +7395,11 @@ export class CommentCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CommentCreate Mutation and return a CommentPayload
+   *
+   * @param input - input to pass into the CommentCreateMutation
+   */
   public async fetch(input: D.CommentCreateInput): Promise<CommentPayload | undefined> {
     return this.request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument, {
       input,
@@ -6917,7 +7411,7 @@ export class CommentCreateMutation extends Request {
 }
 
 /**
- * Mutation CommentUpdateDocument for CommentPayload
+ * A fetchable CommentUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6926,6 +7420,12 @@ export class CommentUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CommentUpdate Mutation and return a CommentPayload
+   *
+   * @param input - input to pass into the CommentUpdateMutation
+   * @param id - id to pass into the CommentUpdateMutation
+   */
   public async fetch(input: D.CommentUpdateInput, id: string): Promise<CommentPayload | undefined> {
     return this.request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument, {
       input,
@@ -6938,7 +7438,7 @@ export class CommentUpdateMutation extends Request {
 }
 
 /**
- * Mutation CommentDeleteDocument for ArchivePayload
+ * A fetchable CommentDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6947,6 +7447,11 @@ export class CommentDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CommentDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the CommentDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument, {
       id,
@@ -6958,7 +7463,7 @@ export class CommentDeleteMutation extends Request {
 }
 
 /**
- * Mutation ContactCreateDocument for ContactPayload
+ * A fetchable ContactCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6967,6 +7472,11 @@ export class ContactCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ContactCreate Mutation and return a ContactPayload
+   *
+   * @param input - input to pass into the ContactCreateMutation
+   */
   public async fetch(input: D.ContactCreateInput): Promise<ContactPayload | undefined> {
     return this.request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument, {
       input,
@@ -6978,7 +7488,7 @@ export class ContactCreateMutation extends Request {
 }
 
 /**
- * Mutation CustomViewCreateDocument for CustomViewPayload
+ * A fetchable CustomViewCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -6987,6 +7497,11 @@ export class CustomViewCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CustomViewCreate Mutation and return a CustomViewPayload
+   *
+   * @param input - input to pass into the CustomViewCreateMutation
+   */
   public async fetch(input: D.CustomViewCreateInput): Promise<CustomViewPayload | undefined> {
     return this.request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(D.CustomViewCreateDocument, {
       input,
@@ -6998,7 +7513,7 @@ export class CustomViewCreateMutation extends Request {
 }
 
 /**
- * Mutation CustomViewUpdateDocument for CustomViewPayload
+ * A fetchable CustomViewUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7007,6 +7522,12 @@ export class CustomViewUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CustomViewUpdate Mutation and return a CustomViewPayload
+   *
+   * @param input - input to pass into the CustomViewUpdateMutation
+   * @param id - id to pass into the CustomViewUpdateMutation
+   */
   public async fetch(input: D.CustomViewUpdateInput, id: string): Promise<CustomViewPayload | undefined> {
     return this.request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(D.CustomViewUpdateDocument, {
       input,
@@ -7019,7 +7540,7 @@ export class CustomViewUpdateMutation extends Request {
 }
 
 /**
- * Mutation CustomViewDeleteDocument for ArchivePayload
+ * A fetchable CustomViewDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7028,6 +7549,11 @@ export class CustomViewDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CustomViewDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the CustomViewDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(D.CustomViewDeleteDocument, {
       id,
@@ -7039,7 +7565,7 @@ export class CustomViewDeleteMutation extends Request {
 }
 
 /**
- * Mutation CycleCreateDocument for CyclePayload
+ * A fetchable CycleCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7048,6 +7574,11 @@ export class CycleCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CycleCreate Mutation and return a CyclePayload
+   *
+   * @param input - input to pass into the CycleCreateMutation
+   */
   public async fetch(input: D.CycleCreateInput): Promise<CyclePayload | undefined> {
     return this.request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument, {
       input,
@@ -7059,7 +7590,7 @@ export class CycleCreateMutation extends Request {
 }
 
 /**
- * Mutation CycleUpdateDocument for CyclePayload
+ * A fetchable CycleUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7068,6 +7599,12 @@ export class CycleUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CycleUpdate Mutation and return a CyclePayload
+   *
+   * @param input - input to pass into the CycleUpdateMutation
+   * @param id - id to pass into the CycleUpdateMutation
+   */
   public async fetch(input: D.CycleUpdateInput, id: string): Promise<CyclePayload | undefined> {
     return this.request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument, {
       input,
@@ -7080,7 +7617,7 @@ export class CycleUpdateMutation extends Request {
 }
 
 /**
- * Mutation CycleArchiveDocument for ArchivePayload
+ * A fetchable CycleArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7089,6 +7626,11 @@ export class CycleArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CycleArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the CycleArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument, {
       id,
@@ -7100,7 +7642,7 @@ export class CycleArchiveMutation extends Request {
 }
 
 /**
- * Mutation DebugFailWithInternalErrorDocument for DebugPayload
+ * A fetchable DebugFailWithInternalError Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7109,6 +7651,10 @@ export class DebugFailWithInternalErrorMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the DebugFailWithInternalError Mutation and return a DebugPayload
+   *
+   */
   public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugFailWithInternalErrorMutation, D.DebugFailWithInternalErrorMutationVariables>(
       D.DebugFailWithInternalErrorDocument,
@@ -7121,7 +7667,7 @@ export class DebugFailWithInternalErrorMutation extends Request {
 }
 
 /**
- * Mutation DebugFailWithWarningDocument for DebugPayload
+ * A fetchable DebugFailWithWarning Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7130,6 +7676,10 @@ export class DebugFailWithWarningMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the DebugFailWithWarning Mutation and return a DebugPayload
+   *
+   */
   public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
       D.DebugFailWithWarningDocument,
@@ -7142,7 +7692,7 @@ export class DebugFailWithWarningMutation extends Request {
 }
 
 /**
- * Mutation DebugCreateSamlOrgDocument for DebugPayload
+ * A fetchable DebugCreateSamlOrg Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7151,6 +7701,10 @@ export class DebugCreateSamlOrgMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the DebugCreateSamlOrg Mutation and return a DebugPayload
+   *
+   */
   public async fetch(): Promise<DebugPayload | undefined> {
     return this.request<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
       D.DebugCreateSamlOrgDocument,
@@ -7163,7 +7717,7 @@ export class DebugCreateSamlOrgMutation extends Request {
 }
 
 /**
- * Mutation EmailUnsubscribeDocument for EmailUnsubscribePayload
+ * A fetchable EmailUnsubscribe Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7172,6 +7726,11 @@ export class EmailUnsubscribeMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the EmailUnsubscribe Mutation and return a EmailUnsubscribePayload
+   *
+   * @param input - input to pass into the EmailUnsubscribeMutation
+   */
   public async fetch(input: D.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload | undefined> {
     return this.request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(D.EmailUnsubscribeDocument, {
       input,
@@ -7183,7 +7742,7 @@ export class EmailUnsubscribeMutation extends Request {
 }
 
 /**
- * Mutation EmojiCreateDocument for EmojiPayload
+ * A fetchable EmojiCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7192,6 +7751,11 @@ export class EmojiCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the EmojiCreate Mutation and return a EmojiPayload
+   *
+   * @param input - input to pass into the EmojiCreateMutation
+   */
   public async fetch(input: D.EmojiCreateInput): Promise<EmojiPayload | undefined> {
     return this.request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument, {
       input,
@@ -7203,7 +7767,7 @@ export class EmojiCreateMutation extends Request {
 }
 
 /**
- * Mutation EmojiDeleteDocument for ArchivePayload
+ * A fetchable EmojiDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7212,6 +7776,11 @@ export class EmojiDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the EmojiDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the EmojiDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument, {
       id,
@@ -7223,7 +7792,7 @@ export class EmojiDeleteMutation extends Request {
 }
 
 /**
- * Mutation FavoriteCreateDocument for FavoritePayload
+ * A fetchable FavoriteCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7232,6 +7801,11 @@ export class FavoriteCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the FavoriteCreate Mutation and return a FavoritePayload
+   *
+   * @param input - input to pass into the FavoriteCreateMutation
+   */
   public async fetch(input: D.FavoriteCreateInput): Promise<FavoritePayload | undefined> {
     return this.request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument, {
       input,
@@ -7243,7 +7817,7 @@ export class FavoriteCreateMutation extends Request {
 }
 
 /**
- * Mutation FavoriteUpdateDocument for FavoritePayload
+ * A fetchable FavoriteUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7252,6 +7826,12 @@ export class FavoriteUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the FavoriteUpdate Mutation and return a FavoritePayload
+   *
+   * @param input - input to pass into the FavoriteUpdateMutation
+   * @param id - id to pass into the FavoriteUpdateMutation
+   */
   public async fetch(input: D.FavoriteUpdateInput, id: string): Promise<FavoritePayload | undefined> {
     return this.request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument, {
       input,
@@ -7264,7 +7844,7 @@ export class FavoriteUpdateMutation extends Request {
 }
 
 /**
- * Mutation FavoriteDeleteDocument for ArchivePayload
+ * A fetchable FavoriteDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7273,6 +7853,11 @@ export class FavoriteDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the FavoriteDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the FavoriteDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument, {
       id,
@@ -7284,7 +7869,7 @@ export class FavoriteDeleteMutation extends Request {
 }
 
 /**
- * Mutation FeedbackCreateDocument for FeedbackPayload
+ * A fetchable FeedbackCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7293,6 +7878,11 @@ export class FeedbackCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the FeedbackCreate Mutation and return a FeedbackPayload
+   *
+   * @param input - input to pass into the FeedbackCreateMutation
+   */
   public async fetch(input: D.FeedbackCreateInput): Promise<FeedbackPayload | undefined> {
     return this.request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument, {
       input,
@@ -7304,7 +7894,7 @@ export class FeedbackCreateMutation extends Request {
 }
 
 /**
- * Mutation FileUploadDocument for UploadPayload
+ * A fetchable FileUpload Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7313,6 +7903,14 @@ export class FileUploadMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the FileUpload Mutation and return a UploadPayload
+   *
+   * @param size - size to pass into the FileUploadMutation
+   * @param contentType - contentType to pass into the FileUploadMutation
+   * @param filename - filename to pass into the FileUploadMutation
+   * @param vars - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
+   */
   public async fetch(
     size: number,
     contentType: string,
@@ -7332,7 +7930,7 @@ export class FileUploadMutation extends Request {
 }
 
 /**
- * Mutation ImageUploadFromUrlDocument for ImageUploadFromUrlPayload
+ * A fetchable ImageUploadFromUrl Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7341,6 +7939,11 @@ export class ImageUploadFromUrlMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ImageUploadFromUrl Mutation and return a ImageUploadFromUrlPayload
+   *
+   * @param url - url to pass into the ImageUploadFromUrlMutation
+   */
   public async fetch(url: string): Promise<ImageUploadFromUrlPayload | undefined> {
     return this.request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
       D.ImageUploadFromUrlDocument,
@@ -7355,7 +7958,7 @@ export class ImageUploadFromUrlMutation extends Request {
 }
 
 /**
- * Mutation IntegrationGithubConnectDocument for IntegrationPayload
+ * A fetchable IntegrationGithubConnect Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7364,6 +7967,11 @@ export class IntegrationGithubConnectMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationGithubConnect Mutation and return a IntegrationPayload
+   *
+   * @param installationId - installationId to pass into the IntegrationGithubConnectMutation
+   */
   public async fetch(installationId: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
       D.IntegrationGithubConnectDocument,
@@ -7378,7 +7986,7 @@ export class IntegrationGithubConnectMutation extends Request {
 }
 
 /**
- * Mutation IntegrationGitlabConnectDocument for IntegrationPayload
+ * A fetchable IntegrationGitlabConnect Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7387,6 +7995,12 @@ export class IntegrationGitlabConnectMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationGitlabConnect Mutation and return a IntegrationPayload
+   *
+   * @param gitlabUrl - gitlabUrl to pass into the IntegrationGitlabConnectMutation
+   * @param accessToken - accessToken to pass into the IntegrationGitlabConnectMutation
+   */
   public async fetch(gitlabUrl: string, accessToken: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
       D.IntegrationGitlabConnectDocument,
@@ -7402,7 +8016,7 @@ export class IntegrationGitlabConnectMutation extends Request {
 }
 
 /**
- * Mutation IntegrationSlackDocument for IntegrationPayload
+ * A fetchable IntegrationSlack Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7411,6 +8025,13 @@ export class IntegrationSlackMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationSlack Mutation and return a IntegrationPayload
+   *
+   * @param redirectUri - redirectUri to pass into the IntegrationSlackMutation
+   * @param code - code to pass into the IntegrationSlackMutation
+   * @param vars - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
+   */
   public async fetch(
     redirectUri: string,
     code: string,
@@ -7428,7 +8049,7 @@ export class IntegrationSlackMutation extends Request {
 }
 
 /**
- * Mutation IntegrationSlackPersonalDocument for IntegrationPayload
+ * A fetchable IntegrationSlackPersonal Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7437,6 +8058,12 @@ export class IntegrationSlackPersonalMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationSlackPersonal Mutation and return a IntegrationPayload
+   *
+   * @param redirectUri - redirectUri to pass into the IntegrationSlackPersonalMutation
+   * @param code - code to pass into the IntegrationSlackPersonalMutation
+   */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
       D.IntegrationSlackPersonalDocument,
@@ -7452,7 +8079,7 @@ export class IntegrationSlackPersonalMutation extends Request {
 }
 
 /**
- * Mutation IntegrationSlackPostDocument for IntegrationPayload
+ * A fetchable IntegrationSlackPost Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7461,6 +8088,14 @@ export class IntegrationSlackPostMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationSlackPost Mutation and return a IntegrationPayload
+   *
+   * @param redirectUri - redirectUri to pass into the IntegrationSlackPostMutation
+   * @param teamId - teamId to pass into the IntegrationSlackPostMutation
+   * @param code - code to pass into the IntegrationSlackPostMutation
+   * @param vars - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
+   */
   public async fetch(
     redirectUri: string,
     teamId: string,
@@ -7483,7 +8118,7 @@ export class IntegrationSlackPostMutation extends Request {
 }
 
 /**
- * Mutation IntegrationSlackProjectPostDocument for IntegrationPayload
+ * A fetchable IntegrationSlackProjectPost Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7492,6 +8127,13 @@ export class IntegrationSlackProjectPostMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationSlackProjectPost Mutation and return a IntegrationPayload
+   *
+   * @param redirectUri - redirectUri to pass into the IntegrationSlackProjectPostMutation
+   * @param projectId - projectId to pass into the IntegrationSlackProjectPostMutation
+   * @param code - code to pass into the IntegrationSlackProjectPostMutation
+   */
   public async fetch(redirectUri: string, projectId: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
       D.IntegrationSlackProjectPostDocument,
@@ -7508,7 +8150,7 @@ export class IntegrationSlackProjectPostMutation extends Request {
 }
 
 /**
- * Mutation IntegrationSlackImportEmojisDocument for IntegrationPayload
+ * A fetchable IntegrationSlackImportEmojis Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7517,6 +8159,12 @@ export class IntegrationSlackImportEmojisMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationSlackImportEmojis Mutation and return a IntegrationPayload
+   *
+   * @param redirectUri - redirectUri to pass into the IntegrationSlackImportEmojisMutation
+   * @param code - code to pass into the IntegrationSlackImportEmojisMutation
+   */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
       D.IntegrationSlackImportEmojisDocument,
@@ -7532,7 +8180,7 @@ export class IntegrationSlackImportEmojisMutation extends Request {
 }
 
 /**
- * Mutation IntegrationFigmaDocument for IntegrationPayload
+ * A fetchable IntegrationFigma Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7541,6 +8189,12 @@ export class IntegrationFigmaMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationFigma Mutation and return a IntegrationPayload
+   *
+   * @param redirectUri - redirectUri to pass into the IntegrationFigmaMutation
+   * @param code - code to pass into the IntegrationFigmaMutation
+   */
   public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(D.IntegrationFigmaDocument, {
       redirectUri,
@@ -7553,7 +8207,7 @@ export class IntegrationFigmaMutation extends Request {
 }
 
 /**
- * Mutation IntegrationGoogleSheetsDocument for IntegrationPayload
+ * A fetchable IntegrationGoogleSheets Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7562,6 +8216,11 @@ export class IntegrationGoogleSheetsMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationGoogleSheets Mutation and return a IntegrationPayload
+   *
+   * @param code - code to pass into the IntegrationGoogleSheetsMutation
+   */
   public async fetch(code: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
       D.IntegrationGoogleSheetsDocument,
@@ -7576,7 +8235,7 @@ export class IntegrationGoogleSheetsMutation extends Request {
 }
 
 /**
- * Mutation RefreshGoogleSheetsDataDocument for IntegrationPayload
+ * A fetchable RefreshGoogleSheetsData Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7585,6 +8244,11 @@ export class RefreshGoogleSheetsDataMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the RefreshGoogleSheetsData Mutation and return a IntegrationPayload
+   *
+   * @param id - id to pass into the RefreshGoogleSheetsDataMutation
+   */
   public async fetch(id: string): Promise<IntegrationPayload | undefined> {
     return this.request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
       D.RefreshGoogleSheetsDataDocument,
@@ -7599,7 +8263,7 @@ export class RefreshGoogleSheetsDataMutation extends Request {
 }
 
 /**
- * Mutation IntegrationSentryConnectDocument for IntegrationPayload
+ * A fetchable IntegrationSentryConnect Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7608,6 +8272,13 @@ export class IntegrationSentryConnectMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationSentryConnect Mutation and return a IntegrationPayload
+   *
+   * @param organizationSlug - organizationSlug to pass into the IntegrationSentryConnectMutation
+   * @param code - code to pass into the IntegrationSentryConnectMutation
+   * @param installationId - installationId to pass into the IntegrationSentryConnectMutation
+   */
   public async fetch(
     organizationSlug: string,
     code: string,
@@ -7628,7 +8299,7 @@ export class IntegrationSentryConnectMutation extends Request {
 }
 
 /**
- * Mutation IntegrationDeleteDocument for ArchivePayload
+ * A fetchable IntegrationDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7637,6 +8308,11 @@ export class IntegrationDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the IntegrationDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
       D.IntegrationDeleteDocument,
@@ -7651,7 +8327,7 @@ export class IntegrationDeleteMutation extends Request {
 }
 
 /**
- * Mutation IntegrationResourceArchiveDocument for ArchivePayload
+ * A fetchable IntegrationResourceArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7660,6 +8336,11 @@ export class IntegrationResourceArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IntegrationResourceArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the IntegrationResourceArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
       D.IntegrationResourceArchiveDocument,
@@ -7674,7 +8355,7 @@ export class IntegrationResourceArchiveMutation extends Request {
 }
 
 /**
- * Mutation IssueLabelCreateDocument for IssueLabelPayload
+ * A fetchable IssueLabelCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7683,6 +8364,11 @@ export class IssueLabelCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueLabelCreate Mutation and return a IssueLabelPayload
+   *
+   * @param input - input to pass into the IssueLabelCreateMutation
+   */
   public async fetch(input: D.IssueLabelCreateInput): Promise<IssueLabelPayload | undefined> {
     return this.request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(D.IssueLabelCreateDocument, {
       input,
@@ -7694,7 +8380,7 @@ export class IssueLabelCreateMutation extends Request {
 }
 
 /**
- * Mutation IssueLabelUpdateDocument for IssueLabelPayload
+ * A fetchable IssueLabelUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7703,6 +8389,12 @@ export class IssueLabelUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueLabelUpdate Mutation and return a IssueLabelPayload
+   *
+   * @param input - input to pass into the IssueLabelUpdateMutation
+   * @param id - id to pass into the IssueLabelUpdateMutation
+   */
   public async fetch(input: D.IssueLabelUpdateInput, id: string): Promise<IssueLabelPayload | undefined> {
     return this.request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(D.IssueLabelUpdateDocument, {
       input,
@@ -7715,7 +8407,7 @@ export class IssueLabelUpdateMutation extends Request {
 }
 
 /**
- * Mutation IssueLabelArchiveDocument for ArchivePayload
+ * A fetchable IssueLabelArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7724,6 +8416,11 @@ export class IssueLabelArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueLabelArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the IssueLabelArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
       D.IssueLabelArchiveDocument,
@@ -7738,7 +8435,7 @@ export class IssueLabelArchiveMutation extends Request {
 }
 
 /**
- * Mutation IssueRelationCreateDocument for IssueRelationPayload
+ * A fetchable IssueRelationCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7747,6 +8444,11 @@ export class IssueRelationCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueRelationCreate Mutation and return a IssueRelationPayload
+   *
+   * @param input - input to pass into the IssueRelationCreateMutation
+   */
   public async fetch(input: D.IssueRelationCreateInput): Promise<IssueRelationPayload | undefined> {
     return this.request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
       D.IssueRelationCreateDocument,
@@ -7761,7 +8463,7 @@ export class IssueRelationCreateMutation extends Request {
 }
 
 /**
- * Mutation IssueRelationUpdateDocument for IssueRelationPayload
+ * A fetchable IssueRelationUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7770,6 +8472,12 @@ export class IssueRelationUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueRelationUpdate Mutation and return a IssueRelationPayload
+   *
+   * @param input - input to pass into the IssueRelationUpdateMutation
+   * @param id - id to pass into the IssueRelationUpdateMutation
+   */
   public async fetch(input: D.IssueRelationUpdateInput, id: string): Promise<IssueRelationPayload | undefined> {
     return this.request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
       D.IssueRelationUpdateDocument,
@@ -7785,7 +8493,7 @@ export class IssueRelationUpdateMutation extends Request {
 }
 
 /**
- * Mutation IssueRelationDeleteDocument for ArchivePayload
+ * A fetchable IssueRelationDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7794,6 +8502,11 @@ export class IssueRelationDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueRelationDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the IssueRelationDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
       D.IssueRelationDeleteDocument,
@@ -7808,7 +8521,7 @@ export class IssueRelationDeleteMutation extends Request {
 }
 
 /**
- * Mutation IssueCreateDocument for IssuePayload
+ * A fetchable IssueCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7817,6 +8530,11 @@ export class IssueCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueCreate Mutation and return a IssuePayload
+   *
+   * @param input - input to pass into the IssueCreateMutation
+   */
   public async fetch(input: D.IssueCreateInput): Promise<IssuePayload | undefined> {
     return this.request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument, {
       input,
@@ -7828,7 +8546,7 @@ export class IssueCreateMutation extends Request {
 }
 
 /**
- * Mutation IssueUpdateDocument for IssuePayload
+ * A fetchable IssueUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7837,6 +8555,12 @@ export class IssueUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueUpdate Mutation and return a IssuePayload
+   *
+   * @param input - input to pass into the IssueUpdateMutation
+   * @param id - id to pass into the IssueUpdateMutation
+   */
   public async fetch(input: D.IssueUpdateInput, id: string): Promise<IssuePayload | undefined> {
     return this.request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument, {
       input,
@@ -7849,7 +8573,7 @@ export class IssueUpdateMutation extends Request {
 }
 
 /**
- * Mutation IssueArchiveDocument for ArchivePayload
+ * A fetchable IssueArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7858,6 +8582,11 @@ export class IssueArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the IssueArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument, {
       id,
@@ -7869,7 +8598,7 @@ export class IssueArchiveMutation extends Request {
 }
 
 /**
- * Mutation IssueUnarchiveDocument for ArchivePayload
+ * A fetchable IssueUnarchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7878,6 +8607,11 @@ export class IssueUnarchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the IssueUnarchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the IssueUnarchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument, {
       id,
@@ -7889,7 +8623,7 @@ export class IssueUnarchiveMutation extends Request {
 }
 
 /**
- * Mutation MilestoneCreateDocument for MilestonePayload
+ * A fetchable MilestoneCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7898,6 +8632,11 @@ export class MilestoneCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the MilestoneCreate Mutation and return a MilestonePayload
+   *
+   * @param input - input to pass into the MilestoneCreateMutation
+   */
   public async fetch(input: D.MilestoneCreateInput): Promise<MilestonePayload | undefined> {
     return this.request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument, {
       input,
@@ -7909,7 +8648,7 @@ export class MilestoneCreateMutation extends Request {
 }
 
 /**
- * Mutation MilestoneUpdateDocument for MilestonePayload
+ * A fetchable MilestoneUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7918,6 +8657,12 @@ export class MilestoneUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the MilestoneUpdate Mutation and return a MilestonePayload
+   *
+   * @param input - input to pass into the MilestoneUpdateMutation
+   * @param id - id to pass into the MilestoneUpdateMutation
+   */
   public async fetch(input: D.MilestoneUpdateInput, id: string): Promise<MilestonePayload | undefined> {
     return this.request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument, {
       input,
@@ -7930,7 +8675,7 @@ export class MilestoneUpdateMutation extends Request {
 }
 
 /**
- * Mutation MilestoneDeleteDocument for ArchivePayload
+ * A fetchable MilestoneDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7939,6 +8684,11 @@ export class MilestoneDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the MilestoneDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the MilestoneDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument, {
       id,
@@ -7950,7 +8700,7 @@ export class MilestoneDeleteMutation extends Request {
 }
 
 /**
- * Mutation NotificationCreateDocument for NotificationPayload
+ * A fetchable NotificationCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7959,6 +8709,12 @@ export class NotificationCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the NotificationCreate Mutation and return a NotificationPayload
+   *
+   * @param input - input to pass into the NotificationCreateMutation
+   * @param id - id to pass into the NotificationCreateMutation
+   */
   public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return this.request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
       D.NotificationCreateDocument,
@@ -7974,7 +8730,7 @@ export class NotificationCreateMutation extends Request {
 }
 
 /**
- * Mutation NotificationUpdateDocument for NotificationPayload
+ * A fetchable NotificationUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -7983,6 +8739,12 @@ export class NotificationUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the NotificationUpdate Mutation and return a NotificationPayload
+   *
+   * @param input - input to pass into the NotificationUpdateMutation
+   * @param id - id to pass into the NotificationUpdateMutation
+   */
   public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
     return this.request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
       D.NotificationUpdateDocument,
@@ -7998,7 +8760,7 @@ export class NotificationUpdateMutation extends Request {
 }
 
 /**
- * Mutation NotificationDeleteDocument for ArchivePayload
+ * A fetchable NotificationDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8007,6 +8769,11 @@ export class NotificationDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the NotificationDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the NotificationDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
       D.NotificationDeleteDocument,
@@ -8021,7 +8788,7 @@ export class NotificationDeleteMutation extends Request {
 }
 
 /**
- * Mutation NotificationArchiveDocument for ArchivePayload
+ * A fetchable NotificationArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8030,6 +8797,11 @@ export class NotificationArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the NotificationArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the NotificationArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
       D.NotificationArchiveDocument,
@@ -8044,7 +8816,7 @@ export class NotificationArchiveMutation extends Request {
 }
 
 /**
- * Mutation NotificationUnarchiveDocument for ArchivePayload
+ * A fetchable NotificationUnarchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8053,6 +8825,11 @@ export class NotificationUnarchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the NotificationUnarchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the NotificationUnarchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
       D.NotificationUnarchiveDocument,
@@ -8067,7 +8844,7 @@ export class NotificationUnarchiveMutation extends Request {
 }
 
 /**
- * Mutation NotificationSubscriptionCreateDocument for NotificationSubscriptionPayload
+ * A fetchable NotificationSubscriptionCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8076,6 +8853,11 @@ export class NotificationSubscriptionCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the NotificationSubscriptionCreate Mutation and return a NotificationSubscriptionPayload
+   *
+   * @param input - input to pass into the NotificationSubscriptionCreateMutation
+   */
   public async fetch(
     input: D.NotificationSubscriptionCreateInput
   ): Promise<NotificationSubscriptionPayload | undefined> {
@@ -8092,7 +8874,7 @@ export class NotificationSubscriptionCreateMutation extends Request {
 }
 
 /**
- * Mutation NotificationSubscriptionDeleteDocument for ArchivePayload
+ * A fetchable NotificationSubscriptionDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8101,6 +8883,11 @@ export class NotificationSubscriptionDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the NotificationSubscriptionDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the NotificationSubscriptionDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
       D.NotificationSubscriptionDeleteDocument,
@@ -8115,7 +8902,7 @@ export class NotificationSubscriptionDeleteMutation extends Request {
 }
 
 /**
- * Mutation OauthClientCreateDocument for OauthClientPayload
+ * A fetchable OauthClientCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8124,6 +8911,11 @@ export class OauthClientCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OauthClientCreate Mutation and return a OauthClientPayload
+   *
+   * @param input - input to pass into the OauthClientCreateMutation
+   */
   public async fetch(input: D.OauthClientCreateInput): Promise<OauthClientPayload | undefined> {
     return this.request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
       D.OauthClientCreateDocument,
@@ -8138,7 +8930,7 @@ export class OauthClientCreateMutation extends Request {
 }
 
 /**
- * Mutation OauthClientUpdateDocument for OauthClientPayload
+ * A fetchable OauthClientUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8147,6 +8939,12 @@ export class OauthClientUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OauthClientUpdate Mutation and return a OauthClientPayload
+   *
+   * @param input - input to pass into the OauthClientUpdateMutation
+   * @param id - id to pass into the OauthClientUpdateMutation
+   */
   public async fetch(input: D.OauthClientUpdateInput, id: string): Promise<OauthClientPayload | undefined> {
     return this.request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
       D.OauthClientUpdateDocument,
@@ -8162,7 +8960,7 @@ export class OauthClientUpdateMutation extends Request {
 }
 
 /**
- * Mutation OauthClientArchiveDocument for ArchivePayload
+ * A fetchable OauthClientArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8171,6 +8969,11 @@ export class OauthClientArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OauthClientArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the OauthClientArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
       D.OauthClientArchiveDocument,
@@ -8185,7 +8988,7 @@ export class OauthClientArchiveMutation extends Request {
 }
 
 /**
- * Mutation OauthClientRotateSecretDocument for RotateSecretPayload
+ * A fetchable OauthClientRotateSecret Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8194,6 +8997,11 @@ export class OauthClientRotateSecretMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OauthClientRotateSecret Mutation and return a RotateSecretPayload
+   *
+   * @param id - id to pass into the OauthClientRotateSecretMutation
+   */
   public async fetch(id: string): Promise<RotateSecretPayload | undefined> {
     return this.request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
       D.OauthClientRotateSecretDocument,
@@ -8208,7 +9016,7 @@ export class OauthClientRotateSecretMutation extends Request {
 }
 
 /**
- * Mutation OauthTokenRevokeDocument for OauthTokenRevokePayload
+ * A fetchable OauthTokenRevoke Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8217,6 +9025,12 @@ export class OauthTokenRevokeMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OauthTokenRevoke Mutation and return a OauthTokenRevokePayload
+   *
+   * @param scope - scope to pass into the OauthTokenRevokeMutation
+   * @param appId - appId to pass into the OauthTokenRevokeMutation
+   */
   public async fetch(scope: string[], appId: string): Promise<OauthTokenRevokePayload | undefined> {
     return this.request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(D.OauthTokenRevokeDocument, {
       scope,
@@ -8229,7 +9043,7 @@ export class OauthTokenRevokeMutation extends Request {
 }
 
 /**
- * Mutation OrganizationDomainVerifyDocument for OrganizationDomainPayload
+ * A fetchable OrganizationDomainVerify Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8238,6 +9052,11 @@ export class OrganizationDomainVerifyMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationDomainVerify Mutation and return a OrganizationDomainPayload
+   *
+   * @param input - input to pass into the OrganizationDomainVerifyMutation
+   */
   public async fetch(input: D.OrganizationDomainVerificationInput): Promise<OrganizationDomainPayload | undefined> {
     return this.request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
       D.OrganizationDomainVerifyDocument,
@@ -8252,7 +9071,7 @@ export class OrganizationDomainVerifyMutation extends Request {
 }
 
 /**
- * Mutation OrganizationDomainCreateDocument for OrganizationDomainPayload
+ * A fetchable OrganizationDomainCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8261,6 +9080,11 @@ export class OrganizationDomainCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationDomainCreate Mutation and return a OrganizationDomainPayload
+   *
+   * @param input - input to pass into the OrganizationDomainCreateMutation
+   */
   public async fetch(input: D.OrganizationDomainCreateInput): Promise<OrganizationDomainPayload | undefined> {
     return this.request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
       D.OrganizationDomainCreateDocument,
@@ -8275,7 +9099,7 @@ export class OrganizationDomainCreateMutation extends Request {
 }
 
 /**
- * Mutation OrganizationDomainDeleteDocument for ArchivePayload
+ * A fetchable OrganizationDomainDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8284,6 +9108,11 @@ export class OrganizationDomainDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationDomainDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the OrganizationDomainDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
       D.OrganizationDomainDeleteDocument,
@@ -8298,7 +9127,7 @@ export class OrganizationDomainDeleteMutation extends Request {
 }
 
 /**
- * Mutation OrganizationInviteCreateDocument for OrganizationInvitePayload
+ * A fetchable OrganizationInviteCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8307,6 +9136,11 @@ export class OrganizationInviteCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationInviteCreate Mutation and return a OrganizationInvitePayload
+   *
+   * @param input - input to pass into the OrganizationInviteCreateMutation
+   */
   public async fetch(input: D.OrganizationInviteCreateInput): Promise<OrganizationInvitePayload | undefined> {
     return this.request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
       D.OrganizationInviteCreateDocument,
@@ -8321,7 +9155,7 @@ export class OrganizationInviteCreateMutation extends Request {
 }
 
 /**
- * Mutation ResentOrganizationInviteDocument for ArchivePayload
+ * A fetchable ResentOrganizationInvite Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8330,6 +9164,11 @@ export class ResentOrganizationInviteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ResentOrganizationInvite Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the ResentOrganizationInviteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
       D.ResentOrganizationInviteDocument,
@@ -8344,7 +9183,7 @@ export class ResentOrganizationInviteMutation extends Request {
 }
 
 /**
- * Mutation OrganizationInviteDeleteDocument for ArchivePayload
+ * A fetchable OrganizationInviteDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8353,6 +9192,11 @@ export class OrganizationInviteDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the OrganizationInviteDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the OrganizationInviteDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
       D.OrganizationInviteDeleteDocument,
@@ -8367,7 +9211,7 @@ export class OrganizationInviteDeleteMutation extends Request {
 }
 
 /**
- * Mutation ProjectLinkCreateDocument for ProjectLinkPayload
+ * A fetchable ProjectLinkCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8376,6 +9220,11 @@ export class ProjectLinkCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ProjectLinkCreate Mutation and return a ProjectLinkPayload
+   *
+   * @param input - input to pass into the ProjectLinkCreateMutation
+   */
   public async fetch(input: D.ProjectLinkCreateInput): Promise<ProjectLinkPayload | undefined> {
     return this.request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
       D.ProjectLinkCreateDocument,
@@ -8390,7 +9239,7 @@ export class ProjectLinkCreateMutation extends Request {
 }
 
 /**
- * Mutation ProjectLinkDeleteDocument for ArchivePayload
+ * A fetchable ProjectLinkDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8399,6 +9248,11 @@ export class ProjectLinkDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ProjectLinkDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the ProjectLinkDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
       D.ProjectLinkDeleteDocument,
@@ -8413,7 +9267,7 @@ export class ProjectLinkDeleteMutation extends Request {
 }
 
 /**
- * Mutation ProjectCreateDocument for ProjectPayload
+ * A fetchable ProjectCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8422,6 +9276,11 @@ export class ProjectCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ProjectCreate Mutation and return a ProjectPayload
+   *
+   * @param input - input to pass into the ProjectCreateMutation
+   */
   public async fetch(input: D.ProjectCreateInput): Promise<ProjectPayload | undefined> {
     return this.request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument, {
       input,
@@ -8433,7 +9292,7 @@ export class ProjectCreateMutation extends Request {
 }
 
 /**
- * Mutation ProjectUpdateDocument for ProjectPayload
+ * A fetchable ProjectUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8442,6 +9301,12 @@ export class ProjectUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ProjectUpdate Mutation and return a ProjectPayload
+   *
+   * @param input - input to pass into the ProjectUpdateMutation
+   * @param id - id to pass into the ProjectUpdateMutation
+   */
   public async fetch(input: D.ProjectUpdateInput, id: string): Promise<ProjectPayload | undefined> {
     return this.request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument, {
       input,
@@ -8454,7 +9319,7 @@ export class ProjectUpdateMutation extends Request {
 }
 
 /**
- * Mutation ProjectArchiveDocument for ArchivePayload
+ * A fetchable ProjectArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8463,6 +9328,11 @@ export class ProjectArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ProjectArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the ProjectArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument, {
       id,
@@ -8474,7 +9344,7 @@ export class ProjectArchiveMutation extends Request {
 }
 
 /**
- * Mutation PushSubscriptionCreateDocument for PushSubscriptionPayload
+ * A fetchable PushSubscriptionCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8483,6 +9353,11 @@ export class PushSubscriptionCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the PushSubscriptionCreate Mutation and return a PushSubscriptionPayload
+   *
+   * @param input - input to pass into the PushSubscriptionCreateMutation
+   */
   public async fetch(input: D.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
       D.PushSubscriptionCreateDocument,
@@ -8497,7 +9372,7 @@ export class PushSubscriptionCreateMutation extends Request {
 }
 
 /**
- * Mutation PushSubscriptionDeleteDocument for PushSubscriptionPayload
+ * A fetchable PushSubscriptionDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8506,6 +9381,11 @@ export class PushSubscriptionDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the PushSubscriptionDelete Mutation and return a PushSubscriptionPayload
+   *
+   * @param id - id to pass into the PushSubscriptionDeleteMutation
+   */
   public async fetch(id: string): Promise<PushSubscriptionPayload | undefined> {
     return this.request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
       D.PushSubscriptionDeleteDocument,
@@ -8520,7 +9400,7 @@ export class PushSubscriptionDeleteMutation extends Request {
 }
 
 /**
- * Mutation ReactionCreateDocument for ReactionPayload
+ * A fetchable ReactionCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8529,6 +9409,11 @@ export class ReactionCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ReactionCreate Mutation and return a ReactionPayload
+   *
+   * @param input - input to pass into the ReactionCreateMutation
+   */
   public async fetch(input: D.ReactionCreateInput): Promise<ReactionPayload | undefined> {
     return this.request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument, {
       input,
@@ -8540,7 +9425,7 @@ export class ReactionCreateMutation extends Request {
 }
 
 /**
- * Mutation ReactionDeleteDocument for ArchivePayload
+ * A fetchable ReactionDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8549,6 +9434,11 @@ export class ReactionDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ReactionDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the ReactionDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument, {
       id,
@@ -8560,7 +9450,7 @@ export class ReactionDeleteMutation extends Request {
 }
 
 /**
- * Mutation CreateCsvExportReportDocument for CreateCsvExportReportPayload
+ * A fetchable CreateCsvExportReport Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8569,6 +9459,10 @@ export class CreateCsvExportReportMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the CreateCsvExportReport Mutation and return a CreateCsvExportReportPayload
+   *
+   */
   public async fetch(): Promise<CreateCsvExportReportPayload | undefined> {
     return this.request<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
       D.CreateCsvExportReportDocument,
@@ -8581,7 +9475,7 @@ export class CreateCsvExportReportMutation extends Request {
 }
 
 /**
- * Mutation SubscriptionSessionCreateDocument for SubscriptionSessionPayload
+ * A fetchable SubscriptionSessionCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8590,6 +9484,11 @@ export class SubscriptionSessionCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the SubscriptionSessionCreate Mutation and return a SubscriptionSessionPayload
+   *
+   * @param plan - plan to pass into the SubscriptionSessionCreateMutation
+   */
   public async fetch(plan: string): Promise<SubscriptionSessionPayload | undefined> {
     return this.request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
       D.SubscriptionSessionCreateDocument,
@@ -8604,7 +9503,7 @@ export class SubscriptionSessionCreateMutation extends Request {
 }
 
 /**
- * Mutation SubscriptionUpdateSessionCreateDocument for SubscriptionSessionPayload
+ * A fetchable SubscriptionUpdateSessionCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8613,6 +9512,10 @@ export class SubscriptionUpdateSessionCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the SubscriptionUpdateSessionCreate Mutation and return a SubscriptionSessionPayload
+   *
+   */
   public async fetch(): Promise<SubscriptionSessionPayload | undefined> {
     return this.request<D.SubscriptionUpdateSessionCreateMutation, D.SubscriptionUpdateSessionCreateMutationVariables>(
       D.SubscriptionUpdateSessionCreateDocument,
@@ -8625,7 +9528,7 @@ export class SubscriptionUpdateSessionCreateMutation extends Request {
 }
 
 /**
- * Mutation SubscriptionUpdateDocument for SubscriptionPayload
+ * A fetchable SubscriptionUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8634,6 +9537,12 @@ export class SubscriptionUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the SubscriptionUpdate Mutation and return a SubscriptionPayload
+   *
+   * @param input - input to pass into the SubscriptionUpdateMutation
+   * @param id - id to pass into the SubscriptionUpdateMutation
+   */
   public async fetch(input: D.SubscriptionUpdateInput, id: string): Promise<SubscriptionPayload | undefined> {
     return this.request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
       D.SubscriptionUpdateDocument,
@@ -8649,7 +9558,7 @@ export class SubscriptionUpdateMutation extends Request {
 }
 
 /**
- * Mutation SubscriptionUpgradeDocument for SubscriptionPayload
+ * A fetchable SubscriptionUpgrade Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8658,6 +9567,12 @@ export class SubscriptionUpgradeMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the SubscriptionUpgrade Mutation and return a SubscriptionPayload
+   *
+   * @param type - type to pass into the SubscriptionUpgradeMutation
+   * @param id - id to pass into the SubscriptionUpgradeMutation
+   */
   public async fetch(type: string, id: string): Promise<SubscriptionPayload | undefined> {
     return this.request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
       D.SubscriptionUpgradeDocument,
@@ -8673,7 +9588,7 @@ export class SubscriptionUpgradeMutation extends Request {
 }
 
 /**
- * Mutation SubscriptionArchiveDocument for ArchivePayload
+ * A fetchable SubscriptionArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8682,6 +9597,11 @@ export class SubscriptionArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the SubscriptionArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the SubscriptionArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
       D.SubscriptionArchiveDocument,
@@ -8696,7 +9616,7 @@ export class SubscriptionArchiveMutation extends Request {
 }
 
 /**
- * Mutation TeamMembershipCreateDocument for TeamMembershipPayload
+ * A fetchable TeamMembershipCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8705,6 +9625,11 @@ export class TeamMembershipCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TeamMembershipCreate Mutation and return a TeamMembershipPayload
+   *
+   * @param input - input to pass into the TeamMembershipCreateMutation
+   */
   public async fetch(input: D.TeamMembershipCreateInput): Promise<TeamMembershipPayload | undefined> {
     return this.request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
       D.TeamMembershipCreateDocument,
@@ -8719,7 +9644,7 @@ export class TeamMembershipCreateMutation extends Request {
 }
 
 /**
- * Mutation TeamMembershipDeleteDocument for ArchivePayload
+ * A fetchable TeamMembershipDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8728,6 +9653,11 @@ export class TeamMembershipDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TeamMembershipDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the TeamMembershipDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
       D.TeamMembershipDeleteDocument,
@@ -8742,7 +9672,7 @@ export class TeamMembershipDeleteMutation extends Request {
 }
 
 /**
- * Mutation TeamCreateDocument for TeamPayload
+ * A fetchable TeamCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8751,6 +9681,12 @@ export class TeamCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TeamCreate Mutation and return a TeamPayload
+   *
+   * @param input - input to pass into the TeamCreateMutation
+   * @param vars - variables without 'input' to pass into the TeamCreateMutation
+   */
   public async fetch(
     input: D.TeamCreateInput,
     vars?: Omit<D.TeamCreateMutationVariables, "input">
@@ -8766,7 +9702,7 @@ export class TeamCreateMutation extends Request {
 }
 
 /**
- * Mutation TeamUpdateDocument for TeamPayload
+ * A fetchable TeamUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8775,6 +9711,12 @@ export class TeamUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TeamUpdate Mutation and return a TeamPayload
+   *
+   * @param input - input to pass into the TeamUpdateMutation
+   * @param id - id to pass into the TeamUpdateMutation
+   */
   public async fetch(input: D.TeamUpdateInput, id: string): Promise<TeamPayload | undefined> {
     return this.request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument, {
       input,
@@ -8787,7 +9729,7 @@ export class TeamUpdateMutation extends Request {
 }
 
 /**
- * Mutation TeamArchiveDocument for ArchivePayload
+ * A fetchable TeamArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8796,6 +9738,11 @@ export class TeamArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TeamArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the TeamArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument, {
       id,
@@ -8807,7 +9754,7 @@ export class TeamArchiveMutation extends Request {
 }
 
 /**
- * Mutation TeamDeleteDocument for ArchivePayload
+ * A fetchable TeamDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8816,6 +9763,11 @@ export class TeamDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TeamDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the TeamDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument, {
       id,
@@ -8827,7 +9779,7 @@ export class TeamDeleteMutation extends Request {
 }
 
 /**
- * Mutation TemplateCreateDocument for TemplatePayload
+ * A fetchable TemplateCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8836,6 +9788,11 @@ export class TemplateCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TemplateCreate Mutation and return a TemplatePayload
+   *
+   * @param input - input to pass into the TemplateCreateMutation
+   */
   public async fetch(input: D.TemplateCreateInput): Promise<TemplatePayload | undefined> {
     return this.request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument, {
       input,
@@ -8847,7 +9804,7 @@ export class TemplateCreateMutation extends Request {
 }
 
 /**
- * Mutation TemplateUpdateDocument for TemplatePayload
+ * A fetchable TemplateUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8856,6 +9813,12 @@ export class TemplateUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TemplateUpdate Mutation and return a TemplatePayload
+   *
+   * @param input - input to pass into the TemplateUpdateMutation
+   * @param id - id to pass into the TemplateUpdateMutation
+   */
   public async fetch(input: D.TemplateUpdateInput, id: string): Promise<TemplatePayload | undefined> {
     return this.request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument, {
       input,
@@ -8868,7 +9831,7 @@ export class TemplateUpdateMutation extends Request {
 }
 
 /**
- * Mutation TemplateDeleteDocument for ArchivePayload
+ * A fetchable TemplateDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8877,6 +9840,11 @@ export class TemplateDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the TemplateDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the TemplateDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument, {
       id,
@@ -8888,7 +9856,7 @@ export class TemplateDeleteMutation extends Request {
 }
 
 /**
- * Mutation UserSettingsUpdateDocument for UserSettingsPayload
+ * A fetchable UserSettingsUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8897,6 +9865,12 @@ export class UserSettingsUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserSettingsUpdate Mutation and return a UserSettingsPayload
+   *
+   * @param input - input to pass into the UserSettingsUpdateMutation
+   * @param id - id to pass into the UserSettingsUpdateMutation
+   */
   public async fetch(input: D.UserSettingsUpdateInput, id: string): Promise<UserSettingsPayload | undefined> {
     return this.request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
       D.UserSettingsUpdateDocument,
@@ -8912,7 +9886,7 @@ export class UserSettingsUpdateMutation extends Request {
 }
 
 /**
- * Mutation UserSettingsFlagIncrementDocument for UserSettingsFlagPayload
+ * A fetchable UserSettingsFlagIncrement Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8921,6 +9895,11 @@ export class UserSettingsFlagIncrementMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserSettingsFlagIncrement Mutation and return a UserSettingsFlagPayload
+   *
+   * @param flag - flag to pass into the UserSettingsFlagIncrementMutation
+   */
   public async fetch(flag: string): Promise<UserSettingsFlagPayload | undefined> {
     return this.request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
       D.UserSettingsFlagIncrementDocument,
@@ -8935,7 +9914,7 @@ export class UserSettingsFlagIncrementMutation extends Request {
 }
 
 /**
- * Mutation UserSettingsFlagsResetDocument for UserSettingsFlagsResetPayload
+ * A fetchable UserSettingsFlagsReset Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8944,6 +9923,10 @@ export class UserSettingsFlagsResetMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserSettingsFlagsReset Mutation and return a UserSettingsFlagsResetPayload
+   *
+   */
   public async fetch(): Promise<UserSettingsFlagsResetPayload | undefined> {
     return this.request<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
       D.UserSettingsFlagsResetDocument,
@@ -8956,7 +9939,7 @@ export class UserSettingsFlagsResetMutation extends Request {
 }
 
 /**
- * Mutation UserFlagUpdateDocument for UserSettingsFlagPayload
+ * A fetchable UserFlagUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8965,6 +9948,12 @@ export class UserFlagUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserFlagUpdate Mutation and return a UserSettingsFlagPayload
+   *
+   * @param operation - operation to pass into the UserFlagUpdateMutation
+   * @param flag - flag to pass into the UserFlagUpdateMutation
+   */
   public async fetch(
     operation: D.UserFlagUpdateOperation,
     flag: D.UserFlagType
@@ -8980,7 +9969,7 @@ export class UserFlagUpdateMutation extends Request {
 }
 
 /**
- * Mutation UserSubscribeToNewsletterDocument for UserSubscribeToNewsletterPayload
+ * A fetchable UserSubscribeToNewsletter Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -8989,6 +9978,10 @@ export class UserSubscribeToNewsletterMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the UserSubscribeToNewsletter Mutation and return a UserSubscribeToNewsletterPayload
+   *
+   */
   public async fetch(): Promise<UserSubscribeToNewsletterPayload | undefined> {
     return this.request<D.UserSubscribeToNewsletterMutation, D.UserSubscribeToNewsletterMutationVariables>(
       D.UserSubscribeToNewsletterDocument,
@@ -9001,7 +9994,7 @@ export class UserSubscribeToNewsletterMutation extends Request {
 }
 
 /**
- * Mutation ViewPreferencesCreateDocument for ViewPreferencesPayload
+ * A fetchable ViewPreferencesCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9010,6 +10003,11 @@ export class ViewPreferencesCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ViewPreferencesCreate Mutation and return a ViewPreferencesPayload
+   *
+   * @param input - input to pass into the ViewPreferencesCreateMutation
+   */
   public async fetch(input: D.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload | undefined> {
     return this.request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
       D.ViewPreferencesCreateDocument,
@@ -9024,7 +10022,7 @@ export class ViewPreferencesCreateMutation extends Request {
 }
 
 /**
- * Mutation ViewPreferencesUpdateDocument for ViewPreferencesPayload
+ * A fetchable ViewPreferencesUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9033,6 +10031,12 @@ export class ViewPreferencesUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ViewPreferencesUpdate Mutation and return a ViewPreferencesPayload
+   *
+   * @param input - input to pass into the ViewPreferencesUpdateMutation
+   * @param id - id to pass into the ViewPreferencesUpdateMutation
+   */
   public async fetch(input: D.ViewPreferencesUpdateInput, id: string): Promise<ViewPreferencesPayload | undefined> {
     return this.request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
       D.ViewPreferencesUpdateDocument,
@@ -9048,7 +10052,7 @@ export class ViewPreferencesUpdateMutation extends Request {
 }
 
 /**
- * Mutation ViewPreferencesDeleteDocument for ArchivePayload
+ * A fetchable ViewPreferencesDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9057,6 +10061,11 @@ export class ViewPreferencesDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the ViewPreferencesDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the ViewPreferencesDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
       D.ViewPreferencesDeleteDocument,
@@ -9071,7 +10080,7 @@ export class ViewPreferencesDeleteMutation extends Request {
 }
 
 /**
- * Mutation WebhookCreateDocument for WebhookPayload
+ * A fetchable WebhookCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9080,6 +10089,11 @@ export class WebhookCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the WebhookCreate Mutation and return a WebhookPayload
+   *
+   * @param input - input to pass into the WebhookCreateMutation
+   */
   public async fetch(input: D.WebhookCreateInput): Promise<WebhookPayload | undefined> {
     return this.request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
       input,
@@ -9091,7 +10105,7 @@ export class WebhookCreateMutation extends Request {
 }
 
 /**
- * Mutation WebhookUpdateDocument for WebhookPayload
+ * A fetchable WebhookUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9100,6 +10114,12 @@ export class WebhookUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the WebhookUpdate Mutation and return a WebhookPayload
+   *
+   * @param input - input to pass into the WebhookUpdateMutation
+   * @param id - id to pass into the WebhookUpdateMutation
+   */
   public async fetch(input: D.WebhookUpdateInput, id: string): Promise<WebhookPayload | undefined> {
     return this.request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument, {
       input,
@@ -9112,7 +10132,7 @@ export class WebhookUpdateMutation extends Request {
 }
 
 /**
- * Mutation WebhookDeleteDocument for ArchivePayload
+ * A fetchable WebhookDelete Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9121,6 +10141,11 @@ export class WebhookDeleteMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the WebhookDelete Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the WebhookDeleteMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument, {
       id,
@@ -9132,7 +10157,7 @@ export class WebhookDeleteMutation extends Request {
 }
 
 /**
- * Mutation WorkflowStateCreateDocument for WorkflowStatePayload
+ * A fetchable WorkflowStateCreate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9141,6 +10166,11 @@ export class WorkflowStateCreateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the WorkflowStateCreate Mutation and return a WorkflowStatePayload
+   *
+   * @param input - input to pass into the WorkflowStateCreateMutation
+   */
   public async fetch(input: D.WorkflowStateCreateInput): Promise<WorkflowStatePayload | undefined> {
     return this.request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
       D.WorkflowStateCreateDocument,
@@ -9155,7 +10185,7 @@ export class WorkflowStateCreateMutation extends Request {
 }
 
 /**
- * Mutation WorkflowStateUpdateDocument for WorkflowStatePayload
+ * A fetchable WorkflowStateUpdate Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9164,6 +10194,12 @@ export class WorkflowStateUpdateMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the WorkflowStateUpdate Mutation and return a WorkflowStatePayload
+   *
+   * @param input - input to pass into the WorkflowStateUpdateMutation
+   * @param id - id to pass into the WorkflowStateUpdateMutation
+   */
   public async fetch(input: D.WorkflowStateUpdateInput, id: string): Promise<WorkflowStatePayload | undefined> {
     return this.request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
       D.WorkflowStateUpdateDocument,
@@ -9179,7 +10215,7 @@ export class WorkflowStateUpdateMutation extends Request {
 }
 
 /**
- * Mutation WorkflowStateArchiveDocument for ArchivePayload
+ * A fetchable WorkflowStateArchive Mutation
  *
  * @param request - function to call the graphql client
  */
@@ -9188,6 +10224,11 @@ export class WorkflowStateArchiveMutation extends Request {
     super(request);
   }
 
+  /**
+   * Call the WorkflowStateArchive Mutation and return a ArchivePayload
+   *
+   * @param id - id to pass into the WorkflowStateArchiveMutation
+   */
   public async fetch(id: string): Promise<ArchivePayload | undefined> {
     return this.request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
       D.WorkflowStateArchiveDocument,
@@ -9202,7 +10243,7 @@ export class WorkflowStateArchiveMutation extends Request {
 }
 
 /**
- * Query User_AssignedIssuesDocument for IssueConnection
+ * A fetchable User_AssignedIssues Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the user scope
@@ -9215,6 +10256,11 @@ export class User_AssignedIssuesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the User_AssignedIssues Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the User_AssignedIssuesQuery
+   */
   public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
       D.User_AssignedIssuesDocument,
@@ -9230,7 +10276,7 @@ export class User_AssignedIssuesQuery extends Request {
 }
 
 /**
- * Query User_CreatedIssuesDocument for IssueConnection
+ * A fetchable User_CreatedIssues Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the user scope
@@ -9243,6 +10289,11 @@ export class User_CreatedIssuesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the User_CreatedIssues Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the User_CreatedIssuesQuery
+   */
   public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
       id: this._id,
@@ -9255,7 +10306,7 @@ export class User_CreatedIssuesQuery extends Request {
 }
 
 /**
- * Query User_TeamMembershipsDocument for TeamMembershipConnection
+ * A fetchable User_TeamMemberships Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the user scope
@@ -9268,6 +10319,11 @@ export class User_TeamMembershipsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the User_TeamMemberships Query and return a TeamMembershipConnection
+   *
+   * @param vars - variables without 'id' to pass into the User_TeamMembershipsQuery
+   */
   public async fetch(
     vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">
   ): Promise<TeamMembershipConnection | undefined> {
@@ -9285,7 +10341,7 @@ export class User_TeamMembershipsQuery extends Request {
 }
 
 /**
- * Query Viewer_AssignedIssuesDocument for IssueConnection
+ * A fetchable Viewer_AssignedIssues Query
  *
  * @param request - function to call the graphql client
  */
@@ -9294,6 +10350,11 @@ export class Viewer_AssignedIssuesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Viewer_AssignedIssues Query and return a IssueConnection
+   *
+   * @param vars - variables to pass into the Viewer_AssignedIssuesQuery
+   */
   public async fetch(vars?: D.Viewer_AssignedIssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.Viewer_AssignedIssuesQuery, D.Viewer_AssignedIssuesQueryVariables>(
       D.Viewer_AssignedIssuesDocument,
@@ -9306,7 +10367,7 @@ export class Viewer_AssignedIssuesQuery extends Request {
 }
 
 /**
- * Query Viewer_CreatedIssuesDocument for IssueConnection
+ * A fetchable Viewer_CreatedIssues Query
  *
  * @param request - function to call the graphql client
  */
@@ -9315,6 +10376,11 @@ export class Viewer_CreatedIssuesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Viewer_CreatedIssues Query and return a IssueConnection
+   *
+   * @param vars - variables to pass into the Viewer_CreatedIssuesQuery
+   */
   public async fetch(vars?: D.Viewer_CreatedIssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.Viewer_CreatedIssuesQuery, D.Viewer_CreatedIssuesQueryVariables>(
       D.Viewer_CreatedIssuesDocument,
@@ -9327,7 +10393,7 @@ export class Viewer_CreatedIssuesQuery extends Request {
 }
 
 /**
- * Query Viewer_TeamMembershipsDocument for TeamMembershipConnection
+ * A fetchable Viewer_TeamMemberships Query
  *
  * @param request - function to call the graphql client
  */
@@ -9336,6 +10402,11 @@ export class Viewer_TeamMembershipsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Viewer_TeamMemberships Query and return a TeamMembershipConnection
+   *
+   * @param vars - variables to pass into the Viewer_TeamMembershipsQuery
+   */
   public async fetch(vars?: D.Viewer_TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.Viewer_TeamMembershipsQuery, D.Viewer_TeamMembershipsQueryVariables>(
       D.Viewer_TeamMembershipsDocument,
@@ -9348,7 +10419,7 @@ export class Viewer_TeamMembershipsQuery extends Request {
 }
 
 /**
- * Query Organization_UsersDocument for UserConnection
+ * A fetchable Organization_Users Query
  *
  * @param request - function to call the graphql client
  */
@@ -9357,6 +10428,11 @@ export class Organization_UsersQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Organization_Users Query and return a UserConnection
+   *
+   * @param vars - variables to pass into the Organization_UsersQuery
+   */
   public async fetch(vars?: D.Organization_UsersQueryVariables): Promise<UserConnection | undefined> {
     return this.request<D.Organization_UsersQuery, D.Organization_UsersQueryVariables>(
       D.Organization_UsersDocument,
@@ -9369,7 +10445,7 @@ export class Organization_UsersQuery extends Request {
 }
 
 /**
- * Query Organization_TeamsDocument for TeamConnection
+ * A fetchable Organization_Teams Query
  *
  * @param request - function to call the graphql client
  */
@@ -9378,6 +10454,11 @@ export class Organization_TeamsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Organization_Teams Query and return a TeamConnection
+   *
+   * @param vars - variables to pass into the Organization_TeamsQuery
+   */
   public async fetch(vars?: D.Organization_TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return this.request<D.Organization_TeamsQuery, D.Organization_TeamsQueryVariables>(
       D.Organization_TeamsDocument,
@@ -9390,7 +10471,7 @@ export class Organization_TeamsQuery extends Request {
 }
 
 /**
- * Query Organization_MilestonesDocument for MilestoneConnection
+ * A fetchable Organization_Milestones Query
  *
  * @param request - function to call the graphql client
  */
@@ -9399,6 +10480,11 @@ export class Organization_MilestonesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Organization_Milestones Query and return a MilestoneConnection
+   *
+   * @param vars - variables to pass into the Organization_MilestonesQuery
+   */
   public async fetch(vars?: D.Organization_MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
     return this.request<D.Organization_MilestonesQuery, D.Organization_MilestonesQueryVariables>(
       D.Organization_MilestonesDocument,
@@ -9411,7 +10497,7 @@ export class Organization_MilestonesQuery extends Request {
 }
 
 /**
- * Query Organization_IntegrationsDocument for IntegrationConnection
+ * A fetchable Organization_Integrations Query
  *
  * @param request - function to call the graphql client
  */
@@ -9420,6 +10506,11 @@ export class Organization_IntegrationsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the Organization_Integrations Query and return a IntegrationConnection
+   *
+   * @param vars - variables to pass into the Organization_IntegrationsQuery
+   */
   public async fetch(vars?: D.Organization_IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
     return this.request<D.Organization_IntegrationsQuery, D.Organization_IntegrationsQueryVariables>(
       D.Organization_IntegrationsDocument,
@@ -9432,7 +10523,7 @@ export class Organization_IntegrationsQuery extends Request {
 }
 
 /**
- * Query AdminUserAccountLookup_UsersDocument for undefined
+ * A fetchable AdminUserAccountLookup_Users Query
  *
  * @param request - function to call the graphql client
  */
@@ -9441,6 +10532,11 @@ export class AdminUserAccountLookup_UsersQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users Query and return a undefined
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_UsersQuery
+   */
   public async fetch(vars?: D.AdminUserAccountLookup_UsersQueryVariables): Promise<undefined | undefined> {
     return this.request<D.AdminUserAccountLookup_UsersQuery, D.AdminUserAccountLookup_UsersQueryVariables>(
       D.AdminUserAccountLookup_UsersDocument,
@@ -9453,7 +10549,7 @@ export class AdminUserAccountLookup_UsersQuery extends Request {
 }
 
 /**
- * Query AdminUserAccountLookup_Users_AssignedIssuesDocument for IssueConnection
+ * A fetchable AdminUserAccountLookup_Users_AssignedIssues Query
  *
  * @param request - function to call the graphql client
  */
@@ -9462,6 +10558,11 @@ export class AdminUserAccountLookup_Users_AssignedIssuesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_AssignedIssues Query and return a IssueConnection
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_AssignedIssuesQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_AssignedIssuesQueryVariables
   ): Promise<IssueConnection | undefined> {
@@ -9476,7 +10577,7 @@ export class AdminUserAccountLookup_Users_AssignedIssuesQuery extends Request {
 }
 
 /**
- * Query AdminUserAccountLookup_Users_CreatedIssuesDocument for IssueConnection
+ * A fetchable AdminUserAccountLookup_Users_CreatedIssues Query
  *
  * @param request - function to call the graphql client
  */
@@ -9485,6 +10586,11 @@ export class AdminUserAccountLookup_Users_CreatedIssuesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_CreatedIssues Query and return a IssueConnection
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_CreatedIssuesQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_CreatedIssuesQueryVariables
   ): Promise<IssueConnection | undefined> {
@@ -9499,7 +10605,7 @@ export class AdminUserAccountLookup_Users_CreatedIssuesQuery extends Request {
 }
 
 /**
- * Query AdminUserAccountLookup_Users_OrganizationDocument for OrganizationAdminPrivileged
+ * A fetchable AdminUserAccountLookup_Users_Organization Query
  *
  * @param request - function to call the graphql client
  */
@@ -9508,6 +10614,11 @@ export class AdminUserAccountLookup_Users_OrganizationQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_Organization Query and return a OrganizationAdminPrivileged
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_OrganizationQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_OrganizationQueryVariables
   ): Promise<OrganizationAdminPrivileged | undefined> {
@@ -9522,7 +10633,7 @@ export class AdminUserAccountLookup_Users_OrganizationQuery extends Request {
 }
 
 /**
- * Query AdminUserAccountLookup_Users_TeamMembershipsDocument for TeamMembershipConnection
+ * A fetchable AdminUserAccountLookup_Users_TeamMemberships Query
  *
  * @param request - function to call the graphql client
  */
@@ -9531,6 +10642,11 @@ export class AdminUserAccountLookup_Users_TeamMembershipsQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_TeamMemberships Query and return a TeamMembershipConnection
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_TeamMembershipsQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_TeamMembershipsQueryVariables
   ): Promise<TeamMembershipConnection | undefined> {
@@ -9545,7 +10661,7 @@ export class AdminUserAccountLookup_Users_TeamMembershipsQuery extends Request {
 }
 
 /**
- * Query AdminUserAccountLookup_Users_Organization_UsersDocument for UserConnection
+ * A fetchable AdminUserAccountLookup_Users_Organization_Users Query
  *
  * @param request - function to call the graphql client
  */
@@ -9554,6 +10670,11 @@ export class AdminUserAccountLookup_Users_Organization_UsersQuery extends Reques
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_Organization_Users Query and return a UserConnection
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_Organization_UsersQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_Organization_UsersQueryVariables
   ): Promise<UserConnection | undefined> {
@@ -9568,7 +10689,7 @@ export class AdminUserAccountLookup_Users_Organization_UsersQuery extends Reques
 }
 
 /**
- * Query AdminUserAccountLookup_Users_Organization_TeamsDocument for TeamConnection
+ * A fetchable AdminUserAccountLookup_Users_Organization_Teams Query
  *
  * @param request - function to call the graphql client
  */
@@ -9577,6 +10698,11 @@ export class AdminUserAccountLookup_Users_Organization_TeamsQuery extends Reques
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_Organization_Teams Query and return a TeamConnection
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_Organization_TeamsQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_Organization_TeamsQueryVariables
   ): Promise<TeamConnection | undefined> {
@@ -9591,7 +10717,7 @@ export class AdminUserAccountLookup_Users_Organization_TeamsQuery extends Reques
 }
 
 /**
- * Query AdminUserAccountLookup_Users_Organization_MilestonesDocument for MilestoneConnection
+ * A fetchable AdminUserAccountLookup_Users_Organization_Milestones Query
  *
  * @param request - function to call the graphql client
  */
@@ -9600,6 +10726,11 @@ export class AdminUserAccountLookup_Users_Organization_MilestonesQuery extends R
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_Organization_Milestones Query and return a MilestoneConnection
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_Organization_MilestonesQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_Organization_MilestonesQueryVariables
   ): Promise<MilestoneConnection | undefined> {
@@ -9614,7 +10745,7 @@ export class AdminUserAccountLookup_Users_Organization_MilestonesQuery extends R
 }
 
 /**
- * Query AdminUserAccountLookup_Users_Organization_IntegrationsDocument for IntegrationConnection
+ * A fetchable AdminUserAccountLookup_Users_Organization_Integrations Query
  *
  * @param request - function to call the graphql client
  */
@@ -9623,6 +10754,11 @@ export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery extends
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_Organization_Integrations Query and return a IntegrationConnection
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_Organization_IntegrationsQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_Organization_IntegrationsQueryVariables
   ): Promise<IntegrationConnection | undefined> {
@@ -9637,7 +10773,7 @@ export class AdminUserAccountLookup_Users_Organization_IntegrationsQuery extends
 }
 
 /**
- * Query AdminUserAccountLookup_Users_Organization_SubscriptionDocument for SubscriptionAdminPrivileged
+ * A fetchable AdminUserAccountLookup_Users_Organization_Subscription Query
  *
  * @param request - function to call the graphql client
  */
@@ -9646,6 +10782,11 @@ export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery extends
     super(request);
   }
 
+  /**
+   * Call the AdminUserAccountLookup_Users_Organization_Subscription Query and return a SubscriptionAdminPrivileged
+   *
+   * @param vars - variables to pass into the AdminUserAccountLookup_Users_Organization_SubscriptionQuery
+   */
   public async fetch(
     vars?: D.AdminUserAccountLookup_Users_Organization_SubscriptionQueryVariables
   ): Promise<SubscriptionAdminPrivileged | undefined> {
@@ -9660,7 +10801,7 @@ export class AdminUserAccountLookup_Users_Organization_SubscriptionQuery extends
 }
 
 /**
- * Query BillingDetails_InvoicesDocument for undefined
+ * A fetchable BillingDetails_Invoices Query
  *
  * @param request - function to call the graphql client
  */
@@ -9669,6 +10810,10 @@ export class BillingDetails_InvoicesQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the BillingDetails_Invoices Query and return a undefined
+   *
+   */
   public async fetch(): Promise<undefined | undefined> {
     return this.request<D.BillingDetails_InvoicesQuery, D.BillingDetails_InvoicesQueryVariables>(
       D.BillingDetails_InvoicesDocument,
@@ -9681,7 +10826,7 @@ export class BillingDetails_InvoicesQuery extends Request {
 }
 
 /**
- * Query BillingDetails_PaymentMethodDocument for Card
+ * A fetchable BillingDetails_PaymentMethod Query
  *
  * @param request - function to call the graphql client
  */
@@ -9690,6 +10835,10 @@ export class BillingDetails_PaymentMethodQuery extends Request {
     super(request);
   }
 
+  /**
+   * Call the BillingDetails_PaymentMethod Query and return a Card
+   *
+   */
   public async fetch(): Promise<Card | undefined> {
     return this.request<D.BillingDetails_PaymentMethodQuery, D.BillingDetails_PaymentMethodQueryVariables>(
       D.BillingDetails_PaymentMethodDocument,
@@ -9702,7 +10851,7 @@ export class BillingDetails_PaymentMethodQuery extends Request {
 }
 
 /**
- * Query CollaborativeDocumentJoin_StepsDocument for StepsResponse
+ * A fetchable CollaborativeDocumentJoin_Steps Query
  *
  * @param request - function to call the graphql client
  * @param clientId - required clientId variable to set the collaborativeDocumentJoin scope
@@ -9721,6 +10870,10 @@ export class CollaborativeDocumentJoin_StepsQuery extends Request {
     this._version = version;
   }
 
+  /**
+   * Call the CollaborativeDocumentJoin_Steps Query and return a StepsResponse
+   *
+   */
   public async fetch(): Promise<StepsResponse | undefined> {
     return this.request<D.CollaborativeDocumentJoin_StepsQuery, D.CollaborativeDocumentJoin_StepsQueryVariables>(
       D.CollaborativeDocumentJoin_StepsDocument,
@@ -9737,7 +10890,7 @@ export class CollaborativeDocumentJoin_StepsQuery extends Request {
 }
 
 /**
- * Query Cycle_IssuesDocument for IssueConnection
+ * A fetchable Cycle_Issues Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the cycle scope
@@ -9750,6 +10903,11 @@ export class Cycle_IssuesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Cycle_Issues Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the Cycle_IssuesQuery
+   */
   public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
       id: this._id,
@@ -9762,7 +10920,7 @@ export class Cycle_IssuesQuery extends Request {
 }
 
 /**
- * Query Cycle_UncompletedIssuesUponCloseDocument for IssueConnection
+ * A fetchable Cycle_UncompletedIssuesUponClose Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the cycle scope
@@ -9775,6 +10933,11 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Cycle_UncompletedIssuesUponClose Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the Cycle_UncompletedIssuesUponCloseQuery
+   */
   public async fetch(
     vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
   ): Promise<IssueConnection | undefined> {
@@ -9792,7 +10955,7 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
 }
 
 /**
- * Query FigmaEmbedInfo_FigmaEmbedDocument for FigmaEmbed
+ * A fetchable FigmaEmbedInfo_FigmaEmbed Query
  *
  * @param request - function to call the graphql client
  * @param fileId - required fileId variable to set the figmaEmbedInfo scope
@@ -9805,6 +10968,11 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
     this._fileId = fileId;
   }
 
+  /**
+   * Call the FigmaEmbedInfo_FigmaEmbed Query and return a FigmaEmbed
+   *
+   * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfo_FigmaEmbedQuery
+   */
   public async fetch(
     vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
   ): Promise<FigmaEmbed | undefined> {
@@ -9822,7 +10990,7 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
 }
 
 /**
- * Query Integration_SettingsDocument for IntegrationSettings
+ * A fetchable Integration_Settings Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration scope
@@ -9835,6 +11003,10 @@ export class Integration_SettingsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Integration_Settings Query and return a IntegrationSettings
+   *
+   */
   public async fetch(): Promise<IntegrationSettings | undefined> {
     return this.request<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
       D.Integration_SettingsDocument,
@@ -9849,7 +11021,7 @@ export class Integration_SettingsQuery extends Request {
 }
 
 /**
- * Query Integration_Settings_SlackPostDocument for SlackPostSettings
+ * A fetchable Integration_Settings_SlackPost Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration settings scope
@@ -9862,6 +11034,10 @@ export class Integration_Settings_SlackPostQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Integration_Settings_SlackPost Query and return a SlackPostSettings
+   *
+   */
   public async fetch(): Promise<SlackPostSettings | undefined> {
     return this.request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
       D.Integration_Settings_SlackPostDocument,
@@ -9876,7 +11052,7 @@ export class Integration_Settings_SlackPostQuery extends Request {
 }
 
 /**
- * Query Integration_Settings_SlackProjectPostDocument for SlackPostSettings
+ * A fetchable Integration_Settings_SlackProjectPost Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration settings scope
@@ -9889,6 +11065,10 @@ export class Integration_Settings_SlackProjectPostQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Integration_Settings_SlackProjectPost Query and return a SlackPostSettings
+   *
+   */
   public async fetch(): Promise<SlackPostSettings | undefined> {
     return this.request<
       D.Integration_Settings_SlackProjectPostQuery,
@@ -9903,7 +11083,7 @@ export class Integration_Settings_SlackProjectPostQuery extends Request {
 }
 
 /**
- * Query Integration_Settings_GoogleSheetsDocument for GoogleSheetsSettings
+ * A fetchable Integration_Settings_GoogleSheets Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration settings scope
@@ -9916,6 +11096,10 @@ export class Integration_Settings_GoogleSheetsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Integration_Settings_GoogleSheets Query and return a GoogleSheetsSettings
+   *
+   */
   public async fetch(): Promise<GoogleSheetsSettings | undefined> {
     return this.request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
       D.Integration_Settings_GoogleSheetsDocument,
@@ -9930,7 +11114,7 @@ export class Integration_Settings_GoogleSheetsQuery extends Request {
 }
 
 /**
- * Query Integration_Settings_SentryDocument for SentrySettings
+ * A fetchable Integration_Settings_Sentry Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integration settings scope
@@ -9943,6 +11127,10 @@ export class Integration_Settings_SentryQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Integration_Settings_Sentry Query and return a SentrySettings
+   *
+   */
   public async fetch(): Promise<SentrySettings | undefined> {
     return this.request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
       D.Integration_Settings_SentryDocument,
@@ -9957,7 +11145,7 @@ export class Integration_Settings_SentryQuery extends Request {
 }
 
 /**
- * Query IntegrationResource_DataDocument for IntegrationResourceData
+ * A fetchable IntegrationResource_Data Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource scope
@@ -9970,6 +11158,10 @@ export class IntegrationResource_DataQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the IntegrationResource_Data Query and return a IntegrationResourceData
+   *
+   */
   public async fetch(): Promise<IntegrationResourceData | undefined> {
     return this.request<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
       D.IntegrationResource_DataDocument,
@@ -9984,7 +11176,7 @@ export class IntegrationResource_DataQuery extends Request {
 }
 
 /**
- * Query IntegrationResource_PullRequestDocument for PullRequestPayload
+ * A fetchable IntegrationResource_PullRequest Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource scope
@@ -9997,6 +11189,10 @@ export class IntegrationResource_PullRequestQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the IntegrationResource_PullRequest Query and return a PullRequestPayload
+   *
+   */
   public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<D.IntegrationResource_PullRequestQuery, D.IntegrationResource_PullRequestQueryVariables>(
       D.IntegrationResource_PullRequestDocument,
@@ -10011,7 +11207,7 @@ export class IntegrationResource_PullRequestQuery extends Request {
 }
 
 /**
- * Query IntegrationResource_Data_GithubPullRequestDocument for PullRequestPayload
+ * A fetchable IntegrationResource_Data_GithubPullRequest Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource data scope
@@ -10024,6 +11220,10 @@ export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the IntegrationResource_Data_GithubPullRequest Query and return a PullRequestPayload
+   *
+   */
   public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<
       D.IntegrationResource_Data_GithubPullRequestQuery,
@@ -10038,7 +11238,7 @@ export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
 }
 
 /**
- * Query IntegrationResource_Data_GitlabMergeRequestDocument for PullRequestPayload
+ * A fetchable IntegrationResource_Data_GitlabMergeRequest Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource data scope
@@ -10051,6 +11251,10 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the IntegrationResource_Data_GitlabMergeRequest Query and return a PullRequestPayload
+   *
+   */
   public async fetch(): Promise<PullRequestPayload | undefined> {
     return this.request<
       D.IntegrationResource_Data_GitlabMergeRequestQuery,
@@ -10065,7 +11269,7 @@ export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
 }
 
 /**
- * Query IntegrationResource_Data_GithubCommitDocument for CommitPayload
+ * A fetchable IntegrationResource_Data_GithubCommit Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource data scope
@@ -10078,6 +11282,10 @@ export class IntegrationResource_Data_GithubCommitQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the IntegrationResource_Data_GithubCommit Query and return a CommitPayload
+   *
+   */
   public async fetch(): Promise<CommitPayload | undefined> {
     return this.request<
       D.IntegrationResource_Data_GithubCommitQuery,
@@ -10092,7 +11300,7 @@ export class IntegrationResource_Data_GithubCommitQuery extends Request {
 }
 
 /**
- * Query IntegrationResource_Data_SentryIssueDocument for SentryIssuePayload
+ * A fetchable IntegrationResource_Data_SentryIssue Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the integrationResource data scope
@@ -10105,6 +11313,10 @@ export class IntegrationResource_Data_SentryIssueQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the IntegrationResource_Data_SentryIssue Query and return a SentryIssuePayload
+   *
+   */
   public async fetch(): Promise<SentryIssuePayload | undefined> {
     return this.request<
       D.IntegrationResource_Data_SentryIssueQuery,
@@ -10119,7 +11331,7 @@ export class IntegrationResource_Data_SentryIssueQuery extends Request {
 }
 
 /**
- * Query InviteInfo_InviteDataDocument for InviteData
+ * A fetchable InviteInfo_InviteData Query
  *
  * @param request - function to call the graphql client
  * @param userHash - required userHash variable to set the inviteInfo scope
@@ -10132,6 +11344,11 @@ export class InviteInfo_InviteDataQuery extends Request {
     this._userHash = userHash;
   }
 
+  /**
+   * Call the InviteInfo_InviteData Query and return a InviteData
+   *
+   * @param vars - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
+   */
   public async fetch(vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">): Promise<InviteData | undefined> {
     return this.request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
       D.InviteInfo_InviteDataDocument,
@@ -10147,7 +11364,7 @@ export class InviteInfo_InviteDataQuery extends Request {
 }
 
 /**
- * Query IssueLabel_IssuesDocument for IssueConnection
+ * A fetchable IssueLabel_Issues Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issueLabel scope
@@ -10160,6 +11377,11 @@ export class IssueLabel_IssuesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the IssueLabel_Issues Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the IssueLabel_IssuesQuery
+   */
   public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
       id: this._id,
@@ -10172,7 +11394,7 @@ export class IssueLabel_IssuesQuery extends Request {
 }
 
 /**
- * Query Issue_SubscribersDocument for UserConnection
+ * A fetchable Issue_Subscribers Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
@@ -10185,6 +11407,11 @@ export class Issue_SubscribersQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Issue_Subscribers Query and return a UserConnection
+   *
+   * @param vars - variables without 'id' to pass into the Issue_SubscribersQuery
+   */
   public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">): Promise<UserConnection | undefined> {
     return this.request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
       id: this._id,
@@ -10197,7 +11424,7 @@ export class Issue_SubscribersQuery extends Request {
 }
 
 /**
- * Query Issue_ChildrenDocument for IssueConnection
+ * A fetchable Issue_Children Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
@@ -10210,6 +11437,11 @@ export class Issue_ChildrenQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Issue_Children Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the Issue_ChildrenQuery
+   */
   public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
       id: this._id,
@@ -10222,7 +11454,7 @@ export class Issue_ChildrenQuery extends Request {
 }
 
 /**
- * Query Issue_CommentsDocument for CommentConnection
+ * A fetchable Issue_Comments Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
@@ -10235,6 +11467,11 @@ export class Issue_CommentsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Issue_Comments Query and return a CommentConnection
+   *
+   * @param vars - variables without 'id' to pass into the Issue_CommentsQuery
+   */
   public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">): Promise<CommentConnection | undefined> {
     return this.request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
       id: this._id,
@@ -10247,7 +11484,7 @@ export class Issue_CommentsQuery extends Request {
 }
 
 /**
- * Query Issue_HistoryDocument for IssueHistoryConnection
+ * A fetchable Issue_History Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
@@ -10260,6 +11497,11 @@ export class Issue_HistoryQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Issue_History Query and return a IssueHistoryConnection
+   *
+   * @param vars - variables without 'id' to pass into the Issue_HistoryQuery
+   */
   public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">): Promise<IssueHistoryConnection | undefined> {
     return this.request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
       id: this._id,
@@ -10272,7 +11514,7 @@ export class Issue_HistoryQuery extends Request {
 }
 
 /**
- * Query Issue_LabelsDocument for IssueLabelConnection
+ * A fetchable Issue_Labels Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
@@ -10285,6 +11527,11 @@ export class Issue_LabelsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Issue_Labels Query and return a IssueLabelConnection
+   *
+   * @param vars - variables without 'id' to pass into the Issue_LabelsQuery
+   */
   public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
       id: this._id,
@@ -10297,7 +11544,7 @@ export class Issue_LabelsQuery extends Request {
 }
 
 /**
- * Query Issue_IntegrationResourcesDocument for IntegrationResourceConnection
+ * A fetchable Issue_IntegrationResources Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
@@ -10310,6 +11557,11 @@ export class Issue_IntegrationResourcesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Issue_IntegrationResources Query and return a IntegrationResourceConnection
+   *
+   * @param vars - variables without 'id' to pass into the Issue_IntegrationResourcesQuery
+   */
   public async fetch(
     vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
   ): Promise<IntegrationResourceConnection | undefined> {
@@ -10327,7 +11579,7 @@ export class Issue_IntegrationResourcesQuery extends Request {
 }
 
 /**
- * Query Issue_RelationsDocument for IssueRelationConnection
+ * A fetchable Issue_Relations Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
@@ -10340,6 +11592,11 @@ export class Issue_RelationsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Issue_Relations Query and return a IssueRelationConnection
+   *
+   * @param vars - variables without 'id' to pass into the Issue_RelationsQuery
+   */
   public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">): Promise<IssueRelationConnection | undefined> {
     return this.request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
       id: this._id,
@@ -10352,7 +11609,7 @@ export class Issue_RelationsQuery extends Request {
 }
 
 /**
- * Query Issue_InverseRelationsDocument for IssueRelationConnection
+ * A fetchable Issue_InverseRelations Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the issue scope
@@ -10365,6 +11622,11 @@ export class Issue_InverseRelationsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Issue_InverseRelations Query and return a IssueRelationConnection
+   *
+   * @param vars - variables without 'id' to pass into the Issue_InverseRelationsQuery
+   */
   public async fetch(
     vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">
   ): Promise<IssueRelationConnection | undefined> {
@@ -10382,7 +11644,7 @@ export class Issue_InverseRelationsQuery extends Request {
 }
 
 /**
- * Query Milestone_ProjectsDocument for ProjectConnection
+ * A fetchable Milestone_Projects Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the milestone scope
@@ -10395,6 +11657,11 @@ export class Milestone_ProjectsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Milestone_Projects Query and return a ProjectConnection
+   *
+   * @param vars - variables without 'id' to pass into the Milestone_ProjectsQuery
+   */
   public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
       id: this._id,
@@ -10407,7 +11674,7 @@ export class Milestone_ProjectsQuery extends Request {
 }
 
 /**
- * Query OrganizationInvite_IssuesDocument for IssueConnection
+ * A fetchable OrganizationInvite_Issues Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the organizationInvite scope
@@ -10420,6 +11687,11 @@ export class OrganizationInvite_IssuesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the OrganizationInvite_Issues Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
+   */
   public async fetch(
     vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">
   ): Promise<IssueConnection | undefined> {
@@ -10437,7 +11709,7 @@ export class OrganizationInvite_IssuesQuery extends Request {
 }
 
 /**
- * Query Project_TeamsDocument for TeamConnection
+ * A fetchable Project_Teams Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the project scope
@@ -10450,6 +11722,11 @@ export class Project_TeamsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Project_Teams Query and return a TeamConnection
+   *
+   * @param vars - variables without 'id' to pass into the Project_TeamsQuery
+   */
   public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">): Promise<TeamConnection | undefined> {
     return this.request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
       id: this._id,
@@ -10462,7 +11739,7 @@ export class Project_TeamsQuery extends Request {
 }
 
 /**
- * Query Project_MembersDocument for UserConnection
+ * A fetchable Project_Members Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the project scope
@@ -10475,6 +11752,11 @@ export class Project_MembersQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Project_Members Query and return a UserConnection
+   *
+   * @param vars - variables without 'id' to pass into the Project_MembersQuery
+   */
   public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">): Promise<UserConnection | undefined> {
     return this.request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
       id: this._id,
@@ -10487,7 +11769,7 @@ export class Project_MembersQuery extends Request {
 }
 
 /**
- * Query Project_IssuesDocument for IssueConnection
+ * A fetchable Project_Issues Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the project scope
@@ -10500,6 +11782,11 @@ export class Project_IssuesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Project_Issues Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the Project_IssuesQuery
+   */
   public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
       id: this._id,
@@ -10512,7 +11799,7 @@ export class Project_IssuesQuery extends Request {
 }
 
 /**
- * Query Project_LinksDocument for ProjectLinkConnection
+ * A fetchable Project_Links Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the project scope
@@ -10525,6 +11812,11 @@ export class Project_LinksQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Project_Links Query and return a ProjectLinkConnection
+   *
+   * @param vars - variables without 'id' to pass into the Project_LinksQuery
+   */
   public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
       id: this._id,
@@ -10537,7 +11829,7 @@ export class Project_LinksQuery extends Request {
 }
 
 /**
- * Query Team_IssuesDocument for IssueConnection
+ * A fetchable Team_Issues Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
@@ -10550,6 +11842,11 @@ export class Team_IssuesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Team_Issues Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the Team_IssuesQuery
+   */
   public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
       id: this._id,
@@ -10562,7 +11859,7 @@ export class Team_IssuesQuery extends Request {
 }
 
 /**
- * Query Team_CyclesDocument for CycleConnection
+ * A fetchable Team_Cycles Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
@@ -10575,6 +11872,11 @@ export class Team_CyclesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Team_Cycles Query and return a CycleConnection
+   *
+   * @param vars - variables without 'id' to pass into the Team_CyclesQuery
+   */
   public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">): Promise<CycleConnection | undefined> {
     return this.request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
       id: this._id,
@@ -10587,7 +11889,7 @@ export class Team_CyclesQuery extends Request {
 }
 
 /**
- * Query Team_MembershipsDocument for TeamMembershipConnection
+ * A fetchable Team_Memberships Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
@@ -10600,6 +11902,11 @@ export class Team_MembershipsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Team_Memberships Query and return a TeamMembershipConnection
+   *
+   * @param vars - variables without 'id' to pass into the Team_MembershipsQuery
+   */
   public async fetch(
     vars?: Omit<D.Team_MembershipsQueryVariables, "id">
   ): Promise<TeamMembershipConnection | undefined> {
@@ -10614,7 +11921,7 @@ export class Team_MembershipsQuery extends Request {
 }
 
 /**
- * Query Team_ProjectsDocument for ProjectConnection
+ * A fetchable Team_Projects Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
@@ -10627,6 +11934,11 @@ export class Team_ProjectsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Team_Projects Query and return a ProjectConnection
+   *
+   * @param vars - variables without 'id' to pass into the Team_ProjectsQuery
+   */
   public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
       id: this._id,
@@ -10639,7 +11951,7 @@ export class Team_ProjectsQuery extends Request {
 }
 
 /**
- * Query Team_StatesDocument for WorkflowStateConnection
+ * A fetchable Team_States Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
@@ -10652,6 +11964,11 @@ export class Team_StatesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Team_States Query and return a WorkflowStateConnection
+   *
+   * @param vars - variables without 'id' to pass into the Team_StatesQuery
+   */
   public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">): Promise<WorkflowStateConnection | undefined> {
     return this.request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
       id: this._id,
@@ -10664,7 +11981,7 @@ export class Team_StatesQuery extends Request {
 }
 
 /**
- * Query Team_TemplatesDocument for TemplateConnection
+ * A fetchable Team_Templates Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
@@ -10677,6 +11994,11 @@ export class Team_TemplatesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Team_Templates Query and return a TemplateConnection
+   *
+   * @param vars - variables without 'id' to pass into the Team_TemplatesQuery
+   */
   public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">): Promise<TemplateConnection | undefined> {
     return this.request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
       id: this._id,
@@ -10689,7 +12011,7 @@ export class Team_TemplatesQuery extends Request {
 }
 
 /**
- * Query Team_LabelsDocument for IssueLabelConnection
+ * A fetchable Team_Labels Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
@@ -10702,6 +12024,11 @@ export class Team_LabelsQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Team_Labels Query and return a IssueLabelConnection
+   *
+   * @param vars - variables without 'id' to pass into the Team_LabelsQuery
+   */
   public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
       id: this._id,
@@ -10714,7 +12041,7 @@ export class Team_LabelsQuery extends Request {
 }
 
 /**
- * Query Team_WebhooksDocument for WebhookConnection
+ * A fetchable Team_Webhooks Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the team scope
@@ -10727,6 +12054,11 @@ export class Team_WebhooksQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the Team_Webhooks Query and return a WebhookConnection
+   *
+   * @param vars - variables without 'id' to pass into the Team_WebhooksQuery
+   */
   public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">): Promise<WebhookConnection | undefined> {
     return this.request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
       id: this._id,
@@ -10739,7 +12071,7 @@ export class Team_WebhooksQuery extends Request {
 }
 
 /**
- * Query WorkflowState_IssuesDocument for IssueConnection
+ * A fetchable WorkflowState_Issues Query
  *
  * @param request - function to call the graphql client
  * @param id - required id variable to set the workflowState scope
@@ -10752,6 +12084,11 @@ export class WorkflowState_IssuesQuery extends Request {
     this._id = id;
   }
 
+  /**
+   * Call the WorkflowState_Issues Query and return a IssueConnection
+   *
+   * @param vars - variables without 'id' to pass into the WorkflowState_IssuesQuery
+   */
   public async fetch(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
       D.WorkflowState_IssuesDocument,
@@ -10764,4 +12101,215 @@ export class WorkflowState_IssuesQuery extends Request {
       return data ? new IssueConnection(this.request, data) : undefined;
     });
   }
+}
+
+/**
+ * The SDK class containing all root operations
+ *
+ * @param request - function to call the graphql client
+ */
+export class LinearSdk extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  public user = new UserQuery(this.request).fetch;
+  public viewer = new ViewerQuery(this.request).fetch;
+  public organization = new OrganizationQuery(this.request).fetch;
+  public organizationExists = new OrganizationExistsQuery(this.request).fetch;
+  public syncBootstrap = new SyncBootstrapQuery(this.request).fetch;
+  public syncUpdates = new SyncUpdatesQuery(this.request).fetch;
+  public archivedModelSync = new ArchivedModelSyncQuery(this.request).fetch;
+  public archivedModelsSync = new ArchivedModelsSyncQuery(this.request).fetch;
+  public adminUserAccountLookup = new AdminUserAccountLookupQuery(this.request).fetch;
+  public users = new UsersQuery(this.request).fetch;
+  public apiKeys = new ApiKeysQuery(this.request).fetch;
+  public applicationWithAuthorization = new ApplicationWithAuthorizationQuery(this.request).fetch;
+  public authorizedApplications = new AuthorizedApplicationsQuery(this.request).fetch;
+  public ssoUrlFromEmail = new SsoUrlFromEmailQuery(this.request).fetch;
+  public billingDetails = new BillingDetailsQuery(this.request).fetch;
+  public collaborativeDocumentJoin = new CollaborativeDocumentJoinQuery(this.request).fetch;
+  public comment = new CommentQuery(this.request).fetch;
+  public comments = new CommentsQuery(this.request).fetch;
+  public customView = new CustomViewQuery(this.request).fetch;
+  public customViews = new CustomViewsQuery(this.request).fetch;
+  public cycle = new CycleQuery(this.request).fetch;
+  public cycles = new CyclesQuery(this.request).fetch;
+  public emoji = new EmojiQuery(this.request).fetch;
+  public emojis = new EmojisQuery(this.request).fetch;
+  public favorite = new FavoriteQuery(this.request).fetch;
+  public favorites = new FavoritesQuery(this.request).fetch;
+  public figmaEmbedInfo = new FigmaEmbedInfoQuery(this.request).fetch;
+  public integration = new IntegrationQuery(this.request).fetch;
+  public integrations = new IntegrationsQuery(this.request).fetch;
+  public integrationResource = new IntegrationResourceQuery(this.request).fetch;
+  public integrationResources = new IntegrationResourcesQuery(this.request).fetch;
+  public inviteInfo = new InviteInfoQuery(this.request).fetch;
+  public issueLabel = new IssueLabelQuery(this.request).fetch;
+  public issueLabels = new IssueLabelsQuery(this.request).fetch;
+  public issueRelation = new IssueRelationQuery(this.request).fetch;
+  public issueRelations = new IssueRelationsQuery(this.request).fetch;
+  public issue = new IssueQuery(this.request).fetch;
+  public issueSearch = new IssueSearchQuery(this.request).fetch;
+  public issues = new IssuesQuery(this.request).fetch;
+  public milestone = new MilestoneQuery(this.request).fetch;
+  public milestones = new MilestonesQuery(this.request).fetch;
+  public notification = new NotificationQuery(this.request).fetch;
+  public notifications = new NotificationsQuery(this.request).fetch;
+  public notificationSubscription = new NotificationSubscriptionQuery(this.request).fetch;
+  public organizationInvite = new OrganizationInviteQuery(this.request).fetch;
+  public organizationInvites = new OrganizationInvitesQuery(this.request).fetch;
+  public projectLink = new ProjectLinkQuery(this.request).fetch;
+  public ProjectLinks = new ProjectLinksQuery(this.request).fetch;
+  public project = new ProjectQuery(this.request).fetch;
+  public projects = new ProjectsQuery(this.request).fetch;
+  public pushSubscriptionTest = new PushSubscriptionTestQuery(this.request).fetch;
+  public reaction = new ReactionQuery(this.request).fetch;
+  public reactions = new ReactionsQuery(this.request).fetch;
+  public subscription = new SubscriptionQuery(this.request).fetch;
+  public teamMembership = new TeamMembershipQuery(this.request).fetch;
+  public teamMemberships = new TeamMembershipsQuery(this.request).fetch;
+  public team = new TeamQuery(this.request).fetch;
+  public teams = new TeamsQuery(this.request).fetch;
+  public templates = new TemplatesQuery(this.request).fetch;
+  public template = new TemplateQuery(this.request).fetch;
+  public viewPreferences = new ViewPreferencesQuery(this.request).fetch;
+  public webhook = new WebhookQuery(this.request).fetch;
+  public webhooks = new WebhooksQuery(this.request).fetch;
+  public workflowState = new WorkflowStateQuery(this.request).fetch;
+  public workflowStates = new WorkflowStatesQuery(this.request).fetch;
+  public userUpdate = new UserUpdateMutation(this.request).fetch;
+  public userPromoteAdmin = new UserPromoteAdminMutation(this.request).fetch;
+  public userDemoteAdmin = new UserDemoteAdminMutation(this.request).fetch;
+  public userSuspend = new UserSuspendMutation(this.request).fetch;
+  public userUnsuspend = new UserUnsuspendMutation(this.request).fetch;
+  public organizationUpdate = new OrganizationUpdateMutation(this.request).fetch;
+  public organizationDeleteChallenge = new OrganizationDeleteChallengeMutation(this.request).fetch;
+  public organizationDelete = new OrganizationDeleteMutation(this.request).fetch;
+  public adminDeleteIntegration = new AdminDeleteIntegrationMutation(this.request).fetch;
+  public organizationToggleAccess = new OrganizationToggleAccessMutation(this.request).fetch;
+  public organizationChangeEmailDomain = new OrganizationChangeEmailDomainMutation(this.request).fetch;
+  public organizationToggleSamlEnabled = new OrganizationToggleSamlEnabledMutation(this.request).fetch;
+  public organizationConfigureSaml = new OrganizationConfigureSamlMutation(this.request).fetch;
+  public adminCommand = new AdminCommandMutation(this.request).fetch;
+  public adminBulkEmail = new AdminBulkEmailMutation(this.request).fetch;
+  public adminCreateStripeCustomer = new AdminCreateStripeCustomerMutation(this.request).fetch;
+  public adminScheduleAnonymousTask = new AdminScheduleAnonymousTaskMutation(this.request).fetch;
+  public adminUserAccountChangeEmail = new AdminUserAccountChangeEmailMutation(this.request).fetch;
+  public eventCreate = new EventCreateMutation(this.request).fetch;
+  public apiKeyCreate = new ApiKeyCreateMutation(this.request).fetch;
+  public apiKeyDelete = new ApiKeyDeleteMutation(this.request).fetch;
+  public emailUserAccountAuthChallenge = new EmailUserAccountAuthChallengeMutation(this.request).fetch;
+  public emailTokenUserAccountAuth = new EmailTokenUserAccountAuthMutation(this.request).fetch;
+  public samlTokenUserAccountAuth = new SamlTokenUserAccountAuthMutation(this.request).fetch;
+  public googleUserAccountAuth = new GoogleUserAccountAuthMutation(this.request).fetch;
+  public createOrganizationFromOnboarding = new CreateOrganizationFromOnboardingMutation(this.request).fetch;
+  public joinOrganizationFromOnboarding = new JoinOrganizationFromOnboardingMutation(this.request).fetch;
+  public leaveOrganization = new LeaveOrganizationMutation(this.request).fetch;
+  public billingEmailUpdate = new BillingEmailUpdateMutation(this.request).fetch;
+  public collaborativeDocumentUpdate = new CollaborativeDocumentUpdateMutation(this.request).fetch;
+  public commentCreate = new CommentCreateMutation(this.request).fetch;
+  public commentUpdate = new CommentUpdateMutation(this.request).fetch;
+  public commentDelete = new CommentDeleteMutation(this.request).fetch;
+  public contactCreate = new ContactCreateMutation(this.request).fetch;
+  public customViewCreate = new CustomViewCreateMutation(this.request).fetch;
+  public customViewUpdate = new CustomViewUpdateMutation(this.request).fetch;
+  public customViewDelete = new CustomViewDeleteMutation(this.request).fetch;
+  public cycleCreate = new CycleCreateMutation(this.request).fetch;
+  public cycleUpdate = new CycleUpdateMutation(this.request).fetch;
+  public cycleArchive = new CycleArchiveMutation(this.request).fetch;
+  public debugFailWithInternalError = new DebugFailWithInternalErrorMutation(this.request).fetch;
+  public debugFailWithWarning = new DebugFailWithWarningMutation(this.request).fetch;
+  public debugCreateSAMLOrg = new DebugCreateSamlOrgMutation(this.request).fetch;
+  public emailUnsubscribe = new EmailUnsubscribeMutation(this.request).fetch;
+  public emojiCreate = new EmojiCreateMutation(this.request).fetch;
+  public emojiDelete = new EmojiDeleteMutation(this.request).fetch;
+  public favoriteCreate = new FavoriteCreateMutation(this.request).fetch;
+  public favoriteUpdate = new FavoriteUpdateMutation(this.request).fetch;
+  public favoriteDelete = new FavoriteDeleteMutation(this.request).fetch;
+  public feedbackCreate = new FeedbackCreateMutation(this.request).fetch;
+  public fileUpload = new FileUploadMutation(this.request).fetch;
+  public imageUploadFromUrl = new ImageUploadFromUrlMutation(this.request).fetch;
+  public integrationGithubConnect = new IntegrationGithubConnectMutation(this.request).fetch;
+  public integrationGitlabConnect = new IntegrationGitlabConnectMutation(this.request).fetch;
+  public integrationSlack = new IntegrationSlackMutation(this.request).fetch;
+  public integrationSlackPersonal = new IntegrationSlackPersonalMutation(this.request).fetch;
+  public integrationSlackPost = new IntegrationSlackPostMutation(this.request).fetch;
+  public integrationSlackProjectPost = new IntegrationSlackProjectPostMutation(this.request).fetch;
+  public integrationSlackImportEmojis = new IntegrationSlackImportEmojisMutation(this.request).fetch;
+  public integrationFigma = new IntegrationFigmaMutation(this.request).fetch;
+  public integrationGoogleSheets = new IntegrationGoogleSheetsMutation(this.request).fetch;
+  public refreshGoogleSheetsData = new RefreshGoogleSheetsDataMutation(this.request).fetch;
+  public integrationSentryConnect = new IntegrationSentryConnectMutation(this.request).fetch;
+  public integrationDelete = new IntegrationDeleteMutation(this.request).fetch;
+  public integrationResourceArchive = new IntegrationResourceArchiveMutation(this.request).fetch;
+  public issueLabelCreate = new IssueLabelCreateMutation(this.request).fetch;
+  public issueLabelUpdate = new IssueLabelUpdateMutation(this.request).fetch;
+  public issueLabelArchive = new IssueLabelArchiveMutation(this.request).fetch;
+  public issueRelationCreate = new IssueRelationCreateMutation(this.request).fetch;
+  public issueRelationUpdate = new IssueRelationUpdateMutation(this.request).fetch;
+  public issueRelationDelete = new IssueRelationDeleteMutation(this.request).fetch;
+  public issueCreate = new IssueCreateMutation(this.request).fetch;
+  public issueUpdate = new IssueUpdateMutation(this.request).fetch;
+  public issueArchive = new IssueArchiveMutation(this.request).fetch;
+  public issueUnarchive = new IssueUnarchiveMutation(this.request).fetch;
+  public milestoneCreate = new MilestoneCreateMutation(this.request).fetch;
+  public milestoneUpdate = new MilestoneUpdateMutation(this.request).fetch;
+  public milestoneDelete = new MilestoneDeleteMutation(this.request).fetch;
+  public notificationCreate = new NotificationCreateMutation(this.request).fetch;
+  public notificationUpdate = new NotificationUpdateMutation(this.request).fetch;
+  public notificationDelete = new NotificationDeleteMutation(this.request).fetch;
+  public notificationArchive = new NotificationArchiveMutation(this.request).fetch;
+  public notificationUnarchive = new NotificationUnarchiveMutation(this.request).fetch;
+  public notificationSubscriptionCreate = new NotificationSubscriptionCreateMutation(this.request).fetch;
+  public notificationSubscriptionDelete = new NotificationSubscriptionDeleteMutation(this.request).fetch;
+  public oauthClientCreate = new OauthClientCreateMutation(this.request).fetch;
+  public oauthClientUpdate = new OauthClientUpdateMutation(this.request).fetch;
+  public oauthClientArchive = new OauthClientArchiveMutation(this.request).fetch;
+  public oauthClientRotateSecret = new OauthClientRotateSecretMutation(this.request).fetch;
+  public oauthTokenRevoke = new OauthTokenRevokeMutation(this.request).fetch;
+  public organizationDomainVerify = new OrganizationDomainVerifyMutation(this.request).fetch;
+  public organizationDomainCreate = new OrganizationDomainCreateMutation(this.request).fetch;
+  public organizationDomainDelete = new OrganizationDomainDeleteMutation(this.request).fetch;
+  public organizationInviteCreate = new OrganizationInviteCreateMutation(this.request).fetch;
+  public resentOrganizationInvite = new ResentOrganizationInviteMutation(this.request).fetch;
+  public organizationInviteDelete = new OrganizationInviteDeleteMutation(this.request).fetch;
+  public projectLinkCreate = new ProjectLinkCreateMutation(this.request).fetch;
+  public projectLinkDelete = new ProjectLinkDeleteMutation(this.request).fetch;
+  public projectCreate = new ProjectCreateMutation(this.request).fetch;
+  public projectUpdate = new ProjectUpdateMutation(this.request).fetch;
+  public projectArchive = new ProjectArchiveMutation(this.request).fetch;
+  public pushSubscriptionCreate = new PushSubscriptionCreateMutation(this.request).fetch;
+  public pushSubscriptionDelete = new PushSubscriptionDeleteMutation(this.request).fetch;
+  public reactionCreate = new ReactionCreateMutation(this.request).fetch;
+  public reactionDelete = new ReactionDeleteMutation(this.request).fetch;
+  public createCsvExportReport = new CreateCsvExportReportMutation(this.request).fetch;
+  public subscriptionSessionCreate = new SubscriptionSessionCreateMutation(this.request).fetch;
+  public subscriptionUpdateSessionCreate = new SubscriptionUpdateSessionCreateMutation(this.request).fetch;
+  public subscriptionUpdate = new SubscriptionUpdateMutation(this.request).fetch;
+  public subscriptionUpgrade = new SubscriptionUpgradeMutation(this.request).fetch;
+  public subscriptionArchive = new SubscriptionArchiveMutation(this.request).fetch;
+  public teamMembershipCreate = new TeamMembershipCreateMutation(this.request).fetch;
+  public teamMembershipDelete = new TeamMembershipDeleteMutation(this.request).fetch;
+  public teamCreate = new TeamCreateMutation(this.request).fetch;
+  public teamUpdate = new TeamUpdateMutation(this.request).fetch;
+  public teamArchive = new TeamArchiveMutation(this.request).fetch;
+  public teamDelete = new TeamDeleteMutation(this.request).fetch;
+  public templateCreate = new TemplateCreateMutation(this.request).fetch;
+  public templateUpdate = new TemplateUpdateMutation(this.request).fetch;
+  public templateDelete = new TemplateDeleteMutation(this.request).fetch;
+  public userSettingsUpdate = new UserSettingsUpdateMutation(this.request).fetch;
+  public userSettingsFlagIncrement = new UserSettingsFlagIncrementMutation(this.request).fetch;
+  public userSettingsFlagsReset = new UserSettingsFlagsResetMutation(this.request).fetch;
+  public userFlagUpdate = new UserFlagUpdateMutation(this.request).fetch;
+  public userSubscribeToNewsletter = new UserSubscribeToNewsletterMutation(this.request).fetch;
+  public viewPreferencesCreate = new ViewPreferencesCreateMutation(this.request).fetch;
+  public viewPreferencesUpdate = new ViewPreferencesUpdateMutation(this.request).fetch;
+  public viewPreferencesDelete = new ViewPreferencesDeleteMutation(this.request).fetch;
+  public webhookCreate = new WebhookCreateMutation(this.request).fetch;
+  public webhookUpdate = new WebhookUpdateMutation(this.request).fetch;
+  public webhookDelete = new WebhookDeleteMutation(this.request).fetch;
+  public workflowStateCreate = new WorkflowStateCreateMutation(this.request).fetch;
+  public workflowStateUpdate = new WorkflowStateUpdateMutation(this.request).fetch;
+  public workflowStateArchive = new WorkflowStateArchiveMutation(this.request).fetch;
 }

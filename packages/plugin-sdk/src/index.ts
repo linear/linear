@@ -9,6 +9,7 @@ import { getSdkDefinitions } from "./definitions";
 import { printModels } from "./model";
 import { ModelVisitor } from "./model-visitor";
 import { printRequest } from "./request";
+import { printSdk } from "./sdk";
 import { RawSdkPluginConfig, SdkModel, SdkPluginContext } from "./types";
 
 /**
@@ -56,6 +57,10 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
     logger.info("Generating operations");
     const printedOperations = printOperations(sdkContext);
 
+    /** Print the root operation sdk  */
+    logger.info("Generating sdk");
+    const printedSdk = printSdk(sdkContext);
+
     // /** Print each api definition  */
     // const printedDefinitions = Object.entries(sdkDefinitions).map(([apiKey, definition]) => {
     //   logger.info("Generating api", apiKey);
@@ -79,12 +84,12 @@ export const plugin: PluginFunction<RawSdkPluginConfig> = async (
           `export * from '${config.documentFile}'\n`,
           /** Print the requester function */
           printRequest(config),
-          "\n",
           /** Print the query return types */
           printedModels,
           printedOperations,
+          printedSdk,
         ],
-        "\n"
+        "\n\n"
       ),
     };
   } catch (e) {

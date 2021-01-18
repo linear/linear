@@ -35,7 +35,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
       name: "data",
       optional: false,
       type: dataType,
-      description: `the initial ${model.name}Fragment response data`,
+      description: `${model.name}Fragment response data`,
     },
   ]);
 
