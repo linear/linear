@@ -40,8 +40,11 @@ function printOperation(context: SdkPluginContext, o: SdkOperation): string {
         }
 
         ${printComment([
-          `Call the ${o.print.name} ${o.print.type} and return a ${o.print.model}${o.print.list ? " list" : ""}`,
+          `Call the ${o.print.name} ${o.print.type.toLowerCase()} and return a ${o.print.model}${
+            o.print.list ? " list" : ""
+          }`,
           ...o.fetchArgs.jsdoc,
+          `@returns parsed response from ${o.print.response}`,
         ])}
         public async fetch(${o.fetchArgs.printInput}): ${o.print.promise} {
           return ${`this.${c.REQUEST_NAME}<${printNamespaced(context, o.print.response)}, ${
