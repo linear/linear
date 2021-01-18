@@ -1,12 +1,4 @@
-import {
-  getArgList,
-  getLast,
-  printComment,
-  printDebug,
-  printList,
-  printTypescriptType,
-  reduceListType,
-} from "@linear/plugin-common";
+import { getArgList, getLast, printComment, printDebug, printList, printTypescriptType } from "@linear/plugin-common";
 import c from "./constants";
 import { printNamespaced, printPascal } from "./print";
 import { getRequestArg } from "./request";
@@ -147,7 +139,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             printDebug("fields.query"),
             printList(
               model.fields.query.map(field => {
-                const typeName = reduceListType(field.node.type) ?? printTypescriptType(context, field.node.type);
+                const typeName = printTypescriptType(context, field.node.type);
                 const fieldQueryName = `${printPascal(field.query.name.value)}Query`;
                 const fieldQueryArgs = field.args?.map(arg => `this._${field.name}?.${arg.name}`);
 

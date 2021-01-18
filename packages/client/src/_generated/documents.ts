@@ -5404,7 +5404,6 @@ export type WorkflowStateConnectionFragment = { __typename?: "WorkflowStateConne
 };
 
 export type TemplateConnectionFragment = { __typename?: "TemplateConnection" } & {
-  nodes: Array<{ __typename?: "Template" } & TemplateFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
@@ -6051,7 +6050,7 @@ export type TeamPayloadFragment = { __typename?: "TeamPayload" } & Pick<TeamPayl
 export type TemplatePayloadFragment = { __typename?: "TemplatePayload" } & Pick<
   TemplatePayload,
   "lastSyncId" | "success"
->;
+> & { template: { __typename?: "Template" } & Pick<Template, "id"> };
 
 export type UserSettingsPayloadFragment = { __typename?: "UserSettingsPayload" } & Pick<
   UserSettingsPayload,
@@ -9916,6 +9915,33 @@ export const WorkflowStateConnectionFragmentDoc: DocumentNode<WorkflowStateConne
     ...PageInfoFragmentDoc.definitions,
   ],
 };
+export const TemplateConnectionFragmentDoc: DocumentNode<TemplateConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TemplateConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TemplateConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
 export const TemplateFragmentDoc: DocumentNode<TemplateFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -9958,44 +9984,6 @@ export const TemplateFragmentDoc: DocumentNode<TemplateFragment, unknown> = {
         ],
       },
     },
-  ],
-};
-export const TemplateConnectionFragmentDoc: DocumentNode<TemplateConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "TemplateConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TemplateConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Template" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...TemplateFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 };
 export const IssueLabelFragmentDoc: DocumentNode<IssueLabelFragment, unknown> = {
@@ -13375,6 +13363,16 @@ export const TemplatePayloadFragmentDoc: DocumentNode<TemplatePayloadFragment, u
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "template" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
