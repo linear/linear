@@ -5246,6 +5246,30 @@ class AuthorizedApplicationsQuery extends LinearRequest {
 }
 
 /**
+ * A fetchable AvailableUsers Query
+ *
+ * @param request - function to call the graphql client
+ */
+class AvailableUsersQuery extends LinearRequest {
+  public constructor(request: Request) {
+    super(request);
+  }
+
+  /**
+   * Call the AvailableUsers Query and return a AuthResolverResponse
+   *
+   */
+  public async fetch(): Promise<AuthResolverResponse | undefined> {
+    return this.request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument, {}).then(
+      response => {
+        const data = response?.availableUsers;
+        return data ? new AuthResolverResponse(this.request, data) : undefined;
+      }
+    );
+  }
+}
+
+/**
  * A fetchable SsoUrlFromEmail Query
  *
  * @param request - function to call the graphql client
@@ -11856,6 +11880,7 @@ export class LinearSdk extends LinearRequest {
   public apiKeys = new ApiKeysQuery(this.request).fetch;
   public applicationWithAuthorization = new ApplicationWithAuthorizationQuery(this.request).fetch;
   public authorizedApplications = new AuthorizedApplicationsQuery(this.request).fetch;
+  public availableUsers = new AvailableUsersQuery(this.request).fetch;
   public ssoUrlFromEmail = new SsoUrlFromEmailQuery(this.request).fetch;
   public billingDetails = new BillingDetailsQuery(this.request).fetch;
   public collaborativeDocumentJoin = new CollaborativeDocumentJoinQuery(this.request).fetch;

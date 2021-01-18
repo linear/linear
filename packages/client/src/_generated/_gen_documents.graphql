@@ -2832,6 +2832,13 @@ query authorizedApplications {
   }
 }
 
+# Fetch users belonging to this user account.
+query availableUsers {
+  availableUsers {
+    ...AuthResolverResponse
+  }
+}
+
 # Fetch SSO login URL for the email provided.
 query ssoUrlFromEmail(
   # Whether the client is the desktop app.

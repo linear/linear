@@ -6385,6 +6385,12 @@ export type AuthorizedApplicationsQuery = { __typename?: "Query" } & {
   >;
 };
 
+export type AvailableUsersQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AvailableUsersQuery = { __typename?: "Query" } & {
+  availableUsers: { __typename?: "AuthResolverResponse" } & AuthResolverResponseFragment;
+};
+
 export type SsoUrlFromEmailQueryVariables = Exact<{
   isDesktop?: Maybe<Scalars["Boolean"]>;
   email: Scalars["String"];
@@ -15437,6 +15443,36 @@ export const AuthorizedApplicationsDocument: DocumentNode<
         ],
       },
     },
+  ],
+};
+export const AvailableUsersDocument: DocumentNode<AvailableUsersQuery, AvailableUsersQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "availableUsers" },
+      variableDefinitions: [],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "availableUsers" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...AuthResolverResponseFragmentDoc.definitions,
   ],
 };
 export const SsoUrlFromEmailDocument: DocumentNode<SsoUrlFromEmailQuery, SsoUrlFromEmailQueryVariables> = {
