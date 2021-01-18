@@ -52,7 +52,7 @@ export function printRequest(): string {
       `export type ${c.REQUEST_TYPE} = <R, V>(doc: DocumentNode, ${c.VARIABLE_NAME}?: V) => Promise<R>`,
       "\n",
       printComment(["Base class to provide a request function", ...args.jsdoc]),
-      `export class ${c.REQUEST_CLASS} {
+      `class ${c.REQUEST_CLASS} {
         public constructor(${args.printInput}) {
           this.${c.REQUEST_NAME} = ${c.REQUEST_NAME}
         }
