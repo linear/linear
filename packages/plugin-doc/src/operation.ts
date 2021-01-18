@@ -11,7 +11,6 @@ import {
   printGraphqlDescription,
   printGraphqlInputArgs,
   printGraphqlResponseArgs,
-  printGraphqlType,
   printList,
 } from "@linear/plugin-common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
@@ -156,12 +155,10 @@ export function printOperations(
         if (
           /** No need to go further than scalar fields */
           isScalarField(context, field) ||
-          /** No need to go further if the field returns one of the parent fields */
-          fields.map(f => printGraphqlType(f.type)).includes(printGraphqlType(field.type)) ||
           /** No need to go further if the field is a connection */
           ["pageInfo", "nodes"].includes(field.name.value) ||
           /** No need to go further if we can get this field from a root query */
-          (findQuery(context, field) && fields.length > 0)
+          findQuery(context, field)
         ) {
           return undefined;
         } else {

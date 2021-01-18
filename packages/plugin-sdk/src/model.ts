@@ -1,6 +1,7 @@
 import {
   getArgList,
   getLast,
+  lowerFirst,
   printComment,
   printDebug,
   printList,
@@ -36,7 +37,10 @@ function printModelField(field: SdkModelField, content: string): string {
  */
 function printModel(context: SdkPluginContext, model: SdkModel): string {
   const dataType = `${printNamespaced(context, model.name)}Fragment`;
-  const operations = context.sdkDefinitions[model.name.toLowerCase()]?.operations ?? [];
+
+  const operations = context.sdkDefinitions[lowerFirst(model.name)]?.operations ?? [];
+  const operationFieldNames = operations.map(o => getLast(o.path));
+
   const args = getArgList([
     getRequestArg(),
     {
@@ -51,7 +55,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
     [
       printDebug(model),
       printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
-      `export class ${model.name} extends ${c.REQUEST_CLASS} {
+      `class ${model.name} extends ${c.REQUEST_CLASS} {
         ${printList(
           [
             printDebug("fields.query"),
@@ -83,9 +87,11 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               ),
               printDebug("fields.object"),
               printList(
-                model.fields.object.map(
-                  field =>
-                    `this.${field.name} = data.${field.name} 
+                model.fields.object.map(field =>
+                  /** Ignore objects returned by an operation */
+                  operationFieldNames.includes(field.name)
+                    ? undefined
+                    : `this.${field.name} = data.${field.name} 
                       ? new ${field.object.name.value}(${c.REQUEST_NAME}, data.${field.name}) 
                       : undefined`
                 ),
@@ -134,8 +140,10 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             ),
             printDebug("fields.object"),
             printList(
-              model.fields.object.map(field =>
-                printModelField(field, `public ${field.name}?: ${field.object.name.value}`)
+              model.fields.object.map((field /** Ignore objects returned by an operation */) =>
+                operationFieldNames.includes(field.name)
+                  ? undefined
+                  : printModelField(field, `public ${field.name}?: ${field.object.name.value}`)
               ),
               "\n"
             ),
@@ -180,11 +188,11 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             printList(
               operations.map(o => {
                 const fieldName = getLast(o.path);
-                const field = model.fields.connection.find(f => f.name === fieldName);
+                const field = model.fields.all.find(f => f.name === fieldName);
                 const requiredVariableNames = Object.keys(o.requiredVariables).map(v => `'${v}'`);
                 const optionalArgs = getOptionalVariables(o.node);
                 const variableType = printNamespaced(context, o.operationVariablesTypes);
-                const optionalArg = optionalArgs
+                const optionalArg = optionalArgs.length
                   ? getArgList([
                       {
                         name: c.VARIABLE_NAME,
@@ -198,18 +206,21 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                       },
                     ])
                   : undefined;
+
                 const operationArgs = printList(
                   [`this.${c.REQUEST_NAME}`, ...Object.keys(o.requiredVariables).map(v => `this.${v}`), ,],
                   ", "
                 );
                 const variableCheck = printList([...Object.keys(o.requiredVariables).map(v => `this.${v}`), ,], " && ");
-                const operationCall = `new ${o.name}${o.operationType}(${operationArgs}).fetch(${optionalArg?.printOutput})`;
+                const operationCall = `new ${o.name}${o.operationType}(${operationArgs}).fetch(${
+                  optionalArg?.printOutput ?? ""
+                })`;
 
                 return printList(
                   [
                     printComment([field?.node.description?.value]),
                     printDebug(o),
-                    `public ${optionalArg ? "" : "get"} ${fieldName}(${optionalArg?.printInput}) {
+                    `public ${optionalArg ? "" : "get"} ${fieldName}(${optionalArg?.printInput ?? ""}) {
                         return ${variableCheck ? `${variableCheck} ?` : ""} ${operationCall} ${
                       variableCheck ? `: undefined` : ""
                     }
