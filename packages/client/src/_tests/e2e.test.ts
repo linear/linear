@@ -26,7 +26,7 @@ async function getSomeTeam() {
   expect(first).toBeDefined();
 
   const team = await client.team(first?.id ?? "");
-  expectSuccess(team, { id: expect.stringContaining("") });
+  expect(typeof team?.id).toBe("string");
 
   return team;
 }
@@ -42,16 +42,9 @@ async function getSomeIssue() {
   expect(first).toBeDefined();
 
   const issue = await client.issue(first?.id ?? "");
-  expectSuccess(issue, { id: expect.stringContaining("") });
+  expect(typeof issue?.id).toBe("string");
 
   return issue;
-}
-
-/**
- * Assert success of the operation
- */
-function expectSuccess<Data>(response: Data, data?: Partial<Data>) {
-  expect(response).toEqual(expect.objectContaining(data ?? {}));
 }
 
 /**
@@ -76,8 +69,7 @@ if (process.env.E2E_API_KEY) {
     describe("queries", () => {
       it("query for the viewer", async () => {
         const viewer = await getClient().viewer;
-
-        expectSuccess(viewer, { id: expect.stringContaining("") });
+        expect(typeof viewer?.id).toBe("string");
       });
 
       it("query for a team", async () => {
@@ -105,26 +97,31 @@ if (process.env.E2E_API_KEY) {
         /** Create issue */
         const createdInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
         const created = await client.issueCreate({ teamId: team?.id ?? "", ...createdInput });
-        expectSuccess(created, { success: true, issue: expect.objectContaining(createdInput) });
+        expect(created?.success).toBe(true);
+        const createdIssue = await created?.issue;
+        expect(createdIssue).toEqual(expect.objectContaining(createdInput));
 
         /** Query for issue */
-        const createdIssue = await created?.issue;
         const createdId = createdIssue?.id ?? "";
         const issue = await client.issue(createdId);
-        expectSuccess(issue, { id: createdId, ...createdInput, archivedAt: null });
+        expect(issue?.id).toBe(createdId);
+        expect(issue?.archivedAt).toBeUndefined();
 
         /** Update issue */
         const updatedInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
         const updated = await client.issueUpdate(updatedInput, createdId);
-        expectSuccess(updated, { success: true, issue: expect.objectContaining(updatedInput) });
+        expect(updated?.success).toBe(true);
+        const updatedIssue = await updated?.issue;
+        expect(updatedIssue).toEqual(expect.objectContaining(updatedInput));
 
         /** Archive issue */
         const archivedIssue = await client.issueArchive(createdId);
-        expectSuccess(archivedIssue, { success: true });
+        expect(archivedIssue?.success).toBe(true);
 
         /** Confirm issue is archived */
         const noIssue = await client.issue(createdId);
-        expectSuccess(noIssue, { id: createdId, ...updatedInput, archivedAt: expect.stringContaining("") });
+        expect(noIssue?.id).toBe(createdId);
+        expect(typeof noIssue?.archivedAt).toBe("string");
       });
     });
   });

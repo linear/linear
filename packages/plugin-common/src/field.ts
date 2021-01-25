@@ -17,7 +17,7 @@ export function isScalarField(context: PluginContext, field: FieldDefinitionNode
  */
 export function isValidField(context: PluginContext, field?: FieldDefinitionNode): field is FieldDefinitionNode {
   if (field && field.name.value !== "edges") {
-    const skipFieldName = context.config.skipFields?.includes(field?.name.value ?? "");
+    const skipFieldName = context.config.skipFields?.includes(field?.name?.value ?? field?.name ?? "");
     const skipDirective = field?.directives?.find(directive =>
       context.config.skipDirectives?.includes(directive.name.value)
     );

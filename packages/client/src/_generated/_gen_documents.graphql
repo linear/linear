@@ -26,8 +26,6 @@ fragment User on User {
   email
   # An URL to the user's avatar image.
   avatarUrl
-  # Reason why is the account disabled.
-  disableReason
   # Unique hash for the user to be used in invite URLs.
   inviteHash
   # The last time the user was seen online. If null, the user is currently online.
@@ -194,10 +192,6 @@ fragment Team on Team {
   issueEstimationExtended
   # What to use as an default estimate for unestimated issues.
   defaultIssueEstimate
-  # The default template to use for new issues created by members of the team.
-  defaultTemplateForMembersId
-  # The default template to use for new issues created by non-members of the team.
-  defaultTemplateForNonMembersId
   # The workflow state into which issues are moved when a PR has been opened as draft.
   draftWorkflowState {
     id
@@ -1115,8 +1109,6 @@ fragment UserAdminPrivileged on UserAdminPrivileged {
   email
   # An URL to the user's avatar image.
   avatarUrl
-  # Reason why is the account disabled.
-  disableReason
   # Unique hash for the user to be used in invite URLs.
   inviteHash
   # The last time the user was seen online. If null, the user is currently online.
