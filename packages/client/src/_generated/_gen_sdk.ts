@@ -125,7 +125,7 @@ class UserConnection extends LinearConnection<User> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new User(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new User(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -2664,7 +2664,7 @@ class CustomViewConnection extends LinearConnection<CustomView> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new CustomView(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -3239,7 +3239,7 @@ class ReactionConnection extends LinearConnection<Reaction> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Reaction(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
