@@ -124,7 +124,7 @@ class UserConnection extends LinearConnection<User> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new User(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new User(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -262,7 +262,7 @@ class IssueConnection extends LinearConnection<Issue> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Issue(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Issue(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -686,7 +686,7 @@ class CycleConnection extends LinearConnection<Cycle> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Cycle(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Cycle(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -800,7 +800,7 @@ class TeamMembershipConnection extends LinearConnection<TeamMembership> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new TeamMembership(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new TeamMembership(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -861,7 +861,7 @@ class ProjectConnection extends LinearConnection<Project> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Project(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Project(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1124,7 +1124,7 @@ class TeamConnection extends LinearConnection<Team> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Team(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Team(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1145,7 +1145,7 @@ class MilestoneConnection extends LinearConnection<Milestone> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Milestone(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Milestone(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1166,7 +1166,7 @@ class IntegrationConnection extends LinearConnection<Integration> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Integration(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Integration(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1364,7 +1364,7 @@ class ProjectLinkConnection extends LinearConnection<ProjectLink> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new ProjectLink(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new ProjectLink(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1431,7 +1431,7 @@ class WorkflowStateConnection extends LinearConnection<WorkflowState> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new WorkflowState(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new WorkflowState(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1521,7 +1521,7 @@ class IssueLabelConnection extends LinearConnection<IssueLabel> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new IssueLabel(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new IssueLabel(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1595,7 +1595,7 @@ class WebhookConnection extends LinearConnection<Webhook> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Webhook(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Webhook(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1665,7 +1665,7 @@ class CommentConnection extends LinearConnection<Comment> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Comment(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Comment(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1738,7 +1738,7 @@ class IssueHistoryConnection extends LinearConnection<IssueHistory> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new IssueHistory(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new IssueHistory(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -1917,7 +1917,7 @@ class IntegrationResourceConnection extends LinearConnection<IntegrationResource
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new IntegrationResource(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new IntegrationResource(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -2133,7 +2133,7 @@ class IssueRelationConnection extends LinearConnection<IssueRelation> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new IssueRelation(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new IssueRelation(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -2496,7 +2496,7 @@ class ApiKeyConnection extends LinearConnection<ApiKey> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new ApiKey(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -2774,7 +2774,7 @@ class CustomViewConnection extends LinearConnection<CustomView> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new CustomView(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -2857,7 +2857,7 @@ class EmojiConnection extends LinearConnection<Emoji> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Emoji(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -2925,7 +2925,7 @@ class FavoriteConnection extends LinearConnection<Favorite> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Favorite(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -3115,7 +3115,7 @@ class NotificationConnection extends LinearConnection<Notification> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Notification(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -3203,7 +3203,7 @@ class NotificationSubscriptionConnection extends LinearConnection<NotificationSu
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new NotificationSubscription(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -3273,7 +3273,7 @@ class OrganizationInviteConnection extends LinearConnection<OrganizationInvite> 
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new OrganizationInvite(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -3372,7 +3372,7 @@ class ReactionConnection extends LinearConnection<Reaction> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Reaction(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
@@ -4847,7 +4847,7 @@ class PushSubscriptionConnection extends LinearConnection<PushSubscription> {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new PushSubscription(this._request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new PushSubscription(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }

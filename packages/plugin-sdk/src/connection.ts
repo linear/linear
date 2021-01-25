@@ -214,7 +214,7 @@ export function printConnectionModel(context: SdkPluginContext, model: SdkModel)
             c.FETCH_NAME,
             printTernary(
               `${c.DATA_NAME}?.${c.NODE_NAME}`,
-              `${c.DATA_NAME}.${c.NODE_NAME}.map(node => new ${modelType}(this._${c.REQUEST_NAME}, node))`
+              `${c.DATA_NAME}.${c.NODE_NAME}.map(node => new ${modelType}(${c.REQUEST_NAME}, node))`
             ),
             printTernary(
               `${c.DATA_NAME}?.${c.PAGEINFO_NAME}`,
