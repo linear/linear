@@ -3,6 +3,7 @@ import {
   findQuery,
   getRequiredArgs,
   isConnection,
+  isValidField,
   isValidFragment,
   Named,
   NamedFields,
@@ -83,7 +84,7 @@ export class FragmentVisitor {
       const type = reduceTypeName(_node.type);
 
       /** Skip objects defined in constants */
-      if (!this._context.config.skipObjects?.includes(type)) {
+      if (isValidField(this.context, _node)) {
         const node = (_node as unknown) as Named<FieldDefinitionNode>;
         const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
 

@@ -152,7 +152,7 @@ export function printConnection(): string {
         }
       }
     
-      ${printComment(["Fetch the next page of results"])}
+      ${printComment(["Fetch the next page of results and append to nodes"])}
       public get ${c.FETCH_NAME}Next(): Promise<this> {
         return ${printTernary(
           `this.${c.PAGEINFO_NAME}?.hasNextPage`,
@@ -165,7 +165,7 @@ export function printConnection(): string {
         )}
       }
     
-      ${printComment(["Fetch the previous page of results"])}
+      ${printComment(["Fetch the previous page of results and prepend to nodes"])}
       public get ${c.FETCH_NAME}Previous(): Promise<this> {
         return ${printTernary(
           `this.${c.PAGEINFO_NAME}?.hasPreviousPage`,

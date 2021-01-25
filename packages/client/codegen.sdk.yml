@@ -16,18 +16,9 @@ generates:
     config:
       documentFile: ./_gen_documents
       skipFields:
-        # - "adminUserAccountLookup"
-        # - "adminCommand"
-        # - "adminBulkEmail"
-        # - "adminCreateStripeCustomer"
-        # - "adminScheduleAnonymousTask"
-        # - "adminUserAccountChangeEmail"
-        # - "adminDeleteIntegration"
-        # - "userPromoteAdmin"
-        # - "userDemoteAdmin"
-        # - "availableUsers"
-        # - "integrationResource"
-        # - "organizationInviteCreate"
+        - "disableReason"
+        - "defaultTemplateForMembersId"
+        - "defaultTemplateForNonMembersId"
       skipObjects:
         # - "UserSettings"
       skipDirectives:

@@ -5150,7 +5150,6 @@ export type UserFragment = { __typename?: "User" } & Pick<
   | "displayName"
   | "email"
   | "avatarUrl"
-  | "disableReason"
   | "inviteHash"
   | "lastSeen"
   | "admin"
@@ -5226,8 +5225,6 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
   | "issueEstimationAllowZero"
   | "issueEstimationExtended"
   | "defaultIssueEstimate"
-  | "defaultTemplateForMembersId"
-  | "defaultTemplateForNonMembersId"
   | "groupIssueHistory"
   | "slackNewIssue"
   | "slackIssueComments"
@@ -5595,7 +5592,6 @@ export type UserAdminPrivilegedFragment = { __typename?: "UserAdminPrivileged" }
   | "displayName"
   | "email"
   | "avatarUrl"
-  | "disableReason"
   | "inviteHash"
   | "lastSeen"
   | "admin"
@@ -8616,7 +8612,6 @@ export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "displayName" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "avatarUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "disableReason" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "lastSeen" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "admin" }, arguments: [], directives: [] },
@@ -9167,18 +9162,6 @@ export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "issueEstimationAllowZero" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationExtended" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "defaultTemplateForMembersId" },
-            arguments: [],
-            directives: [],
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "defaultTemplateForNonMembersId" },
-            arguments: [],
-            directives: [],
-          },
           {
             kind: "Field",
             name: { kind: "Name", value: "draftWorkflowState" },
@@ -10782,7 +10765,6 @@ export const UserAdminPrivilegedFragmentDoc: DocumentNode<UserAdminPrivilegedFra
           { kind: "Field", name: { kind: "Name", value: "displayName" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "avatarUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "disableReason" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "lastSeen" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "admin" }, arguments: [], directives: [] },

@@ -87,7 +87,7 @@ class LinearConnection<Node> extends Connection<Node> {
     }
   }
 
-  /** Fetch the next page of results */
+  /** Fetch the next page of results and append to nodes */
   public get fetchNext(): Promise<this> {
     return this.pageInfo?.hasNextPage
       ? this._fetch({ after: this.pageInfo?.endCursor }).then(response => {
@@ -98,7 +98,7 @@ class LinearConnection<Node> extends Connection<Node> {
       : Promise.resolve(this);
   }
 
-  /** Fetch the previous page of results */
+  /** Fetch the previous page of results and prepend to nodes */
   public get fetchPrevious(): Promise<this> {
     return this.pageInfo?.hasPreviousPage
       ? this._fetch({ before: this.pageInfo?.startCursor }).then(response => {
@@ -147,7 +147,6 @@ class User extends LinearRequest {
     this.displayName = data.displayName ?? undefined;
     this.email = data.email ?? undefined;
     this.avatarUrl = data.avatarUrl ?? undefined;
-    this.disableReason = data.disableReason ?? undefined;
     this.inviteHash = data.inviteHash ?? undefined;
     this.lastSeen = data.lastSeen ?? undefined;
     this.admin = data.admin ?? undefined;
@@ -174,8 +173,6 @@ class User extends LinearRequest {
   public email?: string;
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
-  /** Reason why is the account disabled. */
-  public disableReason?: string;
   /** Unique hash for the user to be used in invite URLs. */
   public inviteHash?: string;
   /** The last time the user was seen online. If null, the user is currently online. */
@@ -456,8 +453,6 @@ class Team extends LinearRequest {
     this.issueEstimationAllowZero = data.issueEstimationAllowZero ?? undefined;
     this.issueEstimationExtended = data.issueEstimationExtended ?? undefined;
     this.defaultIssueEstimate = data.defaultIssueEstimate ?? undefined;
-    this.defaultTemplateForMembersId = data.defaultTemplateForMembersId ?? undefined;
-    this.defaultTemplateForNonMembersId = data.defaultTemplateForNonMembersId ?? undefined;
     this.groupIssueHistory = data.groupIssueHistory ?? undefined;
     this.slackNewIssue = data.slackNewIssue ?? undefined;
     this.slackIssueComments = data.slackIssueComments ?? undefined;
@@ -519,10 +514,6 @@ class Team extends LinearRequest {
   public issueEstimationExtended?: boolean;
   /** What to use as an default estimate for unestimated issues. */
   public defaultIssueEstimate?: number;
-  /** The default template to use for new issues created by members of the team. */
-  public defaultTemplateForMembersId?: string;
-  /** The default template to use for new issues created by non-members of the team. */
-  public defaultTemplateForNonMembersId?: string;
   /** Whether to group recent issue history entries. */
   public groupIssueHistory?: boolean;
   /** Whether to send new issue notifications to Slack. */
@@ -2204,7 +2195,6 @@ class UserAdminPrivileged extends LinearRequest {
     this.displayName = data.displayName ?? undefined;
     this.email = data.email ?? undefined;
     this.avatarUrl = data.avatarUrl ?? undefined;
-    this.disableReason = data.disableReason ?? undefined;
     this.inviteHash = data.inviteHash ?? undefined;
     this.lastSeen = data.lastSeen ?? undefined;
     this.admin = data.admin ?? undefined;
@@ -2232,8 +2222,6 @@ class UserAdminPrivileged extends LinearRequest {
   public email?: string;
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
-  /** Reason why is the account disabled. */
-  public disableReason?: string;
   /** Unique hash for the user to be used in invite URLs. */
   public inviteHash?: string;
   /** The last time the user was seen online. If null, the user is currently online. */
