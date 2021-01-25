@@ -20,6 +20,8 @@ export type Scalars = {
 
 export type Query = {
   __typename?: "Query";
+  /** All users for the organization. */
+  users: UserConnection;
   /** One specific user. */
   user: User;
   /** The currently authenticated user. */
@@ -38,8 +40,6 @@ export type Query = {
   archivedModelsSync: ArchiveResponse;
   /** Finds a user account by email or identifier. Super user required. */
   adminUserAccountLookup: UserAccountAdminPrivileged;
-  /** All users of the organization. */
-  users: UserConnection;
   /** All API keys for the user. */
   apiKeys: ApiKeyConnection;
   /** Get information for an application and whether a user has approved it for the given scopes. */
@@ -54,98 +54,115 @@ export type Query = {
   billingDetails: BillingDetailsPayload;
   /** Join collaborative document and get missing steps. */
   collaborativeDocumentJoin: CollaborationDocumentUpdatePayload;
+  /** All comments. */
+  comments: CommentConnection;
   /** A specific comment. */
   comment: Comment;
-  comments: CommentConnection;
+  /** Custom views for the user. */
+  customViews: CustomViewConnection;
   /** One specific custom view. */
   customView: CustomView;
-  customViews: CustomViewConnection;
-  /** One specific cycle. */
-  cycle: Cycle;
   /** All cycles. */
   cycles: CycleConnection;
+  /** One specific cycle. */
+  cycle: Cycle;
+  /** All custom emojis. */
+  emojis: EmojiConnection;
   /** A specific emoji. */
   emoji: Emoji;
-  emojis: EmojiConnection;
-  /** One specific favorite. */
-  favorite: Favorite;
   /** The user's favorites. */
   favorites: FavoriteConnection;
+  /** One specific favorite. */
+  favorite: Favorite;
   /** Fetch Figma screenshot and other information with file and node identifiers. */
   figmaEmbedInfo: FigmaEmbedPayload;
-  /** One specific integration. */
-  integration: Integration;
   /** All integrations. */
   integrations: IntegrationConnection;
-  /** One specific integration resource. (e.g. linked GitHub pull requests for an issue) */
-  integrationResource: IntegrationResource;
+  /** One specific integration. */
+  integration: Integration;
   /** All integrations resources (e.g. linked GitHub pull requests for issues). */
   integrationResources: IntegrationResourceConnection;
+  /** One specific integration resource. (e.g. linked GitHub pull requests for an issue) */
+  integrationResource: IntegrationResource;
   /** Retrieves information for the public invite page. */
   inviteInfo: InvitePagePayload;
+  /** All issue labels. */
+  issueLabels: IssueLabelConnection;
   /** One specific label. */
   issueLabel: IssueLabel;
-  /** All labels. */
-  issueLabels: IssueLabelConnection;
+  /** All issue relationships. */
+  issueRelations: IssueRelationConnection;
   /** One specific issue relation. */
   issueRelation: IssueRelation;
-  issueRelations: IssueRelationConnection;
+  /** All issues. */
+  issues: IssueConnection;
   /** One specific issue. */
   issue: Issue;
   /** [ALPHA] Search issues. This query is experimental and is subject to change without notice. */
   issueSearch: IssueConnection;
-  issues: IssueConnection;
-  /** One specific milestone. */
-  milestone: Milestone;
   /** All milestones. */
   milestones: MilestoneConnection;
-  /** The user's settings. */
-  notification: UserSettings;
+  /** One specific milestone. */
+  milestone: Milestone;
   /** All notifications. */
   notifications: NotificationConnection;
+  /** One specific notification. */
+  notification: Notification;
   /** The user's notification subscriptions. */
-  notificationSubscription: NotificationSubscriptionConnection;
-  /** One specific organization invite. */
-  organizationInvite: IssueLabel;
+  notificationSubscriptions: NotificationSubscriptionConnection;
+  /** One specific notification subscription. */
+  notificationSubscription: NotificationSubscription;
   /** All invites for the organization. */
   organizationInvites: OrganizationInviteConnection;
+  /** One specific organization invite. */
+  organizationInvite: IssueLabel;
+  /** All links for the project. */
+  projectLinks: ProjectLinkConnection;
   /** One specific project link. */
   projectLink: ProjectLink;
-  /** All links for the project. */
-  ProjectLinks: ProjectLinkConnection;
-  /** One specific project. */
-  project: Project;
   /** All projects. */
   projects: ProjectConnection;
+  /** One specific project. */
+  project: Project;
   /** Sends a test push message. */
   pushSubscriptionTest: PushSubscriptionPayload;
+  /** All comment emoji reactions. */
+  reactions: ReactionConnection;
   /** A specific reaction. */
   reaction: Reaction;
-  reactions: ReactionConnection;
   /** The organization's subscription. */
   subscription: Subscription;
-  /** One specific team membership. */
-  teamMembership: TeamMembership;
   /** All team memberships. */
   teamMemberships: TeamMembershipConnection;
-  /** One specific team. */
-  team: Team;
+  /** One specific team membership. */
+  teamMembership: TeamMembership;
   /** All teams. */
   teams: TeamConnection;
+  /** One specific team. */
+  team: Team;
   /** All templates from all users. */
   templates: Array<Template>;
   /** A specific template. */
   template: Template;
-  /** All view preferences. */
-  viewPreferences: ViewPreferencesConnection;
-  /** A specific webhook. */
-  webhook: Webhook;
+  /** The user's settings. */
+  userSettings: UserSettings;
   /** All webhooks. */
   webhooks: WebhookConnection;
+  /** A specific webhook. */
+  webhook: Webhook;
+  /** All issue workflow states. */
+  workflowStates: WorkflowStateConnection;
   /** One specific state. */
   workflowState: WorkflowState;
-  /** All states. */
-  workflowStates: WorkflowStateConnection;
+};
+
+export type QueryUsersArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type QueryUserArgs = {
@@ -182,15 +199,6 @@ export type QueryAdminUserAccountLookupArgs = {
   id?: Maybe<Scalars["String"]>;
 };
 
-export type QueryUsersArgs = {
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
 export type QueryApiKeysArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -217,10 +225,6 @@ export type QueryCollaborativeDocumentJoinArgs = {
   version: Scalars["Int"];
 };
 
-export type QueryCommentArgs = {
-  id: Scalars["String"];
-};
-
 export type QueryCommentsArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -230,7 +234,7 @@ export type QueryCommentsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryCustomViewArgs = {
+export type QueryCommentArgs = {
   id: Scalars["String"];
 };
 
@@ -243,7 +247,7 @@ export type QueryCustomViewsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryCycleArgs = {
+export type QueryCustomViewArgs = {
   id: Scalars["String"];
 };
 
@@ -256,7 +260,7 @@ export type QueryCyclesArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryEmojiArgs = {
+export type QueryCycleArgs = {
   id: Scalars["String"];
 };
 
@@ -269,7 +273,7 @@ export type QueryEmojisArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryFavoriteArgs = {
+export type QueryEmojiArgs = {
   id: Scalars["String"];
 };
 
@@ -282,13 +286,13 @@ export type QueryFavoritesArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+export type QueryFavoriteArgs = {
+  id: Scalars["String"];
+};
+
 export type QueryFigmaEmbedInfoArgs = {
   nodeId?: Maybe<Scalars["String"]>;
   fileId: Scalars["String"];
-};
-
-export type QueryIntegrationArgs = {
-  id: Scalars["String"];
 };
 
 export type QueryIntegrationsArgs = {
@@ -300,7 +304,7 @@ export type QueryIntegrationsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryIntegrationResourceArgs = {
+export type QueryIntegrationArgs = {
   id: Scalars["String"];
 };
 
@@ -313,16 +317,29 @@ export type QueryIntegrationResourcesArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+export type QueryIntegrationResourceArgs = {
+  id: Scalars["String"];
+};
+
 export type QueryInviteInfoArgs = {
   teamHash?: Maybe<Scalars["String"]>;
   userHash: Scalars["String"];
+};
+
+export type QueryIssueLabelsArgs = {
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type QueryIssueLabelArgs = {
   id: Scalars["String"];
 };
 
-export type QueryIssueLabelsArgs = {
+export type QueryIssueRelationsArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -335,7 +352,7 @@ export type QueryIssueRelationArgs = {
   id: Scalars["String"];
 };
 
-export type QueryIssueRelationsArgs = {
+export type QueryIssuesArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -358,7 +375,7 @@ export type QueryIssueSearchArgs = {
   query: Scalars["String"];
 };
 
-export type QueryIssuesArgs = {
+export type QueryMilestonesArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -371,15 +388,6 @@ export type QueryMilestoneArgs = {
   id: Scalars["String"];
 };
 
-export type QueryMilestonesArgs = {
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
 export type QueryNotificationsArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -389,7 +397,11 @@ export type QueryNotificationsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryNotificationSubscriptionArgs = {
+export type QueryNotificationArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryNotificationSubscriptionsArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -398,7 +410,7 @@ export type QueryNotificationSubscriptionArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryOrganizationInviteArgs = {
+export type QueryNotificationSubscriptionArgs = {
   id: Scalars["String"];
 };
 
@@ -411,7 +423,7 @@ export type QueryOrganizationInvitesArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryProjectLinkArgs = {
+export type QueryOrganizationInviteArgs = {
   id: Scalars["String"];
 };
 
@@ -424,7 +436,7 @@ export type QueryProjectLinksArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryProjectArgs = {
+export type QueryProjectLinkArgs = {
   id: Scalars["String"];
 };
 
@@ -437,7 +449,7 @@ export type QueryProjectsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryReactionArgs = {
+export type QueryProjectArgs = {
   id: Scalars["String"];
 };
 
@@ -450,7 +462,7 @@ export type QueryReactionsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryTeamMembershipArgs = {
+export type QueryReactionArgs = {
   id: Scalars["String"];
 };
 
@@ -463,7 +475,7 @@ export type QueryTeamMembershipsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryTeamArgs = {
+export type QueryTeamMembershipArgs = {
   id: Scalars["String"];
 };
 
@@ -476,20 +488,11 @@ export type QueryTeamsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryTemplateArgs = {
+export type QueryTeamArgs = {
   id: Scalars["String"];
 };
 
-export type QueryViewPreferencesArgs = {
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
-export type QueryWebhookArgs = {
+export type QueryTemplateArgs = {
   id: Scalars["String"];
 };
 
@@ -502,7 +505,7 @@ export type QueryWebhooksArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryWorkflowStateArgs = {
+export type QueryWebhookArgs = {
   id: Scalars["String"];
 };
 
@@ -513,6 +516,30 @@ export type QueryWorkflowStatesArgs = {
   last?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryWorkflowStateArgs = {
+  id: Scalars["String"];
+};
+
+/** By which field should the pagination order by */
+export enum PaginationOrderBy {
+  CreatedAt = "createdAt",
+  UpdatedAt = "updatedAt",
+}
+
+export type UserConnection = {
+  __typename?: "UserConnection";
+  edges: Array<UserEdge>;
+  nodes: Array<User>;
+  pageInfo: PageInfo;
+};
+
+export type UserEdge = {
+  __typename?: "UserEdge";
+  node: User;
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
 };
 
 /** A user that has access to the the resources of an organization. */
@@ -541,14 +568,14 @@ export type User = Node & {
   disableReason: Scalars["String"];
   /** Unique hash for the user to be used in invite URLs. */
   inviteHash: Scalars["String"];
-  /** The settings of the user. */
-  settings: UserSettings;
   /** The last time the user was seen online. If null, the user is currently online. */
   lastSeen?: Maybe<Scalars["DateTime"]>;
   /** Whether the user is an organization administrator. */
   admin: Scalars["Boolean"];
   /** Whether the user account is active or disabled. */
   active: Scalars["Boolean"];
+  /** Settings for the user. Only available for the authenticated user. */
+  settings: UserSettings;
   /** Issues assigned to the user. */
   assignedIssues: IssueConnection;
   /** Issues created by the user. */
@@ -617,12 +644,6 @@ export type UserSettings = Node & {
   /** The user to whom this notification was targeted for. */
   user: User;
 };
-
-/** By which field should the pagination order by */
-export enum PaginationOrderBy {
-  CreatedAt = "createdAt",
-  UpdatedAt = "updatedAt",
-}
 
 export type IssueConnection = {
   __typename?: "IssueConnection";
@@ -1387,20 +1408,6 @@ export type OrganizationIntegrationsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type UserConnection = {
-  __typename?: "UserConnection";
-  edges: Array<UserEdge>;
-  nodes: Array<User>;
-  pageInfo: PageInfo;
-};
-
-export type UserEdge = {
-  __typename?: "UserEdge";
-  node: User;
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-};
-
 export type TeamConnection = {
   __typename?: "TeamConnection";
   edges: Array<TeamEdge>;
@@ -1792,8 +1799,8 @@ export type IssueHistory = Node & {
   issue: Issue;
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   actor?: Maybe<User>;
-  /** The integration that made these changes. If null, possibly means that the change was made by a user. */
-  integration?: Maybe<Integration>;
+  /** Information about the integration or application which created this history entry. */
+  source?: Maybe<Scalars["JSONObject"]>;
   /** Whether the issue's description was updated. */
   updatedDescription?: Maybe<Scalars["Boolean"]>;
   /** What the title was changed from. */
@@ -2087,14 +2094,14 @@ export type UserAdminPrivileged = Node & {
   disableReason: Scalars["String"];
   /** Unique hash for the user to be used in invite URLs. */
   inviteHash: Scalars["String"];
-  /** The settings of the user. */
-  settings: UserSettings;
   /** The last time the user was seen online. If null, the user is currently online. */
   lastSeen?: Maybe<Scalars["DateTime"]>;
   /** Whether the user is an organization administrator. */
   admin: Scalars["Boolean"];
   /** Whether the user account is active or disabled. */
   active: Scalars["Boolean"];
+  /** Settings for the user. Only available for the authenticated user. */
+  settings: UserSettings;
   /** Issues assigned to the user. */
   assignedIssues: IssueConnection;
   /** Issues created by the user. */
@@ -2340,6 +2347,20 @@ export type StepsResponse = {
   clientIds: Array<Scalars["String"]>;
 };
 
+export type CustomViewConnection = {
+  __typename?: "CustomViewConnection";
+  edges: Array<CustomViewEdge>;
+  nodes: Array<CustomView>;
+  pageInfo: PageInfo;
+};
+
+export type CustomViewEdge = {
+  __typename?: "CustomViewEdge";
+  node: CustomView;
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+};
+
 /** A custom view that has been saved by a user. */
 export type CustomView = Node & {
   __typename?: "CustomView";
@@ -2374,16 +2395,16 @@ export type CustomView = Node & {
   shared: Scalars["Boolean"];
 };
 
-export type CustomViewConnection = {
-  __typename?: "CustomViewConnection";
-  edges: Array<CustomViewEdge>;
-  nodes: Array<CustomView>;
+export type EmojiConnection = {
+  __typename?: "EmojiConnection";
+  edges: Array<EmojiEdge>;
+  nodes: Array<Emoji>;
   pageInfo: PageInfo;
 };
 
-export type CustomViewEdge = {
-  __typename?: "CustomViewEdge";
-  node: CustomView;
+export type EmojiEdge = {
+  __typename?: "EmojiEdge";
+  node: Emoji;
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
 };
@@ -2414,16 +2435,16 @@ export type Emoji = Node & {
   organization: Organization;
 };
 
-export type EmojiConnection = {
-  __typename?: "EmojiConnection";
-  edges: Array<EmojiEdge>;
-  nodes: Array<Emoji>;
+export type FavoriteConnection = {
+  __typename?: "FavoriteConnection";
+  edges: Array<FavoriteEdge>;
+  nodes: Array<Favorite>;
   pageInfo: PageInfo;
 };
 
-export type EmojiEdge = {
-  __typename?: "EmojiEdge";
-  node: Emoji;
+export type FavoriteEdge = {
+  __typename?: "FavoriteEdge";
+  node: Favorite;
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
 };
@@ -2458,20 +2479,6 @@ export type Favorite = Node & {
   cycle?: Maybe<Cycle>;
   /** Favorited issue label. */
   label?: Maybe<IssueLabel>;
-};
-
-export type FavoriteConnection = {
-  __typename?: "FavoriteConnection";
-  edges: Array<FavoriteEdge>;
-  nodes: Array<Favorite>;
-  pageInfo: PageInfo;
-};
-
-export type FavoriteEdge = {
-  __typename?: "FavoriteEdge";
-  node: Favorite;
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
 };
 
 export type FigmaEmbedPayload = {
@@ -2664,6 +2671,20 @@ export type PushSubscriptionPayload = {
   success: Scalars["Boolean"];
 };
 
+export type ReactionConnection = {
+  __typename?: "ReactionConnection";
+  edges: Array<ReactionEdge>;
+  nodes: Array<Reaction>;
+  pageInfo: PageInfo;
+};
+
+export type ReactionEdge = {
+  __typename?: "ReactionEdge";
+  node: Reaction;
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+};
+
 /** A reaction associated with a comment. */
 export type Reaction = Node & {
   __typename?: "Reaction";
@@ -2684,54 +2705,6 @@ export type Reaction = Node & {
   user: User;
   /** The comment that the reaction is associated with. */
   comment: Comment;
-};
-
-export type ReactionConnection = {
-  __typename?: "ReactionConnection";
-  edges: Array<ReactionEdge>;
-  nodes: Array<Reaction>;
-  pageInfo: PageInfo;
-};
-
-export type ReactionEdge = {
-  __typename?: "ReactionEdge";
-  node: Reaction;
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-};
-
-export type ViewPreferencesConnection = {
-  __typename?: "ViewPreferencesConnection";
-  edges: Array<ViewPreferencesEdge>;
-  nodes: Array<ViewPreferences>;
-  pageInfo: PageInfo;
-};
-
-export type ViewPreferencesEdge = {
-  __typename?: "ViewPreferencesEdge";
-  node: ViewPreferences;
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-};
-
-/** View preferences. */
-export type ViewPreferences = Node & {
-  __typename?: "ViewPreferences";
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The view preference type. */
-  type: Scalars["String"];
-  /** The view type. */
-  viewType: Scalars["String"];
 };
 
 export type Mutation = {
@@ -2772,6 +2745,8 @@ export type Mutation = {
   adminScheduleAnonymousTask: AdminCommandPayload;
   /** Changes the email address for the user account and all of its users. */
   adminUserAccountChangeEmail: UserAccountAdminPrivileged;
+  /** Permanently deletes the user account and all associated data. */
+  adminUserAccountDelete: AdminResponse;
   /** [Deprecated] Creates a new event. */
   eventCreate: EventPayload;
   /** Creates a new API key. */
@@ -3079,6 +3054,12 @@ export type MutationAdminScheduleAnonymousTaskArgs = {
 
 export type MutationAdminUserAccountChangeEmailArgs = {
   newEmail: Scalars["String"];
+  id: Scalars["String"];
+};
+
+export type MutationAdminUserAccountDeleteArgs = {
+  deleteAllData?: Maybe<Scalars["Boolean"]>;
+  email: Scalars["String"];
   id: Scalars["String"];
 };
 
@@ -3690,6 +3671,13 @@ export type AdminCommandInput = {
 
 export type AdminCommandPayload = {
   __typename?: "AdminCommandPayload";
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+/** Operation response. */
+export type AdminResponse = {
+  __typename?: "AdminResponse";
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
@@ -4929,6 +4917,26 @@ export type ViewPreferencesPayload = {
   success: Scalars["Boolean"];
 };
 
+/** View preferences. */
+export type ViewPreferences = Node & {
+  __typename?: "ViewPreferences";
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The view preference type. */
+  type: Scalars["String"];
+  /** The view type. */
+  viewType: Scalars["String"];
+};
+
 export type ViewPreferencesUpdateInput = {
   /** View preferences. */
   preferences: Scalars["JSONObject"];
@@ -5002,6 +5010,12 @@ export type WorkflowStateUpdateInput = {
   description?: Maybe<Scalars["String"]>;
   /** The position of the state. */
   position?: Maybe<Scalars["Float"]>;
+};
+
+export type SynchronizedPayload = {
+  __typename?: "SynchronizedPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
 };
 
 /** Collaborative editing steps for documents. */
@@ -5098,12 +5112,6 @@ export type FileUpload = {
   size: Scalars["Float"];
 };
 
-export type SynchronizedPayload = {
-  __typename?: "SynchronizedPayload";
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
-};
-
 /** Public information of the OAuth application. */
 export type Application = {
   __typename?: "Application";
@@ -5125,6 +5133,11 @@ export type OrganizationDomainSimplePayload = {
   __typename?: "OrganizationDomainSimplePayload";
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+export type UserConnectionFragment = { __typename?: "UserConnection" } & {
+  nodes: Array<{ __typename?: "User" } & UserFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
 export type UserFragment = { __typename?: "User" } & Pick<
@@ -5335,11 +5348,6 @@ export type OrganizationFragment = { __typename?: "Organization" } & Pick<
   | "createdIssueCount"
 >;
 
-export type UserConnectionFragment = { __typename?: "UserConnection" } & {
-  nodes: Array<{ __typename?: "User" } & UserFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
 export type TeamConnectionFragment = { __typename?: "TeamConnection" } & {
   nodes: Array<{ __typename?: "Team" } & TeamFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
@@ -5453,6 +5461,7 @@ export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
   | "createdAt"
   | "updatedAt"
   | "archivedAt"
+  | "source"
   | "updatedDescription"
   | "fromTitle"
   | "toTitle"
@@ -5471,7 +5480,6 @@ export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
 > & {
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
     fromAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     toAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     fromTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -5689,13 +5697,18 @@ export type StepsResponseFragment = { __typename?: "StepsResponse" } & Pick<
   "version" | "steps" | "clientIds"
 >;
 
+export type CustomViewConnectionFragment = { __typename?: "CustomViewConnection" } & {
+  nodes: Array<{ __typename?: "CustomView" } & CustomViewFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type CustomViewFragment = { __typename?: "CustomView" } & Pick<
   CustomView,
   "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "description" | "icon" | "color" | "filters" | "shared"
 > & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
 
-export type CustomViewConnectionFragment = { __typename?: "CustomViewConnection" } & {
-  nodes: Array<{ __typename?: "CustomView" } & CustomViewFragment>;
+export type EmojiConnectionFragment = { __typename?: "EmojiConnection" } & {
+  nodes: Array<{ __typename?: "Emoji" } & EmojiFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
@@ -5704,8 +5717,8 @@ export type EmojiFragment = { __typename?: "Emoji" } & Pick<
   "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "url" | "source"
 > & { creator: { __typename?: "User" } & Pick<User, "id"> };
 
-export type EmojiConnectionFragment = { __typename?: "EmojiConnection" } & {
-  nodes: Array<{ __typename?: "Emoji" } & EmojiFragment>;
+export type FavoriteConnectionFragment = { __typename?: "FavoriteConnection" } & {
+  nodes: Array<{ __typename?: "Favorite" } & FavoriteFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
@@ -5720,11 +5733,6 @@ export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
   };
-
-export type FavoriteConnectionFragment = { __typename?: "FavoriteConnection" } & {
-  nodes: Array<{ __typename?: "Favorite" } & FavoriteFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
 
 export type FigmaEmbedPayloadFragment = { __typename?: "FigmaEmbedPayload" } & Pick<
   FigmaEmbedPayload,
@@ -5799,25 +5807,15 @@ export type PushSubscriptionPayloadFragment = { __typename?: "PushSubscriptionPa
   "lastSyncId" | "success"
 >;
 
-export type ReactionFragment = { __typename?: "Reaction" } & Pick<
-  Reaction,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "emoji"
-> & { user: { __typename?: "User" } & Pick<User, "id">; comment: { __typename?: "Comment" } & Pick<Comment, "id"> };
-
 export type ReactionConnectionFragment = { __typename?: "ReactionConnection" } & {
   nodes: Array<{ __typename?: "Reaction" } & ReactionFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type ViewPreferencesConnectionFragment = { __typename?: "ViewPreferencesConnection" } & {
-  nodes: Array<{ __typename?: "ViewPreferences" } & ViewPreferencesFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type ViewPreferencesFragment = { __typename?: "ViewPreferences" } & Pick<
-  ViewPreferences,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type" | "viewType"
->;
+export type ReactionFragment = { __typename?: "Reaction" } & Pick<
+  Reaction,
+  "id" | "createdAt" | "updatedAt" | "archivedAt" | "emoji"
+> & { user: { __typename?: "User" } & Pick<User, "id">; comment: { __typename?: "Comment" } & Pick<Comment, "id"> };
 
 export type UserPayloadFragment = { __typename?: "UserPayload" } & Pick<UserPayload, "lastSyncId" | "success"> & {
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -5856,6 +5854,8 @@ export type SamlConfigurationFragment = { __typename?: "SamlConfiguration" } & P
 >;
 
 export type AdminCommandPayloadFragment = { __typename?: "AdminCommandPayload" } & Pick<AdminCommandPayload, "success">;
+
+export type AdminResponseFragment = { __typename?: "AdminResponse" } & Pick<AdminResponse, "success">;
 
 export type EventPayloadFragment = { __typename?: "EventPayload" } & Pick<EventPayload, "success">;
 
@@ -5955,12 +5955,12 @@ export type MilestonePayloadFragment = { __typename?: "MilestonePayload" } & Pic
 export type NotificationPayloadFragment = { __typename?: "NotificationPayload" } & Pick<
   NotificationPayload,
   "lastSyncId" | "success"
-> & { notification: { __typename?: "Notification" } & NotificationFragment };
+> & { notification: { __typename?: "Notification" } & Pick<Notification, "id"> };
 
 export type NotificationSubscriptionPayloadFragment = { __typename?: "NotificationSubscriptionPayload" } & Pick<
   NotificationSubscriptionPayload,
   "lastSyncId" | "success"
-> & { notificationSubscription: { __typename?: "NotificationSubscription" } & NotificationSubscriptionFragment };
+> & { notificationSubscription: { __typename?: "NotificationSubscription" } & Pick<NotificationSubscription, "id"> };
 
 export type OauthClientPayloadFragment = { __typename?: "OauthClientPayload" } & Pick<
   OauthClientPayload,
@@ -6077,6 +6077,11 @@ export type ViewPreferencesPayloadFragment = { __typename?: "ViewPreferencesPayl
   "lastSyncId" | "success"
 > & { viewPreferences: { __typename?: "ViewPreferences" } & ViewPreferencesFragment };
 
+export type ViewPreferencesFragment = { __typename?: "ViewPreferences" } & Pick<
+  ViewPreferences,
+  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type" | "viewType"
+>;
+
 export type WebhookPayloadFragment = { __typename?: "WebhookPayload" } & Pick<
   WebhookPayload,
   "lastSyncId" | "success"
@@ -6086,6 +6091,11 @@ export type WorkflowStatePayloadFragment = { __typename?: "WorkflowStatePayload"
   WorkflowStatePayload,
   "lastSyncId" | "success"
 > & { workflowState: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id"> };
+
+export type SynchronizedPayloadFragment = { __typename?: "SynchronizedPayload" } & Pick<
+  SynchronizedPayload,
+  "lastSyncId"
+>;
 
 export type DocumentStepFragment = { __typename?: "DocumentStep" } & Pick<
   DocumentStep,
@@ -6112,11 +6122,6 @@ export type FileUploadFragment = { __typename?: "FileUpload" } & Pick<
   "id" | "assetUrl" | "contentType" | "filename" | "metaData" | "size"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
-export type SynchronizedPayloadFragment = { __typename?: "SynchronizedPayload" } & Pick<
-  SynchronizedPayload,
-  "lastSyncId"
->;
-
 export type ApplicationFragment = { __typename?: "Application" } & Pick<
   Application,
   "clientId" | "name" | "description" | "developer" | "developerUrl" | "imageUrl"
@@ -6126,6 +6131,19 @@ export type OrganizationDomainSimplePayloadFragment = { __typename?: "Organizati
   OrganizationDomainSimplePayload,
   "success"
 >;
+
+export type UsersQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type UsersQuery = { __typename?: "Query" } & {
+  users: { __typename?: "UserConnection" } & UserConnectionFragment;
+};
 
 export type UserQueryVariables = Exact<{
   id: Scalars["String"];
@@ -6338,19 +6356,6 @@ export type AdminUserAccountLookupQuery = { __typename?: "Query" } & {
   adminUserAccountLookup: { __typename?: "UserAccountAdminPrivileged" } & UserAccountAdminPrivilegedFragment;
 };
 
-export type UsersQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type UsersQuery = { __typename?: "Query" } & {
-  users: { __typename?: "UserConnection" } & UserConnectionFragment;
-};
-
 export type ApiKeysQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -6438,12 +6443,6 @@ export type CollaborativeDocumentJoin_StepsQuery = { __typename?: "Query" } & {
   };
 };
 
-export type CommentQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type CommentQuery = { __typename?: "Query" } & { comment: { __typename?: "Comment" } & CommentFragment };
-
 export type CommentsQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -6457,13 +6456,11 @@ export type CommentsQuery = { __typename?: "Query" } & {
   comments: { __typename?: "CommentConnection" } & CommentConnectionFragment;
 };
 
-export type CustomViewQueryVariables = Exact<{
+export type CommentQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
 
-export type CustomViewQuery = { __typename?: "Query" } & {
-  customView: { __typename?: "CustomView" } & CustomViewFragment;
-};
+export type CommentQuery = { __typename?: "Query" } & { comment: { __typename?: "Comment" } & CommentFragment };
 
 export type CustomViewsQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
@@ -6476,6 +6473,27 @@ export type CustomViewsQueryVariables = Exact<{
 
 export type CustomViewsQuery = { __typename?: "Query" } & {
   customViews: { __typename?: "CustomViewConnection" } & CustomViewConnectionFragment;
+};
+
+export type CustomViewQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type CustomViewQuery = { __typename?: "Query" } & {
+  customView: { __typename?: "CustomView" } & CustomViewFragment;
+};
+
+export type CyclesQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type CyclesQuery = { __typename?: "Query" } & {
+  cycles: { __typename?: "CycleConnection" } & CycleConnectionFragment;
 };
 
 export type CycleQueryVariables = Exact<{
@@ -6514,25 +6532,6 @@ export type Cycle_UncompletedIssuesUponCloseQuery = { __typename?: "Query" } & {
   };
 };
 
-export type CyclesQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type CyclesQuery = { __typename?: "Query" } & {
-  cycles: { __typename?: "CycleConnection" } & CycleConnectionFragment;
-};
-
-export type EmojiQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type EmojiQuery = { __typename?: "Query" } & { emoji: { __typename?: "Emoji" } & EmojiFragment };
-
 export type EmojisQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -6546,11 +6545,11 @@ export type EmojisQuery = { __typename?: "Query" } & {
   emojis: { __typename?: "EmojiConnection" } & EmojiConnectionFragment;
 };
 
-export type FavoriteQueryVariables = Exact<{
+export type EmojiQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
 
-export type FavoriteQuery = { __typename?: "Query" } & { favorite: { __typename?: "Favorite" } & FavoriteFragment };
+export type EmojiQuery = { __typename?: "Query" } & { emoji: { __typename?: "Emoji" } & EmojiFragment };
 
 export type FavoritesQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
@@ -6564,6 +6563,12 @@ export type FavoritesQueryVariables = Exact<{
 export type FavoritesQuery = { __typename?: "Query" } & {
   favorites: { __typename?: "FavoriteConnection" } & FavoriteConnectionFragment;
 };
+
+export type FavoriteQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type FavoriteQuery = { __typename?: "Query" } & { favorite: { __typename?: "Favorite" } & FavoriteFragment };
 
 export type FigmaEmbedInfoQueryVariables = Exact<{
   nodeId?: Maybe<Scalars["String"]>;
@@ -6583,6 +6588,19 @@ export type FigmaEmbedInfo_FigmaEmbedQuery = { __typename?: "Query" } & {
   figmaEmbedInfo: { __typename?: "FigmaEmbedPayload" } & {
     figmaEmbed?: Maybe<{ __typename?: "FigmaEmbed" } & FigmaEmbedFragment>;
   };
+};
+
+export type IntegrationsQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type IntegrationsQuery = { __typename?: "Query" } & {
+  integrations: { __typename?: "IntegrationConnection" } & IntegrationConnectionFragment;
 };
 
 export type IntegrationQueryVariables = Exact<{
@@ -6651,7 +6669,7 @@ export type Integration_Settings_SentryQuery = { __typename?: "Query" } & {
   };
 };
 
-export type IntegrationsQueryVariables = Exact<{
+export type IntegrationResourcesQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -6660,8 +6678,8 @@ export type IntegrationsQueryVariables = Exact<{
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
 
-export type IntegrationsQuery = { __typename?: "Query" } & {
-  integrations: { __typename?: "IntegrationConnection" } & IntegrationConnectionFragment;
+export type IntegrationResourcesQuery = { __typename?: "Query" } & {
+  integrationResources: { __typename?: "IntegrationResourceConnection" } & IntegrationResourceConnectionFragment;
 };
 
 export type IntegrationResourceQueryVariables = Exact<{
@@ -6740,19 +6758,6 @@ export type IntegrationResource_PullRequestQuery = { __typename?: "Query" } & {
   };
 };
 
-export type IntegrationResourcesQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type IntegrationResourcesQuery = { __typename?: "Query" } & {
-  integrationResources: { __typename?: "IntegrationResourceConnection" } & IntegrationResourceConnectionFragment;
-};
-
 export type InviteInfoQueryVariables = Exact<{
   teamHash?: Maybe<Scalars["String"]>;
   userHash: Scalars["String"];
@@ -6771,6 +6776,19 @@ export type InviteInfo_InviteDataQuery = { __typename?: "Query" } & {
   inviteInfo: { __typename?: "InvitePagePayload" } & {
     inviteData?: Maybe<{ __typename?: "InviteData" } & InviteDataFragment>;
   };
+};
+
+export type IssueLabelsQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type IssueLabelsQuery = { __typename?: "Query" } & {
+  issueLabels: { __typename?: "IssueLabelConnection" } & IssueLabelConnectionFragment;
 };
 
 export type IssueLabelQueryVariables = Exact<{
@@ -6795,27 +6813,6 @@ export type IssueLabel_IssuesQuery = { __typename?: "Query" } & {
   issueLabel: { __typename?: "IssueLabel" } & { issues: { __typename?: "IssueConnection" } & IssueConnectionFragment };
 };
 
-export type IssueLabelsQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type IssueLabelsQuery = { __typename?: "Query" } & {
-  issueLabels: { __typename?: "IssueLabelConnection" } & IssueLabelConnectionFragment;
-};
-
-export type IssueRelationQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IssueRelationQuery = { __typename?: "Query" } & {
-  issueRelation: { __typename?: "IssueRelation" } & IssueRelationFragment;
-};
-
 export type IssueRelationsQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -6827,6 +6824,27 @@ export type IssueRelationsQueryVariables = Exact<{
 
 export type IssueRelationsQuery = { __typename?: "Query" } & {
   issueRelations: { __typename?: "IssueRelationConnection" } & IssueRelationConnectionFragment;
+};
+
+export type IssueRelationQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type IssueRelationQuery = { __typename?: "Query" } & {
+  issueRelation: { __typename?: "IssueRelation" } & IssueRelationFragment;
+};
+
+export type IssuesQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type IssuesQuery = { __typename?: "Query" } & {
+  issues: { __typename?: "IssueConnection" } & IssueConnectionFragment;
 };
 
 export type IssueQueryVariables = Exact<{
@@ -6969,7 +6987,7 @@ export type IssueSearchQuery = { __typename?: "Query" } & {
   issueSearch: { __typename?: "IssueConnection" } & IssueConnectionFragment;
 };
 
-export type IssuesQueryVariables = Exact<{
+export type MilestonesQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -6978,8 +6996,8 @@ export type IssuesQueryVariables = Exact<{
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
 
-export type IssuesQuery = { __typename?: "Query" } & {
-  issues: { __typename?: "IssueConnection" } & IssueConnectionFragment;
+export type MilestonesQuery = { __typename?: "Query" } & {
+  milestones: { __typename?: "MilestoneConnection" } & MilestoneConnectionFragment;
 };
 
 export type MilestoneQueryVariables = Exact<{
@@ -7004,25 +7022,6 @@ export type Milestone_ProjectsQuery = { __typename?: "Query" } & {
   };
 };
 
-export type MilestonesQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type MilestonesQuery = { __typename?: "Query" } & {
-  milestones: { __typename?: "MilestoneConnection" } & MilestoneConnectionFragment;
-};
-
-export type NotificationQueryVariables = Exact<{ [key: string]: never }>;
-
-export type NotificationQuery = { __typename?: "Query" } & {
-  notification: { __typename?: "UserSettings" } & UserSettingsFragment;
-};
-
 export type NotificationsQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -7036,7 +7035,15 @@ export type NotificationsQuery = { __typename?: "Query" } & {
   notifications: { __typename?: "NotificationConnection" } & NotificationConnectionFragment;
 };
 
-export type NotificationSubscriptionQueryVariables = Exact<{
+export type NotificationQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type NotificationQuery = { __typename?: "Query" } & {
+  notification: { __typename?: "Notification" } & NotificationFragment;
+};
+
+export type NotificationSubscriptionsQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -7045,10 +7052,31 @@ export type NotificationSubscriptionQueryVariables = Exact<{
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
 
-export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
-  notificationSubscription: {
+export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
+  notificationSubscriptions: {
     __typename?: "NotificationSubscriptionConnection";
   } & NotificationSubscriptionConnectionFragment;
+};
+
+export type NotificationSubscriptionQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
+  notificationSubscription: { __typename?: "NotificationSubscription" } & NotificationSubscriptionFragment;
+};
+
+export type OrganizationInvitesQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type OrganizationInvitesQuery = { __typename?: "Query" } & {
+  organizationInvites: { __typename?: "OrganizationInviteConnection" } & OrganizationInviteConnectionFragment;
 };
 
 export type OrganizationInviteQueryVariables = Exact<{
@@ -7075,27 +7103,6 @@ export type OrganizationInvite_IssuesQuery = { __typename?: "Query" } & {
   };
 };
 
-export type OrganizationInvitesQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type OrganizationInvitesQuery = { __typename?: "Query" } & {
-  organizationInvites: { __typename?: "OrganizationInviteConnection" } & OrganizationInviteConnectionFragment;
-};
-
-export type ProjectLinkQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ProjectLinkQuery = { __typename?: "Query" } & {
-  projectLink: { __typename?: "ProjectLink" } & ProjectLinkFragment;
-};
-
 export type ProjectLinksQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -7106,7 +7113,28 @@ export type ProjectLinksQueryVariables = Exact<{
 }>;
 
 export type ProjectLinksQuery = { __typename?: "Query" } & {
-  ProjectLinks: { __typename?: "ProjectLinkConnection" } & ProjectLinkConnectionFragment;
+  projectLinks: { __typename?: "ProjectLinkConnection" } & ProjectLinkConnectionFragment;
+};
+
+export type ProjectLinkQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ProjectLinkQuery = { __typename?: "Query" } & {
+  projectLink: { __typename?: "ProjectLink" } & ProjectLinkFragment;
+};
+
+export type ProjectsQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type ProjectsQuery = { __typename?: "Query" } & {
+  projects: { __typename?: "ProjectConnection" } & ProjectConnectionFragment;
 };
 
 export type ProjectQueryVariables = Exact<{
@@ -7173,30 +7201,11 @@ export type Project_LinksQuery = { __typename?: "Query" } & {
   };
 };
 
-export type ProjectsQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type ProjectsQuery = { __typename?: "Query" } & {
-  projects: { __typename?: "ProjectConnection" } & ProjectConnectionFragment;
-};
-
 export type PushSubscriptionTestQueryVariables = Exact<{ [key: string]: never }>;
 
 export type PushSubscriptionTestQuery = { __typename?: "Query" } & {
   pushSubscriptionTest: { __typename?: "PushSubscriptionPayload" } & PushSubscriptionPayloadFragment;
 };
-
-export type ReactionQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ReactionQuery = { __typename?: "Query" } & { reaction: { __typename?: "Reaction" } & ReactionFragment };
 
 export type ReactionsQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
@@ -7211,18 +7220,16 @@ export type ReactionsQuery = { __typename?: "Query" } & {
   reactions: { __typename?: "ReactionConnection" } & ReactionConnectionFragment;
 };
 
+export type ReactionQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ReactionQuery = { __typename?: "Query" } & { reaction: { __typename?: "Reaction" } & ReactionFragment };
+
 export type SubscriptionQueryVariables = Exact<{ [key: string]: never }>;
 
 export type SubscriptionQuery = { __typename?: "Query" } & {
   subscription: { __typename?: "Subscription" } & SubscriptionFragment;
-};
-
-export type TeamMembershipQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type TeamMembershipQuery = { __typename?: "Query" } & {
-  teamMembership: { __typename?: "TeamMembership" } & TeamMembershipFragment;
 };
 
 export type TeamMembershipsQueryVariables = Exact<{
@@ -7236,6 +7243,27 @@ export type TeamMembershipsQueryVariables = Exact<{
 
 export type TeamMembershipsQuery = { __typename?: "Query" } & {
   teamMemberships: { __typename?: "TeamMembershipConnection" } & TeamMembershipConnectionFragment;
+};
+
+export type TeamMembershipQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type TeamMembershipQuery = { __typename?: "Query" } & {
+  teamMembership: { __typename?: "TeamMembership" } & TeamMembershipFragment;
+};
+
+export type TeamsQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type TeamsQuery = { __typename?: "Query" } & {
+  teams: { __typename?: "TeamConnection" } & TeamConnectionFragment;
 };
 
 export type TeamQueryVariables = Exact<{
@@ -7360,19 +7388,6 @@ export type Team_WebhooksQuery = { __typename?: "Query" } & {
   team: { __typename?: "Team" } & { webhooks: { __typename?: "WebhookConnection" } & WebhookConnectionFragment };
 };
 
-export type TeamsQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type TeamsQuery = { __typename?: "Query" } & {
-  teams: { __typename?: "TeamConnection" } & TeamConnectionFragment;
-};
-
 export type TemplatesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type TemplatesQuery = { __typename?: "Query" } & {
@@ -7390,24 +7405,11 @@ export type TemplateQueryVariables = Exact<{
 
 export type TemplateQuery = { __typename?: "Query" } & { template: { __typename?: "Template" } & TemplateFragment };
 
-export type ViewPreferencesQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
+export type UserSettingsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ViewPreferencesQuery = { __typename?: "Query" } & {
-  viewPreferences: { __typename?: "ViewPreferencesConnection" } & ViewPreferencesConnectionFragment;
+export type UserSettingsQuery = { __typename?: "Query" } & {
+  userSettings: { __typename?: "UserSettings" } & UserSettingsFragment;
 };
-
-export type WebhookQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type WebhookQuery = { __typename?: "Query" } & { webhook: { __typename?: "Webhook" } & WebhookFragment };
 
 export type WebhooksQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
@@ -7420,6 +7422,25 @@ export type WebhooksQueryVariables = Exact<{
 
 export type WebhooksQuery = { __typename?: "Query" } & {
   webhooks: { __typename?: "WebhookConnection" } & WebhookConnectionFragment;
+};
+
+export type WebhookQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type WebhookQuery = { __typename?: "Query" } & { webhook: { __typename?: "Webhook" } & WebhookFragment };
+
+export type WorkflowStatesQueryVariables = Exact<{
+  before?: Maybe<Scalars["String"]>;
+  after?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  last?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type WorkflowStatesQuery = { __typename?: "Query" } & {
+  workflowStates: { __typename?: "WorkflowStateConnection" } & WorkflowStateConnectionFragment;
 };
 
 export type WorkflowStateQueryVariables = Exact<{
@@ -7444,19 +7465,6 @@ export type WorkflowState_IssuesQuery = { __typename?: "Query" } & {
   workflowState: { __typename?: "WorkflowState" } & {
     issues: { __typename?: "IssueConnection" } & IssueConnectionFragment;
   };
-};
-
-export type WorkflowStatesQueryVariables = Exact<{
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  last?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type WorkflowStatesQuery = { __typename?: "Query" } & {
-  workflowStates: { __typename?: "WorkflowStateConnection" } & WorkflowStateConnectionFragment;
 };
 
 export type UserUpdateMutationVariables = Exact<{
@@ -7611,6 +7619,16 @@ export type AdminUserAccountChangeEmailMutationVariables = Exact<{
 
 export type AdminUserAccountChangeEmailMutation = { __typename?: "Mutation" } & {
   adminUserAccountChangeEmail: { __typename?: "UserAccountAdminPrivileged" } & UserAccountAdminPrivilegedFragment;
+};
+
+export type AdminUserAccountDeleteMutationVariables = Exact<{
+  deleteAllData?: Maybe<Scalars["Boolean"]>;
+  email: Scalars["String"];
+  id: Scalars["String"];
+}>;
+
+export type AdminUserAccountDeleteMutation = { __typename?: "Mutation" } & {
+  adminUserAccountDelete: { __typename?: "AdminResponse" } & AdminResponseFragment;
 };
 
 export type EventCreateMutationVariables = Exact<{
@@ -8579,6 +8597,94 @@ export type WorkflowStateArchiveMutation = { __typename?: "Mutation" } & {
   workflowStateArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
+export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "User" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "displayName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "avatarUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "disableReason" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSeen" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "admin" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "active" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const PageInfoFragmentDoc: DocumentNode<PageInfoFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "PageInfo" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PageInfo" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "hasPreviousPage" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "hasNextPage" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "startCursor" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "endCursor" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const UserConnectionFragmentDoc: DocumentNode<UserConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
 export const UserSettingsFragmentDoc: DocumentNode<UserSettingsFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -8715,26 +8821,6 @@ export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
-        ],
-      },
-    },
-  ],
-};
-export const PageInfoFragmentDoc: DocumentNode<PageInfoFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "PageInfo" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PageInfo" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "hasPreviousPage" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "hasNextPage" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "startCursor" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "endCursor" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -9036,74 +9122,6 @@ export const ProjectConnectionFragmentDoc: DocumentNode<ProjectConnectionFragmen
       },
     },
     ...ProjectFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "User" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "displayName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "avatarUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "disableReason" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "lastSeen" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "admin" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "active" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const UserConnectionFragmentDoc: DocumentNode<UserConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 };
@@ -10083,16 +10101,7 @@ export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integration" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
+          { kind: "Field", name: { kind: "Name", value: "source" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "updatedDescription" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "fromTitle" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "toTitle" }, arguments: [], directives: [] },
@@ -11923,68 +11932,6 @@ export const ReactionConnectionFragmentDoc: DocumentNode<ReactionConnectionFragm
     ...PageInfoFragmentDoc.definitions,
   ],
 };
-export const ViewPreferencesFragmentDoc: DocumentNode<ViewPreferencesFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ViewPreferences" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferences" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "viewType" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const ViewPreferencesConnectionFragmentDoc: DocumentNode<ViewPreferencesConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ViewPreferencesConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferencesConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferences" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...ViewPreferencesFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
 export const UserPayloadFragmentDoc: DocumentNode<UserPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -12153,6 +12100,21 @@ export const AdminCommandPayloadFragmentDoc: DocumentNode<AdminCommandPayloadFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "AdminCommandPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AdminCommandPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
+export const AdminResponseFragmentDoc: DocumentNode<AdminResponseFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AdminResponse" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AdminResponse" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
@@ -12751,14 +12713,13 @@ export const NotificationPayloadFragmentDoc: DocumentNode<NotificationPayloadFra
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Notification" }, directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
-    ...NotificationFragmentDoc.definitions,
   ],
 };
 export const NotificationSubscriptionPayloadFragmentDoc: DocumentNode<
@@ -12783,16 +12744,13 @@ export const NotificationSubscriptionPayloadFragmentDoc: DocumentNode<
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscription" }, directives: [] },
-              ],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
-    ...NotificationSubscriptionFragmentDoc.definitions,
   ],
 };
 export const OauthClientFragmentDoc: DocumentNode<OauthClientFragment, unknown> = {
@@ -13271,6 +13229,28 @@ export const UserSubscribeToNewsletterPayloadFragmentDoc: DocumentNode<
     },
   ],
 };
+export const ViewPreferencesFragmentDoc: DocumentNode<ViewPreferencesFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ViewPreferences" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferences" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "viewType" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
 export const ViewPreferencesPayloadFragmentDoc: DocumentNode<ViewPreferencesPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -13354,6 +13334,21 @@ export const WorkflowStatePayloadFragmentDoc: DocumentNode<WorkflowStatePayloadF
           },
           { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
+      },
+    },
+  ],
+};
+export const SynchronizedPayloadFragmentDoc: DocumentNode<SynchronizedPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SynchronizedPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SynchronizedPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] }],
       },
     },
   ],
@@ -13507,21 +13502,6 @@ export const FileUploadFragmentDoc: DocumentNode<FileUploadFragment, unknown> = 
     },
   ],
 };
-export const SynchronizedPayloadFragmentDoc: DocumentNode<SynchronizedPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SynchronizedPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SynchronizedPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
 export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -13560,6 +13540,102 @@ export const OrganizationDomainSimplePayloadFragmentDoc: DocumentNode<
         selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
       },
     },
+  ],
+};
+export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "users" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "users" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserConnectionFragmentDoc.definitions,
   ],
 };
 export const UserDocument: DocumentNode<UserQuery, UserQueryVariables> = {
@@ -15138,102 +15214,6 @@ export const AdminUserAccountLookupDocument: DocumentNode<
     ...UserAccountAdminPrivilegedFragmentDoc.definitions,
   ],
 };
-export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "users" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "users" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserConnectionFragmentDoc.definitions,
-  ],
-};
 export const ApiKeysDocument: DocumentNode<ApiKeysQuery, ApiKeysQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -15752,47 +15732,6 @@ export const CollaborativeDocumentJoin_StepsDocument: DocumentNode<
     ...StepsResponseFragmentDoc.definitions,
   ],
 };
-export const CommentDocument: DocumentNode<CommentQuery, CommentQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "comment" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "comment" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Comment" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...CommentFragmentDoc.definitions,
-  ],
-};
 export const CommentsDocument: DocumentNode<CommentsQuery, CommentsQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -15891,13 +15830,13 @@ export const CommentsDocument: DocumentNode<CommentsQuery, CommentsQueryVariable
     ...CommentConnectionFragmentDoc.definitions,
   ],
 };
-export const CustomViewDocument: DocumentNode<CustomViewQuery, CustomViewQueryVariables> = {
+export const CommentDocument: DocumentNode<CommentQuery, CommentQueryVariables> = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "customView" },
+      name: { kind: "Name", value: "comment" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
@@ -15912,7 +15851,7 @@ export const CustomViewDocument: DocumentNode<CustomViewQuery, CustomViewQueryVa
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "customView" },
+            name: { kind: "Name", value: "comment" },
             arguments: [
               {
                 kind: "Argument",
@@ -15923,13 +15862,13 @@ export const CustomViewDocument: DocumentNode<CustomViewQuery, CustomViewQueryVa
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomView" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Comment" }, directives: [] }],
             },
           },
         ],
       },
     },
-    ...CustomViewFragmentDoc.definitions,
+    ...CommentFragmentDoc.definitions,
   ],
 };
 export const CustomViewsDocument: DocumentNode<CustomViewsQuery, CustomViewsQueryVariables> = {
@@ -16028,6 +15967,145 @@ export const CustomViewsDocument: DocumentNode<CustomViewsQuery, CustomViewsQuer
       },
     },
     ...CustomViewConnectionFragmentDoc.definitions,
+  ],
+};
+export const CustomViewDocument: DocumentNode<CustomViewQuery, CustomViewQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "customView" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "customView" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomView" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...CustomViewFragmentDoc.definitions,
+  ],
+};
+export const CyclesDocument: DocumentNode<CyclesQuery, CyclesQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "cycles" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycles" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CycleConnection" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CycleConnectionFragmentDoc.definitions,
   ],
 };
 export const CycleDocument: DocumentNode<CycleQuery, CycleQueryVariables> = {
@@ -16316,145 +16394,6 @@ export const Cycle_UncompletedIssuesUponCloseDocument: DocumentNode<
     ...IssueConnectionFragmentDoc.definitions,
   ],
 };
-export const CyclesDocument: DocumentNode<CyclesQuery, CyclesQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "cycles" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycles" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CycleConnection" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...CycleConnectionFragmentDoc.definitions,
-  ],
-};
-export const EmojiDocument: DocumentNode<EmojiQuery, EmojiQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "emoji" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "emoji" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Emoji" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...EmojiFragmentDoc.definitions,
-  ],
-};
 export const EmojisDocument: DocumentNode<EmojisQuery, EmojisQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -16553,13 +16492,13 @@ export const EmojisDocument: DocumentNode<EmojisQuery, EmojisQueryVariables> = {
     ...EmojiConnectionFragmentDoc.definitions,
   ],
 };
-export const FavoriteDocument: DocumentNode<FavoriteQuery, FavoriteQueryVariables> = {
+export const EmojiDocument: DocumentNode<EmojiQuery, EmojiQueryVariables> = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "favorite" },
+      name: { kind: "Name", value: "emoji" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
@@ -16574,7 +16513,7 @@ export const FavoriteDocument: DocumentNode<FavoriteQuery, FavoriteQueryVariable
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "favorite" },
+            name: { kind: "Name", value: "emoji" },
             arguments: [
               {
                 kind: "Argument",
@@ -16585,13 +16524,13 @@ export const FavoriteDocument: DocumentNode<FavoriteQuery, FavoriteQueryVariable
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Favorite" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Emoji" }, directives: [] }],
             },
           },
         ],
       },
     },
-    ...FavoriteFragmentDoc.definitions,
+    ...EmojiFragmentDoc.definitions,
   ],
 };
 export const FavoritesDocument: DocumentNode<FavoritesQuery, FavoritesQueryVariables> = {
@@ -16690,6 +16629,47 @@ export const FavoritesDocument: DocumentNode<FavoritesQuery, FavoritesQueryVaria
       },
     },
     ...FavoriteConnectionFragmentDoc.definitions,
+  ],
+};
+export const FavoriteDocument: DocumentNode<FavoriteQuery, FavoriteQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "favorite" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "favorite" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Favorite" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...FavoriteFragmentDoc.definitions,
   ],
 };
 export const FigmaEmbedInfoDocument: DocumentNode<FigmaEmbedInfoQuery, FigmaEmbedInfoQueryVariables> = {
@@ -16812,6 +16792,104 @@ export const FigmaEmbedInfo_FigmaEmbedDocument: DocumentNode<
       },
     },
     ...FigmaEmbedFragmentDoc.definitions,
+  ],
+};
+export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "integrations" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrations" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationConnection" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationConnectionFragmentDoc.definitions,
   ],
 };
 export const IntegrationDocument: DocumentNode<IntegrationQuery, IntegrationQueryVariables> = {
@@ -17196,13 +17274,16 @@ export const Integration_Settings_SentryDocument: DocumentNode<
     ...SentrySettingsFragmentDoc.definitions,
   ],
 };
-export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQueryVariables> = {
+export const IntegrationResourcesDocument: DocumentNode<
+  IntegrationResourcesQuery,
+  IntegrationResourcesQueryVariables
+> = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "integrations" },
+      name: { kind: "Name", value: "integrationResources" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
@@ -17247,7 +17328,7 @@ export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQ
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "integrations" },
+            name: { kind: "Name", value: "integrationResources" },
             arguments: [
               {
                 kind: "Argument",
@@ -17284,14 +17365,18 @@ export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQ
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationConnection" }, directives: [] },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "IntegrationResourceConnection" },
+                  directives: [],
+                },
               ],
             },
           },
         ],
       },
     },
-    ...IntegrationConnectionFragmentDoc.definitions,
+    ...IntegrationResourceConnectionFragmentDoc.definitions,
   ],
 };
 export const IntegrationResourceDocument: DocumentNode<IntegrationResourceQuery, IntegrationResourceQueryVariables> = {
@@ -17739,111 +17824,6 @@ export const IntegrationResource_PullRequestDocument: DocumentNode<
     ...PullRequestPayloadFragmentDoc.definitions,
   ],
 };
-export const IntegrationResourcesDocument: DocumentNode<
-  IntegrationResourcesQuery,
-  IntegrationResourcesQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResources" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResources" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "IntegrationResourceConnection" },
-                  directives: [],
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceConnectionFragmentDoc.definitions,
-  ],
-};
 export const InviteInfoDocument: DocumentNode<InviteInfoQuery, InviteInfoQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -17964,6 +17944,104 @@ export const InviteInfo_InviteDataDocument: DocumentNode<
       },
     },
     ...InviteDataFragmentDoc.definitions,
+  ],
+};
+export const IssueLabelsDocument: DocumentNode<IssueLabelsQuery, IssueLabelsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issueLabels" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueLabels" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueLabelConnectionFragmentDoc.definitions,
   ],
 };
 export const IssueLabelDocument: DocumentNode<IssueLabelQuery, IssueLabelQueryVariables> = {
@@ -18128,145 +18206,6 @@ export const IssueLabel_IssuesDocument: DocumentNode<IssueLabel_IssuesQuery, Iss
     ...IssueConnectionFragmentDoc.definitions,
   ],
 };
-export const IssueLabelsDocument: DocumentNode<IssueLabelsQuery, IssueLabelsQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "issueLabels" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueLabels" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueLabelConnectionFragmentDoc.definitions,
-  ],
-};
-export const IssueRelationDocument: DocumentNode<IssueRelationQuery, IssueRelationQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "issueRelation" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueRelation" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelation" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueRelationFragmentDoc.definitions,
-  ],
-};
 export const IssueRelationsDocument: DocumentNode<IssueRelationsQuery, IssueRelationsQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -18363,6 +18302,145 @@ export const IssueRelationsDocument: DocumentNode<IssueRelationsQuery, IssueRela
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
+  ],
+};
+export const IssueRelationDocument: DocumentNode<IssueRelationQuery, IssueRelationQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issueRelation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueRelation" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelation" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueRelationFragmentDoc.definitions,
+  ],
+};
+export const IssuesDocument: DocumentNode<IssuesQuery, IssuesQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issues" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issues" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueConnectionFragmentDoc.definitions,
   ],
 };
 export const IssueDocument: DocumentNode<IssueQuery, IssueQueryVariables> = {
@@ -19505,13 +19583,13 @@ export const IssueSearchDocument: DocumentNode<IssueSearchQuery, IssueSearchQuer
     ...IssueConnectionFragmentDoc.definitions,
   ],
 };
-export const IssuesDocument: DocumentNode<IssuesQuery, IssuesQueryVariables> = {
+export const MilestonesDocument: DocumentNode<MilestonesQuery, MilestonesQueryVariables> = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "issues" },
+      name: { kind: "Name", value: "milestones" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
@@ -19556,7 +19634,7 @@ export const IssuesDocument: DocumentNode<IssuesQuery, IssuesQueryVariables> = {
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "issues" },
+            name: { kind: "Name", value: "milestones" },
             arguments: [
               {
                 kind: "Argument",
@@ -19593,14 +19671,14 @@ export const IssuesDocument: DocumentNode<IssuesQuery, IssuesQueryVariables> = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "MilestoneConnection" }, directives: [] },
               ],
             },
           },
         ],
       },
     },
-    ...IssueConnectionFragmentDoc.definitions,
+    ...MilestoneConnectionFragmentDoc.definitions,
   ],
 };
 export const MilestoneDocument: DocumentNode<MilestoneQuery, MilestoneQueryVariables> = {
@@ -19765,132 +19843,6 @@ export const Milestone_ProjectsDocument: DocumentNode<Milestone_ProjectsQuery, M
     ...ProjectConnectionFragmentDoc.definitions,
   ],
 };
-export const MilestonesDocument: DocumentNode<MilestonesQuery, MilestonesQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "milestones" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestones" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "MilestoneConnection" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...MilestoneConnectionFragmentDoc.definitions,
-  ],
-};
-export const NotificationDocument: DocumentNode<NotificationQuery, NotificationQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "notification" },
-      variableDefinitions: [],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notification" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettings" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserSettingsFragmentDoc.definitions,
-  ],
-};
 export const NotificationsDocument: DocumentNode<NotificationsQuery, NotificationsQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -19989,16 +19941,57 @@ export const NotificationsDocument: DocumentNode<NotificationsQuery, Notificatio
     ...NotificationConnectionFragmentDoc.definitions,
   ],
 };
-export const NotificationSubscriptionDocument: DocumentNode<
-  NotificationSubscriptionQuery,
-  NotificationSubscriptionQueryVariables
+export const NotificationDocument: DocumentNode<NotificationQuery, NotificationQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "notification" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notification" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Notification" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationFragmentDoc.definitions,
+  ],
+};
+export const NotificationSubscriptionsDocument: DocumentNode<
+  NotificationSubscriptionsQuery,
+  NotificationSubscriptionsQueryVariables
 > = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "notificationSubscription" },
+      name: { kind: "Name", value: "notificationSubscriptions" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
@@ -20043,7 +20036,7 @@ export const NotificationSubscriptionDocument: DocumentNode<
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "notificationSubscription" },
+            name: { kind: "Name", value: "notificationSubscriptions" },
             arguments: [
               {
                 kind: "Argument",
@@ -20092,6 +20085,154 @@ export const NotificationSubscriptionDocument: DocumentNode<
       },
     },
     ...NotificationSubscriptionConnectionFragmentDoc.definitions,
+  ],
+};
+export const NotificationSubscriptionDocument: DocumentNode<
+  NotificationSubscriptionQuery,
+  NotificationSubscriptionQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "notificationSubscription" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationSubscription" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscription" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationSubscriptionFragmentDoc.definitions,
+  ],
+};
+export const OrganizationInvitesDocument: DocumentNode<OrganizationInvitesQuery, OrganizationInvitesQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "organizationInvites" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationInvites" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "OrganizationInviteConnection" },
+                  directives: [],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationInviteConnectionFragmentDoc.definitions,
   ],
 };
 export const OrganizationInviteDocument: DocumentNode<OrganizationInviteQuery, OrganizationInviteQueryVariables> = {
@@ -20259,156 +20400,13 @@ export const OrganizationInvite_IssuesDocument: DocumentNode<
     ...IssueConnectionFragmentDoc.definitions,
   ],
 };
-export const OrganizationInvitesDocument: DocumentNode<OrganizationInvitesQuery, OrganizationInvitesQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "organizationInvites" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationInvites" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "OrganizationInviteConnection" },
-                  directives: [],
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationInviteConnectionFragmentDoc.definitions,
-  ],
-};
-export const ProjectLinkDocument: DocumentNode<ProjectLinkQuery, ProjectLinkQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "projectLink" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectLink" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLink" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectLinkFragmentDoc.definitions,
-  ],
-};
 export const ProjectLinksDocument: DocumentNode<ProjectLinksQuery, ProjectLinksQueryVariables> = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "ProjectLinks" },
+      name: { kind: "Name", value: "projectLinks" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
@@ -20453,7 +20451,7 @@ export const ProjectLinksDocument: DocumentNode<ProjectLinksQuery, ProjectLinksQ
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "ProjectLinks" },
+            name: { kind: "Name", value: "projectLinks" },
             arguments: [
               {
                 kind: "Argument",
@@ -20498,6 +20496,145 @@ export const ProjectLinksDocument: DocumentNode<ProjectLinksQuery, ProjectLinksQ
       },
     },
     ...ProjectLinkConnectionFragmentDoc.definitions,
+  ],
+};
+export const ProjectLinkDocument: DocumentNode<ProjectLinkQuery, ProjectLinkQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "projectLink" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectLink" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLink" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectLinkFragmentDoc.definitions,
+  ],
+};
+export const ProjectsDocument: DocumentNode<ProjectsQuery, ProjectsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "projects" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projects" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectConnectionFragmentDoc.definitions,
   ],
 };
 export const ProjectDocument: DocumentNode<ProjectQuery, ProjectQueryVariables> = {
@@ -21029,104 +21166,6 @@ export const Project_LinksDocument: DocumentNode<Project_LinksQuery, Project_Lin
     ...ProjectLinkConnectionFragmentDoc.definitions,
   ],
 };
-export const ProjectsDocument: DocumentNode<ProjectsQuery, ProjectsQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "projects" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projects" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectConnectionFragmentDoc.definitions,
-  ],
-};
 export const PushSubscriptionTestDocument: DocumentNode<
   PushSubscriptionTestQuery,
   PushSubscriptionTestQueryVariables
@@ -21158,47 +21197,6 @@ export const PushSubscriptionTestDocument: DocumentNode<
       },
     },
     ...PushSubscriptionPayloadFragmentDoc.definitions,
-  ],
-};
-export const ReactionDocument: DocumentNode<ReactionQuery, ReactionQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "reaction" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "reaction" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Reaction" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...ReactionFragmentDoc.definitions,
   ],
 };
 export const ReactionsDocument: DocumentNode<ReactionsQuery, ReactionsQueryVariables> = {
@@ -21299,6 +21297,47 @@ export const ReactionsDocument: DocumentNode<ReactionsQuery, ReactionsQueryVaria
     ...ReactionConnectionFragmentDoc.definitions,
   ],
 };
+export const ReactionDocument: DocumentNode<ReactionQuery, ReactionQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "reaction" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "reaction" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Reaction" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...ReactionFragmentDoc.definitions,
+  ],
+};
 export const SubscriptionDocument: DocumentNode<SubscriptionQuery, SubscriptionQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -21325,47 +21364,6 @@ export const SubscriptionDocument: DocumentNode<SubscriptionQuery, SubscriptionQ
       },
     },
     ...SubscriptionFragmentDoc.definitions,
-  ],
-};
-export const TeamMembershipDocument: DocumentNode<TeamMembershipQuery, TeamMembershipQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "teamMembership" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamMembership" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembership" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamMembershipFragmentDoc.definitions,
   ],
 };
 export const TeamMembershipsDocument: DocumentNode<TeamMembershipsQuery, TeamMembershipsQueryVariables> = {
@@ -21464,6 +21462,143 @@ export const TeamMembershipsDocument: DocumentNode<TeamMembershipsQuery, TeamMem
       },
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
+  ],
+};
+export const TeamMembershipDocument: DocumentNode<TeamMembershipQuery, TeamMembershipQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "teamMembership" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamMembership" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembership" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamMembershipFragmentDoc.definitions,
+  ],
+};
+export const TeamsDocument: DocumentNode<TeamsQuery, TeamsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "teams" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teams" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamConnectionFragmentDoc.definitions,
   ],
 };
 export const TeamDocument: DocumentNode<TeamQuery, TeamQueryVariables> = {
@@ -22483,102 +22618,6 @@ export const Team_WebhooksDocument: DocumentNode<Team_WebhooksQuery, Team_Webhoo
     ...WebhookConnectionFragmentDoc.definitions,
   ],
 };
-export const TeamsDocument: DocumentNode<TeamsQuery, TeamsQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "teams" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teams" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamConnectionFragmentDoc.definitions,
-  ],
-};
 export const TemplatesDocument: DocumentNode<TemplatesQuery, TemplatesQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -22678,143 +22717,32 @@ export const TemplateDocument: DocumentNode<TemplateQuery, TemplateQueryVariable
     ...TemplateFragmentDoc.definitions,
   ],
 };
-export const ViewPreferencesDocument: DocumentNode<ViewPreferencesQuery, ViewPreferencesQueryVariables> = {
+export const UserSettingsDocument: DocumentNode<UserSettingsQuery, UserSettingsQueryVariables> = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "viewPreferences" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
+      name: { kind: "Name", value: "userSettings" },
+      variableDefinitions: [],
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "viewPreferences" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
+            name: { kind: "Name", value: "userSettings" },
+            arguments: [],
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettings" }, directives: [] }],
             },
           },
         ],
       },
     },
-    ...ViewPreferencesConnectionFragmentDoc.definitions,
-  ],
-};
-export const WebhookDocument: DocumentNode<WebhookQuery, WebhookQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "webhook" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "webhook" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Webhook" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...WebhookFragmentDoc.definitions,
+    ...UserSettingsFragmentDoc.definitions,
   ],
 };
 export const WebhooksDocument: DocumentNode<WebhooksQuery, WebhooksQueryVariables> = {
@@ -22913,6 +22841,145 @@ export const WebhooksDocument: DocumentNode<WebhooksQuery, WebhooksQueryVariable
       },
     },
     ...WebhookConnectionFragmentDoc.definitions,
+  ],
+};
+export const WebhookDocument: DocumentNode<WebhookQuery, WebhookQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "webhook" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "webhook" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Webhook" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...WebhookFragmentDoc.definitions,
+  ],
+};
+export const WorkflowStatesDocument: DocumentNode<WorkflowStatesQuery, WorkflowStatesQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "workflowStates" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "workflowStates" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStateConnection" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...WorkflowStateConnectionFragmentDoc.definitions,
   ],
 };
 export const WorkflowStateDocument: DocumentNode<WorkflowStateQuery, WorkflowStateQueryVariables> = {
@@ -23078,104 +23145,6 @@ export const WorkflowState_IssuesDocument: DocumentNode<
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
-  ],
-};
-export const WorkflowStatesDocument: DocumentNode<WorkflowStatesQuery, WorkflowStatesQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "workflowStates" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "workflowStates" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStateConnection" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...WorkflowStateConnectionFragmentDoc.definitions,
   ],
 };
 export const UserUpdateDocument: DocumentNode<UserUpdateMutation, UserUpdateMutationVariables> = {
@@ -24082,6 +24051,72 @@ export const AdminUserAccountChangeEmailDocument: DocumentNode<
       },
     },
     ...UserAccountAdminPrivilegedFragmentDoc.definitions,
+  ],
+};
+export const AdminUserAccountDeleteDocument: DocumentNode<
+  AdminUserAccountDeleteMutation,
+  AdminUserAccountDeleteMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "adminUserAccountDelete" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "deleteAllData" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "email" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+      ],
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "adminUserAccountDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "deleteAllData" },
+                value: { kind: "Variable", name: { kind: "Name", value: "deleteAllData" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "email" },
+                value: { kind: "Variable", name: { kind: "Name", value: "email" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AdminResponse" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...AdminResponseFragmentDoc.definitions,
   ],
 };
 export const EventCreateDocument: DocumentNode<EventCreateMutation, EventCreateMutationVariables> = {

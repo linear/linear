@@ -16,6 +16,83 @@
         "description": null,
         "fields": [
           {
+            "name": "users",
+            "description": "All users for the organization.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "user",
             "description": "One specific user.",
             "args": [
@@ -333,83 +410,6 @@
             "deprecationReason": null
           },
           {
-            "name": "users",
-            "description": "All users of the organization.",
-            "args": [
-              {
-                "name": "before",
-                "description": "A cursor to be used with last for backward pagination.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "after",
-                "description": "A cursor to be used with first for forward pagination",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "first",
-                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "last",
-                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "includeArchived",
-                "description": "Should archived resources be included (default: false)",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "orderBy",
-                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
-                "type": {
-                  "kind": "ENUM",
-                  "name": "PaginationOrderBy",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "apiKeys",
             "description": "All API keys for the user.",
             "args": [
@@ -706,39 +706,8 @@
             "deprecationReason": null
           },
           {
-            "name": "comment",
-            "description": "A specific comment.",
-            "args": [
-              {
-                "name": "id",
-                "description": "The identifier of the comment to retrieve.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Comment",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "comments",
-            "description": null,
+            "description": "All comments.",
             "args": [
               {
                 "name": "before",
@@ -814,12 +783,12 @@
             "deprecationReason": null
           },
           {
-            "name": "customView",
-            "description": "One specific custom view.",
+            "name": "comment",
+            "description": "A specific comment.",
             "args": [
               {
                 "name": "id",
-                "description": null,
+                "description": "The identifier of the comment to retrieve.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -837,7 +806,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "CustomView",
+                "name": "Comment",
                 "ofType": null
               }
             },
@@ -846,7 +815,7 @@
           },
           {
             "name": "customViews",
-            "description": null,
+            "description": "Custom views for the user.",
             "args": [
               {
                 "name": "before",
@@ -922,8 +891,8 @@
             "deprecationReason": null
           },
           {
-            "name": "cycle",
-            "description": "One specific cycle.",
+            "name": "customView",
+            "description": "One specific custom view.",
             "args": [
               {
                 "name": "id",
@@ -945,7 +914,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Cycle",
+                "name": "CustomView",
                 "ofType": null
               }
             },
@@ -1030,12 +999,12 @@
             "deprecationReason": null
           },
           {
-            "name": "emoji",
-            "description": "A specific emoji.",
+            "name": "cycle",
+            "description": "One specific cycle.",
             "args": [
               {
                 "name": "id",
-                "description": "The identifier of the emoji to retrieve.",
+                "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -1053,7 +1022,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Emoji",
+                "name": "Cycle",
                 "ofType": null
               }
             },
@@ -1062,7 +1031,7 @@
           },
           {
             "name": "emojis",
-            "description": null,
+            "description": "All custom emojis.",
             "args": [
               {
                 "name": "before",
@@ -1138,12 +1107,12 @@
             "deprecationReason": null
           },
           {
-            "name": "favorite",
-            "description": "One specific favorite.",
+            "name": "emoji",
+            "description": "A specific emoji.",
             "args": [
               {
                 "name": "id",
-                "description": null,
+                "description": "The identifier of the emoji to retrieve.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -1161,7 +1130,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Favorite",
+                "name": "Emoji",
                 "ofType": null
               }
             },
@@ -1246,6 +1215,37 @@
             "deprecationReason": null
           },
           {
+            "name": "favorite",
+            "description": "One specific favorite.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Favorite",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "figmaEmbedInfo",
             "description": "Fetch Figma screenshot and other information with file and node identifiers.",
             "args": [
@@ -1280,37 +1280,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "FigmaEmbedPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "integration",
-            "description": "One specific integration.",
-            "args": [
-              {
-                "name": "id",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Integration",
                 "ofType": null
               }
             },
@@ -1395,8 +1364,8 @@
             "deprecationReason": null
           },
           {
-            "name": "integrationResource",
-            "description": "One specific integration resource. (e.g. linked GitHub pull requests for an issue)",
+            "name": "integration",
+            "description": "One specific integration.",
             "args": [
               {
                 "name": "id",
@@ -1418,7 +1387,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "IntegrationResource",
+                "name": "Integration",
                 "ofType": null
               }
             },
@@ -1503,6 +1472,37 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationResource",
+            "description": "One specific integration resource. (e.g. linked GitHub pull requests for an issue)",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationResource",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "inviteInfo",
             "description": "Retrieves information for the public invite page.",
             "args": [
@@ -1544,39 +1544,8 @@
             "deprecationReason": null
           },
           {
-            "name": "issueLabel",
-            "description": "One specific label.",
-            "args": [
-              {
-                "name": "id",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "IssueLabel",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "issueLabels",
-            "description": "All labels.",
+            "description": "All issue labels.",
             "args": [
               {
                 "name": "before",
@@ -1652,8 +1621,8 @@
             "deprecationReason": null
           },
           {
-            "name": "issueRelation",
-            "description": "One specific issue relation.",
+            "name": "issueLabel",
+            "description": "One specific label.",
             "args": [
               {
                 "name": "id",
@@ -1675,7 +1644,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "IssueRelation",
+                "name": "IssueLabel",
                 "ofType": null
               }
             },
@@ -1684,7 +1653,7 @@
           },
           {
             "name": "issueRelations",
-            "description": null,
+            "description": "All issue relationships.",
             "args": [
               {
                 "name": "before",
@@ -1753,6 +1722,114 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "IssueRelationConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueRelation",
+            "description": "One specific issue relation.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IssueRelation",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issues",
+            "description": "All issues.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IssueConnection",
                 "ofType": null
               }
             },
@@ -1882,114 +1959,6 @@
             "deprecationReason": null
           },
           {
-            "name": "issues",
-            "description": null,
-            "args": [
-              {
-                "name": "before",
-                "description": "A cursor to be used with last for backward pagination.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "after",
-                "description": "A cursor to be used with first for forward pagination",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "first",
-                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "last",
-                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "includeArchived",
-                "description": "Should archived resources be included (default: false)",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "orderBy",
-                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
-                "type": {
-                  "kind": "ENUM",
-                  "name": "PaginationOrderBy",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "IssueConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "milestone",
-            "description": "One specific milestone.",
-            "args": [
-              {
-                "name": "id",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Milestone",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "milestones",
             "description": "All milestones.",
             "args": [
@@ -2067,15 +2036,30 @@
             "deprecationReason": null
           },
           {
-            "name": "notification",
-            "description": "The user's settings.",
-            "args": [],
+            "name": "milestone",
+            "description": "One specific milestone.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "UserSettings",
+                "name": "Milestone",
                 "ofType": null
               }
             },
@@ -2160,7 +2144,38 @@
             "deprecationReason": null
           },
           {
-            "name": "notificationSubscription",
+            "name": "notification",
+            "description": "One specific notification.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Notification",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notificationSubscriptions",
             "description": "The user's notification subscriptions.",
             "args": [
               {
@@ -2237,8 +2252,8 @@
             "deprecationReason": null
           },
           {
-            "name": "organizationInvite",
-            "description": "One specific organization invite.",
+            "name": "notificationSubscription",
+            "description": "One specific notification subscription.",
             "args": [
               {
                 "name": "id",
@@ -2260,7 +2275,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "IssueLabel",
+                "name": "NotificationSubscription",
                 "ofType": null
               }
             },
@@ -2345,8 +2360,8 @@
             "deprecationReason": null
           },
           {
-            "name": "projectLink",
-            "description": "One specific project link.",
+            "name": "organizationInvite",
+            "description": "One specific organization invite.",
             "args": [
               {
                 "name": "id",
@@ -2368,7 +2383,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ProjectLink",
+                "name": "IssueLabel",
                 "ofType": null
               }
             },
@@ -2376,7 +2391,7 @@
             "deprecationReason": null
           },
           {
-            "name": "ProjectLinks",
+            "name": "projectLinks",
             "description": "All links for the project.",
             "args": [
               {
@@ -2453,8 +2468,8 @@
             "deprecationReason": null
           },
           {
-            "name": "project",
-            "description": "One specific project.",
+            "name": "projectLink",
+            "description": "One specific project link.",
             "args": [
               {
                 "name": "id",
@@ -2476,7 +2491,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Project",
+                "name": "ProjectLink",
                 "ofType": null
               }
             },
@@ -2561,28 +2576,12 @@
             "deprecationReason": null
           },
           {
-            "name": "pushSubscriptionTest",
-            "description": "Sends a test push message.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PushSubscriptionPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "reaction",
-            "description": "A specific reaction.",
+            "name": "project",
+            "description": "One specific project.",
             "args": [
               {
                 "name": "id",
-                "description": "The identifier to retrieve.",
+                "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -2600,7 +2599,23 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Reaction",
+                "name": "Project",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pushSubscriptionTest",
+            "description": "Sends a test push message.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PushSubscriptionPayload",
                 "ofType": null
               }
             },
@@ -2609,7 +2624,7 @@
           },
           {
             "name": "reactions",
-            "description": null,
+            "description": "All comment emoji reactions.",
             "args": [
               {
                 "name": "before",
@@ -2685,28 +2700,12 @@
             "deprecationReason": null
           },
           {
-            "name": "subscription",
-            "description": "The organization's subscription.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Subscription",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "teamMembership",
-            "description": "One specific team membership.",
+            "name": "reaction",
+            "description": "A specific reaction.",
             "args": [
               {
                 "name": "id",
-                "description": null,
+                "description": "The identifier to retrieve.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -2724,7 +2723,23 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TeamMembership",
+                "name": "Reaction",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subscription",
+            "description": "The organization's subscription.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Subscription",
                 "ofType": null
               }
             },
@@ -2809,8 +2824,8 @@
             "deprecationReason": null
           },
           {
-            "name": "team",
-            "description": "One specific team.",
+            "name": "teamMembership",
+            "description": "One specific team membership.",
             "args": [
               {
                 "name": "id",
@@ -2832,7 +2847,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Team",
+                "name": "TeamMembership",
                 "ofType": null
               }
             },
@@ -2917,6 +2932,37 @@
             "deprecationReason": null
           },
           {
+            "name": "team",
+            "description": "One specific team.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Team",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "templates",
             "description": "All templates from all users.",
             "args": [],
@@ -2972,107 +3018,15 @@
             "deprecationReason": null
           },
           {
-            "name": "viewPreferences",
-            "description": "All view preferences.",
-            "args": [
-              {
-                "name": "before",
-                "description": "A cursor to be used with last for backward pagination.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "after",
-                "description": "A cursor to be used with first for forward pagination",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "first",
-                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "last",
-                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "includeArchived",
-                "description": "Should archived resources be included (default: false)",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "orderBy",
-                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
-                "type": {
-                  "kind": "ENUM",
-                  "name": "PaginationOrderBy",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
+            "name": "userSettings",
+            "description": "The user's settings.",
+            "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ViewPreferencesConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "webhook",
-            "description": "A specific webhook.",
-            "args": [
-              {
-                "name": "id",
-                "description": "The identifier of the webhook to retrieve.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Webhook",
+                "name": "UserSettings",
                 "ofType": null
               }
             },
@@ -3157,12 +3111,12 @@
             "deprecationReason": null
           },
           {
-            "name": "workflowState",
-            "description": "One specific state.",
+            "name": "webhook",
+            "description": "A specific webhook.",
             "args": [
               {
                 "name": "id",
-                "description": null,
+                "description": "The identifier of the webhook to retrieve.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -3180,7 +3134,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WorkflowState",
+                "name": "Webhook",
                 "ofType": null
               }
             },
@@ -3189,7 +3143,7 @@
           },
           {
             "name": "workflowStates",
-            "description": "All states.",
+            "description": "All issue workflow states.",
             "args": [
               {
                 "name": "before",
@@ -3263,6 +3217,37 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "workflowState",
+            "description": "One specific state.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "WorkflowState",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -3292,6 +3277,16 @@
       },
       {
         "kind": "SCALAR",
+        "name": "Boolean",
+        "description": "The `Boolean` scalar type represents `true` or `false`.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
         "name": "Float",
         "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).",
         "fields": null,
@@ -3301,12 +3296,143 @@
         "possibleTypes": null
       },
       {
-        "kind": "SCALAR",
-        "name": "Boolean",
-        "description": "The `Boolean` scalar type represents `true` or `false`.",
+        "kind": "ENUM",
+        "name": "PaginationOrderBy",
+        "description": "By which field should the pagination order by",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
+        "enumValues": [
+          {
+            "name": "createdAt",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UserConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "UserEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "User",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UserEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -3468,22 +3594,6 @@
             "deprecationReason": null
           },
           {
-            "name": "settings",
-            "description": "The settings of the user.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserSettings",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "lastSeen",
             "description": "The last time the user was seen online. If null, the user is currently online.",
             "args": [],
@@ -3521,6 +3631,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "settings",
+            "description": "Settings for the user. Only available for the authenticated user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserSettings",
                 "ofType": null
               }
             },
@@ -3995,17 +4121,17 @@
           },
           {
             "kind": "OBJECT",
-            "name": "ViewPreferences",
-            "ofType": null
-          },
-          {
-            "kind": "OBJECT",
             "name": "OauthClient",
             "ofType": null
           },
           {
             "kind": "OBJECT",
             "name": "OrganizationDomain",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "ViewPreferences",
             "ofType": null
           },
           {
@@ -4171,29 +4297,6 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "PaginationOrderBy",
-        "description": "By which field should the pagination order by",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "createdAt",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "updatedAt",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
         "possibleTypes": null
       },
       {
@@ -9325,124 +9428,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "UserConnection",
-        "description": null,
-        "fields": [
-          {
-            "name": "edges",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "UserEdge",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "nodes",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "User",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pageInfo",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "UserEdge",
-        "description": null,
-        "fields": [
-          {
-            "name": "node",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "cursor",
-            "description": "Used in `before` and `after` args",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "TeamConnection",
         "description": null,
         "fields": [
@@ -12115,12 +12100,12 @@
             "deprecationReason": null
           },
           {
-            "name": "integration",
-            "description": "The integration that made these changes. If null, possibly means that the change was made by a user.",
+            "name": "source",
+            "description": "Information about the integration or application which created this history entry.",
             "args": [],
             "type": {
-              "kind": "OBJECT",
-              "name": "Integration",
+              "kind": "SCALAR",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -14138,22 +14123,6 @@
             "deprecationReason": null
           },
           {
-            "name": "settings",
-            "description": "The settings of the user.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserSettings",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "lastSeen",
             "description": "The last time the user was seen online. If null, the user is currently online.",
             "args": [],
@@ -14191,6 +14160,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "settings",
+            "description": "Settings for the user. Only available for the authenticated user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserSettings",
                 "ofType": null
               }
             },
@@ -15787,6 +15772,124 @@
       },
       {
         "kind": "OBJECT",
+        "name": "CustomViewConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CustomViewEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CustomView",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "CustomViewEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CustomView",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "CustomView",
         "description": "A custom view that has been saved by a user.",
         "fields": [
@@ -15992,7 +16095,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "CustomViewConnection",
+        "name": "EmojiConnection",
         "description": null,
         "fields": [
           {
@@ -16010,7 +16113,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "CustomViewEdge",
+                    "name": "EmojiEdge",
                     "ofType": null
                   }
                 }
@@ -16034,7 +16137,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "CustomView",
+                    "name": "Emoji",
                     "ofType": null
                   }
                 }
@@ -16067,7 +16170,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "CustomViewEdge",
+        "name": "EmojiEdge",
         "description": null,
         "fields": [
           {
@@ -16079,7 +16182,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "CustomView",
+                "name": "Emoji",
                 "ofType": null
               }
             },
@@ -16267,7 +16370,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "EmojiConnection",
+        "name": "FavoriteConnection",
         "description": null,
         "fields": [
           {
@@ -16285,7 +16388,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "EmojiEdge",
+                    "name": "FavoriteEdge",
                     "ofType": null
                   }
                 }
@@ -16309,7 +16412,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "Emoji",
+                    "name": "Favorite",
                     "ofType": null
                   }
                 }
@@ -16342,7 +16445,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "EmojiEdge",
+        "name": "FavoriteEdge",
         "description": null,
         "fields": [
           {
@@ -16354,7 +16457,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Emoji",
+                "name": "Favorite",
                 "ofType": null
               }
             },
@@ -16565,124 +16668,6 @@
             "ofType": null
           }
         ],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "FavoriteConnection",
-        "description": null,
-        "fields": [
-          {
-            "name": "edges",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "FavoriteEdge",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "nodes",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "Favorite",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pageInfo",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "FavoriteEdge",
-        "description": null,
-        "fields": [
-          {
-            "name": "node",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Favorite",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "cursor",
-            "description": "Used in `before` and `after` args",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -17904,131 +17889,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "Reaction",
-        "description": "A reaction associated with a comment.",
-        "fields": [
-          {
-            "name": "id",
-            "description": "The unique identifier of the entity.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "createdAt",
-            "description": "The time at which the entity was created.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "updatedAt",
-            "description": "The last time at which the entity was updated. This is the same as the creation time if the\n    entity hasn't been update after creation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "archivedAt",
-            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "emoji",
-            "description": "Name of the reaction's emoji.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "user",
-            "description": "The user who reacted.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "comment",
-            "description": "The comment that the reaction is associated with.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Comment",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [
-          {
-            "kind": "INTERFACE",
-            "name": "Node",
-            "ofType": null
-          }
-        ],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "ReactionConnection",
         "description": null,
         "fields": [
@@ -18147,126 +18007,8 @@
       },
       {
         "kind": "OBJECT",
-        "name": "ViewPreferencesConnection",
-        "description": null,
-        "fields": [
-          {
-            "name": "edges",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "ViewPreferencesEdge",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "nodes",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "ViewPreferences",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pageInfo",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "ViewPreferencesEdge",
-        "description": null,
-        "fields": [
-          {
-            "name": "node",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ViewPreferences",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "cursor",
-            "description": "Used in `before` and `after` args",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "ViewPreferences",
-        "description": "View preferences.",
+        "name": "Reaction",
+        "description": "A reaction associated with a comment.",
         "fields": [
           {
             "name": "id",
@@ -18329,8 +18071,8 @@
             "deprecationReason": null
           },
           {
-            "name": "type",
-            "description": "The view preference type.",
+            "name": "emoji",
+            "description": "Name of the reaction's emoji.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -18345,15 +18087,31 @@
             "deprecationReason": null
           },
           {
-            "name": "viewType",
-            "description": "The view type.",
+            "name": "user",
+            "description": "The user who reacted.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "comment",
+            "description": "The comment that the reaction is associated with.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Comment",
                 "ofType": null
               }
             },
@@ -19030,6 +18788,61 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "UserAccountAdminPrivileged",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "adminUserAccountDelete",
+            "description": "Permanently deletes the user account and all associated data.",
+            "args": [
+              {
+                "name": "deleteAllData",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "email",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AdminResponse",
                 "ofType": null
               }
             },
@@ -23750,6 +23563,33 @@
         "kind": "OBJECT",
         "name": "AdminCommandPayload",
         "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AdminResponse",
+        "description": "Operation response.",
         "fields": [
           {
             "name": "success",
@@ -30480,6 +30320,115 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "ViewPreferences",
+        "description": "View preferences.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was updated. This is the same as the creation time if the\n    entity hasn't been update after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The view preference type.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "viewType",
+            "description": "The view type.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "ViewPreferencesUpdateInput",
         "description": null,
@@ -30877,6 +30826,33 @@
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SynchronizedPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "lastSyncId",
+            "description": "The identifier of the last sync operation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -31443,33 +31419,6 @@
           {
             "name": "size",
             "description": "Size of the uploaded file in bytes.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SynchronizedPayload",
-        "description": null,
-        "fields": [
-          {
-            "name": "lastSyncId",
-            "description": "The identifier of the last sync operation.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
