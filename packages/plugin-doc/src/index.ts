@@ -1,5 +1,5 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, logger, PluginConfig } from "@linear/plugin-common";
+import { ContextVisitor, logger, PluginConfig, printLines } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
 import { FragmentVisitor } from "./fragment-visitor";
@@ -28,12 +28,12 @@ export const plugin: PluginFunction = async (
     logger.info("Generating operations");
     const operations = visit(ast, new OperationVisitor(fragmentVisitor.context));
 
-    return [
+    return printLines([
       /** Print all fragments */
       fragments,
       /** Print all operations */
       operations,
-    ].join("\n\n");
+    ]);
   } catch (e) {
     logger.fatal(e);
     throw e;
@@ -60,5 +60,3 @@ export const validate: PluginValidateFn = async (
     throw new Error(`${prefix} output file extension to be ".graphql" but is "${outputFile}"`);
   }
 };
-
-export { FragmentVisitor, OperationVisitor };

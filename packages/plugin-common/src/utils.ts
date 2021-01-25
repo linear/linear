@@ -75,7 +75,7 @@ export function getKeyByValue<Key extends string, Value>(obj: Record<Key, Value>
 /**
  * Return the key matching the value of an object
  */
-export function getKeyByValue<K extends string, V>(o: Record<K, V>, v: V): K | undefined {
-  const keys = Object.keys(o) as K[];
-  return keys.find(key => o[key] === v);
+export function getKeyByValue<Key extends string, Value>(obj: Record<Key, Value>, value: Value): Key | undefined {
+  const keys = Object.keys(obj) as Key[];
+  return keys.find(key => obj[key] === value);
 }

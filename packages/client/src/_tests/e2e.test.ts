@@ -20,6 +20,7 @@ function getClient() {
 async function getSomeTeam() {
   const client = getClient();
   const teams = await client.teams();
+  const moreTeams = await teams?.fetchNext;
 
   const first = teams.nodes[0];
   expect(first).toBeDefined();
@@ -49,7 +50,7 @@ async function getSomeIssue() {
 /**
  * Assert success of the operation
  */
-function expectSuccess<T>(response: T, data?: Partial<T>) {
+function expectSuccess<Data>(response: Data, data?: Partial<Data>) {
   expect(response).toEqual(expect.objectContaining(data ?? {}));
 }
 

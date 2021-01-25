@@ -1,7 +1,8 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, logger, nonNullable, PluginContext, printList } from "@linear/plugin-common";
+import { ContextVisitor, logger, nonNullable, PluginContext, printLines } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
+import { printConnection } from "./connection";
 import c from "./constants";
 import { printModels } from "./model";
 import { ModelVisitor } from "./model-visitor";

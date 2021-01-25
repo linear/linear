@@ -1,4 +1,4 @@
-import { ArgDefinition, getArgList, printComment, printList } from "@linear/plugin-common";
+import { ArgDefinition, getArgList, printComment, printLines, printList } from "@linear/plugin-common";
 import c from "./constants";
 import { SdkOperation } from "./types";
 import { getOptionalVariables, getRequiredVariables } from "./variable";
@@ -18,21 +18,18 @@ export function getRequestArg(): ArgDefinition {
 /**
  * Get the requester args from the operation variables
  */
-export function printRequestArgs(o: SdkOperation): string {
-  const requiredVariables = getRequiredVariables(o.node);
-  const requiredArg = printList(
-    requiredVariables.map(v => v.variable.name?.value),
-    ", "
-  );
+export function printRequestArgs(operation: SdkOperation): string {
+  const requiredVariables = getRequiredVariables(operation.node);
+  const requiredArg = printList(requiredVariables.map(variable => variable.variable.name?.value));
 
-  const optionalVariables = getOptionalVariables(o.node);
+  const optionalVariables = getOptionalVariables(operation.node);
 
   if (requiredArg) {
     /** Merge id variable into requester variables */
     if (optionalVariables.length) {
-      return `{${requiredArg}, ...${c.VARIABLE_NAME}}`;
+      return `{ ${requiredArg}, ...${c.VARIABLE_NAME} }`;
     } else {
-      return `{${requiredArg}}`;
+      return `{ ${requiredArg} }`;
     }
   }
 
@@ -45,21 +42,21 @@ export function printRequestArgs(o: SdkOperation): string {
 export function printRequest(): string {
   const args = getArgList([getRequestArg()]);
 
-  return printList(
-    [
-      "\n",
-      printComment([`The function for calling the graphql client`]),
-      `export type ${c.REQUEST_TYPE} = <R, V>(doc: DocumentNode, ${c.VARIABLE_NAME}?: V) => Promise<R>`,
-      "\n",
-      printComment(["Base class to provide a request function", ...args.jsdoc]),
-      `class ${c.REQUEST_CLASS} {
-        public constructor(${args.printInput}) {
-          this.${c.REQUEST_NAME} = ${c.REQUEST_NAME}
-        }
+  return printLines([
+    "\n",
+    printComment([`The function for calling the graphql client`]),
+    `export type ${c.REQUEST_TYPE} = <${printList([c.RESPONSE_TYPE, c.VARIABLE_TYPE])}>(doc: DocumentNode, ${
+      c.VARIABLE_NAME
+    }?: ${c.VARIABLE_TYPE}) => Promise<${c.RESPONSE_TYPE}>`,
+    "\n",
+    printComment(["Base class to provide a request function", ...args.jsdoc]),
+    `class ${c.REQUEST_CLASS} {
+        protected _${c.REQUEST_NAME}: ${c.REQUEST_TYPE}
 
-        protected ${c.REQUEST_NAME}: ${c.REQUEST_TYPE}
+        public constructor(${args.printInput}) {
+          this._${c.REQUEST_NAME} = ${c.REQUEST_NAME}
+        }
       }`,
-    ],
-    "\n"
-  );
+    "\n",
+  ]);
 }

@@ -3,20 +3,20 @@ import { Kind, OperationDefinitionNode, VariableDefinitionNode } from "graphql";
 /**
  * Is this variable a non null type
  */
-export function isRequiredVariable(v: VariableDefinitionNode): boolean {
-  return v.type.kind === Kind.NON_NULL_TYPE;
+export function isRequiredVariable(variable: VariableDefinitionNode): boolean {
+  return variable.type.kind === Kind.NON_NULL_TYPE;
 }
 
 /**
  * Return all required variables for this node
  */
-export function getRequiredVariables(node?: OperationDefinitionNode): VariableDefinitionNode[] {
-  return node?.variableDefinitions?.filter(isRequiredVariable) ?? [];
+export function getRequiredVariables(operation?: OperationDefinitionNode): VariableDefinitionNode[] {
+  return operation?.variableDefinitions?.filter(isRequiredVariable) ?? [];
 }
 
 /**
  * Return all optional variables for this node
  */
-export function getOptionalVariables(node: OperationDefinitionNode): VariableDefinitionNode[] {
-  return node.variableDefinitions?.filter(v => !isRequiredVariable(v)) ?? [];
+export function getOptionalVariables(operation: OperationDefinitionNode): VariableDefinitionNode[] {
+  return operation.variableDefinitions?.filter(variable => !isRequiredVariable(variable)) ?? [];
 }

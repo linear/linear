@@ -4,7 +4,7 @@ import * as D from "./documents";
 export * from "./documents";
 
 /** The function for calling the graphql client */
-export type Request = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
+export type Request = <Response, Variables>(doc: DocumentNode, variables?: Variables) => Promise<Response>;
 
 /**
  * Base class to provide a request function
@@ -12,30 +12,124 @@ export type Request = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
  * @param request - function to call the graphql client
  */
 class LinearRequest {
-  public constructor(request: Request) {
-    this.request = request;
-  }
+  protected _request: Request;
 
-  protected request: Request;
+  public constructor(request: Request) {
+    this._request = request;
+  }
 }
 
+/** Fetch return type wrapped in a promise */
+type Fetch<Response> = Promise<Response | undefined>;
+
+/**
+ * Variables required for pagination
+ * Follows the Relay spec
+ */
+type ConnectionVariables = { after?: string; before?: string };
+
+/**
+ * Abstract class for connection models containing a list of nodes and pagination information
+ * Follows the Relay spec
+ */
+abstract class Connection<Node> extends LinearRequest {
+  public pageInfo?: PageInfo;
+  public nodes?: Node[];
+}
+
+/**
+ * The base connection class to provide pagination
+ * Follows the Relay spec
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - Function to refetch the connection given different pagination variables
+ * @param nodes - The list of models to initialize the connection
+ * @param pageInfo - The pagination information to initialize the connection
+ */
+class LinearConnection<Node> extends Connection<Node> {
+  private _fetch: (variables?: ConnectionVariables) => Fetch<Connection<Node>>;
+
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Node>>,
+    nodes?: Node[],
+    pageInfo?: PageInfo
+  ) {
+    super(request);
+    this._fetch = fetch;
+    this.nodes = nodes;
+    this.pageInfo = pageInfo;
+  }
+
+  /** Add nodes to the end of the existing nodes */
+  private _appendNodes(nodes?: Node[]) {
+    this.nodes = nodes ? [...(this.nodes ?? []), ...nodes] : this.nodes;
+  }
+
+  /** Add nodes to the start of the existing nodes */
+  private _prependNodes(nodes?: Node[]) {
+    this.nodes = nodes ? [...nodes, ...(this.nodes ?? [])] : this.nodes;
+  }
+
+  /** Update the pagination end cursor */
+  private _appendPageInfo(pageInfo?: PageInfo) {
+    if (this.pageInfo) {
+      this.pageInfo.endCursor = pageInfo?.endCursor ?? this.pageInfo.startCursor;
+      this.pageInfo.hasNextPage = pageInfo?.hasNextPage ?? this.pageInfo.hasNextPage;
+    }
+  }
+
+  /** Update the pagination start cursor */
+  private _prependPageInfo(pageInfo?: PageInfo) {
+    if (this.pageInfo) {
+      this.pageInfo.startCursor = pageInfo?.startCursor ?? this.pageInfo.startCursor;
+      this.pageInfo.hasPreviousPage = pageInfo?.hasPreviousPage ?? this.pageInfo.hasPreviousPage;
+    }
+  }
+
+  /** Fetch the next page of results */
+  public get fetchNext(): Promise<this> {
+    return this.pageInfo?.hasNextPage
+      ? this._fetch({ after: this.pageInfo?.endCursor }).then(response => {
+          this._appendNodes(response?.nodes);
+          this._appendPageInfo(response?.pageInfo);
+          return this;
+        })
+      : Promise.resolve(this);
+  }
+
+  /** Fetch the previous page of results */
+  public get fetchPrevious(): Promise<this> {
+    return this.pageInfo?.hasPreviousPage
+      ? this._fetch({ before: this.pageInfo?.startCursor }).then(response => {
+          this._prependNodes(response?.nodes);
+          this._prependPageInfo(response?.pageInfo);
+          return this;
+        })
+      : Promise.resolve(this);
+  }
+}
 /**
  * UserConnection model
  *
  * @param request - function to call the graphql client
- * @param data - UserConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this UserConnection model
+ * @param data - UserConnection response data
  */
-class UserConnection extends LinearRequest {
-  public constructor(request: Request, data: D.UserConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new User(request, node)) : undefined;
+class UserConnection extends LinearConnection<User> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<User>>,
+    data: D.UserConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new User(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: User[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A user that has access to the the resources of an organization.
  *
@@ -93,27 +187,26 @@ class User extends LinearRequest {
   /** Number of issues created. */
   public createdIssueCount?: number;
   /** Settings for the user. Only available for the authenticated user. */
-  public get settings(): Promise<UserSettings | undefined> {
-    return new UserSettingsQuery(this.request).fetch();
+  public get settings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
   }
   /** Organization in which the user belongs to. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** Issues assigned to the user. */
-  public assignedIssues(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
-    return this.id ? new User_AssignedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public assignedIssues(variables?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
+    return this.id ? new User_AssignedIssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Issues created by the user. */
-  public createdIssues(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
-    return this.id ? new User_CreatedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public createdIssues(variables?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
+    return this.id ? new User_CreatedIssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Memberships associated with the user. */
-  public teamMemberships(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
-    return this.id ? new User_TeamMembershipsQuery(this.request, this.id).fetch(vars) : undefined;
+  public teamMemberships(variables?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
+    return this.id ? new User_TeamMembershipsQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * The settings of a user as a JSON object.
  *
@@ -150,11 +243,10 @@ class UserSettings extends LinearRequest {
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom?: string[];
   /** The user to whom this notification was targeted for. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
-
 /**
  * IssueConnection model
  *
@@ -167,11 +259,7 @@ class IssueConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Issue(request, node)) : undefined;
   }
-
-  public nodes?: Issue[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An issue.
  *
@@ -271,67 +359,66 @@ class Issue extends LinearRequest {
   /** Suggested branch name for the issue. */
   public branchName?: string;
   /** The team that the issue is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The cycle that the issue is associated with. */
-  public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
+  public get cycle(): Fetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The workflow state that the issue is associated with. */
-  public get state(): Promise<WorkflowState | undefined> | undefined {
-    return this._state?.id ? new WorkflowStateQuery(this.request).fetch(this._state?.id) : undefined;
+  public get state(): Fetch<WorkflowState> | undefined {
+    return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
   }
   /** The user to whom the issue is assigned to. */
-  public get assignee(): Promise<User | undefined> | undefined {
-    return this._assignee?.id ? new UserQuery(this.request).fetch(this._assignee?.id) : undefined;
+  public get assignee(): Fetch<User> | undefined {
+    return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
   /** The parent of the issue. */
-  public get parent(): Promise<Issue | undefined> | undefined {
-    return this._parent?.id ? new IssueQuery(this.request).fetch(this._parent?.id) : undefined;
+  public get parent(): Fetch<Issue> | undefined {
+    return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The project that the issue is associated with. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The user who created the issue. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** Users who are subscribed to the issue. */
-  public subscribers(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
-    return this.id ? new Issue_SubscribersQuery(this.request, this.id).fetch(vars) : undefined;
+  public subscribers(variables?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
+    return this.id ? new Issue_SubscribersQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Children of the issue. */
-  public children(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
-    return this.id ? new Issue_ChildrenQuery(this.request, this.id).fetch(vars) : undefined;
+  public children(variables?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
+    return this.id ? new Issue_ChildrenQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Comments associated with the issue. */
-  public comments(vars?: Omit<D.Issue_CommentsQueryVariables, "id">) {
-    return this.id ? new Issue_CommentsQuery(this.request, this.id).fetch(vars) : undefined;
+  public comments(variables?: Omit<D.Issue_CommentsQueryVariables, "id">) {
+    return this.id ? new Issue_CommentsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** History entries associated with the issue. */
-  public history(vars?: Omit<D.Issue_HistoryQueryVariables, "id">) {
-    return this.id ? new Issue_HistoryQuery(this.request, this.id).fetch(vars) : undefined;
+  public history(variables?: Omit<D.Issue_HistoryQueryVariables, "id">) {
+    return this.id ? new Issue_HistoryQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Labels associated with this issue. */
-  public labels(vars?: Omit<D.Issue_LabelsQueryVariables, "id">) {
-    return this.id ? new Issue_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
+  public labels(variables?: Omit<D.Issue_LabelsQueryVariables, "id">) {
+    return this.id ? new Issue_LabelsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Integration resources for this issue. */
-  public integrationResources(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
-    return this.id ? new Issue_IntegrationResourcesQuery(this.request, this.id).fetch(vars) : undefined;
+  public integrationResources(variables?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
+    return this.id ? new Issue_IntegrationResourcesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Relations associated with this issue. */
-  public relations(vars?: Omit<D.Issue_RelationsQueryVariables, "id">) {
-    return this.id ? new Issue_RelationsQuery(this.request, this.id).fetch(vars) : undefined;
+  public relations(variables?: Omit<D.Issue_RelationsQueryVariables, "id">) {
+    return this.id ? new Issue_RelationsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Inverse relations associated with this issue. */
-  public inverseRelations(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
-    return this.id ? new Issue_InverseRelationsQuery(this.request, this.id).fetch(vars) : undefined;
+  public inverseRelations(variables?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
+    return this.id ? new Issue_InverseRelationsQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * An organizational unit that contains issues.
  *
@@ -453,77 +540,76 @@ class Team extends LinearRequest {
   /** Calender feed (iCal) for cycles. */
   public cycleCalenderUrl?: string;
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
-  public get draftWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get draftWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._draftWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._draftWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._draftWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been opened. */
-  public get startWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get startWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._startWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._startWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
-  public get reviewWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get reviewWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._reviewWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._reviewWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._reviewWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been merged. */
-  public get mergeWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get mergeWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._mergeWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._mergeWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
-  public get markedAsDuplicateWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get markedAsDuplicateWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._markedAsDuplicateWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._markedAsDuplicateWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
   }
   /** Team's currently active cycle. */
-  public get activeCycle(): Promise<Cycle | undefined> | undefined {
-    return this._activeCycle?.id ? new CycleQuery(this.request).fetch(this._activeCycle?.id) : undefined;
+  public get activeCycle(): Fetch<Cycle> | undefined {
+    return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
   }
   /** The organization that the team is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** Issues associated with the team. */
-  public issues(vars?: Omit<D.Team_IssuesQueryVariables, "id">) {
-    return this.id ? new Team_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.Team_IssuesQueryVariables, "id">) {
+    return this.id ? new Team_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Cycles associated with the team. */
-  public cycles(vars?: Omit<D.Team_CyclesQueryVariables, "id">) {
-    return this.id ? new Team_CyclesQuery(this.request, this.id).fetch(vars) : undefined;
+  public cycles(variables?: Omit<D.Team_CyclesQueryVariables, "id">) {
+    return this.id ? new Team_CyclesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Memberships associated with the team. */
-  public memberships(vars?: Omit<D.Team_MembershipsQueryVariables, "id">) {
-    return this.id ? new Team_MembershipsQuery(this.request, this.id).fetch(vars) : undefined;
+  public memberships(variables?: Omit<D.Team_MembershipsQueryVariables, "id">) {
+    return this.id ? new Team_MembershipsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Projects associated with the team. */
-  public projects(vars?: Omit<D.Team_ProjectsQueryVariables, "id">) {
-    return this.id ? new Team_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
+  public projects(variables?: Omit<D.Team_ProjectsQueryVariables, "id">) {
+    return this.id ? new Team_ProjectsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** The states that define the workflow associated with the team. */
-  public states(vars?: Omit<D.Team_StatesQueryVariables, "id">) {
-    return this.id ? new Team_StatesQuery(this.request, this.id).fetch(vars) : undefined;
+  public states(variables?: Omit<D.Team_StatesQueryVariables, "id">) {
+    return this.id ? new Team_StatesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Templates associated with the team. */
-  public templates(vars?: Omit<D.Team_TemplatesQueryVariables, "id">) {
-    return this.id ? new Team_TemplatesQuery(this.request, this.id).fetch(vars) : undefined;
+  public templates(variables?: Omit<D.Team_TemplatesQueryVariables, "id">) {
+    return this.id ? new Team_TemplatesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Labels associated with the team. */
-  public labels(vars?: Omit<D.Team_LabelsQueryVariables, "id">) {
-    return this.id ? new Team_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
+  public labels(variables?: Omit<D.Team_LabelsQueryVariables, "id">) {
+    return this.id ? new Team_LabelsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Webhooks associated with the team. */
-  public webhooks(vars?: Omit<D.Team_WebhooksQueryVariables, "id">) {
-    return this.id ? new Team_WebhooksQuery(this.request, this.id).fetch(vars) : undefined;
+  public webhooks(variables?: Omit<D.Team_WebhooksQueryVariables, "id">) {
+    return this.id ? new Team_WebhooksQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * A state in a team workflow.
  *
@@ -569,15 +655,14 @@ class WorkflowState extends LinearRequest {
   /** The type of the state. */
   public type?: string;
   /** The team to which this state belongs to. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** Issues belonging in this state. */
-  public issues(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
-    return this.id ? new WorkflowState_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
+    return this.id ? new WorkflowState_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * CycleConnection model
  *
@@ -590,11 +675,7 @@ class CycleConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Cycle(request, node)) : undefined;
   }
-
-  public nodes?: Cycle[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A set of issues to be resolved in a specified amount of time.
  *
@@ -652,19 +733,18 @@ class Cycle extends LinearRequest {
   /** The number of completed estimation points after each day. */
   public completedScopeHistory?: number[];
   /** The team that the cycle is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** Issues associated with the cycle. */
-  public issues(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
-    return this.id ? new Cycle_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
+    return this.id ? new Cycle_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Issues that weren't completed when the cycle was closed. */
-  public uncompletedIssuesUponClose(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
-    return this.id ? new Cycle_UncompletedIssuesUponCloseQuery(this.request, this.id).fetch(vars) : undefined;
+  public uncompletedIssuesUponClose(variables?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
+    return this.id ? new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * PageInfo model
  *
@@ -689,7 +769,6 @@ class PageInfo extends LinearRequest {
   /** Cursor representing the last result in the paginated results. */
   public endCursor?: string;
 }
-
 /**
  * TeamMembershipConnection model
  *
@@ -702,11 +781,7 @@ class TeamMembershipConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new TeamMembership(request, node)) : undefined;
   }
-
-  public nodes?: TeamMembership[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * Defines the membership of a user to a team.
  *
@@ -739,15 +814,14 @@ class TeamMembership extends LinearRequest {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
   /** The user that the membership is associated with. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The team that the membership is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
-
 /**
  * ProjectConnection model
  *
@@ -760,11 +834,7 @@ class ProjectConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Project(request, node)) : undefined;
   }
-
-  public nodes?: Project[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A project.
  *
@@ -853,35 +923,34 @@ class Project extends LinearRequest {
   /** Whether to send new issue status updates to Slack. */
   public slackIssueStatuses?: boolean;
   /** The user who created the project. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The project lead. */
-  public get lead(): Promise<User | undefined> | undefined {
-    return this._lead?.id ? new UserQuery(this.request).fetch(this._lead?.id) : undefined;
+  public get lead(): Fetch<User> | undefined {
+    return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
   /** The milestone that this project is associated with. */
-  public get milestone(): Promise<Milestone | undefined> | undefined {
-    return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
+  public get milestone(): Fetch<Milestone> | undefined {
+    return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
   }
   /** Teams associated with this project. */
-  public teams(vars?: Omit<D.Project_TeamsQueryVariables, "id">) {
-    return this.id ? new Project_TeamsQuery(this.request, this.id).fetch(vars) : undefined;
+  public teams(variables?: Omit<D.Project_TeamsQueryVariables, "id">) {
+    return this.id ? new Project_TeamsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Users that are members of the project. */
-  public members(vars?: Omit<D.Project_MembersQueryVariables, "id">) {
-    return this.id ? new Project_MembersQuery(this.request, this.id).fetch(vars) : undefined;
+  public members(variables?: Omit<D.Project_MembersQueryVariables, "id">) {
+    return this.id ? new Project_MembersQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Issues associated with the project. */
-  public issues(vars?: Omit<D.Project_IssuesQueryVariables, "id">) {
-    return this.id ? new Project_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.Project_IssuesQueryVariables, "id">) {
+    return this.id ? new Project_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Links associated with the project. */
-  public links(vars?: Omit<D.Project_LinksQueryVariables, "id">) {
-    return this.id ? new Project_LinksQuery(this.request, this.id).fetch(vars) : undefined;
+  public links(variables?: Omit<D.Project_LinksQueryVariables, "id">) {
+    return this.id ? new Project_LinksQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * A milestone that contains projects.
  *
@@ -915,15 +984,14 @@ class Milestone extends LinearRequest {
   /** The sort order for the milestone. */
   public sortOrder?: number;
   /** The organization that the milestone belongs to. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** Projects associated with the milestone. */
-  public projects(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
-    return this.id ? new Milestone_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
+  public projects(variables?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
+    return this.id ? new Milestone_ProjectsQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * An organization. Organizations are root-level objects that contain user accounts and teams.
  *
@@ -989,27 +1057,26 @@ class Organization extends LinearRequest {
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
   /** The organization's subscription to a paid plan. */
-  public get subscription(): Promise<Subscription | undefined> {
-    return new SubscriptionQuery(this.request).fetch();
+  public get subscription(): Fetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
   }
   /** Users associated with the organization. */
-  public users(vars?: D.Organization_UsersQueryVariables) {
-    return new Organization_UsersQuery(this.request).fetch(vars);
+  public users(variables?: D.Organization_UsersQueryVariables) {
+    return new Organization_UsersQuery(this._request).fetch(variables);
   }
   /** Teams associated with the organization. */
-  public teams(vars?: D.Organization_TeamsQueryVariables) {
-    return new Organization_TeamsQuery(this.request).fetch(vars);
+  public teams(variables?: D.Organization_TeamsQueryVariables) {
+    return new Organization_TeamsQuery(this._request).fetch(variables);
   }
   /** Milestones associated with the organization. */
-  public milestones(vars?: D.Organization_MilestonesQueryVariables) {
-    return new Organization_MilestonesQuery(this.request).fetch(vars);
+  public milestones(variables?: D.Organization_MilestonesQueryVariables) {
+    return new Organization_MilestonesQuery(this._request).fetch(variables);
   }
   /** Integrations associated with the organization. */
-  public integrations(vars?: D.Organization_IntegrationsQueryVariables) {
-    return new Organization_IntegrationsQuery(this.request).fetch(vars);
+  public integrations(variables?: D.Organization_IntegrationsQueryVariables) {
+    return new Organization_IntegrationsQuery(this._request).fetch(variables);
   }
 }
-
 /**
  * UserConnection model
  *
@@ -1039,11 +1106,7 @@ class TeamConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Team(request, node)) : undefined;
   }
-
-  public nodes?: Team[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * MilestoneConnection model
  *
@@ -1056,11 +1119,7 @@ class MilestoneConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Milestone(request, node)) : undefined;
   }
-
-  public nodes?: Milestone[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * IntegrationConnection model
  *
@@ -1073,11 +1132,7 @@ class IntegrationConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Integration(request, node)) : undefined;
   }
-
-  public nodes?: Integration[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An integration with an external service.
  *
@@ -1116,23 +1171,22 @@ class Integration extends LinearRequest {
   /** The external service identifier. */
   public serviceId?: string;
   /** The organization that the integration is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** The team that the integration is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user that added the integration. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** Settings related to the integration. */
   public get settings() {
-    return this.id ? new Integration_SettingsQuery(this.request, this.id).fetch() : undefined;
+    return this.id ? new Integration_SettingsQuery(this._request, this.id).fetch() : undefined;
   }
 }
-
 /**
  * The integration resource's settings
  *
@@ -1153,7 +1207,6 @@ class IntegrationSettings extends LinearRequest {
   public googleSheets?: GoogleSheetsSettings;
   public sentry?: SentrySettings;
 }
-
 /**
  * Slack notification specific settings.
  *
@@ -1172,7 +1225,6 @@ class SlackPostSettings extends LinearRequest {
   public channelId?: string;
   public configurationUrl?: string;
 }
-
 /**
  * Google Sheets specific settings.
  *
@@ -1193,7 +1245,6 @@ class GoogleSheetsSettings extends LinearRequest {
   public sheetId?: number;
   public updatedIssuesAt?: D.Scalars["DateTime"];
 }
-
 /**
  * Sentry specific settings.
  *
@@ -1209,7 +1260,6 @@ class SentrySettings extends LinearRequest {
   /** The slug of the Sentry organization being connected. */
   public organizationSlug?: string;
 }
-
 /**
  * The subscription of an organization.
  *
@@ -1252,15 +1302,14 @@ class Subscription extends LinearRequest {
   /** The subscription type of a pending change. Null if no change pending. */
   public pendingChangeType?: string;
   /** The creator of the subscription. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * ProjectLinkConnection model
  *
@@ -1273,11 +1322,7 @@ class ProjectLinkConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new ProjectLink(request, node)) : undefined;
   }
-
-  public nodes?: ProjectLink[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An external link for a project.
  *
@@ -1316,15 +1361,14 @@ class ProjectLink extends LinearRequest {
   /** The link's label. */
   public label?: string;
   /** The user who created the link. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The project that the link is associated with. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
-
 /**
  * WorkflowStateConnection model
  *
@@ -1337,11 +1381,7 @@ class WorkflowStateConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new WorkflowState(request, node)) : undefined;
   }
-
-  public nodes?: WorkflowState[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * TemplateConnection model
  *
@@ -1355,11 +1395,10 @@ class TemplateConnection extends LinearRequest {
   }
 
   public pageInfo?: PageInfo;
-  public get nodes(): Promise<Template[] | undefined> {
-    return new TemplatesQuery(this.request).fetch();
+  public get nodes(): Fetch<Template[]> {
+    return new TemplatesQuery(this._request).fetch();
   }
 }
-
 /**
  * A template object used for creating new issues faster.
  *
@@ -1404,15 +1443,14 @@ class Template extends LinearRequest {
   /** Template data. */
   public templateData?: D.Scalars["JSON"];
   /** The team that the template is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the template. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
-
 /**
  * IssueLabelConnection model
  *
@@ -1425,11 +1463,7 @@ class IssueLabelConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueLabel(request, node)) : undefined;
   }
-
-  public nodes?: IssueLabel[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * Labels that can be associated with issues.
  *
@@ -1471,19 +1505,18 @@ class IssueLabel extends LinearRequest {
   /** The label's color as a HEX string. */
   public color?: string;
   /** The team to which the label belongs to. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the label. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** Issues associated with the label. */
-  public issues(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
-    return this.id ? new IssueLabel_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
+    return this.id ? new IssueLabel_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * WebhookConnection model
  *
@@ -1496,11 +1529,7 @@ class WebhookConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Webhook(request, node)) : undefined;
   }
-
-  public nodes?: Webhook[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A webhook used to send HTTP notifications over data updates
  *
@@ -1542,15 +1571,14 @@ class Webhook extends LinearRequest {
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
   /** The team that the webhook is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the webhook. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
-
 /**
  * CommentConnection model
  *
@@ -1563,11 +1591,7 @@ class CommentConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Comment(request, node)) : undefined;
   }
-
-  public nodes?: Comment[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A comment associated with an issue.
  *
@@ -1612,15 +1636,14 @@ class Comment extends LinearRequest {
   /** The time user edited the comment. */
   public editedAt?: D.Scalars["DateTime"];
   /** The user who wrote the comment. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The issue that the comment is associated with. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
-
 /**
  * IssueHistoryConnection model
  *
@@ -1633,11 +1656,7 @@ class IssueHistoryConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueHistory(request, node)) : undefined;
   }
-
-  public nodes?: IssueHistory[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A record of changes to an issue.
  *
@@ -1740,63 +1759,62 @@ class IssueHistory extends LinearRequest {
   /** What the due date was changed to */
   public toDueDate?: D.Scalars["TimelessDateScalar"];
   /** The issue that was changed. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
-  public get actor(): Promise<User | undefined> | undefined {
-    return this._actor?.id ? new UserQuery(this.request).fetch(this._actor?.id) : undefined;
+  public get actor(): Fetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The user from whom the issue was re-assigned from. */
-  public get fromAssignee(): Promise<User | undefined> | undefined {
-    return this._fromAssignee?.id ? new UserQuery(this.request).fetch(this._fromAssignee?.id) : undefined;
+  public get fromAssignee(): Fetch<User> | undefined {
+    return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
   }
   /** The user to whom the issue was assigned to. */
-  public get toAssignee(): Promise<User | undefined> | undefined {
-    return this._toAssignee?.id ? new UserQuery(this.request).fetch(this._toAssignee?.id) : undefined;
+  public get toAssignee(): Fetch<User> | undefined {
+    return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
   }
   /** The team from which the issue was moved from. */
-  public get fromTeam(): Promise<Team | undefined> | undefined {
-    return this._fromTeam?.id ? new TeamQuery(this.request).fetch(this._fromTeam?.id) : undefined;
+  public get fromTeam(): Fetch<Team> | undefined {
+    return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
   }
   /** The team to which the issue was moved to. */
-  public get toTeam(): Promise<Team | undefined> | undefined {
-    return this._toTeam?.id ? new TeamQuery(this.request).fetch(this._toTeam?.id) : undefined;
+  public get toTeam(): Fetch<Team> | undefined {
+    return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
   }
   /** The previous parent of the issue. */
-  public get fromParent(): Promise<Issue | undefined> | undefined {
-    return this._fromParent?.id ? new IssueQuery(this.request).fetch(this._fromParent?.id) : undefined;
+  public get fromParent(): Fetch<Issue> | undefined {
+    return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
   /** The new parent of the issue. */
-  public get toParent(): Promise<Issue | undefined> | undefined {
-    return this._toParent?.id ? new IssueQuery(this.request).fetch(this._toParent?.id) : undefined;
+  public get toParent(): Fetch<Issue> | undefined {
+    return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
   /** The previous workflow state of the issue. */
-  public get fromState(): Promise<WorkflowState | undefined> | undefined {
-    return this._fromState?.id ? new WorkflowStateQuery(this.request).fetch(this._fromState?.id) : undefined;
+  public get fromState(): Fetch<WorkflowState> | undefined {
+    return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
   }
   /** The new workflow state of the issue. */
-  public get toState(): Promise<WorkflowState | undefined> | undefined {
-    return this._toState?.id ? new WorkflowStateQuery(this.request).fetch(this._toState?.id) : undefined;
+  public get toState(): Fetch<WorkflowState> | undefined {
+    return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
   }
   /** The previous cycle of the issue. */
-  public get fromCycle(): Promise<Cycle | undefined> | undefined {
-    return this._fromCycle?.id ? new CycleQuery(this.request).fetch(this._fromCycle?.id) : undefined;
+  public get fromCycle(): Fetch<Cycle> | undefined {
+    return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
   }
   /** The new cycle of the issue. */
-  public get toCycle(): Promise<Cycle | undefined> | undefined {
-    return this._toCycle?.id ? new CycleQuery(this.request).fetch(this._toCycle?.id) : undefined;
+  public get toCycle(): Fetch<Cycle> | undefined {
+    return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
   }
   /** The previous project of the issue. */
-  public get fromProject(): Promise<Project | undefined> | undefined {
-    return this._fromProject?.id ? new ProjectQuery(this.request).fetch(this._fromProject?.id) : undefined;
+  public get fromProject(): Fetch<Project> | undefined {
+    return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
   }
   /** The new project of the issue. */
-  public get toProject(): Promise<Project | undefined> | undefined {
-    return this._toProject?.id ? new ProjectQuery(this.request).fetch(this._toProject?.id) : undefined;
+  public get toProject(): Fetch<Project> | undefined {
+    return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
   }
 }
-
 /**
  * IntegrationResourceConnection model
  *
@@ -1809,11 +1827,7 @@ class IntegrationResourceConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IntegrationResource(request, node)) : undefined;
   }
-
-  public nodes?: IntegrationResource[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An integration resource created by an external service.
  *
@@ -1852,23 +1866,22 @@ class IntegrationResource extends LinearRequest {
   /** The external service resource ID. */
   public resourceId?: string;
   /** The integration that the resource is associated with. */
-  public get integration(): Promise<Integration | undefined> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this.request).fetch(this._integration?.id) : undefined;
+  public get integration(): Fetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
   /** The issue that the resource is associated with. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** Detailed information about the external resource. */
   public get data() {
-    return this.id ? new IntegrationResource_DataQuery(this.request, this.id).fetch() : undefined;
+    return this.id ? new IntegrationResource_DataQuery(this._request, this.id).fetch() : undefined;
   }
   /** Pull request information for GitHub pull requests and GitLab merge requests. */
   public get pullRequest() {
-    return this.id ? new IntegrationResource_PullRequestQuery(this.request, this.id).fetch() : undefined;
+    return this.id ? new IntegrationResource_PullRequestQuery(this._request, this.id).fetch() : undefined;
   }
 }
-
 /**
  * Integration resource's payload
  *
@@ -1897,7 +1910,6 @@ class IntegrationResourceData extends LinearRequest {
   /** The payload for an IntegrationResource of type 'sentryIssue' */
   public sentryIssue?: SentryIssuePayload;
 }
-
 /**
  * Pull request data
  *
@@ -1940,7 +1952,6 @@ class PullRequestPayload extends LinearRequest {
   public closedAt?: string;
   public mergedAt?: string;
 }
-
 /**
  * GitHub's commit data
  *
@@ -1967,7 +1978,6 @@ class CommitPayload extends LinearRequest {
   public removed?: string[];
   public modified?: string[];
 }
-
 /**
  * Sentry issue data
  *
@@ -2013,7 +2023,6 @@ class SentryIssuePayload extends LinearRequest {
   /** The name of the first release version this issue appeared on, if available. */
   public firstVersion?: string;
 }
-
 /**
  * IssueRelationConnection model
  *
@@ -2026,11 +2035,7 @@ class IssueRelationConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new IssueRelation(request, node)) : undefined;
   }
-
-  public nodes?: IssueRelation[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A relation between two issues.
  *
@@ -2066,15 +2071,14 @@ class IssueRelation extends LinearRequest {
   /** The relationship of the issue with the related issue. */
   public type?: string;
   /** The issue whose relationship is being described. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The related issue. */
-  public get relatedIssue(): Promise<Issue | undefined> | undefined {
-    return this._relatedIssue?.id ? new IssueQuery(this.request).fetch(this._relatedIssue?.id) : undefined;
+  public get relatedIssue(): Fetch<Issue> | undefined {
+    return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
   }
 }
-
 /**
  * OrganizationExistsPayload model
  *
@@ -2093,7 +2097,6 @@ class OrganizationExistsPayload extends LinearRequest {
   /** Whether the organization exists. */
   public exists?: boolean;
 }
-
 /**
  * Contains either the full serialized state of the application or delta packets that the requester can
  *   apply to the local data set in order to be up-to-date.
@@ -2128,7 +2131,6 @@ class SyncResponse extends LinearRequest {
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   public databaseVersion?: number;
 }
-
 /**
  * Contains requested archived model objects.
  *
@@ -2150,7 +2152,6 @@ class ArchiveResponse extends LinearRequest {
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   public databaseVersion?: number;
 }
-
 /**
  * A user account. Super user required.
  *
@@ -2186,7 +2187,6 @@ class UserAccountAdminPrivileged extends LinearRequest {
   public service?: string;
   public users?: UserAdminPrivileged[];
 }
-
 /**
  * A user that has access to the the resources of an organization. Super user required.
  *
@@ -2247,11 +2247,10 @@ class UserAdminPrivileged extends LinearRequest {
   /** Organization in which the user belongs to. Super user required. */
   public organization?: OrganizationAdminPrivileged;
   /** Settings for the user. Only available for the authenticated user. */
-  public get settings(): Promise<UserSettings | undefined> {
-    return new UserSettingsQuery(this.request).fetch();
+  public get settings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
   }
 }
-
 /**
  * An organization. Super user required.
  *
@@ -2323,7 +2322,6 @@ class OrganizationAdminPrivileged extends LinearRequest {
   /** The organization's subscription to a paid plan. Super user required. */
   public subscription?: SubscriptionAdminPrivileged;
 }
-
 /**
  * The subscription of an organization. Super user required.
  *
@@ -2372,15 +2370,14 @@ class SubscriptionAdminPrivileged extends LinearRequest {
   /** The Stripe status for the subscription. */
   public stripeStatus?: string;
   /** The creator of the subscription. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * ApiKeyConnection model
  *
@@ -2393,11 +2390,7 @@ class ApiKeyConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined;
   }
-
-  public nodes?: ApiKey[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An API key. Grants access to the user's resources.
  *
@@ -2428,7 +2421,6 @@ class ApiKey extends LinearRequest {
   /** The label of the API key. */
   public label?: string;
 }
-
 /**
  * Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
  *
@@ -2462,7 +2454,6 @@ class UserAuthorizedApplication extends LinearRequest {
   /** Whether the user has authorized the application for the given scopes. */
   public isAuthorized?: boolean;
 }
-
 /**
  * Public information of the OAuth application, plus the authorized scopes for a given user.
  *
@@ -2499,7 +2490,6 @@ class AuthorizedApplication extends LinearRequest {
   /** OAuth application's ID. */
   public appId?: string;
 }
-
 /**
  * AuthResolverResponse model
  *
@@ -2532,7 +2522,6 @@ class AuthResolverResponse extends LinearRequest {
   /** Organizations this account has access to, but is not yet a member. */
   public availableOrganizations?: Organization[];
 }
-
 /**
  * SsoUrlFromEmailResponse model
  *
@@ -2551,7 +2540,6 @@ class SsoUrlFromEmailResponse extends LinearRequest {
   /** SAML SSO sign-in URL. */
   public samlSsoUrl?: string;
 }
-
 /**
  * BillingDetailsPayload model
  *
@@ -2576,7 +2564,6 @@ class BillingDetailsPayload extends LinearRequest {
   /** The payment method. */
   public paymentMethod?: Card;
 }
-
 /**
  * Invoice model
  *
@@ -2604,7 +2591,6 @@ class Invoice extends LinearRequest {
   /** The invoice total, in cents. */
   public total?: number;
 }
-
 /**
  * Card model
  *
@@ -2623,7 +2609,6 @@ class Card extends LinearRequest {
   /** The last four digits used to identify the card. */
   public last4?: string;
 }
-
 /**
  * CollaborationDocumentUpdatePayload model
  *
@@ -2642,7 +2627,6 @@ class CollaborationDocumentUpdatePayload extends LinearRequest {
   /** Document steps the client has not seen yet and need to rebase it's local steps on. */
   public steps?: StepsResponse;
 }
-
 /**
  * StepsResponse model
  *
@@ -2664,24 +2648,27 @@ class StepsResponse extends LinearRequest {
   /** List of client IDs for the document steps. */
   public clientIds?: string[];
 }
-
 /**
  * CustomViewConnection model
  *
  * @param request - function to call the graphql client
- * @param data - CustomViewConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this CustomViewConnection model
+ * @param data - CustomViewConnection response data
  */
-class CustomViewConnection extends LinearRequest {
-  public constructor(request: Request, data: D.CustomViewConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined;
+class CustomViewConnection extends LinearConnection<CustomView> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<CustomView>>,
+    data: D.CustomViewConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new CustomView(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: CustomView[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A custom view that has been saved by a user.
  *
@@ -2732,19 +2719,18 @@ class CustomView extends LinearRequest {
   /** Whether the custom view is shared with everyone in the organization. */
   public shared?: boolean;
   /** The organization of the custom view. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** The team associated with the custom view. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the custom view. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
-
 /**
  * EmojiConnection model
  *
@@ -2757,11 +2743,7 @@ class EmojiConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
   }
-
-  public nodes?: Emoji[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A custom emoji.
  *
@@ -2801,15 +2783,14 @@ class Emoji extends LinearRequest {
   /** The source of the emoji. */
   public source?: string;
   /** The user who created the emoji. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the emoji belongs to. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * FavoriteConnection model
  *
@@ -2822,11 +2803,7 @@ class FavoriteConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
   }
-
-  public nodes?: Favorite[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * User favorites presented in the sidebar.
  *
@@ -2873,31 +2850,30 @@ class Favorite extends LinearRequest {
   /** The order of the item in the favorites list. */
   public sortOrder?: number;
   /** The owner of the favorite. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** Favorited issue. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** Favorited project. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** Favorited project team. */
-  public get projectTeam(): Promise<Project | undefined> | undefined {
-    return this._projectTeam?.id ? new ProjectQuery(this.request).fetch(this._projectTeam?.id) : undefined;
+  public get projectTeam(): Fetch<Project> | undefined {
+    return this._projectTeam?.id ? new ProjectQuery(this._request).fetch(this._projectTeam?.id) : undefined;
   }
   /** Favorited cycle. */
-  public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
+  public get cycle(): Fetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** Favorited issue label. */
-  public get label(): Promise<IssueLabel | undefined> | undefined {
-    return this._label?.id ? new IssueLabelQuery(this.request).fetch(this._label?.id) : undefined;
+  public get label(): Fetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
 }
-
 /**
  * FavoriteConnection model
  *
@@ -2936,7 +2912,6 @@ class FigmaEmbedPayload extends LinearRequest {
   /** Figma embed information. */
   public figmaEmbed?: FigmaEmbed;
 }
-
 /**
  * Object representing Figma preview information.
  *
@@ -2961,7 +2936,6 @@ class FigmaEmbed extends LinearRequest {
   /** Figma screenshot URL. */
   public url?: string;
 }
-
 /**
  * InvitePagePayload model
  *
@@ -2980,7 +2954,6 @@ class InvitePagePayload extends LinearRequest {
   /** Invite data. */
   public inviteData?: InviteData;
 }
-
 /**
  * InviteData model
  *
@@ -3017,7 +2990,6 @@ class InviteData extends LinearRequest {
   /** The user count of the organization. */
   public userCount?: number;
 }
-
 /**
  * NotificationConnection model
  *
@@ -3030,11 +3002,7 @@ class NotificationConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined;
   }
-
-  public nodes?: Notification[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A notification sent to a user.
  *
@@ -3086,23 +3054,22 @@ class Notification extends LinearRequest {
    */
   public emailedAt?: D.Scalars["DateTime"];
   /** The recipient of the notification. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The issue that the notification is associated with. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The team which the notification is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The comment which the notification is associated with. */
-  public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
+  public get comment(): Fetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
-
 /**
  * NotificationSubscriptionConnection model
  *
@@ -3115,11 +3082,7 @@ class NotificationSubscriptionConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined;
   }
-
-  public nodes?: NotificationSubscription[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * Notification subscriptions for models.
  *
@@ -3157,19 +3120,18 @@ class NotificationSubscription extends LinearRequest {
   /** The type of the subscription. */
   public type?: string;
   /** The user associated with notification subscriptions. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** Subscribed team. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** Subscribed project. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
-
 /**
  * OrganizationInviteConnection model
  *
@@ -3182,11 +3144,7 @@ class OrganizationInviteConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined;
   }
-
-  public nodes?: OrganizationInvite[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An invitation to the organization that has been sent via email.
  *
@@ -3231,23 +3189,22 @@ class OrganizationInvite extends LinearRequest {
   /** The time at which the invite will be expiring. Null, if the invite shouldn't expire */
   public expiresAt?: D.Scalars["DateTime"];
   /** The user who created the invitation. */
-  public get inviter(): Promise<User | undefined> | undefined {
-    return this._inviter?.id ? new UserQuery(this.request).fetch(this._inviter?.id) : undefined;
+  public get inviter(): Fetch<User> | undefined {
+    return this._inviter?.id ? new UserQuery(this._request).fetch(this._inviter?.id) : undefined;
   }
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
-  public get invitee(): Promise<User | undefined> | undefined {
-    return this._invitee?.id ? new UserQuery(this.request).fetch(this._invitee?.id) : undefined;
+  public get invitee(): Fetch<User> | undefined {
+    return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
   }
   /** The organization that the invite is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** undefined */
-  public issues(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
-    return this.id ? new OrganizationInvite_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
+    return this.id ? new OrganizationInvite_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * PushSubscriptionPayload model
  *
@@ -3266,24 +3223,27 @@ class PushSubscriptionPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * ReactionConnection model
  *
  * @param request - function to call the graphql client
- * @param data - ReactionConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this ReactionConnection model
+ * @param data - ReactionConnection response data
  */
-class ReactionConnection extends LinearRequest {
-  public constructor(request: Request, data: D.ReactionConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined;
+class ReactionConnection extends LinearConnection<Reaction> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Reaction>>,
+    data: D.ReactionConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Reaction(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Reaction[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A reaction associated with a comment.
  *
@@ -3319,15 +3279,14 @@ class Reaction extends LinearRequest {
   /** Name of the reaction's emoji. */
   public emoji?: string;
   /** The user who reacted. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The comment that the reaction is associated with. */
-  public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
+  public get comment(): Fetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
-
 /**
  * ReactionConnection model
  *
@@ -3417,11 +3376,10 @@ class UserPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The user that was created or updated. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
-
 /**
  * UserAdminPayload model
  *
@@ -3437,7 +3395,6 @@ class UserAdminPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OrganizationPayload model
  *
@@ -3456,11 +3413,10 @@ class OrganizationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The organization that was created or updated. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * OrganizationDeletePayload model
  *
@@ -3476,7 +3432,6 @@ class OrganizationDeletePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * AdminIntegrationPayload model
  *
@@ -3492,7 +3447,6 @@ class AdminIntegrationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OrganizationAccessPayload model
  *
@@ -3508,7 +3462,6 @@ class OrganizationAccessPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OrganizationSamlConfigurePayload model
  *
@@ -3532,7 +3485,6 @@ class OrganizationSamlConfigurePayload extends LinearRequest {
   /** Organization's current SAML configuration. */
   public samlConfiguration?: SamlConfiguration;
 }
-
 /**
  * The integration resource's settings
  *
@@ -3560,7 +3512,6 @@ class SamlConfiguration extends LinearRequest {
   /** List of allowed email domains for SAML authentication. */
   public allowedDomains?: string[];
 }
-
 /**
  * AdminCommandPayload model
  *
@@ -3576,12 +3527,11 @@ class AdminCommandPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * Operation response.
  *
  * @param request - function to call the graphql client
- * @param data - AdminResponseFragment response data
+ * @param data - D.AdminResponseFragment response data
  */
 class AdminResponse extends LinearRequest {
   public constructor(request: Request, data: D.AdminResponseFragment) {
@@ -3592,7 +3542,6 @@ class AdminResponse extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * EventPayload model
  *
@@ -3608,7 +3557,6 @@ class EventPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * ApiKeyPayload model
  *
@@ -3630,7 +3578,6 @@ class ApiKeyPayload extends LinearRequest {
   /** The API key that was created. */
   public apiKey?: ApiKey;
 }
-
 /**
  * ArchivePayload model
  *
@@ -3649,7 +3596,6 @@ class ArchivePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * EmailUserAccountAuthChallengeResponse model
  *
@@ -3668,7 +3614,6 @@ class EmailUserAccountAuthChallengeResponse extends LinearRequest {
   /** Supported challenge for this user account. Can be either verificationCode or password. */
   public authType?: string;
 }
-
 /**
  * CreateOrJoinOrganizationResponse model
  *
@@ -3683,14 +3628,13 @@ class CreateOrJoinOrganizationResponse extends LinearRequest {
     this._user = data.user ?? undefined;
   }
 
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
-
 /**
  * BillingEmailPayload model
  *
@@ -3709,7 +3653,6 @@ class BillingEmailPayload extends LinearRequest {
   /** The customer's email address the invoices are sent to. */
   public email?: string;
 }
-
 /**
  * CommentPayload model
  *
@@ -3731,11 +3674,10 @@ class CommentPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The comment that was created or updated. */
-  public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
+  public get comment(): Fetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
-
 /**
  * ContactPayload model
  *
@@ -3751,7 +3693,6 @@ class ContactPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * CustomViewPayload model
  *
@@ -3773,11 +3714,10 @@ class CustomViewPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The custom view that was created or updated. */
-  public get customView(): Promise<CustomView | undefined> | undefined {
-    return this._customView?.id ? new CustomViewQuery(this.request).fetch(this._customView?.id) : undefined;
+  public get customView(): Fetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
 }
-
 /**
  * CyclePayload model
  *
@@ -3799,11 +3739,10 @@ class CyclePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The Cycle that was created or updated. */
-  public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
+  public get cycle(): Fetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
 }
-
 /**
  * DebugPayload model
  *
@@ -3819,7 +3758,6 @@ class DebugPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * EmailUnsubscribePayload model
  *
@@ -3835,7 +3773,6 @@ class EmailUnsubscribePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * EmojiPayload model
  *
@@ -3857,11 +3794,10 @@ class EmojiPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The emoji that was created. */
-  public get emoji(): Promise<Emoji | undefined> | undefined {
-    return this._emoji?.id ? new EmojiQuery(this.request).fetch(this._emoji?.id) : undefined;
+  public get emoji(): Fetch<Emoji> | undefined {
+    return this._emoji?.id ? new EmojiQuery(this._request).fetch(this._emoji?.id) : undefined;
   }
 }
-
 /**
  * FavoritePayload model
  *
@@ -3883,11 +3819,10 @@ class FavoritePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The object that was added as a favorite. */
-  public get favorite(): Promise<Favorite | undefined> | undefined {
-    return this._favorite?.id ? new FavoriteQuery(this.request).fetch(this._favorite?.id) : undefined;
+  public get favorite(): Fetch<Favorite> | undefined {
+    return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
   }
 }
-
 /**
  * FeedbackPayload model
  *
@@ -3903,7 +3838,6 @@ class FeedbackPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * UploadPayload model
  *
@@ -3925,7 +3859,6 @@ class UploadPayload extends LinearRequest {
   /** Object describing the file to be uploaded. */
   public uploadFile?: UploadFile;
 }
-
 /**
  * Object representing Google Cloud upload policy, plus additional data.
  *
@@ -3957,7 +3890,6 @@ class UploadFile extends LinearRequest {
   public metaData?: D.Scalars["JSON"];
   public headers?: UploadFileHeader[];
 }
-
 /**
  * UploadFileHeader model
  *
@@ -3976,7 +3908,6 @@ class UploadFileHeader extends LinearRequest {
   /** Upload file header value. */
   public value?: string;
 }
-
 /**
  * ImageUploadFromUrlPayload model
  *
@@ -3998,7 +3929,6 @@ class ImageUploadFromUrlPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * IntegrationPayload model
  *
@@ -4020,11 +3950,10 @@ class IntegrationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The integration that was created or updated. */
-  public get integration(): Promise<Integration | undefined> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this.request).fetch(this._integration?.id) : undefined;
+  public get integration(): Fetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
 }
-
 /**
  * IssueLabelPayload model
  *
@@ -4046,11 +3975,10 @@ class IssueLabelPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The label that was created or updated. */
-  public get issueLabel(): Promise<IssueLabel | undefined> | undefined {
-    return this._issueLabel?.id ? new IssueLabelQuery(this.request).fetch(this._issueLabel?.id) : undefined;
+  public get issueLabel(): Fetch<IssueLabel> | undefined {
+    return this._issueLabel?.id ? new IssueLabelQuery(this._request).fetch(this._issueLabel?.id) : undefined;
   }
 }
-
 /**
  * IssueRelationPayload model
  *
@@ -4072,11 +4000,10 @@ class IssueRelationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The issue relation that was created or updated. */
-  public get issueRelation(): Promise<IssueRelation | undefined> | undefined {
-    return this._issueRelation?.id ? new IssueRelationQuery(this.request).fetch(this._issueRelation?.id) : undefined;
+  public get issueRelation(): Fetch<IssueRelation> | undefined {
+    return this._issueRelation?.id ? new IssueRelationQuery(this._request).fetch(this._issueRelation?.id) : undefined;
   }
 }
-
 /**
  * IssuePayload model
  *
@@ -4098,11 +4025,10 @@ class IssuePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The issue that was created or updated. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
-
 /**
  * MilestonePayload model
  *
@@ -4124,11 +4050,10 @@ class MilestonePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The milesteone that was created or updated. */
-  public get milestone(): Promise<Milestone | undefined> | undefined {
-    return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
+  public get milestone(): Fetch<Milestone> | undefined {
+    return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
   }
 }
-
 /**
  * NotificationPayload model
  *
@@ -4150,11 +4075,10 @@ class NotificationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The notification that was created or updated. */
-  public get notification(): Promise<Notification | undefined> | undefined {
-    return this._notification?.id ? new NotificationQuery(this.request).fetch(this._notification?.id) : undefined;
+  public get notification(): Fetch<Notification> | undefined {
+    return this._notification?.id ? new NotificationQuery(this._request).fetch(this._notification?.id) : undefined;
   }
 }
-
 /**
  * NotificationSubscriptionPayload model
  *
@@ -4176,13 +4100,12 @@ class NotificationSubscriptionPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The notification subscription that was created or updated. */
-  public get notificationSubscription(): Promise<NotificationSubscription | undefined> | undefined {
+  public get notificationSubscription(): Fetch<NotificationSubscription> | undefined {
     return this._notificationSubscription?.id
-      ? new NotificationSubscriptionQuery(this.request).fetch(this._notificationSubscription?.id)
+      ? new NotificationSubscriptionQuery(this._request).fetch(this._notificationSubscription?.id)
       : undefined;
   }
 }
-
 /**
  * OauthClientPayload model
  *
@@ -4204,7 +4127,6 @@ class OauthClientPayload extends LinearRequest {
   /** The OAuth client application that was created or updated. */
   public oauthClient?: OauthClient;
 }
-
 /**
  * OAuth2 client application
  *
@@ -4256,7 +4178,6 @@ class OauthClient extends LinearRequest {
   /** List of allowed redirect URIs for the application. */
   public redirectUris?: string[];
 }
-
 /**
  * RotateSecretPayload model
  *
@@ -4275,7 +4196,6 @@ class RotateSecretPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OauthTokenRevokePayload model
  *
@@ -4291,7 +4211,6 @@ class OauthTokenRevokePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OrganizationDomainPayload model
  *
@@ -4315,7 +4234,6 @@ class OrganizationDomainPayload extends LinearRequest {
   /** The organization domain that was created or updated. */
   public organizationDomain?: OrganizationDomain;
 }
-
 /**
  * Defines the use of a domain by an organization.
  *
@@ -4355,11 +4273,10 @@ class OrganizationDomain extends LinearRequest {
   /** E-mail used to verify this domain */
   public verificationEmail?: string;
   /** The user who added the domain. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
-
 /**
  * OrganizationInvitePayload model
  *
@@ -4383,7 +4300,6 @@ class OrganizationInvitePayload extends LinearRequest {
   /** The organization invite that was created or updated. */
   public organizationInvite?: OrganizationInvite;
 }
-
 /**
  * ProjectLinkPayload model
  *
@@ -4405,11 +4321,10 @@ class ProjectLinkPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The project that was created or updated. */
-  public get projectLink(): Promise<ProjectLink | undefined> | undefined {
-    return this._projectLink?.id ? new ProjectLinkQuery(this.request).fetch(this._projectLink?.id) : undefined;
+  public get projectLink(): Fetch<ProjectLink> | undefined {
+    return this._projectLink?.id ? new ProjectLinkQuery(this._request).fetch(this._projectLink?.id) : undefined;
   }
 }
-
 /**
  * ProjectPayload model
  *
@@ -4431,11 +4346,10 @@ class ProjectPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The project that was created or updated. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
-
 /**
  * ReactionPayload model
  *
@@ -4455,11 +4369,10 @@ class ReactionPayload extends LinearRequest {
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
   public success?: boolean;
-  public get reaction(): Promise<Reaction | undefined> | undefined {
-    return this._reaction?.id ? new ReactionQuery(this.request).fetch(this._reaction?.id) : undefined;
+  public get reaction(): Fetch<Reaction> | undefined {
+    return this._reaction?.id ? new ReactionQuery(this._request).fetch(this._reaction?.id) : undefined;
   }
 }
-
 /**
  * CreateCsvExportReportPayload model
  *
@@ -4475,7 +4388,6 @@ class CreateCsvExportReportPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * SubscriptionSessionPayload model
  *
@@ -4491,7 +4403,6 @@ class SubscriptionSessionPayload extends LinearRequest {
   /** The subscription session that was created or updated. */
   public session?: string;
 }
-
 /**
  * SubscriptionPayload model
  *
@@ -4513,11 +4424,10 @@ class SubscriptionPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The subscription entity being mutated. */
-  public get subscription(): Promise<Subscription | undefined> {
-    return new SubscriptionQuery(this.request).fetch();
+  public get subscription(): Fetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
   }
 }
-
 /**
  * TeamMembershipPayload model
  *
@@ -4539,11 +4449,12 @@ class TeamMembershipPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The team membership that was created or updated. */
-  public get teamMembership(): Promise<TeamMembership | undefined> | undefined {
-    return this._teamMembership?.id ? new TeamMembershipQuery(this.request).fetch(this._teamMembership?.id) : undefined;
+  public get teamMembership(): Fetch<TeamMembership> | undefined {
+    return this._teamMembership?.id
+      ? new TeamMembershipQuery(this._request).fetch(this._teamMembership?.id)
+      : undefined;
   }
 }
-
 /**
  * TeamPayload model
  *
@@ -4565,11 +4476,10 @@ class TeamPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The team that was created or updated. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
-
 /**
  * TemplatePayload model
  *
@@ -4591,11 +4501,10 @@ class TemplatePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The template that was created or updated. */
-  public get template(): Promise<Template | undefined> | undefined {
-    return this._template?.id ? new TemplateQuery(this.request).fetch(this._template?.id) : undefined;
+  public get template(): Fetch<Template> | undefined {
+    return this._template?.id ? new TemplateQuery(this._request).fetch(this._template?.id) : undefined;
   }
 }
-
 /**
  * UserSettingsPayload model
  *
@@ -4614,11 +4523,10 @@ class UserSettingsPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The user's settings. */
-  public get userSettings(): Promise<UserSettings | undefined> {
-    return new UserSettingsQuery(this.request).fetch();
+  public get userSettings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
   }
 }
-
 /**
  * UserSettingsFlagPayload model
  *
@@ -4643,7 +4551,6 @@ class UserSettingsFlagPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * UserSettingsFlagsResetPayload model
  *
@@ -4662,7 +4569,6 @@ class UserSettingsFlagsResetPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * UserSubscribeToNewsletterPayload model
  *
@@ -4678,7 +4584,6 @@ class UserSubscribeToNewsletterPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * ViewPreferencesPayload model
  *
@@ -4700,12 +4605,11 @@ class ViewPreferencesPayload extends LinearRequest {
   /** The view preferences entity being mutated. */
   public viewPreferences?: ViewPreferences;
 }
-
 /**
  * View preferences.
  *
  * @param request - function to call the graphql client
- * @param data - ViewPreferencesFragment response data
+ * @param data - D.ViewPreferencesFragment response data
  */
 class ViewPreferences extends LinearRequest {
   public constructor(request: Request, data: D.ViewPreferencesFragment) {
@@ -4734,7 +4638,6 @@ class ViewPreferences extends LinearRequest {
   /** The view type. */
   public viewType?: string;
 }
-
 /**
  * WebhookPayload model
  *
@@ -4756,11 +4659,10 @@ class WebhookPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The webhook entity being mutated. */
-  public get webhook(): Promise<Webhook | undefined> | undefined {
-    return this._webhook?.id ? new WebhookQuery(this.request).fetch(this._webhook?.id) : undefined;
+  public get webhook(): Fetch<Webhook> | undefined {
+    return this._webhook?.id ? new WebhookQuery(this._request).fetch(this._webhook?.id) : undefined;
   }
 }
-
 /**
  * WorkflowStatePayload model
  *
@@ -4782,16 +4684,15 @@ class WorkflowStatePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The state that was created or updated. */
-  public get workflowState(): Promise<WorkflowState | undefined> | undefined {
-    return this._workflowState?.id ? new WorkflowStateQuery(this.request).fetch(this._workflowState?.id) : undefined;
+  public get workflowState(): Fetch<WorkflowState> | undefined {
+    return this._workflowState?.id ? new WorkflowStateQuery(this._request).fetch(this._workflowState?.id) : undefined;
   }
 }
-
 /**
  * SynchronizedPayload model
  *
  * @param request - function to call the graphql client
- * @param data - SynchronizedPayloadFragment response data
+ * @param data - D.SynchronizedPayloadFragment response data
  */
 class SynchronizedPayload extends LinearRequest {
   public constructor(request: Request, data: D.SynchronizedPayloadFragment) {
@@ -4802,7 +4703,6 @@ class SynchronizedPayload extends LinearRequest {
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
 }
-
 /**
  * Collaborative editing steps for documents.
  *
@@ -4839,7 +4739,6 @@ class DocumentStep extends LinearRequest {
   /** Connected client ID. */
   public clientId?: string;
 }
-
 /**
  * A user's web browser push notification subscription.
  *
@@ -4867,7 +4766,6 @@ class PushSubscription extends LinearRequest {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
 }
-
 /**
  * PushSubscriptionConnection model
  *
@@ -4880,11 +4778,7 @@ class PushSubscriptionConnection extends LinearRequest {
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
     this.nodes = data.nodes ? data.nodes.map(node => new PushSubscription(request, node)) : undefined;
   }
-
-  public nodes?: PushSubscription[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A user account.
  *
@@ -4921,7 +4815,6 @@ class UserAccount extends LinearRequest {
   /** Users belonging to the account. */
   public users?: User[];
 }
-
 /**
  * A recorded entry of a file uploaded by a user.
  *
@@ -4955,15 +4848,14 @@ class FileUpload extends LinearRequest {
   /** Size of the uploaded file in bytes. */
   public size?: number;
   /** The user who uploaded the file. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization the upload belongs to. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * Public information of the OAuth application.
  *
@@ -5010,7 +4902,6 @@ class Application extends LinearRequest {
   /** Image of the application. */
   public imageUrl?: string;
 }
-
 /**
  * OrganizationDomainSimplePayload model
  *
@@ -5041,7 +4932,7 @@ class UserQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.user;
-      return data ? new User(this.request, data) : undefined;
+      return data ? new User(this._request, data) : undefined;
     });
   }
 }
@@ -5059,7 +4950,7 @@ class ViewerQuery extends LinearRequest {
   public async fetch(): Promise<User | undefined> {
     return this.request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, {}).then(response => {
       const data = response?.viewer;
-      return data ? new User(this.request, data) : undefined;
+      return data ? new User(this._request, data) : undefined;
     });
   }
 }
@@ -5078,7 +4969,7 @@ class OrganizationQuery extends LinearRequest {
     return this.request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument, {}).then(
       response => {
         const data = response?.organization;
-        return data ? new Organization(this.request, data) : undefined;
+        return data ? new Organization(this._request, data) : undefined;
       }
     );
   }
@@ -5099,7 +4990,7 @@ class OrganizationExistsQuery extends LinearRequest {
       urlKey,
     }).then(response => {
       const data = response?.organizationExists;
-      return data ? new OrganizationExistsPayload(this.request, data) : undefined;
+      return data ? new OrganizationExistsPayload(this._request, data) : undefined;
     });
   }
 }
@@ -5120,7 +5011,7 @@ class SyncBootstrapQuery extends LinearRequest {
       sinceSyncId,
     }).then(response => {
       const data = response?.syncBootstrap;
-      return data ? new SyncResponse(this.request, data) : undefined;
+      return data ? new SyncResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5140,7 +5031,7 @@ class SyncUpdatesQuery extends LinearRequest {
       sinceSyncId,
     }).then(response => {
       const data = response?.syncUpdates;
-      return data ? new SyncResponse(this.request, data) : undefined;
+      return data ? new SyncResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5161,7 +5052,7 @@ class ArchivedModelSyncQuery extends LinearRequest {
       modelClass,
     }).then(response => {
       const data = response?.archivedModelSync;
-      return data ? new ArchiveResponse(this.request, data) : undefined;
+      return data ? new ArchiveResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5179,15 +5070,15 @@ class ArchivedModelsSyncQuery extends LinearRequest {
   public async fetch(
     modelClass: string,
     teamId: string,
-    vars?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
-  ): Promise<ArchiveResponse | undefined> {
-    return this.request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(D.ArchivedModelsSyncDocument, {
+    variables?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
+  ): Fetch<ArchiveResponse> {
+    return this._request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(D.ArchivedModelsSyncDocument, {
       modelClass,
       teamId,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.archivedModelsSync;
-      return data ? new ArchiveResponse(this.request, data) : undefined;
+      return data ? new ArchiveResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5205,10 +5096,10 @@ class AdminUserAccountLookupQuery extends LinearRequest {
   public async fetch(vars?: D.AdminUserAccountLookupQueryVariables): Promise<UserAccountAdminPrivileged | undefined> {
     return this.request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
       D.AdminUserAccountLookupDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.adminUserAccountLookup;
-      return data ? new UserAccountAdminPrivileged(this.request, data) : undefined;
+      return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
     });
   }
 }
@@ -5244,7 +5135,9 @@ class ApiKeysQuery extends LinearRequest {
   public async fetch(vars?: D.ApiKeysQueryVariables): Promise<ApiKeyConnection | undefined> {
     return this.request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, vars).then(response => {
       const data = response?.apiKeys;
-      return data ? new ApiKeyConnection(this.request, data) : undefined;
+      return data
+        ? new ApiKeyConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5262,18 +5155,18 @@ class ApplicationWithAuthorizationQuery extends LinearRequest {
   public async fetch(
     scope: string[],
     clientId: string,
-    vars?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
-  ): Promise<UserAuthorizedApplication | undefined> {
-    return this.request<D.ApplicationWithAuthorizationQuery, D.ApplicationWithAuthorizationQueryVariables>(
+    variables?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
+  ): Fetch<UserAuthorizedApplication> {
+    return this._request<D.ApplicationWithAuthorizationQuery, D.ApplicationWithAuthorizationQueryVariables>(
       D.ApplicationWithAuthorizationDocument,
       {
         scope,
         clientId,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.applicationWithAuthorization;
-      return data ? new UserAuthorizedApplication(this.request, data) : undefined;
+      return data ? new UserAuthorizedApplication(this._request, data) : undefined;
     });
   }
 }
@@ -5294,7 +5187,7 @@ class AuthorizedApplicationsQuery extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.authorizedApplications;
-      return data ? data.map(node => new AuthorizedApplication(this.request, node)) : undefined;
+      return data ? data.map(node => new AuthorizedApplication(this._request, node)) : undefined;
     });
   }
 }
@@ -5311,14 +5204,14 @@ class SsoUrlFromEmailQuery extends LinearRequest {
 
   public async fetch(
     email: string,
-    vars?: Omit<D.SsoUrlFromEmailQueryVariables, "email">
-  ): Promise<SsoUrlFromEmailResponse | undefined> {
-    return this.request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument, {
+    variables?: Omit<D.SsoUrlFromEmailQueryVariables, "email">
+  ): Fetch<SsoUrlFromEmailResponse> {
+    return this._request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument, {
       email,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.ssoUrlFromEmail;
-      return data ? new SsoUrlFromEmailResponse(this.request, data) : undefined;
+      return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5337,7 +5230,7 @@ class BillingDetailsQuery extends LinearRequest {
     return this.request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument, {}).then(
       response => {
         const data = response?.billingDetails;
-        return data ? new BillingDetailsPayload(this.request, data) : undefined;
+        return data ? new BillingDetailsPayload(this._request, data) : undefined;
       }
     );
   }
@@ -5367,7 +5260,7 @@ class CollaborativeDocumentJoinQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.collaborativeDocumentJoin;
-      return data ? new CollaborationDocumentUpdatePayload(this.request, data) : undefined;
+      return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -5387,7 +5280,7 @@ class CommentQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.comment;
-      return data ? new Comment(this.request, data) : undefined;
+      return data ? new Comment(this._request, data) : undefined;
     });
   }
 }
@@ -5425,7 +5318,7 @@ class CustomViewQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.customView;
-      return data ? new CustomView(this.request, data) : undefined;
+      return data ? new CustomView(this._request, data) : undefined;
     });
   }
 }
@@ -5463,7 +5356,7 @@ class CycleQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.cycle;
-      return data ? new Cycle(this.request, data) : undefined;
+      return data ? new Cycle(this._request, data) : undefined;
     });
   }
 }
@@ -5501,7 +5394,7 @@ class EmojiQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.emoji;
-      return data ? new Emoji(this.request, data) : undefined;
+      return data ? new Emoji(this._request, data) : undefined;
     });
   }
 }
@@ -5539,7 +5432,7 @@ class FavoriteQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.favorite;
-      return data ? new Favorite(this.request, data) : undefined;
+      return data ? new Favorite(this._request, data) : undefined;
     });
   }
 }
@@ -5601,7 +5494,7 @@ class IntegrationQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.integration;
-      return data ? new Integration(this.request, data) : undefined;
+      return data ? new Integration(this._request, data) : undefined;
     });
   }
 }
@@ -5644,7 +5537,7 @@ class IntegrationResourceQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationResource;
-      return data ? new IntegrationResource(this.request, data) : undefined;
+      return data ? new IntegrationResource(this._request, data) : undefined;
     });
   }
 }
@@ -5709,7 +5602,7 @@ class IssueLabelQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.issueLabel;
-      return data ? new IssueLabel(this.request, data) : undefined;
+      return data ? new IssueLabel(this._request, data) : undefined;
     });
   }
 }
@@ -5747,7 +5640,7 @@ class IssueRelationQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.issueRelation;
-      return data ? new IssueRelation(this.request, data) : undefined;
+      return data ? new IssueRelation(this._request, data) : undefined;
     });
   }
 }
@@ -5787,7 +5680,7 @@ class IssueQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.issue;
-      return data ? new Issue(this.request, data) : undefined;
+      return data ? new Issue(this._request, data) : undefined;
     });
   }
 }
@@ -5808,10 +5701,12 @@ class IssueSearchQuery extends LinearRequest {
   ): Promise<IssueConnection | undefined> {
     return this.request<D.IssueSearchQuery, D.IssueSearchQueryVariables>(D.IssueSearchDocument, {
       query,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issueSearch;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch(query, { ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5849,7 +5744,7 @@ class MilestoneQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.milestone;
-      return data ? new Milestone(this.request, data) : undefined;
+      return data ? new Milestone(this._request, data) : undefined;
     });
   }
 }
@@ -5970,10 +5865,16 @@ class OrganizationInvitesQuery extends LinearRequest {
   public async fetch(vars?: D.OrganizationInvitesQueryVariables): Promise<OrganizationInviteConnection | undefined> {
     return this.request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
       D.OrganizationInvitesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organizationInvites;
-      return data ? new OrganizationInviteConnection(this.request, data) : undefined;
+      return data
+        ? new OrganizationInviteConnection(
+            this._request,
+            pagination => this.fetch({ ...variables, ...pagination }),
+            data
+          )
+        : undefined;
     });
   }
 }
@@ -5993,7 +5894,7 @@ class OrganizationInviteQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.organizationInvite;
-      return data ? new IssueLabel(this.request, data) : undefined;
+      return data ? new IssueLabel(this._request, data) : undefined;
     });
   }
 }
@@ -6012,7 +5913,9 @@ class ProjectLinksQuery extends LinearRequest {
     return this.request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
       response => {
         const data = response?.projectLinks;
-        return data ? new ProjectLinkConnection(this.request, data) : undefined;
+        return data
+          ? new ProjectLinkConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
       }
     );
   }
@@ -6033,7 +5936,7 @@ class ProjectLinkQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.projectLink;
-      return data ? new ProjectLink(this.request, data) : undefined;
+      return data ? new ProjectLink(this._request, data) : undefined;
     });
   }
 }
@@ -6051,7 +5954,9 @@ class ProjectsQuery extends LinearRequest {
   public async fetch(vars?: D.ProjectsQueryVariables): Promise<ProjectConnection | undefined> {
     return this.request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars).then(response => {
       const data = response?.projects;
-      return data ? new ProjectConnection(this.request, data) : undefined;
+      return data
+        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6110,7 +6015,9 @@ class ReactionsQuery extends LinearRequest {
   public async fetch(vars?: D.ReactionsQueryVariables): Promise<ReactionConnection | undefined> {
     return this.request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, vars).then(response => {
       const data = response?.reactions;
-      return data ? new ReactionConnection(this.request, data) : undefined;
+      return data
+        ? new ReactionConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6190,7 +6097,7 @@ class TeamMembershipQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.teamMembership;
-      return data ? new TeamMembership(this.request, data) : undefined;
+      return data ? new TeamMembership(this._request, data) : undefined;
     });
   }
 }
@@ -6208,7 +6115,9 @@ class TeamsQuery extends LinearRequest {
   public async fetch(vars?: D.TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return this.request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars).then(response => {
       const data = response?.teams;
-      return data ? new TeamConnection(this.request, data) : undefined;
+      return data
+        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6226,7 +6135,7 @@ class TemplatesQuery extends LinearRequest {
   public async fetch(): Promise<Template[] | undefined> {
     return this.request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument, {}).then(response => {
       const data = response?.templates;
-      return data ? data.map(node => new Template(this.request, node)) : undefined;
+      return data ? data.map(node => new Template(this._request, node)) : undefined;
     });
   }
 }
@@ -6246,7 +6155,7 @@ class TemplateQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.template;
-      return data ? new Template(this.request, data) : undefined;
+      return data ? new Template(this._request, data) : undefined;
     });
   }
 }
@@ -6265,7 +6174,7 @@ class UserSettingsQuery extends LinearRequest {
     return this.request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument, vars).then(
       response => {
         const data = response?.userSettings;
-        return data ? new UserSettings(this.request, data) : undefined;
+        return data ? new UserSettings(this._request, data) : undefined;
       }
     );
   }
@@ -6304,7 +6213,9 @@ class WebhooksQuery extends LinearRequest {
   public async fetch(vars?: D.WebhooksQueryVariables): Promise<WebhookConnection | undefined> {
     return this.request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, vars).then(response => {
       const data = response?.webhooks;
-      return data ? new WebhookConnection(this.request, data) : undefined;
+      return data
+        ? new WebhookConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6324,7 +6235,7 @@ class WebhookQuery extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.webhook;
-      return data ? new Webhook(this.request, data) : undefined;
+      return data ? new Webhook(this._request, data) : undefined;
     });
   }
 }
@@ -6365,7 +6276,7 @@ class UserUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.userUpdate;
-      return data ? new UserPayload(this.request, data) : undefined;
+      return data ? new UserPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6385,7 +6296,7 @@ class UserPromoteAdminMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.userPromoteAdmin;
-      return data ? new UserAdminPayload(this.request, data) : undefined;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6405,7 +6316,7 @@ class UserDemoteAdminMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.userDemoteAdmin;
-      return data ? new UserAdminPayload(this.request, data) : undefined;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6425,7 +6336,7 @@ class UserSuspendMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.userSuspend;
-      return data ? new UserAdminPayload(this.request, data) : undefined;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6445,7 +6356,7 @@ class UserUnsuspendMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.userUnsuspend;
-      return data ? new UserAdminPayload(this.request, data) : undefined;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6468,7 +6379,7 @@ class OrganizationUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationUpdate;
-      return data ? new OrganizationPayload(this.request, data) : undefined;
+      return data ? new OrganizationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6489,7 +6400,7 @@ class OrganizationDeleteChallengeMutation extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.organizationDeleteChallenge;
-      return data ? new OrganizationDeletePayload(this.request, data) : undefined;
+      return data ? new OrganizationDeletePayload(this._request, data) : undefined;
     });
   }
 }
@@ -6512,7 +6423,7 @@ class OrganizationDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationDelete;
-      return data ? new OrganizationDeletePayload(this.request, data) : undefined;
+      return data ? new OrganizationDeletePayload(this._request, data) : undefined;
     });
   }
 }
@@ -6535,7 +6446,7 @@ class AdminDeleteIntegrationMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.adminDeleteIntegration;
-      return data ? new AdminIntegrationPayload(this.request, data) : undefined;
+      return data ? new AdminIntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6558,7 +6469,7 @@ class OrganizationToggleAccessMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationToggleAccess;
-      return data ? new OrganizationAccessPayload(this.request, data) : undefined;
+      return data ? new OrganizationAccessPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6583,7 +6494,7 @@ class OrganizationChangeEmailDomainMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationChangeEmailDomain;
-      return data ? new OrganizationAccessPayload(this.request, data) : undefined;
+      return data ? new OrganizationAccessPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6606,7 +6517,7 @@ class OrganizationToggleSamlEnabledMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationToggleSamlEnabled;
-      return data ? new OrganizationSamlConfigurePayload(this.request, data) : undefined;
+      return data ? new OrganizationSamlConfigurePayload(this._request, data) : undefined;
     });
   }
 }
@@ -6633,7 +6544,7 @@ class OrganizationConfigureSamlMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationConfigureSaml;
-      return data ? new OrganizationSamlConfigurePayload(this.request, data) : undefined;
+      return data ? new OrganizationSamlConfigurePayload(this._request, data) : undefined;
     });
   }
 }
@@ -6653,7 +6564,7 @@ class AdminCommandMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.adminCommand;
-      return data ? new AdminCommandPayload(this.request, data) : undefined;
+      return data ? new AdminCommandPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6672,16 +6583,16 @@ class AdminBulkEmailMutation extends LinearRequest {
     emails: string[],
     markdownContent: string,
     subject: string,
-    vars?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
-  ): Promise<AdminCommandPayload | undefined> {
-    return this.request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument, {
+    variables?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
+  ): Fetch<AdminCommandPayload> {
+    return this._request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument, {
       emails,
       markdownContent,
       subject,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.adminBulkEmail;
-      return data ? new AdminCommandPayload(this.request, data) : undefined;
+      return data ? new AdminCommandPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6704,7 +6615,7 @@ class AdminCreateStripeCustomerMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.adminCreateStripeCustomer;
-      return data ? new AdminCommandPayload(this.request, data) : undefined;
+      return data ? new AdminCommandPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6727,7 +6638,7 @@ class AdminScheduleAnonymousTaskMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.adminScheduleAnonymousTask;
-      return data ? new AdminCommandPayload(this.request, data) : undefined;
+      return data ? new AdminCommandPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6751,7 +6662,7 @@ class AdminUserAccountChangeEmailMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.adminUserAccountChangeEmail;
-      return data ? new UserAccountAdminPrivileged(this.request, data) : undefined;
+      return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
     });
   }
 }
@@ -6771,7 +6682,7 @@ class EventCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.eventCreate;
-      return data ? new EventPayload(this.request, data) : undefined;
+      return data ? new EventPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6791,7 +6702,7 @@ class ApiKeyCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.apiKeyCreate;
-      return data ? new ApiKeyPayload(this.request, data) : undefined;
+      return data ? new ApiKeyPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6811,7 +6722,7 @@ class ApiKeyDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.apiKeyDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -6836,7 +6747,7 @@ class EmailUserAccountAuthChallengeMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.emailUserAccountAuthChallenge;
-      return data ? new EmailUserAccountAuthChallengeResponse(this.request, data) : undefined;
+      return data ? new EmailUserAccountAuthChallengeResponse(this._request, data) : undefined;
     });
   }
 }
@@ -6859,7 +6770,7 @@ class EmailTokenUserAccountAuthMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.emailTokenUserAccountAuth;
-      return data ? new AuthResolverResponse(this.request, data) : undefined;
+      return data ? new AuthResolverResponse(this._request, data) : undefined;
     });
   }
 }
@@ -6882,7 +6793,7 @@ class SamlTokenUserAccountAuthMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.samlTokenUserAccountAuth;
-      return data ? new AuthResolverResponse(this.request, data) : undefined;
+      return data ? new AuthResolverResponse(this._request, data) : undefined;
     });
   }
 }
@@ -6905,7 +6816,7 @@ class GoogleUserAccountAuthMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.googleUserAccountAuth;
-      return data ? new AuthResolverResponse(this.request, data) : undefined;
+      return data ? new AuthResolverResponse(this._request, data) : undefined;
     });
   }
 }
@@ -6922,17 +6833,17 @@ class CreateOrganizationFromOnboardingMutation extends LinearRequest {
 
   public async fetch(
     input: D.CreateOrganizationInput,
-    vars?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
-  ): Promise<CreateOrJoinOrganizationResponse | undefined> {
-    return this.request<
+    variables?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
+  ): Fetch<CreateOrJoinOrganizationResponse> {
+    return this._request<
       D.CreateOrganizationFromOnboardingMutation,
       D.CreateOrganizationFromOnboardingMutationVariables
     >(D.CreateOrganizationFromOnboardingDocument, {
       input,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.createOrganizationFromOnboarding;
-      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
     });
   }
 }
@@ -6955,7 +6866,7 @@ class JoinOrganizationFromOnboardingMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.joinOrganizationFromOnboarding;
-      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
     });
   }
 }
@@ -6978,7 +6889,7 @@ class LeaveOrganizationMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.leaveOrganization;
-      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7001,7 +6912,7 @@ class BillingEmailUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.billingEmailUpdate;
-      return data ? new BillingEmailPayload(this.request, data) : undefined;
+      return data ? new BillingEmailPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7026,7 +6937,7 @@ class CollaborativeDocumentUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.collaborativeDocumentUpdate;
-      return data ? new CollaborationDocumentUpdatePayload(this.request, data) : undefined;
+      return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7046,7 +6957,7 @@ class CommentCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.commentCreate;
-      return data ? new CommentPayload(this.request, data) : undefined;
+      return data ? new CommentPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7067,7 +6978,7 @@ class CommentUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.commentUpdate;
-      return data ? new CommentPayload(this.request, data) : undefined;
+      return data ? new CommentPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7087,7 +6998,7 @@ class CommentDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.commentDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7107,7 +7018,7 @@ class ContactCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.contactCreate;
-      return data ? new ContactPayload(this.request, data) : undefined;
+      return data ? new ContactPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7127,7 +7038,7 @@ class CustomViewCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.customViewCreate;
-      return data ? new CustomViewPayload(this.request, data) : undefined;
+      return data ? new CustomViewPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7148,7 +7059,7 @@ class CustomViewUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.customViewUpdate;
-      return data ? new CustomViewPayload(this.request, data) : undefined;
+      return data ? new CustomViewPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7168,7 +7079,7 @@ class CustomViewDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.customViewDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7188,7 +7099,7 @@ class CycleCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.cycleCreate;
-      return data ? new CyclePayload(this.request, data) : undefined;
+      return data ? new CyclePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7209,7 +7120,7 @@ class CycleUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.cycleUpdate;
-      return data ? new CyclePayload(this.request, data) : undefined;
+      return data ? new CyclePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7229,7 +7140,7 @@ class CycleArchiveMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.cycleArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7250,7 +7161,7 @@ class DebugFailWithInternalErrorMutation extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.debugFailWithInternalError;
-      return data ? new DebugPayload(this.request, data) : undefined;
+      return data ? new DebugPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7271,7 +7182,7 @@ class DebugFailWithWarningMutation extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.debugFailWithWarning;
-      return data ? new DebugPayload(this.request, data) : undefined;
+      return data ? new DebugPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7292,7 +7203,7 @@ class DebugCreateSamlOrgMutation extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.debugCreateSAMLOrg;
-      return data ? new DebugPayload(this.request, data) : undefined;
+      return data ? new DebugPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7312,7 +7223,7 @@ class EmailUnsubscribeMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.emailUnsubscribe;
-      return data ? new EmailUnsubscribePayload(this.request, data) : undefined;
+      return data ? new EmailUnsubscribePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7332,7 +7243,7 @@ class EmojiCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.emojiCreate;
-      return data ? new EmojiPayload(this.request, data) : undefined;
+      return data ? new EmojiPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7352,7 +7263,7 @@ class EmojiDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.emojiDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7372,7 +7283,7 @@ class FavoriteCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.favoriteCreate;
-      return data ? new FavoritePayload(this.request, data) : undefined;
+      return data ? new FavoritePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7393,7 +7304,7 @@ class FavoriteUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.favoriteUpdate;
-      return data ? new FavoritePayload(this.request, data) : undefined;
+      return data ? new FavoritePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7413,7 +7324,7 @@ class FavoriteDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.favoriteDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7433,7 +7344,7 @@ class FeedbackCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.feedbackCreate;
-      return data ? new FeedbackPayload(this.request, data) : undefined;
+      return data ? new FeedbackPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7452,16 +7363,16 @@ class FileUploadMutation extends LinearRequest {
     size: number,
     contentType: string,
     filename: string,
-    vars?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
-  ): Promise<UploadPayload | undefined> {
-    return this.request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument, {
+    variables?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
+  ): Fetch<UploadPayload> {
+    return this._request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument, {
       size,
       contentType,
       filename,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.fileUpload;
-      return data ? new UploadPayload(this.request, data) : undefined;
+      return data ? new UploadPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7484,7 +7395,7 @@ class ImageUploadFromUrlMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.imageUploadFromUrl;
-      return data ? new ImageUploadFromUrlPayload(this.request, data) : undefined;
+      return data ? new ImageUploadFromUrlPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7507,7 +7418,7 @@ class IntegrationGithubConnectMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationGithubConnect;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7531,7 +7442,7 @@ class IntegrationGitlabConnectMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationGitlabConnect;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7549,15 +7460,15 @@ class IntegrationSlackMutation extends LinearRequest {
   public async fetch(
     redirectUri: string,
     code: string,
-    vars?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
-  ): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(D.IntegrationSlackDocument, {
+    variables?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
+  ): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(D.IntegrationSlackDocument, {
       redirectUri,
       code,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.integrationSlack;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7581,7 +7492,7 @@ class IntegrationSlackPersonalMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationSlackPersonal;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7600,19 +7511,19 @@ class IntegrationSlackPostMutation extends LinearRequest {
     redirectUri: string,
     teamId: string,
     code: string,
-    vars?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
-  ): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
+    variables?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
+  ): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
       D.IntegrationSlackPostDocument,
       {
         redirectUri,
         teamId,
         code,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.integrationSlackPost;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7637,7 +7548,7 @@ class IntegrationSlackProjectPostMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationSlackProjectPost;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7661,7 +7572,7 @@ class IntegrationSlackImportEmojisMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationSlackImportEmojis;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7682,7 +7593,7 @@ class IntegrationFigmaMutation extends LinearRequest {
       code,
     }).then(response => {
       const data = response?.integrationFigma;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7705,7 +7616,7 @@ class IntegrationGoogleSheetsMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationGoogleSheets;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7728,7 +7639,7 @@ class RefreshGoogleSheetsDataMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.refreshGoogleSheetsData;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7757,7 +7668,7 @@ class IntegrationSentryConnectMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationSentryConnect;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7780,7 +7691,7 @@ class IntegrationDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7803,7 +7714,7 @@ class IntegrationResourceArchiveMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationResourceArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7823,7 +7734,7 @@ class IssueLabelCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.issueLabelCreate;
-      return data ? new IssueLabelPayload(this.request, data) : undefined;
+      return data ? new IssueLabelPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7844,7 +7755,7 @@ class IssueLabelUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.issueLabelUpdate;
-      return data ? new IssueLabelPayload(this.request, data) : undefined;
+      return data ? new IssueLabelPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7867,7 +7778,7 @@ class IssueLabelArchiveMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.issueLabelArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7890,7 +7801,7 @@ class IssueRelationCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.issueRelationCreate;
-      return data ? new IssueRelationPayload(this.request, data) : undefined;
+      return data ? new IssueRelationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7914,7 +7825,7 @@ class IssueRelationUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.issueRelationUpdate;
-      return data ? new IssueRelationPayload(this.request, data) : undefined;
+      return data ? new IssueRelationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7937,7 +7848,7 @@ class IssueRelationDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.issueRelationDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7957,7 +7868,7 @@ class IssueCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.issueCreate;
-      return data ? new IssuePayload(this.request, data) : undefined;
+      return data ? new IssuePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7978,7 +7889,7 @@ class IssueUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.issueUpdate;
-      return data ? new IssuePayload(this.request, data) : undefined;
+      return data ? new IssuePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7998,7 +7909,7 @@ class IssueArchiveMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.issueArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8018,7 +7929,7 @@ class IssueUnarchiveMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.issueUnarchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8038,7 +7949,7 @@ class MilestoneCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.milestoneCreate;
-      return data ? new MilestonePayload(this.request, data) : undefined;
+      return data ? new MilestonePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8059,7 +7970,7 @@ class MilestoneUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.milestoneUpdate;
-      return data ? new MilestonePayload(this.request, data) : undefined;
+      return data ? new MilestonePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8079,7 +7990,7 @@ class MilestoneDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.milestoneDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8103,7 +8014,7 @@ class NotificationCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationCreate;
-      return data ? new NotificationPayload(this.request, data) : undefined;
+      return data ? new NotificationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8127,7 +8038,7 @@ class NotificationUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationUpdate;
-      return data ? new NotificationPayload(this.request, data) : undefined;
+      return data ? new NotificationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8150,7 +8061,7 @@ class NotificationDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8173,7 +8084,7 @@ class NotificationArchiveMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8196,7 +8107,7 @@ class NotificationUnarchiveMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationUnarchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8221,7 +8132,7 @@ class NotificationSubscriptionCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationSubscriptionCreate;
-      return data ? new NotificationSubscriptionPayload(this.request, data) : undefined;
+      return data ? new NotificationSubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8244,7 +8155,7 @@ class NotificationSubscriptionDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationSubscriptionDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8267,7 +8178,7 @@ class OauthClientCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.oauthClientCreate;
-      return data ? new OauthClientPayload(this.request, data) : undefined;
+      return data ? new OauthClientPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8291,7 +8202,7 @@ class OauthClientUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.oauthClientUpdate;
-      return data ? new OauthClientPayload(this.request, data) : undefined;
+      return data ? new OauthClientPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8314,7 +8225,7 @@ class OauthClientArchiveMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.oauthClientArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8337,7 +8248,7 @@ class OauthClientRotateSecretMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.oauthClientRotateSecret;
-      return data ? new RotateSecretPayload(this.request, data) : undefined;
+      return data ? new RotateSecretPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8358,7 +8269,7 @@ class OauthTokenRevokeMutation extends LinearRequest {
       appId,
     }).then(response => {
       const data = response?.oauthTokenRevoke;
-      return data ? new OauthTokenRevokePayload(this.request, data) : undefined;
+      return data ? new OauthTokenRevokePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8381,7 +8292,7 @@ class OrganizationDomainVerifyMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationDomainVerify;
-      return data ? new OrganizationDomainPayload(this.request, data) : undefined;
+      return data ? new OrganizationDomainPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8404,7 +8315,7 @@ class OrganizationDomainCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationDomainCreate;
-      return data ? new OrganizationDomainPayload(this.request, data) : undefined;
+      return data ? new OrganizationDomainPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8427,7 +8338,7 @@ class OrganizationDomainDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationDomainDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8450,7 +8361,7 @@ class OrganizationInviteCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationInviteCreate;
-      return data ? new OrganizationInvitePayload(this.request, data) : undefined;
+      return data ? new OrganizationInvitePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8473,7 +8384,7 @@ class ResentOrganizationInviteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.resentOrganizationInvite;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8496,7 +8407,7 @@ class OrganizationInviteDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationInviteDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8519,7 +8430,7 @@ class ProjectLinkCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.projectLinkCreate;
-      return data ? new ProjectLinkPayload(this.request, data) : undefined;
+      return data ? new ProjectLinkPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8542,7 +8453,7 @@ class ProjectLinkDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.projectLinkDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8562,7 +8473,7 @@ class ProjectCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.projectCreate;
-      return data ? new ProjectPayload(this.request, data) : undefined;
+      return data ? new ProjectPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8583,7 +8494,7 @@ class ProjectUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.projectUpdate;
-      return data ? new ProjectPayload(this.request, data) : undefined;
+      return data ? new ProjectPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8603,7 +8514,7 @@ class ProjectArchiveMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.projectArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8626,7 +8537,7 @@ class PushSubscriptionCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.pushSubscriptionCreate;
-      return data ? new PushSubscriptionPayload(this.request, data) : undefined;
+      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8649,7 +8560,7 @@ class PushSubscriptionDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.pushSubscriptionDelete;
-      return data ? new PushSubscriptionPayload(this.request, data) : undefined;
+      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8669,7 +8580,7 @@ class ReactionCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.reactionCreate;
-      return data ? new ReactionPayload(this.request, data) : undefined;
+      return data ? new ReactionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8689,7 +8600,7 @@ class ReactionDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.reactionDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8710,7 +8621,7 @@ class CreateCsvExportReportMutation extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.createCsvExportReport;
-      return data ? new CreateCsvExportReportPayload(this.request, data) : undefined;
+      return data ? new CreateCsvExportReportPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8733,7 +8644,7 @@ class SubscriptionSessionCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.subscriptionSessionCreate;
-      return data ? new SubscriptionSessionPayload(this.request, data) : undefined;
+      return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8754,7 +8665,7 @@ class SubscriptionUpdateSessionCreateMutation extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.subscriptionUpdateSessionCreate;
-      return data ? new SubscriptionSessionPayload(this.request, data) : undefined;
+      return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8778,7 +8689,7 @@ class SubscriptionUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.subscriptionUpdate;
-      return data ? new SubscriptionPayload(this.request, data) : undefined;
+      return data ? new SubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8802,7 +8713,7 @@ class SubscriptionUpgradeMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.subscriptionUpgrade;
-      return data ? new SubscriptionPayload(this.request, data) : undefined;
+      return data ? new SubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8825,7 +8736,7 @@ class SubscriptionArchiveMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.subscriptionArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8848,7 +8759,7 @@ class TeamMembershipCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.teamMembershipCreate;
-      return data ? new TeamMembershipPayload(this.request, data) : undefined;
+      return data ? new TeamMembershipPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8871,7 +8782,7 @@ class TeamMembershipDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.teamMembershipDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8888,14 +8799,14 @@ class TeamCreateMutation extends LinearRequest {
 
   public async fetch(
     input: D.TeamCreateInput,
-    vars?: Omit<D.TeamCreateMutationVariables, "input">
-  ): Promise<TeamPayload | undefined> {
-    return this.request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument, {
+    variables?: Omit<D.TeamCreateMutationVariables, "input">
+  ): Fetch<TeamPayload> {
+    return this._request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument, {
       input,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.teamCreate;
-      return data ? new TeamPayload(this.request, data) : undefined;
+      return data ? new TeamPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8916,7 +8827,7 @@ class TeamUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.teamUpdate;
-      return data ? new TeamPayload(this.request, data) : undefined;
+      return data ? new TeamPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8936,7 +8847,7 @@ class TeamArchiveMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.teamArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8956,7 +8867,7 @@ class TeamDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.teamDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8976,7 +8887,7 @@ class TemplateCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.templateCreate;
-      return data ? new TemplatePayload(this.request, data) : undefined;
+      return data ? new TemplatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8997,7 +8908,7 @@ class TemplateUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.templateUpdate;
-      return data ? new TemplatePayload(this.request, data) : undefined;
+      return data ? new TemplatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9017,7 +8928,7 @@ class TemplateDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.templateDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9041,7 +8952,7 @@ class UserSettingsUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.userSettingsUpdate;
-      return data ? new UserSettingsPayload(this.request, data) : undefined;
+      return data ? new UserSettingsPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9064,7 +8975,7 @@ class UserSettingsFlagIncrementMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.userSettingsFlagIncrement;
-      return data ? new UserSettingsFlagPayload(this.request, data) : undefined;
+      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9085,7 +8996,7 @@ class UserSettingsFlagsResetMutation extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.userSettingsFlagsReset;
-      return data ? new UserSettingsFlagsResetPayload(this.request, data) : undefined;
+      return data ? new UserSettingsFlagsResetPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9109,7 +9020,7 @@ class UserFlagUpdateMutation extends LinearRequest {
       flag,
     }).then(response => {
       const data = response?.userFlagUpdate;
-      return data ? new UserSettingsFlagPayload(this.request, data) : undefined;
+      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9130,7 +9041,7 @@ class UserSubscribeToNewsletterMutation extends LinearRequest {
       {}
     ).then(response => {
       const data = response?.userSubscribeToNewsletter;
-      return data ? new UserSubscribeToNewsletterPayload(this.request, data) : undefined;
+      return data ? new UserSubscribeToNewsletterPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9153,7 +9064,7 @@ class ViewPreferencesCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.viewPreferencesCreate;
-      return data ? new ViewPreferencesPayload(this.request, data) : undefined;
+      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9177,7 +9088,7 @@ class ViewPreferencesUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.viewPreferencesUpdate;
-      return data ? new ViewPreferencesPayload(this.request, data) : undefined;
+      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9200,7 +9111,7 @@ class ViewPreferencesDeleteMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.viewPreferencesDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9220,7 +9131,7 @@ class WebhookCreateMutation extends LinearRequest {
       input,
     }).then(response => {
       const data = response?.webhookCreate;
-      return data ? new WebhookPayload(this.request, data) : undefined;
+      return data ? new WebhookPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9241,7 +9152,7 @@ class WebhookUpdateMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.webhookUpdate;
-      return data ? new WebhookPayload(this.request, data) : undefined;
+      return data ? new WebhookPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9261,7 +9172,7 @@ class WebhookDeleteMutation extends LinearRequest {
       id,
     }).then(response => {
       const data = response?.webhookDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9284,7 +9195,7 @@ class WorkflowStateCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.workflowStateCreate;
-      return data ? new WorkflowStatePayload(this.request, data) : undefined;
+      return data ? new WorkflowStatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9308,7 +9219,7 @@ class WorkflowStateUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.workflowStateUpdate;
-      return data ? new WorkflowStatePayload(this.request, data) : undefined;
+      return data ? new WorkflowStatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9331,7 +9242,7 @@ class WorkflowStateArchiveMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.workflowStateArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9355,11 +9266,13 @@ class User_AssignedIssuesQuery extends LinearRequest {
       D.User_AssignedIssuesDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.user?.assignedIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9381,10 +9294,12 @@ class User_CreatedIssuesQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.user?.createdIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9410,11 +9325,13 @@ class User_TeamMembershipsQuery extends LinearRequest {
       D.User_TeamMembershipsDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.user?.teamMemberships;
-      return data ? new TeamMembershipConnection(this.request, data) : undefined;
+      return data
+        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9432,10 +9349,12 @@ class Viewer_AssignedIssuesQuery extends LinearRequest {
   public async fetch(vars?: D.Viewer_AssignedIssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.Viewer_AssignedIssuesQuery, D.Viewer_AssignedIssuesQueryVariables>(
       D.Viewer_AssignedIssuesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.viewer?.assignedIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9453,10 +9372,12 @@ class Viewer_CreatedIssuesQuery extends LinearRequest {
   public async fetch(vars?: D.Viewer_CreatedIssuesQueryVariables): Promise<IssueConnection | undefined> {
     return this.request<D.Viewer_CreatedIssuesQuery, D.Viewer_CreatedIssuesQueryVariables>(
       D.Viewer_CreatedIssuesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.viewer?.createdIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9474,10 +9395,12 @@ class Viewer_TeamMembershipsQuery extends LinearRequest {
   public async fetch(vars?: D.Viewer_TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.Viewer_TeamMembershipsQuery, D.Viewer_TeamMembershipsQueryVariables>(
       D.Viewer_TeamMembershipsDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.viewer?.teamMemberships;
-      return data ? new TeamMembershipConnection(this.request, data) : undefined;
+      return data
+        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9495,10 +9418,12 @@ class Organization_UsersQuery extends LinearRequest {
   public async fetch(vars?: D.Organization_UsersQueryVariables): Promise<UserConnection | undefined> {
     return this.request<D.Organization_UsersQuery, D.Organization_UsersQueryVariables>(
       D.Organization_UsersDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organization?.users;
-      return data ? new UserConnection(this.request, data) : undefined;
+      return data
+        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9516,10 +9441,12 @@ class Organization_TeamsQuery extends LinearRequest {
   public async fetch(vars?: D.Organization_TeamsQueryVariables): Promise<TeamConnection | undefined> {
     return this.request<D.Organization_TeamsQuery, D.Organization_TeamsQueryVariables>(
       D.Organization_TeamsDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organization?.teams;
-      return data ? new TeamConnection(this.request, data) : undefined;
+      return data
+        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9537,10 +9464,12 @@ class Organization_MilestonesQuery extends LinearRequest {
   public async fetch(vars?: D.Organization_MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
     return this.request<D.Organization_MilestonesQuery, D.Organization_MilestonesQueryVariables>(
       D.Organization_MilestonesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organization?.milestones;
-      return data ? new MilestoneConnection(this.request, data) : undefined;
+      return data
+        ? new MilestoneConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9558,10 +9487,12 @@ class Organization_IntegrationsQuery extends LinearRequest {
   public async fetch(vars?: D.Organization_IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
     return this.request<D.Organization_IntegrationsQuery, D.Organization_IntegrationsQueryVariables>(
       D.Organization_IntegrationsDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organization?.integrations;
-      return data ? new IntegrationConnection(this.request, data) : undefined;
+      return data
+        ? new IntegrationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9947,11 +9878,11 @@ class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
       D.FigmaEmbedInfo_FigmaEmbedDocument,
       {
         fileId: this._fileId,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.figmaEmbedInfo?.figmaEmbed;
-      return data ? new FigmaEmbed(this.request, data) : undefined;
+      return data ? new FigmaEmbed(this._request, data) : undefined;
     });
   }
 }
@@ -9978,7 +9909,7 @@ class Integration_SettingsQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integration?.settings;
-      return data ? new IntegrationSettings(this.request, data) : undefined;
+      return data ? new IntegrationSettings(this._request, data) : undefined;
     });
   }
 }
@@ -10005,7 +9936,7 @@ class Integration_Settings_SlackPostQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integration?.settings?.slackPost;
-      return data ? new SlackPostSettings(this.request, data) : undefined;
+      return data ? new SlackPostSettings(this._request, data) : undefined;
     });
   }
 }
@@ -10032,7 +9963,7 @@ class Integration_Settings_SlackProjectPostQuery extends LinearRequest {
       id: this._id,
     }).then(response => {
       const data = response?.integration?.settings?.slackProjectPost;
-      return data ? new SlackPostSettings(this.request, data) : undefined;
+      return data ? new SlackPostSettings(this._request, data) : undefined;
     });
   }
 }
@@ -10059,7 +9990,7 @@ class Integration_Settings_GoogleSheetsQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integration?.settings?.googleSheets;
-      return data ? new GoogleSheetsSettings(this.request, data) : undefined;
+      return data ? new GoogleSheetsSettings(this._request, data) : undefined;
     });
   }
 }
@@ -10086,7 +10017,7 @@ class Integration_Settings_SentryQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integration?.settings?.sentry;
-      return data ? new SentrySettings(this.request, data) : undefined;
+      return data ? new SentrySettings(this._request, data) : undefined;
     });
   }
 }
@@ -10113,7 +10044,7 @@ class IntegrationResource_DataQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationResource?.data;
-      return data ? new IntegrationResourceData(this.request, data) : undefined;
+      return data ? new IntegrationResourceData(this._request, data) : undefined;
     });
   }
 }
@@ -10140,7 +10071,7 @@ class IntegrationResource_PullRequestQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationResource?.pullRequest;
-      return data ? new PullRequestPayload(this.request, data) : undefined;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10167,7 +10098,7 @@ class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
       id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.githubPullRequest;
-      return data ? new PullRequestPayload(this.request, data) : undefined;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10194,7 +10125,7 @@ class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
       id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.gitlabMergeRequest;
-      return data ? new PullRequestPayload(this.request, data) : undefined;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10221,7 +10152,7 @@ class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
       id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.githubCommit;
-      return data ? new CommitPayload(this.request, data) : undefined;
+      return data ? new CommitPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10248,7 +10179,7 @@ class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
       id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.sentryIssue;
-      return data ? new SentryIssuePayload(this.request, data) : undefined;
+      return data ? new SentryIssuePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10272,11 +10203,11 @@ class InviteInfo_InviteDataQuery extends LinearRequest {
       D.InviteInfo_InviteDataDocument,
       {
         userHash: this._userHash,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.inviteInfo?.inviteData;
-      return data ? new InviteData(this.request, data) : undefined;
+      return data ? new InviteData(this._request, data) : undefined;
     });
   }
 }
@@ -10298,10 +10229,12 @@ class IssueLabel_IssuesQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issueLabel?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10323,10 +10256,12 @@ class Issue_SubscribersQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">): Promise<UserConnection | undefined> {
     return this.request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.subscribers;
-      return data ? new UserConnection(this.request, data) : undefined;
+      return data
+        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10348,10 +10283,12 @@ class Issue_ChildrenQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.children;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10373,10 +10310,12 @@ class Issue_CommentsQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">): Promise<CommentConnection | undefined> {
     return this.request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.comments;
-      return data ? new CommentConnection(this.request, data) : undefined;
+      return data
+        ? new CommentConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10398,10 +10337,12 @@ class Issue_HistoryQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">): Promise<IssueHistoryConnection | undefined> {
     return this.request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.history;
-      return data ? new IssueHistoryConnection(this.request, data) : undefined;
+      return data
+        ? new IssueHistoryConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10423,10 +10364,12 @@ class Issue_LabelsQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.labels;
-      return data ? new IssueLabelConnection(this.request, data) : undefined;
+      return data
+        ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10446,17 +10389,23 @@ class Issue_IntegrationResourcesQuery extends LinearRequest {
   }
 
   public async fetch(
-    vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
-  ): Promise<IntegrationResourceConnection | undefined> {
-    return this.request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
+    variables?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
+  ): Fetch<IntegrationResourceConnection> {
+    return this._request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
       D.Issue_IntegrationResourcesDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.issue?.integrationResources;
-      return data ? new IntegrationResourceConnection(this.request, data) : undefined;
+      return data
+        ? new IntegrationResourceConnection(
+            this._request,
+            pagination => this.fetch({ ...variables, ...pagination }),
+            data
+          )
+        : undefined;
     });
   }
 }
@@ -10478,10 +10427,12 @@ class Issue_RelationsQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">): Promise<IssueRelationConnection | undefined> {
     return this.request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.relations;
-      return data ? new IssueRelationConnection(this.request, data) : undefined;
+      return data
+        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10507,11 +10458,13 @@ class Issue_InverseRelationsQuery extends LinearRequest {
       D.Issue_InverseRelationsDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.issue?.inverseRelations;
-      return data ? new IssueRelationConnection(this.request, data) : undefined;
+      return data
+        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10533,10 +10486,12 @@ class Milestone_ProjectsQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.milestone?.projects;
-      return data ? new ProjectConnection(this.request, data) : undefined;
+      return data
+        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10562,11 +10517,13 @@ class OrganizationInvite_IssuesQuery extends LinearRequest {
       D.OrganizationInvite_IssuesDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.organizationInvite?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10588,10 +10545,12 @@ class Project_TeamsQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">): Promise<TeamConnection | undefined> {
     return this.request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.project?.teams;
-      return data ? new TeamConnection(this.request, data) : undefined;
+      return data
+        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10613,10 +10572,12 @@ class Project_MembersQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">): Promise<UserConnection | undefined> {
     return this.request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.project?.members;
-      return data ? new UserConnection(this.request, data) : undefined;
+      return data
+        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10638,10 +10599,12 @@ class Project_IssuesQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.project?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10663,10 +10626,12 @@ class Project_LinksQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.project?.links;
-      return data ? new ProjectLinkConnection(this.request, data) : undefined;
+      return data
+        ? new ProjectLinkConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10688,10 +10653,12 @@ class Team_IssuesQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
     return this.request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10713,10 +10680,12 @@ class Team_CyclesQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">): Promise<CycleConnection | undefined> {
     return this.request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.cycles;
-      return data ? new CycleConnection(this.request, data) : undefined;
+      return data
+        ? new CycleConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10740,10 +10709,12 @@ class Team_MembershipsQuery extends LinearRequest {
   ): Promise<TeamMembershipConnection | undefined> {
     return this.request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.memberships;
-      return data ? new TeamMembershipConnection(this.request, data) : undefined;
+      return data
+        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10765,10 +10736,12 @@ class Team_ProjectsQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
     return this.request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.projects;
-      return data ? new ProjectConnection(this.request, data) : undefined;
+      return data
+        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10790,10 +10763,12 @@ class Team_StatesQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">): Promise<WorkflowStateConnection | undefined> {
     return this.request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.states;
-      return data ? new WorkflowStateConnection(this.request, data) : undefined;
+      return data
+        ? new WorkflowStateConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10815,10 +10790,10 @@ class Team_TemplatesQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">): Promise<TemplateConnection | undefined> {
     return this.request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.templates;
-      return data ? new TemplateConnection(this.request, data) : undefined;
+      return data ? new TemplateConnection(this._request, data) : undefined;
     });
   }
 }
@@ -10840,10 +10815,12 @@ class Team_LabelsQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
     return this.request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.labels;
-      return data ? new IssueLabelConnection(this.request, data) : undefined;
+      return data
+        ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10865,10 +10842,12 @@ class Team_WebhooksQuery extends LinearRequest {
   public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">): Promise<WebhookConnection | undefined> {
     return this.request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.webhooks;
-      return data ? new WebhookConnection(this.request, data) : undefined;
+      return data
+        ? new WebhookConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10892,11 +10871,13 @@ class WorkflowState_IssuesQuery extends LinearRequest {
       D.WorkflowState_IssuesDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.workflowState?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }

@@ -12,6 +12,7 @@ import {
   printGraphqlDescription,
   printGraphqlInputArgs,
   printGraphqlResponseArgs,
+  printLines,
   printList,
   reduceListType,
 } from "@linear/plugin-common";
@@ -34,26 +35,23 @@ function printOperationWrapper(
       "_"
     );
 
-    return printList(
-      [
-        /** The operation description */
-        printGraphqlDescription(lastField.description?.value),
-        printGraphqlDebug({ type, operationName, field: lastField }),
-        /** The operation definition */
-        `${type} ${operationName}${printGraphqlInputArgs(fields)} {`,
-        /** Each field and its required content */
-        fields
-          .slice()
-          .reverse()
-          .reduce((acc, field) => {
-            return `${field.name.value}${printGraphqlResponseArgs(field)} {
+    return printLines([
+      /** The operation description */
+      printGraphqlDescription(lastField.description?.value),
+      printGraphqlDebug({ type, operationName, field: lastField }),
+      /** The operation definition */
+      `${type} ${operationName}${printGraphqlInputArgs(fields)} {`,
+      /** Each field and its required content */
+      fields
+        .slice()
+        .reverse()
+        .reduce((acc, field) => {
+          return `${field.name.value}${printGraphqlResponseArgs(field)} {
               ${acc === "" ? body : acc}
             }`;
-          }, ""),
-        `}`,
-      ],
-      "\n"
-    );
+        }, ""),
+      `}`,
+    ]);
   } else {
     return "";
   }
@@ -70,7 +68,7 @@ function printOperationFields(
 ): string {
   const lastField = getLast(fields);
   return isValidField(context, lastField)
-    ? printList(
+    ? printLines(
         object.fields?.map(field => {
           if (isValidField(context, field)) {
             if (i > 9) {
@@ -81,26 +79,22 @@ function printOperationFields(
             const operation = printOperationBody(context, [field], i + 1);
 
             return operation
-              ? printList(
-                  [
-                    /** The field description */
-                    printGraphqlDescription(field.description?.value),
-                    /** Debug detail */
-                    printGraphqlDebug(field),
-                    /** The field content */
-                    `${field.name.value} {
+              ? printLines([
+                  /** The field description */
+                  printGraphqlDescription(field.description?.value),
+                  /** Debug detail */
+                  printGraphqlDebug(field),
+                  /** The field content */
+                  `${field.name.value} {
                       ${operation}
                     }`,
-                  ],
-                  "\n"
-                )
+                ])
               : field.name.value;
           } else {
             /** Skip fields that should not be exposed */
             return undefined;
           }
-        }),
-        "\n"
+        })
       )
     : "";
 }
@@ -178,7 +172,7 @@ export function printOperations(
       });
 
       /** Return operation for this node as well as any nested field operations */
-      return printList([nodeOperation, ...fieldOperations], "\n");
+      return printLines([nodeOperation, ...fieldOperations]);
     } else {
       /** Do not nest mutations */
       return nodeOperation;

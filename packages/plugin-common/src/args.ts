@@ -1,5 +1,5 @@
 import { FieldDefinitionNode, InputValueDefinitionNode, Kind } from "graphql";
-import { printGraphqlComment, printGraphqlType, printList } from "./print";
+import { printGraphqlComment, printGraphqlType, printLines, printList } from "./print";
 import { ArgDefinition, ArgList } from "./types";
 import { nonNullable } from "./utils";
 
@@ -7,7 +7,7 @@ import { nonNullable } from "./utils";
  * Return only the required arguments
  */
 export function getRequiredArgs(args: readonly InputValueDefinitionNode[] = []): InputValueDefinitionNode[] {
-  return args.filter(a => a.type.kind === Kind.NON_NULL_TYPE);
+  return args.filter(arg => arg.type.kind === Kind.NON_NULL_TYPE);
 }
 
 /**
@@ -26,14 +26,12 @@ export function getArgList(_args: (ArgDefinition | undefined)[]): ArgList {
     printInput: printList(
       args.filter(nonNullable).map(({ name, type, optional, defaultName }) => {
         return `${name}${optional ? "?" : ""}: ${type}${defaultName ? ` = ${defaultName}` : ""}`;
-      }),
-      ", "
+      })
     ),
     printOutput: printList(
       args.filter(nonNullable).map(({ name }) => {
         return name;
-      }),
-      ", "
+      })
     ),
   };
 }
@@ -41,11 +39,11 @@ export function getArgList(_args: (ArgDefinition | undefined)[]): ArgList {
 /**
  * Print the arg for passing into the operation input
  */
-function printGraphqlInputArg(node?: InputValueDefinitionNode): string {
-  if (node) {
-    const arg = printGraphqlType(node.type);
-    const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
-    return printList([description, `$${node.name.value}: ${arg}`], "\n");
+function printGraphqlInputArg(input?: InputValueDefinitionNode): string {
+  if (input) {
+    const arg = printGraphqlType(input.type);
+    const description = input.description?.value ? printGraphqlComment([input.description?.value]) : undefined;
+    return printLines([description, `$${input.name.value}: ${arg}`]);
   } else {
     return "";
   }
@@ -56,19 +54,19 @@ function printGraphqlInputArg(node?: InputValueDefinitionNode): string {
  */
 export function printGraphqlInputArgs(fields: FieldDefinitionNode[]): string {
   const args = fields.flatMap(field => field.arguments);
-  return args?.length ? printList(["(", ...args.map(printGraphqlInputArg), ")"], "\n") : "";
+  return args?.length ? printLines(["(", ...args.map(printGraphqlInputArg), ")"]) : "";
 }
 
 /**
  * Print the arg for passing into the operation response
  */
-function printGraphqlResponseArg(node: InputValueDefinitionNode): string {
-  return `${node.name.value}: $${node.name.value}`;
+function printGraphqlResponseArg(input: InputValueDefinitionNode): string {
+  return `${input.name.value}: $${input.name.value}`;
 }
 
 /**
  * Print the args list for passing into the operation response
  */
 export function printGraphqlResponseArgs(field: FieldDefinitionNode): string {
-  return field.arguments?.length ? printList(["(", ...field.arguments.map(printGraphqlResponseArg), ")"], "\n") : "";
+  return field.arguments?.length ? printLines(["(", ...field.arguments.map(printGraphqlResponseArg), ")"]) : "";
 }

@@ -21,8 +21,8 @@ import { getOptionalVariables, getRequiredVariables } from "./variable";
  * Get a list of all non null document notes
  */
 function getDocumentNodes(documents: Types.DocumentFile[]): DocumentNode[] {
-  return documents.reduce<DocumentNode[]>((prev, v) => {
-    return [...prev, v.document].filter(nonNullable);
+  return documents.reduce<DocumentNode[]>((prev, node) => {
+    return [...prev, node.document].filter(nonNullable);
   }, []);
 }
 
@@ -34,7 +34,9 @@ function getOperations(documents: Types.DocumentFile[]): OperationDefinitionNode
     return document.kind === Kind.DOCUMENT
       ? [
           ...acc,
-          ...(document?.definitions.filter(d => d.kind === Kind.OPERATION_DEFINITION) as OperationDefinitionNode[]),
+          ...(document?.definitions.filter(
+            definition => definition.kind === Kind.OPERATION_DEFINITION
+          ) as OperationDefinitionNode[]),
         ]
       : acc;
   }, []);
@@ -56,7 +58,7 @@ export function parseOperations(
     const operationType = printPascal(node.operation);
 
     /** Find a matching query if it exists */
-    const query = context.queries.find(q => q.name.value === node.name?.value);
+    const query = context.queries.find(_query => _query.name.value === node.name?.value);
 
     /** Identify returned field node */
     const returnedField = path.reduce<OperationDefinitionNode | FieldNode | undefined>((acc2, name) => {
@@ -94,46 +96,42 @@ export function parseOperations(
       /** The name of the model in a list, if a list */
       list: listName,
       /** The returned promise result from fetch  */
-      promise: `Promise<${modelName}${listName ? "[]" : ""} | undefined>`,
+      promise: `${c.FETCH_TYPE}<${modelName}${listName ? "[]" : ""}>`,
     };
 
     /** Find a matching model */
-    const model = query
-      ? models.find(
-          b =>
-            /** Find model that matches query type */
-            b.name === printTypescriptType(context, query.type) ||
-            /** Or the returned fragment type */
-            b.name === fragment?.name.value
-        )
-      : undefined;
+    const model = models.find(
+      b =>
+        /** Find model that matches query type */
+        b.name === printTypescriptType(context, query?.type) ||
+        /** Or the returned fragment type */
+        b.name === fragment?.name.value
+    );
 
     /** Find a parent operation */
     const parentSdkKey = sdkPath.slice(0, -1).join("_");
-    const parent = acc[parentSdkKey]?.operations.find(d => d.path.join("_") === sdkKey);
+    const parent = acc[parentSdkKey]?.operations.find(operation => operation.path.join("_") === sdkKey);
 
     /** Argument definition for each required variable */
-    const requiredVariables: ArgDefinition[] = getRequiredVariables(node).map(v => ({
-      name: v.variable.name.value,
-      type: printTypescriptType(context, v.type, c.NAMESPACE_DOCUMENT),
+    const requiredVariables: ArgDefinition[] = getRequiredVariables(node).map(variable => ({
+      name: variable.variable.name.value,
+      type: printTypescriptType(context, variable.type, c.NAMESPACE_DOCUMENT),
       optional: false,
-      description: `required ${v.variable.name.value} to pass to ${print.field}`,
+      description: `required ${variable.variable.name.value} to pass to ${print.field}`,
     }));
 
     /** Single definition for any optional variables */
     const optionalVariables = getOptionalVariables(node);
     const omittedVariableNames = new Set([
-      ...(parent?.requiredArgs.args.map(v => `'${v.name}'`) ?? []),
-      ...requiredVariables.map(v => `'${v.name}'`),
+      ...(parent?.requiredArgs.args.map(variable => `'${variable.name}'`) ?? []),
+      ...requiredVariables.map(variable => `'${variable.name}'`),
     ]);
     const optionalArg = requiredVariables.length
       ? {
           name: c.VARIABLE_NAME,
           optional: true,
           type: `Omit<${print.variables}, ${printList([...omittedVariableNames], " | ")}>`,
-          description: `variables without ${printList([...omittedVariableNames], ", ")} to pass into the ${
-            print.response
-          }`,
+          description: `variables without ${printList([...omittedVariableNames])} to pass into the ${print.response}`,
         }
       : {
           name: c.VARIABLE_NAME,
@@ -147,8 +145,8 @@ export function parseOperations(
 
     /** Fetch args without parent required args */
     const parentArgs = parent?.requiredArgs.args ?? [];
-    const parentArgNames = parentArgs.map(a => a.name);
-    const fetchArgs = getArgList(args.filter(a => !parentArgNames.includes(a.name)));
+    const parentArgNames = parentArgs.map(arg => arg.name);
+    const fetchArgs = getArgList(args.filter(arg => !parentArgNames.includes(arg.name)));
 
     /** Create the operation */
     const sdkOperation: SdkOperation = {
@@ -162,8 +160,8 @@ export function parseOperations(
       model,
       fragment,
       args: getArgList(args),
-      requiredArgs: getArgList(args.filter(a => !a.optional)),
-      optionalArgs: getArgList(args.filter(a => a.optional)),
+      requiredArgs: getArgList(args.filter(arg => !arg.optional)),
+      optionalArgs: getArgList(args.filter(arg => arg.optional)),
       parentArgs: getArgList(parentArgs),
       fetchArgs,
       parent,

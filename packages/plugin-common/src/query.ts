@@ -17,8 +17,8 @@ export function findQuery(
     return undefined;
   }
 
-  const match = context.queries.find(q => {
-    return reduceTypeName(q.type) === type && reduceListType(q.type) === listType;
+  const match = context.queries.find(query => {
+    return reduceTypeName(query.type) === type && reduceListType(query.type) === listType;
   });
 
   return match;

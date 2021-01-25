@@ -1,4 +1,13 @@
-import { getArgList, printComment, printDebug, printList, printTernary } from "@linear/plugin-common";
+import {
+  getArgList,
+  printComment,
+  printDebug,
+  printLines,
+  printList,
+  printSet,
+  printTernary,
+} from "@linear/plugin-common";
+import { isConnectionModel } from "./connection";
 import c from "./constants";
 import { printNamespaced } from "./print";
 import { getRequestArg } from "./request";
@@ -9,84 +18,89 @@ import { SdkOperation, SdkPluginContext } from "./types";
  */
 export function printOperations(context: SdkPluginContext): string {
   const returnTypes = Object.values(context.sdkDefinitions).reduce<string[]>((acc, definition) => {
-    return [...acc, ...definition.operations.map(o => printOperation(context, o))];
+    return [...acc, ...definition.operations.map(operation => printOperation(context, operation))];
   }, []);
 
-  return printList(returnTypes, "\n\n");
+  return printLines(returnTypes);
 }
 
 /**
  * Print the exported return type for an sdk operation
  */
-function printOperation(context: SdkPluginContext, o: SdkOperation): string {
-  const constructorArgs = getArgList([getRequestArg(), ...(o.parentArgs.args ?? [])]);
+function printOperation(context: SdkPluginContext, operation: SdkOperation): string {
+  const constructorArgs = getArgList([getRequestArg(), ...(operation.parentArgs.args ?? [])]);
+  const parentArgNames = operation.parentArgs.args.map(arg => arg.name);
 
-  return printList(
-    [
-      printComment([`A fetchable ${o.name} ${o.print.type}`, ...constructorArgs.jsdoc]),
-      printDebug(o),
-      `class ${o.print.response} extends ${c.REQUEST_CLASS} {
-        ${printList(
-          o.parentArgs.args.map(arg => `private _${arg.name}: ${arg.type}`),
-          "\n"
-        )}
+  return printLines([
+    printComment([`A fetchable ${operation.name} ${operation.print.type}`, ...constructorArgs.jsdoc]),
+    printDebug(operation),
+    `class ${operation.print.response} extends ${c.REQUEST_CLASS} {
+        ${printLines(operation.parentArgs.args.map(arg => `private _${arg.name}: ${arg.type}`))}
 
         public constructor(${constructorArgs.printInput}) {
           super(${c.REQUEST_NAME})
-          ${printList(
-            o.parentArgs.args.map(arg => `this._${arg.name} = ${arg.name}`),
-            "\n"
-          )}
+          ${printLines(operation.parentArgs.args.map(arg => printSet(`this._${arg.name}`, `${arg.name}`)))}
         }
 
         ${printComment([
-          `Call the ${o.print.name} ${o.print.type.toLowerCase()} and return a ${o.print.model}${
-            o.print.list ? " list" : ""
-          }`,
-          ...o.fetchArgs.jsdoc,
-          `@returns parsed response from ${o.print.response}`,
+          `Call the ${operation.print.name} ${operation.print.type.toLowerCase()} and return a ${
+            operation.print.model
+          }${operation.print.list ? " list" : ""}`,
+          ...operation.fetchArgs.jsdoc,
+          `@returns parsed response from ${operation.print.response}`,
         ])}
-        public async fetch(${o.fetchArgs.printInput}): ${o.print.promise} {
-          return ${`this.${c.REQUEST_NAME}<${printNamespaced(context, o.print.response)}, ${
-            o.print.variables
-          }>(${printList([o.print.document, printOperationArgs(o)], ", ")}).then(response => {
-            const data = ${printList(["response", ...o.path], "?.")}
+        public async ${c.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
+          return ${`this._${c.REQUEST_NAME}<${printNamespaced(context, operation.print.response)}, ${
+            operation.print.variables
+          }>(${printList([operation.print.document, printOperationArgs(operation)])}).then(${c.RESPONSE_NAME} => {
+            ${printSet(`const ${c.DATA_NAME}`, `${printList([c.RESPONSE_NAME, ...operation.path], "?.")}`)}
             return ${printTernary(
-              "data",
-              o.print.list
-                ? `data.map(node => new ${o.print.list}(this.${c.REQUEST_NAME}, node))`
-                : `new ${o.print.model}(this.${c.REQUEST_NAME}, data)`
+              c.DATA_NAME,
+              operation.print.list
+                ? `${c.DATA_NAME}.map(node => new ${operation.print.list}(${printList([
+                    `this._${c.REQUEST_NAME}`,
+                    "node",
+                  ])}))`
+                : isConnectionModel(operation.model)
+                ? `new ${operation.print.model}(${printList([
+                    `this._${c.REQUEST_NAME}`,
+                    `pagination => this.${c.FETCH_NAME}(${printList([
+                      ...operation.requiredArgs.args
+                        .filter(arg => !parentArgNames.includes(arg.name))
+                        .map(arg => arg.name),
+                      `{ ${printList([`...${c.VARIABLE_NAME}`, `...pagination`])} }`,
+                    ])})`,
+                    c.DATA_NAME,
+                  ])})`
+                : `new ${operation.print.model}(${printList([`this._${c.REQUEST_NAME}`, c.DATA_NAME])})`
             )}
           })`}
         }
       }
     `,
-    ],
-    "\n"
-  );
+  ]);
 }
 
 /**
  * Get the request args from the operation variables
  */
-export function printOperationArgs(o: SdkOperation): string {
-  const parentVariableNames = o.parentArgs.args.map(a => a.name) ?? [];
+export function printOperationArgs(operation: SdkOperation): string {
+  const parentVariableNames = operation.parentArgs.args.map(arg => arg.name) ?? [];
 
-  if (parentVariableNames.length || o.requiredArgs.args.length) {
+  if (parentVariableNames.length || operation.requiredArgs.args.length) {
     return `{
-      ${printList(
-        [
-          /** Merge required variables from parent scope */
-          ...parentVariableNames.map(v => `${v}: this._${v}`),
-          /** Merge remaining required variables */
-          ...o.requiredArgs.args.map(v => (parentVariableNames.includes(v.name) ? undefined : v.name)),
-          /** Spread optional variables */
-          o.optionalArgs.args.length ? `...${c.VARIABLE_NAME}` : undefined,
-        ],
-        ", "
-      )}
+      ${printList([
+        /** Merge required variables from parent scope */
+        ...parentVariableNames.map(variable => `${variable}: this._${variable}`),
+        /** Merge remaining required variables */
+        ...operation.requiredArgs.args.map(variable =>
+          parentVariableNames.includes(variable.name) ? undefined : variable.name
+        ),
+        /** Spread optional variables */
+        operation.optionalArgs.args.length ? `...${c.VARIABLE_NAME}` : undefined,
+      ])}
     }`;
   }
 
-  return o.optionalArgs.args.length ? c.VARIABLE_NAME : "{}";
+  return operation.optionalArgs.args.length ? c.VARIABLE_NAME : "{}";
 }
