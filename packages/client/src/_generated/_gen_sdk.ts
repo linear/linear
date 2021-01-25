@@ -3,7 +3,7 @@ import { DocumentNode } from "graphql";
 import * as D from "./documents";
 export * from "./documents";
 
-/** The function type for calling the graphql client */
+/** The function for calling the graphql client */
 export type Request = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
 
 /**
@@ -17,6 +17,23 @@ class LinearRequest {
   }
 
   protected request: Request;
+}
+
+/**
+ * UserConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - UserConnectionFragment response data
+ */
+class UserConnection extends LinearRequest {
+  public constructor(request: Request, data: D.UserConnectionFragment) {
+    super(request);
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new User(request, node)) : undefined;
+  }
+
+  public nodes?: User[];
+  public pageInfo?: PageInfo;
 }
 
 /**
@@ -75,9 +92,9 @@ class User extends LinearRequest {
   public active?: boolean;
   /** Number of issues created. */
   public createdIssueCount?: number;
-  /** The settings of the user. */
+  /** Settings for the user. Only available for the authenticated user. */
   public get settings(): Promise<UserSettings | undefined> {
-    return new NotificationQuery(this.request).fetch();
+    return new UserSettingsQuery(this.request).fetch();
   }
   /** Organization in which the user belongs to. */
   public get organization(): Promise<Organization | undefined> {
@@ -1630,7 +1647,6 @@ class IssueHistoryConnection extends LinearRequest {
 class IssueHistory extends LinearRequest {
   private _issue?: D.IssueHistoryFragment["issue"];
   private _actor?: D.IssueHistoryFragment["actor"];
-  private _integration?: D.IssueHistoryFragment["integration"];
   private _fromAssignee?: D.IssueHistoryFragment["fromAssignee"];
   private _toAssignee?: D.IssueHistoryFragment["toAssignee"];
   private _fromTeam?: D.IssueHistoryFragment["fromTeam"];
@@ -1650,6 +1666,7 @@ class IssueHistory extends LinearRequest {
     this.createdAt = data.createdAt ?? undefined;
     this.updatedAt = data.updatedAt ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
+    this.source = data.source ?? undefined;
     this.updatedDescription = data.updatedDescription ?? undefined;
     this.fromTitle = data.fromTitle ?? undefined;
     this.toTitle = data.toTitle ?? undefined;
@@ -1667,7 +1684,6 @@ class IssueHistory extends LinearRequest {
     this.toDueDate = data.toDueDate ?? undefined;
     this._issue = data.issue ?? undefined;
     this._actor = data.actor ?? undefined;
-    this._integration = data.integration ?? undefined;
     this._fromAssignee = data.fromAssignee ?? undefined;
     this._toAssignee = data.toAssignee ?? undefined;
     this._fromTeam = data.fromTeam ?? undefined;
@@ -1693,6 +1709,8 @@ class IssueHistory extends LinearRequest {
   public updatedAt?: D.Scalars["DateTime"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
+  /** Information about the integration or application which created this history entry. */
+  public source?: D.Scalars["JSONObject"];
   /** Whether the issue's description was updated. */
   public updatedDescription?: boolean;
   /** What the title was changed from. */
@@ -1728,10 +1746,6 @@ class IssueHistory extends LinearRequest {
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   public get actor(): Promise<User | undefined> | undefined {
     return this._actor?.id ? new UserQuery(this.request).fetch(this._actor?.id) : undefined;
-  }
-  /** The integration that made these changes. If null, possibly means that the change was made by a user. */
-  public get integration(): Promise<Integration | undefined> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this.request).fetch(this._integration?.id) : undefined;
   }
   /** The user from whom the issue was re-assigned from. */
   public get fromAssignee(): Promise<User | undefined> | undefined {
@@ -2232,9 +2246,9 @@ class UserAdminPrivileged extends LinearRequest {
   public createdIssueCount?: number;
   /** Organization in which the user belongs to. Super user required. */
   public organization?: OrganizationAdminPrivileged;
-  /** The settings of the user. */
+  /** Settings for the user. Only available for the authenticated user. */
   public get settings(): Promise<UserSettings | undefined> {
-    return new NotificationQuery(this.request).fetch();
+    return new UserSettingsQuery(this.request).fetch();
   }
 }
 
@@ -2652,6 +2666,23 @@ class StepsResponse extends LinearRequest {
 }
 
 /**
+ * CustomViewConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - CustomViewConnectionFragment response data
+ */
+class CustomViewConnection extends LinearRequest {
+  public constructor(request: Request, data: D.CustomViewConnectionFragment) {
+    super(request);
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined;
+  }
+
+  public nodes?: CustomView[];
+  public pageInfo?: PageInfo;
+}
+
+/**
  * A custom view that has been saved by a user.
  *
  * @param request - function to call the graphql client
@@ -2715,19 +2746,19 @@ class CustomView extends LinearRequest {
 }
 
 /**
- * CustomViewConnection model
+ * EmojiConnection model
  *
  * @param request - function to call the graphql client
  * @param data - the initial CustomViewConnectionFragment response data
  */
-class CustomViewConnection extends LinearRequest {
-  public constructor(request: Request, data: D.CustomViewConnectionFragment) {
+class EmojiConnection extends LinearRequest {
+  public constructor(request: Request, data: D.EmojiConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
   }
 
-  public nodes?: CustomView[];
+  public nodes?: Emoji[];
   public pageInfo?: PageInfo;
 }
 
@@ -2780,19 +2811,19 @@ class Emoji extends LinearRequest {
 }
 
 /**
- * EmojiConnection model
+ * FavoriteConnection model
  *
  * @param request - function to call the graphql client
  * @param data - the initial EmojiConnectionFragment response data
  */
-class EmojiConnection extends LinearRequest {
-  public constructor(request: Request, data: D.EmojiConnectionFragment) {
+class FavoriteConnection extends LinearRequest {
+  public constructor(request: Request, data: D.FavoriteConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
   }
 
-  public nodes?: Emoji[];
+  public nodes?: Favorite[];
   public pageInfo?: PageInfo;
 }
 
@@ -3237,6 +3268,23 @@ class PushSubscriptionPayload extends LinearRequest {
 }
 
 /**
+ * ReactionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - ReactionConnectionFragment response data
+ */
+class ReactionConnection extends LinearRequest {
+  public constructor(request: Request, data: D.ReactionConnectionFragment) {
+    super(request);
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined;
+  }
+
+  public nodes?: Reaction[];
+  public pageInfo?: PageInfo;
+}
+
+/**
  * A reaction associated with a comment.
  *
  * @param request - function to call the graphql client
@@ -3521,6 +3569,22 @@ class SamlConfiguration extends LinearRequest {
  */
 class AdminCommandPayload extends LinearRequest {
   public constructor(request: Request, data: D.AdminCommandPayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+
+/**
+ * Operation response.
+ *
+ * @param request - function to call the graphql client
+ * @param data - AdminResponseFragment response data
+ */
+class AdminResponse extends LinearRequest {
+  public constructor(request: Request, data: D.AdminResponseFragment) {
     super(request);
     this.success = data.success ?? undefined;
   }
@@ -4072,11 +4136,13 @@ class MilestonePayload extends LinearRequest {
  * @param data - the initial NotificationPayloadFragment response data
  */
 class NotificationPayload extends LinearRequest {
+  private _notification?: D.NotificationPayloadFragment["notification"];
+
   public constructor(request: Request, data: D.NotificationPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this.notification = data.notification ? new Notification(request, data.notification) : undefined;
+    this._notification = data.notification ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
@@ -4084,7 +4150,9 @@ class NotificationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The notification that was created or updated. */
-  public notification?: Notification;
+  public get notification(): Promise<Notification | undefined> | undefined {
+    return this._notification?.id ? new NotificationQuery(this.request).fetch(this._notification?.id) : undefined;
+  }
 }
 
 /**
@@ -4094,13 +4162,13 @@ class NotificationPayload extends LinearRequest {
  * @param data - the initial NotificationSubscriptionPayloadFragment response data
  */
 class NotificationSubscriptionPayload extends LinearRequest {
+  private _notificationSubscription?: D.NotificationSubscriptionPayloadFragment["notificationSubscription"];
+
   public constructor(request: Request, data: D.NotificationSubscriptionPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this.notificationSubscription = data.notificationSubscription
-      ? new NotificationSubscription(request, data.notificationSubscription)
-      : undefined;
+    this._notificationSubscription = data.notificationSubscription ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
@@ -4108,7 +4176,11 @@ class NotificationSubscriptionPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The notification subscription that was created or updated. */
-  public notificationSubscription?: NotificationSubscription;
+  public get notificationSubscription(): Promise<NotificationSubscription | undefined> | undefined {
+    return this._notificationSubscription?.id
+      ? new NotificationSubscriptionQuery(this.request).fetch(this._notificationSubscription?.id)
+      : undefined;
+  }
 }
 
 /**
@@ -4543,7 +4615,7 @@ class UserSettingsPayload extends LinearRequest {
   public success?: boolean;
   /** The user's settings. */
   public get userSettings(): Promise<UserSettings | undefined> {
-    return new NotificationQuery(this.request).fetch();
+    return new UserSettingsQuery(this.request).fetch();
   }
 }
 
@@ -4630,6 +4702,40 @@ class ViewPreferencesPayload extends LinearRequest {
 }
 
 /**
+ * View preferences.
+ *
+ * @param request - function to call the graphql client
+ * @param data - ViewPreferencesFragment response data
+ */
+class ViewPreferences extends LinearRequest {
+  public constructor(request: Request, data: D.ViewPreferencesFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.type = data.type ?? undefined;
+    this.viewType = data.viewType ?? undefined;
+  }
+
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** The time at which the entity was created. */
+  public createdAt?: D.Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: D.Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: D.Scalars["DateTime"];
+  /** The view preference type. */
+  public type?: string;
+  /** The view type. */
+  public viewType?: string;
+}
+
+/**
  * WebhookPayload model
  *
  * @param request - function to call the graphql client
@@ -4679,6 +4785,22 @@ class WorkflowStatePayload extends LinearRequest {
   public get workflowState(): Promise<WorkflowState | undefined> | undefined {
     return this._workflowState?.id ? new WorkflowStateQuery(this.request).fetch(this._workflowState?.id) : undefined;
   }
+}
+
+/**
+ * SynchronizedPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - SynchronizedPayloadFragment response data
+ */
+class SynchronizedPayload extends LinearRequest {
+  public constructor(request: Request, data: D.SynchronizedPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
 }
 
 /**
@@ -4843,7 +4965,7 @@ class FileUpload extends LinearRequest {
 }
 
 /**
- * SynchronizedPayload model
+ * Public information of the OAuth application.
  *
  * @param request - function to call the graphql client
  * @param data - the initial SynchronizedPayloadFragment response data
@@ -5275,7 +5397,7 @@ class CommentQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class CommentsQuery extends LinearRequest {
+class CustomViewsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5313,7 +5435,7 @@ class CustomViewQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class CustomViewsQuery extends LinearRequest {
+class CyclesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5351,7 +5473,7 @@ class CycleQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class CyclesQuery extends LinearRequest {
+class EmojisQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5389,7 +5511,7 @@ class EmojiQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class EmojisQuery extends LinearRequest {
+class FavoritesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5489,7 +5611,7 @@ class IntegrationQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IntegrationsQuery extends LinearRequest {
+class IntegrationResourcesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5532,7 +5654,7 @@ class IntegrationResourceQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IntegrationResourcesQuery extends LinearRequest {
+class InviteInfoQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5597,7 +5719,7 @@ class IssueLabelQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssueLabelsQuery extends LinearRequest {
+class IssueRelationsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5635,7 +5757,7 @@ class IssueRelationQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssueRelationsQuery extends LinearRequest {
+class IssuesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5699,7 +5821,7 @@ class IssueSearchQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssuesQuery extends LinearRequest {
+class MilestonesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5737,7 +5859,7 @@ class MilestoneQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class MilestonesQuery extends LinearRequest {
+class NotificationsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5775,7 +5897,7 @@ class NotificationQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class NotificationsQuery extends LinearRequest {
+class NotificationSubscriptionsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5805,7 +5927,9 @@ class NotificationSubscriptionQuery extends LinearRequest {
   ): Promise<NotificationSubscriptionConnection | undefined> {
     return this.request<D.NotificationSubscriptionQuery, D.NotificationSubscriptionQueryVariables>(
       D.NotificationSubscriptionDocument,
-      vars
+      {
+        id,
+      }
     ).then(response => {
       const data = response?.notificationSubscription;
       return data ? new NotificationSubscriptionConnection(this.request, data) : undefined;
@@ -5859,7 +5983,7 @@ class OrganizationInvitesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ProjectLinkQuery extends LinearRequest {
+class OrganizationInviteQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5868,8 +5992,8 @@ class ProjectLinkQuery extends LinearRequest {
     return this.request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
       id,
     }).then(response => {
-      const data = response?.projectLink;
-      return data ? new ProjectLink(this.request, data) : undefined;
+      const data = response?.organizationInvite;
+      return data ? new IssueLabel(this.request, data) : undefined;
     });
   }
 }
@@ -5887,7 +6011,7 @@ class ProjectLinksQuery extends LinearRequest {
   public async fetch(vars?: D.ProjectLinksQueryVariables): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
       response => {
-        const data = response?.ProjectLinks;
+        const data = response?.projectLinks;
         return data ? new ProjectLinkConnection(this.request, data) : undefined;
       }
     );
@@ -5899,7 +6023,7 @@ class ProjectLinksQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ProjectQuery extends LinearRequest {
+class ProjectLinkQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5908,8 +6032,8 @@ class ProjectQuery extends LinearRequest {
     return this.request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
       id,
     }).then(response => {
-      const data = response?.project;
-      return data ? new Project(this.request, data) : undefined;
+      const data = response?.projectLink;
+      return data ? new ProjectLink(this.request, data) : undefined;
     });
   }
 }
@@ -5937,7 +6061,7 @@ class ProjectsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class PushSubscriptionTestQuery extends LinearRequest {
+class ProjectQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5958,7 +6082,7 @@ class PushSubscriptionTestQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ReactionQuery extends LinearRequest {
+class PushSubscriptionTestQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5996,7 +6120,7 @@ class ReactionsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class SubscriptionQuery extends LinearRequest {
+class ReactionQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6016,7 +6140,7 @@ class SubscriptionQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class TeamMembershipQuery extends LinearRequest {
+class SubscriptionQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6056,7 +6180,7 @@ class TeamMembershipsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class TeamQuery extends LinearRequest {
+class TeamMembershipQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6065,8 +6189,8 @@ class TeamQuery extends LinearRequest {
     return this.request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
       id,
     }).then(response => {
-      const data = response?.team;
-      return data ? new Team(this.request, data) : undefined;
+      const data = response?.teamMembership;
+      return data ? new TeamMembership(this.request, data) : undefined;
     });
   }
 }
@@ -6132,7 +6256,7 @@ class TemplateQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ViewPreferencesQuery extends LinearRequest {
+class UserSettingsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6140,8 +6264,8 @@ class ViewPreferencesQuery extends LinearRequest {
   public async fetch(vars?: D.ViewPreferencesQueryVariables): Promise<ViewPreferencesConnection | undefined> {
     return this.request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument, vars).then(
       response => {
-        const data = response?.viewPreferences;
-        return data ? new ViewPreferencesConnection(this.request, data) : undefined;
+        const data = response?.userSettings;
+        return data ? new UserSettings(this.request, data) : undefined;
       }
     );
   }
@@ -6190,7 +6314,7 @@ class WebhooksQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WorkflowStateQuery extends LinearRequest {
+class WebhookQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6199,8 +6323,8 @@ class WorkflowStateQuery extends LinearRequest {
     return this.request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, {
       id,
     }).then(response => {
-      const data = response?.workflowState;
-      return data ? new WorkflowState(this.request, data) : undefined;
+      const data = response?.webhook;
+      return data ? new Webhook(this.request, data) : undefined;
     });
   }
 }

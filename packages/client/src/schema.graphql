@@ -5,6 +5,35 @@ schema {
 }
 type Query {
   """
+  All users for the organization.
+  """
+  users(
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): UserConnection!
+  """
   One specific user.
   """
   user(
@@ -95,35 +124,6 @@ type Query {
     id: String
   ): UserAccountAdminPrivileged!
   """
-  All users of the organization.
-  """
-  users(
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): UserConnection!
-  """
   All API keys for the user.
   """
   apiKeys(
@@ -212,14 +212,8 @@ type Query {
     version: Int!
   ): CollaborationDocumentUpdatePayload!
   """
-  A specific comment.
+  All comments.
   """
-  comment(
-    """
-    The identifier of the comment to retrieve.
-    """
-    id: String!
-  ): Comment!
   comments(
     """
     A cursor to be used with last for backward pagination.
@@ -247,9 +241,17 @@ type Query {
     orderBy: PaginationOrderBy
   ): CommentConnection!
   """
-  One specific custom view.
+  A specific comment.
   """
-  customView(id: String!): CustomView!
+  comment(
+    """
+    The identifier of the comment to retrieve.
+    """
+    id: String!
+  ): Comment!
+  """
+  Custom views for the user.
+  """
   customViews(
     """
     A cursor to be used with last for backward pagination.
@@ -277,9 +279,9 @@ type Query {
     orderBy: PaginationOrderBy
   ): CustomViewConnection!
   """
-  One specific cycle.
+  One specific custom view.
   """
-  cycle(id: String!): Cycle!
+  customView(id: String!): CustomView!
   """
   All cycles.
   """
@@ -310,14 +312,12 @@ type Query {
     orderBy: PaginationOrderBy
   ): CycleConnection!
   """
-  A specific emoji.
+  One specific cycle.
   """
-  emoji(
-    """
-    The identifier of the emoji to retrieve.
-    """
-    id: String!
-  ): Emoji!
+  cycle(id: String!): Cycle!
+  """
+  All custom emojis.
+  """
   emojis(
     """
     A cursor to be used with last for backward pagination.
@@ -345,9 +345,14 @@ type Query {
     orderBy: PaginationOrderBy
   ): EmojiConnection!
   """
-  One specific favorite.
+  A specific emoji.
   """
-  favorite(id: String!): Favorite!
+  emoji(
+    """
+    The identifier of the emoji to retrieve.
+    """
+    id: String!
+  ): Emoji!
   """
   The user's favorites.
   """
@@ -378,6 +383,10 @@ type Query {
     orderBy: PaginationOrderBy
   ): FavoriteConnection!
   """
+  One specific favorite.
+  """
+  favorite(id: String!): Favorite!
+  """
   Fetch Figma screenshot and other information with file and node identifiers.
   """
   figmaEmbedInfo(
@@ -390,10 +399,6 @@ type Query {
     """
     fileId: String!
   ): FigmaEmbedPayload!
-  """
-  One specific integration.
-  """
-  integration(id: String!): Integration!
   """
   All integrations.
   """
@@ -424,9 +429,9 @@ type Query {
     orderBy: PaginationOrderBy
   ): IntegrationConnection!
   """
-  One specific integration resource. (e.g. linked GitHub pull requests for an issue)
+  One specific integration.
   """
-  integrationResource(id: String!): IntegrationResource!
+  integration(id: String!): Integration!
   """
   All integrations resources (e.g. linked GitHub pull requests for issues).
   """
@@ -457,6 +462,10 @@ type Query {
     orderBy: PaginationOrderBy
   ): IntegrationResourceConnection!
   """
+  One specific integration resource. (e.g. linked GitHub pull requests for an issue)
+  """
+  integrationResource(id: String!): IntegrationResource!
+  """
   Retrieves information for the public invite page.
   """
   inviteInfo(
@@ -470,11 +479,7 @@ type Query {
     userHash: String!
   ): InvitePagePayload!
   """
-  One specific label.
-  """
-  issueLabel(id: String!): IssueLabel!
-  """
-  All labels.
+  All issue labels.
   """
   issueLabels(
     """
@@ -503,9 +508,12 @@ type Query {
     orderBy: PaginationOrderBy
   ): IssueLabelConnection!
   """
-  One specific issue relation.
+  One specific label.
   """
-  issueRelation(id: String!): IssueRelation!
+  issueLabel(id: String!): IssueLabel!
+  """
+  All issue relationships.
+  """
   issueRelations(
     """
     A cursor to be used with last for backward pagination.
@@ -532,6 +540,39 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
+  """
+  One specific issue relation.
+  """
+  issueRelation(id: String!): IssueRelation!
+  """
+  All issues.
+  """
+  issues(
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
   """
   One specific issue.
   """
@@ -569,36 +610,6 @@ type Query {
     """
     query: String!
   ): IssueConnection!
-  issues(
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): IssueConnection!
-  """
-  One specific milestone.
-  """
-  milestone(id: String!): Milestone!
   """
   All milestones.
   """
@@ -629,9 +640,9 @@ type Query {
     orderBy: PaginationOrderBy
   ): MilestoneConnection!
   """
-  The user's settings.
+  One specific milestone.
   """
-  notification: UserSettings!
+  milestone(id: String!): Milestone!
   """
   All notifications.
   """
@@ -662,9 +673,13 @@ type Query {
     orderBy: PaginationOrderBy
   ): NotificationConnection!
   """
+  One specific notification.
+  """
+  notification(id: String!): Notification!
+  """
   The user's notification subscriptions.
   """
-  notificationSubscription(
+  notificationSubscriptions(
     """
     A cursor to be used with last for backward pagination.
     """
@@ -691,9 +706,9 @@ type Query {
     orderBy: PaginationOrderBy
   ): NotificationSubscriptionConnection!
   """
-  One specific organization invite.
+  One specific notification subscription.
   """
-  organizationInvite(id: String!): IssueLabel!
+  notificationSubscription(id: String!): NotificationSubscription!
   """
   All invites for the organization.
   """
@@ -724,13 +739,13 @@ type Query {
     orderBy: PaginationOrderBy
   ): OrganizationInviteConnection!
   """
-  One specific project link.
+  One specific organization invite.
   """
-  projectLink(id: String!): ProjectLink!
+  organizationInvite(id: String!): IssueLabel!
   """
   All links for the project.
   """
-  ProjectLinks(
+  projectLinks(
     """
     A cursor to be used with last for backward pagination.
     """
@@ -757,9 +772,9 @@ type Query {
     orderBy: PaginationOrderBy
   ): ProjectLinkConnection!
   """
-  One specific project.
+  One specific project link.
   """
-  project(id: String!): Project!
+  projectLink(id: String!): ProjectLink!
   """
   All projects.
   """
@@ -790,18 +805,16 @@ type Query {
     orderBy: PaginationOrderBy
   ): ProjectConnection!
   """
+  One specific project.
+  """
+  project(id: String!): Project!
+  """
   Sends a test push message.
   """
   pushSubscriptionTest: PushSubscriptionPayload!
   """
-  A specific reaction.
+  All comment emoji reactions.
   """
-  reaction(
-    """
-    The identifier to retrieve.
-    """
-    id: String!
-  ): Reaction!
   reactions(
     """
     A cursor to be used with last for backward pagination.
@@ -829,13 +842,18 @@ type Query {
     orderBy: PaginationOrderBy
   ): ReactionConnection!
   """
+  A specific reaction.
+  """
+  reaction(
+    """
+    The identifier to retrieve.
+    """
+    id: String!
+  ): Reaction!
+  """
   The organization's subscription.
   """
   subscription: Subscription!
-  """
-  One specific team membership.
-  """
-  teamMembership(id: String!): TeamMembership!
   """
   All team memberships.
   """
@@ -866,9 +884,9 @@ type Query {
     orderBy: PaginationOrderBy
   ): TeamMembershipConnection!
   """
-  One specific team.
+  One specific team membership.
   """
-  team(id: String!): Team!
+  teamMembership(id: String!): TeamMembership!
   """
   All teams.
   """
@@ -899,6 +917,10 @@ type Query {
     orderBy: PaginationOrderBy
   ): TeamConnection!
   """
+  One specific team.
+  """
+  team(id: String!): Team!
+  """
   All templates from all users.
   """
   templates: [Template!]!
@@ -912,43 +934,9 @@ type Query {
     id: String!
   ): Template!
   """
-  All view preferences.
+  The user's settings.
   """
-  viewPreferences(
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): ViewPreferencesConnection!
-  """
-  A specific webhook.
-  """
-  webhook(
-    """
-    The identifier of the webhook to retrieve.
-    """
-    id: String!
-  ): Webhook!
+  userSettings: UserSettings!
   """
   All webhooks.
   """
@@ -979,11 +967,16 @@ type Query {
     orderBy: PaginationOrderBy
   ): WebhookConnection!
   """
-  One specific state.
+  A specific webhook.
   """
-  workflowState(id: String!): WorkflowState!
+  webhook(
+    """
+    The identifier of the webhook to retrieve.
+    """
+    id: String!
+  ): Webhook!
   """
-  All states.
+  All issue workflow states.
   """
   workflowStates(
     """
@@ -1011,6 +1004,29 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): WorkflowStateConnection!
+  """
+  One specific state.
+  """
+  workflowState(id: String!): WorkflowState!
+}
+"""
+By which field should the pagination order by
+"""
+enum PaginationOrderBy {
+  createdAt
+  updatedAt
+}
+type UserConnection {
+  edges: [UserEdge!]!
+  nodes: [User!]!
+  pageInfo: PageInfo!
+}
+type UserEdge {
+  node: User!
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
 }
 """
 A user that has access to the the resources of an organization.
@@ -1058,10 +1074,6 @@ type User implements Node {
   """
   inviteHash: String!
   """
-  The settings of the user.
-  """
-  settings: UserSettings!
-  """
   The last time the user was seen online. If null, the user is currently online.
   """
   lastSeen: DateTime
@@ -1073,6 +1085,10 @@ type User implements Node {
   Whether the user account is active or disabled.
   """
   active: Boolean!
+  """
+  Settings for the user. Only available for the authenticated user.
+  """
+  settings: UserSettings!
   """
   Issues assigned to the user.
   """
@@ -1217,13 +1233,6 @@ type UserSettings implements Node {
 The `JSONObject` scalar type represents JSON values as a string
 """
 scalar JSONObject
-"""
-By which field should the pagination order by
-"""
-enum PaginationOrderBy {
-  createdAt
-  updatedAt
-}
 type IssueConnection {
   edges: [IssueEdge!]!
   nodes: [Issue!]!
@@ -2747,18 +2756,6 @@ type Organization implements Node {
   """
   createdIssueCount: Int!
 }
-type UserConnection {
-  edges: [UserEdge!]!
-  nodes: [User!]!
-  pageInfo: PageInfo!
-}
-type UserEdge {
-  node: User!
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-}
 type TeamConnection {
   edges: [TeamEdge!]!
   nodes: [Team!]!
@@ -3279,9 +3276,9 @@ type IssueHistory implements Node {
   """
   actor: User
   """
-  The integration that made these changes. If null, possibly means that the change was made by a user.
+  Information about the integration or application which created this history entry.
   """
-  integration: Integration
+  source: JSONObject
   """
   Whether the issue's description was updated.
   """
@@ -3726,10 +3723,6 @@ type UserAdminPrivileged implements Node {
   """
   inviteHash: String!
   """
-  The settings of the user.
-  """
-  settings: UserSettings!
-  """
   The last time the user was seen online. If null, the user is currently online.
   """
   lastSeen: DateTime
@@ -3741,6 +3734,10 @@ type UserAdminPrivileged implements Node {
   Whether the user account is active or disabled.
   """
   active: Boolean!
+  """
+  Settings for the user. Only available for the authenticated user.
+  """
+  settings: UserSettings!
   """
   Issues assigned to the user.
   """
@@ -4129,6 +4126,18 @@ type StepsResponse {
   """
   clientIds: [String!]!
 }
+type CustomViewConnection {
+  edges: [CustomViewEdge!]!
+  nodes: [CustomView!]!
+  pageInfo: PageInfo!
+}
+type CustomViewEdge {
+  node: CustomView!
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+}
 """
 A custom view that has been saved by a user.
 """
@@ -4187,13 +4196,13 @@ type CustomView implements Node {
   """
   shared: Boolean!
 }
-type CustomViewConnection {
-  edges: [CustomViewEdge!]!
-  nodes: [CustomView!]!
+type EmojiConnection {
+  edges: [EmojiEdge!]!
+  nodes: [Emoji!]!
   pageInfo: PageInfo!
 }
-type CustomViewEdge {
-  node: CustomView!
+type EmojiEdge {
+  node: Emoji!
   """
   Used in `before` and `after` args
   """
@@ -4241,13 +4250,13 @@ type Emoji implements Node {
   """
   organization: Organization!
 }
-type EmojiConnection {
-  edges: [EmojiEdge!]!
-  nodes: [Emoji!]!
+type FavoriteConnection {
+  edges: [FavoriteEdge!]!
+  nodes: [Favorite!]!
   pageInfo: PageInfo!
 }
-type EmojiEdge {
-  node: Emoji!
+type FavoriteEdge {
+  node: Favorite!
   """
   Used in `before` and `after` args
   """
@@ -4306,18 +4315,6 @@ type Favorite implements Node {
   Favorited issue label.
   """
   label: IssueLabel
-}
-type FavoriteConnection {
-  edges: [FavoriteEdge!]!
-  nodes: [Favorite!]!
-  pageInfo: PageInfo!
-}
-type FavoriteEdge {
-  node: Favorite!
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
 }
 type FigmaEmbedPayload {
   """
@@ -4587,6 +4584,18 @@ type PushSubscriptionPayload {
   """
   success: Boolean!
 }
+type ReactionConnection {
+  edges: [ReactionEdge!]!
+  nodes: [Reaction!]!
+  pageInfo: PageInfo!
+}
+type ReactionEdge {
+  node: Reaction!
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+}
 """
 A reaction associated with a comment.
 """
@@ -4620,60 +4629,6 @@ type Reaction implements Node {
   The comment that the reaction is associated with.
   """
   comment: Comment!
-}
-type ReactionConnection {
-  edges: [ReactionEdge!]!
-  nodes: [Reaction!]!
-  pageInfo: PageInfo!
-}
-type ReactionEdge {
-  node: Reaction!
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-}
-type ViewPreferencesConnection {
-  edges: [ViewPreferencesEdge!]!
-  nodes: [ViewPreferences!]!
-  pageInfo: PageInfo!
-}
-type ViewPreferencesEdge {
-  node: ViewPreferences!
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-}
-"""
-View preferences.
-"""
-type ViewPreferences implements Node {
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The view preference type.
-  """
-  type: String!
-  """
-  The view type.
-  """
-  viewType: String!
 }
 type Mutation {
   """
@@ -4856,6 +4811,10 @@ type Mutation {
   Changes the email address for the user account and all of its users.
   """
   adminUserAccountChangeEmail(newEmail: String!, id: String!): UserAccountAdminPrivileged!
+  """
+  Permanently deletes the user account and all associated data.
+  """
+  adminUserAccountDelete(deleteAllData: Boolean, email: String!, id: String!): AdminResponse!
   """
   [Deprecated] Creates a new event.
   """
@@ -6215,6 +6174,15 @@ input AdminCommandInput {
   value: String
 }
 type AdminCommandPayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+"""
+Operation response.
+"""
+type AdminResponse {
   """
   Whether the operation was successful.
   """
@@ -8142,6 +8110,36 @@ type ViewPreferencesPayload {
   """
   success: Boolean!
 }
+"""
+View preferences.
+"""
+type ViewPreferences implements Node {
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The last time at which the entity was updated. This is the same as the creation time if the
+      entity hasn't been update after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The view preference type.
+  """
+  type: String!
+  """
+  The view type.
+  """
+  viewType: String!
+}
 input ViewPreferencesUpdateInput {
   """
   View preferences.
@@ -8259,6 +8257,12 @@ input WorkflowStateUpdateInput {
   The position of the state.
   """
   position: Float
+}
+type SynchronizedPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
 }
 """
 Collaborative editing steps for documents.
@@ -8401,12 +8405,6 @@ type FileUpload {
   Size of the uploaded file in bytes.
   """
   size: Float!
-}
-type SynchronizedPayload {
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
 }
 """
 Public information of the OAuth application.
