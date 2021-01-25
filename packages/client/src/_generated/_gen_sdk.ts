@@ -3,7 +3,7 @@ import { DocumentNode } from "graphql";
 import * as D from "./_gen_documents";
 
 /** The function for calling the graphql client */
-export type Request = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
+export type Request = <Response, Variables>(doc: DocumentNode, variables?: Variables) => Promise<Response>;
 
 /**
  * Base class to provide a request function
@@ -11,35 +11,129 @@ export type Request = <R, V>(doc: DocumentNode, vars?: V) => Promise<R>;
  * @param request - function to call the graphql client
  */
 class LinearRequest {
-  public constructor(request: Request) {
-    this.request = request;
-  }
+  protected _request: Request;
 
-  protected request: Request;
+  public constructor(request: Request) {
+    this._request = request;
+  }
 }
 
+/** Fetch return type wrapped in a promise */
+type Fetch<Response> = Promise<Response | undefined>;
+
+/**
+ * Variables required for pagination
+ * Follows the Relay spec
+ */
+type ConnectionVariables = { after?: string; before?: string };
+
+/**
+ * Abstract class for connection models containing a list of nodes and pagination information
+ * Follows the Relay spec
+ */
+abstract class Connection<Node> extends LinearRequest {
+  public pageInfo?: PageInfo;
+  public nodes?: Node[];
+}
+
+/**
+ * The base connection class to provide pagination
+ * Follows the Relay spec
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - Function to refetch the connection given different pagination variables
+ * @param nodes - The list of models to initialize the connection
+ * @param pageInfo - The pagination information to initialize the connection
+ */
+class LinearConnection<Node> extends Connection<Node> {
+  private _fetch: (variables?: ConnectionVariables) => Fetch<Connection<Node>>;
+
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Node>>,
+    nodes?: Node[],
+    pageInfo?: PageInfo
+  ) {
+    super(request);
+    this._fetch = fetch;
+    this.nodes = nodes;
+    this.pageInfo = pageInfo;
+  }
+
+  /** Add nodes to the end of the existing nodes */
+  private _appendNodes(nodes?: Node[]) {
+    this.nodes = nodes ? [...(this.nodes ?? []), ...nodes] : this.nodes;
+  }
+
+  /** Add nodes to the start of the existing nodes */
+  private _prependNodes(nodes?: Node[]) {
+    this.nodes = nodes ? [...nodes, ...(this.nodes ?? [])] : this.nodes;
+  }
+
+  /** Update the pagination end cursor */
+  private _appendPageInfo(pageInfo?: PageInfo) {
+    if (this.pageInfo) {
+      this.pageInfo.endCursor = pageInfo?.endCursor ?? this.pageInfo.startCursor;
+      this.pageInfo.hasNextPage = pageInfo?.hasNextPage ?? this.pageInfo.hasNextPage;
+    }
+  }
+
+  /** Update the pagination start cursor */
+  private _prependPageInfo(pageInfo?: PageInfo) {
+    if (this.pageInfo) {
+      this.pageInfo.startCursor = pageInfo?.startCursor ?? this.pageInfo.startCursor;
+      this.pageInfo.hasPreviousPage = pageInfo?.hasPreviousPage ?? this.pageInfo.hasPreviousPage;
+    }
+  }
+
+  /** Fetch the next page of results */
+  public get fetchNext(): Promise<this> {
+    return this.pageInfo?.hasNextPage
+      ? this._fetch({ after: this.pageInfo?.endCursor }).then(response => {
+          this._appendNodes(response?.nodes);
+          this._appendPageInfo(response?.pageInfo);
+          return this;
+        })
+      : Promise.resolve(this);
+  }
+
+  /** Fetch the previous page of results */
+  public get fetchPrevious(): Promise<this> {
+    return this.pageInfo?.hasPreviousPage
+      ? this._fetch({ before: this.pageInfo?.startCursor }).then(response => {
+          this._prependNodes(response?.nodes);
+          this._prependPageInfo(response?.pageInfo);
+          return this;
+        })
+      : Promise.resolve(this);
+  }
+}
 /**
  * UserConnection model
  *
  * @param request - function to call the graphql client
- * @param data - UserConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this UserConnection model
+ * @param data - UserConnection response data
  */
-class UserConnection extends LinearRequest {
-  public constructor(request: Request, data: D.UserConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new User(request, node)) : undefined;
+class UserConnection extends LinearConnection<User> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<User>>,
+    data: D.UserConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new User(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: User[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A user that has access to the the resources of an organization.
  *
  * @param request - function to call the graphql client
- * @param data - UserFragment response data
+ * @param data - D.UserFragment response data
  */
 class User extends LinearRequest {
   public constructor(request: Request, data: D.UserFragment) {
@@ -92,32 +186,31 @@ class User extends LinearRequest {
   /** Number of issues created. */
   public createdIssueCount?: number;
   /** Settings for the user. Only available for the authenticated user. */
-  public get settings(): Promise<UserSettings | undefined> {
-    return new UserSettingsQuery(this.request).fetch();
+  public get settings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
   }
   /** Organization in which the user belongs to. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** Issues assigned to the user. */
-  public assignedIssues(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
-    return this.id ? new User_AssignedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public assignedIssues(variables?: Omit<D.User_AssignedIssuesQueryVariables, "id">) {
+    return this.id ? new User_AssignedIssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Issues created by the user. */
-  public createdIssues(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
-    return this.id ? new User_CreatedIssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public createdIssues(variables?: Omit<D.User_CreatedIssuesQueryVariables, "id">) {
+    return this.id ? new User_CreatedIssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Memberships associated with the user. */
-  public teamMemberships(vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
-    return this.id ? new User_TeamMembershipsQuery(this.request, this.id).fetch(vars) : undefined;
+  public teamMemberships(variables?: Omit<D.User_TeamMembershipsQueryVariables, "id">) {
+    return this.id ? new User_TeamMembershipsQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * The settings of a user as a JSON object.
  *
  * @param request - function to call the graphql client
- * @param data - UserSettingsFragment response data
+ * @param data - D.UserSettingsFragment response data
  */
 class UserSettings extends LinearRequest {
   private _user?: D.UserSettingsFragment["user"];
@@ -149,33 +242,36 @@ class UserSettings extends LinearRequest {
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom?: string[];
   /** The user to whom this notification was targeted for. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
-
 /**
  * IssueConnection model
  *
  * @param request - function to call the graphql client
- * @param data - IssueConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this IssueConnection model
+ * @param data - IssueConnection response data
  */
-class IssueConnection extends LinearRequest {
-  public constructor(request: Request, data: D.IssueConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Issue(request, node)) : undefined;
+class IssueConnection extends LinearConnection<Issue> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Issue>>,
+    data: D.IssueConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Issue(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Issue[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An issue.
  *
  * @param request - function to call the graphql client
- * @param data - IssueFragment response data
+ * @param data - D.IssueFragment response data
  */
 class Issue extends LinearRequest {
   private _team?: D.IssueFragment["team"];
@@ -270,72 +366,71 @@ class Issue extends LinearRequest {
   /** Suggested branch name for the issue. */
   public branchName?: string;
   /** The team that the issue is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The cycle that the issue is associated with. */
-  public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
+  public get cycle(): Fetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The workflow state that the issue is associated with. */
-  public get state(): Promise<WorkflowState | undefined> | undefined {
-    return this._state?.id ? new WorkflowStateQuery(this.request).fetch(this._state?.id) : undefined;
+  public get state(): Fetch<WorkflowState> | undefined {
+    return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
   }
   /** The user to whom the issue is assigned to. */
-  public get assignee(): Promise<User | undefined> | undefined {
-    return this._assignee?.id ? new UserQuery(this.request).fetch(this._assignee?.id) : undefined;
+  public get assignee(): Fetch<User> | undefined {
+    return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
   /** The parent of the issue. */
-  public get parent(): Promise<Issue | undefined> | undefined {
-    return this._parent?.id ? new IssueQuery(this.request).fetch(this._parent?.id) : undefined;
+  public get parent(): Fetch<Issue> | undefined {
+    return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The project that the issue is associated with. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The user who created the issue. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** Users who are subscribed to the issue. */
-  public subscribers(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
-    return this.id ? new Issue_SubscribersQuery(this.request, this.id).fetch(vars) : undefined;
+  public subscribers(variables?: Omit<D.Issue_SubscribersQueryVariables, "id">) {
+    return this.id ? new Issue_SubscribersQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Children of the issue. */
-  public children(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
-    return this.id ? new Issue_ChildrenQuery(this.request, this.id).fetch(vars) : undefined;
+  public children(variables?: Omit<D.Issue_ChildrenQueryVariables, "id">) {
+    return this.id ? new Issue_ChildrenQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Comments associated with the issue. */
-  public comments(vars?: Omit<D.Issue_CommentsQueryVariables, "id">) {
-    return this.id ? new Issue_CommentsQuery(this.request, this.id).fetch(vars) : undefined;
+  public comments(variables?: Omit<D.Issue_CommentsQueryVariables, "id">) {
+    return this.id ? new Issue_CommentsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** History entries associated with the issue. */
-  public history(vars?: Omit<D.Issue_HistoryQueryVariables, "id">) {
-    return this.id ? new Issue_HistoryQuery(this.request, this.id).fetch(vars) : undefined;
+  public history(variables?: Omit<D.Issue_HistoryQueryVariables, "id">) {
+    return this.id ? new Issue_HistoryQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Labels associated with this issue. */
-  public labels(vars?: Omit<D.Issue_LabelsQueryVariables, "id">) {
-    return this.id ? new Issue_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
+  public labels(variables?: Omit<D.Issue_LabelsQueryVariables, "id">) {
+    return this.id ? new Issue_LabelsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Integration resources for this issue. */
-  public integrationResources(vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
-    return this.id ? new Issue_IntegrationResourcesQuery(this.request, this.id).fetch(vars) : undefined;
+  public integrationResources(variables?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">) {
+    return this.id ? new Issue_IntegrationResourcesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Relations associated with this issue. */
-  public relations(vars?: Omit<D.Issue_RelationsQueryVariables, "id">) {
-    return this.id ? new Issue_RelationsQuery(this.request, this.id).fetch(vars) : undefined;
+  public relations(variables?: Omit<D.Issue_RelationsQueryVariables, "id">) {
+    return this.id ? new Issue_RelationsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Inverse relations associated with this issue. */
-  public inverseRelations(vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
-    return this.id ? new Issue_InverseRelationsQuery(this.request, this.id).fetch(vars) : undefined;
+  public inverseRelations(variables?: Omit<D.Issue_InverseRelationsQueryVariables, "id">) {
+    return this.id ? new Issue_InverseRelationsQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * An organizational unit that contains issues.
  *
  * @param request - function to call the graphql client
- * @param data - TeamFragment response data
+ * @param data - D.TeamFragment response data
  */
 class Team extends LinearRequest {
   private _draftWorkflowState?: D.TeamFragment["draftWorkflowState"];
@@ -452,82 +547,81 @@ class Team extends LinearRequest {
   /** Calender feed (iCal) for cycles. */
   public cycleCalenderUrl?: string;
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
-  public get draftWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get draftWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._draftWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._draftWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._draftWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been opened. */
-  public get startWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get startWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._startWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._startWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
-  public get reviewWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get reviewWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._reviewWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._reviewWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._reviewWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been merged. */
-  public get mergeWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get mergeWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._mergeWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._mergeWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
-  public get markedAsDuplicateWorkflowState(): Promise<WorkflowState | undefined> | undefined {
+  public get markedAsDuplicateWorkflowState(): Fetch<WorkflowState> | undefined {
     return this._markedAsDuplicateWorkflowState?.id
-      ? new WorkflowStateQuery(this.request).fetch(this._markedAsDuplicateWorkflowState?.id)
+      ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
   }
   /** Team's currently active cycle. */
-  public get activeCycle(): Promise<Cycle | undefined> | undefined {
-    return this._activeCycle?.id ? new CycleQuery(this.request).fetch(this._activeCycle?.id) : undefined;
+  public get activeCycle(): Fetch<Cycle> | undefined {
+    return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
   }
   /** The organization that the team is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** Issues associated with the team. */
-  public issues(vars?: Omit<D.Team_IssuesQueryVariables, "id">) {
-    return this.id ? new Team_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.Team_IssuesQueryVariables, "id">) {
+    return this.id ? new Team_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Cycles associated with the team. */
-  public cycles(vars?: Omit<D.Team_CyclesQueryVariables, "id">) {
-    return this.id ? new Team_CyclesQuery(this.request, this.id).fetch(vars) : undefined;
+  public cycles(variables?: Omit<D.Team_CyclesQueryVariables, "id">) {
+    return this.id ? new Team_CyclesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Memberships associated with the team. */
-  public memberships(vars?: Omit<D.Team_MembershipsQueryVariables, "id">) {
-    return this.id ? new Team_MembershipsQuery(this.request, this.id).fetch(vars) : undefined;
+  public memberships(variables?: Omit<D.Team_MembershipsQueryVariables, "id">) {
+    return this.id ? new Team_MembershipsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Projects associated with the team. */
-  public projects(vars?: Omit<D.Team_ProjectsQueryVariables, "id">) {
-    return this.id ? new Team_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
+  public projects(variables?: Omit<D.Team_ProjectsQueryVariables, "id">) {
+    return this.id ? new Team_ProjectsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** The states that define the workflow associated with the team. */
-  public states(vars?: Omit<D.Team_StatesQueryVariables, "id">) {
-    return this.id ? new Team_StatesQuery(this.request, this.id).fetch(vars) : undefined;
+  public states(variables?: Omit<D.Team_StatesQueryVariables, "id">) {
+    return this.id ? new Team_StatesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Templates associated with the team. */
-  public templates(vars?: Omit<D.Team_TemplatesQueryVariables, "id">) {
-    return this.id ? new Team_TemplatesQuery(this.request, this.id).fetch(vars) : undefined;
+  public templates(variables?: Omit<D.Team_TemplatesQueryVariables, "id">) {
+    return this.id ? new Team_TemplatesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Labels associated with the team. */
-  public labels(vars?: Omit<D.Team_LabelsQueryVariables, "id">) {
-    return this.id ? new Team_LabelsQuery(this.request, this.id).fetch(vars) : undefined;
+  public labels(variables?: Omit<D.Team_LabelsQueryVariables, "id">) {
+    return this.id ? new Team_LabelsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Webhooks associated with the team. */
-  public webhooks(vars?: Omit<D.Team_WebhooksQueryVariables, "id">) {
-    return this.id ? new Team_WebhooksQuery(this.request, this.id).fetch(vars) : undefined;
+  public webhooks(variables?: Omit<D.Team_WebhooksQueryVariables, "id">) {
+    return this.id ? new Team_WebhooksQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * A state in a team workflow.
  *
  * @param request - function to call the graphql client
- * @param data - WorkflowStateFragment response data
+ * @param data - D.WorkflowStateFragment response data
  */
 class WorkflowState extends LinearRequest {
   private _team?: D.WorkflowStateFragment["team"];
@@ -568,37 +662,40 @@ class WorkflowState extends LinearRequest {
   /** The type of the state. */
   public type?: string;
   /** The team to which this state belongs to. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** Issues belonging in this state. */
-  public issues(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
-    return this.id ? new WorkflowState_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.WorkflowState_IssuesQueryVariables, "id">) {
+    return this.id ? new WorkflowState_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * CycleConnection model
  *
  * @param request - function to call the graphql client
- * @param data - CycleConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this CycleConnection model
+ * @param data - CycleConnection response data
  */
-class CycleConnection extends LinearRequest {
-  public constructor(request: Request, data: D.CycleConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Cycle(request, node)) : undefined;
+class CycleConnection extends LinearConnection<Cycle> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Cycle>>,
+    data: D.CycleConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Cycle(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Cycle[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A set of issues to be resolved in a specified amount of time.
  *
  * @param request - function to call the graphql client
- * @param data - CycleFragment response data
+ * @param data - D.CycleFragment response data
  */
 class Cycle extends LinearRequest {
   private _team?: D.CycleFragment["team"];
@@ -651,24 +748,23 @@ class Cycle extends LinearRequest {
   /** The number of completed estimation points after each day. */
   public completedScopeHistory?: number[];
   /** The team that the cycle is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** Issues associated with the cycle. */
-  public issues(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
-    return this.id ? new Cycle_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.Cycle_IssuesQueryVariables, "id">) {
+    return this.id ? new Cycle_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Issues that weren't completed when the cycle was closed. */
-  public uncompletedIssuesUponClose(vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
-    return this.id ? new Cycle_UncompletedIssuesUponCloseQuery(this.request, this.id).fetch(vars) : undefined;
+  public uncompletedIssuesUponClose(variables?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
+    return this.id ? new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * PageInfo model
  *
  * @param request - function to call the graphql client
- * @param data - PageInfoFragment response data
+ * @param data - D.PageInfoFragment response data
  */
 class PageInfo extends LinearRequest {
   public constructor(request: Request, data: D.PageInfoFragment) {
@@ -688,29 +784,32 @@ class PageInfo extends LinearRequest {
   /** Cursor representing the last result in the paginated results. */
   public endCursor?: string;
 }
-
 /**
  * TeamMembershipConnection model
  *
  * @param request - function to call the graphql client
- * @param data - TeamMembershipConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this TeamMembershipConnection model
+ * @param data - TeamMembershipConnection response data
  */
-class TeamMembershipConnection extends LinearRequest {
-  public constructor(request: Request, data: D.TeamMembershipConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new TeamMembership(request, node)) : undefined;
+class TeamMembershipConnection extends LinearConnection<TeamMembership> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<TeamMembership>>,
+    data: D.TeamMembershipConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new TeamMembership(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: TeamMembership[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * Defines the membership of a user to a team.
  *
  * @param request - function to call the graphql client
- * @param data - TeamMembershipFragment response data
+ * @param data - D.TeamMembershipFragment response data
  */
 class TeamMembership extends LinearRequest {
   private _user?: D.TeamMembershipFragment["user"];
@@ -738,37 +837,40 @@ class TeamMembership extends LinearRequest {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
   /** The user that the membership is associated with. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The team that the membership is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
-
 /**
  * ProjectConnection model
  *
  * @param request - function to call the graphql client
- * @param data - ProjectConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this ProjectConnection model
+ * @param data - ProjectConnection response data
  */
-class ProjectConnection extends LinearRequest {
-  public constructor(request: Request, data: D.ProjectConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Project(request, node)) : undefined;
+class ProjectConnection extends LinearConnection<Project> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Project>>,
+    data: D.ProjectConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Project(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Project[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A project.
  *
  * @param request - function to call the graphql client
- * @param data - ProjectFragment response data
+ * @param data - D.ProjectFragment response data
  */
 class Project extends LinearRequest {
   private _creator?: D.ProjectFragment["creator"];
@@ -852,40 +954,39 @@ class Project extends LinearRequest {
   /** Whether to send new issue status updates to Slack. */
   public slackIssueStatuses?: boolean;
   /** The user who created the project. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The project lead. */
-  public get lead(): Promise<User | undefined> | undefined {
-    return this._lead?.id ? new UserQuery(this.request).fetch(this._lead?.id) : undefined;
+  public get lead(): Fetch<User> | undefined {
+    return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
   /** The milestone that this project is associated with. */
-  public get milestone(): Promise<Milestone | undefined> | undefined {
-    return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
+  public get milestone(): Fetch<Milestone> | undefined {
+    return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
   }
   /** Teams associated with this project. */
-  public teams(vars?: Omit<D.Project_TeamsQueryVariables, "id">) {
-    return this.id ? new Project_TeamsQuery(this.request, this.id).fetch(vars) : undefined;
+  public teams(variables?: Omit<D.Project_TeamsQueryVariables, "id">) {
+    return this.id ? new Project_TeamsQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Users that are members of the project. */
-  public members(vars?: Omit<D.Project_MembersQueryVariables, "id">) {
-    return this.id ? new Project_MembersQuery(this.request, this.id).fetch(vars) : undefined;
+  public members(variables?: Omit<D.Project_MembersQueryVariables, "id">) {
+    return this.id ? new Project_MembersQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Issues associated with the project. */
-  public issues(vars?: Omit<D.Project_IssuesQueryVariables, "id">) {
-    return this.id ? new Project_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.Project_IssuesQueryVariables, "id">) {
+    return this.id ? new Project_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Links associated with the project. */
-  public links(vars?: Omit<D.Project_LinksQueryVariables, "id">) {
-    return this.id ? new Project_LinksQuery(this.request, this.id).fetch(vars) : undefined;
+  public links(variables?: Omit<D.Project_LinksQueryVariables, "id">) {
+    return this.id ? new Project_LinksQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * A milestone that contains projects.
  *
  * @param request - function to call the graphql client
- * @param data - MilestoneFragment response data
+ * @param data - D.MilestoneFragment response data
  */
 class Milestone extends LinearRequest {
   public constructor(request: Request, data: D.MilestoneFragment) {
@@ -914,20 +1015,19 @@ class Milestone extends LinearRequest {
   /** The sort order for the milestone. */
   public sortOrder?: number;
   /** The organization that the milestone belongs to. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** Projects associated with the milestone. */
-  public projects(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
-    return this.id ? new Milestone_ProjectsQuery(this.request, this.id).fetch(vars) : undefined;
+  public projects(variables?: Omit<D.Milestone_ProjectsQueryVariables, "id">) {
+    return this.id ? new Milestone_ProjectsQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * An organization. Organizations are root-level objects that contain user accounts and teams.
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationFragment response data
+ * @param data - D.OrganizationFragment response data
  */
 class Organization extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationFragment) {
@@ -988,83 +1088,94 @@ class Organization extends LinearRequest {
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
   /** The organization's subscription to a paid plan. */
-  public get subscription(): Promise<Subscription | undefined> {
-    return new SubscriptionQuery(this.request).fetch();
+  public get subscription(): Fetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
   }
   /** Users associated with the organization. */
-  public users(vars?: D.Organization_UsersQueryVariables) {
-    return new Organization_UsersQuery(this.request).fetch(vars);
+  public users(variables?: D.Organization_UsersQueryVariables) {
+    return new Organization_UsersQuery(this._request).fetch(variables);
   }
   /** Teams associated with the organization. */
-  public teams(vars?: D.Organization_TeamsQueryVariables) {
-    return new Organization_TeamsQuery(this.request).fetch(vars);
+  public teams(variables?: D.Organization_TeamsQueryVariables) {
+    return new Organization_TeamsQuery(this._request).fetch(variables);
   }
   /** Milestones associated with the organization. */
-  public milestones(vars?: D.Organization_MilestonesQueryVariables) {
-    return new Organization_MilestonesQuery(this.request).fetch(vars);
+  public milestones(variables?: D.Organization_MilestonesQueryVariables) {
+    return new Organization_MilestonesQuery(this._request).fetch(variables);
   }
   /** Integrations associated with the organization. */
-  public integrations(vars?: D.Organization_IntegrationsQueryVariables) {
-    return new Organization_IntegrationsQuery(this.request).fetch(vars);
+  public integrations(variables?: D.Organization_IntegrationsQueryVariables) {
+    return new Organization_IntegrationsQuery(this._request).fetch(variables);
   }
 }
-
 /**
  * TeamConnection model
  *
  * @param request - function to call the graphql client
- * @param data - TeamConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this TeamConnection model
+ * @param data - TeamConnection response data
  */
-class TeamConnection extends LinearRequest {
-  public constructor(request: Request, data: D.TeamConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Team(request, node)) : undefined;
+class TeamConnection extends LinearConnection<Team> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Team>>,
+    data: D.TeamConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Team(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Team[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * MilestoneConnection model
  *
  * @param request - function to call the graphql client
- * @param data - MilestoneConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this MilestoneConnection model
+ * @param data - MilestoneConnection response data
  */
-class MilestoneConnection extends LinearRequest {
-  public constructor(request: Request, data: D.MilestoneConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Milestone(request, node)) : undefined;
+class MilestoneConnection extends LinearConnection<Milestone> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Milestone>>,
+    data: D.MilestoneConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Milestone(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Milestone[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * IntegrationConnection model
  *
  * @param request - function to call the graphql client
- * @param data - IntegrationConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this IntegrationConnection model
+ * @param data - IntegrationConnection response data
  */
-class IntegrationConnection extends LinearRequest {
-  public constructor(request: Request, data: D.IntegrationConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Integration(request, node)) : undefined;
+class IntegrationConnection extends LinearConnection<Integration> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Integration>>,
+    data: D.IntegrationConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Integration(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Integration[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An integration with an external service.
  *
  * @param request - function to call the graphql client
- * @param data - IntegrationFragment response data
+ * @param data - D.IntegrationFragment response data
  */
 class Integration extends LinearRequest {
   private _team?: D.IntegrationFragment["team"];
@@ -1098,28 +1209,27 @@ class Integration extends LinearRequest {
   /** The external service identifier. */
   public serviceId?: string;
   /** The organization that the integration is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** The team that the integration is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user that added the integration. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** Settings related to the integration. */
   public get settings() {
-    return this.id ? new Integration_SettingsQuery(this.request, this.id).fetch() : undefined;
+    return this.id ? new Integration_SettingsQuery(this._request, this.id).fetch() : undefined;
   }
 }
-
 /**
  * The integration resource's settings
  *
  * @param request - function to call the graphql client
- * @param data - IntegrationSettingsFragment response data
+ * @param data - D.IntegrationSettingsFragment response data
  */
 class IntegrationSettings extends LinearRequest {
   public constructor(request: Request, data: D.IntegrationSettingsFragment) {
@@ -1135,12 +1245,11 @@ class IntegrationSettings extends LinearRequest {
   public googleSheets?: GoogleSheetsSettings;
   public sentry?: SentrySettings;
 }
-
 /**
  * Slack notification specific settings.
  *
  * @param request - function to call the graphql client
- * @param data - SlackPostSettingsFragment response data
+ * @param data - D.SlackPostSettingsFragment response data
  */
 class SlackPostSettings extends LinearRequest {
   public constructor(request: Request, data: D.SlackPostSettingsFragment) {
@@ -1154,12 +1263,11 @@ class SlackPostSettings extends LinearRequest {
   public channelId?: string;
   public configurationUrl?: string;
 }
-
 /**
  * Google Sheets specific settings.
  *
  * @param request - function to call the graphql client
- * @param data - GoogleSheetsSettingsFragment response data
+ * @param data - D.GoogleSheetsSettingsFragment response data
  */
 class GoogleSheetsSettings extends LinearRequest {
   public constructor(request: Request, data: D.GoogleSheetsSettingsFragment) {
@@ -1175,12 +1283,11 @@ class GoogleSheetsSettings extends LinearRequest {
   public sheetId?: number;
   public updatedIssuesAt?: D.Scalars["DateTime"];
 }
-
 /**
  * Sentry specific settings.
  *
  * @param request - function to call the graphql client
- * @param data - SentrySettingsFragment response data
+ * @param data - D.SentrySettingsFragment response data
  */
 class SentrySettings extends LinearRequest {
   public constructor(request: Request, data: D.SentrySettingsFragment) {
@@ -1191,12 +1298,11 @@ class SentrySettings extends LinearRequest {
   /** The slug of the Sentry organization being connected. */
   public organizationSlug?: string;
 }
-
 /**
  * The subscription of an organization.
  *
  * @param request - function to call the graphql client
- * @param data - SubscriptionFragment response data
+ * @param data - D.SubscriptionFragment response data
  */
 class Subscription extends LinearRequest {
   private _creator?: D.SubscriptionFragment["creator"];
@@ -1234,37 +1340,40 @@ class Subscription extends LinearRequest {
   /** The subscription type of a pending change. Null if no change pending. */
   public pendingChangeType?: string;
   /** The creator of the subscription. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * ProjectLinkConnection model
  *
  * @param request - function to call the graphql client
- * @param data - ProjectLinkConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this ProjectLinkConnection model
+ * @param data - ProjectLinkConnection response data
  */
-class ProjectLinkConnection extends LinearRequest {
-  public constructor(request: Request, data: D.ProjectLinkConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new ProjectLink(request, node)) : undefined;
+class ProjectLinkConnection extends LinearConnection<ProjectLink> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<ProjectLink>>,
+    data: D.ProjectLinkConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new ProjectLink(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: ProjectLink[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An external link for a project.
  *
  * @param request - function to call the graphql client
- * @param data - ProjectLinkFragment response data
+ * @param data - D.ProjectLinkFragment response data
  */
 class ProjectLink extends LinearRequest {
   private _creator?: D.ProjectLinkFragment["creator"];
@@ -1298,37 +1407,40 @@ class ProjectLink extends LinearRequest {
   /** The link's label. */
   public label?: string;
   /** The user who created the link. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The project that the link is associated with. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
-
 /**
  * WorkflowStateConnection model
  *
  * @param request - function to call the graphql client
- * @param data - WorkflowStateConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this WorkflowStateConnection model
+ * @param data - WorkflowStateConnection response data
  */
-class WorkflowStateConnection extends LinearRequest {
-  public constructor(request: Request, data: D.WorkflowStateConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new WorkflowState(request, node)) : undefined;
+class WorkflowStateConnection extends LinearConnection<WorkflowState> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<WorkflowState>>,
+    data: D.WorkflowStateConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new WorkflowState(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: WorkflowState[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * TemplateConnection model
  *
  * @param request - function to call the graphql client
- * @param data - TemplateConnectionFragment response data
+ * @param data - D.TemplateConnectionFragment response data
  */
 class TemplateConnection extends LinearRequest {
   public constructor(request: Request, data: D.TemplateConnectionFragment) {
@@ -1337,16 +1449,15 @@ class TemplateConnection extends LinearRequest {
   }
 
   public pageInfo?: PageInfo;
-  public get nodes(): Promise<Template[] | undefined> {
-    return new TemplatesQuery(this.request).fetch();
+  public get nodes(): Fetch<Template[]> {
+    return new TemplatesQuery(this._request).fetch();
   }
 }
-
 /**
  * A template object used for creating new issues faster.
  *
  * @param request - function to call the graphql client
- * @param data - TemplateFragment response data
+ * @param data - D.TemplateFragment response data
  */
 class Template extends LinearRequest {
   private _team?: D.TemplateFragment["team"];
@@ -1386,37 +1497,40 @@ class Template extends LinearRequest {
   /** Template data. */
   public templateData?: D.Scalars["JSON"];
   /** The team that the template is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the template. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
-
 /**
  * IssueLabelConnection model
  *
  * @param request - function to call the graphql client
- * @param data - IssueLabelConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this IssueLabelConnection model
+ * @param data - IssueLabelConnection response data
  */
-class IssueLabelConnection extends LinearRequest {
-  public constructor(request: Request, data: D.IssueLabelConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new IssueLabel(request, node)) : undefined;
+class IssueLabelConnection extends LinearConnection<IssueLabel> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<IssueLabel>>,
+    data: D.IssueLabelConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new IssueLabel(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: IssueLabel[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * Labels that can be associated with issues.
  *
  * @param request - function to call the graphql client
- * @param data - IssueLabelFragment response data
+ * @param data - D.IssueLabelFragment response data
  */
 class IssueLabel extends LinearRequest {
   private _team?: D.IssueLabelFragment["team"];
@@ -1453,41 +1567,44 @@ class IssueLabel extends LinearRequest {
   /** The label's color as a HEX string. */
   public color?: string;
   /** The team to which the label belongs to. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the label. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** Issues associated with the label. */
-  public issues(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
-    return this.id ? new IssueLabel_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.IssueLabel_IssuesQueryVariables, "id">) {
+    return this.id ? new IssueLabel_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * WebhookConnection model
  *
  * @param request - function to call the graphql client
- * @param data - WebhookConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this WebhookConnection model
+ * @param data - WebhookConnection response data
  */
-class WebhookConnection extends LinearRequest {
-  public constructor(request: Request, data: D.WebhookConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Webhook(request, node)) : undefined;
+class WebhookConnection extends LinearConnection<Webhook> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Webhook>>,
+    data: D.WebhookConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Webhook(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Webhook[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A webhook used to send HTTP notifications over data updates
  *
  * @param request - function to call the graphql client
- * @param data - WebhookFragment response data
+ * @param data - D.WebhookFragment response data
  */
 class Webhook extends LinearRequest {
   private _team?: D.WebhookFragment["team"];
@@ -1524,37 +1641,40 @@ class Webhook extends LinearRequest {
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
   /** The team that the webhook is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the webhook. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
-
 /**
  * CommentConnection model
  *
  * @param request - function to call the graphql client
- * @param data - CommentConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this CommentConnection model
+ * @param data - CommentConnection response data
  */
-class CommentConnection extends LinearRequest {
-  public constructor(request: Request, data: D.CommentConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Comment(request, node)) : undefined;
+class CommentConnection extends LinearConnection<Comment> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Comment>>,
+    data: D.CommentConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Comment(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Comment[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A comment associated with an issue.
  *
  * @param request - function to call the graphql client
- * @param data - CommentFragment response data
+ * @param data - D.CommentFragment response data
  */
 class Comment extends LinearRequest {
   private _user?: D.CommentFragment["user"];
@@ -1594,37 +1714,40 @@ class Comment extends LinearRequest {
   /** The time user edited the comment. */
   public editedAt?: D.Scalars["DateTime"];
   /** The user who wrote the comment. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The issue that the comment is associated with. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
-
 /**
  * IssueHistoryConnection model
  *
  * @param request - function to call the graphql client
- * @param data - IssueHistoryConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this IssueHistoryConnection model
+ * @param data - IssueHistoryConnection response data
  */
-class IssueHistoryConnection extends LinearRequest {
-  public constructor(request: Request, data: D.IssueHistoryConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new IssueHistory(request, node)) : undefined;
+class IssueHistoryConnection extends LinearConnection<IssueHistory> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<IssueHistory>>,
+    data: D.IssueHistoryConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new IssueHistory(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: IssueHistory[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A record of changes to an issue.
  *
  * @param request - function to call the graphql client
- * @param data - IssueHistoryFragment response data
+ * @param data - D.IssueHistoryFragment response data
  */
 class IssueHistory extends LinearRequest {
   private _issue?: D.IssueHistoryFragment["issue"];
@@ -1722,85 +1845,88 @@ class IssueHistory extends LinearRequest {
   /** What the due date was changed to */
   public toDueDate?: D.Scalars["TimelessDateScalar"];
   /** The issue that was changed. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
-  public get actor(): Promise<User | undefined> | undefined {
-    return this._actor?.id ? new UserQuery(this.request).fetch(this._actor?.id) : undefined;
+  public get actor(): Fetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The user from whom the issue was re-assigned from. */
-  public get fromAssignee(): Promise<User | undefined> | undefined {
-    return this._fromAssignee?.id ? new UserQuery(this.request).fetch(this._fromAssignee?.id) : undefined;
+  public get fromAssignee(): Fetch<User> | undefined {
+    return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
   }
   /** The user to whom the issue was assigned to. */
-  public get toAssignee(): Promise<User | undefined> | undefined {
-    return this._toAssignee?.id ? new UserQuery(this.request).fetch(this._toAssignee?.id) : undefined;
+  public get toAssignee(): Fetch<User> | undefined {
+    return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
   }
   /** The team from which the issue was moved from. */
-  public get fromTeam(): Promise<Team | undefined> | undefined {
-    return this._fromTeam?.id ? new TeamQuery(this.request).fetch(this._fromTeam?.id) : undefined;
+  public get fromTeam(): Fetch<Team> | undefined {
+    return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
   }
   /** The team to which the issue was moved to. */
-  public get toTeam(): Promise<Team | undefined> | undefined {
-    return this._toTeam?.id ? new TeamQuery(this.request).fetch(this._toTeam?.id) : undefined;
+  public get toTeam(): Fetch<Team> | undefined {
+    return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
   }
   /** The previous parent of the issue. */
-  public get fromParent(): Promise<Issue | undefined> | undefined {
-    return this._fromParent?.id ? new IssueQuery(this.request).fetch(this._fromParent?.id) : undefined;
+  public get fromParent(): Fetch<Issue> | undefined {
+    return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
   /** The new parent of the issue. */
-  public get toParent(): Promise<Issue | undefined> | undefined {
-    return this._toParent?.id ? new IssueQuery(this.request).fetch(this._toParent?.id) : undefined;
+  public get toParent(): Fetch<Issue> | undefined {
+    return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
   /** The previous workflow state of the issue. */
-  public get fromState(): Promise<WorkflowState | undefined> | undefined {
-    return this._fromState?.id ? new WorkflowStateQuery(this.request).fetch(this._fromState?.id) : undefined;
+  public get fromState(): Fetch<WorkflowState> | undefined {
+    return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
   }
   /** The new workflow state of the issue. */
-  public get toState(): Promise<WorkflowState | undefined> | undefined {
-    return this._toState?.id ? new WorkflowStateQuery(this.request).fetch(this._toState?.id) : undefined;
+  public get toState(): Fetch<WorkflowState> | undefined {
+    return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
   }
   /** The previous cycle of the issue. */
-  public get fromCycle(): Promise<Cycle | undefined> | undefined {
-    return this._fromCycle?.id ? new CycleQuery(this.request).fetch(this._fromCycle?.id) : undefined;
+  public get fromCycle(): Fetch<Cycle> | undefined {
+    return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
   }
   /** The new cycle of the issue. */
-  public get toCycle(): Promise<Cycle | undefined> | undefined {
-    return this._toCycle?.id ? new CycleQuery(this.request).fetch(this._toCycle?.id) : undefined;
+  public get toCycle(): Fetch<Cycle> | undefined {
+    return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
   }
   /** The previous project of the issue. */
-  public get fromProject(): Promise<Project | undefined> | undefined {
-    return this._fromProject?.id ? new ProjectQuery(this.request).fetch(this._fromProject?.id) : undefined;
+  public get fromProject(): Fetch<Project> | undefined {
+    return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
   }
   /** The new project of the issue. */
-  public get toProject(): Promise<Project | undefined> | undefined {
-    return this._toProject?.id ? new ProjectQuery(this.request).fetch(this._toProject?.id) : undefined;
+  public get toProject(): Fetch<Project> | undefined {
+    return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
   }
 }
-
 /**
  * IntegrationResourceConnection model
  *
  * @param request - function to call the graphql client
- * @param data - IntegrationResourceConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this IntegrationResourceConnection model
+ * @param data - IntegrationResourceConnection response data
  */
-class IntegrationResourceConnection extends LinearRequest {
-  public constructor(request: Request, data: D.IntegrationResourceConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new IntegrationResource(request, node)) : undefined;
+class IntegrationResourceConnection extends LinearConnection<IntegrationResource> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<IntegrationResource>>,
+    data: D.IntegrationResourceConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new IntegrationResource(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: IntegrationResource[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An integration resource created by an external service.
  *
  * @param request - function to call the graphql client
- * @param data - IntegrationResourceFragment response data
+ * @param data - D.IntegrationResourceFragment response data
  */
 class IntegrationResource extends LinearRequest {
   private _integration?: D.IntegrationResourceFragment["integration"];
@@ -1834,28 +1960,27 @@ class IntegrationResource extends LinearRequest {
   /** The external service resource ID. */
   public resourceId?: string;
   /** The integration that the resource is associated with. */
-  public get integration(): Promise<Integration | undefined> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this.request).fetch(this._integration?.id) : undefined;
+  public get integration(): Fetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
   /** The issue that the resource is associated with. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** Detailed information about the external resource. */
   public get data() {
-    return this.id ? new IntegrationResource_DataQuery(this.request, this.id).fetch() : undefined;
+    return this.id ? new IntegrationResource_DataQuery(this._request, this.id).fetch() : undefined;
   }
   /** Pull request information for GitHub pull requests and GitLab merge requests. */
   public get pullRequest() {
-    return this.id ? new IntegrationResource_PullRequestQuery(this.request, this.id).fetch() : undefined;
+    return this.id ? new IntegrationResource_PullRequestQuery(this._request, this.id).fetch() : undefined;
   }
 }
-
 /**
  * Integration resource's payload
  *
  * @param request - function to call the graphql client
- * @param data - IntegrationResourceDataFragment response data
+ * @param data - D.IntegrationResourceDataFragment response data
  */
 class IntegrationResourceData extends LinearRequest {
   public constructor(request: Request, data: D.IntegrationResourceDataFragment) {
@@ -1879,12 +2004,11 @@ class IntegrationResourceData extends LinearRequest {
   /** The payload for an IntegrationResource of type 'sentryIssue' */
   public sentryIssue?: SentryIssuePayload;
 }
-
 /**
  * Pull request data
  *
  * @param request - function to call the graphql client
- * @param data - PullRequestPayloadFragment response data
+ * @param data - D.PullRequestPayloadFragment response data
  */
 class PullRequestPayload extends LinearRequest {
   public constructor(request: Request, data: D.PullRequestPayloadFragment) {
@@ -1922,12 +2046,11 @@ class PullRequestPayload extends LinearRequest {
   public closedAt?: string;
   public mergedAt?: string;
 }
-
 /**
  * GitHub's commit data
  *
  * @param request - function to call the graphql client
- * @param data - CommitPayloadFragment response data
+ * @param data - D.CommitPayloadFragment response data
  */
 class CommitPayload extends LinearRequest {
   public constructor(request: Request, data: D.CommitPayloadFragment) {
@@ -1949,12 +2072,11 @@ class CommitPayload extends LinearRequest {
   public removed?: string[];
   public modified?: string[];
 }
-
 /**
  * Sentry issue data
  *
  * @param request - function to call the graphql client
- * @param data - SentryIssuePayloadFragment response data
+ * @param data - D.SentryIssuePayloadFragment response data
  */
 class SentryIssuePayload extends LinearRequest {
   public constructor(request: Request, data: D.SentryIssuePayloadFragment) {
@@ -1995,29 +2117,32 @@ class SentryIssuePayload extends LinearRequest {
   /** The name of the first release version this issue appeared on, if available. */
   public firstVersion?: string;
 }
-
 /**
  * IssueRelationConnection model
  *
  * @param request - function to call the graphql client
- * @param data - IssueRelationConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this IssueRelationConnection model
+ * @param data - IssueRelationConnection response data
  */
-class IssueRelationConnection extends LinearRequest {
-  public constructor(request: Request, data: D.IssueRelationConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new IssueRelation(request, node)) : undefined;
+class IssueRelationConnection extends LinearConnection<IssueRelation> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<IssueRelation>>,
+    data: D.IssueRelationConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new IssueRelation(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: IssueRelation[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A relation between two issues.
  *
  * @param request - function to call the graphql client
- * @param data - IssueRelationFragment response data
+ * @param data - D.IssueRelationFragment response data
  */
 class IssueRelation extends LinearRequest {
   private _issue?: D.IssueRelationFragment["issue"];
@@ -2048,20 +2173,19 @@ class IssueRelation extends LinearRequest {
   /** The relationship of the issue with the related issue. */
   public type?: string;
   /** The issue whose relationship is being described. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The related issue. */
-  public get relatedIssue(): Promise<Issue | undefined> | undefined {
-    return this._relatedIssue?.id ? new IssueQuery(this.request).fetch(this._relatedIssue?.id) : undefined;
+  public get relatedIssue(): Fetch<Issue> | undefined {
+    return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
   }
 }
-
 /**
  * OrganizationExistsPayload model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationExistsPayloadFragment response data
+ * @param data - D.OrganizationExistsPayloadFragment response data
  */
 class OrganizationExistsPayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationExistsPayloadFragment) {
@@ -2075,13 +2199,12 @@ class OrganizationExistsPayload extends LinearRequest {
   /** Whether the organization exists. */
   public exists?: boolean;
 }
-
 /**
  * Contains either the full serialized state of the application or delta packets that the requester can
  *   apply to the local data set in order to be up-to-date.
  *
  * @param request - function to call the graphql client
- * @param data - SyncResponseFragment response data
+ * @param data - D.SyncResponseFragment response data
  */
 class SyncResponse extends LinearRequest {
   public constructor(request: Request, data: D.SyncResponseFragment) {
@@ -2110,12 +2233,11 @@ class SyncResponse extends LinearRequest {
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   public databaseVersion?: number;
 }
-
 /**
  * Contains requested archived model objects.
  *
  * @param request - function to call the graphql client
- * @param data - ArchiveResponseFragment response data
+ * @param data - D.ArchiveResponseFragment response data
  */
 class ArchiveResponse extends LinearRequest {
   public constructor(request: Request, data: D.ArchiveResponseFragment) {
@@ -2132,12 +2254,11 @@ class ArchiveResponse extends LinearRequest {
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   public databaseVersion?: number;
 }
-
 /**
  * A user account. Super user required.
  *
  * @param request - function to call the graphql client
- * @param data - UserAccountAdminPrivilegedFragment response data
+ * @param data - D.UserAccountAdminPrivilegedFragment response data
  */
 class UserAccountAdminPrivileged extends LinearRequest {
   public constructor(request: Request, data: D.UserAccountAdminPrivilegedFragment) {
@@ -2168,12 +2289,11 @@ class UserAccountAdminPrivileged extends LinearRequest {
   public service?: string;
   public users?: UserAdminPrivileged[];
 }
-
 /**
  * A user that has access to the the resources of an organization. Super user required.
  *
  * @param request - function to call the graphql client
- * @param data - UserAdminPrivilegedFragment response data
+ * @param data - D.UserAdminPrivilegedFragment response data
  */
 class UserAdminPrivileged extends LinearRequest {
   public constructor(request: Request, data: D.UserAdminPrivilegedFragment) {
@@ -2229,16 +2349,15 @@ class UserAdminPrivileged extends LinearRequest {
   /** Organization in which the user belongs to. Super user required. */
   public organization?: OrganizationAdminPrivileged;
   /** Settings for the user. Only available for the authenticated user. */
-  public get settings(): Promise<UserSettings | undefined> {
-    return new UserSettingsQuery(this.request).fetch();
+  public get settings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
   }
 }
-
 /**
  * An organization. Super user required.
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationAdminPrivilegedFragment response data
+ * @param data - D.OrganizationAdminPrivilegedFragment response data
  */
 class OrganizationAdminPrivileged extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationAdminPrivilegedFragment) {
@@ -2305,12 +2424,11 @@ class OrganizationAdminPrivileged extends LinearRequest {
   /** The organization's subscription to a paid plan. Super user required. */
   public subscription?: SubscriptionAdminPrivileged;
 }
-
 /**
  * The subscription of an organization. Super user required.
  *
  * @param request - function to call the graphql client
- * @param data - SubscriptionAdminPrivilegedFragment response data
+ * @param data - D.SubscriptionAdminPrivilegedFragment response data
  */
 class SubscriptionAdminPrivileged extends LinearRequest {
   private _creator?: D.SubscriptionAdminPrivilegedFragment["creator"];
@@ -2354,37 +2472,40 @@ class SubscriptionAdminPrivileged extends LinearRequest {
   /** The Stripe status for the subscription. */
   public stripeStatus?: string;
   /** The creator of the subscription. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * ApiKeyConnection model
  *
  * @param request - function to call the graphql client
- * @param data - ApiKeyConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this ApiKeyConnection model
+ * @param data - ApiKeyConnection response data
  */
-class ApiKeyConnection extends LinearRequest {
-  public constructor(request: Request, data: D.ApiKeyConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined;
+class ApiKeyConnection extends LinearConnection<ApiKey> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<ApiKey>>,
+    data: D.ApiKeyConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new ApiKey(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: ApiKey[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An API key. Grants access to the user's resources.
  *
  * @param request - function to call the graphql client
- * @param data - ApiKeyFragment response data
+ * @param data - D.ApiKeyFragment response data
  */
 class ApiKey extends LinearRequest {
   public constructor(request: Request, data: D.ApiKeyFragment) {
@@ -2410,12 +2531,11 @@ class ApiKey extends LinearRequest {
   /** The label of the API key. */
   public label?: string;
 }
-
 /**
  * Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
  *
  * @param request - function to call the graphql client
- * @param data - UserAuthorizedApplicationFragment response data
+ * @param data - D.UserAuthorizedApplicationFragment response data
  */
 class UserAuthorizedApplication extends LinearRequest {
   public constructor(request: Request, data: D.UserAuthorizedApplicationFragment) {
@@ -2444,12 +2564,11 @@ class UserAuthorizedApplication extends LinearRequest {
   /** Whether the user has authorized the application for the given scopes. */
   public isAuthorized?: boolean;
 }
-
 /**
  * Public information of the OAuth application, plus the authorized scopes for a given user.
  *
  * @param request - function to call the graphql client
- * @param data - AuthorizedApplicationFragment response data
+ * @param data - D.AuthorizedApplicationFragment response data
  */
 class AuthorizedApplication extends LinearRequest {
   public constructor(request: Request, data: D.AuthorizedApplicationFragment) {
@@ -2481,12 +2600,11 @@ class AuthorizedApplication extends LinearRequest {
   /** OAuth application's ID. */
   public appId?: string;
 }
-
 /**
  * AuthResolverResponse model
  *
  * @param request - function to call the graphql client
- * @param data - AuthResolverResponseFragment response data
+ * @param data - D.AuthResolverResponseFragment response data
  */
 class AuthResolverResponse extends LinearRequest {
   public constructor(request: Request, data: D.AuthResolverResponseFragment) {
@@ -2514,12 +2632,11 @@ class AuthResolverResponse extends LinearRequest {
   /** Organizations this account has access to, but is not yet a member. */
   public availableOrganizations?: Organization[];
 }
-
 /**
  * SsoUrlFromEmailResponse model
  *
  * @param request - function to call the graphql client
- * @param data - SsoUrlFromEmailResponseFragment response data
+ * @param data - D.SsoUrlFromEmailResponseFragment response data
  */
 class SsoUrlFromEmailResponse extends LinearRequest {
   public constructor(request: Request, data: D.SsoUrlFromEmailResponseFragment) {
@@ -2533,12 +2650,11 @@ class SsoUrlFromEmailResponse extends LinearRequest {
   /** SAML SSO sign-in URL. */
   public samlSsoUrl?: string;
 }
-
 /**
  * BillingDetailsPayload model
  *
  * @param request - function to call the graphql client
- * @param data - BillingDetailsPayloadFragment response data
+ * @param data - D.BillingDetailsPayloadFragment response data
  */
 class BillingDetailsPayload extends LinearRequest {
   public constructor(request: Request, data: D.BillingDetailsPayloadFragment) {
@@ -2558,12 +2674,11 @@ class BillingDetailsPayload extends LinearRequest {
   /** The payment method. */
   public paymentMethod?: Card;
 }
-
 /**
  * Invoice model
  *
  * @param request - function to call the graphql client
- * @param data - InvoiceFragment response data
+ * @param data - D.InvoiceFragment response data
  */
 class Invoice extends LinearRequest {
   public constructor(request: Request, data: D.InvoiceFragment) {
@@ -2586,12 +2701,11 @@ class Invoice extends LinearRequest {
   /** The invoice total, in cents. */
   public total?: number;
 }
-
 /**
  * Card model
  *
  * @param request - function to call the graphql client
- * @param data - CardFragment response data
+ * @param data - D.CardFragment response data
  */
 class Card extends LinearRequest {
   public constructor(request: Request, data: D.CardFragment) {
@@ -2605,12 +2719,11 @@ class Card extends LinearRequest {
   /** The last four digits used to identify the card. */
   public last4?: string;
 }
-
 /**
  * CollaborationDocumentUpdatePayload model
  *
  * @param request - function to call the graphql client
- * @param data - CollaborationDocumentUpdatePayloadFragment response data
+ * @param data - D.CollaborationDocumentUpdatePayloadFragment response data
  */
 class CollaborationDocumentUpdatePayload extends LinearRequest {
   public constructor(request: Request, data: D.CollaborationDocumentUpdatePayloadFragment) {
@@ -2624,12 +2737,11 @@ class CollaborationDocumentUpdatePayload extends LinearRequest {
   /** Document steps the client has not seen yet and need to rebase it's local steps on. */
   public steps?: StepsResponse;
 }
-
 /**
  * StepsResponse model
  *
  * @param request - function to call the graphql client
- * @param data - StepsResponseFragment response data
+ * @param data - D.StepsResponseFragment response data
  */
 class StepsResponse extends LinearRequest {
   public constructor(request: Request, data: D.StepsResponseFragment) {
@@ -2646,29 +2758,32 @@ class StepsResponse extends LinearRequest {
   /** List of client IDs for the document steps. */
   public clientIds?: string[];
 }
-
 /**
  * CustomViewConnection model
  *
  * @param request - function to call the graphql client
- * @param data - CustomViewConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this CustomViewConnection model
+ * @param data - CustomViewConnection response data
  */
-class CustomViewConnection extends LinearRequest {
-  public constructor(request: Request, data: D.CustomViewConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined;
+class CustomViewConnection extends LinearConnection<CustomView> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<CustomView>>,
+    data: D.CustomViewConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new CustomView(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: CustomView[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A custom view that has been saved by a user.
  *
  * @param request - function to call the graphql client
- * @param data - CustomViewFragment response data
+ * @param data - D.CustomViewFragment response data
  */
 class CustomView extends LinearRequest {
   private _team?: D.CustomViewFragment["team"];
@@ -2714,41 +2829,44 @@ class CustomView extends LinearRequest {
   /** Whether the custom view is shared with everyone in the organization. */
   public shared?: boolean;
   /** The organization of the custom view. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** The team associated with the custom view. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user who created the custom view. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
-
 /**
  * EmojiConnection model
  *
  * @param request - function to call the graphql client
- * @param data - EmojiConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this EmojiConnection model
+ * @param data - EmojiConnection response data
  */
-class EmojiConnection extends LinearRequest {
-  public constructor(request: Request, data: D.EmojiConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
+class EmojiConnection extends LinearConnection<Emoji> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Emoji>>,
+    data: D.EmojiConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Emoji(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Emoji[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A custom emoji.
  *
  * @param request - function to call the graphql client
- * @param data - EmojiFragment response data
+ * @param data - D.EmojiFragment response data
  */
 class Emoji extends LinearRequest {
   private _creator?: D.EmojiFragment["creator"];
@@ -2783,37 +2901,40 @@ class Emoji extends LinearRequest {
   /** The source of the emoji. */
   public source?: string;
   /** The user who created the emoji. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the emoji belongs to. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * FavoriteConnection model
  *
  * @param request - function to call the graphql client
- * @param data - FavoriteConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this FavoriteConnection model
+ * @param data - FavoriteConnection response data
  */
-class FavoriteConnection extends LinearRequest {
-  public constructor(request: Request, data: D.FavoriteConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
+class FavoriteConnection extends LinearConnection<Favorite> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Favorite>>,
+    data: D.FavoriteConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Favorite(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Favorite[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * User favorites presented in the sidebar.
  *
  * @param request - function to call the graphql client
- * @param data - FavoriteFragment response data
+ * @param data - D.FavoriteFragment response data
  */
 class Favorite extends LinearRequest {
   private _user?: D.FavoriteFragment["user"];
@@ -2855,36 +2976,35 @@ class Favorite extends LinearRequest {
   /** The order of the item in the favorites list. */
   public sortOrder?: number;
   /** The owner of the favorite. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** Favorited issue. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** Favorited project. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** Favorited project team. */
-  public get projectTeam(): Promise<Project | undefined> | undefined {
-    return this._projectTeam?.id ? new ProjectQuery(this.request).fetch(this._projectTeam?.id) : undefined;
+  public get projectTeam(): Fetch<Project> | undefined {
+    return this._projectTeam?.id ? new ProjectQuery(this._request).fetch(this._projectTeam?.id) : undefined;
   }
   /** Favorited cycle. */
-  public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
+  public get cycle(): Fetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** Favorited issue label. */
-  public get label(): Promise<IssueLabel | undefined> | undefined {
-    return this._label?.id ? new IssueLabelQuery(this.request).fetch(this._label?.id) : undefined;
+  public get label(): Fetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
 }
-
 /**
  * FigmaEmbedPayload model
  *
  * @param request - function to call the graphql client
- * @param data - FigmaEmbedPayloadFragment response data
+ * @param data - D.FigmaEmbedPayloadFragment response data
  */
 class FigmaEmbedPayload extends LinearRequest {
   public constructor(request: Request, data: D.FigmaEmbedPayloadFragment) {
@@ -2901,12 +3021,11 @@ class FigmaEmbedPayload extends LinearRequest {
   /** Figma embed information. */
   public figmaEmbed?: FigmaEmbed;
 }
-
 /**
  * Object representing Figma preview information.
  *
  * @param request - function to call the graphql client
- * @param data - FigmaEmbedFragment response data
+ * @param data - D.FigmaEmbedFragment response data
  */
 class FigmaEmbed extends LinearRequest {
   public constructor(request: Request, data: D.FigmaEmbedFragment) {
@@ -2926,12 +3045,11 @@ class FigmaEmbed extends LinearRequest {
   /** Figma screenshot URL. */
   public url?: string;
 }
-
 /**
  * InvitePagePayload model
  *
  * @param request - function to call the graphql client
- * @param data - InvitePagePayloadFragment response data
+ * @param data - D.InvitePagePayloadFragment response data
  */
 class InvitePagePayload extends LinearRequest {
   public constructor(request: Request, data: D.InvitePagePayloadFragment) {
@@ -2945,12 +3063,11 @@ class InvitePagePayload extends LinearRequest {
   /** Invite data. */
   public inviteData?: InviteData;
 }
-
 /**
  * InviteData model
  *
  * @param request - function to call the graphql client
- * @param data - InviteDataFragment response data
+ * @param data - D.InviteDataFragment response data
  */
 class InviteData extends LinearRequest {
   public constructor(request: Request, data: D.InviteDataFragment) {
@@ -2982,29 +3099,32 @@ class InviteData extends LinearRequest {
   /** The user count of the organization. */
   public userCount?: number;
 }
-
 /**
  * NotificationConnection model
  *
  * @param request - function to call the graphql client
- * @param data - NotificationConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this NotificationConnection model
+ * @param data - NotificationConnection response data
  */
-class NotificationConnection extends LinearRequest {
-  public constructor(request: Request, data: D.NotificationConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined;
+class NotificationConnection extends LinearConnection<Notification> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Notification>>,
+    data: D.NotificationConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Notification(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Notification[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A notification sent to a user.
  *
  * @param request - function to call the graphql client
- * @param data - NotificationFragment response data
+ * @param data - D.NotificationFragment response data
  */
 class Notification extends LinearRequest {
   private _user?: D.NotificationFragment["user"];
@@ -3051,45 +3171,48 @@ class Notification extends LinearRequest {
    */
   public emailedAt?: D.Scalars["DateTime"];
   /** The recipient of the notification. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The issue that the notification is associated with. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The team which the notification is associated with. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The comment which the notification is associated with. */
-  public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
+  public get comment(): Fetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
-
 /**
  * NotificationSubscriptionConnection model
  *
  * @param request - function to call the graphql client
- * @param data - NotificationSubscriptionConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this NotificationSubscriptionConnection model
+ * @param data - NotificationSubscriptionConnection response data
  */
-class NotificationSubscriptionConnection extends LinearRequest {
-  public constructor(request: Request, data: D.NotificationSubscriptionConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined;
+class NotificationSubscriptionConnection extends LinearConnection<NotificationSubscription> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<NotificationSubscription>>,
+    data: D.NotificationSubscriptionConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new NotificationSubscription(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: NotificationSubscription[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * Notification subscriptions for models.
  *
  * @param request - function to call the graphql client
- * @param data - NotificationSubscriptionFragment response data
+ * @param data - D.NotificationSubscriptionFragment response data
  */
 class NotificationSubscription extends LinearRequest {
   private _user?: D.NotificationSubscriptionFragment["user"];
@@ -3122,41 +3245,44 @@ class NotificationSubscription extends LinearRequest {
   /** The type of the subscription. */
   public type?: string;
   /** The user associated with notification subscriptions. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** Subscribed team. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** Subscribed project. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
-
 /**
  * OrganizationInviteConnection model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationInviteConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this OrganizationInviteConnection model
+ * @param data - OrganizationInviteConnection response data
  */
-class OrganizationInviteConnection extends LinearRequest {
-  public constructor(request: Request, data: D.OrganizationInviteConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined;
+class OrganizationInviteConnection extends LinearConnection<OrganizationInvite> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<OrganizationInvite>>,
+    data: D.OrganizationInviteConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new OrganizationInvite(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: OrganizationInvite[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * An invitation to the organization that has been sent via email.
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationInviteFragment response data
+ * @param data - D.OrganizationInviteFragment response data
  */
 class OrganizationInvite extends LinearRequest {
   private _inviter?: D.OrganizationInviteFragment["inviter"];
@@ -3196,28 +3322,27 @@ class OrganizationInvite extends LinearRequest {
   /** The time at which the invite will be expiring. Null, if the invite shouldn't expire */
   public expiresAt?: D.Scalars["DateTime"];
   /** The user who created the invitation. */
-  public get inviter(): Promise<User | undefined> | undefined {
-    return this._inviter?.id ? new UserQuery(this.request).fetch(this._inviter?.id) : undefined;
+  public get inviter(): Fetch<User> | undefined {
+    return this._inviter?.id ? new UserQuery(this._request).fetch(this._inviter?.id) : undefined;
   }
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
-  public get invitee(): Promise<User | undefined> | undefined {
-    return this._invitee?.id ? new UserQuery(this.request).fetch(this._invitee?.id) : undefined;
+  public get invitee(): Fetch<User> | undefined {
+    return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
   }
   /** The organization that the invite is associated with. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /** undefined */
-  public issues(vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
-    return this.id ? new OrganizationInvite_IssuesQuery(this.request, this.id).fetch(vars) : undefined;
+  public issues(variables?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">) {
+    return this.id ? new OrganizationInvite_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
-
 /**
  * PushSubscriptionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - PushSubscriptionPayloadFragment response data
+ * @param data - D.PushSubscriptionPayloadFragment response data
  */
 class PushSubscriptionPayload extends LinearRequest {
   public constructor(request: Request, data: D.PushSubscriptionPayloadFragment) {
@@ -3231,29 +3356,32 @@ class PushSubscriptionPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * ReactionConnection model
  *
  * @param request - function to call the graphql client
- * @param data - ReactionConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this ReactionConnection model
+ * @param data - ReactionConnection response data
  */
-class ReactionConnection extends LinearRequest {
-  public constructor(request: Request, data: D.ReactionConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined;
+class ReactionConnection extends LinearConnection<Reaction> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Reaction>>,
+    data: D.ReactionConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Reaction(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: Reaction[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A reaction associated with a comment.
  *
  * @param request - function to call the graphql client
- * @param data - ReactionFragment response data
+ * @param data - D.ReactionFragment response data
  */
 class Reaction extends LinearRequest {
   private _user?: D.ReactionFragment["user"];
@@ -3284,20 +3412,19 @@ class Reaction extends LinearRequest {
   /** Name of the reaction's emoji. */
   public emoji?: string;
   /** The user who reacted. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The comment that the reaction is associated with. */
-  public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
+  public get comment(): Fetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
-
 /**
  * UserPayload model
  *
  * @param request - function to call the graphql client
- * @param data - UserPayloadFragment response data
+ * @param data - D.UserPayloadFragment response data
  */
 class UserPayload extends LinearRequest {
   private _user?: D.UserPayloadFragment["user"];
@@ -3314,16 +3441,15 @@ class UserPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The user that was created or updated. */
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
-
 /**
  * UserAdminPayload model
  *
  * @param request - function to call the graphql client
- * @param data - UserAdminPayloadFragment response data
+ * @param data - D.UserAdminPayloadFragment response data
  */
 class UserAdminPayload extends LinearRequest {
   public constructor(request: Request, data: D.UserAdminPayloadFragment) {
@@ -3334,12 +3460,11 @@ class UserAdminPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OrganizationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationPayloadFragment response data
+ * @param data - D.OrganizationPayloadFragment response data
  */
 class OrganizationPayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationPayloadFragment) {
@@ -3353,16 +3478,15 @@ class OrganizationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The organization that was created or updated. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * OrganizationDeletePayload model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationDeletePayloadFragment response data
+ * @param data - D.OrganizationDeletePayloadFragment response data
  */
 class OrganizationDeletePayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationDeletePayloadFragment) {
@@ -3373,12 +3497,11 @@ class OrganizationDeletePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * AdminIntegrationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - AdminIntegrationPayloadFragment response data
+ * @param data - D.AdminIntegrationPayloadFragment response data
  */
 class AdminIntegrationPayload extends LinearRequest {
   public constructor(request: Request, data: D.AdminIntegrationPayloadFragment) {
@@ -3389,12 +3512,11 @@ class AdminIntegrationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OrganizationAccessPayload model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationAccessPayloadFragment response data
+ * @param data - D.OrganizationAccessPayloadFragment response data
  */
 class OrganizationAccessPayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationAccessPayloadFragment) {
@@ -3405,12 +3527,11 @@ class OrganizationAccessPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OrganizationSamlConfigurePayload model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationSamlConfigurePayloadFragment response data
+ * @param data - D.OrganizationSamlConfigurePayloadFragment response data
  */
 class OrganizationSamlConfigurePayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationSamlConfigurePayloadFragment) {
@@ -3429,12 +3550,11 @@ class OrganizationSamlConfigurePayload extends LinearRequest {
   /** Organization's current SAML configuration. */
   public samlConfiguration?: SamlConfiguration;
 }
-
 /**
  * The integration resource's settings
  *
  * @param request - function to call the graphql client
- * @param data - SamlConfigurationFragment response data
+ * @param data - D.SamlConfigurationFragment response data
  */
 class SamlConfiguration extends LinearRequest {
   public constructor(request: Request, data: D.SamlConfigurationFragment) {
@@ -3457,12 +3577,11 @@ class SamlConfiguration extends LinearRequest {
   /** List of allowed email domains for SAML authentication. */
   public allowedDomains?: string[];
 }
-
 /**
  * AdminCommandPayload model
  *
  * @param request - function to call the graphql client
- * @param data - AdminCommandPayloadFragment response data
+ * @param data - D.AdminCommandPayloadFragment response data
  */
 class AdminCommandPayload extends LinearRequest {
   public constructor(request: Request, data: D.AdminCommandPayloadFragment) {
@@ -3473,12 +3592,11 @@ class AdminCommandPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * Operation response.
  *
  * @param request - function to call the graphql client
- * @param data - AdminResponseFragment response data
+ * @param data - D.AdminResponseFragment response data
  */
 class AdminResponse extends LinearRequest {
   public constructor(request: Request, data: D.AdminResponseFragment) {
@@ -3489,12 +3607,11 @@ class AdminResponse extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * EventPayload model
  *
  * @param request - function to call the graphql client
- * @param data - EventPayloadFragment response data
+ * @param data - D.EventPayloadFragment response data
  */
 class EventPayload extends LinearRequest {
   public constructor(request: Request, data: D.EventPayloadFragment) {
@@ -3505,12 +3622,11 @@ class EventPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * ApiKeyPayload model
  *
  * @param request - function to call the graphql client
- * @param data - ApiKeyPayloadFragment response data
+ * @param data - D.ApiKeyPayloadFragment response data
  */
 class ApiKeyPayload extends LinearRequest {
   public constructor(request: Request, data: D.ApiKeyPayloadFragment) {
@@ -3527,12 +3643,11 @@ class ApiKeyPayload extends LinearRequest {
   /** The API key that was created. */
   public apiKey?: ApiKey;
 }
-
 /**
  * ArchivePayload model
  *
  * @param request - function to call the graphql client
- * @param data - ArchivePayloadFragment response data
+ * @param data - D.ArchivePayloadFragment response data
  */
 class ArchivePayload extends LinearRequest {
   public constructor(request: Request, data: D.ArchivePayloadFragment) {
@@ -3546,12 +3661,11 @@ class ArchivePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * EmailUserAccountAuthChallengeResponse model
  *
  * @param request - function to call the graphql client
- * @param data - EmailUserAccountAuthChallengeResponseFragment response data
+ * @param data - D.EmailUserAccountAuthChallengeResponseFragment response data
  */
 class EmailUserAccountAuthChallengeResponse extends LinearRequest {
   public constructor(request: Request, data: D.EmailUserAccountAuthChallengeResponseFragment) {
@@ -3565,12 +3679,11 @@ class EmailUserAccountAuthChallengeResponse extends LinearRequest {
   /** Supported challenge for this user account. Can be either verificationCode or password. */
   public authType?: string;
 }
-
 /**
  * CreateOrJoinOrganizationResponse model
  *
  * @param request - function to call the graphql client
- * @param data - CreateOrJoinOrganizationResponseFragment response data
+ * @param data - D.CreateOrJoinOrganizationResponseFragment response data
  */
 class CreateOrJoinOrganizationResponse extends LinearRequest {
   private _user?: D.CreateOrJoinOrganizationResponseFragment["user"];
@@ -3580,19 +3693,18 @@ class CreateOrJoinOrganizationResponse extends LinearRequest {
     this._user = data.user ?? undefined;
   }
 
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
-  public get user(): Promise<User | undefined> | undefined {
-    return this._user?.id ? new UserQuery(this.request).fetch(this._user?.id) : undefined;
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
-
 /**
  * BillingEmailPayload model
  *
  * @param request - function to call the graphql client
- * @param data - BillingEmailPayloadFragment response data
+ * @param data - D.BillingEmailPayloadFragment response data
  */
 class BillingEmailPayload extends LinearRequest {
   public constructor(request: Request, data: D.BillingEmailPayloadFragment) {
@@ -3606,12 +3718,11 @@ class BillingEmailPayload extends LinearRequest {
   /** The customer's email address the invoices are sent to. */
   public email?: string;
 }
-
 /**
  * CommentPayload model
  *
  * @param request - function to call the graphql client
- * @param data - CommentPayloadFragment response data
+ * @param data - D.CommentPayloadFragment response data
  */
 class CommentPayload extends LinearRequest {
   private _comment?: D.CommentPayloadFragment["comment"];
@@ -3628,16 +3739,15 @@ class CommentPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The comment that was created or updated. */
-  public get comment(): Promise<Comment | undefined> | undefined {
-    return this._comment?.id ? new CommentQuery(this.request).fetch(this._comment?.id) : undefined;
+  public get comment(): Fetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
 }
-
 /**
  * ContactPayload model
  *
  * @param request - function to call the graphql client
- * @param data - ContactPayloadFragment response data
+ * @param data - D.ContactPayloadFragment response data
  */
 class ContactPayload extends LinearRequest {
   public constructor(request: Request, data: D.ContactPayloadFragment) {
@@ -3648,12 +3758,11 @@ class ContactPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * CustomViewPayload model
  *
  * @param request - function to call the graphql client
- * @param data - CustomViewPayloadFragment response data
+ * @param data - D.CustomViewPayloadFragment response data
  */
 class CustomViewPayload extends LinearRequest {
   private _customView?: D.CustomViewPayloadFragment["customView"];
@@ -3670,16 +3779,15 @@ class CustomViewPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The custom view that was created or updated. */
-  public get customView(): Promise<CustomView | undefined> | undefined {
-    return this._customView?.id ? new CustomViewQuery(this.request).fetch(this._customView?.id) : undefined;
+  public get customView(): Fetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
 }
-
 /**
  * CyclePayload model
  *
  * @param request - function to call the graphql client
- * @param data - CyclePayloadFragment response data
+ * @param data - D.CyclePayloadFragment response data
  */
 class CyclePayload extends LinearRequest {
   private _cycle?: D.CyclePayloadFragment["cycle"];
@@ -3696,16 +3804,15 @@ class CyclePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The Cycle that was created or updated. */
-  public get cycle(): Promise<Cycle | undefined> | undefined {
-    return this._cycle?.id ? new CycleQuery(this.request).fetch(this._cycle?.id) : undefined;
+  public get cycle(): Fetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
 }
-
 /**
  * DebugPayload model
  *
  * @param request - function to call the graphql client
- * @param data - DebugPayloadFragment response data
+ * @param data - D.DebugPayloadFragment response data
  */
 class DebugPayload extends LinearRequest {
   public constructor(request: Request, data: D.DebugPayloadFragment) {
@@ -3716,12 +3823,11 @@ class DebugPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * EmailUnsubscribePayload model
  *
  * @param request - function to call the graphql client
- * @param data - EmailUnsubscribePayloadFragment response data
+ * @param data - D.EmailUnsubscribePayloadFragment response data
  */
 class EmailUnsubscribePayload extends LinearRequest {
   public constructor(request: Request, data: D.EmailUnsubscribePayloadFragment) {
@@ -3732,12 +3838,11 @@ class EmailUnsubscribePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * EmojiPayload model
  *
  * @param request - function to call the graphql client
- * @param data - EmojiPayloadFragment response data
+ * @param data - D.EmojiPayloadFragment response data
  */
 class EmojiPayload extends LinearRequest {
   private _emoji?: D.EmojiPayloadFragment["emoji"];
@@ -3754,16 +3859,15 @@ class EmojiPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The emoji that was created. */
-  public get emoji(): Promise<Emoji | undefined> | undefined {
-    return this._emoji?.id ? new EmojiQuery(this.request).fetch(this._emoji?.id) : undefined;
+  public get emoji(): Fetch<Emoji> | undefined {
+    return this._emoji?.id ? new EmojiQuery(this._request).fetch(this._emoji?.id) : undefined;
   }
 }
-
 /**
  * FavoritePayload model
  *
  * @param request - function to call the graphql client
- * @param data - FavoritePayloadFragment response data
+ * @param data - D.FavoritePayloadFragment response data
  */
 class FavoritePayload extends LinearRequest {
   private _favorite?: D.FavoritePayloadFragment["favorite"];
@@ -3780,16 +3884,15 @@ class FavoritePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The object that was added as a favorite. */
-  public get favorite(): Promise<Favorite | undefined> | undefined {
-    return this._favorite?.id ? new FavoriteQuery(this.request).fetch(this._favorite?.id) : undefined;
+  public get favorite(): Fetch<Favorite> | undefined {
+    return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
   }
 }
-
 /**
  * FeedbackPayload model
  *
  * @param request - function to call the graphql client
- * @param data - FeedbackPayloadFragment response data
+ * @param data - D.FeedbackPayloadFragment response data
  */
 class FeedbackPayload extends LinearRequest {
   public constructor(request: Request, data: D.FeedbackPayloadFragment) {
@@ -3800,12 +3903,11 @@ class FeedbackPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * UploadPayload model
  *
  * @param request - function to call the graphql client
- * @param data - UploadPayloadFragment response data
+ * @param data - D.UploadPayloadFragment response data
  */
 class UploadPayload extends LinearRequest {
   public constructor(request: Request, data: D.UploadPayloadFragment) {
@@ -3822,12 +3924,11 @@ class UploadPayload extends LinearRequest {
   /** Object describing the file to be uploaded. */
   public uploadFile?: UploadFile;
 }
-
 /**
  * Object representing Google Cloud upload policy, plus additional data.
  *
  * @param request - function to call the graphql client
- * @param data - UploadFileFragment response data
+ * @param data - D.UploadFileFragment response data
  */
 class UploadFile extends LinearRequest {
   public constructor(request: Request, data: D.UploadFileFragment) {
@@ -3854,12 +3955,11 @@ class UploadFile extends LinearRequest {
   public metaData?: D.Scalars["JSON"];
   public headers?: UploadFileHeader[];
 }
-
 /**
  * UploadFileHeader model
  *
  * @param request - function to call the graphql client
- * @param data - UploadFileHeaderFragment response data
+ * @param data - D.UploadFileHeaderFragment response data
  */
 class UploadFileHeader extends LinearRequest {
   public constructor(request: Request, data: D.UploadFileHeaderFragment) {
@@ -3873,12 +3973,11 @@ class UploadFileHeader extends LinearRequest {
   /** Upload file header value. */
   public value?: string;
 }
-
 /**
  * ImageUploadFromUrlPayload model
  *
  * @param request - function to call the graphql client
- * @param data - ImageUploadFromUrlPayloadFragment response data
+ * @param data - D.ImageUploadFromUrlPayloadFragment response data
  */
 class ImageUploadFromUrlPayload extends LinearRequest {
   public constructor(request: Request, data: D.ImageUploadFromUrlPayloadFragment) {
@@ -3895,12 +3994,11 @@ class ImageUploadFromUrlPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * IntegrationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - IntegrationPayloadFragment response data
+ * @param data - D.IntegrationPayloadFragment response data
  */
 class IntegrationPayload extends LinearRequest {
   private _integration?: D.IntegrationPayloadFragment["integration"];
@@ -3917,16 +4015,15 @@ class IntegrationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The integration that was created or updated. */
-  public get integration(): Promise<Integration | undefined> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this.request).fetch(this._integration?.id) : undefined;
+  public get integration(): Fetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
 }
-
 /**
  * IssueLabelPayload model
  *
  * @param request - function to call the graphql client
- * @param data - IssueLabelPayloadFragment response data
+ * @param data - D.IssueLabelPayloadFragment response data
  */
 class IssueLabelPayload extends LinearRequest {
   private _issueLabel?: D.IssueLabelPayloadFragment["issueLabel"];
@@ -3943,16 +4040,15 @@ class IssueLabelPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The label that was created or updated. */
-  public get issueLabel(): Promise<IssueLabel | undefined> | undefined {
-    return this._issueLabel?.id ? new IssueLabelQuery(this.request).fetch(this._issueLabel?.id) : undefined;
+  public get issueLabel(): Fetch<IssueLabel> | undefined {
+    return this._issueLabel?.id ? new IssueLabelQuery(this._request).fetch(this._issueLabel?.id) : undefined;
   }
 }
-
 /**
  * IssueRelationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - IssueRelationPayloadFragment response data
+ * @param data - D.IssueRelationPayloadFragment response data
  */
 class IssueRelationPayload extends LinearRequest {
   private _issueRelation?: D.IssueRelationPayloadFragment["issueRelation"];
@@ -3969,16 +4065,15 @@ class IssueRelationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The issue relation that was created or updated. */
-  public get issueRelation(): Promise<IssueRelation | undefined> | undefined {
-    return this._issueRelation?.id ? new IssueRelationQuery(this.request).fetch(this._issueRelation?.id) : undefined;
+  public get issueRelation(): Fetch<IssueRelation> | undefined {
+    return this._issueRelation?.id ? new IssueRelationQuery(this._request).fetch(this._issueRelation?.id) : undefined;
   }
 }
-
 /**
  * IssuePayload model
  *
  * @param request - function to call the graphql client
- * @param data - IssuePayloadFragment response data
+ * @param data - D.IssuePayloadFragment response data
  */
 class IssuePayload extends LinearRequest {
   private _issue?: D.IssuePayloadFragment["issue"];
@@ -3995,16 +4090,15 @@ class IssuePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The issue that was created or updated. */
-  public get issue(): Promise<Issue | undefined> | undefined {
-    return this._issue?.id ? new IssueQuery(this.request).fetch(this._issue?.id) : undefined;
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
-
 /**
  * MilestonePayload model
  *
  * @param request - function to call the graphql client
- * @param data - MilestonePayloadFragment response data
+ * @param data - D.MilestonePayloadFragment response data
  */
 class MilestonePayload extends LinearRequest {
   private _milestone?: D.MilestonePayloadFragment["milestone"];
@@ -4021,16 +4115,15 @@ class MilestonePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The milesteone that was created or updated. */
-  public get milestone(): Promise<Milestone | undefined> | undefined {
-    return this._milestone?.id ? new MilestoneQuery(this.request).fetch(this._milestone?.id) : undefined;
+  public get milestone(): Fetch<Milestone> | undefined {
+    return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
   }
 }
-
 /**
  * NotificationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - NotificationPayloadFragment response data
+ * @param data - D.NotificationPayloadFragment response data
  */
 class NotificationPayload extends LinearRequest {
   private _notification?: D.NotificationPayloadFragment["notification"];
@@ -4047,16 +4140,15 @@ class NotificationPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The notification that was created or updated. */
-  public get notification(): Promise<Notification | undefined> | undefined {
-    return this._notification?.id ? new NotificationQuery(this.request).fetch(this._notification?.id) : undefined;
+  public get notification(): Fetch<Notification> | undefined {
+    return this._notification?.id ? new NotificationQuery(this._request).fetch(this._notification?.id) : undefined;
   }
 }
-
 /**
  * NotificationSubscriptionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - NotificationSubscriptionPayloadFragment response data
+ * @param data - D.NotificationSubscriptionPayloadFragment response data
  */
 class NotificationSubscriptionPayload extends LinearRequest {
   private _notificationSubscription?: D.NotificationSubscriptionPayloadFragment["notificationSubscription"];
@@ -4073,18 +4165,17 @@ class NotificationSubscriptionPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The notification subscription that was created or updated. */
-  public get notificationSubscription(): Promise<NotificationSubscription | undefined> | undefined {
+  public get notificationSubscription(): Fetch<NotificationSubscription> | undefined {
     return this._notificationSubscription?.id
-      ? new NotificationSubscriptionQuery(this.request).fetch(this._notificationSubscription?.id)
+      ? new NotificationSubscriptionQuery(this._request).fetch(this._notificationSubscription?.id)
       : undefined;
   }
 }
-
 /**
  * OauthClientPayload model
  *
  * @param request - function to call the graphql client
- * @param data - OauthClientPayloadFragment response data
+ * @param data - D.OauthClientPayloadFragment response data
  */
 class OauthClientPayload extends LinearRequest {
   public constructor(request: Request, data: D.OauthClientPayloadFragment) {
@@ -4101,12 +4192,11 @@ class OauthClientPayload extends LinearRequest {
   /** The OAuth client application that was created or updated. */
   public oauthClient?: OauthClient;
 }
-
 /**
  * OAuth2 client application
  *
  * @param request - function to call the graphql client
- * @param data - OauthClientFragment response data
+ * @param data - D.OauthClientFragment response data
  */
 class OauthClient extends LinearRequest {
   public constructor(request: Request, data: D.OauthClientFragment) {
@@ -4153,12 +4243,11 @@ class OauthClient extends LinearRequest {
   /** List of allowed redirect URIs for the application. */
   public redirectUris?: string[];
 }
-
 /**
  * RotateSecretPayload model
  *
  * @param request - function to call the graphql client
- * @param data - RotateSecretPayloadFragment response data
+ * @param data - D.RotateSecretPayloadFragment response data
  */
 class RotateSecretPayload extends LinearRequest {
   public constructor(request: Request, data: D.RotateSecretPayloadFragment) {
@@ -4172,12 +4261,11 @@ class RotateSecretPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OauthTokenRevokePayload model
  *
  * @param request - function to call the graphql client
- * @param data - OauthTokenRevokePayloadFragment response data
+ * @param data - D.OauthTokenRevokePayloadFragment response data
  */
 class OauthTokenRevokePayload extends LinearRequest {
   public constructor(request: Request, data: D.OauthTokenRevokePayloadFragment) {
@@ -4188,12 +4276,11 @@ class OauthTokenRevokePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * OrganizationDomainPayload model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationDomainPayloadFragment response data
+ * @param data - D.OrganizationDomainPayloadFragment response data
  */
 class OrganizationDomainPayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationDomainPayloadFragment) {
@@ -4212,12 +4299,11 @@ class OrganizationDomainPayload extends LinearRequest {
   /** The organization domain that was created or updated. */
   public organizationDomain?: OrganizationDomain;
 }
-
 /**
  * Defines the use of a domain by an organization.
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationDomainFragment response data
+ * @param data - D.OrganizationDomainFragment response data
  */
 class OrganizationDomain extends LinearRequest {
   private _creator?: D.OrganizationDomainFragment["creator"];
@@ -4252,16 +4338,15 @@ class OrganizationDomain extends LinearRequest {
   /** E-mail used to verify this domain */
   public verificationEmail?: string;
   /** The user who added the domain. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
-
 /**
  * OrganizationInvitePayload model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationInvitePayloadFragment response data
+ * @param data - D.OrganizationInvitePayloadFragment response data
  */
 class OrganizationInvitePayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationInvitePayloadFragment) {
@@ -4280,12 +4365,11 @@ class OrganizationInvitePayload extends LinearRequest {
   /** The organization invite that was created or updated. */
   public organizationInvite?: OrganizationInvite;
 }
-
 /**
  * ProjectLinkPayload model
  *
  * @param request - function to call the graphql client
- * @param data - ProjectLinkPayloadFragment response data
+ * @param data - D.ProjectLinkPayloadFragment response data
  */
 class ProjectLinkPayload extends LinearRequest {
   private _projectLink?: D.ProjectLinkPayloadFragment["projectLink"];
@@ -4302,16 +4386,15 @@ class ProjectLinkPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The project that was created or updated. */
-  public get projectLink(): Promise<ProjectLink | undefined> | undefined {
-    return this._projectLink?.id ? new ProjectLinkQuery(this.request).fetch(this._projectLink?.id) : undefined;
+  public get projectLink(): Fetch<ProjectLink> | undefined {
+    return this._projectLink?.id ? new ProjectLinkQuery(this._request).fetch(this._projectLink?.id) : undefined;
   }
 }
-
 /**
  * ProjectPayload model
  *
  * @param request - function to call the graphql client
- * @param data - ProjectPayloadFragment response data
+ * @param data - D.ProjectPayloadFragment response data
  */
 class ProjectPayload extends LinearRequest {
   private _project?: D.ProjectPayloadFragment["project"];
@@ -4328,16 +4411,15 @@ class ProjectPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The project that was created or updated. */
-  public get project(): Promise<Project | undefined> | undefined {
-    return this._project?.id ? new ProjectQuery(this.request).fetch(this._project?.id) : undefined;
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
-
 /**
  * ReactionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - ReactionPayloadFragment response data
+ * @param data - D.ReactionPayloadFragment response data
  */
 class ReactionPayload extends LinearRequest {
   private _reaction?: D.ReactionPayloadFragment["reaction"];
@@ -4352,16 +4434,15 @@ class ReactionPayload extends LinearRequest {
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
   public success?: boolean;
-  public get reaction(): Promise<Reaction | undefined> | undefined {
-    return this._reaction?.id ? new ReactionQuery(this.request).fetch(this._reaction?.id) : undefined;
+  public get reaction(): Fetch<Reaction> | undefined {
+    return this._reaction?.id ? new ReactionQuery(this._request).fetch(this._reaction?.id) : undefined;
   }
 }
-
 /**
  * CreateCsvExportReportPayload model
  *
  * @param request - function to call the graphql client
- * @param data - CreateCsvExportReportPayloadFragment response data
+ * @param data - D.CreateCsvExportReportPayloadFragment response data
  */
 class CreateCsvExportReportPayload extends LinearRequest {
   public constructor(request: Request, data: D.CreateCsvExportReportPayloadFragment) {
@@ -4372,12 +4453,11 @@ class CreateCsvExportReportPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * SubscriptionSessionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - SubscriptionSessionPayloadFragment response data
+ * @param data - D.SubscriptionSessionPayloadFragment response data
  */
 class SubscriptionSessionPayload extends LinearRequest {
   public constructor(request: Request, data: D.SubscriptionSessionPayloadFragment) {
@@ -4388,12 +4468,11 @@ class SubscriptionSessionPayload extends LinearRequest {
   /** The subscription session that was created or updated. */
   public session?: string;
 }
-
 /**
  * SubscriptionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - SubscriptionPayloadFragment response data
+ * @param data - D.SubscriptionPayloadFragment response data
  */
 class SubscriptionPayload extends LinearRequest {
   public constructor(request: Request, data: D.SubscriptionPayloadFragment) {
@@ -4410,16 +4489,15 @@ class SubscriptionPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The subscription entity being mutated. */
-  public get subscription(): Promise<Subscription | undefined> {
-    return new SubscriptionQuery(this.request).fetch();
+  public get subscription(): Fetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
   }
 }
-
 /**
  * TeamMembershipPayload model
  *
  * @param request - function to call the graphql client
- * @param data - TeamMembershipPayloadFragment response data
+ * @param data - D.TeamMembershipPayloadFragment response data
  */
 class TeamMembershipPayload extends LinearRequest {
   private _teamMembership?: D.TeamMembershipPayloadFragment["teamMembership"];
@@ -4436,16 +4514,17 @@ class TeamMembershipPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The team membership that was created or updated. */
-  public get teamMembership(): Promise<TeamMembership | undefined> | undefined {
-    return this._teamMembership?.id ? new TeamMembershipQuery(this.request).fetch(this._teamMembership?.id) : undefined;
+  public get teamMembership(): Fetch<TeamMembership> | undefined {
+    return this._teamMembership?.id
+      ? new TeamMembershipQuery(this._request).fetch(this._teamMembership?.id)
+      : undefined;
   }
 }
-
 /**
  * TeamPayload model
  *
  * @param request - function to call the graphql client
- * @param data - TeamPayloadFragment response data
+ * @param data - D.TeamPayloadFragment response data
  */
 class TeamPayload extends LinearRequest {
   private _team?: D.TeamPayloadFragment["team"];
@@ -4462,16 +4541,15 @@ class TeamPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The team that was created or updated. */
-  public get team(): Promise<Team | undefined> | undefined {
-    return this._team?.id ? new TeamQuery(this.request).fetch(this._team?.id) : undefined;
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
-
 /**
  * TemplatePayload model
  *
  * @param request - function to call the graphql client
- * @param data - TemplatePayloadFragment response data
+ * @param data - D.TemplatePayloadFragment response data
  */
 class TemplatePayload extends LinearRequest {
   private _template?: D.TemplatePayloadFragment["template"];
@@ -4488,16 +4566,15 @@ class TemplatePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The template that was created or updated. */
-  public get template(): Promise<Template | undefined> | undefined {
-    return this._template?.id ? new TemplateQuery(this.request).fetch(this._template?.id) : undefined;
+  public get template(): Fetch<Template> | undefined {
+    return this._template?.id ? new TemplateQuery(this._request).fetch(this._template?.id) : undefined;
   }
 }
-
 /**
  * UserSettingsPayload model
  *
  * @param request - function to call the graphql client
- * @param data - UserSettingsPayloadFragment response data
+ * @param data - D.UserSettingsPayloadFragment response data
  */
 class UserSettingsPayload extends LinearRequest {
   public constructor(request: Request, data: D.UserSettingsPayloadFragment) {
@@ -4511,16 +4588,15 @@ class UserSettingsPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The user's settings. */
-  public get userSettings(): Promise<UserSettings | undefined> {
-    return new UserSettingsQuery(this.request).fetch();
+  public get userSettings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
   }
 }
-
 /**
  * UserSettingsFlagPayload model
  *
  * @param request - function to call the graphql client
- * @param data - UserSettingsFlagPayloadFragment response data
+ * @param data - D.UserSettingsFlagPayloadFragment response data
  */
 class UserSettingsFlagPayload extends LinearRequest {
   public constructor(request: Request, data: D.UserSettingsFlagPayloadFragment) {
@@ -4540,12 +4616,11 @@ class UserSettingsFlagPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * UserSettingsFlagsResetPayload model
  *
  * @param request - function to call the graphql client
- * @param data - UserSettingsFlagsResetPayloadFragment response data
+ * @param data - D.UserSettingsFlagsResetPayloadFragment response data
  */
 class UserSettingsFlagsResetPayload extends LinearRequest {
   public constructor(request: Request, data: D.UserSettingsFlagsResetPayloadFragment) {
@@ -4559,12 +4634,11 @@ class UserSettingsFlagsResetPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * UserSubscribeToNewsletterPayload model
  *
  * @param request - function to call the graphql client
- * @param data - UserSubscribeToNewsletterPayloadFragment response data
+ * @param data - D.UserSubscribeToNewsletterPayloadFragment response data
  */
 class UserSubscribeToNewsletterPayload extends LinearRequest {
   public constructor(request: Request, data: D.UserSubscribeToNewsletterPayloadFragment) {
@@ -4575,12 +4649,11 @@ class UserSubscribeToNewsletterPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * ViewPreferencesPayload model
  *
  * @param request - function to call the graphql client
- * @param data - ViewPreferencesPayloadFragment response data
+ * @param data - D.ViewPreferencesPayloadFragment response data
  */
 class ViewPreferencesPayload extends LinearRequest {
   public constructor(request: Request, data: D.ViewPreferencesPayloadFragment) {
@@ -4597,12 +4670,11 @@ class ViewPreferencesPayload extends LinearRequest {
   /** The view preferences entity being mutated. */
   public viewPreferences?: ViewPreferences;
 }
-
 /**
  * View preferences.
  *
  * @param request - function to call the graphql client
- * @param data - ViewPreferencesFragment response data
+ * @param data - D.ViewPreferencesFragment response data
  */
 class ViewPreferences extends LinearRequest {
   public constructor(request: Request, data: D.ViewPreferencesFragment) {
@@ -4631,12 +4703,11 @@ class ViewPreferences extends LinearRequest {
   /** The view type. */
   public viewType?: string;
 }
-
 /**
  * WebhookPayload model
  *
  * @param request - function to call the graphql client
- * @param data - WebhookPayloadFragment response data
+ * @param data - D.WebhookPayloadFragment response data
  */
 class WebhookPayload extends LinearRequest {
   private _webhook?: D.WebhookPayloadFragment["webhook"];
@@ -4653,16 +4724,15 @@ class WebhookPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The webhook entity being mutated. */
-  public get webhook(): Promise<Webhook | undefined> | undefined {
-    return this._webhook?.id ? new WebhookQuery(this.request).fetch(this._webhook?.id) : undefined;
+  public get webhook(): Fetch<Webhook> | undefined {
+    return this._webhook?.id ? new WebhookQuery(this._request).fetch(this._webhook?.id) : undefined;
   }
 }
-
 /**
  * WorkflowStatePayload model
  *
  * @param request - function to call the graphql client
- * @param data - WorkflowStatePayloadFragment response data
+ * @param data - D.WorkflowStatePayloadFragment response data
  */
 class WorkflowStatePayload extends LinearRequest {
   private _workflowState?: D.WorkflowStatePayloadFragment["workflowState"];
@@ -4679,16 +4749,15 @@ class WorkflowStatePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The state that was created or updated. */
-  public get workflowState(): Promise<WorkflowState | undefined> | undefined {
-    return this._workflowState?.id ? new WorkflowStateQuery(this.request).fetch(this._workflowState?.id) : undefined;
+  public get workflowState(): Fetch<WorkflowState> | undefined {
+    return this._workflowState?.id ? new WorkflowStateQuery(this._request).fetch(this._workflowState?.id) : undefined;
   }
 }
-
 /**
  * SynchronizedPayload model
  *
  * @param request - function to call the graphql client
- * @param data - SynchronizedPayloadFragment response data
+ * @param data - D.SynchronizedPayloadFragment response data
  */
 class SynchronizedPayload extends LinearRequest {
   public constructor(request: Request, data: D.SynchronizedPayloadFragment) {
@@ -4699,12 +4768,11 @@ class SynchronizedPayload extends LinearRequest {
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
 }
-
 /**
  * Collaborative editing steps for documents.
  *
  * @param request - function to call the graphql client
- * @param data - DocumentStepFragment response data
+ * @param data - D.DocumentStepFragment response data
  */
 class DocumentStep extends LinearRequest {
   public constructor(request: Request, data: D.DocumentStepFragment) {
@@ -4736,12 +4804,11 @@ class DocumentStep extends LinearRequest {
   /** Connected client ID. */
   public clientId?: string;
 }
-
 /**
  * A user's web browser push notification subscription.
  *
  * @param request - function to call the graphql client
- * @param data - PushSubscriptionFragment response data
+ * @param data - D.PushSubscriptionFragment response data
  */
 class PushSubscription extends LinearRequest {
   public constructor(request: Request, data: D.PushSubscriptionFragment) {
@@ -4764,29 +4831,32 @@ class PushSubscription extends LinearRequest {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
 }
-
 /**
  * PushSubscriptionConnection model
  *
  * @param request - function to call the graphql client
- * @param data - PushSubscriptionConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this PushSubscriptionConnection model
+ * @param data - PushSubscriptionConnection response data
  */
-class PushSubscriptionConnection extends LinearRequest {
-  public constructor(request: Request, data: D.PushSubscriptionConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new PushSubscription(request, node)) : undefined;
+class PushSubscriptionConnection extends LinearConnection<PushSubscription> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<PushSubscription>>,
+    data: D.PushSubscriptionConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new PushSubscription(this._request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  public nodes?: PushSubscription[];
-  public pageInfo?: PageInfo;
 }
-
 /**
  * A user account.
  *
  * @param request - function to call the graphql client
- * @param data - UserAccountFragment response data
+ * @param data - D.UserAccountFragment response data
  */
 class UserAccount extends LinearRequest {
   public constructor(request: Request, data: D.UserAccountFragment) {
@@ -4818,12 +4888,11 @@ class UserAccount extends LinearRequest {
   /** Users belonging to the account. */
   public users?: User[];
 }
-
 /**
  * A recorded entry of a file uploaded by a user.
  *
  * @param request - function to call the graphql client
- * @param data - FileUploadFragment response data
+ * @param data - D.FileUploadFragment response data
  */
 class FileUpload extends LinearRequest {
   private _creator?: D.FileUploadFragment["creator"];
@@ -4852,20 +4921,19 @@ class FileUpload extends LinearRequest {
   /** Size of the uploaded file in bytes. */
   public size?: number;
   /** The user who uploaded the file. */
-  public get creator(): Promise<User | undefined> | undefined {
-    return this._creator?.id ? new UserQuery(this.request).fetch(this._creator?.id) : undefined;
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization the upload belongs to. */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
 }
-
 /**
  * Public information of the OAuth application.
  *
  * @param request - function to call the graphql client
- * @param data - ApplicationFragment response data
+ * @param data - D.ApplicationFragment response data
  */
 class Application extends LinearRequest {
   public constructor(request: Request, data: D.ApplicationFragment) {
@@ -4891,12 +4959,11 @@ class Application extends LinearRequest {
   /** Image of the application. */
   public imageUrl?: string;
 }
-
 /**
  * OrganizationDomainSimplePayload model
  *
  * @param request - function to call the graphql client
- * @param data - OrganizationDomainSimplePayloadFragment response data
+ * @param data - D.OrganizationDomainSimplePayloadFragment response data
  */
 class OrganizationDomainSimplePayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationDomainSimplePayloadFragment) {
@@ -4907,7 +4974,6 @@ class OrganizationDomainSimplePayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
 }
-
 /**
  * A fetchable Users Query
  *
@@ -4921,13 +4987,15 @@ class UsersQuery extends LinearRequest {
   /**
    * Call the Users query and return a UserConnection
    *
-   * @param vars - variables to pass into the UsersQuery
+   * @param variables - variables to pass into the UsersQuery
    * @returns parsed response from UsersQuery
    */
-  public async fetch(vars?: D.UsersQueryVariables): Promise<UserConnection | undefined> {
-    return this.request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, vars).then(response => {
+  public async fetch(variables?: D.UsersQueryVariables): Fetch<UserConnection> {
+    return this._request<D.UsersQuery, D.UsersQueryVariables>(D.UsersDocument, variables).then(response => {
       const data = response?.users;
-      return data ? new UserConnection(this.request, data) : undefined;
+      return data
+        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -4948,12 +5016,12 @@ class UserQuery extends LinearRequest {
    * @param id - required id to pass to user
    * @returns parsed response from UserQuery
    */
-  public async fetch(id: string): Promise<User | undefined> {
-    return this.request<D.UserQuery, D.UserQueryVariables>(D.UserDocument, {
+  public async fetch(id: string): Fetch<User> {
+    return this._request<D.UserQuery, D.UserQueryVariables>(D.UserDocument, {
       id,
     }).then(response => {
       const data = response?.user;
-      return data ? new User(this.request, data) : undefined;
+      return data ? new User(this._request, data) : undefined;
     });
   }
 }
@@ -4973,10 +5041,10 @@ class ViewerQuery extends LinearRequest {
    *
    * @returns parsed response from ViewerQuery
    */
-  public async fetch(): Promise<User | undefined> {
-    return this.request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, {}).then(response => {
+  public async fetch(): Fetch<User> {
+    return this._request<D.ViewerQuery, D.ViewerQueryVariables>(D.ViewerDocument, {}).then(response => {
       const data = response?.viewer;
-      return data ? new User(this.request, data) : undefined;
+      return data ? new User(this._request, data) : undefined;
     });
   }
 }
@@ -4996,11 +5064,11 @@ class OrganizationQuery extends LinearRequest {
    *
    * @returns parsed response from OrganizationQuery
    */
-  public async fetch(): Promise<Organization | undefined> {
-    return this.request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument, {}).then(
+  public async fetch(): Fetch<Organization> {
+    return this._request<D.OrganizationQuery, D.OrganizationQueryVariables>(D.OrganizationDocument, {}).then(
       response => {
         const data = response?.organization;
-        return data ? new Organization(this.request, data) : undefined;
+        return data ? new Organization(this._request, data) : undefined;
       }
     );
   }
@@ -5022,12 +5090,12 @@ class OrganizationExistsQuery extends LinearRequest {
    * @param urlKey - required urlKey to pass to organizationExists
    * @returns parsed response from OrganizationExistsQuery
    */
-  public async fetch(urlKey: string): Promise<OrganizationExistsPayload | undefined> {
-    return this.request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(D.OrganizationExistsDocument, {
+  public async fetch(urlKey: string): Fetch<OrganizationExistsPayload> {
+    return this._request<D.OrganizationExistsQuery, D.OrganizationExistsQueryVariables>(D.OrganizationExistsDocument, {
       urlKey,
     }).then(response => {
       const data = response?.organizationExists;
-      return data ? new OrganizationExistsPayload(this.request, data) : undefined;
+      return data ? new OrganizationExistsPayload(this._request, data) : undefined;
     });
   }
 }
@@ -5049,13 +5117,13 @@ class SyncBootstrapQuery extends LinearRequest {
    * @param sinceSyncId - required sinceSyncId to pass to syncBootstrap
    * @returns parsed response from SyncBootstrapQuery
    */
-  public async fetch(databaseVersion: number, sinceSyncId: number): Promise<SyncResponse | undefined> {
-    return this.request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument, {
+  public async fetch(databaseVersion: number, sinceSyncId: number): Fetch<SyncResponse> {
+    return this._request<D.SyncBootstrapQuery, D.SyncBootstrapQueryVariables>(D.SyncBootstrapDocument, {
       databaseVersion,
       sinceSyncId,
     }).then(response => {
       const data = response?.syncBootstrap;
-      return data ? new SyncResponse(this.request, data) : undefined;
+      return data ? new SyncResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5076,12 +5144,12 @@ class SyncUpdatesQuery extends LinearRequest {
    * @param sinceSyncId - required sinceSyncId to pass to syncUpdates
    * @returns parsed response from SyncUpdatesQuery
    */
-  public async fetch(sinceSyncId: number): Promise<SyncResponse | undefined> {
-    return this.request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument, {
+  public async fetch(sinceSyncId: number): Fetch<SyncResponse> {
+    return this._request<D.SyncUpdatesQuery, D.SyncUpdatesQueryVariables>(D.SyncUpdatesDocument, {
       sinceSyncId,
     }).then(response => {
       const data = response?.syncUpdates;
-      return data ? new SyncResponse(this.request, data) : undefined;
+      return data ? new SyncResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5103,13 +5171,13 @@ class ArchivedModelSyncQuery extends LinearRequest {
    * @param modelClass - required modelClass to pass to archivedModelSync
    * @returns parsed response from ArchivedModelSyncQuery
    */
-  public async fetch(identifier: string, modelClass: string): Promise<ArchiveResponse | undefined> {
-    return this.request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument, {
+  public async fetch(identifier: string, modelClass: string): Fetch<ArchiveResponse> {
+    return this._request<D.ArchivedModelSyncQuery, D.ArchivedModelSyncQueryVariables>(D.ArchivedModelSyncDocument, {
       identifier,
       modelClass,
     }).then(response => {
       const data = response?.archivedModelSync;
-      return data ? new ArchiveResponse(this.request, data) : undefined;
+      return data ? new ArchiveResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5129,21 +5197,21 @@ class ArchivedModelsSyncQuery extends LinearRequest {
    *
    * @param modelClass - required modelClass to pass to archivedModelsSync
    * @param teamId - required teamId to pass to archivedModelsSync
-   * @param vars - variables without 'modelClass', 'teamId' to pass into the ArchivedModelsSyncQuery
+   * @param variables - variables without 'modelClass', 'teamId' to pass into the ArchivedModelsSyncQuery
    * @returns parsed response from ArchivedModelsSyncQuery
    */
   public async fetch(
     modelClass: string,
     teamId: string,
-    vars?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
-  ): Promise<ArchiveResponse | undefined> {
-    return this.request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(D.ArchivedModelsSyncDocument, {
+    variables?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
+  ): Fetch<ArchiveResponse> {
+    return this._request<D.ArchivedModelsSyncQuery, D.ArchivedModelsSyncQueryVariables>(D.ArchivedModelsSyncDocument, {
       modelClass,
       teamId,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.archivedModelsSync;
-      return data ? new ArchiveResponse(this.request, data) : undefined;
+      return data ? new ArchiveResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5161,16 +5229,16 @@ class AdminUserAccountLookupQuery extends LinearRequest {
   /**
    * Call the AdminUserAccountLookup query and return a UserAccountAdminPrivileged
    *
-   * @param vars - variables to pass into the AdminUserAccountLookupQuery
+   * @param variables - variables to pass into the AdminUserAccountLookupQuery
    * @returns parsed response from AdminUserAccountLookupQuery
    */
-  public async fetch(vars?: D.AdminUserAccountLookupQueryVariables): Promise<UserAccountAdminPrivileged | undefined> {
-    return this.request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
+  public async fetch(variables?: D.AdminUserAccountLookupQueryVariables): Fetch<UserAccountAdminPrivileged> {
+    return this._request<D.AdminUserAccountLookupQuery, D.AdminUserAccountLookupQueryVariables>(
       D.AdminUserAccountLookupDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.adminUserAccountLookup;
-      return data ? new UserAccountAdminPrivileged(this.request, data) : undefined;
+      return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
     });
   }
 }
@@ -5188,13 +5256,15 @@ class ApiKeysQuery extends LinearRequest {
   /**
    * Call the ApiKeys query and return a ApiKeyConnection
    *
-   * @param vars - variables to pass into the ApiKeysQuery
+   * @param variables - variables to pass into the ApiKeysQuery
    * @returns parsed response from ApiKeysQuery
    */
-  public async fetch(vars?: D.ApiKeysQueryVariables): Promise<ApiKeyConnection | undefined> {
-    return this.request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, vars).then(response => {
+  public async fetch(variables?: D.ApiKeysQueryVariables): Fetch<ApiKeyConnection> {
+    return this._request<D.ApiKeysQuery, D.ApiKeysQueryVariables>(D.ApiKeysDocument, variables).then(response => {
       const data = response?.apiKeys;
-      return data ? new ApiKeyConnection(this.request, data) : undefined;
+      return data
+        ? new ApiKeyConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5214,24 +5284,24 @@ class ApplicationWithAuthorizationQuery extends LinearRequest {
    *
    * @param scope - required scope to pass to applicationWithAuthorization
    * @param clientId - required clientId to pass to applicationWithAuthorization
-   * @param vars - variables without 'scope', 'clientId' to pass into the ApplicationWithAuthorizationQuery
+   * @param variables - variables without 'scope', 'clientId' to pass into the ApplicationWithAuthorizationQuery
    * @returns parsed response from ApplicationWithAuthorizationQuery
    */
   public async fetch(
     scope: string[],
     clientId: string,
-    vars?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
-  ): Promise<UserAuthorizedApplication | undefined> {
-    return this.request<D.ApplicationWithAuthorizationQuery, D.ApplicationWithAuthorizationQueryVariables>(
+    variables?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
+  ): Fetch<UserAuthorizedApplication> {
+    return this._request<D.ApplicationWithAuthorizationQuery, D.ApplicationWithAuthorizationQueryVariables>(
       D.ApplicationWithAuthorizationDocument,
       {
         scope,
         clientId,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.applicationWithAuthorization;
-      return data ? new UserAuthorizedApplication(this.request, data) : undefined;
+      return data ? new UserAuthorizedApplication(this._request, data) : undefined;
     });
   }
 }
@@ -5251,13 +5321,13 @@ class AuthorizedApplicationsQuery extends LinearRequest {
    *
    * @returns parsed response from AuthorizedApplicationsQuery
    */
-  public async fetch(): Promise<AuthorizedApplication[] | undefined> {
-    return this.request<D.AuthorizedApplicationsQuery, D.AuthorizedApplicationsQueryVariables>(
+  public async fetch(): Fetch<AuthorizedApplication[]> {
+    return this._request<D.AuthorizedApplicationsQuery, D.AuthorizedApplicationsQueryVariables>(
       D.AuthorizedApplicationsDocument,
       {}
     ).then(response => {
       const data = response?.authorizedApplications;
-      return data ? data.map(node => new AuthorizedApplication(this.request, node)) : undefined;
+      return data ? data.map(node => new AuthorizedApplication(this._request, node)) : undefined;
     });
   }
 }
@@ -5277,11 +5347,11 @@ class AvailableUsersQuery extends LinearRequest {
    *
    * @returns parsed response from AvailableUsersQuery
    */
-  public async fetch(): Promise<AuthResolverResponse | undefined> {
-    return this.request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument, {}).then(
+  public async fetch(): Fetch<AuthResolverResponse> {
+    return this._request<D.AvailableUsersQuery, D.AvailableUsersQueryVariables>(D.AvailableUsersDocument, {}).then(
       response => {
         const data = response?.availableUsers;
-        return data ? new AuthResolverResponse(this.request, data) : undefined;
+        return data ? new AuthResolverResponse(this._request, data) : undefined;
       }
     );
   }
@@ -5301,19 +5371,19 @@ class SsoUrlFromEmailQuery extends LinearRequest {
    * Call the SsoUrlFromEmail query and return a SsoUrlFromEmailResponse
    *
    * @param email - required email to pass to ssoUrlFromEmail
-   * @param vars - variables without 'email' to pass into the SsoUrlFromEmailQuery
+   * @param variables - variables without 'email' to pass into the SsoUrlFromEmailQuery
    * @returns parsed response from SsoUrlFromEmailQuery
    */
   public async fetch(
     email: string,
-    vars?: Omit<D.SsoUrlFromEmailQueryVariables, "email">
-  ): Promise<SsoUrlFromEmailResponse | undefined> {
-    return this.request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument, {
+    variables?: Omit<D.SsoUrlFromEmailQueryVariables, "email">
+  ): Fetch<SsoUrlFromEmailResponse> {
+    return this._request<D.SsoUrlFromEmailQuery, D.SsoUrlFromEmailQueryVariables>(D.SsoUrlFromEmailDocument, {
       email,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.ssoUrlFromEmail;
-      return data ? new SsoUrlFromEmailResponse(this.request, data) : undefined;
+      return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5333,11 +5403,11 @@ class BillingDetailsQuery extends LinearRequest {
    *
    * @returns parsed response from BillingDetailsQuery
    */
-  public async fetch(): Promise<BillingDetailsPayload | undefined> {
-    return this.request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument, {}).then(
+  public async fetch(): Fetch<BillingDetailsPayload> {
+    return this._request<D.BillingDetailsQuery, D.BillingDetailsQueryVariables>(D.BillingDetailsDocument, {}).then(
       response => {
         const data = response?.billingDetails;
-        return data ? new BillingDetailsPayload(this.request, data) : undefined;
+        return data ? new BillingDetailsPayload(this._request, data) : undefined;
       }
     );
   }
@@ -5361,12 +5431,8 @@ class CollaborativeDocumentJoinQuery extends LinearRequest {
    * @param version - required version to pass to collaborativeDocumentJoin
    * @returns parsed response from CollaborativeDocumentJoinQuery
    */
-  public async fetch(
-    clientId: string,
-    issueId: string,
-    version: number
-  ): Promise<CollaborationDocumentUpdatePayload | undefined> {
-    return this.request<D.CollaborativeDocumentJoinQuery, D.CollaborativeDocumentJoinQueryVariables>(
+  public async fetch(clientId: string, issueId: string, version: number): Fetch<CollaborationDocumentUpdatePayload> {
+    return this._request<D.CollaborativeDocumentJoinQuery, D.CollaborativeDocumentJoinQueryVariables>(
       D.CollaborativeDocumentJoinDocument,
       {
         clientId,
@@ -5375,7 +5441,7 @@ class CollaborativeDocumentJoinQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.collaborativeDocumentJoin;
-      return data ? new CollaborationDocumentUpdatePayload(this.request, data) : undefined;
+      return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -5393,13 +5459,15 @@ class CommentsQuery extends LinearRequest {
   /**
    * Call the Comments query and return a CommentConnection
    *
-   * @param vars - variables to pass into the CommentsQuery
+   * @param variables - variables to pass into the CommentsQuery
    * @returns parsed response from CommentsQuery
    */
-  public async fetch(vars?: D.CommentsQueryVariables): Promise<CommentConnection | undefined> {
-    return this.request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument, vars).then(response => {
+  public async fetch(variables?: D.CommentsQueryVariables): Fetch<CommentConnection> {
+    return this._request<D.CommentsQuery, D.CommentsQueryVariables>(D.CommentsDocument, variables).then(response => {
       const data = response?.comments;
-      return data ? new CommentConnection(this.request, data) : undefined;
+      return data
+        ? new CommentConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5420,12 +5488,12 @@ class CommentQuery extends LinearRequest {
    * @param id - required id to pass to comment
    * @returns parsed response from CommentQuery
    */
-  public async fetch(id: string): Promise<Comment | undefined> {
-    return this.request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, {
+  public async fetch(id: string): Fetch<Comment> {
+    return this._request<D.CommentQuery, D.CommentQueryVariables>(D.CommentDocument, {
       id,
     }).then(response => {
       const data = response?.comment;
-      return data ? new Comment(this.request, data) : undefined;
+      return data ? new Comment(this._request, data) : undefined;
     });
   }
 }
@@ -5443,14 +5511,18 @@ class CustomViewsQuery extends LinearRequest {
   /**
    * Call the CustomViews query and return a CustomViewConnection
    *
-   * @param vars - variables to pass into the CustomViewsQuery
+   * @param variables - variables to pass into the CustomViewsQuery
    * @returns parsed response from CustomViewsQuery
    */
-  public async fetch(vars?: D.CustomViewsQueryVariables): Promise<CustomViewConnection | undefined> {
-    return this.request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument, vars).then(response => {
-      const data = response?.customViews;
-      return data ? new CustomViewConnection(this.request, data) : undefined;
-    });
+  public async fetch(variables?: D.CustomViewsQueryVariables): Fetch<CustomViewConnection> {
+    return this._request<D.CustomViewsQuery, D.CustomViewsQueryVariables>(D.CustomViewsDocument, variables).then(
+      response => {
+        const data = response?.customViews;
+        return data
+          ? new CustomViewConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
+      }
+    );
   }
 }
 
@@ -5470,12 +5542,12 @@ class CustomViewQuery extends LinearRequest {
    * @param id - required id to pass to customView
    * @returns parsed response from CustomViewQuery
    */
-  public async fetch(id: string): Promise<CustomView | undefined> {
-    return this.request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, {
+  public async fetch(id: string): Fetch<CustomView> {
+    return this._request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, {
       id,
     }).then(response => {
       const data = response?.customView;
-      return data ? new CustomView(this.request, data) : undefined;
+      return data ? new CustomView(this._request, data) : undefined;
     });
   }
 }
@@ -5493,13 +5565,15 @@ class CyclesQuery extends LinearRequest {
   /**
    * Call the Cycles query and return a CycleConnection
    *
-   * @param vars - variables to pass into the CyclesQuery
+   * @param variables - variables to pass into the CyclesQuery
    * @returns parsed response from CyclesQuery
    */
-  public async fetch(vars?: D.CyclesQueryVariables): Promise<CycleConnection | undefined> {
-    return this.request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument, vars).then(response => {
+  public async fetch(variables?: D.CyclesQueryVariables): Fetch<CycleConnection> {
+    return this._request<D.CyclesQuery, D.CyclesQueryVariables>(D.CyclesDocument, variables).then(response => {
       const data = response?.cycles;
-      return data ? new CycleConnection(this.request, data) : undefined;
+      return data
+        ? new CycleConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5520,12 +5594,12 @@ class CycleQuery extends LinearRequest {
    * @param id - required id to pass to cycle
    * @returns parsed response from CycleQuery
    */
-  public async fetch(id: string): Promise<Cycle | undefined> {
-    return this.request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, {
+  public async fetch(id: string): Fetch<Cycle> {
+    return this._request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, {
       id,
     }).then(response => {
       const data = response?.cycle;
-      return data ? new Cycle(this.request, data) : undefined;
+      return data ? new Cycle(this._request, data) : undefined;
     });
   }
 }
@@ -5543,13 +5617,15 @@ class EmojisQuery extends LinearRequest {
   /**
    * Call the Emojis query and return a EmojiConnection
    *
-   * @param vars - variables to pass into the EmojisQuery
+   * @param variables - variables to pass into the EmojisQuery
    * @returns parsed response from EmojisQuery
    */
-  public async fetch(vars?: D.EmojisQueryVariables): Promise<EmojiConnection | undefined> {
-    return this.request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument, vars).then(response => {
+  public async fetch(variables?: D.EmojisQueryVariables): Fetch<EmojiConnection> {
+    return this._request<D.EmojisQuery, D.EmojisQueryVariables>(D.EmojisDocument, variables).then(response => {
       const data = response?.emojis;
-      return data ? new EmojiConnection(this.request, data) : undefined;
+      return data
+        ? new EmojiConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5570,12 +5646,12 @@ class EmojiQuery extends LinearRequest {
    * @param id - required id to pass to emoji
    * @returns parsed response from EmojiQuery
    */
-  public async fetch(id: string): Promise<Emoji | undefined> {
-    return this.request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, {
+  public async fetch(id: string): Fetch<Emoji> {
+    return this._request<D.EmojiQuery, D.EmojiQueryVariables>(D.EmojiDocument, {
       id,
     }).then(response => {
       const data = response?.emoji;
-      return data ? new Emoji(this.request, data) : undefined;
+      return data ? new Emoji(this._request, data) : undefined;
     });
   }
 }
@@ -5593,13 +5669,15 @@ class FavoritesQuery extends LinearRequest {
   /**
    * Call the Favorites query and return a FavoriteConnection
    *
-   * @param vars - variables to pass into the FavoritesQuery
+   * @param variables - variables to pass into the FavoritesQuery
    * @returns parsed response from FavoritesQuery
    */
-  public async fetch(vars?: D.FavoritesQueryVariables): Promise<FavoriteConnection | undefined> {
-    return this.request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument, vars).then(response => {
+  public async fetch(variables?: D.FavoritesQueryVariables): Fetch<FavoriteConnection> {
+    return this._request<D.FavoritesQuery, D.FavoritesQueryVariables>(D.FavoritesDocument, variables).then(response => {
       const data = response?.favorites;
-      return data ? new FavoriteConnection(this.request, data) : undefined;
+      return data
+        ? new FavoriteConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5620,12 +5698,12 @@ class FavoriteQuery extends LinearRequest {
    * @param id - required id to pass to favorite
    * @returns parsed response from FavoriteQuery
    */
-  public async fetch(id: string): Promise<Favorite | undefined> {
-    return this.request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, {
+  public async fetch(id: string): Fetch<Favorite> {
+    return this._request<D.FavoriteQuery, D.FavoriteQueryVariables>(D.FavoriteDocument, {
       id,
     }).then(response => {
       const data = response?.favorite;
-      return data ? new Favorite(this.request, data) : undefined;
+      return data ? new Favorite(this._request, data) : undefined;
     });
   }
 }
@@ -5644,19 +5722,19 @@ class FigmaEmbedInfoQuery extends LinearRequest {
    * Call the FigmaEmbedInfo query and return a FigmaEmbedPayload
    *
    * @param fileId - required fileId to pass to figmaEmbedInfo
-   * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
+   * @param variables - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
    * @returns parsed response from FigmaEmbedInfoQuery
    */
   public async fetch(
     fileId: string,
-    vars?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">
-  ): Promise<FigmaEmbedPayload | undefined> {
-    return this.request<D.FigmaEmbedInfoQuery, D.FigmaEmbedInfoQueryVariables>(D.FigmaEmbedInfoDocument, {
+    variables?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">
+  ): Fetch<FigmaEmbedPayload> {
+    return this._request<D.FigmaEmbedInfoQuery, D.FigmaEmbedInfoQueryVariables>(D.FigmaEmbedInfoDocument, {
       fileId,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.figmaEmbedInfo;
-      return data ? new FigmaEmbedPayload(this.request, data) : undefined;
+      return data ? new FigmaEmbedPayload(this._request, data) : undefined;
     });
   }
 }
@@ -5674,14 +5752,16 @@ class IntegrationsQuery extends LinearRequest {
   /**
    * Call the Integrations query and return a IntegrationConnection
    *
-   * @param vars - variables to pass into the IntegrationsQuery
+   * @param variables - variables to pass into the IntegrationsQuery
    * @returns parsed response from IntegrationsQuery
    */
-  public async fetch(vars?: D.IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
-    return this.request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument, vars).then(
+  public async fetch(variables?: D.IntegrationsQueryVariables): Fetch<IntegrationConnection> {
+    return this._request<D.IntegrationsQuery, D.IntegrationsQueryVariables>(D.IntegrationsDocument, variables).then(
       response => {
         const data = response?.integrations;
-        return data ? new IntegrationConnection(this.request, data) : undefined;
+        return data
+          ? new IntegrationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
       }
     );
   }
@@ -5703,12 +5783,12 @@ class IntegrationQuery extends LinearRequest {
    * @param id - required id to pass to integration
    * @returns parsed response from IntegrationQuery
    */
-  public async fetch(id: string): Promise<Integration | undefined> {
-    return this.request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument, {
+  public async fetch(id: string): Fetch<Integration> {
+    return this._request<D.IntegrationQuery, D.IntegrationQueryVariables>(D.IntegrationDocument, {
       id,
     }).then(response => {
       const data = response?.integration;
-      return data ? new Integration(this.request, data) : undefined;
+      return data ? new Integration(this._request, data) : undefined;
     });
   }
 }
@@ -5726,16 +5806,22 @@ class IntegrationResourcesQuery extends LinearRequest {
   /**
    * Call the IntegrationResources query and return a IntegrationResourceConnection
    *
-   * @param vars - variables to pass into the IntegrationResourcesQuery
+   * @param variables - variables to pass into the IntegrationResourcesQuery
    * @returns parsed response from IntegrationResourcesQuery
    */
-  public async fetch(vars?: D.IntegrationResourcesQueryVariables): Promise<IntegrationResourceConnection | undefined> {
-    return this.request<D.IntegrationResourcesQuery, D.IntegrationResourcesQueryVariables>(
+  public async fetch(variables?: D.IntegrationResourcesQueryVariables): Fetch<IntegrationResourceConnection> {
+    return this._request<D.IntegrationResourcesQuery, D.IntegrationResourcesQueryVariables>(
       D.IntegrationResourcesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.integrationResources;
-      return data ? new IntegrationResourceConnection(this.request, data) : undefined;
+      return data
+        ? new IntegrationResourceConnection(
+            this._request,
+            pagination => this.fetch({ ...variables, ...pagination }),
+            data
+          )
+        : undefined;
     });
   }
 }
@@ -5756,15 +5842,15 @@ class IntegrationResourceQuery extends LinearRequest {
    * @param id - required id to pass to integrationResource
    * @returns parsed response from IntegrationResourceQuery
    */
-  public async fetch(id: string): Promise<IntegrationResource | undefined> {
-    return this.request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
+  public async fetch(id: string): Fetch<IntegrationResource> {
+    return this._request<D.IntegrationResourceQuery, D.IntegrationResourceQueryVariables>(
       D.IntegrationResourceDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.integrationResource;
-      return data ? new IntegrationResource(this.request, data) : undefined;
+      return data ? new IntegrationResource(this._request, data) : undefined;
     });
   }
 }
@@ -5783,19 +5869,19 @@ class InviteInfoQuery extends LinearRequest {
    * Call the InviteInfo query and return a InvitePagePayload
    *
    * @param userHash - required userHash to pass to inviteInfo
-   * @param vars - variables without 'userHash' to pass into the InviteInfoQuery
+   * @param variables - variables without 'userHash' to pass into the InviteInfoQuery
    * @returns parsed response from InviteInfoQuery
    */
   public async fetch(
     userHash: string,
-    vars?: Omit<D.InviteInfoQueryVariables, "userHash">
-  ): Promise<InvitePagePayload | undefined> {
-    return this.request<D.InviteInfoQuery, D.InviteInfoQueryVariables>(D.InviteInfoDocument, {
+    variables?: Omit<D.InviteInfoQueryVariables, "userHash">
+  ): Fetch<InvitePagePayload> {
+    return this._request<D.InviteInfoQuery, D.InviteInfoQueryVariables>(D.InviteInfoDocument, {
       userHash,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.inviteInfo;
-      return data ? new InvitePagePayload(this.request, data) : undefined;
+      return data ? new InvitePagePayload(this._request, data) : undefined;
     });
   }
 }
@@ -5813,14 +5899,18 @@ class IssueLabelsQuery extends LinearRequest {
   /**
    * Call the IssueLabels query and return a IssueLabelConnection
    *
-   * @param vars - variables to pass into the IssueLabelsQuery
+   * @param variables - variables to pass into the IssueLabelsQuery
    * @returns parsed response from IssueLabelsQuery
    */
-  public async fetch(vars?: D.IssueLabelsQueryVariables): Promise<IssueLabelConnection | undefined> {
-    return this.request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument, vars).then(response => {
-      const data = response?.issueLabels;
-      return data ? new IssueLabelConnection(this.request, data) : undefined;
-    });
+  public async fetch(variables?: D.IssueLabelsQueryVariables): Fetch<IssueLabelConnection> {
+    return this._request<D.IssueLabelsQuery, D.IssueLabelsQueryVariables>(D.IssueLabelsDocument, variables).then(
+      response => {
+        const data = response?.issueLabels;
+        return data
+          ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
+      }
+    );
   }
 }
 
@@ -5840,12 +5930,12 @@ class IssueLabelQuery extends LinearRequest {
    * @param id - required id to pass to issueLabel
    * @returns parsed response from IssueLabelQuery
    */
-  public async fetch(id: string): Promise<IssueLabel | undefined> {
-    return this.request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, {
+  public async fetch(id: string): Fetch<IssueLabel> {
+    return this._request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, {
       id,
     }).then(response => {
       const data = response?.issueLabel;
-      return data ? new IssueLabel(this.request, data) : undefined;
+      return data ? new IssueLabel(this._request, data) : undefined;
     });
   }
 }
@@ -5863,16 +5953,19 @@ class IssueRelationsQuery extends LinearRequest {
   /**
    * Call the IssueRelations query and return a IssueRelationConnection
    *
-   * @param vars - variables to pass into the IssueRelationsQuery
+   * @param variables - variables to pass into the IssueRelationsQuery
    * @returns parsed response from IssueRelationsQuery
    */
-  public async fetch(vars?: D.IssueRelationsQueryVariables): Promise<IssueRelationConnection | undefined> {
-    return this.request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(D.IssueRelationsDocument, vars).then(
-      response => {
-        const data = response?.issueRelations;
-        return data ? new IssueRelationConnection(this.request, data) : undefined;
-      }
-    );
+  public async fetch(variables?: D.IssueRelationsQueryVariables): Fetch<IssueRelationConnection> {
+    return this._request<D.IssueRelationsQuery, D.IssueRelationsQueryVariables>(
+      D.IssueRelationsDocument,
+      variables
+    ).then(response => {
+      const data = response?.issueRelations;
+      return data
+        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
+    });
   }
 }
 
@@ -5892,12 +5985,12 @@ class IssueRelationQuery extends LinearRequest {
    * @param id - required id to pass to issueRelation
    * @returns parsed response from IssueRelationQuery
    */
-  public async fetch(id: string): Promise<IssueRelation | undefined> {
-    return this.request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, {
+  public async fetch(id: string): Fetch<IssueRelation> {
+    return this._request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, {
       id,
     }).then(response => {
       const data = response?.issueRelation;
-      return data ? new IssueRelation(this.request, data) : undefined;
+      return data ? new IssueRelation(this._request, data) : undefined;
     });
   }
 }
@@ -5915,13 +6008,15 @@ class IssuesQuery extends LinearRequest {
   /**
    * Call the Issues query and return a IssueConnection
    *
-   * @param vars - variables to pass into the IssuesQuery
+   * @param variables - variables to pass into the IssuesQuery
    * @returns parsed response from IssuesQuery
    */
-  public async fetch(vars?: D.IssuesQueryVariables): Promise<IssueConnection | undefined> {
-    return this.request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, vars).then(response => {
+  public async fetch(variables?: D.IssuesQueryVariables): Fetch<IssueConnection> {
+    return this._request<D.IssuesQuery, D.IssuesQueryVariables>(D.IssuesDocument, variables).then(response => {
       const data = response?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5942,12 +6037,12 @@ class IssueQuery extends LinearRequest {
    * @param id - required id to pass to issue
    * @returns parsed response from IssueQuery
    */
-  public async fetch(id: string): Promise<Issue | undefined> {
-    return this.request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, {
+  public async fetch(id: string): Fetch<Issue> {
+    return this._request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, {
       id,
     }).then(response => {
       const data = response?.issue;
-      return data ? new Issue(this.request, data) : undefined;
+      return data ? new Issue(this._request, data) : undefined;
     });
   }
 }
@@ -5966,19 +6061,18 @@ class IssueSearchQuery extends LinearRequest {
    * Call the IssueSearch query and return a IssueConnection
    *
    * @param query - required query to pass to issueSearch
-   * @param vars - variables without 'query' to pass into the IssueSearchQuery
+   * @param variables - variables without 'query' to pass into the IssueSearchQuery
    * @returns parsed response from IssueSearchQuery
    */
-  public async fetch(
-    query: string,
-    vars?: Omit<D.IssueSearchQueryVariables, "query">
-  ): Promise<IssueConnection | undefined> {
-    return this.request<D.IssueSearchQuery, D.IssueSearchQueryVariables>(D.IssueSearchDocument, {
+  public async fetch(query: string, variables?: Omit<D.IssueSearchQueryVariables, "query">): Fetch<IssueConnection> {
+    return this._request<D.IssueSearchQuery, D.IssueSearchQueryVariables>(D.IssueSearchDocument, {
       query,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issueSearch;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch(query, { ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -5996,14 +6090,18 @@ class MilestonesQuery extends LinearRequest {
   /**
    * Call the Milestones query and return a MilestoneConnection
    *
-   * @param vars - variables to pass into the MilestonesQuery
+   * @param variables - variables to pass into the MilestonesQuery
    * @returns parsed response from MilestonesQuery
    */
-  public async fetch(vars?: D.MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
-    return this.request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument, vars).then(response => {
-      const data = response?.milestones;
-      return data ? new MilestoneConnection(this.request, data) : undefined;
-    });
+  public async fetch(variables?: D.MilestonesQueryVariables): Fetch<MilestoneConnection> {
+    return this._request<D.MilestonesQuery, D.MilestonesQueryVariables>(D.MilestonesDocument, variables).then(
+      response => {
+        const data = response?.milestones;
+        return data
+          ? new MilestoneConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
+      }
+    );
   }
 }
 
@@ -6023,12 +6121,12 @@ class MilestoneQuery extends LinearRequest {
    * @param id - required id to pass to milestone
    * @returns parsed response from MilestoneQuery
    */
-  public async fetch(id: string): Promise<Milestone | undefined> {
-    return this.request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, {
+  public async fetch(id: string): Fetch<Milestone> {
+    return this._request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, {
       id,
     }).then(response => {
       const data = response?.milestone;
-      return data ? new Milestone(this.request, data) : undefined;
+      return data ? new Milestone(this._request, data) : undefined;
     });
   }
 }
@@ -6046,14 +6144,16 @@ class NotificationsQuery extends LinearRequest {
   /**
    * Call the Notifications query and return a NotificationConnection
    *
-   * @param vars - variables to pass into the NotificationsQuery
+   * @param variables - variables to pass into the NotificationsQuery
    * @returns parsed response from NotificationsQuery
    */
-  public async fetch(vars?: D.NotificationsQueryVariables): Promise<NotificationConnection | undefined> {
-    return this.request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument, vars).then(
+  public async fetch(variables?: D.NotificationsQueryVariables): Fetch<NotificationConnection> {
+    return this._request<D.NotificationsQuery, D.NotificationsQueryVariables>(D.NotificationsDocument, variables).then(
       response => {
         const data = response?.notifications;
-        return data ? new NotificationConnection(this.request, data) : undefined;
+        return data
+          ? new NotificationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
       }
     );
   }
@@ -6075,12 +6175,12 @@ class NotificationQuery extends LinearRequest {
    * @param id - required id to pass to notification
    * @returns parsed response from NotificationQuery
    */
-  public async fetch(id: string): Promise<Notification | undefined> {
-    return this.request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument, {
+  public async fetch(id: string): Fetch<Notification> {
+    return this._request<D.NotificationQuery, D.NotificationQueryVariables>(D.NotificationDocument, {
       id,
     }).then(response => {
       const data = response?.notification;
-      return data ? new Notification(this.request, data) : undefined;
+      return data ? new Notification(this._request, data) : undefined;
     });
   }
 }
@@ -6098,18 +6198,22 @@ class NotificationSubscriptionsQuery extends LinearRequest {
   /**
    * Call the NotificationSubscriptions query and return a NotificationSubscriptionConnection
    *
-   * @param vars - variables to pass into the NotificationSubscriptionsQuery
+   * @param variables - variables to pass into the NotificationSubscriptionsQuery
    * @returns parsed response from NotificationSubscriptionsQuery
    */
-  public async fetch(
-    vars?: D.NotificationSubscriptionsQueryVariables
-  ): Promise<NotificationSubscriptionConnection | undefined> {
-    return this.request<D.NotificationSubscriptionsQuery, D.NotificationSubscriptionsQueryVariables>(
+  public async fetch(variables?: D.NotificationSubscriptionsQueryVariables): Fetch<NotificationSubscriptionConnection> {
+    return this._request<D.NotificationSubscriptionsQuery, D.NotificationSubscriptionsQueryVariables>(
       D.NotificationSubscriptionsDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.notificationSubscriptions;
-      return data ? new NotificationSubscriptionConnection(this.request, data) : undefined;
+      return data
+        ? new NotificationSubscriptionConnection(
+            this._request,
+            pagination => this.fetch({ ...variables, ...pagination }),
+            data
+          )
+        : undefined;
     });
   }
 }
@@ -6130,15 +6234,15 @@ class NotificationSubscriptionQuery extends LinearRequest {
    * @param id - required id to pass to notificationSubscription
    * @returns parsed response from NotificationSubscriptionQuery
    */
-  public async fetch(id: string): Promise<NotificationSubscription | undefined> {
-    return this.request<D.NotificationSubscriptionQuery, D.NotificationSubscriptionQueryVariables>(
+  public async fetch(id: string): Fetch<NotificationSubscription> {
+    return this._request<D.NotificationSubscriptionQuery, D.NotificationSubscriptionQueryVariables>(
       D.NotificationSubscriptionDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.notificationSubscription;
-      return data ? new NotificationSubscription(this.request, data) : undefined;
+      return data ? new NotificationSubscription(this._request, data) : undefined;
     });
   }
 }
@@ -6156,16 +6260,22 @@ class OrganizationInvitesQuery extends LinearRequest {
   /**
    * Call the OrganizationInvites query and return a OrganizationInviteConnection
    *
-   * @param vars - variables to pass into the OrganizationInvitesQuery
+   * @param variables - variables to pass into the OrganizationInvitesQuery
    * @returns parsed response from OrganizationInvitesQuery
    */
-  public async fetch(vars?: D.OrganizationInvitesQueryVariables): Promise<OrganizationInviteConnection | undefined> {
-    return this.request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
+  public async fetch(variables?: D.OrganizationInvitesQueryVariables): Fetch<OrganizationInviteConnection> {
+    return this._request<D.OrganizationInvitesQuery, D.OrganizationInvitesQueryVariables>(
       D.OrganizationInvitesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organizationInvites;
-      return data ? new OrganizationInviteConnection(this.request, data) : undefined;
+      return data
+        ? new OrganizationInviteConnection(
+            this._request,
+            pagination => this.fetch({ ...variables, ...pagination }),
+            data
+          )
+        : undefined;
     });
   }
 }
@@ -6186,12 +6296,12 @@ class OrganizationInviteQuery extends LinearRequest {
    * @param id - required id to pass to organizationInvite
    * @returns parsed response from OrganizationInviteQuery
    */
-  public async fetch(id: string): Promise<IssueLabel | undefined> {
-    return this.request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(D.OrganizationInviteDocument, {
+  public async fetch(id: string): Fetch<IssueLabel> {
+    return this._request<D.OrganizationInviteQuery, D.OrganizationInviteQueryVariables>(D.OrganizationInviteDocument, {
       id,
     }).then(response => {
       const data = response?.organizationInvite;
-      return data ? new IssueLabel(this.request, data) : undefined;
+      return data ? new IssueLabel(this._request, data) : undefined;
     });
   }
 }
@@ -6209,14 +6319,16 @@ class ProjectLinksQuery extends LinearRequest {
   /**
    * Call the ProjectLinks query and return a ProjectLinkConnection
    *
-   * @param vars - variables to pass into the ProjectLinksQuery
+   * @param variables - variables to pass into the ProjectLinksQuery
    * @returns parsed response from ProjectLinksQuery
    */
-  public async fetch(vars?: D.ProjectLinksQueryVariables): Promise<ProjectLinkConnection | undefined> {
-    return this.request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
+  public async fetch(variables?: D.ProjectLinksQueryVariables): Fetch<ProjectLinkConnection> {
+    return this._request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, variables).then(
       response => {
         const data = response?.projectLinks;
-        return data ? new ProjectLinkConnection(this.request, data) : undefined;
+        return data
+          ? new ProjectLinkConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
       }
     );
   }
@@ -6238,12 +6350,12 @@ class ProjectLinkQuery extends LinearRequest {
    * @param id - required id to pass to projectLink
    * @returns parsed response from ProjectLinkQuery
    */
-  public async fetch(id: string): Promise<ProjectLink | undefined> {
-    return this.request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
+  public async fetch(id: string): Fetch<ProjectLink> {
+    return this._request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
       id,
     }).then(response => {
       const data = response?.projectLink;
-      return data ? new ProjectLink(this.request, data) : undefined;
+      return data ? new ProjectLink(this._request, data) : undefined;
     });
   }
 }
@@ -6261,13 +6373,15 @@ class ProjectsQuery extends LinearRequest {
   /**
    * Call the Projects query and return a ProjectConnection
    *
-   * @param vars - variables to pass into the ProjectsQuery
+   * @param variables - variables to pass into the ProjectsQuery
    * @returns parsed response from ProjectsQuery
    */
-  public async fetch(vars?: D.ProjectsQueryVariables): Promise<ProjectConnection | undefined> {
-    return this.request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars).then(response => {
+  public async fetch(variables?: D.ProjectsQueryVariables): Fetch<ProjectConnection> {
+    return this._request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, variables).then(response => {
       const data = response?.projects;
-      return data ? new ProjectConnection(this.request, data) : undefined;
+      return data
+        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6288,12 +6402,12 @@ class ProjectQuery extends LinearRequest {
    * @param id - required id to pass to project
    * @returns parsed response from ProjectQuery
    */
-  public async fetch(id: string): Promise<Project | undefined> {
-    return this.request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
+  public async fetch(id: string): Fetch<Project> {
+    return this._request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
       id,
     }).then(response => {
       const data = response?.project;
-      return data ? new Project(this.request, data) : undefined;
+      return data ? new Project(this._request, data) : undefined;
     });
   }
 }
@@ -6313,13 +6427,13 @@ class PushSubscriptionTestQuery extends LinearRequest {
    *
    * @returns parsed response from PushSubscriptionTestQuery
    */
-  public async fetch(): Promise<PushSubscriptionPayload | undefined> {
-    return this.request<D.PushSubscriptionTestQuery, D.PushSubscriptionTestQueryVariables>(
+  public async fetch(): Fetch<PushSubscriptionPayload> {
+    return this._request<D.PushSubscriptionTestQuery, D.PushSubscriptionTestQueryVariables>(
       D.PushSubscriptionTestDocument,
       {}
     ).then(response => {
       const data = response?.pushSubscriptionTest;
-      return data ? new PushSubscriptionPayload(this.request, data) : undefined;
+      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6337,13 +6451,15 @@ class ReactionsQuery extends LinearRequest {
   /**
    * Call the Reactions query and return a ReactionConnection
    *
-   * @param vars - variables to pass into the ReactionsQuery
+   * @param variables - variables to pass into the ReactionsQuery
    * @returns parsed response from ReactionsQuery
    */
-  public async fetch(vars?: D.ReactionsQueryVariables): Promise<ReactionConnection | undefined> {
-    return this.request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, vars).then(response => {
+  public async fetch(variables?: D.ReactionsQueryVariables): Fetch<ReactionConnection> {
+    return this._request<D.ReactionsQuery, D.ReactionsQueryVariables>(D.ReactionsDocument, variables).then(response => {
       const data = response?.reactions;
-      return data ? new ReactionConnection(this.request, data) : undefined;
+      return data
+        ? new ReactionConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6364,12 +6480,12 @@ class ReactionQuery extends LinearRequest {
    * @param id - required id to pass to reaction
    * @returns parsed response from ReactionQuery
    */
-  public async fetch(id: string): Promise<Reaction | undefined> {
-    return this.request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, {
+  public async fetch(id: string): Fetch<Reaction> {
+    return this._request<D.ReactionQuery, D.ReactionQueryVariables>(D.ReactionDocument, {
       id,
     }).then(response => {
       const data = response?.reaction;
-      return data ? new Reaction(this.request, data) : undefined;
+      return data ? new Reaction(this._request, data) : undefined;
     });
   }
 }
@@ -6389,11 +6505,11 @@ class SubscriptionQuery extends LinearRequest {
    *
    * @returns parsed response from SubscriptionQuery
    */
-  public async fetch(): Promise<Subscription | undefined> {
-    return this.request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument, {}).then(
+  public async fetch(): Fetch<Subscription> {
+    return this._request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument, {}).then(
       response => {
         const data = response?.subscription;
-        return data ? new Subscription(this.request, data) : undefined;
+        return data ? new Subscription(this._request, data) : undefined;
       }
     );
   }
@@ -6412,16 +6528,19 @@ class TeamMembershipsQuery extends LinearRequest {
   /**
    * Call the TeamMemberships query and return a TeamMembershipConnection
    *
-   * @param vars - variables to pass into the TeamMembershipsQuery
+   * @param variables - variables to pass into the TeamMembershipsQuery
    * @returns parsed response from TeamMembershipsQuery
    */
-  public async fetch(vars?: D.TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
-    return this.request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(D.TeamMembershipsDocument, vars).then(
-      response => {
-        const data = response?.teamMemberships;
-        return data ? new TeamMembershipConnection(this.request, data) : undefined;
-      }
-    );
+  public async fetch(variables?: D.TeamMembershipsQueryVariables): Fetch<TeamMembershipConnection> {
+    return this._request<D.TeamMembershipsQuery, D.TeamMembershipsQueryVariables>(
+      D.TeamMembershipsDocument,
+      variables
+    ).then(response => {
+      const data = response?.teamMemberships;
+      return data
+        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
+    });
   }
 }
 
@@ -6441,12 +6560,12 @@ class TeamMembershipQuery extends LinearRequest {
    * @param id - required id to pass to teamMembership
    * @returns parsed response from TeamMembershipQuery
    */
-  public async fetch(id: string): Promise<TeamMembership | undefined> {
-    return this.request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument, {
+  public async fetch(id: string): Fetch<TeamMembership> {
+    return this._request<D.TeamMembershipQuery, D.TeamMembershipQueryVariables>(D.TeamMembershipDocument, {
       id,
     }).then(response => {
       const data = response?.teamMembership;
-      return data ? new TeamMembership(this.request, data) : undefined;
+      return data ? new TeamMembership(this._request, data) : undefined;
     });
   }
 }
@@ -6464,13 +6583,15 @@ class TeamsQuery extends LinearRequest {
   /**
    * Call the Teams query and return a TeamConnection
    *
-   * @param vars - variables to pass into the TeamsQuery
+   * @param variables - variables to pass into the TeamsQuery
    * @returns parsed response from TeamsQuery
    */
-  public async fetch(vars?: D.TeamsQueryVariables): Promise<TeamConnection | undefined> {
-    return this.request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars).then(response => {
+  public async fetch(variables?: D.TeamsQueryVariables): Fetch<TeamConnection> {
+    return this._request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, variables).then(response => {
       const data = response?.teams;
-      return data ? new TeamConnection(this.request, data) : undefined;
+      return data
+        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6491,12 +6612,12 @@ class TeamQuery extends LinearRequest {
    * @param id - required id to pass to team
    * @returns parsed response from TeamQuery
    */
-  public async fetch(id: string): Promise<Team | undefined> {
-    return this.request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
+  public async fetch(id: string): Fetch<Team> {
+    return this._request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
       id,
     }).then(response => {
       const data = response?.team;
-      return data ? new Team(this.request, data) : undefined;
+      return data ? new Team(this._request, data) : undefined;
     });
   }
 }
@@ -6516,10 +6637,10 @@ class TemplatesQuery extends LinearRequest {
    *
    * @returns parsed response from TemplatesQuery
    */
-  public async fetch(): Promise<Template[] | undefined> {
-    return this.request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument, {}).then(response => {
+  public async fetch(): Fetch<Template[]> {
+    return this._request<D.TemplatesQuery, D.TemplatesQueryVariables>(D.TemplatesDocument, {}).then(response => {
       const data = response?.templates;
-      return data ? data.map(node => new Template(this.request, node)) : undefined;
+      return data ? data.map(node => new Template(this._request, node)) : undefined;
     });
   }
 }
@@ -6540,12 +6661,12 @@ class TemplateQuery extends LinearRequest {
    * @param id - required id to pass to template
    * @returns parsed response from TemplateQuery
    */
-  public async fetch(id: string): Promise<Template | undefined> {
-    return this.request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, {
+  public async fetch(id: string): Fetch<Template> {
+    return this._request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, {
       id,
     }).then(response => {
       const data = response?.template;
-      return data ? new Template(this.request, data) : undefined;
+      return data ? new Template(this._request, data) : undefined;
     });
   }
 }
@@ -6565,11 +6686,11 @@ class UserSettingsQuery extends LinearRequest {
    *
    * @returns parsed response from UserSettingsQuery
    */
-  public async fetch(): Promise<UserSettings | undefined> {
-    return this.request<D.UserSettingsQuery, D.UserSettingsQueryVariables>(D.UserSettingsDocument, {}).then(
+  public async fetch(): Fetch<UserSettings> {
+    return this._request<D.UserSettingsQuery, D.UserSettingsQueryVariables>(D.UserSettingsDocument, {}).then(
       response => {
         const data = response?.userSettings;
-        return data ? new UserSettings(this.request, data) : undefined;
+        return data ? new UserSettings(this._request, data) : undefined;
       }
     );
   }
@@ -6588,13 +6709,15 @@ class WebhooksQuery extends LinearRequest {
   /**
    * Call the Webhooks query and return a WebhookConnection
    *
-   * @param vars - variables to pass into the WebhooksQuery
+   * @param variables - variables to pass into the WebhooksQuery
    * @returns parsed response from WebhooksQuery
    */
-  public async fetch(vars?: D.WebhooksQueryVariables): Promise<WebhookConnection | undefined> {
-    return this.request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, vars).then(response => {
+  public async fetch(variables?: D.WebhooksQueryVariables): Fetch<WebhookConnection> {
+    return this._request<D.WebhooksQuery, D.WebhooksQueryVariables>(D.WebhooksDocument, variables).then(response => {
       const data = response?.webhooks;
-      return data ? new WebhookConnection(this.request, data) : undefined;
+      return data
+        ? new WebhookConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6615,12 +6738,12 @@ class WebhookQuery extends LinearRequest {
    * @param id - required id to pass to webhook
    * @returns parsed response from WebhookQuery
    */
-  public async fetch(id: string): Promise<Webhook | undefined> {
-    return this.request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, {
+  public async fetch(id: string): Fetch<Webhook> {
+    return this._request<D.WebhookQuery, D.WebhookQueryVariables>(D.WebhookDocument, {
       id,
     }).then(response => {
       const data = response?.webhook;
-      return data ? new Webhook(this.request, data) : undefined;
+      return data ? new Webhook(this._request, data) : undefined;
     });
   }
 }
@@ -6638,16 +6761,19 @@ class WorkflowStatesQuery extends LinearRequest {
   /**
    * Call the WorkflowStates query and return a WorkflowStateConnection
    *
-   * @param vars - variables to pass into the WorkflowStatesQuery
+   * @param variables - variables to pass into the WorkflowStatesQuery
    * @returns parsed response from WorkflowStatesQuery
    */
-  public async fetch(vars?: D.WorkflowStatesQueryVariables): Promise<WorkflowStateConnection | undefined> {
-    return this.request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(D.WorkflowStatesDocument, vars).then(
-      response => {
-        const data = response?.workflowStates;
-        return data ? new WorkflowStateConnection(this.request, data) : undefined;
-      }
-    );
+  public async fetch(variables?: D.WorkflowStatesQueryVariables): Fetch<WorkflowStateConnection> {
+    return this._request<D.WorkflowStatesQuery, D.WorkflowStatesQueryVariables>(
+      D.WorkflowStatesDocument,
+      variables
+    ).then(response => {
+      const data = response?.workflowStates;
+      return data
+        ? new WorkflowStateConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
+    });
   }
 }
 
@@ -6667,12 +6793,12 @@ class WorkflowStateQuery extends LinearRequest {
    * @param id - required id to pass to workflowState
    * @returns parsed response from WorkflowStateQuery
    */
-  public async fetch(id: string): Promise<WorkflowState | undefined> {
-    return this.request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, {
+  public async fetch(id: string): Fetch<WorkflowState> {
+    return this._request<D.WorkflowStateQuery, D.WorkflowStateQueryVariables>(D.WorkflowStateDocument, {
       id,
     }).then(response => {
       const data = response?.workflowState;
-      return data ? new WorkflowState(this.request, data) : undefined;
+      return data ? new WorkflowState(this._request, data) : undefined;
     });
   }
 }
@@ -6694,13 +6820,13 @@ class UserUpdateMutation extends LinearRequest {
    * @param id - required id to pass to userUpdate
    * @returns parsed response from UserUpdateMutation
    */
-  public async fetch(input: D.UpdateUserInput, id: string): Promise<UserPayload | undefined> {
-    return this.request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument, {
+  public async fetch(input: D.UpdateUserInput, id: string): Fetch<UserPayload> {
+    return this._request<D.UserUpdateMutation, D.UserUpdateMutationVariables>(D.UserUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.userUpdate;
-      return data ? new UserPayload(this.request, data) : undefined;
+      return data ? new UserPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6721,12 +6847,12 @@ class UserPromoteAdminMutation extends LinearRequest {
    * @param id - required id to pass to userPromoteAdmin
    * @returns parsed response from UserPromoteAdminMutation
    */
-  public async fetch(id: string): Promise<UserAdminPayload | undefined> {
-    return this.request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(D.UserPromoteAdminDocument, {
+  public async fetch(id: string): Fetch<UserAdminPayload> {
+    return this._request<D.UserPromoteAdminMutation, D.UserPromoteAdminMutationVariables>(D.UserPromoteAdminDocument, {
       id,
     }).then(response => {
       const data = response?.userPromoteAdmin;
-      return data ? new UserAdminPayload(this.request, data) : undefined;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6747,12 +6873,12 @@ class UserDemoteAdminMutation extends LinearRequest {
    * @param id - required id to pass to userDemoteAdmin
    * @returns parsed response from UserDemoteAdminMutation
    */
-  public async fetch(id: string): Promise<UserAdminPayload | undefined> {
-    return this.request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument, {
+  public async fetch(id: string): Fetch<UserAdminPayload> {
+    return this._request<D.UserDemoteAdminMutation, D.UserDemoteAdminMutationVariables>(D.UserDemoteAdminDocument, {
       id,
     }).then(response => {
       const data = response?.userDemoteAdmin;
-      return data ? new UserAdminPayload(this.request, data) : undefined;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6773,12 +6899,12 @@ class UserSuspendMutation extends LinearRequest {
    * @param id - required id to pass to userSuspend
    * @returns parsed response from UserSuspendMutation
    */
-  public async fetch(id: string): Promise<UserAdminPayload | undefined> {
-    return this.request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, {
+  public async fetch(id: string): Fetch<UserAdminPayload> {
+    return this._request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, {
       id,
     }).then(response => {
       const data = response?.userSuspend;
-      return data ? new UserAdminPayload(this.request, data) : undefined;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6799,12 +6925,12 @@ class UserUnsuspendMutation extends LinearRequest {
    * @param id - required id to pass to userUnsuspend
    * @returns parsed response from UserUnsuspendMutation
    */
-  public async fetch(id: string): Promise<UserAdminPayload | undefined> {
-    return this.request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument, {
+  public async fetch(id: string): Fetch<UserAdminPayload> {
+    return this._request<D.UserUnsuspendMutation, D.UserUnsuspendMutationVariables>(D.UserUnsuspendDocument, {
       id,
     }).then(response => {
       const data = response?.userUnsuspend;
-      return data ? new UserAdminPayload(this.request, data) : undefined;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6825,15 +6951,15 @@ class OrganizationUpdateMutation extends LinearRequest {
    * @param input - required input to pass to organizationUpdate
    * @returns parsed response from OrganizationUpdateMutation
    */
-  public async fetch(input: D.UpdateOrganizationInput): Promise<OrganizationPayload | undefined> {
-    return this.request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
+  public async fetch(input: D.UpdateOrganizationInput): Fetch<OrganizationPayload> {
+    return this._request<D.OrganizationUpdateMutation, D.OrganizationUpdateMutationVariables>(
       D.OrganizationUpdateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.organizationUpdate;
-      return data ? new OrganizationPayload(this.request, data) : undefined;
+      return data ? new OrganizationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6853,13 +6979,13 @@ class OrganizationDeleteChallengeMutation extends LinearRequest {
    *
    * @returns parsed response from OrganizationDeleteChallengeMutation
    */
-  public async fetch(): Promise<OrganizationDeletePayload | undefined> {
-    return this.request<D.OrganizationDeleteChallengeMutation, D.OrganizationDeleteChallengeMutationVariables>(
+  public async fetch(): Fetch<OrganizationDeletePayload> {
+    return this._request<D.OrganizationDeleteChallengeMutation, D.OrganizationDeleteChallengeMutationVariables>(
       D.OrganizationDeleteChallengeDocument,
       {}
     ).then(response => {
       const data = response?.organizationDeleteChallenge;
-      return data ? new OrganizationDeletePayload(this.request, data) : undefined;
+      return data ? new OrganizationDeletePayload(this._request, data) : undefined;
     });
   }
 }
@@ -6880,15 +7006,15 @@ class OrganizationDeleteMutation extends LinearRequest {
    * @param input - required input to pass to organizationDelete
    * @returns parsed response from OrganizationDeleteMutation
    */
-  public async fetch(input: D.DeleteOrganizationInput): Promise<OrganizationDeletePayload | undefined> {
-    return this.request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
+  public async fetch(input: D.DeleteOrganizationInput): Fetch<OrganizationDeletePayload> {
+    return this._request<D.OrganizationDeleteMutation, D.OrganizationDeleteMutationVariables>(
       D.OrganizationDeleteDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.organizationDelete;
-      return data ? new OrganizationDeletePayload(this.request, data) : undefined;
+      return data ? new OrganizationDeletePayload(this._request, data) : undefined;
     });
   }
 }
@@ -6909,15 +7035,15 @@ class AdminDeleteIntegrationMutation extends LinearRequest {
    * @param id - required id to pass to adminDeleteIntegration
    * @returns parsed response from AdminDeleteIntegrationMutation
    */
-  public async fetch(id: string): Promise<AdminIntegrationPayload | undefined> {
-    return this.request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
+  public async fetch(id: string): Fetch<AdminIntegrationPayload> {
+    return this._request<D.AdminDeleteIntegrationMutation, D.AdminDeleteIntegrationMutationVariables>(
       D.AdminDeleteIntegrationDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.adminDeleteIntegration;
-      return data ? new AdminIntegrationPayload(this.request, data) : undefined;
+      return data ? new AdminIntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6938,15 +7064,15 @@ class OrganizationToggleAccessMutation extends LinearRequest {
    * @param id - required id to pass to organizationToggleAccess
    * @returns parsed response from OrganizationToggleAccessMutation
    */
-  public async fetch(id: string): Promise<OrganizationAccessPayload | undefined> {
-    return this.request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
+  public async fetch(id: string): Fetch<OrganizationAccessPayload> {
+    return this._request<D.OrganizationToggleAccessMutation, D.OrganizationToggleAccessMutationVariables>(
       D.OrganizationToggleAccessDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.organizationToggleAccess;
-      return data ? new OrganizationAccessPayload(this.request, data) : undefined;
+      return data ? new OrganizationAccessPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6969,8 +7095,8 @@ class OrganizationChangeEmailDomainMutation extends LinearRequest {
    * @param id - required id to pass to organizationChangeEmailDomain
    * @returns parsed response from OrganizationChangeEmailDomainMutation
    */
-  public async fetch(toDomain: string, fromDomain: string, id: string): Promise<OrganizationAccessPayload | undefined> {
-    return this.request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
+  public async fetch(toDomain: string, fromDomain: string, id: string): Fetch<OrganizationAccessPayload> {
+    return this._request<D.OrganizationChangeEmailDomainMutation, D.OrganizationChangeEmailDomainMutationVariables>(
       D.OrganizationChangeEmailDomainDocument,
       {
         toDomain,
@@ -6979,7 +7105,7 @@ class OrganizationChangeEmailDomainMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationChangeEmailDomain;
-      return data ? new OrganizationAccessPayload(this.request, data) : undefined;
+      return data ? new OrganizationAccessPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7000,15 +7126,15 @@ class OrganizationToggleSamlEnabledMutation extends LinearRequest {
    * @param id - required id to pass to organizationToggleSamlEnabled
    * @returns parsed response from OrganizationToggleSamlEnabledMutation
    */
-  public async fetch(id: string): Promise<OrganizationSamlConfigurePayload | undefined> {
-    return this.request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
+  public async fetch(id: string): Fetch<OrganizationSamlConfigurePayload> {
+    return this._request<D.OrganizationToggleSamlEnabledMutation, D.OrganizationToggleSamlEnabledMutationVariables>(
       D.OrganizationToggleSamlEnabledDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.organizationToggleSamlEnabled;
-      return data ? new OrganizationSamlConfigurePayload(this.request, data) : undefined;
+      return data ? new OrganizationSamlConfigurePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7030,11 +7156,8 @@ class OrganizationConfigureSamlMutation extends LinearRequest {
    * @param id - required id to pass to organizationConfigureSaml
    * @returns parsed response from OrganizationConfigureSamlMutation
    */
-  public async fetch(
-    samlConfiguration: D.SamlConfigurationInput,
-    id: string
-  ): Promise<OrganizationSamlConfigurePayload | undefined> {
-    return this.request<D.OrganizationConfigureSamlMutation, D.OrganizationConfigureSamlMutationVariables>(
+  public async fetch(samlConfiguration: D.SamlConfigurationInput, id: string): Fetch<OrganizationSamlConfigurePayload> {
+    return this._request<D.OrganizationConfigureSamlMutation, D.OrganizationConfigureSamlMutationVariables>(
       D.OrganizationConfigureSamlDocument,
       {
         samlConfiguration,
@@ -7042,7 +7165,7 @@ class OrganizationConfigureSamlMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.organizationConfigureSaml;
-      return data ? new OrganizationSamlConfigurePayload(this.request, data) : undefined;
+      return data ? new OrganizationSamlConfigurePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7063,12 +7186,12 @@ class AdminCommandMutation extends LinearRequest {
    * @param input - required input to pass to adminCommand
    * @returns parsed response from AdminCommandMutation
    */
-  public async fetch(input: D.AdminCommandInput): Promise<AdminCommandPayload | undefined> {
-    return this.request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument, {
+  public async fetch(input: D.AdminCommandInput): Fetch<AdminCommandPayload> {
+    return this._request<D.AdminCommandMutation, D.AdminCommandMutationVariables>(D.AdminCommandDocument, {
       input,
     }).then(response => {
       const data = response?.adminCommand;
-      return data ? new AdminCommandPayload(this.request, data) : undefined;
+      return data ? new AdminCommandPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7089,23 +7212,23 @@ class AdminBulkEmailMutation extends LinearRequest {
    * @param emails - required emails to pass to adminBulkEmail
    * @param markdownContent - required markdownContent to pass to adminBulkEmail
    * @param subject - required subject to pass to adminBulkEmail
-   * @param vars - variables without 'emails', 'markdownContent', 'subject' to pass into the AdminBulkEmailMutation
+   * @param variables - variables without 'emails', 'markdownContent', 'subject' to pass into the AdminBulkEmailMutation
    * @returns parsed response from AdminBulkEmailMutation
    */
   public async fetch(
     emails: string[],
     markdownContent: string,
     subject: string,
-    vars?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
-  ): Promise<AdminCommandPayload | undefined> {
-    return this.request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument, {
+    variables?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
+  ): Fetch<AdminCommandPayload> {
+    return this._request<D.AdminBulkEmailMutation, D.AdminBulkEmailMutationVariables>(D.AdminBulkEmailDocument, {
       emails,
       markdownContent,
       subject,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.adminBulkEmail;
-      return data ? new AdminCommandPayload(this.request, data) : undefined;
+      return data ? new AdminCommandPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7126,15 +7249,15 @@ class AdminCreateStripeCustomerMutation extends LinearRequest {
    * @param organizationId - required organizationId to pass to adminCreateStripeCustomer
    * @returns parsed response from AdminCreateStripeCustomerMutation
    */
-  public async fetch(organizationId: string): Promise<AdminCommandPayload | undefined> {
-    return this.request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
+  public async fetch(organizationId: string): Fetch<AdminCommandPayload> {
+    return this._request<D.AdminCreateStripeCustomerMutation, D.AdminCreateStripeCustomerMutationVariables>(
       D.AdminCreateStripeCustomerDocument,
       {
         organizationId,
       }
     ).then(response => {
       const data = response?.adminCreateStripeCustomer;
-      return data ? new AdminCommandPayload(this.request, data) : undefined;
+      return data ? new AdminCommandPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7155,15 +7278,15 @@ class AdminScheduleAnonymousTaskMutation extends LinearRequest {
    * @param taskName - required taskName to pass to adminScheduleAnonymousTask
    * @returns parsed response from AdminScheduleAnonymousTaskMutation
    */
-  public async fetch(taskName: string): Promise<AdminCommandPayload | undefined> {
-    return this.request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
+  public async fetch(taskName: string): Fetch<AdminCommandPayload> {
+    return this._request<D.AdminScheduleAnonymousTaskMutation, D.AdminScheduleAnonymousTaskMutationVariables>(
       D.AdminScheduleAnonymousTaskDocument,
       {
         taskName,
       }
     ).then(response => {
       const data = response?.adminScheduleAnonymousTask;
-      return data ? new AdminCommandPayload(this.request, data) : undefined;
+      return data ? new AdminCommandPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7185,8 +7308,8 @@ class AdminUserAccountChangeEmailMutation extends LinearRequest {
    * @param id - required id to pass to adminUserAccountChangeEmail
    * @returns parsed response from AdminUserAccountChangeEmailMutation
    */
-  public async fetch(newEmail: string, id: string): Promise<UserAccountAdminPrivileged | undefined> {
-    return this.request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
+  public async fetch(newEmail: string, id: string): Fetch<UserAccountAdminPrivileged> {
+    return this._request<D.AdminUserAccountChangeEmailMutation, D.AdminUserAccountChangeEmailMutationVariables>(
       D.AdminUserAccountChangeEmailDocument,
       {
         newEmail,
@@ -7194,7 +7317,7 @@ class AdminUserAccountChangeEmailMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.adminUserAccountChangeEmail;
-      return data ? new UserAccountAdminPrivileged(this.request, data) : undefined;
+      return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
     });
   }
 }
@@ -7214,24 +7337,24 @@ class AdminUserAccountDeleteMutation extends LinearRequest {
    *
    * @param email - required email to pass to adminUserAccountDelete
    * @param id - required id to pass to adminUserAccountDelete
-   * @param vars - variables without 'email', 'id' to pass into the AdminUserAccountDeleteMutation
+   * @param variables - variables without 'email', 'id' to pass into the AdminUserAccountDeleteMutation
    * @returns parsed response from AdminUserAccountDeleteMutation
    */
   public async fetch(
     email: string,
     id: string,
-    vars?: Omit<D.AdminUserAccountDeleteMutationVariables, "email" | "id">
-  ): Promise<AdminResponse | undefined> {
-    return this.request<D.AdminUserAccountDeleteMutation, D.AdminUserAccountDeleteMutationVariables>(
+    variables?: Omit<D.AdminUserAccountDeleteMutationVariables, "email" | "id">
+  ): Fetch<AdminResponse> {
+    return this._request<D.AdminUserAccountDeleteMutation, D.AdminUserAccountDeleteMutationVariables>(
       D.AdminUserAccountDeleteDocument,
       {
         email,
         id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.adminUserAccountDelete;
-      return data ? new AdminResponse(this.request, data) : undefined;
+      return data ? new AdminResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7252,12 +7375,12 @@ class EventCreateMutation extends LinearRequest {
    * @param input - required input to pass to eventCreate
    * @returns parsed response from EventCreateMutation
    */
-  public async fetch(input: D.EventCreateInput): Promise<EventPayload | undefined> {
-    return this.request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument, {
+  public async fetch(input: D.EventCreateInput): Fetch<EventPayload> {
+    return this._request<D.EventCreateMutation, D.EventCreateMutationVariables>(D.EventCreateDocument, {
       input,
     }).then(response => {
       const data = response?.eventCreate;
-      return data ? new EventPayload(this.request, data) : undefined;
+      return data ? new EventPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7278,12 +7401,12 @@ class ApiKeyCreateMutation extends LinearRequest {
    * @param input - required input to pass to apiKeyCreate
    * @returns parsed response from ApiKeyCreateMutation
    */
-  public async fetch(input: D.ApiKeyCreateInput): Promise<ApiKeyPayload | undefined> {
-    return this.request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument, {
+  public async fetch(input: D.ApiKeyCreateInput): Fetch<ApiKeyPayload> {
+    return this._request<D.ApiKeyCreateMutation, D.ApiKeyCreateMutationVariables>(D.ApiKeyCreateDocument, {
       input,
     }).then(response => {
       const data = response?.apiKeyCreate;
-      return data ? new ApiKeyPayload(this.request, data) : undefined;
+      return data ? new ApiKeyPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7304,12 +7427,12 @@ class ApiKeyDeleteMutation extends LinearRequest {
    * @param id - required id to pass to apiKeyDelete
    * @returns parsed response from ApiKeyDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.ApiKeyDeleteMutation, D.ApiKeyDeleteMutationVariables>(D.ApiKeyDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.apiKeyDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7330,17 +7453,15 @@ class EmailUserAccountAuthChallengeMutation extends LinearRequest {
    * @param input - required input to pass to emailUserAccountAuthChallenge
    * @returns parsed response from EmailUserAccountAuthChallengeMutation
    */
-  public async fetch(
-    input: D.EmailUserAccountAuthChallengeInput
-  ): Promise<EmailUserAccountAuthChallengeResponse | undefined> {
-    return this.request<D.EmailUserAccountAuthChallengeMutation, D.EmailUserAccountAuthChallengeMutationVariables>(
+  public async fetch(input: D.EmailUserAccountAuthChallengeInput): Fetch<EmailUserAccountAuthChallengeResponse> {
+    return this._request<D.EmailUserAccountAuthChallengeMutation, D.EmailUserAccountAuthChallengeMutationVariables>(
       D.EmailUserAccountAuthChallengeDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.emailUserAccountAuthChallenge;
-      return data ? new EmailUserAccountAuthChallengeResponse(this.request, data) : undefined;
+      return data ? new EmailUserAccountAuthChallengeResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7361,15 +7482,15 @@ class EmailTokenUserAccountAuthMutation extends LinearRequest {
    * @param input - required input to pass to emailTokenUserAccountAuth
    * @returns parsed response from EmailTokenUserAccountAuthMutation
    */
-  public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
-    return this.request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
+  public async fetch(input: D.TokenUserAccountAuthInput): Fetch<AuthResolverResponse> {
+    return this._request<D.EmailTokenUserAccountAuthMutation, D.EmailTokenUserAccountAuthMutationVariables>(
       D.EmailTokenUserAccountAuthDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.emailTokenUserAccountAuth;
-      return data ? new AuthResolverResponse(this.request, data) : undefined;
+      return data ? new AuthResolverResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7390,15 +7511,15 @@ class SamlTokenUserAccountAuthMutation extends LinearRequest {
    * @param input - required input to pass to samlTokenUserAccountAuth
    * @returns parsed response from SamlTokenUserAccountAuthMutation
    */
-  public async fetch(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
-    return this.request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
+  public async fetch(input: D.TokenUserAccountAuthInput): Fetch<AuthResolverResponse> {
+    return this._request<D.SamlTokenUserAccountAuthMutation, D.SamlTokenUserAccountAuthMutationVariables>(
       D.SamlTokenUserAccountAuthDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.samlTokenUserAccountAuth;
-      return data ? new AuthResolverResponse(this.request, data) : undefined;
+      return data ? new AuthResolverResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7419,15 +7540,15 @@ class GoogleUserAccountAuthMutation extends LinearRequest {
    * @param input - required input to pass to googleUserAccountAuth
    * @returns parsed response from GoogleUserAccountAuthMutation
    */
-  public async fetch(input: D.GoogleUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
-    return this.request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
+  public async fetch(input: D.GoogleUserAccountAuthInput): Fetch<AuthResolverResponse> {
+    return this._request<D.GoogleUserAccountAuthMutation, D.GoogleUserAccountAuthMutationVariables>(
       D.GoogleUserAccountAuthDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.googleUserAccountAuth;
-      return data ? new AuthResolverResponse(this.request, data) : undefined;
+      return data ? new AuthResolverResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7446,22 +7567,22 @@ class CreateOrganizationFromOnboardingMutation extends LinearRequest {
    * Call the CreateOrganizationFromOnboarding mutation and return a CreateOrJoinOrganizationResponse
    *
    * @param input - required input to pass to createOrganizationFromOnboarding
-   * @param vars - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
+   * @param variables - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
    * @returns parsed response from CreateOrganizationFromOnboardingMutation
    */
   public async fetch(
     input: D.CreateOrganizationInput,
-    vars?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
-  ): Promise<CreateOrJoinOrganizationResponse | undefined> {
-    return this.request<
+    variables?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
+  ): Fetch<CreateOrJoinOrganizationResponse> {
+    return this._request<
       D.CreateOrganizationFromOnboardingMutation,
       D.CreateOrganizationFromOnboardingMutationVariables
     >(D.CreateOrganizationFromOnboardingDocument, {
       input,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.createOrganizationFromOnboarding;
-      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7482,15 +7603,15 @@ class JoinOrganizationFromOnboardingMutation extends LinearRequest {
    * @param input - required input to pass to joinOrganizationFromOnboarding
    * @returns parsed response from JoinOrganizationFromOnboardingMutation
    */
-  public async fetch(input: D.JoinOrganizationInput): Promise<CreateOrJoinOrganizationResponse | undefined> {
-    return this.request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
+  public async fetch(input: D.JoinOrganizationInput): Fetch<CreateOrJoinOrganizationResponse> {
+    return this._request<D.JoinOrganizationFromOnboardingMutation, D.JoinOrganizationFromOnboardingMutationVariables>(
       D.JoinOrganizationFromOnboardingDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.joinOrganizationFromOnboarding;
-      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7511,15 +7632,15 @@ class LeaveOrganizationMutation extends LinearRequest {
    * @param organizationId - required organizationId to pass to leaveOrganization
    * @returns parsed response from LeaveOrganizationMutation
    */
-  public async fetch(organizationId: string): Promise<CreateOrJoinOrganizationResponse | undefined> {
-    return this.request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
+  public async fetch(organizationId: string): Fetch<CreateOrJoinOrganizationResponse> {
+    return this._request<D.LeaveOrganizationMutation, D.LeaveOrganizationMutationVariables>(
       D.LeaveOrganizationDocument,
       {
         organizationId,
       }
     ).then(response => {
       const data = response?.leaveOrganization;
-      return data ? new CreateOrJoinOrganizationResponse(this.request, data) : undefined;
+      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
     });
   }
 }
@@ -7540,15 +7661,15 @@ class BillingEmailUpdateMutation extends LinearRequest {
    * @param input - required input to pass to billingEmailUpdate
    * @returns parsed response from BillingEmailUpdateMutation
    */
-  public async fetch(input: D.BillingEmailUpdateInput): Promise<BillingEmailPayload | undefined> {
-    return this.request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
+  public async fetch(input: D.BillingEmailUpdateInput): Fetch<BillingEmailPayload> {
+    return this._request<D.BillingEmailUpdateMutation, D.BillingEmailUpdateMutationVariables>(
       D.BillingEmailUpdateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.billingEmailUpdate;
-      return data ? new BillingEmailPayload(this.request, data) : undefined;
+      return data ? new BillingEmailPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7569,17 +7690,15 @@ class CollaborativeDocumentUpdateMutation extends LinearRequest {
    * @param input - required input to pass to collaborativeDocumentUpdate
    * @returns parsed response from CollaborativeDocumentUpdateMutation
    */
-  public async fetch(
-    input: D.CollaborationDocumentUpdateInput
-  ): Promise<CollaborationDocumentUpdatePayload | undefined> {
-    return this.request<D.CollaborativeDocumentUpdateMutation, D.CollaborativeDocumentUpdateMutationVariables>(
+  public async fetch(input: D.CollaborationDocumentUpdateInput): Fetch<CollaborationDocumentUpdatePayload> {
+    return this._request<D.CollaborativeDocumentUpdateMutation, D.CollaborativeDocumentUpdateMutationVariables>(
       D.CollaborativeDocumentUpdateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.collaborativeDocumentUpdate;
-      return data ? new CollaborationDocumentUpdatePayload(this.request, data) : undefined;
+      return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7600,12 +7719,12 @@ class CommentCreateMutation extends LinearRequest {
    * @param input - required input to pass to commentCreate
    * @returns parsed response from CommentCreateMutation
    */
-  public async fetch(input: D.CommentCreateInput): Promise<CommentPayload | undefined> {
-    return this.request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument, {
+  public async fetch(input: D.CommentCreateInput): Fetch<CommentPayload> {
+    return this._request<D.CommentCreateMutation, D.CommentCreateMutationVariables>(D.CommentCreateDocument, {
       input,
     }).then(response => {
       const data = response?.commentCreate;
-      return data ? new CommentPayload(this.request, data) : undefined;
+      return data ? new CommentPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7627,13 +7746,13 @@ class CommentUpdateMutation extends LinearRequest {
    * @param id - required id to pass to commentUpdate
    * @returns parsed response from CommentUpdateMutation
    */
-  public async fetch(input: D.CommentUpdateInput, id: string): Promise<CommentPayload | undefined> {
-    return this.request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument, {
+  public async fetch(input: D.CommentUpdateInput, id: string): Fetch<CommentPayload> {
+    return this._request<D.CommentUpdateMutation, D.CommentUpdateMutationVariables>(D.CommentUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.commentUpdate;
-      return data ? new CommentPayload(this.request, data) : undefined;
+      return data ? new CommentPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7654,12 +7773,12 @@ class CommentDeleteMutation extends LinearRequest {
    * @param id - required id to pass to commentDelete
    * @returns parsed response from CommentDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.CommentDeleteMutation, D.CommentDeleteMutationVariables>(D.CommentDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.commentDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7680,12 +7799,12 @@ class ContactCreateMutation extends LinearRequest {
    * @param input - required input to pass to contactCreate
    * @returns parsed response from ContactCreateMutation
    */
-  public async fetch(input: D.ContactCreateInput): Promise<ContactPayload | undefined> {
-    return this.request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument, {
+  public async fetch(input: D.ContactCreateInput): Fetch<ContactPayload> {
+    return this._request<D.ContactCreateMutation, D.ContactCreateMutationVariables>(D.ContactCreateDocument, {
       input,
     }).then(response => {
       const data = response?.contactCreate;
-      return data ? new ContactPayload(this.request, data) : undefined;
+      return data ? new ContactPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7706,12 +7825,12 @@ class CustomViewCreateMutation extends LinearRequest {
    * @param input - required input to pass to customViewCreate
    * @returns parsed response from CustomViewCreateMutation
    */
-  public async fetch(input: D.CustomViewCreateInput): Promise<CustomViewPayload | undefined> {
-    return this.request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(D.CustomViewCreateDocument, {
+  public async fetch(input: D.CustomViewCreateInput): Fetch<CustomViewPayload> {
+    return this._request<D.CustomViewCreateMutation, D.CustomViewCreateMutationVariables>(D.CustomViewCreateDocument, {
       input,
     }).then(response => {
       const data = response?.customViewCreate;
-      return data ? new CustomViewPayload(this.request, data) : undefined;
+      return data ? new CustomViewPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7733,13 +7852,13 @@ class CustomViewUpdateMutation extends LinearRequest {
    * @param id - required id to pass to customViewUpdate
    * @returns parsed response from CustomViewUpdateMutation
    */
-  public async fetch(input: D.CustomViewUpdateInput, id: string): Promise<CustomViewPayload | undefined> {
-    return this.request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(D.CustomViewUpdateDocument, {
+  public async fetch(input: D.CustomViewUpdateInput, id: string): Fetch<CustomViewPayload> {
+    return this._request<D.CustomViewUpdateMutation, D.CustomViewUpdateMutationVariables>(D.CustomViewUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.customViewUpdate;
-      return data ? new CustomViewPayload(this.request, data) : undefined;
+      return data ? new CustomViewPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7760,12 +7879,12 @@ class CustomViewDeleteMutation extends LinearRequest {
    * @param id - required id to pass to customViewDelete
    * @returns parsed response from CustomViewDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(D.CustomViewDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.CustomViewDeleteMutation, D.CustomViewDeleteMutationVariables>(D.CustomViewDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.customViewDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7786,12 +7905,12 @@ class CycleCreateMutation extends LinearRequest {
    * @param input - required input to pass to cycleCreate
    * @returns parsed response from CycleCreateMutation
    */
-  public async fetch(input: D.CycleCreateInput): Promise<CyclePayload | undefined> {
-    return this.request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument, {
+  public async fetch(input: D.CycleCreateInput): Fetch<CyclePayload> {
+    return this._request<D.CycleCreateMutation, D.CycleCreateMutationVariables>(D.CycleCreateDocument, {
       input,
     }).then(response => {
       const data = response?.cycleCreate;
-      return data ? new CyclePayload(this.request, data) : undefined;
+      return data ? new CyclePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7813,13 +7932,13 @@ class CycleUpdateMutation extends LinearRequest {
    * @param id - required id to pass to cycleUpdate
    * @returns parsed response from CycleUpdateMutation
    */
-  public async fetch(input: D.CycleUpdateInput, id: string): Promise<CyclePayload | undefined> {
-    return this.request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument, {
+  public async fetch(input: D.CycleUpdateInput, id: string): Fetch<CyclePayload> {
+    return this._request<D.CycleUpdateMutation, D.CycleUpdateMutationVariables>(D.CycleUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.cycleUpdate;
-      return data ? new CyclePayload(this.request, data) : undefined;
+      return data ? new CyclePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7840,12 +7959,12 @@ class CycleArchiveMutation extends LinearRequest {
    * @param id - required id to pass to cycleArchive
    * @returns parsed response from CycleArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.CycleArchiveMutation, D.CycleArchiveMutationVariables>(D.CycleArchiveDocument, {
       id,
     }).then(response => {
       const data = response?.cycleArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7865,13 +7984,13 @@ class DebugFailWithInternalErrorMutation extends LinearRequest {
    *
    * @returns parsed response from DebugFailWithInternalErrorMutation
    */
-  public async fetch(): Promise<DebugPayload | undefined> {
-    return this.request<D.DebugFailWithInternalErrorMutation, D.DebugFailWithInternalErrorMutationVariables>(
+  public async fetch(): Fetch<DebugPayload> {
+    return this._request<D.DebugFailWithInternalErrorMutation, D.DebugFailWithInternalErrorMutationVariables>(
       D.DebugFailWithInternalErrorDocument,
       {}
     ).then(response => {
       const data = response?.debugFailWithInternalError;
-      return data ? new DebugPayload(this.request, data) : undefined;
+      return data ? new DebugPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7891,13 +8010,13 @@ class DebugFailWithWarningMutation extends LinearRequest {
    *
    * @returns parsed response from DebugFailWithWarningMutation
    */
-  public async fetch(): Promise<DebugPayload | undefined> {
-    return this.request<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
+  public async fetch(): Fetch<DebugPayload> {
+    return this._request<D.DebugFailWithWarningMutation, D.DebugFailWithWarningMutationVariables>(
       D.DebugFailWithWarningDocument,
       {}
     ).then(response => {
       const data = response?.debugFailWithWarning;
-      return data ? new DebugPayload(this.request, data) : undefined;
+      return data ? new DebugPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7917,13 +8036,13 @@ class DebugCreateSamlOrgMutation extends LinearRequest {
    *
    * @returns parsed response from DebugCreateSamlOrgMutation
    */
-  public async fetch(): Promise<DebugPayload | undefined> {
-    return this.request<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
+  public async fetch(): Fetch<DebugPayload> {
+    return this._request<D.DebugCreateSamlOrgMutation, D.DebugCreateSamlOrgMutationVariables>(
       D.DebugCreateSamlOrgDocument,
       {}
     ).then(response => {
       const data = response?.debugCreateSAMLOrg;
-      return data ? new DebugPayload(this.request, data) : undefined;
+      return data ? new DebugPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7944,12 +8063,12 @@ class EmailUnsubscribeMutation extends LinearRequest {
    * @param input - required input to pass to emailUnsubscribe
    * @returns parsed response from EmailUnsubscribeMutation
    */
-  public async fetch(input: D.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload | undefined> {
-    return this.request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(D.EmailUnsubscribeDocument, {
+  public async fetch(input: D.EmailUnsubscribeInput): Fetch<EmailUnsubscribePayload> {
+    return this._request<D.EmailUnsubscribeMutation, D.EmailUnsubscribeMutationVariables>(D.EmailUnsubscribeDocument, {
       input,
     }).then(response => {
       const data = response?.emailUnsubscribe;
-      return data ? new EmailUnsubscribePayload(this.request, data) : undefined;
+      return data ? new EmailUnsubscribePayload(this._request, data) : undefined;
     });
   }
 }
@@ -7970,12 +8089,12 @@ class EmojiCreateMutation extends LinearRequest {
    * @param input - required input to pass to emojiCreate
    * @returns parsed response from EmojiCreateMutation
    */
-  public async fetch(input: D.EmojiCreateInput): Promise<EmojiPayload | undefined> {
-    return this.request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument, {
+  public async fetch(input: D.EmojiCreateInput): Fetch<EmojiPayload> {
+    return this._request<D.EmojiCreateMutation, D.EmojiCreateMutationVariables>(D.EmojiCreateDocument, {
       input,
     }).then(response => {
       const data = response?.emojiCreate;
-      return data ? new EmojiPayload(this.request, data) : undefined;
+      return data ? new EmojiPayload(this._request, data) : undefined;
     });
   }
 }
@@ -7996,12 +8115,12 @@ class EmojiDeleteMutation extends LinearRequest {
    * @param id - required id to pass to emojiDelete
    * @returns parsed response from EmojiDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.EmojiDeleteMutation, D.EmojiDeleteMutationVariables>(D.EmojiDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.emojiDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8022,12 +8141,12 @@ class FavoriteCreateMutation extends LinearRequest {
    * @param input - required input to pass to favoriteCreate
    * @returns parsed response from FavoriteCreateMutation
    */
-  public async fetch(input: D.FavoriteCreateInput): Promise<FavoritePayload | undefined> {
-    return this.request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument, {
+  public async fetch(input: D.FavoriteCreateInput): Fetch<FavoritePayload> {
+    return this._request<D.FavoriteCreateMutation, D.FavoriteCreateMutationVariables>(D.FavoriteCreateDocument, {
       input,
     }).then(response => {
       const data = response?.favoriteCreate;
-      return data ? new FavoritePayload(this.request, data) : undefined;
+      return data ? new FavoritePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8049,13 +8168,13 @@ class FavoriteUpdateMutation extends LinearRequest {
    * @param id - required id to pass to favoriteUpdate
    * @returns parsed response from FavoriteUpdateMutation
    */
-  public async fetch(input: D.FavoriteUpdateInput, id: string): Promise<FavoritePayload | undefined> {
-    return this.request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument, {
+  public async fetch(input: D.FavoriteUpdateInput, id: string): Fetch<FavoritePayload> {
+    return this._request<D.FavoriteUpdateMutation, D.FavoriteUpdateMutationVariables>(D.FavoriteUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.favoriteUpdate;
-      return data ? new FavoritePayload(this.request, data) : undefined;
+      return data ? new FavoritePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8076,12 +8195,12 @@ class FavoriteDeleteMutation extends LinearRequest {
    * @param id - required id to pass to favoriteDelete
    * @returns parsed response from FavoriteDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.FavoriteDeleteMutation, D.FavoriteDeleteMutationVariables>(D.FavoriteDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.favoriteDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8102,12 +8221,12 @@ class FeedbackCreateMutation extends LinearRequest {
    * @param input - required input to pass to feedbackCreate
    * @returns parsed response from FeedbackCreateMutation
    */
-  public async fetch(input: D.FeedbackCreateInput): Promise<FeedbackPayload | undefined> {
-    return this.request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument, {
+  public async fetch(input: D.FeedbackCreateInput): Fetch<FeedbackPayload> {
+    return this._request<D.FeedbackCreateMutation, D.FeedbackCreateMutationVariables>(D.FeedbackCreateDocument, {
       input,
     }).then(response => {
       const data = response?.feedbackCreate;
-      return data ? new FeedbackPayload(this.request, data) : undefined;
+      return data ? new FeedbackPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8128,23 +8247,23 @@ class FileUploadMutation extends LinearRequest {
    * @param size - required size to pass to fileUpload
    * @param contentType - required contentType to pass to fileUpload
    * @param filename - required filename to pass to fileUpload
-   * @param vars - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
+   * @param variables - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
    * @returns parsed response from FileUploadMutation
    */
   public async fetch(
     size: number,
     contentType: string,
     filename: string,
-    vars?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
-  ): Promise<UploadPayload | undefined> {
-    return this.request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument, {
+    variables?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
+  ): Fetch<UploadPayload> {
+    return this._request<D.FileUploadMutation, D.FileUploadMutationVariables>(D.FileUploadDocument, {
       size,
       contentType,
       filename,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.fileUpload;
-      return data ? new UploadPayload(this.request, data) : undefined;
+      return data ? new UploadPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8165,15 +8284,15 @@ class ImageUploadFromUrlMutation extends LinearRequest {
    * @param url - required url to pass to imageUploadFromUrl
    * @returns parsed response from ImageUploadFromUrlMutation
    */
-  public async fetch(url: string): Promise<ImageUploadFromUrlPayload | undefined> {
-    return this.request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
+  public async fetch(url: string): Fetch<ImageUploadFromUrlPayload> {
+    return this._request<D.ImageUploadFromUrlMutation, D.ImageUploadFromUrlMutationVariables>(
       D.ImageUploadFromUrlDocument,
       {
         url,
       }
     ).then(response => {
       const data = response?.imageUploadFromUrl;
-      return data ? new ImageUploadFromUrlPayload(this.request, data) : undefined;
+      return data ? new ImageUploadFromUrlPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8194,15 +8313,15 @@ class IntegrationGithubConnectMutation extends LinearRequest {
    * @param installationId - required installationId to pass to integrationGithubConnect
    * @returns parsed response from IntegrationGithubConnectMutation
    */
-  public async fetch(installationId: string): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
+  public async fetch(installationId: string): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationGithubConnectMutation, D.IntegrationGithubConnectMutationVariables>(
       D.IntegrationGithubConnectDocument,
       {
         installationId,
       }
     ).then(response => {
       const data = response?.integrationGithubConnect;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8224,8 +8343,8 @@ class IntegrationGitlabConnectMutation extends LinearRequest {
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
    * @returns parsed response from IntegrationGitlabConnectMutation
    */
-  public async fetch(gitlabUrl: string, accessToken: string): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
+  public async fetch(gitlabUrl: string, accessToken: string): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationGitlabConnectMutation, D.IntegrationGitlabConnectMutationVariables>(
       D.IntegrationGitlabConnectDocument,
       {
         gitlabUrl,
@@ -8233,7 +8352,7 @@ class IntegrationGitlabConnectMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationGitlabConnect;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8253,21 +8372,21 @@ class IntegrationSlackMutation extends LinearRequest {
    *
    * @param redirectUri - required redirectUri to pass to integrationSlack
    * @param code - required code to pass to integrationSlack
-   * @param vars - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
+   * @param variables - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
    * @returns parsed response from IntegrationSlackMutation
    */
   public async fetch(
     redirectUri: string,
     code: string,
-    vars?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
-  ): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(D.IntegrationSlackDocument, {
+    variables?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
+  ): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationSlackMutation, D.IntegrationSlackMutationVariables>(D.IntegrationSlackDocument, {
       redirectUri,
       code,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.integrationSlack;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8289,8 +8408,8 @@ class IntegrationSlackPersonalMutation extends LinearRequest {
    * @param code - required code to pass to integrationSlackPersonal
    * @returns parsed response from IntegrationSlackPersonalMutation
    */
-  public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
+  public async fetch(redirectUri: string, code: string): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationSlackPersonalMutation, D.IntegrationSlackPersonalMutationVariables>(
       D.IntegrationSlackPersonalDocument,
       {
         redirectUri,
@@ -8298,7 +8417,7 @@ class IntegrationSlackPersonalMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationSlackPersonal;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8319,26 +8438,26 @@ class IntegrationSlackPostMutation extends LinearRequest {
    * @param redirectUri - required redirectUri to pass to integrationSlackPost
    * @param teamId - required teamId to pass to integrationSlackPost
    * @param code - required code to pass to integrationSlackPost
-   * @param vars - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
+   * @param variables - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
    * @returns parsed response from IntegrationSlackPostMutation
    */
   public async fetch(
     redirectUri: string,
     teamId: string,
     code: string,
-    vars?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
-  ): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
+    variables?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
+  ): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationSlackPostMutation, D.IntegrationSlackPostMutationVariables>(
       D.IntegrationSlackPostDocument,
       {
         redirectUri,
         teamId,
         code,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.integrationSlackPost;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8361,8 +8480,8 @@ class IntegrationSlackProjectPostMutation extends LinearRequest {
    * @param code - required code to pass to integrationSlackProjectPost
    * @returns parsed response from IntegrationSlackProjectPostMutation
    */
-  public async fetch(redirectUri: string, projectId: string, code: string): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
+  public async fetch(redirectUri: string, projectId: string, code: string): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationSlackProjectPostMutation, D.IntegrationSlackProjectPostMutationVariables>(
       D.IntegrationSlackProjectPostDocument,
       {
         redirectUri,
@@ -8371,7 +8490,7 @@ class IntegrationSlackProjectPostMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationSlackProjectPost;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8393,8 +8512,8 @@ class IntegrationSlackImportEmojisMutation extends LinearRequest {
    * @param code - required code to pass to integrationSlackImportEmojis
    * @returns parsed response from IntegrationSlackImportEmojisMutation
    */
-  public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
+  public async fetch(redirectUri: string, code: string): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationSlackImportEmojisMutation, D.IntegrationSlackImportEmojisMutationVariables>(
       D.IntegrationSlackImportEmojisDocument,
       {
         redirectUri,
@@ -8402,7 +8521,7 @@ class IntegrationSlackImportEmojisMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationSlackImportEmojis;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8424,13 +8543,13 @@ class IntegrationFigmaMutation extends LinearRequest {
    * @param code - required code to pass to integrationFigma
    * @returns parsed response from IntegrationFigmaMutation
    */
-  public async fetch(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(D.IntegrationFigmaDocument, {
+  public async fetch(redirectUri: string, code: string): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationFigmaMutation, D.IntegrationFigmaMutationVariables>(D.IntegrationFigmaDocument, {
       redirectUri,
       code,
     }).then(response => {
       const data = response?.integrationFigma;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8451,15 +8570,15 @@ class IntegrationGoogleSheetsMutation extends LinearRequest {
    * @param code - required code to pass to integrationGoogleSheets
    * @returns parsed response from IntegrationGoogleSheetsMutation
    */
-  public async fetch(code: string): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
+  public async fetch(code: string): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationGoogleSheetsMutation, D.IntegrationGoogleSheetsMutationVariables>(
       D.IntegrationGoogleSheetsDocument,
       {
         code,
       }
     ).then(response => {
       const data = response?.integrationGoogleSheets;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8480,15 +8599,15 @@ class RefreshGoogleSheetsDataMutation extends LinearRequest {
    * @param id - required id to pass to refreshGoogleSheetsData
    * @returns parsed response from RefreshGoogleSheetsDataMutation
    */
-  public async fetch(id: string): Promise<IntegrationPayload | undefined> {
-    return this.request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
+  public async fetch(id: string): Fetch<IntegrationPayload> {
+    return this._request<D.RefreshGoogleSheetsDataMutation, D.RefreshGoogleSheetsDataMutationVariables>(
       D.RefreshGoogleSheetsDataDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.refreshGoogleSheetsData;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8511,12 +8630,8 @@ class IntegrationSentryConnectMutation extends LinearRequest {
    * @param installationId - required installationId to pass to integrationSentryConnect
    * @returns parsed response from IntegrationSentryConnectMutation
    */
-  public async fetch(
-    organizationSlug: string,
-    code: string,
-    installationId: string
-  ): Promise<IntegrationPayload | undefined> {
-    return this.request<D.IntegrationSentryConnectMutation, D.IntegrationSentryConnectMutationVariables>(
+  public async fetch(organizationSlug: string, code: string, installationId: string): Fetch<IntegrationPayload> {
+    return this._request<D.IntegrationSentryConnectMutation, D.IntegrationSentryConnectMutationVariables>(
       D.IntegrationSentryConnectDocument,
       {
         organizationSlug,
@@ -8525,7 +8640,7 @@ class IntegrationSentryConnectMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.integrationSentryConnect;
-      return data ? new IntegrationPayload(this.request, data) : undefined;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8546,15 +8661,15 @@ class IntegrationDeleteMutation extends LinearRequest {
    * @param id - required id to pass to integrationDelete
    * @returns parsed response from IntegrationDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.IntegrationDeleteMutation, D.IntegrationDeleteMutationVariables>(
       D.IntegrationDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.integrationDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8575,15 +8690,15 @@ class IntegrationResourceArchiveMutation extends LinearRequest {
    * @param id - required id to pass to integrationResourceArchive
    * @returns parsed response from IntegrationResourceArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.IntegrationResourceArchiveMutation, D.IntegrationResourceArchiveMutationVariables>(
       D.IntegrationResourceArchiveDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.integrationResourceArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8604,12 +8719,12 @@ class IssueLabelCreateMutation extends LinearRequest {
    * @param input - required input to pass to issueLabelCreate
    * @returns parsed response from IssueLabelCreateMutation
    */
-  public async fetch(input: D.IssueLabelCreateInput): Promise<IssueLabelPayload | undefined> {
-    return this.request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(D.IssueLabelCreateDocument, {
+  public async fetch(input: D.IssueLabelCreateInput): Fetch<IssueLabelPayload> {
+    return this._request<D.IssueLabelCreateMutation, D.IssueLabelCreateMutationVariables>(D.IssueLabelCreateDocument, {
       input,
     }).then(response => {
       const data = response?.issueLabelCreate;
-      return data ? new IssueLabelPayload(this.request, data) : undefined;
+      return data ? new IssueLabelPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8631,13 +8746,13 @@ class IssueLabelUpdateMutation extends LinearRequest {
    * @param id - required id to pass to issueLabelUpdate
    * @returns parsed response from IssueLabelUpdateMutation
    */
-  public async fetch(input: D.IssueLabelUpdateInput, id: string): Promise<IssueLabelPayload | undefined> {
-    return this.request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(D.IssueLabelUpdateDocument, {
+  public async fetch(input: D.IssueLabelUpdateInput, id: string): Fetch<IssueLabelPayload> {
+    return this._request<D.IssueLabelUpdateMutation, D.IssueLabelUpdateMutationVariables>(D.IssueLabelUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.issueLabelUpdate;
-      return data ? new IssueLabelPayload(this.request, data) : undefined;
+      return data ? new IssueLabelPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8658,15 +8773,15 @@ class IssueLabelArchiveMutation extends LinearRequest {
    * @param id - required id to pass to issueLabelArchive
    * @returns parsed response from IssueLabelArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.IssueLabelArchiveMutation, D.IssueLabelArchiveMutationVariables>(
       D.IssueLabelArchiveDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.issueLabelArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8687,15 +8802,15 @@ class IssueRelationCreateMutation extends LinearRequest {
    * @param input - required input to pass to issueRelationCreate
    * @returns parsed response from IssueRelationCreateMutation
    */
-  public async fetch(input: D.IssueRelationCreateInput): Promise<IssueRelationPayload | undefined> {
-    return this.request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
+  public async fetch(input: D.IssueRelationCreateInput): Fetch<IssueRelationPayload> {
+    return this._request<D.IssueRelationCreateMutation, D.IssueRelationCreateMutationVariables>(
       D.IssueRelationCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.issueRelationCreate;
-      return data ? new IssueRelationPayload(this.request, data) : undefined;
+      return data ? new IssueRelationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8717,8 +8832,8 @@ class IssueRelationUpdateMutation extends LinearRequest {
    * @param id - required id to pass to issueRelationUpdate
    * @returns parsed response from IssueRelationUpdateMutation
    */
-  public async fetch(input: D.IssueRelationUpdateInput, id: string): Promise<IssueRelationPayload | undefined> {
-    return this.request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
+  public async fetch(input: D.IssueRelationUpdateInput, id: string): Fetch<IssueRelationPayload> {
+    return this._request<D.IssueRelationUpdateMutation, D.IssueRelationUpdateMutationVariables>(
       D.IssueRelationUpdateDocument,
       {
         input,
@@ -8726,7 +8841,7 @@ class IssueRelationUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.issueRelationUpdate;
-      return data ? new IssueRelationPayload(this.request, data) : undefined;
+      return data ? new IssueRelationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8747,15 +8862,15 @@ class IssueRelationDeleteMutation extends LinearRequest {
    * @param id - required id to pass to issueRelationDelete
    * @returns parsed response from IssueRelationDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.IssueRelationDeleteMutation, D.IssueRelationDeleteMutationVariables>(
       D.IssueRelationDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.issueRelationDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8776,12 +8891,12 @@ class IssueCreateMutation extends LinearRequest {
    * @param input - required input to pass to issueCreate
    * @returns parsed response from IssueCreateMutation
    */
-  public async fetch(input: D.IssueCreateInput): Promise<IssuePayload | undefined> {
-    return this.request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument, {
+  public async fetch(input: D.IssueCreateInput): Fetch<IssuePayload> {
+    return this._request<D.IssueCreateMutation, D.IssueCreateMutationVariables>(D.IssueCreateDocument, {
       input,
     }).then(response => {
       const data = response?.issueCreate;
-      return data ? new IssuePayload(this.request, data) : undefined;
+      return data ? new IssuePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8803,13 +8918,13 @@ class IssueUpdateMutation extends LinearRequest {
    * @param id - required id to pass to issueUpdate
    * @returns parsed response from IssueUpdateMutation
    */
-  public async fetch(input: D.IssueUpdateInput, id: string): Promise<IssuePayload | undefined> {
-    return this.request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument, {
+  public async fetch(input: D.IssueUpdateInput, id: string): Fetch<IssuePayload> {
+    return this._request<D.IssueUpdateMutation, D.IssueUpdateMutationVariables>(D.IssueUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.issueUpdate;
-      return data ? new IssuePayload(this.request, data) : undefined;
+      return data ? new IssuePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8830,12 +8945,12 @@ class IssueArchiveMutation extends LinearRequest {
    * @param id - required id to pass to issueArchive
    * @returns parsed response from IssueArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.IssueArchiveMutation, D.IssueArchiveMutationVariables>(D.IssueArchiveDocument, {
       id,
     }).then(response => {
       const data = response?.issueArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8856,12 +8971,12 @@ class IssueUnarchiveMutation extends LinearRequest {
    * @param id - required id to pass to issueUnarchive
    * @returns parsed response from IssueUnarchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.IssueUnarchiveMutation, D.IssueUnarchiveMutationVariables>(D.IssueUnarchiveDocument, {
       id,
     }).then(response => {
       const data = response?.issueUnarchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8882,12 +8997,12 @@ class MilestoneCreateMutation extends LinearRequest {
    * @param input - required input to pass to milestoneCreate
    * @returns parsed response from MilestoneCreateMutation
    */
-  public async fetch(input: D.MilestoneCreateInput): Promise<MilestonePayload | undefined> {
-    return this.request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument, {
+  public async fetch(input: D.MilestoneCreateInput): Fetch<MilestonePayload> {
+    return this._request<D.MilestoneCreateMutation, D.MilestoneCreateMutationVariables>(D.MilestoneCreateDocument, {
       input,
     }).then(response => {
       const data = response?.milestoneCreate;
-      return data ? new MilestonePayload(this.request, data) : undefined;
+      return data ? new MilestonePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8909,13 +9024,13 @@ class MilestoneUpdateMutation extends LinearRequest {
    * @param id - required id to pass to milestoneUpdate
    * @returns parsed response from MilestoneUpdateMutation
    */
-  public async fetch(input: D.MilestoneUpdateInput, id: string): Promise<MilestonePayload | undefined> {
-    return this.request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument, {
+  public async fetch(input: D.MilestoneUpdateInput, id: string): Fetch<MilestonePayload> {
+    return this._request<D.MilestoneUpdateMutation, D.MilestoneUpdateMutationVariables>(D.MilestoneUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.milestoneUpdate;
-      return data ? new MilestonePayload(this.request, data) : undefined;
+      return data ? new MilestonePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8936,12 +9051,12 @@ class MilestoneDeleteMutation extends LinearRequest {
    * @param id - required id to pass to milestoneDelete
    * @returns parsed response from MilestoneDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.MilestoneDeleteMutation, D.MilestoneDeleteMutationVariables>(D.MilestoneDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.milestoneDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -8963,8 +9078,8 @@ class NotificationCreateMutation extends LinearRequest {
    * @param id - required id to pass to notificationCreate
    * @returns parsed response from NotificationCreateMutation
    */
-  public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
-    return this.request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
+  public async fetch(input: D.NotificationUpdateInput, id: string): Fetch<NotificationPayload> {
+    return this._request<D.NotificationCreateMutation, D.NotificationCreateMutationVariables>(
       D.NotificationCreateDocument,
       {
         input,
@@ -8972,7 +9087,7 @@ class NotificationCreateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationCreate;
-      return data ? new NotificationPayload(this.request, data) : undefined;
+      return data ? new NotificationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8994,8 +9109,8 @@ class NotificationUpdateMutation extends LinearRequest {
    * @param id - required id to pass to notificationUpdate
    * @returns parsed response from NotificationUpdateMutation
    */
-  public async fetch(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
-    return this.request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
+  public async fetch(input: D.NotificationUpdateInput, id: string): Fetch<NotificationPayload> {
+    return this._request<D.NotificationUpdateMutation, D.NotificationUpdateMutationVariables>(
       D.NotificationUpdateDocument,
       {
         input,
@@ -9003,7 +9118,7 @@ class NotificationUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.notificationUpdate;
-      return data ? new NotificationPayload(this.request, data) : undefined;
+      return data ? new NotificationPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9024,15 +9139,15 @@ class NotificationDeleteMutation extends LinearRequest {
    * @param id - required id to pass to notificationDelete
    * @returns parsed response from NotificationDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.NotificationDeleteMutation, D.NotificationDeleteMutationVariables>(
       D.NotificationDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.notificationDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9053,15 +9168,15 @@ class NotificationArchiveMutation extends LinearRequest {
    * @param id - required id to pass to notificationArchive
    * @returns parsed response from NotificationArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.NotificationArchiveMutation, D.NotificationArchiveMutationVariables>(
       D.NotificationArchiveDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.notificationArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9082,15 +9197,15 @@ class NotificationUnarchiveMutation extends LinearRequest {
    * @param id - required id to pass to notificationUnarchive
    * @returns parsed response from NotificationUnarchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.NotificationUnarchiveMutation, D.NotificationUnarchiveMutationVariables>(
       D.NotificationUnarchiveDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.notificationUnarchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9111,17 +9226,15 @@ class NotificationSubscriptionCreateMutation extends LinearRequest {
    * @param input - required input to pass to notificationSubscriptionCreate
    * @returns parsed response from NotificationSubscriptionCreateMutation
    */
-  public async fetch(
-    input: D.NotificationSubscriptionCreateInput
-  ): Promise<NotificationSubscriptionPayload | undefined> {
-    return this.request<D.NotificationSubscriptionCreateMutation, D.NotificationSubscriptionCreateMutationVariables>(
+  public async fetch(input: D.NotificationSubscriptionCreateInput): Fetch<NotificationSubscriptionPayload> {
+    return this._request<D.NotificationSubscriptionCreateMutation, D.NotificationSubscriptionCreateMutationVariables>(
       D.NotificationSubscriptionCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.notificationSubscriptionCreate;
-      return data ? new NotificationSubscriptionPayload(this.request, data) : undefined;
+      return data ? new NotificationSubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9142,15 +9255,15 @@ class NotificationSubscriptionDeleteMutation extends LinearRequest {
    * @param id - required id to pass to notificationSubscriptionDelete
    * @returns parsed response from NotificationSubscriptionDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.NotificationSubscriptionDeleteMutation, D.NotificationSubscriptionDeleteMutationVariables>(
       D.NotificationSubscriptionDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.notificationSubscriptionDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9171,15 +9284,15 @@ class OauthClientCreateMutation extends LinearRequest {
    * @param input - required input to pass to oauthClientCreate
    * @returns parsed response from OauthClientCreateMutation
    */
-  public async fetch(input: D.OauthClientCreateInput): Promise<OauthClientPayload | undefined> {
-    return this.request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
+  public async fetch(input: D.OauthClientCreateInput): Fetch<OauthClientPayload> {
+    return this._request<D.OauthClientCreateMutation, D.OauthClientCreateMutationVariables>(
       D.OauthClientCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.oauthClientCreate;
-      return data ? new OauthClientPayload(this.request, data) : undefined;
+      return data ? new OauthClientPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9201,8 +9314,8 @@ class OauthClientUpdateMutation extends LinearRequest {
    * @param id - required id to pass to oauthClientUpdate
    * @returns parsed response from OauthClientUpdateMutation
    */
-  public async fetch(input: D.OauthClientUpdateInput, id: string): Promise<OauthClientPayload | undefined> {
-    return this.request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
+  public async fetch(input: D.OauthClientUpdateInput, id: string): Fetch<OauthClientPayload> {
+    return this._request<D.OauthClientUpdateMutation, D.OauthClientUpdateMutationVariables>(
       D.OauthClientUpdateDocument,
       {
         input,
@@ -9210,7 +9323,7 @@ class OauthClientUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.oauthClientUpdate;
-      return data ? new OauthClientPayload(this.request, data) : undefined;
+      return data ? new OauthClientPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9231,15 +9344,15 @@ class OauthClientArchiveMutation extends LinearRequest {
    * @param id - required id to pass to oauthClientArchive
    * @returns parsed response from OauthClientArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.OauthClientArchiveMutation, D.OauthClientArchiveMutationVariables>(
       D.OauthClientArchiveDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.oauthClientArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9260,15 +9373,15 @@ class OauthClientRotateSecretMutation extends LinearRequest {
    * @param id - required id to pass to oauthClientRotateSecret
    * @returns parsed response from OauthClientRotateSecretMutation
    */
-  public async fetch(id: string): Promise<RotateSecretPayload | undefined> {
-    return this.request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
+  public async fetch(id: string): Fetch<RotateSecretPayload> {
+    return this._request<D.OauthClientRotateSecretMutation, D.OauthClientRotateSecretMutationVariables>(
       D.OauthClientRotateSecretDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.oauthClientRotateSecret;
-      return data ? new RotateSecretPayload(this.request, data) : undefined;
+      return data ? new RotateSecretPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9290,13 +9403,13 @@ class OauthTokenRevokeMutation extends LinearRequest {
    * @param appId - required appId to pass to oauthTokenRevoke
    * @returns parsed response from OauthTokenRevokeMutation
    */
-  public async fetch(scope: string[], appId: string): Promise<OauthTokenRevokePayload | undefined> {
-    return this.request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(D.OauthTokenRevokeDocument, {
+  public async fetch(scope: string[], appId: string): Fetch<OauthTokenRevokePayload> {
+    return this._request<D.OauthTokenRevokeMutation, D.OauthTokenRevokeMutationVariables>(D.OauthTokenRevokeDocument, {
       scope,
       appId,
     }).then(response => {
       const data = response?.oauthTokenRevoke;
-      return data ? new OauthTokenRevokePayload(this.request, data) : undefined;
+      return data ? new OauthTokenRevokePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9317,15 +9430,15 @@ class OrganizationDomainVerifyMutation extends LinearRequest {
    * @param input - required input to pass to organizationDomainVerify
    * @returns parsed response from OrganizationDomainVerifyMutation
    */
-  public async fetch(input: D.OrganizationDomainVerificationInput): Promise<OrganizationDomainPayload | undefined> {
-    return this.request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
+  public async fetch(input: D.OrganizationDomainVerificationInput): Fetch<OrganizationDomainPayload> {
+    return this._request<D.OrganizationDomainVerifyMutation, D.OrganizationDomainVerifyMutationVariables>(
       D.OrganizationDomainVerifyDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.organizationDomainVerify;
-      return data ? new OrganizationDomainPayload(this.request, data) : undefined;
+      return data ? new OrganizationDomainPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9346,15 +9459,15 @@ class OrganizationDomainCreateMutation extends LinearRequest {
    * @param input - required input to pass to organizationDomainCreate
    * @returns parsed response from OrganizationDomainCreateMutation
    */
-  public async fetch(input: D.OrganizationDomainCreateInput): Promise<OrganizationDomainPayload | undefined> {
-    return this.request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
+  public async fetch(input: D.OrganizationDomainCreateInput): Fetch<OrganizationDomainPayload> {
+    return this._request<D.OrganizationDomainCreateMutation, D.OrganizationDomainCreateMutationVariables>(
       D.OrganizationDomainCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.organizationDomainCreate;
-      return data ? new OrganizationDomainPayload(this.request, data) : undefined;
+      return data ? new OrganizationDomainPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9375,15 +9488,15 @@ class OrganizationDomainDeleteMutation extends LinearRequest {
    * @param id - required id to pass to organizationDomainDelete
    * @returns parsed response from OrganizationDomainDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.OrganizationDomainDeleteMutation, D.OrganizationDomainDeleteMutationVariables>(
       D.OrganizationDomainDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.organizationDomainDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9404,15 +9517,15 @@ class OrganizationInviteCreateMutation extends LinearRequest {
    * @param input - required input to pass to organizationInviteCreate
    * @returns parsed response from OrganizationInviteCreateMutation
    */
-  public async fetch(input: D.OrganizationInviteCreateInput): Promise<OrganizationInvitePayload | undefined> {
-    return this.request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
+  public async fetch(input: D.OrganizationInviteCreateInput): Fetch<OrganizationInvitePayload> {
+    return this._request<D.OrganizationInviteCreateMutation, D.OrganizationInviteCreateMutationVariables>(
       D.OrganizationInviteCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.organizationInviteCreate;
-      return data ? new OrganizationInvitePayload(this.request, data) : undefined;
+      return data ? new OrganizationInvitePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9433,15 +9546,15 @@ class ResentOrganizationInviteMutation extends LinearRequest {
    * @param id - required id to pass to resentOrganizationInvite
    * @returns parsed response from ResentOrganizationInviteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.ResentOrganizationInviteMutation, D.ResentOrganizationInviteMutationVariables>(
       D.ResentOrganizationInviteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.resentOrganizationInvite;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9462,15 +9575,15 @@ class OrganizationInviteDeleteMutation extends LinearRequest {
    * @param id - required id to pass to organizationInviteDelete
    * @returns parsed response from OrganizationInviteDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.OrganizationInviteDeleteMutation, D.OrganizationInviteDeleteMutationVariables>(
       D.OrganizationInviteDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.organizationInviteDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9491,15 +9604,15 @@ class ProjectLinkCreateMutation extends LinearRequest {
    * @param input - required input to pass to projectLinkCreate
    * @returns parsed response from ProjectLinkCreateMutation
    */
-  public async fetch(input: D.ProjectLinkCreateInput): Promise<ProjectLinkPayload | undefined> {
-    return this.request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
+  public async fetch(input: D.ProjectLinkCreateInput): Fetch<ProjectLinkPayload> {
+    return this._request<D.ProjectLinkCreateMutation, D.ProjectLinkCreateMutationVariables>(
       D.ProjectLinkCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.projectLinkCreate;
-      return data ? new ProjectLinkPayload(this.request, data) : undefined;
+      return data ? new ProjectLinkPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9520,15 +9633,15 @@ class ProjectLinkDeleteMutation extends LinearRequest {
    * @param id - required id to pass to projectLinkDelete
    * @returns parsed response from ProjectLinkDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.ProjectLinkDeleteMutation, D.ProjectLinkDeleteMutationVariables>(
       D.ProjectLinkDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.projectLinkDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9549,12 +9662,12 @@ class ProjectCreateMutation extends LinearRequest {
    * @param input - required input to pass to projectCreate
    * @returns parsed response from ProjectCreateMutation
    */
-  public async fetch(input: D.ProjectCreateInput): Promise<ProjectPayload | undefined> {
-    return this.request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument, {
+  public async fetch(input: D.ProjectCreateInput): Fetch<ProjectPayload> {
+    return this._request<D.ProjectCreateMutation, D.ProjectCreateMutationVariables>(D.ProjectCreateDocument, {
       input,
     }).then(response => {
       const data = response?.projectCreate;
-      return data ? new ProjectPayload(this.request, data) : undefined;
+      return data ? new ProjectPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9576,13 +9689,13 @@ class ProjectUpdateMutation extends LinearRequest {
    * @param id - required id to pass to projectUpdate
    * @returns parsed response from ProjectUpdateMutation
    */
-  public async fetch(input: D.ProjectUpdateInput, id: string): Promise<ProjectPayload | undefined> {
-    return this.request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument, {
+  public async fetch(input: D.ProjectUpdateInput, id: string): Fetch<ProjectPayload> {
+    return this._request<D.ProjectUpdateMutation, D.ProjectUpdateMutationVariables>(D.ProjectUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.projectUpdate;
-      return data ? new ProjectPayload(this.request, data) : undefined;
+      return data ? new ProjectPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9603,12 +9716,12 @@ class ProjectArchiveMutation extends LinearRequest {
    * @param id - required id to pass to projectArchive
    * @returns parsed response from ProjectArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.ProjectArchiveMutation, D.ProjectArchiveMutationVariables>(D.ProjectArchiveDocument, {
       id,
     }).then(response => {
       const data = response?.projectArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9629,15 +9742,15 @@ class PushSubscriptionCreateMutation extends LinearRequest {
    * @param input - required input to pass to pushSubscriptionCreate
    * @returns parsed response from PushSubscriptionCreateMutation
    */
-  public async fetch(input: D.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload | undefined> {
-    return this.request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
+  public async fetch(input: D.PushSubscriptionCreateInput): Fetch<PushSubscriptionPayload> {
+    return this._request<D.PushSubscriptionCreateMutation, D.PushSubscriptionCreateMutationVariables>(
       D.PushSubscriptionCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.pushSubscriptionCreate;
-      return data ? new PushSubscriptionPayload(this.request, data) : undefined;
+      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9658,15 +9771,15 @@ class PushSubscriptionDeleteMutation extends LinearRequest {
    * @param id - required id to pass to pushSubscriptionDelete
    * @returns parsed response from PushSubscriptionDeleteMutation
    */
-  public async fetch(id: string): Promise<PushSubscriptionPayload | undefined> {
-    return this.request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<PushSubscriptionPayload> {
+    return this._request<D.PushSubscriptionDeleteMutation, D.PushSubscriptionDeleteMutationVariables>(
       D.PushSubscriptionDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.pushSubscriptionDelete;
-      return data ? new PushSubscriptionPayload(this.request, data) : undefined;
+      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9687,12 +9800,12 @@ class ReactionCreateMutation extends LinearRequest {
    * @param input - required input to pass to reactionCreate
    * @returns parsed response from ReactionCreateMutation
    */
-  public async fetch(input: D.ReactionCreateInput): Promise<ReactionPayload | undefined> {
-    return this.request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument, {
+  public async fetch(input: D.ReactionCreateInput): Fetch<ReactionPayload> {
+    return this._request<D.ReactionCreateMutation, D.ReactionCreateMutationVariables>(D.ReactionCreateDocument, {
       input,
     }).then(response => {
       const data = response?.reactionCreate;
-      return data ? new ReactionPayload(this.request, data) : undefined;
+      return data ? new ReactionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9713,12 +9826,12 @@ class ReactionDeleteMutation extends LinearRequest {
    * @param id - required id to pass to reactionDelete
    * @returns parsed response from ReactionDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.ReactionDeleteMutation, D.ReactionDeleteMutationVariables>(D.ReactionDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.reactionDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9738,13 +9851,13 @@ class CreateCsvExportReportMutation extends LinearRequest {
    *
    * @returns parsed response from CreateCsvExportReportMutation
    */
-  public async fetch(): Promise<CreateCsvExportReportPayload | undefined> {
-    return this.request<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
+  public async fetch(): Fetch<CreateCsvExportReportPayload> {
+    return this._request<D.CreateCsvExportReportMutation, D.CreateCsvExportReportMutationVariables>(
       D.CreateCsvExportReportDocument,
       {}
     ).then(response => {
       const data = response?.createCsvExportReport;
-      return data ? new CreateCsvExportReportPayload(this.request, data) : undefined;
+      return data ? new CreateCsvExportReportPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9765,15 +9878,15 @@ class SubscriptionSessionCreateMutation extends LinearRequest {
    * @param plan - required plan to pass to subscriptionSessionCreate
    * @returns parsed response from SubscriptionSessionCreateMutation
    */
-  public async fetch(plan: string): Promise<SubscriptionSessionPayload | undefined> {
-    return this.request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
+  public async fetch(plan: string): Fetch<SubscriptionSessionPayload> {
+    return this._request<D.SubscriptionSessionCreateMutation, D.SubscriptionSessionCreateMutationVariables>(
       D.SubscriptionSessionCreateDocument,
       {
         plan,
       }
     ).then(response => {
       const data = response?.subscriptionSessionCreate;
-      return data ? new SubscriptionSessionPayload(this.request, data) : undefined;
+      return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9793,13 +9906,13 @@ class SubscriptionUpdateSessionCreateMutation extends LinearRequest {
    *
    * @returns parsed response from SubscriptionUpdateSessionCreateMutation
    */
-  public async fetch(): Promise<SubscriptionSessionPayload | undefined> {
-    return this.request<D.SubscriptionUpdateSessionCreateMutation, D.SubscriptionUpdateSessionCreateMutationVariables>(
+  public async fetch(): Fetch<SubscriptionSessionPayload> {
+    return this._request<D.SubscriptionUpdateSessionCreateMutation, D.SubscriptionUpdateSessionCreateMutationVariables>(
       D.SubscriptionUpdateSessionCreateDocument,
       {}
     ).then(response => {
       const data = response?.subscriptionUpdateSessionCreate;
-      return data ? new SubscriptionSessionPayload(this.request, data) : undefined;
+      return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9821,8 +9934,8 @@ class SubscriptionUpdateMutation extends LinearRequest {
    * @param id - required id to pass to subscriptionUpdate
    * @returns parsed response from SubscriptionUpdateMutation
    */
-  public async fetch(input: D.SubscriptionUpdateInput, id: string): Promise<SubscriptionPayload | undefined> {
-    return this.request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
+  public async fetch(input: D.SubscriptionUpdateInput, id: string): Fetch<SubscriptionPayload> {
+    return this._request<D.SubscriptionUpdateMutation, D.SubscriptionUpdateMutationVariables>(
       D.SubscriptionUpdateDocument,
       {
         input,
@@ -9830,7 +9943,7 @@ class SubscriptionUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.subscriptionUpdate;
-      return data ? new SubscriptionPayload(this.request, data) : undefined;
+      return data ? new SubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9852,8 +9965,8 @@ class SubscriptionUpgradeMutation extends LinearRequest {
    * @param id - required id to pass to subscriptionUpgrade
    * @returns parsed response from SubscriptionUpgradeMutation
    */
-  public async fetch(type: string, id: string): Promise<SubscriptionPayload | undefined> {
-    return this.request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
+  public async fetch(type: string, id: string): Fetch<SubscriptionPayload> {
+    return this._request<D.SubscriptionUpgradeMutation, D.SubscriptionUpgradeMutationVariables>(
       D.SubscriptionUpgradeDocument,
       {
         type,
@@ -9861,7 +9974,7 @@ class SubscriptionUpgradeMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.subscriptionUpgrade;
-      return data ? new SubscriptionPayload(this.request, data) : undefined;
+      return data ? new SubscriptionPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9882,15 +9995,15 @@ class SubscriptionArchiveMutation extends LinearRequest {
    * @param id - required id to pass to subscriptionArchive
    * @returns parsed response from SubscriptionArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.SubscriptionArchiveMutation, D.SubscriptionArchiveMutationVariables>(
       D.SubscriptionArchiveDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.subscriptionArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9911,15 +10024,15 @@ class TeamMembershipCreateMutation extends LinearRequest {
    * @param input - required input to pass to teamMembershipCreate
    * @returns parsed response from TeamMembershipCreateMutation
    */
-  public async fetch(input: D.TeamMembershipCreateInput): Promise<TeamMembershipPayload | undefined> {
-    return this.request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
+  public async fetch(input: D.TeamMembershipCreateInput): Fetch<TeamMembershipPayload> {
+    return this._request<D.TeamMembershipCreateMutation, D.TeamMembershipCreateMutationVariables>(
       D.TeamMembershipCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.teamMembershipCreate;
-      return data ? new TeamMembershipPayload(this.request, data) : undefined;
+      return data ? new TeamMembershipPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9940,15 +10053,15 @@ class TeamMembershipDeleteMutation extends LinearRequest {
    * @param id - required id to pass to teamMembershipDelete
    * @returns parsed response from TeamMembershipDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.TeamMembershipDeleteMutation, D.TeamMembershipDeleteMutationVariables>(
       D.TeamMembershipDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.teamMembershipDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9967,19 +10080,19 @@ class TeamCreateMutation extends LinearRequest {
    * Call the TeamCreate mutation and return a TeamPayload
    *
    * @param input - required input to pass to teamCreate
-   * @param vars - variables without 'input' to pass into the TeamCreateMutation
+   * @param variables - variables without 'input' to pass into the TeamCreateMutation
    * @returns parsed response from TeamCreateMutation
    */
   public async fetch(
     input: D.TeamCreateInput,
-    vars?: Omit<D.TeamCreateMutationVariables, "input">
-  ): Promise<TeamPayload | undefined> {
-    return this.request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument, {
+    variables?: Omit<D.TeamCreateMutationVariables, "input">
+  ): Fetch<TeamPayload> {
+    return this._request<D.TeamCreateMutation, D.TeamCreateMutationVariables>(D.TeamCreateDocument, {
       input,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.teamCreate;
-      return data ? new TeamPayload(this.request, data) : undefined;
+      return data ? new TeamPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10001,13 +10114,13 @@ class TeamUpdateMutation extends LinearRequest {
    * @param id - required id to pass to teamUpdate
    * @returns parsed response from TeamUpdateMutation
    */
-  public async fetch(input: D.TeamUpdateInput, id: string): Promise<TeamPayload | undefined> {
-    return this.request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument, {
+  public async fetch(input: D.TeamUpdateInput, id: string): Fetch<TeamPayload> {
+    return this._request<D.TeamUpdateMutation, D.TeamUpdateMutationVariables>(D.TeamUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.teamUpdate;
-      return data ? new TeamPayload(this.request, data) : undefined;
+      return data ? new TeamPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10028,12 +10141,12 @@ class TeamArchiveMutation extends LinearRequest {
    * @param id - required id to pass to teamArchive
    * @returns parsed response from TeamArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.TeamArchiveMutation, D.TeamArchiveMutationVariables>(D.TeamArchiveDocument, {
       id,
     }).then(response => {
       const data = response?.teamArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10054,12 +10167,12 @@ class TeamDeleteMutation extends LinearRequest {
    * @param id - required id to pass to teamDelete
    * @returns parsed response from TeamDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.TeamDeleteMutation, D.TeamDeleteMutationVariables>(D.TeamDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.teamDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10080,12 +10193,12 @@ class TemplateCreateMutation extends LinearRequest {
    * @param input - required input to pass to templateCreate
    * @returns parsed response from TemplateCreateMutation
    */
-  public async fetch(input: D.TemplateCreateInput): Promise<TemplatePayload | undefined> {
-    return this.request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument, {
+  public async fetch(input: D.TemplateCreateInput): Fetch<TemplatePayload> {
+    return this._request<D.TemplateCreateMutation, D.TemplateCreateMutationVariables>(D.TemplateCreateDocument, {
       input,
     }).then(response => {
       const data = response?.templateCreate;
-      return data ? new TemplatePayload(this.request, data) : undefined;
+      return data ? new TemplatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10107,13 +10220,13 @@ class TemplateUpdateMutation extends LinearRequest {
    * @param id - required id to pass to templateUpdate
    * @returns parsed response from TemplateUpdateMutation
    */
-  public async fetch(input: D.TemplateUpdateInput, id: string): Promise<TemplatePayload | undefined> {
-    return this.request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument, {
+  public async fetch(input: D.TemplateUpdateInput, id: string): Fetch<TemplatePayload> {
+    return this._request<D.TemplateUpdateMutation, D.TemplateUpdateMutationVariables>(D.TemplateUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.templateUpdate;
-      return data ? new TemplatePayload(this.request, data) : undefined;
+      return data ? new TemplatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10134,12 +10247,12 @@ class TemplateDeleteMutation extends LinearRequest {
    * @param id - required id to pass to templateDelete
    * @returns parsed response from TemplateDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.TemplateDeleteMutation, D.TemplateDeleteMutationVariables>(D.TemplateDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.templateDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10161,8 +10274,8 @@ class UserSettingsUpdateMutation extends LinearRequest {
    * @param id - required id to pass to userSettingsUpdate
    * @returns parsed response from UserSettingsUpdateMutation
    */
-  public async fetch(input: D.UserSettingsUpdateInput, id: string): Promise<UserSettingsPayload | undefined> {
-    return this.request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
+  public async fetch(input: D.UserSettingsUpdateInput, id: string): Fetch<UserSettingsPayload> {
+    return this._request<D.UserSettingsUpdateMutation, D.UserSettingsUpdateMutationVariables>(
       D.UserSettingsUpdateDocument,
       {
         input,
@@ -10170,7 +10283,7 @@ class UserSettingsUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.userSettingsUpdate;
-      return data ? new UserSettingsPayload(this.request, data) : undefined;
+      return data ? new UserSettingsPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10191,15 +10304,15 @@ class UserSettingsFlagIncrementMutation extends LinearRequest {
    * @param flag - required flag to pass to userSettingsFlagIncrement
    * @returns parsed response from UserSettingsFlagIncrementMutation
    */
-  public async fetch(flag: string): Promise<UserSettingsFlagPayload | undefined> {
-    return this.request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
+  public async fetch(flag: string): Fetch<UserSettingsFlagPayload> {
+    return this._request<D.UserSettingsFlagIncrementMutation, D.UserSettingsFlagIncrementMutationVariables>(
       D.UserSettingsFlagIncrementDocument,
       {
         flag,
       }
     ).then(response => {
       const data = response?.userSettingsFlagIncrement;
-      return data ? new UserSettingsFlagPayload(this.request, data) : undefined;
+      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10219,13 +10332,13 @@ class UserSettingsFlagsResetMutation extends LinearRequest {
    *
    * @returns parsed response from UserSettingsFlagsResetMutation
    */
-  public async fetch(): Promise<UserSettingsFlagsResetPayload | undefined> {
-    return this.request<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
+  public async fetch(): Fetch<UserSettingsFlagsResetPayload> {
+    return this._request<D.UserSettingsFlagsResetMutation, D.UserSettingsFlagsResetMutationVariables>(
       D.UserSettingsFlagsResetDocument,
       {}
     ).then(response => {
       const data = response?.userSettingsFlagsReset;
-      return data ? new UserSettingsFlagsResetPayload(this.request, data) : undefined;
+      return data ? new UserSettingsFlagsResetPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10247,16 +10360,13 @@ class UserFlagUpdateMutation extends LinearRequest {
    * @param flag - required flag to pass to userFlagUpdate
    * @returns parsed response from UserFlagUpdateMutation
    */
-  public async fetch(
-    operation: D.UserFlagUpdateOperation,
-    flag: D.UserFlagType
-  ): Promise<UserSettingsFlagPayload | undefined> {
-    return this.request<D.UserFlagUpdateMutation, D.UserFlagUpdateMutationVariables>(D.UserFlagUpdateDocument, {
+  public async fetch(operation: D.UserFlagUpdateOperation, flag: D.UserFlagType): Fetch<UserSettingsFlagPayload> {
+    return this._request<D.UserFlagUpdateMutation, D.UserFlagUpdateMutationVariables>(D.UserFlagUpdateDocument, {
       operation,
       flag,
     }).then(response => {
       const data = response?.userFlagUpdate;
-      return data ? new UserSettingsFlagPayload(this.request, data) : undefined;
+      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10276,13 +10386,13 @@ class UserSubscribeToNewsletterMutation extends LinearRequest {
    *
    * @returns parsed response from UserSubscribeToNewsletterMutation
    */
-  public async fetch(): Promise<UserSubscribeToNewsletterPayload | undefined> {
-    return this.request<D.UserSubscribeToNewsletterMutation, D.UserSubscribeToNewsletterMutationVariables>(
+  public async fetch(): Fetch<UserSubscribeToNewsletterPayload> {
+    return this._request<D.UserSubscribeToNewsletterMutation, D.UserSubscribeToNewsletterMutationVariables>(
       D.UserSubscribeToNewsletterDocument,
       {}
     ).then(response => {
       const data = response?.userSubscribeToNewsletter;
-      return data ? new UserSubscribeToNewsletterPayload(this.request, data) : undefined;
+      return data ? new UserSubscribeToNewsletterPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10303,15 +10413,15 @@ class ViewPreferencesCreateMutation extends LinearRequest {
    * @param input - required input to pass to viewPreferencesCreate
    * @returns parsed response from ViewPreferencesCreateMutation
    */
-  public async fetch(input: D.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload | undefined> {
-    return this.request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
+  public async fetch(input: D.ViewPreferencesCreateInput): Fetch<ViewPreferencesPayload> {
+    return this._request<D.ViewPreferencesCreateMutation, D.ViewPreferencesCreateMutationVariables>(
       D.ViewPreferencesCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.viewPreferencesCreate;
-      return data ? new ViewPreferencesPayload(this.request, data) : undefined;
+      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10333,8 +10443,8 @@ class ViewPreferencesUpdateMutation extends LinearRequest {
    * @param id - required id to pass to viewPreferencesUpdate
    * @returns parsed response from ViewPreferencesUpdateMutation
    */
-  public async fetch(input: D.ViewPreferencesUpdateInput, id: string): Promise<ViewPreferencesPayload | undefined> {
-    return this.request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
+  public async fetch(input: D.ViewPreferencesUpdateInput, id: string): Fetch<ViewPreferencesPayload> {
+    return this._request<D.ViewPreferencesUpdateMutation, D.ViewPreferencesUpdateMutationVariables>(
       D.ViewPreferencesUpdateDocument,
       {
         input,
@@ -10342,7 +10452,7 @@ class ViewPreferencesUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.viewPreferencesUpdate;
-      return data ? new ViewPreferencesPayload(this.request, data) : undefined;
+      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10363,15 +10473,15 @@ class ViewPreferencesDeleteMutation extends LinearRequest {
    * @param id - required id to pass to viewPreferencesDelete
    * @returns parsed response from ViewPreferencesDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.ViewPreferencesDeleteMutation, D.ViewPreferencesDeleteMutationVariables>(
       D.ViewPreferencesDeleteDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.viewPreferencesDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10392,12 +10502,12 @@ class WebhookCreateMutation extends LinearRequest {
    * @param input - required input to pass to webhookCreate
    * @returns parsed response from WebhookCreateMutation
    */
-  public async fetch(input: D.WebhookCreateInput): Promise<WebhookPayload | undefined> {
-    return this.request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
+  public async fetch(input: D.WebhookCreateInput): Fetch<WebhookPayload> {
+    return this._request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
       input,
     }).then(response => {
       const data = response?.webhookCreate;
-      return data ? new WebhookPayload(this.request, data) : undefined;
+      return data ? new WebhookPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10419,13 +10529,13 @@ class WebhookUpdateMutation extends LinearRequest {
    * @param id - required id to pass to webhookUpdate
    * @returns parsed response from WebhookUpdateMutation
    */
-  public async fetch(input: D.WebhookUpdateInput, id: string): Promise<WebhookPayload | undefined> {
-    return this.request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument, {
+  public async fetch(input: D.WebhookUpdateInput, id: string): Fetch<WebhookPayload> {
+    return this._request<D.WebhookUpdateMutation, D.WebhookUpdateMutationVariables>(D.WebhookUpdateDocument, {
       input,
       id,
     }).then(response => {
       const data = response?.webhookUpdate;
-      return data ? new WebhookPayload(this.request, data) : undefined;
+      return data ? new WebhookPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10446,12 +10556,12 @@ class WebhookDeleteMutation extends LinearRequest {
    * @param id - required id to pass to webhookDelete
    * @returns parsed response from WebhookDeleteMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument, {
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.WebhookDeleteMutation, D.WebhookDeleteMutationVariables>(D.WebhookDeleteDocument, {
       id,
     }).then(response => {
       const data = response?.webhookDelete;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10472,15 +10582,15 @@ class WorkflowStateCreateMutation extends LinearRequest {
    * @param input - required input to pass to workflowStateCreate
    * @returns parsed response from WorkflowStateCreateMutation
    */
-  public async fetch(input: D.WorkflowStateCreateInput): Promise<WorkflowStatePayload | undefined> {
-    return this.request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
+  public async fetch(input: D.WorkflowStateCreateInput): Fetch<WorkflowStatePayload> {
+    return this._request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
       D.WorkflowStateCreateDocument,
       {
         input,
       }
     ).then(response => {
       const data = response?.workflowStateCreate;
-      return data ? new WorkflowStatePayload(this.request, data) : undefined;
+      return data ? new WorkflowStatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10502,8 +10612,8 @@ class WorkflowStateUpdateMutation extends LinearRequest {
    * @param id - required id to pass to workflowStateUpdate
    * @returns parsed response from WorkflowStateUpdateMutation
    */
-  public async fetch(input: D.WorkflowStateUpdateInput, id: string): Promise<WorkflowStatePayload | undefined> {
-    return this.request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
+  public async fetch(input: D.WorkflowStateUpdateInput, id: string): Fetch<WorkflowStatePayload> {
+    return this._request<D.WorkflowStateUpdateMutation, D.WorkflowStateUpdateMutationVariables>(
       D.WorkflowStateUpdateDocument,
       {
         input,
@@ -10511,7 +10621,7 @@ class WorkflowStateUpdateMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.workflowStateUpdate;
-      return data ? new WorkflowStatePayload(this.request, data) : undefined;
+      return data ? new WorkflowStatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10532,15 +10642,15 @@ class WorkflowStateArchiveMutation extends LinearRequest {
    * @param id - required id to pass to workflowStateArchive
    * @returns parsed response from WorkflowStateArchiveMutation
    */
-  public async fetch(id: string): Promise<ArchivePayload | undefined> {
-    return this.request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
+  public async fetch(id: string): Fetch<ArchivePayload> {
+    return this._request<D.WorkflowStateArchiveMutation, D.WorkflowStateArchiveMutationVariables>(
       D.WorkflowStateArchiveDocument,
       {
         id,
       }
     ).then(response => {
       const data = response?.workflowStateArchive;
-      return data ? new ArchivePayload(this.request, data) : undefined;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10562,19 +10672,21 @@ class User_AssignedIssuesQuery extends LinearRequest {
   /**
    * Call the User_AssignedIssues query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the User_AssignedIssuesQuery
+   * @param variables - variables without 'id' to pass into the User_AssignedIssuesQuery
    * @returns parsed response from User_AssignedIssuesQuery
    */
-  public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
-    return this.request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
+  public async fetch(variables?: Omit<D.User_AssignedIssuesQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.User_AssignedIssuesQuery, D.User_AssignedIssuesQueryVariables>(
       D.User_AssignedIssuesDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.user?.assignedIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10596,16 +10708,18 @@ class User_CreatedIssuesQuery extends LinearRequest {
   /**
    * Call the User_CreatedIssues query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the User_CreatedIssuesQuery
+   * @param variables - variables without 'id' to pass into the User_CreatedIssuesQuery
    * @returns parsed response from User_CreatedIssuesQuery
    */
-  public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
-    return this.request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
+  public async fetch(variables?: Omit<D.User_CreatedIssuesQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.User_CreatedIssuesQuery, D.User_CreatedIssuesQueryVariables>(D.User_CreatedIssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.user?.createdIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10627,21 +10741,21 @@ class User_TeamMembershipsQuery extends LinearRequest {
   /**
    * Call the User_TeamMemberships query and return a TeamMembershipConnection
    *
-   * @param vars - variables without 'id' to pass into the User_TeamMembershipsQuery
+   * @param variables - variables without 'id' to pass into the User_TeamMembershipsQuery
    * @returns parsed response from User_TeamMembershipsQuery
    */
-  public async fetch(
-    vars?: Omit<D.User_TeamMembershipsQueryVariables, "id">
-  ): Promise<TeamMembershipConnection | undefined> {
-    return this.request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
+  public async fetch(variables?: Omit<D.User_TeamMembershipsQueryVariables, "id">): Fetch<TeamMembershipConnection> {
+    return this._request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
       D.User_TeamMembershipsDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.user?.teamMemberships;
-      return data ? new TeamMembershipConnection(this.request, data) : undefined;
+      return data
+        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10659,16 +10773,18 @@ class Viewer_AssignedIssuesQuery extends LinearRequest {
   /**
    * Call the Viewer_AssignedIssues query and return a IssueConnection
    *
-   * @param vars - variables to pass into the Viewer_AssignedIssuesQuery
+   * @param variables - variables to pass into the Viewer_AssignedIssuesQuery
    * @returns parsed response from Viewer_AssignedIssuesQuery
    */
-  public async fetch(vars?: D.Viewer_AssignedIssuesQueryVariables): Promise<IssueConnection | undefined> {
-    return this.request<D.Viewer_AssignedIssuesQuery, D.Viewer_AssignedIssuesQueryVariables>(
+  public async fetch(variables?: D.Viewer_AssignedIssuesQueryVariables): Fetch<IssueConnection> {
+    return this._request<D.Viewer_AssignedIssuesQuery, D.Viewer_AssignedIssuesQueryVariables>(
       D.Viewer_AssignedIssuesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.viewer?.assignedIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10686,16 +10802,18 @@ class Viewer_CreatedIssuesQuery extends LinearRequest {
   /**
    * Call the Viewer_CreatedIssues query and return a IssueConnection
    *
-   * @param vars - variables to pass into the Viewer_CreatedIssuesQuery
+   * @param variables - variables to pass into the Viewer_CreatedIssuesQuery
    * @returns parsed response from Viewer_CreatedIssuesQuery
    */
-  public async fetch(vars?: D.Viewer_CreatedIssuesQueryVariables): Promise<IssueConnection | undefined> {
-    return this.request<D.Viewer_CreatedIssuesQuery, D.Viewer_CreatedIssuesQueryVariables>(
+  public async fetch(variables?: D.Viewer_CreatedIssuesQueryVariables): Fetch<IssueConnection> {
+    return this._request<D.Viewer_CreatedIssuesQuery, D.Viewer_CreatedIssuesQueryVariables>(
       D.Viewer_CreatedIssuesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.viewer?.createdIssues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10713,16 +10831,18 @@ class Viewer_TeamMembershipsQuery extends LinearRequest {
   /**
    * Call the Viewer_TeamMemberships query and return a TeamMembershipConnection
    *
-   * @param vars - variables to pass into the Viewer_TeamMembershipsQuery
+   * @param variables - variables to pass into the Viewer_TeamMembershipsQuery
    * @returns parsed response from Viewer_TeamMembershipsQuery
    */
-  public async fetch(vars?: D.Viewer_TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
-    return this.request<D.Viewer_TeamMembershipsQuery, D.Viewer_TeamMembershipsQueryVariables>(
+  public async fetch(variables?: D.Viewer_TeamMembershipsQueryVariables): Fetch<TeamMembershipConnection> {
+    return this._request<D.Viewer_TeamMembershipsQuery, D.Viewer_TeamMembershipsQueryVariables>(
       D.Viewer_TeamMembershipsDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.viewer?.teamMemberships;
-      return data ? new TeamMembershipConnection(this.request, data) : undefined;
+      return data
+        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10740,16 +10860,18 @@ class Organization_UsersQuery extends LinearRequest {
   /**
    * Call the Organization_Users query and return a UserConnection
    *
-   * @param vars - variables to pass into the Organization_UsersQuery
+   * @param variables - variables to pass into the Organization_UsersQuery
    * @returns parsed response from Organization_UsersQuery
    */
-  public async fetch(vars?: D.Organization_UsersQueryVariables): Promise<UserConnection | undefined> {
-    return this.request<D.Organization_UsersQuery, D.Organization_UsersQueryVariables>(
+  public async fetch(variables?: D.Organization_UsersQueryVariables): Fetch<UserConnection> {
+    return this._request<D.Organization_UsersQuery, D.Organization_UsersQueryVariables>(
       D.Organization_UsersDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organization?.users;
-      return data ? new UserConnection(this.request, data) : undefined;
+      return data
+        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10767,16 +10889,18 @@ class Organization_TeamsQuery extends LinearRequest {
   /**
    * Call the Organization_Teams query and return a TeamConnection
    *
-   * @param vars - variables to pass into the Organization_TeamsQuery
+   * @param variables - variables to pass into the Organization_TeamsQuery
    * @returns parsed response from Organization_TeamsQuery
    */
-  public async fetch(vars?: D.Organization_TeamsQueryVariables): Promise<TeamConnection | undefined> {
-    return this.request<D.Organization_TeamsQuery, D.Organization_TeamsQueryVariables>(
+  public async fetch(variables?: D.Organization_TeamsQueryVariables): Fetch<TeamConnection> {
+    return this._request<D.Organization_TeamsQuery, D.Organization_TeamsQueryVariables>(
       D.Organization_TeamsDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organization?.teams;
-      return data ? new TeamConnection(this.request, data) : undefined;
+      return data
+        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10794,16 +10918,18 @@ class Organization_MilestonesQuery extends LinearRequest {
   /**
    * Call the Organization_Milestones query and return a MilestoneConnection
    *
-   * @param vars - variables to pass into the Organization_MilestonesQuery
+   * @param variables - variables to pass into the Organization_MilestonesQuery
    * @returns parsed response from Organization_MilestonesQuery
    */
-  public async fetch(vars?: D.Organization_MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
-    return this.request<D.Organization_MilestonesQuery, D.Organization_MilestonesQueryVariables>(
+  public async fetch(variables?: D.Organization_MilestonesQueryVariables): Fetch<MilestoneConnection> {
+    return this._request<D.Organization_MilestonesQuery, D.Organization_MilestonesQueryVariables>(
       D.Organization_MilestonesDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organization?.milestones;
-      return data ? new MilestoneConnection(this.request, data) : undefined;
+      return data
+        ? new MilestoneConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10821,16 +10947,18 @@ class Organization_IntegrationsQuery extends LinearRequest {
   /**
    * Call the Organization_Integrations query and return a IntegrationConnection
    *
-   * @param vars - variables to pass into the Organization_IntegrationsQuery
+   * @param variables - variables to pass into the Organization_IntegrationsQuery
    * @returns parsed response from Organization_IntegrationsQuery
    */
-  public async fetch(vars?: D.Organization_IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
-    return this.request<D.Organization_IntegrationsQuery, D.Organization_IntegrationsQueryVariables>(
+  public async fetch(variables?: D.Organization_IntegrationsQueryVariables): Fetch<IntegrationConnection> {
+    return this._request<D.Organization_IntegrationsQuery, D.Organization_IntegrationsQueryVariables>(
       D.Organization_IntegrationsDocument,
-      vars
+      variables
     ).then(response => {
       const data = response?.organization?.integrations;
-      return data ? new IntegrationConnection(this.request, data) : undefined;
+      return data
+        ? new IntegrationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10850,13 +10978,13 @@ class BillingDetails_PaymentMethodQuery extends LinearRequest {
    *
    * @returns parsed response from BillingDetails_PaymentMethodQuery
    */
-  public async fetch(): Promise<Card | undefined> {
-    return this.request<D.BillingDetails_PaymentMethodQuery, D.BillingDetails_PaymentMethodQueryVariables>(
+  public async fetch(): Fetch<Card> {
+    return this._request<D.BillingDetails_PaymentMethodQuery, D.BillingDetails_PaymentMethodQueryVariables>(
       D.BillingDetails_PaymentMethodDocument,
       {}
     ).then(response => {
       const data = response?.billingDetails?.paymentMethod;
-      return data ? new Card(this.request, data) : undefined;
+      return data ? new Card(this._request, data) : undefined;
     });
   }
 }
@@ -10886,8 +11014,8 @@ class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
    *
    * @returns parsed response from CollaborativeDocumentJoin_StepsQuery
    */
-  public async fetch(): Promise<StepsResponse | undefined> {
-    return this.request<D.CollaborativeDocumentJoin_StepsQuery, D.CollaborativeDocumentJoin_StepsQueryVariables>(
+  public async fetch(): Fetch<StepsResponse> {
+    return this._request<D.CollaborativeDocumentJoin_StepsQuery, D.CollaborativeDocumentJoin_StepsQueryVariables>(
       D.CollaborativeDocumentJoin_StepsDocument,
       {
         clientId: this._clientId,
@@ -10896,7 +11024,7 @@ class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
       }
     ).then(response => {
       const data = response?.collaborativeDocumentJoin?.steps;
-      return data ? new StepsResponse(this.request, data) : undefined;
+      return data ? new StepsResponse(this._request, data) : undefined;
     });
   }
 }
@@ -10918,16 +11046,18 @@ class Cycle_IssuesQuery extends LinearRequest {
   /**
    * Call the Cycle_Issues query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Cycle_IssuesQuery
+   * @param variables - variables without 'id' to pass into the Cycle_IssuesQuery
    * @returns parsed response from Cycle_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.Cycle_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
-    return this.request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
+  public async fetch(variables?: Omit<D.Cycle_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.Cycle_IssuesQuery, D.Cycle_IssuesQueryVariables>(D.Cycle_IssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.cycle?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10949,21 +11079,21 @@ class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
   /**
    * Call the Cycle_UncompletedIssuesUponClose query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Cycle_UncompletedIssuesUponCloseQuery
+   * @param variables - variables without 'id' to pass into the Cycle_UncompletedIssuesUponCloseQuery
    * @returns parsed response from Cycle_UncompletedIssuesUponCloseQuery
    */
-  public async fetch(
-    vars?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
-  ): Promise<IssueConnection | undefined> {
-    return this.request<D.Cycle_UncompletedIssuesUponCloseQuery, D.Cycle_UncompletedIssuesUponCloseQueryVariables>(
+  public async fetch(variables?: Omit<D.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.Cycle_UncompletedIssuesUponCloseQuery, D.Cycle_UncompletedIssuesUponCloseQueryVariables>(
       D.Cycle_UncompletedIssuesUponCloseDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.cycle?.uncompletedIssuesUponClose;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -10985,21 +11115,19 @@ class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
   /**
    * Call the FigmaEmbedInfo_FigmaEmbed query and return a FigmaEmbed
    *
-   * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfo_FigmaEmbedQuery
+   * @param variables - variables without 'fileId' to pass into the FigmaEmbedInfo_FigmaEmbedQuery
    * @returns parsed response from FigmaEmbedInfo_FigmaEmbedQuery
    */
-  public async fetch(
-    vars?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
-  ): Promise<FigmaEmbed | undefined> {
-    return this.request<D.FigmaEmbedInfo_FigmaEmbedQuery, D.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
+  public async fetch(variables?: Omit<D.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">): Fetch<FigmaEmbed> {
+    return this._request<D.FigmaEmbedInfo_FigmaEmbedQuery, D.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       D.FigmaEmbedInfo_FigmaEmbedDocument,
       {
         fileId: this._fileId,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.figmaEmbedInfo?.figmaEmbed;
-      return data ? new FigmaEmbed(this.request, data) : undefined;
+      return data ? new FigmaEmbed(this._request, data) : undefined;
     });
   }
 }
@@ -11023,15 +11151,15 @@ class Integration_SettingsQuery extends LinearRequest {
    *
    * @returns parsed response from Integration_SettingsQuery
    */
-  public async fetch(): Promise<IntegrationSettings | undefined> {
-    return this.request<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
+  public async fetch(): Fetch<IntegrationSettings> {
+    return this._request<D.Integration_SettingsQuery, D.Integration_SettingsQueryVariables>(
       D.Integration_SettingsDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integration?.settings;
-      return data ? new IntegrationSettings(this.request, data) : undefined;
+      return data ? new IntegrationSettings(this._request, data) : undefined;
     });
   }
 }
@@ -11055,15 +11183,15 @@ class Integration_Settings_SlackPostQuery extends LinearRequest {
    *
    * @returns parsed response from Integration_Settings_SlackPostQuery
    */
-  public async fetch(): Promise<SlackPostSettings | undefined> {
-    return this.request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
+  public async fetch(): Fetch<SlackPostSettings> {
+    return this._request<D.Integration_Settings_SlackPostQuery, D.Integration_Settings_SlackPostQueryVariables>(
       D.Integration_Settings_SlackPostDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integration?.settings?.slackPost;
-      return data ? new SlackPostSettings(this.request, data) : undefined;
+      return data ? new SlackPostSettings(this._request, data) : undefined;
     });
   }
 }
@@ -11087,15 +11215,15 @@ class Integration_Settings_SlackProjectPostQuery extends LinearRequest {
    *
    * @returns parsed response from Integration_Settings_SlackProjectPostQuery
    */
-  public async fetch(): Promise<SlackPostSettings | undefined> {
-    return this.request<
+  public async fetch(): Fetch<SlackPostSettings> {
+    return this._request<
       D.Integration_Settings_SlackProjectPostQuery,
       D.Integration_Settings_SlackProjectPostQueryVariables
     >(D.Integration_Settings_SlackProjectPostDocument, {
       id: this._id,
     }).then(response => {
       const data = response?.integration?.settings?.slackProjectPost;
-      return data ? new SlackPostSettings(this.request, data) : undefined;
+      return data ? new SlackPostSettings(this._request, data) : undefined;
     });
   }
 }
@@ -11119,15 +11247,15 @@ class Integration_Settings_GoogleSheetsQuery extends LinearRequest {
    *
    * @returns parsed response from Integration_Settings_GoogleSheetsQuery
    */
-  public async fetch(): Promise<GoogleSheetsSettings | undefined> {
-    return this.request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
+  public async fetch(): Fetch<GoogleSheetsSettings> {
+    return this._request<D.Integration_Settings_GoogleSheetsQuery, D.Integration_Settings_GoogleSheetsQueryVariables>(
       D.Integration_Settings_GoogleSheetsDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integration?.settings?.googleSheets;
-      return data ? new GoogleSheetsSettings(this.request, data) : undefined;
+      return data ? new GoogleSheetsSettings(this._request, data) : undefined;
     });
   }
 }
@@ -11151,15 +11279,15 @@ class Integration_Settings_SentryQuery extends LinearRequest {
    *
    * @returns parsed response from Integration_Settings_SentryQuery
    */
-  public async fetch(): Promise<SentrySettings | undefined> {
-    return this.request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
+  public async fetch(): Fetch<SentrySettings> {
+    return this._request<D.Integration_Settings_SentryQuery, D.Integration_Settings_SentryQueryVariables>(
       D.Integration_Settings_SentryDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integration?.settings?.sentry;
-      return data ? new SentrySettings(this.request, data) : undefined;
+      return data ? new SentrySettings(this._request, data) : undefined;
     });
   }
 }
@@ -11183,15 +11311,15 @@ class IntegrationResource_DataQuery extends LinearRequest {
    *
    * @returns parsed response from IntegrationResource_DataQuery
    */
-  public async fetch(): Promise<IntegrationResourceData | undefined> {
-    return this.request<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
+  public async fetch(): Fetch<IntegrationResourceData> {
+    return this._request<D.IntegrationResource_DataQuery, D.IntegrationResource_DataQueryVariables>(
       D.IntegrationResource_DataDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integrationResource?.data;
-      return data ? new IntegrationResourceData(this.request, data) : undefined;
+      return data ? new IntegrationResourceData(this._request, data) : undefined;
     });
   }
 }
@@ -11215,15 +11343,15 @@ class IntegrationResource_PullRequestQuery extends LinearRequest {
    *
    * @returns parsed response from IntegrationResource_PullRequestQuery
    */
-  public async fetch(): Promise<PullRequestPayload | undefined> {
-    return this.request<D.IntegrationResource_PullRequestQuery, D.IntegrationResource_PullRequestQueryVariables>(
+  public async fetch(): Fetch<PullRequestPayload> {
+    return this._request<D.IntegrationResource_PullRequestQuery, D.IntegrationResource_PullRequestQueryVariables>(
       D.IntegrationResource_PullRequestDocument,
       {
         id: this._id,
       }
     ).then(response => {
       const data = response?.integrationResource?.pullRequest;
-      return data ? new PullRequestPayload(this.request, data) : undefined;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
     });
   }
 }
@@ -11247,15 +11375,15 @@ class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
    *
    * @returns parsed response from IntegrationResource_Data_GithubPullRequestQuery
    */
-  public async fetch(): Promise<PullRequestPayload | undefined> {
-    return this.request<
+  public async fetch(): Fetch<PullRequestPayload> {
+    return this._request<
       D.IntegrationResource_Data_GithubPullRequestQuery,
       D.IntegrationResource_Data_GithubPullRequestQueryVariables
     >(D.IntegrationResource_Data_GithubPullRequestDocument, {
       id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.githubPullRequest;
-      return data ? new PullRequestPayload(this.request, data) : undefined;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
     });
   }
 }
@@ -11279,15 +11407,15 @@ class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
    *
    * @returns parsed response from IntegrationResource_Data_GitlabMergeRequestQuery
    */
-  public async fetch(): Promise<PullRequestPayload | undefined> {
-    return this.request<
+  public async fetch(): Fetch<PullRequestPayload> {
+    return this._request<
       D.IntegrationResource_Data_GitlabMergeRequestQuery,
       D.IntegrationResource_Data_GitlabMergeRequestQueryVariables
     >(D.IntegrationResource_Data_GitlabMergeRequestDocument, {
       id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.gitlabMergeRequest;
-      return data ? new PullRequestPayload(this.request, data) : undefined;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
     });
   }
 }
@@ -11311,15 +11439,15 @@ class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
    *
    * @returns parsed response from IntegrationResource_Data_GithubCommitQuery
    */
-  public async fetch(): Promise<CommitPayload | undefined> {
-    return this.request<
+  public async fetch(): Fetch<CommitPayload> {
+    return this._request<
       D.IntegrationResource_Data_GithubCommitQuery,
       D.IntegrationResource_Data_GithubCommitQueryVariables
     >(D.IntegrationResource_Data_GithubCommitDocument, {
       id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.githubCommit;
-      return data ? new CommitPayload(this.request, data) : undefined;
+      return data ? new CommitPayload(this._request, data) : undefined;
     });
   }
 }
@@ -11343,15 +11471,15 @@ class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
    *
    * @returns parsed response from IntegrationResource_Data_SentryIssueQuery
    */
-  public async fetch(): Promise<SentryIssuePayload | undefined> {
-    return this.request<
+  public async fetch(): Fetch<SentryIssuePayload> {
+    return this._request<
       D.IntegrationResource_Data_SentryIssueQuery,
       D.IntegrationResource_Data_SentryIssueQueryVariables
     >(D.IntegrationResource_Data_SentryIssueDocument, {
       id: this._id,
     }).then(response => {
       const data = response?.integrationResource?.data?.sentryIssue;
-      return data ? new SentryIssuePayload(this.request, data) : undefined;
+      return data ? new SentryIssuePayload(this._request, data) : undefined;
     });
   }
 }
@@ -11373,19 +11501,19 @@ class InviteInfo_InviteDataQuery extends LinearRequest {
   /**
    * Call the InviteInfo_InviteData query and return a InviteData
    *
-   * @param vars - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
+   * @param variables - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
    * @returns parsed response from InviteInfo_InviteDataQuery
    */
-  public async fetch(vars?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">): Promise<InviteData | undefined> {
-    return this.request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
+  public async fetch(variables?: Omit<D.InviteInfo_InviteDataQueryVariables, "userHash">): Fetch<InviteData> {
+    return this._request<D.InviteInfo_InviteDataQuery, D.InviteInfo_InviteDataQueryVariables>(
       D.InviteInfo_InviteDataDocument,
       {
         userHash: this._userHash,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.inviteInfo?.inviteData;
-      return data ? new InviteData(this.request, data) : undefined;
+      return data ? new InviteData(this._request, data) : undefined;
     });
   }
 }
@@ -11407,16 +11535,18 @@ class IssueLabel_IssuesQuery extends LinearRequest {
   /**
    * Call the IssueLabel_Issues query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the IssueLabel_IssuesQuery
+   * @param variables - variables without 'id' to pass into the IssueLabel_IssuesQuery
    * @returns parsed response from IssueLabel_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.IssueLabel_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
-    return this.request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
+  public async fetch(variables?: Omit<D.IssueLabel_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.IssueLabel_IssuesQuery, D.IssueLabel_IssuesQueryVariables>(D.IssueLabel_IssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issueLabel?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11438,16 +11568,18 @@ class Issue_SubscribersQuery extends LinearRequest {
   /**
    * Call the Issue_Subscribers query and return a UserConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_SubscribersQuery
+   * @param variables - variables without 'id' to pass into the Issue_SubscribersQuery
    * @returns parsed response from Issue_SubscribersQuery
    */
-  public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">): Promise<UserConnection | undefined> {
-    return this.request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
+  public async fetch(variables?: Omit<D.Issue_SubscribersQueryVariables, "id">): Fetch<UserConnection> {
+    return this._request<D.Issue_SubscribersQuery, D.Issue_SubscribersQueryVariables>(D.Issue_SubscribersDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.subscribers;
-      return data ? new UserConnection(this.request, data) : undefined;
+      return data
+        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11469,16 +11601,18 @@ class Issue_ChildrenQuery extends LinearRequest {
   /**
    * Call the Issue_Children query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_ChildrenQuery
+   * @param variables - variables without 'id' to pass into the Issue_ChildrenQuery
    * @returns parsed response from Issue_ChildrenQuery
    */
-  public async fetch(vars?: Omit<D.Issue_ChildrenQueryVariables, "id">): Promise<IssueConnection | undefined> {
-    return this.request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
+  public async fetch(variables?: Omit<D.Issue_ChildrenQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.Issue_ChildrenQuery, D.Issue_ChildrenQueryVariables>(D.Issue_ChildrenDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.children;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11500,16 +11634,18 @@ class Issue_CommentsQuery extends LinearRequest {
   /**
    * Call the Issue_Comments query and return a CommentConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_CommentsQuery
+   * @param variables - variables without 'id' to pass into the Issue_CommentsQuery
    * @returns parsed response from Issue_CommentsQuery
    */
-  public async fetch(vars?: Omit<D.Issue_CommentsQueryVariables, "id">): Promise<CommentConnection | undefined> {
-    return this.request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
+  public async fetch(variables?: Omit<D.Issue_CommentsQueryVariables, "id">): Fetch<CommentConnection> {
+    return this._request<D.Issue_CommentsQuery, D.Issue_CommentsQueryVariables>(D.Issue_CommentsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.comments;
-      return data ? new CommentConnection(this.request, data) : undefined;
+      return data
+        ? new CommentConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11531,16 +11667,18 @@ class Issue_HistoryQuery extends LinearRequest {
   /**
    * Call the Issue_History query and return a IssueHistoryConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_HistoryQuery
+   * @param variables - variables without 'id' to pass into the Issue_HistoryQuery
    * @returns parsed response from Issue_HistoryQuery
    */
-  public async fetch(vars?: Omit<D.Issue_HistoryQueryVariables, "id">): Promise<IssueHistoryConnection | undefined> {
-    return this.request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
+  public async fetch(variables?: Omit<D.Issue_HistoryQueryVariables, "id">): Fetch<IssueHistoryConnection> {
+    return this._request<D.Issue_HistoryQuery, D.Issue_HistoryQueryVariables>(D.Issue_HistoryDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.history;
-      return data ? new IssueHistoryConnection(this.request, data) : undefined;
+      return data
+        ? new IssueHistoryConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11562,16 +11700,18 @@ class Issue_LabelsQuery extends LinearRequest {
   /**
    * Call the Issue_Labels query and return a IssueLabelConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_LabelsQuery
+   * @param variables - variables without 'id' to pass into the Issue_LabelsQuery
    * @returns parsed response from Issue_LabelsQuery
    */
-  public async fetch(vars?: Omit<D.Issue_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
-    return this.request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
+  public async fetch(variables?: Omit<D.Issue_LabelsQueryVariables, "id">): Fetch<IssueLabelConnection> {
+    return this._request<D.Issue_LabelsQuery, D.Issue_LabelsQueryVariables>(D.Issue_LabelsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.labels;
-      return data ? new IssueLabelConnection(this.request, data) : undefined;
+      return data
+        ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11593,21 +11733,27 @@ class Issue_IntegrationResourcesQuery extends LinearRequest {
   /**
    * Call the Issue_IntegrationResources query and return a IntegrationResourceConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_IntegrationResourcesQuery
+   * @param variables - variables without 'id' to pass into the Issue_IntegrationResourcesQuery
    * @returns parsed response from Issue_IntegrationResourcesQuery
    */
   public async fetch(
-    vars?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
-  ): Promise<IntegrationResourceConnection | undefined> {
-    return this.request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
+    variables?: Omit<D.Issue_IntegrationResourcesQueryVariables, "id">
+  ): Fetch<IntegrationResourceConnection> {
+    return this._request<D.Issue_IntegrationResourcesQuery, D.Issue_IntegrationResourcesQueryVariables>(
       D.Issue_IntegrationResourcesDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.issue?.integrationResources;
-      return data ? new IntegrationResourceConnection(this.request, data) : undefined;
+      return data
+        ? new IntegrationResourceConnection(
+            this._request,
+            pagination => this.fetch({ ...variables, ...pagination }),
+            data
+          )
+        : undefined;
     });
   }
 }
@@ -11629,16 +11775,18 @@ class Issue_RelationsQuery extends LinearRequest {
   /**
    * Call the Issue_Relations query and return a IssueRelationConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_RelationsQuery
+   * @param variables - variables without 'id' to pass into the Issue_RelationsQuery
    * @returns parsed response from Issue_RelationsQuery
    */
-  public async fetch(vars?: Omit<D.Issue_RelationsQueryVariables, "id">): Promise<IssueRelationConnection | undefined> {
-    return this.request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
+  public async fetch(variables?: Omit<D.Issue_RelationsQueryVariables, "id">): Fetch<IssueRelationConnection> {
+    return this._request<D.Issue_RelationsQuery, D.Issue_RelationsQueryVariables>(D.Issue_RelationsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.issue?.relations;
-      return data ? new IssueRelationConnection(this.request, data) : undefined;
+      return data
+        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11660,21 +11808,21 @@ class Issue_InverseRelationsQuery extends LinearRequest {
   /**
    * Call the Issue_InverseRelations query and return a IssueRelationConnection
    *
-   * @param vars - variables without 'id' to pass into the Issue_InverseRelationsQuery
+   * @param variables - variables without 'id' to pass into the Issue_InverseRelationsQuery
    * @returns parsed response from Issue_InverseRelationsQuery
    */
-  public async fetch(
-    vars?: Omit<D.Issue_InverseRelationsQueryVariables, "id">
-  ): Promise<IssueRelationConnection | undefined> {
-    return this.request<D.Issue_InverseRelationsQuery, D.Issue_InverseRelationsQueryVariables>(
+  public async fetch(variables?: Omit<D.Issue_InverseRelationsQueryVariables, "id">): Fetch<IssueRelationConnection> {
+    return this._request<D.Issue_InverseRelationsQuery, D.Issue_InverseRelationsQueryVariables>(
       D.Issue_InverseRelationsDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.issue?.inverseRelations;
-      return data ? new IssueRelationConnection(this.request, data) : undefined;
+      return data
+        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11696,16 +11844,18 @@ class Milestone_ProjectsQuery extends LinearRequest {
   /**
    * Call the Milestone_Projects query and return a ProjectConnection
    *
-   * @param vars - variables without 'id' to pass into the Milestone_ProjectsQuery
+   * @param variables - variables without 'id' to pass into the Milestone_ProjectsQuery
    * @returns parsed response from Milestone_ProjectsQuery
    */
-  public async fetch(vars?: Omit<D.Milestone_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
-    return this.request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
+  public async fetch(variables?: Omit<D.Milestone_ProjectsQueryVariables, "id">): Fetch<ProjectConnection> {
+    return this._request<D.Milestone_ProjectsQuery, D.Milestone_ProjectsQueryVariables>(D.Milestone_ProjectsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.milestone?.projects;
-      return data ? new ProjectConnection(this.request, data) : undefined;
+      return data
+        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11727,21 +11877,21 @@ class OrganizationInvite_IssuesQuery extends LinearRequest {
   /**
    * Call the OrganizationInvite_Issues query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
+   * @param variables - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
    * @returns parsed response from OrganizationInvite_IssuesQuery
    */
-  public async fetch(
-    vars?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">
-  ): Promise<IssueConnection | undefined> {
-    return this.request<D.OrganizationInvite_IssuesQuery, D.OrganizationInvite_IssuesQueryVariables>(
+  public async fetch(variables?: Omit<D.OrganizationInvite_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.OrganizationInvite_IssuesQuery, D.OrganizationInvite_IssuesQueryVariables>(
       D.OrganizationInvite_IssuesDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.organizationInvite?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11763,16 +11913,18 @@ class Project_TeamsQuery extends LinearRequest {
   /**
    * Call the Project_Teams query and return a TeamConnection
    *
-   * @param vars - variables without 'id' to pass into the Project_TeamsQuery
+   * @param variables - variables without 'id' to pass into the Project_TeamsQuery
    * @returns parsed response from Project_TeamsQuery
    */
-  public async fetch(vars?: Omit<D.Project_TeamsQueryVariables, "id">): Promise<TeamConnection | undefined> {
-    return this.request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
+  public async fetch(variables?: Omit<D.Project_TeamsQueryVariables, "id">): Fetch<TeamConnection> {
+    return this._request<D.Project_TeamsQuery, D.Project_TeamsQueryVariables>(D.Project_TeamsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.project?.teams;
-      return data ? new TeamConnection(this.request, data) : undefined;
+      return data
+        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11794,16 +11946,18 @@ class Project_MembersQuery extends LinearRequest {
   /**
    * Call the Project_Members query and return a UserConnection
    *
-   * @param vars - variables without 'id' to pass into the Project_MembersQuery
+   * @param variables - variables without 'id' to pass into the Project_MembersQuery
    * @returns parsed response from Project_MembersQuery
    */
-  public async fetch(vars?: Omit<D.Project_MembersQueryVariables, "id">): Promise<UserConnection | undefined> {
-    return this.request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
+  public async fetch(variables?: Omit<D.Project_MembersQueryVariables, "id">): Fetch<UserConnection> {
+    return this._request<D.Project_MembersQuery, D.Project_MembersQueryVariables>(D.Project_MembersDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.project?.members;
-      return data ? new UserConnection(this.request, data) : undefined;
+      return data
+        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11825,16 +11979,18 @@ class Project_IssuesQuery extends LinearRequest {
   /**
    * Call the Project_Issues query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Project_IssuesQuery
+   * @param variables - variables without 'id' to pass into the Project_IssuesQuery
    * @returns parsed response from Project_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.Project_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
-    return this.request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
+  public async fetch(variables?: Omit<D.Project_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.Project_IssuesQuery, D.Project_IssuesQueryVariables>(D.Project_IssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.project?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11856,16 +12012,18 @@ class Project_LinksQuery extends LinearRequest {
   /**
    * Call the Project_Links query and return a ProjectLinkConnection
    *
-   * @param vars - variables without 'id' to pass into the Project_LinksQuery
+   * @param variables - variables without 'id' to pass into the Project_LinksQuery
    * @returns parsed response from Project_LinksQuery
    */
-  public async fetch(vars?: Omit<D.Project_LinksQueryVariables, "id">): Promise<ProjectLinkConnection | undefined> {
-    return this.request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
+  public async fetch(variables?: Omit<D.Project_LinksQueryVariables, "id">): Fetch<ProjectLinkConnection> {
+    return this._request<D.Project_LinksQuery, D.Project_LinksQueryVariables>(D.Project_LinksDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.project?.links;
-      return data ? new ProjectLinkConnection(this.request, data) : undefined;
+      return data
+        ? new ProjectLinkConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11887,16 +12045,18 @@ class Team_IssuesQuery extends LinearRequest {
   /**
    * Call the Team_Issues query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_IssuesQuery
+   * @param variables - variables without 'id' to pass into the Team_IssuesQuery
    * @returns parsed response from Team_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.Team_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
-    return this.request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
+  public async fetch(variables?: Omit<D.Team_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.Team_IssuesQuery, D.Team_IssuesQueryVariables>(D.Team_IssuesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11918,16 +12078,18 @@ class Team_CyclesQuery extends LinearRequest {
   /**
    * Call the Team_Cycles query and return a CycleConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_CyclesQuery
+   * @param variables - variables without 'id' to pass into the Team_CyclesQuery
    * @returns parsed response from Team_CyclesQuery
    */
-  public async fetch(vars?: Omit<D.Team_CyclesQueryVariables, "id">): Promise<CycleConnection | undefined> {
-    return this.request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
+  public async fetch(variables?: Omit<D.Team_CyclesQueryVariables, "id">): Fetch<CycleConnection> {
+    return this._request<D.Team_CyclesQuery, D.Team_CyclesQueryVariables>(D.Team_CyclesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.cycles;
-      return data ? new CycleConnection(this.request, data) : undefined;
+      return data
+        ? new CycleConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11949,18 +12111,18 @@ class Team_MembershipsQuery extends LinearRequest {
   /**
    * Call the Team_Memberships query and return a TeamMembershipConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_MembershipsQuery
+   * @param variables - variables without 'id' to pass into the Team_MembershipsQuery
    * @returns parsed response from Team_MembershipsQuery
    */
-  public async fetch(
-    vars?: Omit<D.Team_MembershipsQueryVariables, "id">
-  ): Promise<TeamMembershipConnection | undefined> {
-    return this.request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
+  public async fetch(variables?: Omit<D.Team_MembershipsQueryVariables, "id">): Fetch<TeamMembershipConnection> {
+    return this._request<D.Team_MembershipsQuery, D.Team_MembershipsQueryVariables>(D.Team_MembershipsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.memberships;
-      return data ? new TeamMembershipConnection(this.request, data) : undefined;
+      return data
+        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -11982,16 +12144,18 @@ class Team_ProjectsQuery extends LinearRequest {
   /**
    * Call the Team_Projects query and return a ProjectConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_ProjectsQuery
+   * @param variables - variables without 'id' to pass into the Team_ProjectsQuery
    * @returns parsed response from Team_ProjectsQuery
    */
-  public async fetch(vars?: Omit<D.Team_ProjectsQueryVariables, "id">): Promise<ProjectConnection | undefined> {
-    return this.request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
+  public async fetch(variables?: Omit<D.Team_ProjectsQueryVariables, "id">): Fetch<ProjectConnection> {
+    return this._request<D.Team_ProjectsQuery, D.Team_ProjectsQueryVariables>(D.Team_ProjectsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.projects;
-      return data ? new ProjectConnection(this.request, data) : undefined;
+      return data
+        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -12013,16 +12177,18 @@ class Team_StatesQuery extends LinearRequest {
   /**
    * Call the Team_States query and return a WorkflowStateConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_StatesQuery
+   * @param variables - variables without 'id' to pass into the Team_StatesQuery
    * @returns parsed response from Team_StatesQuery
    */
-  public async fetch(vars?: Omit<D.Team_StatesQueryVariables, "id">): Promise<WorkflowStateConnection | undefined> {
-    return this.request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
+  public async fetch(variables?: Omit<D.Team_StatesQueryVariables, "id">): Fetch<WorkflowStateConnection> {
+    return this._request<D.Team_StatesQuery, D.Team_StatesQueryVariables>(D.Team_StatesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.states;
-      return data ? new WorkflowStateConnection(this.request, data) : undefined;
+      return data
+        ? new WorkflowStateConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -12044,16 +12210,16 @@ class Team_TemplatesQuery extends LinearRequest {
   /**
    * Call the Team_Templates query and return a TemplateConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_TemplatesQuery
+   * @param variables - variables without 'id' to pass into the Team_TemplatesQuery
    * @returns parsed response from Team_TemplatesQuery
    */
-  public async fetch(vars?: Omit<D.Team_TemplatesQueryVariables, "id">): Promise<TemplateConnection | undefined> {
-    return this.request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
+  public async fetch(variables?: Omit<D.Team_TemplatesQueryVariables, "id">): Fetch<TemplateConnection> {
+    return this._request<D.Team_TemplatesQuery, D.Team_TemplatesQueryVariables>(D.Team_TemplatesDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.templates;
-      return data ? new TemplateConnection(this.request, data) : undefined;
+      return data ? new TemplateConnection(this._request, data) : undefined;
     });
   }
 }
@@ -12075,16 +12241,18 @@ class Team_LabelsQuery extends LinearRequest {
   /**
    * Call the Team_Labels query and return a IssueLabelConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_LabelsQuery
+   * @param variables - variables without 'id' to pass into the Team_LabelsQuery
    * @returns parsed response from Team_LabelsQuery
    */
-  public async fetch(vars?: Omit<D.Team_LabelsQueryVariables, "id">): Promise<IssueLabelConnection | undefined> {
-    return this.request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
+  public async fetch(variables?: Omit<D.Team_LabelsQueryVariables, "id">): Fetch<IssueLabelConnection> {
+    return this._request<D.Team_LabelsQuery, D.Team_LabelsQueryVariables>(D.Team_LabelsDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.labels;
-      return data ? new IssueLabelConnection(this.request, data) : undefined;
+      return data
+        ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -12106,16 +12274,18 @@ class Team_WebhooksQuery extends LinearRequest {
   /**
    * Call the Team_Webhooks query and return a WebhookConnection
    *
-   * @param vars - variables without 'id' to pass into the Team_WebhooksQuery
+   * @param variables - variables without 'id' to pass into the Team_WebhooksQuery
    * @returns parsed response from Team_WebhooksQuery
    */
-  public async fetch(vars?: Omit<D.Team_WebhooksQueryVariables, "id">): Promise<WebhookConnection | undefined> {
-    return this.request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
+  public async fetch(variables?: Omit<D.Team_WebhooksQueryVariables, "id">): Fetch<WebhookConnection> {
+    return this._request<D.Team_WebhooksQuery, D.Team_WebhooksQueryVariables>(D.Team_WebhooksDocument, {
       id: this._id,
-      ...vars,
+      ...variables,
     }).then(response => {
       const data = response?.team?.webhooks;
-      return data ? new WebhookConnection(this.request, data) : undefined;
+      return data
+        ? new WebhookConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -12137,19 +12307,21 @@ class WorkflowState_IssuesQuery extends LinearRequest {
   /**
    * Call the WorkflowState_Issues query and return a IssueConnection
    *
-   * @param vars - variables without 'id' to pass into the WorkflowState_IssuesQuery
+   * @param variables - variables without 'id' to pass into the WorkflowState_IssuesQuery
    * @returns parsed response from WorkflowState_IssuesQuery
    */
-  public async fetch(vars?: Omit<D.WorkflowState_IssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
-    return this.request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
+  public async fetch(variables?: Omit<D.WorkflowState_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
+    return this._request<D.WorkflowState_IssuesQuery, D.WorkflowState_IssuesQueryVariables>(
       D.WorkflowState_IssuesDocument,
       {
         id: this._id,
-        ...vars,
+        ...variables,
       }
     ).then(response => {
       const data = response?.workflowState?.issues;
-      return data ? new IssueConnection(this.request, data) : undefined;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -12168,11 +12340,11 @@ export class LinearSdk extends LinearRequest {
    * Query users for UserConnection
    * All users for the organization.
    *
-   * @param vars - variables to pass into the UsersQuery
+   * @param variables - variables to pass into the UsersQuery
    * @returns UserConnection
    */
-  public users(vars?: D.UsersQueryVariables): Promise<UserConnection | undefined> {
-    return new UsersQuery(this.request).fetch(vars);
+  public users(variables?: D.UsersQueryVariables): Fetch<UserConnection> {
+    return new UsersQuery(this._request).fetch(variables);
   }
   /**
    * Query user for User
@@ -12181,8 +12353,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to user
    * @returns User
    */
-  public user(id: string): Promise<User | undefined> {
-    return new UserQuery(this.request).fetch(id);
+  public user(id: string): Fetch<User> {
+    return new UserQuery(this._request).fetch(id);
   }
   /**
    * Query viewer for User
@@ -12190,8 +12362,8 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns User
    */
-  public get viewer(): Promise<User | undefined> {
-    return new ViewerQuery(this.request).fetch();
+  public get viewer(): Fetch<User> {
+    return new ViewerQuery(this._request).fetch();
   }
   /**
    * Query organization for Organization
@@ -12199,8 +12371,8 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns Organization
    */
-  public get organization(): Promise<Organization | undefined> {
-    return new OrganizationQuery(this.request).fetch();
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
   }
   /**
    * Query organizationExists for OrganizationExistsPayload
@@ -12209,8 +12381,8 @@ export class LinearSdk extends LinearRequest {
    * @param urlKey - required urlKey to pass to organizationExists
    * @returns OrganizationExistsPayload
    */
-  public organizationExists(urlKey: string): Promise<OrganizationExistsPayload | undefined> {
-    return new OrganizationExistsQuery(this.request).fetch(urlKey);
+  public organizationExists(urlKey: string): Fetch<OrganizationExistsPayload> {
+    return new OrganizationExistsQuery(this._request).fetch(urlKey);
   }
   /**
    * Query syncBootstrap for SyncResponse
@@ -12220,8 +12392,8 @@ export class LinearSdk extends LinearRequest {
    * @param sinceSyncId - required sinceSyncId to pass to syncBootstrap
    * @returns SyncResponse
    */
-  public syncBootstrap(databaseVersion: number, sinceSyncId: number): Promise<SyncResponse | undefined> {
-    return new SyncBootstrapQuery(this.request).fetch(databaseVersion, sinceSyncId);
+  public syncBootstrap(databaseVersion: number, sinceSyncId: number): Fetch<SyncResponse> {
+    return new SyncBootstrapQuery(this._request).fetch(databaseVersion, sinceSyncId);
   }
   /**
    * Query syncUpdates for SyncResponse
@@ -12230,8 +12402,8 @@ export class LinearSdk extends LinearRequest {
    * @param sinceSyncId - required sinceSyncId to pass to syncUpdates
    * @returns SyncResponse
    */
-  public syncUpdates(sinceSyncId: number): Promise<SyncResponse | undefined> {
-    return new SyncUpdatesQuery(this.request).fetch(sinceSyncId);
+  public syncUpdates(sinceSyncId: number): Fetch<SyncResponse> {
+    return new SyncUpdatesQuery(this._request).fetch(sinceSyncId);
   }
   /**
    * Query archivedModelSync for ArchiveResponse
@@ -12241,8 +12413,8 @@ export class LinearSdk extends LinearRequest {
    * @param modelClass - required modelClass to pass to archivedModelSync
    * @returns ArchiveResponse
    */
-  public archivedModelSync(identifier: string, modelClass: string): Promise<ArchiveResponse | undefined> {
-    return new ArchivedModelSyncQuery(this.request).fetch(identifier, modelClass);
+  public archivedModelSync(identifier: string, modelClass: string): Fetch<ArchiveResponse> {
+    return new ArchivedModelSyncQuery(this._request).fetch(identifier, modelClass);
   }
   /**
    * Query archivedModelsSync for ArchiveResponse
@@ -12250,37 +12422,35 @@ export class LinearSdk extends LinearRequest {
    *
    * @param modelClass - required modelClass to pass to archivedModelsSync
    * @param teamId - required teamId to pass to archivedModelsSync
-   * @param vars - variables without 'modelClass', 'teamId' to pass into the ArchivedModelsSyncQuery
+   * @param variables - variables without 'modelClass', 'teamId' to pass into the ArchivedModelsSyncQuery
    * @returns ArchiveResponse
    */
   public archivedModelsSync(
     modelClass: string,
     teamId: string,
-    vars?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
-  ): Promise<ArchiveResponse | undefined> {
-    return new ArchivedModelsSyncQuery(this.request).fetch(modelClass, teamId, vars);
+    variables?: Omit<D.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
+  ): Fetch<ArchiveResponse> {
+    return new ArchivedModelsSyncQuery(this._request).fetch(modelClass, teamId, variables);
   }
   /**
    * Query adminUserAccountLookup for UserAccountAdminPrivileged
    * Finds a user account by email or identifier. Super user required.
    *
-   * @param vars - variables to pass into the AdminUserAccountLookupQuery
+   * @param variables - variables to pass into the AdminUserAccountLookupQuery
    * @returns UserAccountAdminPrivileged
    */
-  public adminUserAccountLookup(
-    vars?: D.AdminUserAccountLookupQueryVariables
-  ): Promise<UserAccountAdminPrivileged | undefined> {
-    return new AdminUserAccountLookupQuery(this.request).fetch(vars);
+  public adminUserAccountLookup(variables?: D.AdminUserAccountLookupQueryVariables): Fetch<UserAccountAdminPrivileged> {
+    return new AdminUserAccountLookupQuery(this._request).fetch(variables);
   }
   /**
    * Query apiKeys for ApiKeyConnection
    * All API keys for the user.
    *
-   * @param vars - variables to pass into the ApiKeysQuery
+   * @param variables - variables to pass into the ApiKeysQuery
    * @returns ApiKeyConnection
    */
-  public apiKeys(vars?: D.ApiKeysQueryVariables): Promise<ApiKeyConnection | undefined> {
-    return new ApiKeysQuery(this.request).fetch(vars);
+  public apiKeys(variables?: D.ApiKeysQueryVariables): Fetch<ApiKeyConnection> {
+    return new ApiKeysQuery(this._request).fetch(variables);
   }
   /**
    * Query applicationWithAuthorization for UserAuthorizedApplication
@@ -12288,15 +12458,15 @@ export class LinearSdk extends LinearRequest {
    *
    * @param scope - required scope to pass to applicationWithAuthorization
    * @param clientId - required clientId to pass to applicationWithAuthorization
-   * @param vars - variables without 'scope', 'clientId' to pass into the ApplicationWithAuthorizationQuery
+   * @param variables - variables without 'scope', 'clientId' to pass into the ApplicationWithAuthorizationQuery
    * @returns UserAuthorizedApplication
    */
   public applicationWithAuthorization(
     scope: string[],
     clientId: string,
-    vars?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
-  ): Promise<UserAuthorizedApplication | undefined> {
-    return new ApplicationWithAuthorizationQuery(this.request).fetch(scope, clientId, vars);
+    variables?: Omit<D.ApplicationWithAuthorizationQueryVariables, "scope" | "clientId">
+  ): Fetch<UserAuthorizedApplication> {
+    return new ApplicationWithAuthorizationQuery(this._request).fetch(scope, clientId, variables);
   }
   /**
    * Query authorizedApplications for AuthorizedApplications
@@ -12304,8 +12474,8 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns AuthorizedApplication[]
    */
-  public get authorizedApplications(): Promise<AuthorizedApplication[] | undefined> {
-    return new AuthorizedApplicationsQuery(this.request).fetch();
+  public get authorizedApplications(): Fetch<AuthorizedApplication[]> {
+    return new AuthorizedApplicationsQuery(this._request).fetch();
   }
   /**
    * Query availableUsers for AuthResolverResponse
@@ -12313,22 +12483,22 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns AuthResolverResponse
    */
-  public get availableUsers(): Promise<AuthResolverResponse | undefined> {
-    return new AvailableUsersQuery(this.request).fetch();
+  public get availableUsers(): Fetch<AuthResolverResponse> {
+    return new AvailableUsersQuery(this._request).fetch();
   }
   /**
    * Query ssoUrlFromEmail for SsoUrlFromEmailResponse
    * Fetch SSO login URL for the email provided.
    *
    * @param email - required email to pass to ssoUrlFromEmail
-   * @param vars - variables without 'email' to pass into the SsoUrlFromEmailQuery
+   * @param variables - variables without 'email' to pass into the SsoUrlFromEmailQuery
    * @returns SsoUrlFromEmailResponse
    */
   public ssoUrlFromEmail(
     email: string,
-    vars?: Omit<D.SsoUrlFromEmailQueryVariables, "email">
-  ): Promise<SsoUrlFromEmailResponse | undefined> {
-    return new SsoUrlFromEmailQuery(this.request).fetch(email, vars);
+    variables?: Omit<D.SsoUrlFromEmailQueryVariables, "email">
+  ): Fetch<SsoUrlFromEmailResponse> {
+    return new SsoUrlFromEmailQuery(this._request).fetch(email, variables);
   }
   /**
    * Query billingDetails for BillingDetailsPayload
@@ -12336,8 +12506,8 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns BillingDetailsPayload
    */
-  public get billingDetails(): Promise<BillingDetailsPayload | undefined> {
-    return new BillingDetailsQuery(this.request).fetch();
+  public get billingDetails(): Fetch<BillingDetailsPayload> {
+    return new BillingDetailsQuery(this._request).fetch();
   }
   /**
    * Query collaborativeDocumentJoin for CollaborationDocumentUpdatePayload
@@ -12352,18 +12522,18 @@ export class LinearSdk extends LinearRequest {
     clientId: string,
     issueId: string,
     version: number
-  ): Promise<CollaborationDocumentUpdatePayload | undefined> {
-    return new CollaborativeDocumentJoinQuery(this.request).fetch(clientId, issueId, version);
+  ): Fetch<CollaborationDocumentUpdatePayload> {
+    return new CollaborativeDocumentJoinQuery(this._request).fetch(clientId, issueId, version);
   }
   /**
    * Query comments for CommentConnection
    * All comments.
    *
-   * @param vars - variables to pass into the CommentsQuery
+   * @param variables - variables to pass into the CommentsQuery
    * @returns CommentConnection
    */
-  public comments(vars?: D.CommentsQueryVariables): Promise<CommentConnection | undefined> {
-    return new CommentsQuery(this.request).fetch(vars);
+  public comments(variables?: D.CommentsQueryVariables): Fetch<CommentConnection> {
+    return new CommentsQuery(this._request).fetch(variables);
   }
   /**
    * Query comment for Comment
@@ -12372,18 +12542,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to comment
    * @returns Comment
    */
-  public comment(id: string): Promise<Comment | undefined> {
-    return new CommentQuery(this.request).fetch(id);
+  public comment(id: string): Fetch<Comment> {
+    return new CommentQuery(this._request).fetch(id);
   }
   /**
    * Query customViews for CustomViewConnection
    * Custom views for the user.
    *
-   * @param vars - variables to pass into the CustomViewsQuery
+   * @param variables - variables to pass into the CustomViewsQuery
    * @returns CustomViewConnection
    */
-  public customViews(vars?: D.CustomViewsQueryVariables): Promise<CustomViewConnection | undefined> {
-    return new CustomViewsQuery(this.request).fetch(vars);
+  public customViews(variables?: D.CustomViewsQueryVariables): Fetch<CustomViewConnection> {
+    return new CustomViewsQuery(this._request).fetch(variables);
   }
   /**
    * Query customView for CustomView
@@ -12392,18 +12562,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to customView
    * @returns CustomView
    */
-  public customView(id: string): Promise<CustomView | undefined> {
-    return new CustomViewQuery(this.request).fetch(id);
+  public customView(id: string): Fetch<CustomView> {
+    return new CustomViewQuery(this._request).fetch(id);
   }
   /**
    * Query cycles for CycleConnection
    * All cycles.
    *
-   * @param vars - variables to pass into the CyclesQuery
+   * @param variables - variables to pass into the CyclesQuery
    * @returns CycleConnection
    */
-  public cycles(vars?: D.CyclesQueryVariables): Promise<CycleConnection | undefined> {
-    return new CyclesQuery(this.request).fetch(vars);
+  public cycles(variables?: D.CyclesQueryVariables): Fetch<CycleConnection> {
+    return new CyclesQuery(this._request).fetch(variables);
   }
   /**
    * Query cycle for Cycle
@@ -12412,18 +12582,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to cycle
    * @returns Cycle
    */
-  public cycle(id: string): Promise<Cycle | undefined> {
-    return new CycleQuery(this.request).fetch(id);
+  public cycle(id: string): Fetch<Cycle> {
+    return new CycleQuery(this._request).fetch(id);
   }
   /**
    * Query emojis for EmojiConnection
    * All custom emojis.
    *
-   * @param vars - variables to pass into the EmojisQuery
+   * @param variables - variables to pass into the EmojisQuery
    * @returns EmojiConnection
    */
-  public emojis(vars?: D.EmojisQueryVariables): Promise<EmojiConnection | undefined> {
-    return new EmojisQuery(this.request).fetch(vars);
+  public emojis(variables?: D.EmojisQueryVariables): Fetch<EmojiConnection> {
+    return new EmojisQuery(this._request).fetch(variables);
   }
   /**
    * Query emoji for Emoji
@@ -12432,18 +12602,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to emoji
    * @returns Emoji
    */
-  public emoji(id: string): Promise<Emoji | undefined> {
-    return new EmojiQuery(this.request).fetch(id);
+  public emoji(id: string): Fetch<Emoji> {
+    return new EmojiQuery(this._request).fetch(id);
   }
   /**
    * Query favorites for FavoriteConnection
    * The user's favorites.
    *
-   * @param vars - variables to pass into the FavoritesQuery
+   * @param variables - variables to pass into the FavoritesQuery
    * @returns FavoriteConnection
    */
-  public favorites(vars?: D.FavoritesQueryVariables): Promise<FavoriteConnection | undefined> {
-    return new FavoritesQuery(this.request).fetch(vars);
+  public favorites(variables?: D.FavoritesQueryVariables): Fetch<FavoriteConnection> {
+    return new FavoritesQuery(this._request).fetch(variables);
   }
   /**
    * Query favorite for Favorite
@@ -12452,32 +12622,32 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to favorite
    * @returns Favorite
    */
-  public favorite(id: string): Promise<Favorite | undefined> {
-    return new FavoriteQuery(this.request).fetch(id);
+  public favorite(id: string): Fetch<Favorite> {
+    return new FavoriteQuery(this._request).fetch(id);
   }
   /**
    * Query figmaEmbedInfo for FigmaEmbedPayload
    * Fetch Figma screenshot and other information with file and node identifiers.
    *
    * @param fileId - required fileId to pass to figmaEmbedInfo
-   * @param vars - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
+   * @param variables - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
    * @returns FigmaEmbedPayload
    */
   public figmaEmbedInfo(
     fileId: string,
-    vars?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">
-  ): Promise<FigmaEmbedPayload | undefined> {
-    return new FigmaEmbedInfoQuery(this.request).fetch(fileId, vars);
+    variables?: Omit<D.FigmaEmbedInfoQueryVariables, "fileId">
+  ): Fetch<FigmaEmbedPayload> {
+    return new FigmaEmbedInfoQuery(this._request).fetch(fileId, variables);
   }
   /**
    * Query integrations for IntegrationConnection
    * All integrations.
    *
-   * @param vars - variables to pass into the IntegrationsQuery
+   * @param variables - variables to pass into the IntegrationsQuery
    * @returns IntegrationConnection
    */
-  public integrations(vars?: D.IntegrationsQueryVariables): Promise<IntegrationConnection | undefined> {
-    return new IntegrationsQuery(this.request).fetch(vars);
+  public integrations(variables?: D.IntegrationsQueryVariables): Fetch<IntegrationConnection> {
+    return new IntegrationsQuery(this._request).fetch(variables);
   }
   /**
    * Query integration for Integration
@@ -12486,20 +12656,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to integration
    * @returns Integration
    */
-  public integration(id: string): Promise<Integration | undefined> {
-    return new IntegrationQuery(this.request).fetch(id);
+  public integration(id: string): Fetch<Integration> {
+    return new IntegrationQuery(this._request).fetch(id);
   }
   /**
    * Query integrationResources for IntegrationResourceConnection
    * All integrations resources (e.g. linked GitHub pull requests for issues).
    *
-   * @param vars - variables to pass into the IntegrationResourcesQuery
+   * @param variables - variables to pass into the IntegrationResourcesQuery
    * @returns IntegrationResourceConnection
    */
-  public integrationResources(
-    vars?: D.IntegrationResourcesQueryVariables
-  ): Promise<IntegrationResourceConnection | undefined> {
-    return new IntegrationResourcesQuery(this.request).fetch(vars);
+  public integrationResources(variables?: D.IntegrationResourcesQueryVariables): Fetch<IntegrationResourceConnection> {
+    return new IntegrationResourcesQuery(this._request).fetch(variables);
   }
   /**
    * Query integrationResource for IntegrationResource
@@ -12508,32 +12676,32 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to integrationResource
    * @returns IntegrationResource
    */
-  public integrationResource(id: string): Promise<IntegrationResource | undefined> {
-    return new IntegrationResourceQuery(this.request).fetch(id);
+  public integrationResource(id: string): Fetch<IntegrationResource> {
+    return new IntegrationResourceQuery(this._request).fetch(id);
   }
   /**
    * Query inviteInfo for InvitePagePayload
    * Retrieves information for the public invite page.
    *
    * @param userHash - required userHash to pass to inviteInfo
-   * @param vars - variables without 'userHash' to pass into the InviteInfoQuery
+   * @param variables - variables without 'userHash' to pass into the InviteInfoQuery
    * @returns InvitePagePayload
    */
   public inviteInfo(
     userHash: string,
-    vars?: Omit<D.InviteInfoQueryVariables, "userHash">
-  ): Promise<InvitePagePayload | undefined> {
-    return new InviteInfoQuery(this.request).fetch(userHash, vars);
+    variables?: Omit<D.InviteInfoQueryVariables, "userHash">
+  ): Fetch<InvitePagePayload> {
+    return new InviteInfoQuery(this._request).fetch(userHash, variables);
   }
   /**
    * Query issueLabels for IssueLabelConnection
    * All issue labels.
    *
-   * @param vars - variables to pass into the IssueLabelsQuery
+   * @param variables - variables to pass into the IssueLabelsQuery
    * @returns IssueLabelConnection
    */
-  public issueLabels(vars?: D.IssueLabelsQueryVariables): Promise<IssueLabelConnection | undefined> {
-    return new IssueLabelsQuery(this.request).fetch(vars);
+  public issueLabels(variables?: D.IssueLabelsQueryVariables): Fetch<IssueLabelConnection> {
+    return new IssueLabelsQuery(this._request).fetch(variables);
   }
   /**
    * Query issueLabel for IssueLabel
@@ -12542,18 +12710,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueLabel
    * @returns IssueLabel
    */
-  public issueLabel(id: string): Promise<IssueLabel | undefined> {
-    return new IssueLabelQuery(this.request).fetch(id);
+  public issueLabel(id: string): Fetch<IssueLabel> {
+    return new IssueLabelQuery(this._request).fetch(id);
   }
   /**
    * Query issueRelations for IssueRelationConnection
    * All issue relationships.
    *
-   * @param vars - variables to pass into the IssueRelationsQuery
+   * @param variables - variables to pass into the IssueRelationsQuery
    * @returns IssueRelationConnection
    */
-  public issueRelations(vars?: D.IssueRelationsQueryVariables): Promise<IssueRelationConnection | undefined> {
-    return new IssueRelationsQuery(this.request).fetch(vars);
+  public issueRelations(variables?: D.IssueRelationsQueryVariables): Fetch<IssueRelationConnection> {
+    return new IssueRelationsQuery(this._request).fetch(variables);
   }
   /**
    * Query issueRelation for IssueRelation
@@ -12562,18 +12730,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueRelation
    * @returns IssueRelation
    */
-  public issueRelation(id: string): Promise<IssueRelation | undefined> {
-    return new IssueRelationQuery(this.request).fetch(id);
+  public issueRelation(id: string): Fetch<IssueRelation> {
+    return new IssueRelationQuery(this._request).fetch(id);
   }
   /**
    * Query issues for IssueConnection
    * All issues.
    *
-   * @param vars - variables to pass into the IssuesQuery
+   * @param variables - variables to pass into the IssuesQuery
    * @returns IssueConnection
    */
-  public issues(vars?: D.IssuesQueryVariables): Promise<IssueConnection | undefined> {
-    return new IssuesQuery(this.request).fetch(vars);
+  public issues(variables?: D.IssuesQueryVariables): Fetch<IssueConnection> {
+    return new IssuesQuery(this._request).fetch(variables);
   }
   /**
    * Query issue for Issue
@@ -12582,32 +12750,29 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issue
    * @returns Issue
    */
-  public issue(id: string): Promise<Issue | undefined> {
-    return new IssueQuery(this.request).fetch(id);
+  public issue(id: string): Fetch<Issue> {
+    return new IssueQuery(this._request).fetch(id);
   }
   /**
    * Query issueSearch for IssueConnection
    * [ALPHA] Search issues. This query is experimental and is subject to change without notice.
    *
    * @param query - required query to pass to issueSearch
-   * @param vars - variables without 'query' to pass into the IssueSearchQuery
+   * @param variables - variables without 'query' to pass into the IssueSearchQuery
    * @returns IssueConnection
    */
-  public issueSearch(
-    query: string,
-    vars?: Omit<D.IssueSearchQueryVariables, "query">
-  ): Promise<IssueConnection | undefined> {
-    return new IssueSearchQuery(this.request).fetch(query, vars);
+  public issueSearch(query: string, variables?: Omit<D.IssueSearchQueryVariables, "query">): Fetch<IssueConnection> {
+    return new IssueSearchQuery(this._request).fetch(query, variables);
   }
   /**
    * Query milestones for MilestoneConnection
    * All milestones.
    *
-   * @param vars - variables to pass into the MilestonesQuery
+   * @param variables - variables to pass into the MilestonesQuery
    * @returns MilestoneConnection
    */
-  public milestones(vars?: D.MilestonesQueryVariables): Promise<MilestoneConnection | undefined> {
-    return new MilestonesQuery(this.request).fetch(vars);
+  public milestones(variables?: D.MilestonesQueryVariables): Fetch<MilestoneConnection> {
+    return new MilestonesQuery(this._request).fetch(variables);
   }
   /**
    * Query milestone for Milestone
@@ -12616,18 +12781,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to milestone
    * @returns Milestone
    */
-  public milestone(id: string): Promise<Milestone | undefined> {
-    return new MilestoneQuery(this.request).fetch(id);
+  public milestone(id: string): Fetch<Milestone> {
+    return new MilestoneQuery(this._request).fetch(id);
   }
   /**
    * Query notifications for NotificationConnection
    * All notifications.
    *
-   * @param vars - variables to pass into the NotificationsQuery
+   * @param variables - variables to pass into the NotificationsQuery
    * @returns NotificationConnection
    */
-  public notifications(vars?: D.NotificationsQueryVariables): Promise<NotificationConnection | undefined> {
-    return new NotificationsQuery(this.request).fetch(vars);
+  public notifications(variables?: D.NotificationsQueryVariables): Fetch<NotificationConnection> {
+    return new NotificationsQuery(this._request).fetch(variables);
   }
   /**
    * Query notification for Notification
@@ -12636,20 +12801,20 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to notification
    * @returns Notification
    */
-  public notification(id: string): Promise<Notification | undefined> {
-    return new NotificationQuery(this.request).fetch(id);
+  public notification(id: string): Fetch<Notification> {
+    return new NotificationQuery(this._request).fetch(id);
   }
   /**
    * Query notificationSubscriptions for NotificationSubscriptionConnection
    * The user's notification subscriptions.
    *
-   * @param vars - variables to pass into the NotificationSubscriptionsQuery
+   * @param variables - variables to pass into the NotificationSubscriptionsQuery
    * @returns NotificationSubscriptionConnection
    */
   public notificationSubscriptions(
-    vars?: D.NotificationSubscriptionsQueryVariables
-  ): Promise<NotificationSubscriptionConnection | undefined> {
-    return new NotificationSubscriptionsQuery(this.request).fetch(vars);
+    variables?: D.NotificationSubscriptionsQueryVariables
+  ): Fetch<NotificationSubscriptionConnection> {
+    return new NotificationSubscriptionsQuery(this._request).fetch(variables);
   }
   /**
    * Query notificationSubscription for NotificationSubscription
@@ -12658,20 +12823,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to notificationSubscription
    * @returns NotificationSubscription
    */
-  public notificationSubscription(id: string): Promise<NotificationSubscription | undefined> {
-    return new NotificationSubscriptionQuery(this.request).fetch(id);
+  public notificationSubscription(id: string): Fetch<NotificationSubscription> {
+    return new NotificationSubscriptionQuery(this._request).fetch(id);
   }
   /**
    * Query organizationInvites for OrganizationInviteConnection
    * All invites for the organization.
    *
-   * @param vars - variables to pass into the OrganizationInvitesQuery
+   * @param variables - variables to pass into the OrganizationInvitesQuery
    * @returns OrganizationInviteConnection
    */
-  public organizationInvites(
-    vars?: D.OrganizationInvitesQueryVariables
-  ): Promise<OrganizationInviteConnection | undefined> {
-    return new OrganizationInvitesQuery(this.request).fetch(vars);
+  public organizationInvites(variables?: D.OrganizationInvitesQueryVariables): Fetch<OrganizationInviteConnection> {
+    return new OrganizationInvitesQuery(this._request).fetch(variables);
   }
   /**
    * Query organizationInvite for IssueLabel
@@ -12680,18 +12843,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to organizationInvite
    * @returns IssueLabel
    */
-  public organizationInvite(id: string): Promise<IssueLabel | undefined> {
-    return new OrganizationInviteQuery(this.request).fetch(id);
+  public organizationInvite(id: string): Fetch<IssueLabel> {
+    return new OrganizationInviteQuery(this._request).fetch(id);
   }
   /**
    * Query projectLinks for ProjectLinkConnection
    * All links for the project.
    *
-   * @param vars - variables to pass into the ProjectLinksQuery
+   * @param variables - variables to pass into the ProjectLinksQuery
    * @returns ProjectLinkConnection
    */
-  public projectLinks(vars?: D.ProjectLinksQueryVariables): Promise<ProjectLinkConnection | undefined> {
-    return new ProjectLinksQuery(this.request).fetch(vars);
+  public projectLinks(variables?: D.ProjectLinksQueryVariables): Fetch<ProjectLinkConnection> {
+    return new ProjectLinksQuery(this._request).fetch(variables);
   }
   /**
    * Query projectLink for ProjectLink
@@ -12700,18 +12863,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to projectLink
    * @returns ProjectLink
    */
-  public projectLink(id: string): Promise<ProjectLink | undefined> {
-    return new ProjectLinkQuery(this.request).fetch(id);
+  public projectLink(id: string): Fetch<ProjectLink> {
+    return new ProjectLinkQuery(this._request).fetch(id);
   }
   /**
    * Query projects for ProjectConnection
    * All projects.
    *
-   * @param vars - variables to pass into the ProjectsQuery
+   * @param variables - variables to pass into the ProjectsQuery
    * @returns ProjectConnection
    */
-  public projects(vars?: D.ProjectsQueryVariables): Promise<ProjectConnection | undefined> {
-    return new ProjectsQuery(this.request).fetch(vars);
+  public projects(variables?: D.ProjectsQueryVariables): Fetch<ProjectConnection> {
+    return new ProjectsQuery(this._request).fetch(variables);
   }
   /**
    * Query project for Project
@@ -12720,8 +12883,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to project
    * @returns Project
    */
-  public project(id: string): Promise<Project | undefined> {
-    return new ProjectQuery(this.request).fetch(id);
+  public project(id: string): Fetch<Project> {
+    return new ProjectQuery(this._request).fetch(id);
   }
   /**
    * Query pushSubscriptionTest for PushSubscriptionPayload
@@ -12729,18 +12892,18 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns PushSubscriptionPayload
    */
-  public get pushSubscriptionTest(): Promise<PushSubscriptionPayload | undefined> {
-    return new PushSubscriptionTestQuery(this.request).fetch();
+  public get pushSubscriptionTest(): Fetch<PushSubscriptionPayload> {
+    return new PushSubscriptionTestQuery(this._request).fetch();
   }
   /**
    * Query reactions for ReactionConnection
    * All comment emoji reactions.
    *
-   * @param vars - variables to pass into the ReactionsQuery
+   * @param variables - variables to pass into the ReactionsQuery
    * @returns ReactionConnection
    */
-  public reactions(vars?: D.ReactionsQueryVariables): Promise<ReactionConnection | undefined> {
-    return new ReactionsQuery(this.request).fetch(vars);
+  public reactions(variables?: D.ReactionsQueryVariables): Fetch<ReactionConnection> {
+    return new ReactionsQuery(this._request).fetch(variables);
   }
   /**
    * Query reaction for Reaction
@@ -12749,8 +12912,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to reaction
    * @returns Reaction
    */
-  public reaction(id: string): Promise<Reaction | undefined> {
-    return new ReactionQuery(this.request).fetch(id);
+  public reaction(id: string): Fetch<Reaction> {
+    return new ReactionQuery(this._request).fetch(id);
   }
   /**
    * Query subscription for Subscription
@@ -12758,18 +12921,18 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns Subscription
    */
-  public get subscription(): Promise<Subscription | undefined> {
-    return new SubscriptionQuery(this.request).fetch();
+  public get subscription(): Fetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
   }
   /**
    * Query teamMemberships for TeamMembershipConnection
    * All team memberships.
    *
-   * @param vars - variables to pass into the TeamMembershipsQuery
+   * @param variables - variables to pass into the TeamMembershipsQuery
    * @returns TeamMembershipConnection
    */
-  public teamMemberships(vars?: D.TeamMembershipsQueryVariables): Promise<TeamMembershipConnection | undefined> {
-    return new TeamMembershipsQuery(this.request).fetch(vars);
+  public teamMemberships(variables?: D.TeamMembershipsQueryVariables): Fetch<TeamMembershipConnection> {
+    return new TeamMembershipsQuery(this._request).fetch(variables);
   }
   /**
    * Query teamMembership for TeamMembership
@@ -12778,18 +12941,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to teamMembership
    * @returns TeamMembership
    */
-  public teamMembership(id: string): Promise<TeamMembership | undefined> {
-    return new TeamMembershipQuery(this.request).fetch(id);
+  public teamMembership(id: string): Fetch<TeamMembership> {
+    return new TeamMembershipQuery(this._request).fetch(id);
   }
   /**
    * Query teams for TeamConnection
    * All teams.
    *
-   * @param vars - variables to pass into the TeamsQuery
+   * @param variables - variables to pass into the TeamsQuery
    * @returns TeamConnection
    */
-  public teams(vars?: D.TeamsQueryVariables): Promise<TeamConnection | undefined> {
-    return new TeamsQuery(this.request).fetch(vars);
+  public teams(variables?: D.TeamsQueryVariables): Fetch<TeamConnection> {
+    return new TeamsQuery(this._request).fetch(variables);
   }
   /**
    * Query team for Team
@@ -12798,8 +12961,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to team
    * @returns Team
    */
-  public team(id: string): Promise<Team | undefined> {
-    return new TeamQuery(this.request).fetch(id);
+  public team(id: string): Fetch<Team> {
+    return new TeamQuery(this._request).fetch(id);
   }
   /**
    * Query templates for Templates
@@ -12807,8 +12970,8 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns Template[]
    */
-  public get templates(): Promise<Template[] | undefined> {
-    return new TemplatesQuery(this.request).fetch();
+  public get templates(): Fetch<Template[]> {
+    return new TemplatesQuery(this._request).fetch();
   }
   /**
    * Query template for Template
@@ -12817,8 +12980,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to template
    * @returns Template
    */
-  public template(id: string): Promise<Template | undefined> {
-    return new TemplateQuery(this.request).fetch(id);
+  public template(id: string): Fetch<Template> {
+    return new TemplateQuery(this._request).fetch(id);
   }
   /**
    * Query userSettings for UserSettings
@@ -12826,18 +12989,18 @@ export class LinearSdk extends LinearRequest {
    *
    * @returns UserSettings
    */
-  public get userSettings(): Promise<UserSettings | undefined> {
-    return new UserSettingsQuery(this.request).fetch();
+  public get userSettings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
   }
   /**
    * Query webhooks for WebhookConnection
    * All webhooks.
    *
-   * @param vars - variables to pass into the WebhooksQuery
+   * @param variables - variables to pass into the WebhooksQuery
    * @returns WebhookConnection
    */
-  public webhooks(vars?: D.WebhooksQueryVariables): Promise<WebhookConnection | undefined> {
-    return new WebhooksQuery(this.request).fetch(vars);
+  public webhooks(variables?: D.WebhooksQueryVariables): Fetch<WebhookConnection> {
+    return new WebhooksQuery(this._request).fetch(variables);
   }
   /**
    * Query webhook for Webhook
@@ -12846,18 +13009,18 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to webhook
    * @returns Webhook
    */
-  public webhook(id: string): Promise<Webhook | undefined> {
-    return new WebhookQuery(this.request).fetch(id);
+  public webhook(id: string): Fetch<Webhook> {
+    return new WebhookQuery(this._request).fetch(id);
   }
   /**
    * Query workflowStates for WorkflowStateConnection
    * All issue workflow states.
    *
-   * @param vars - variables to pass into the WorkflowStatesQuery
+   * @param variables - variables to pass into the WorkflowStatesQuery
    * @returns WorkflowStateConnection
    */
-  public workflowStates(vars?: D.WorkflowStatesQueryVariables): Promise<WorkflowStateConnection | undefined> {
-    return new WorkflowStatesQuery(this.request).fetch(vars);
+  public workflowStates(variables?: D.WorkflowStatesQueryVariables): Fetch<WorkflowStateConnection> {
+    return new WorkflowStatesQuery(this._request).fetch(variables);
   }
   /**
    * Query workflowState for WorkflowState
@@ -12866,8 +13029,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to workflowState
    * @returns WorkflowState
    */
-  public workflowState(id: string): Promise<WorkflowState | undefined> {
-    return new WorkflowStateQuery(this.request).fetch(id);
+  public workflowState(id: string): Fetch<WorkflowState> {
+    return new WorkflowStateQuery(this._request).fetch(id);
   }
   /**
    * Mutation userUpdate for UserPayload
@@ -12876,8 +13039,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to userUpdate
    * @returns UserPayload
    */
-  public userUpdate(input: D.UpdateUserInput, id: string): Promise<UserPayload | undefined> {
-    return new UserUpdateMutation(this.request).fetch(input, id);
+  public userUpdate(input: D.UpdateUserInput, id: string): Fetch<UserPayload> {
+    return new UserUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation userPromoteAdmin for UserAdminPayload
@@ -12885,8 +13048,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to userPromoteAdmin
    * @returns UserAdminPayload
    */
-  public userPromoteAdmin(id: string): Promise<UserAdminPayload | undefined> {
-    return new UserPromoteAdminMutation(this.request).fetch(id);
+  public userPromoteAdmin(id: string): Fetch<UserAdminPayload> {
+    return new UserPromoteAdminMutation(this._request).fetch(id);
   }
   /**
    * Mutation userDemoteAdmin for UserAdminPayload
@@ -12894,8 +13057,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to userDemoteAdmin
    * @returns UserAdminPayload
    */
-  public userDemoteAdmin(id: string): Promise<UserAdminPayload | undefined> {
-    return new UserDemoteAdminMutation(this.request).fetch(id);
+  public userDemoteAdmin(id: string): Fetch<UserAdminPayload> {
+    return new UserDemoteAdminMutation(this._request).fetch(id);
   }
   /**
    * Mutation userSuspend for UserAdminPayload
@@ -12903,8 +13066,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to userSuspend
    * @returns UserAdminPayload
    */
-  public userSuspend(id: string): Promise<UserAdminPayload | undefined> {
-    return new UserSuspendMutation(this.request).fetch(id);
+  public userSuspend(id: string): Fetch<UserAdminPayload> {
+    return new UserSuspendMutation(this._request).fetch(id);
   }
   /**
    * Mutation userUnsuspend for UserAdminPayload
@@ -12912,8 +13075,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to userUnsuspend
    * @returns UserAdminPayload
    */
-  public userUnsuspend(id: string): Promise<UserAdminPayload | undefined> {
-    return new UserUnsuspendMutation(this.request).fetch(id);
+  public userUnsuspend(id: string): Fetch<UserAdminPayload> {
+    return new UserUnsuspendMutation(this._request).fetch(id);
   }
   /**
    * Mutation organizationUpdate for OrganizationPayload
@@ -12921,16 +13084,16 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to organizationUpdate
    * @returns OrganizationPayload
    */
-  public organizationUpdate(input: D.UpdateOrganizationInput): Promise<OrganizationPayload | undefined> {
-    return new OrganizationUpdateMutation(this.request).fetch(input);
+  public organizationUpdate(input: D.UpdateOrganizationInput): Fetch<OrganizationPayload> {
+    return new OrganizationUpdateMutation(this._request).fetch(input);
   }
   /**
    * Mutation organizationDeleteChallenge for OrganizationDeletePayload
    *
    * @returns OrganizationDeletePayload
    */
-  public get organizationDeleteChallenge(): Promise<OrganizationDeletePayload | undefined> {
-    return new OrganizationDeleteChallengeMutation(this.request).fetch();
+  public get organizationDeleteChallenge(): Fetch<OrganizationDeletePayload> {
+    return new OrganizationDeleteChallengeMutation(this._request).fetch();
   }
   /**
    * Mutation organizationDelete for OrganizationDeletePayload
@@ -12938,8 +13101,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to organizationDelete
    * @returns OrganizationDeletePayload
    */
-  public organizationDelete(input: D.DeleteOrganizationInput): Promise<OrganizationDeletePayload | undefined> {
-    return new OrganizationDeleteMutation(this.request).fetch(input);
+  public organizationDelete(input: D.DeleteOrganizationInput): Fetch<OrganizationDeletePayload> {
+    return new OrganizationDeleteMutation(this._request).fetch(input);
   }
   /**
    * Mutation adminDeleteIntegration for AdminIntegrationPayload
@@ -12947,8 +13110,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to adminDeleteIntegration
    * @returns AdminIntegrationPayload
    */
-  public adminDeleteIntegration(id: string): Promise<AdminIntegrationPayload | undefined> {
-    return new AdminDeleteIntegrationMutation(this.request).fetch(id);
+  public adminDeleteIntegration(id: string): Fetch<AdminIntegrationPayload> {
+    return new AdminDeleteIntegrationMutation(this._request).fetch(id);
   }
   /**
    * Mutation organizationToggleAccess for OrganizationAccessPayload
@@ -12956,8 +13119,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to organizationToggleAccess
    * @returns OrganizationAccessPayload
    */
-  public organizationToggleAccess(id: string): Promise<OrganizationAccessPayload | undefined> {
-    return new OrganizationToggleAccessMutation(this.request).fetch(id);
+  public organizationToggleAccess(id: string): Fetch<OrganizationAccessPayload> {
+    return new OrganizationToggleAccessMutation(this._request).fetch(id);
   }
   /**
    * Mutation organizationChangeEmailDomain for OrganizationAccessPayload
@@ -12971,8 +13134,8 @@ export class LinearSdk extends LinearRequest {
     toDomain: string,
     fromDomain: string,
     id: string
-  ): Promise<OrganizationAccessPayload | undefined> {
-    return new OrganizationChangeEmailDomainMutation(this.request).fetch(toDomain, fromDomain, id);
+  ): Fetch<OrganizationAccessPayload> {
+    return new OrganizationChangeEmailDomainMutation(this._request).fetch(toDomain, fromDomain, id);
   }
   /**
    * Mutation organizationToggleSamlEnabled for OrganizationSamlConfigurePayload
@@ -12980,8 +13143,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to organizationToggleSamlEnabled
    * @returns OrganizationSamlConfigurePayload
    */
-  public organizationToggleSamlEnabled(id: string): Promise<OrganizationSamlConfigurePayload | undefined> {
-    return new OrganizationToggleSamlEnabledMutation(this.request).fetch(id);
+  public organizationToggleSamlEnabled(id: string): Fetch<OrganizationSamlConfigurePayload> {
+    return new OrganizationToggleSamlEnabledMutation(this._request).fetch(id);
   }
   /**
    * Mutation organizationConfigureSaml for OrganizationSamlConfigurePayload
@@ -12993,8 +13156,8 @@ export class LinearSdk extends LinearRequest {
   public organizationConfigureSaml(
     samlConfiguration: D.SamlConfigurationInput,
     id: string
-  ): Promise<OrganizationSamlConfigurePayload | undefined> {
-    return new OrganizationConfigureSamlMutation(this.request).fetch(samlConfiguration, id);
+  ): Fetch<OrganizationSamlConfigurePayload> {
+    return new OrganizationConfigureSamlMutation(this._request).fetch(samlConfiguration, id);
   }
   /**
    * Mutation adminCommand for AdminCommandPayload
@@ -13002,8 +13165,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to adminCommand
    * @returns AdminCommandPayload
    */
-  public adminCommand(input: D.AdminCommandInput): Promise<AdminCommandPayload | undefined> {
-    return new AdminCommandMutation(this.request).fetch(input);
+  public adminCommand(input: D.AdminCommandInput): Fetch<AdminCommandPayload> {
+    return new AdminCommandMutation(this._request).fetch(input);
   }
   /**
    * Mutation adminBulkEmail for AdminCommandPayload
@@ -13011,16 +13174,16 @@ export class LinearSdk extends LinearRequest {
    * @param emails - required emails to pass to adminBulkEmail
    * @param markdownContent - required markdownContent to pass to adminBulkEmail
    * @param subject - required subject to pass to adminBulkEmail
-   * @param vars - variables without 'emails', 'markdownContent', 'subject' to pass into the AdminBulkEmailMutation
+   * @param variables - variables without 'emails', 'markdownContent', 'subject' to pass into the AdminBulkEmailMutation
    * @returns AdminCommandPayload
    */
   public adminBulkEmail(
     emails: string[],
     markdownContent: string,
     subject: string,
-    vars?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
-  ): Promise<AdminCommandPayload | undefined> {
-    return new AdminBulkEmailMutation(this.request).fetch(emails, markdownContent, subject, vars);
+    variables?: Omit<D.AdminBulkEmailMutationVariables, "emails" | "markdownContent" | "subject">
+  ): Fetch<AdminCommandPayload> {
+    return new AdminBulkEmailMutation(this._request).fetch(emails, markdownContent, subject, variables);
   }
   /**
    * Mutation adminCreateStripeCustomer for AdminCommandPayload
@@ -13028,8 +13191,8 @@ export class LinearSdk extends LinearRequest {
    * @param organizationId - required organizationId to pass to adminCreateStripeCustomer
    * @returns AdminCommandPayload
    */
-  public adminCreateStripeCustomer(organizationId: string): Promise<AdminCommandPayload | undefined> {
-    return new AdminCreateStripeCustomerMutation(this.request).fetch(organizationId);
+  public adminCreateStripeCustomer(organizationId: string): Fetch<AdminCommandPayload> {
+    return new AdminCreateStripeCustomerMutation(this._request).fetch(organizationId);
   }
   /**
    * Mutation adminScheduleAnonymousTask for AdminCommandPayload
@@ -13037,8 +13200,8 @@ export class LinearSdk extends LinearRequest {
    * @param taskName - required taskName to pass to adminScheduleAnonymousTask
    * @returns AdminCommandPayload
    */
-  public adminScheduleAnonymousTask(taskName: string): Promise<AdminCommandPayload | undefined> {
-    return new AdminScheduleAnonymousTaskMutation(this.request).fetch(taskName);
+  public adminScheduleAnonymousTask(taskName: string): Fetch<AdminCommandPayload> {
+    return new AdminScheduleAnonymousTaskMutation(this._request).fetch(taskName);
   }
   /**
    * Mutation adminUserAccountChangeEmail for UserAccountAdminPrivileged
@@ -13047,23 +13210,23 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to adminUserAccountChangeEmail
    * @returns UserAccountAdminPrivileged
    */
-  public adminUserAccountChangeEmail(newEmail: string, id: string): Promise<UserAccountAdminPrivileged | undefined> {
-    return new AdminUserAccountChangeEmailMutation(this.request).fetch(newEmail, id);
+  public adminUserAccountChangeEmail(newEmail: string, id: string): Fetch<UserAccountAdminPrivileged> {
+    return new AdminUserAccountChangeEmailMutation(this._request).fetch(newEmail, id);
   }
   /**
    * Mutation adminUserAccountDelete for AdminResponse
    *
    * @param email - required email to pass to adminUserAccountDelete
    * @param id - required id to pass to adminUserAccountDelete
-   * @param vars - variables without 'email', 'id' to pass into the AdminUserAccountDeleteMutation
+   * @param variables - variables without 'email', 'id' to pass into the AdminUserAccountDeleteMutation
    * @returns AdminResponse
    */
   public adminUserAccountDelete(
     email: string,
     id: string,
-    vars?: Omit<D.AdminUserAccountDeleteMutationVariables, "email" | "id">
-  ): Promise<AdminResponse | undefined> {
-    return new AdminUserAccountDeleteMutation(this.request).fetch(email, id, vars);
+    variables?: Omit<D.AdminUserAccountDeleteMutationVariables, "email" | "id">
+  ): Fetch<AdminResponse> {
+    return new AdminUserAccountDeleteMutation(this._request).fetch(email, id, variables);
   }
   /**
    * Mutation eventCreate for EventPayload
@@ -13071,8 +13234,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to eventCreate
    * @returns EventPayload
    */
-  public eventCreate(input: D.EventCreateInput): Promise<EventPayload | undefined> {
-    return new EventCreateMutation(this.request).fetch(input);
+  public eventCreate(input: D.EventCreateInput): Fetch<EventPayload> {
+    return new EventCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation apiKeyCreate for ApiKeyPayload
@@ -13080,8 +13243,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to apiKeyCreate
    * @returns ApiKeyPayload
    */
-  public apiKeyCreate(input: D.ApiKeyCreateInput): Promise<ApiKeyPayload | undefined> {
-    return new ApiKeyCreateMutation(this.request).fetch(input);
+  public apiKeyCreate(input: D.ApiKeyCreateInput): Fetch<ApiKeyPayload> {
+    return new ApiKeyCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation apiKeyDelete for ArchivePayload
@@ -13089,8 +13252,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to apiKeyDelete
    * @returns ArchivePayload
    */
-  public apiKeyDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new ApiKeyDeleteMutation(this.request).fetch(id);
+  public apiKeyDelete(id: string): Fetch<ArchivePayload> {
+    return new ApiKeyDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation emailUserAccountAuthChallenge for EmailUserAccountAuthChallengeResponse
@@ -13100,8 +13263,8 @@ export class LinearSdk extends LinearRequest {
    */
   public emailUserAccountAuthChallenge(
     input: D.EmailUserAccountAuthChallengeInput
-  ): Promise<EmailUserAccountAuthChallengeResponse | undefined> {
-    return new EmailUserAccountAuthChallengeMutation(this.request).fetch(input);
+  ): Fetch<EmailUserAccountAuthChallengeResponse> {
+    return new EmailUserAccountAuthChallengeMutation(this._request).fetch(input);
   }
   /**
    * Mutation emailTokenUserAccountAuth for AuthResolverResponse
@@ -13109,8 +13272,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to emailTokenUserAccountAuth
    * @returns AuthResolverResponse
    */
-  public emailTokenUserAccountAuth(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
-    return new EmailTokenUserAccountAuthMutation(this.request).fetch(input);
+  public emailTokenUserAccountAuth(input: D.TokenUserAccountAuthInput): Fetch<AuthResolverResponse> {
+    return new EmailTokenUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
    * Mutation samlTokenUserAccountAuth for AuthResolverResponse
@@ -13118,8 +13281,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to samlTokenUserAccountAuth
    * @returns AuthResolverResponse
    */
-  public samlTokenUserAccountAuth(input: D.TokenUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
-    return new SamlTokenUserAccountAuthMutation(this.request).fetch(input);
+  public samlTokenUserAccountAuth(input: D.TokenUserAccountAuthInput): Fetch<AuthResolverResponse> {
+    return new SamlTokenUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
    * Mutation googleUserAccountAuth for AuthResolverResponse
@@ -13127,21 +13290,21 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to googleUserAccountAuth
    * @returns AuthResolverResponse
    */
-  public googleUserAccountAuth(input: D.GoogleUserAccountAuthInput): Promise<AuthResolverResponse | undefined> {
-    return new GoogleUserAccountAuthMutation(this.request).fetch(input);
+  public googleUserAccountAuth(input: D.GoogleUserAccountAuthInput): Fetch<AuthResolverResponse> {
+    return new GoogleUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
    * Mutation createOrganizationFromOnboarding for CreateOrJoinOrganizationResponse
    *
    * @param input - required input to pass to createOrganizationFromOnboarding
-   * @param vars - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
+   * @param variables - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
    * @returns CreateOrJoinOrganizationResponse
    */
   public createOrganizationFromOnboarding(
     input: D.CreateOrganizationInput,
-    vars?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
-  ): Promise<CreateOrJoinOrganizationResponse | undefined> {
-    return new CreateOrganizationFromOnboardingMutation(this.request).fetch(input, vars);
+    variables?: Omit<D.CreateOrganizationFromOnboardingMutationVariables, "input">
+  ): Fetch<CreateOrJoinOrganizationResponse> {
+    return new CreateOrganizationFromOnboardingMutation(this._request).fetch(input, variables);
   }
   /**
    * Mutation joinOrganizationFromOnboarding for CreateOrJoinOrganizationResponse
@@ -13149,10 +13312,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to joinOrganizationFromOnboarding
    * @returns CreateOrJoinOrganizationResponse
    */
-  public joinOrganizationFromOnboarding(
-    input: D.JoinOrganizationInput
-  ): Promise<CreateOrJoinOrganizationResponse | undefined> {
-    return new JoinOrganizationFromOnboardingMutation(this.request).fetch(input);
+  public joinOrganizationFromOnboarding(input: D.JoinOrganizationInput): Fetch<CreateOrJoinOrganizationResponse> {
+    return new JoinOrganizationFromOnboardingMutation(this._request).fetch(input);
   }
   /**
    * Mutation leaveOrganization for CreateOrJoinOrganizationResponse
@@ -13160,8 +13321,8 @@ export class LinearSdk extends LinearRequest {
    * @param organizationId - required organizationId to pass to leaveOrganization
    * @returns CreateOrJoinOrganizationResponse
    */
-  public leaveOrganization(organizationId: string): Promise<CreateOrJoinOrganizationResponse | undefined> {
-    return new LeaveOrganizationMutation(this.request).fetch(organizationId);
+  public leaveOrganization(organizationId: string): Fetch<CreateOrJoinOrganizationResponse> {
+    return new LeaveOrganizationMutation(this._request).fetch(organizationId);
   }
   /**
    * Mutation billingEmailUpdate for BillingEmailPayload
@@ -13169,8 +13330,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to billingEmailUpdate
    * @returns BillingEmailPayload
    */
-  public billingEmailUpdate(input: D.BillingEmailUpdateInput): Promise<BillingEmailPayload | undefined> {
-    return new BillingEmailUpdateMutation(this.request).fetch(input);
+  public billingEmailUpdate(input: D.BillingEmailUpdateInput): Fetch<BillingEmailPayload> {
+    return new BillingEmailUpdateMutation(this._request).fetch(input);
   }
   /**
    * Mutation collaborativeDocumentUpdate for CollaborationDocumentUpdatePayload
@@ -13180,8 +13341,8 @@ export class LinearSdk extends LinearRequest {
    */
   public collaborativeDocumentUpdate(
     input: D.CollaborationDocumentUpdateInput
-  ): Promise<CollaborationDocumentUpdatePayload | undefined> {
-    return new CollaborativeDocumentUpdateMutation(this.request).fetch(input);
+  ): Fetch<CollaborationDocumentUpdatePayload> {
+    return new CollaborativeDocumentUpdateMutation(this._request).fetch(input);
   }
   /**
    * Mutation commentCreate for CommentPayload
@@ -13189,8 +13350,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to commentCreate
    * @returns CommentPayload
    */
-  public commentCreate(input: D.CommentCreateInput): Promise<CommentPayload | undefined> {
-    return new CommentCreateMutation(this.request).fetch(input);
+  public commentCreate(input: D.CommentCreateInput): Fetch<CommentPayload> {
+    return new CommentCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation commentUpdate for CommentPayload
@@ -13199,8 +13360,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to commentUpdate
    * @returns CommentPayload
    */
-  public commentUpdate(input: D.CommentUpdateInput, id: string): Promise<CommentPayload | undefined> {
-    return new CommentUpdateMutation(this.request).fetch(input, id);
+  public commentUpdate(input: D.CommentUpdateInput, id: string): Fetch<CommentPayload> {
+    return new CommentUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation commentDelete for ArchivePayload
@@ -13208,8 +13369,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to commentDelete
    * @returns ArchivePayload
    */
-  public commentDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new CommentDeleteMutation(this.request).fetch(id);
+  public commentDelete(id: string): Fetch<ArchivePayload> {
+    return new CommentDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation contactCreate for ContactPayload
@@ -13217,8 +13378,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to contactCreate
    * @returns ContactPayload
    */
-  public contactCreate(input: D.ContactCreateInput): Promise<ContactPayload | undefined> {
-    return new ContactCreateMutation(this.request).fetch(input);
+  public contactCreate(input: D.ContactCreateInput): Fetch<ContactPayload> {
+    return new ContactCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation customViewCreate for CustomViewPayload
@@ -13226,8 +13387,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to customViewCreate
    * @returns CustomViewPayload
    */
-  public customViewCreate(input: D.CustomViewCreateInput): Promise<CustomViewPayload | undefined> {
-    return new CustomViewCreateMutation(this.request).fetch(input);
+  public customViewCreate(input: D.CustomViewCreateInput): Fetch<CustomViewPayload> {
+    return new CustomViewCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation customViewUpdate for CustomViewPayload
@@ -13236,8 +13397,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to customViewUpdate
    * @returns CustomViewPayload
    */
-  public customViewUpdate(input: D.CustomViewUpdateInput, id: string): Promise<CustomViewPayload | undefined> {
-    return new CustomViewUpdateMutation(this.request).fetch(input, id);
+  public customViewUpdate(input: D.CustomViewUpdateInput, id: string): Fetch<CustomViewPayload> {
+    return new CustomViewUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation customViewDelete for ArchivePayload
@@ -13245,8 +13406,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to customViewDelete
    * @returns ArchivePayload
    */
-  public customViewDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new CustomViewDeleteMutation(this.request).fetch(id);
+  public customViewDelete(id: string): Fetch<ArchivePayload> {
+    return new CustomViewDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation cycleCreate for CyclePayload
@@ -13254,8 +13415,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to cycleCreate
    * @returns CyclePayload
    */
-  public cycleCreate(input: D.CycleCreateInput): Promise<CyclePayload | undefined> {
-    return new CycleCreateMutation(this.request).fetch(input);
+  public cycleCreate(input: D.CycleCreateInput): Fetch<CyclePayload> {
+    return new CycleCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation cycleUpdate for CyclePayload
@@ -13264,8 +13425,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to cycleUpdate
    * @returns CyclePayload
    */
-  public cycleUpdate(input: D.CycleUpdateInput, id: string): Promise<CyclePayload | undefined> {
-    return new CycleUpdateMutation(this.request).fetch(input, id);
+  public cycleUpdate(input: D.CycleUpdateInput, id: string): Fetch<CyclePayload> {
+    return new CycleUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation cycleArchive for ArchivePayload
@@ -13273,32 +13434,32 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to cycleArchive
    * @returns ArchivePayload
    */
-  public cycleArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new CycleArchiveMutation(this.request).fetch(id);
+  public cycleArchive(id: string): Fetch<ArchivePayload> {
+    return new CycleArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation debugFailWithInternalError for DebugPayload
    *
    * @returns DebugPayload
    */
-  public get debugFailWithInternalError(): Promise<DebugPayload | undefined> {
-    return new DebugFailWithInternalErrorMutation(this.request).fetch();
+  public get debugFailWithInternalError(): Fetch<DebugPayload> {
+    return new DebugFailWithInternalErrorMutation(this._request).fetch();
   }
   /**
    * Mutation debugFailWithWarning for DebugPayload
    *
    * @returns DebugPayload
    */
-  public get debugFailWithWarning(): Promise<DebugPayload | undefined> {
-    return new DebugFailWithWarningMutation(this.request).fetch();
+  public get debugFailWithWarning(): Fetch<DebugPayload> {
+    return new DebugFailWithWarningMutation(this._request).fetch();
   }
   /**
    * Mutation debugCreateSAMLOrg for DebugPayload
    *
    * @returns DebugPayload
    */
-  public get debugCreateSAMLOrg(): Promise<DebugPayload | undefined> {
-    return new DebugCreateSamlOrgMutation(this.request).fetch();
+  public get debugCreateSAMLOrg(): Fetch<DebugPayload> {
+    return new DebugCreateSamlOrgMutation(this._request).fetch();
   }
   /**
    * Mutation emailUnsubscribe for EmailUnsubscribePayload
@@ -13306,8 +13467,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to emailUnsubscribe
    * @returns EmailUnsubscribePayload
    */
-  public emailUnsubscribe(input: D.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload | undefined> {
-    return new EmailUnsubscribeMutation(this.request).fetch(input);
+  public emailUnsubscribe(input: D.EmailUnsubscribeInput): Fetch<EmailUnsubscribePayload> {
+    return new EmailUnsubscribeMutation(this._request).fetch(input);
   }
   /**
    * Mutation emojiCreate for EmojiPayload
@@ -13315,8 +13476,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to emojiCreate
    * @returns EmojiPayload
    */
-  public emojiCreate(input: D.EmojiCreateInput): Promise<EmojiPayload | undefined> {
-    return new EmojiCreateMutation(this.request).fetch(input);
+  public emojiCreate(input: D.EmojiCreateInput): Fetch<EmojiPayload> {
+    return new EmojiCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation emojiDelete for ArchivePayload
@@ -13324,8 +13485,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to emojiDelete
    * @returns ArchivePayload
    */
-  public emojiDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new EmojiDeleteMutation(this.request).fetch(id);
+  public emojiDelete(id: string): Fetch<ArchivePayload> {
+    return new EmojiDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation favoriteCreate for FavoritePayload
@@ -13333,8 +13494,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to favoriteCreate
    * @returns FavoritePayload
    */
-  public favoriteCreate(input: D.FavoriteCreateInput): Promise<FavoritePayload | undefined> {
-    return new FavoriteCreateMutation(this.request).fetch(input);
+  public favoriteCreate(input: D.FavoriteCreateInput): Fetch<FavoritePayload> {
+    return new FavoriteCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation favoriteUpdate for FavoritePayload
@@ -13343,8 +13504,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to favoriteUpdate
    * @returns FavoritePayload
    */
-  public favoriteUpdate(input: D.FavoriteUpdateInput, id: string): Promise<FavoritePayload | undefined> {
-    return new FavoriteUpdateMutation(this.request).fetch(input, id);
+  public favoriteUpdate(input: D.FavoriteUpdateInput, id: string): Fetch<FavoritePayload> {
+    return new FavoriteUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation favoriteDelete for ArchivePayload
@@ -13352,8 +13513,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to favoriteDelete
    * @returns ArchivePayload
    */
-  public favoriteDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new FavoriteDeleteMutation(this.request).fetch(id);
+  public favoriteDelete(id: string): Fetch<ArchivePayload> {
+    return new FavoriteDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation feedbackCreate for FeedbackPayload
@@ -13361,8 +13522,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to feedbackCreate
    * @returns FeedbackPayload
    */
-  public feedbackCreate(input: D.FeedbackCreateInput): Promise<FeedbackPayload | undefined> {
-    return new FeedbackCreateMutation(this.request).fetch(input);
+  public feedbackCreate(input: D.FeedbackCreateInput): Fetch<FeedbackPayload> {
+    return new FeedbackCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation fileUpload for UploadPayload
@@ -13370,16 +13531,16 @@ export class LinearSdk extends LinearRequest {
    * @param size - required size to pass to fileUpload
    * @param contentType - required contentType to pass to fileUpload
    * @param filename - required filename to pass to fileUpload
-   * @param vars - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
+   * @param variables - variables without 'size', 'contentType', 'filename' to pass into the FileUploadMutation
    * @returns UploadPayload
    */
   public fileUpload(
     size: number,
     contentType: string,
     filename: string,
-    vars?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
-  ): Promise<UploadPayload | undefined> {
-    return new FileUploadMutation(this.request).fetch(size, contentType, filename, vars);
+    variables?: Omit<D.FileUploadMutationVariables, "size" | "contentType" | "filename">
+  ): Fetch<UploadPayload> {
+    return new FileUploadMutation(this._request).fetch(size, contentType, filename, variables);
   }
   /**
    * Mutation imageUploadFromUrl for ImageUploadFromUrlPayload
@@ -13387,8 +13548,8 @@ export class LinearSdk extends LinearRequest {
    * @param url - required url to pass to imageUploadFromUrl
    * @returns ImageUploadFromUrlPayload
    */
-  public imageUploadFromUrl(url: string): Promise<ImageUploadFromUrlPayload | undefined> {
-    return new ImageUploadFromUrlMutation(this.request).fetch(url);
+  public imageUploadFromUrl(url: string): Fetch<ImageUploadFromUrlPayload> {
+    return new ImageUploadFromUrlMutation(this._request).fetch(url);
   }
   /**
    * Mutation integrationGithubConnect for IntegrationPayload
@@ -13396,8 +13557,8 @@ export class LinearSdk extends LinearRequest {
    * @param installationId - required installationId to pass to integrationGithubConnect
    * @returns IntegrationPayload
    */
-  public integrationGithubConnect(installationId: string): Promise<IntegrationPayload | undefined> {
-    return new IntegrationGithubConnectMutation(this.request).fetch(installationId);
+  public integrationGithubConnect(installationId: string): Fetch<IntegrationPayload> {
+    return new IntegrationGithubConnectMutation(this._request).fetch(installationId);
   }
   /**
    * Mutation integrationGitlabConnect for IntegrationPayload
@@ -13406,23 +13567,23 @@ export class LinearSdk extends LinearRequest {
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
    * @returns IntegrationPayload
    */
-  public integrationGitlabConnect(gitlabUrl: string, accessToken: string): Promise<IntegrationPayload | undefined> {
-    return new IntegrationGitlabConnectMutation(this.request).fetch(gitlabUrl, accessToken);
+  public integrationGitlabConnect(gitlabUrl: string, accessToken: string): Fetch<IntegrationPayload> {
+    return new IntegrationGitlabConnectMutation(this._request).fetch(gitlabUrl, accessToken);
   }
   /**
    * Mutation integrationSlack for IntegrationPayload
    *
    * @param redirectUri - required redirectUri to pass to integrationSlack
    * @param code - required code to pass to integrationSlack
-   * @param vars - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
+   * @param variables - variables without 'redirectUri', 'code' to pass into the IntegrationSlackMutation
    * @returns IntegrationPayload
    */
   public integrationSlack(
     redirectUri: string,
     code: string,
-    vars?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
-  ): Promise<IntegrationPayload | undefined> {
-    return new IntegrationSlackMutation(this.request).fetch(redirectUri, code, vars);
+    variables?: Omit<D.IntegrationSlackMutationVariables, "redirectUri" | "code">
+  ): Fetch<IntegrationPayload> {
+    return new IntegrationSlackMutation(this._request).fetch(redirectUri, code, variables);
   }
   /**
    * Mutation integrationSlackPersonal for IntegrationPayload
@@ -13431,8 +13592,8 @@ export class LinearSdk extends LinearRequest {
    * @param code - required code to pass to integrationSlackPersonal
    * @returns IntegrationPayload
    */
-  public integrationSlackPersonal(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
-    return new IntegrationSlackPersonalMutation(this.request).fetch(redirectUri, code);
+  public integrationSlackPersonal(redirectUri: string, code: string): Fetch<IntegrationPayload> {
+    return new IntegrationSlackPersonalMutation(this._request).fetch(redirectUri, code);
   }
   /**
    * Mutation integrationSlackPost for IntegrationPayload
@@ -13440,16 +13601,16 @@ export class LinearSdk extends LinearRequest {
    * @param redirectUri - required redirectUri to pass to integrationSlackPost
    * @param teamId - required teamId to pass to integrationSlackPost
    * @param code - required code to pass to integrationSlackPost
-   * @param vars - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
+   * @param variables - variables without 'redirectUri', 'teamId', 'code' to pass into the IntegrationSlackPostMutation
    * @returns IntegrationPayload
    */
   public integrationSlackPost(
     redirectUri: string,
     teamId: string,
     code: string,
-    vars?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
-  ): Promise<IntegrationPayload | undefined> {
-    return new IntegrationSlackPostMutation(this.request).fetch(redirectUri, teamId, code, vars);
+    variables?: Omit<D.IntegrationSlackPostMutationVariables, "redirectUri" | "teamId" | "code">
+  ): Fetch<IntegrationPayload> {
+    return new IntegrationSlackPostMutation(this._request).fetch(redirectUri, teamId, code, variables);
   }
   /**
    * Mutation integrationSlackProjectPost for IntegrationPayload
@@ -13459,12 +13620,8 @@ export class LinearSdk extends LinearRequest {
    * @param code - required code to pass to integrationSlackProjectPost
    * @returns IntegrationPayload
    */
-  public integrationSlackProjectPost(
-    redirectUri: string,
-    projectId: string,
-    code: string
-  ): Promise<IntegrationPayload | undefined> {
-    return new IntegrationSlackProjectPostMutation(this.request).fetch(redirectUri, projectId, code);
+  public integrationSlackProjectPost(redirectUri: string, projectId: string, code: string): Fetch<IntegrationPayload> {
+    return new IntegrationSlackProjectPostMutation(this._request).fetch(redirectUri, projectId, code);
   }
   /**
    * Mutation integrationSlackImportEmojis for IntegrationPayload
@@ -13473,8 +13630,8 @@ export class LinearSdk extends LinearRequest {
    * @param code - required code to pass to integrationSlackImportEmojis
    * @returns IntegrationPayload
    */
-  public integrationSlackImportEmojis(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
-    return new IntegrationSlackImportEmojisMutation(this.request).fetch(redirectUri, code);
+  public integrationSlackImportEmojis(redirectUri: string, code: string): Fetch<IntegrationPayload> {
+    return new IntegrationSlackImportEmojisMutation(this._request).fetch(redirectUri, code);
   }
   /**
    * Mutation integrationFigma for IntegrationPayload
@@ -13483,8 +13640,8 @@ export class LinearSdk extends LinearRequest {
    * @param code - required code to pass to integrationFigma
    * @returns IntegrationPayload
    */
-  public integrationFigma(redirectUri: string, code: string): Promise<IntegrationPayload | undefined> {
-    return new IntegrationFigmaMutation(this.request).fetch(redirectUri, code);
+  public integrationFigma(redirectUri: string, code: string): Fetch<IntegrationPayload> {
+    return new IntegrationFigmaMutation(this._request).fetch(redirectUri, code);
   }
   /**
    * Mutation integrationGoogleSheets for IntegrationPayload
@@ -13492,8 +13649,8 @@ export class LinearSdk extends LinearRequest {
    * @param code - required code to pass to integrationGoogleSheets
    * @returns IntegrationPayload
    */
-  public integrationGoogleSheets(code: string): Promise<IntegrationPayload | undefined> {
-    return new IntegrationGoogleSheetsMutation(this.request).fetch(code);
+  public integrationGoogleSheets(code: string): Fetch<IntegrationPayload> {
+    return new IntegrationGoogleSheetsMutation(this._request).fetch(code);
   }
   /**
    * Mutation refreshGoogleSheetsData for IntegrationPayload
@@ -13501,8 +13658,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to refreshGoogleSheetsData
    * @returns IntegrationPayload
    */
-  public refreshGoogleSheetsData(id: string): Promise<IntegrationPayload | undefined> {
-    return new RefreshGoogleSheetsDataMutation(this.request).fetch(id);
+  public refreshGoogleSheetsData(id: string): Fetch<IntegrationPayload> {
+    return new RefreshGoogleSheetsDataMutation(this._request).fetch(id);
   }
   /**
    * Mutation integrationSentryConnect for IntegrationPayload
@@ -13516,8 +13673,8 @@ export class LinearSdk extends LinearRequest {
     organizationSlug: string,
     code: string,
     installationId: string
-  ): Promise<IntegrationPayload | undefined> {
-    return new IntegrationSentryConnectMutation(this.request).fetch(organizationSlug, code, installationId);
+  ): Fetch<IntegrationPayload> {
+    return new IntegrationSentryConnectMutation(this._request).fetch(organizationSlug, code, installationId);
   }
   /**
    * Mutation integrationDelete for ArchivePayload
@@ -13525,8 +13682,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to integrationDelete
    * @returns ArchivePayload
    */
-  public integrationDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new IntegrationDeleteMutation(this.request).fetch(id);
+  public integrationDelete(id: string): Fetch<ArchivePayload> {
+    return new IntegrationDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation integrationResourceArchive for ArchivePayload
@@ -13534,8 +13691,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to integrationResourceArchive
    * @returns ArchivePayload
    */
-  public integrationResourceArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new IntegrationResourceArchiveMutation(this.request).fetch(id);
+  public integrationResourceArchive(id: string): Fetch<ArchivePayload> {
+    return new IntegrationResourceArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation issueLabelCreate for IssueLabelPayload
@@ -13543,8 +13700,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to issueLabelCreate
    * @returns IssueLabelPayload
    */
-  public issueLabelCreate(input: D.IssueLabelCreateInput): Promise<IssueLabelPayload | undefined> {
-    return new IssueLabelCreateMutation(this.request).fetch(input);
+  public issueLabelCreate(input: D.IssueLabelCreateInput): Fetch<IssueLabelPayload> {
+    return new IssueLabelCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation issueLabelUpdate for IssueLabelPayload
@@ -13553,8 +13710,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueLabelUpdate
    * @returns IssueLabelPayload
    */
-  public issueLabelUpdate(input: D.IssueLabelUpdateInput, id: string): Promise<IssueLabelPayload | undefined> {
-    return new IssueLabelUpdateMutation(this.request).fetch(input, id);
+  public issueLabelUpdate(input: D.IssueLabelUpdateInput, id: string): Fetch<IssueLabelPayload> {
+    return new IssueLabelUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation issueLabelArchive for ArchivePayload
@@ -13562,8 +13719,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueLabelArchive
    * @returns ArchivePayload
    */
-  public issueLabelArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new IssueLabelArchiveMutation(this.request).fetch(id);
+  public issueLabelArchive(id: string): Fetch<ArchivePayload> {
+    return new IssueLabelArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation issueRelationCreate for IssueRelationPayload
@@ -13571,8 +13728,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to issueRelationCreate
    * @returns IssueRelationPayload
    */
-  public issueRelationCreate(input: D.IssueRelationCreateInput): Promise<IssueRelationPayload | undefined> {
-    return new IssueRelationCreateMutation(this.request).fetch(input);
+  public issueRelationCreate(input: D.IssueRelationCreateInput): Fetch<IssueRelationPayload> {
+    return new IssueRelationCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation issueRelationUpdate for IssueRelationPayload
@@ -13581,8 +13738,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueRelationUpdate
    * @returns IssueRelationPayload
    */
-  public issueRelationUpdate(input: D.IssueRelationUpdateInput, id: string): Promise<IssueRelationPayload | undefined> {
-    return new IssueRelationUpdateMutation(this.request).fetch(input, id);
+  public issueRelationUpdate(input: D.IssueRelationUpdateInput, id: string): Fetch<IssueRelationPayload> {
+    return new IssueRelationUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation issueRelationDelete for ArchivePayload
@@ -13590,8 +13747,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueRelationDelete
    * @returns ArchivePayload
    */
-  public issueRelationDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new IssueRelationDeleteMutation(this.request).fetch(id);
+  public issueRelationDelete(id: string): Fetch<ArchivePayload> {
+    return new IssueRelationDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation issueCreate for IssuePayload
@@ -13599,8 +13756,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to issueCreate
    * @returns IssuePayload
    */
-  public issueCreate(input: D.IssueCreateInput): Promise<IssuePayload | undefined> {
-    return new IssueCreateMutation(this.request).fetch(input);
+  public issueCreate(input: D.IssueCreateInput): Fetch<IssuePayload> {
+    return new IssueCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation issueUpdate for IssuePayload
@@ -13609,8 +13766,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueUpdate
    * @returns IssuePayload
    */
-  public issueUpdate(input: D.IssueUpdateInput, id: string): Promise<IssuePayload | undefined> {
-    return new IssueUpdateMutation(this.request).fetch(input, id);
+  public issueUpdate(input: D.IssueUpdateInput, id: string): Fetch<IssuePayload> {
+    return new IssueUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation issueArchive for ArchivePayload
@@ -13618,8 +13775,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueArchive
    * @returns ArchivePayload
    */
-  public issueArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new IssueArchiveMutation(this.request).fetch(id);
+  public issueArchive(id: string): Fetch<ArchivePayload> {
+    return new IssueArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation issueUnarchive for ArchivePayload
@@ -13627,8 +13784,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to issueUnarchive
    * @returns ArchivePayload
    */
-  public issueUnarchive(id: string): Promise<ArchivePayload | undefined> {
-    return new IssueUnarchiveMutation(this.request).fetch(id);
+  public issueUnarchive(id: string): Fetch<ArchivePayload> {
+    return new IssueUnarchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation milestoneCreate for MilestonePayload
@@ -13636,8 +13793,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to milestoneCreate
    * @returns MilestonePayload
    */
-  public milestoneCreate(input: D.MilestoneCreateInput): Promise<MilestonePayload | undefined> {
-    return new MilestoneCreateMutation(this.request).fetch(input);
+  public milestoneCreate(input: D.MilestoneCreateInput): Fetch<MilestonePayload> {
+    return new MilestoneCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation milestoneUpdate for MilestonePayload
@@ -13646,8 +13803,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to milestoneUpdate
    * @returns MilestonePayload
    */
-  public milestoneUpdate(input: D.MilestoneUpdateInput, id: string): Promise<MilestonePayload | undefined> {
-    return new MilestoneUpdateMutation(this.request).fetch(input, id);
+  public milestoneUpdate(input: D.MilestoneUpdateInput, id: string): Fetch<MilestonePayload> {
+    return new MilestoneUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation milestoneDelete for ArchivePayload
@@ -13655,8 +13812,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to milestoneDelete
    * @returns ArchivePayload
    */
-  public milestoneDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new MilestoneDeleteMutation(this.request).fetch(id);
+  public milestoneDelete(id: string): Fetch<ArchivePayload> {
+    return new MilestoneDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation notificationCreate for NotificationPayload
@@ -13665,8 +13822,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to notificationCreate
    * @returns NotificationPayload
    */
-  public notificationCreate(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
-    return new NotificationCreateMutation(this.request).fetch(input, id);
+  public notificationCreate(input: D.NotificationUpdateInput, id: string): Fetch<NotificationPayload> {
+    return new NotificationCreateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation notificationUpdate for NotificationPayload
@@ -13675,8 +13832,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to notificationUpdate
    * @returns NotificationPayload
    */
-  public notificationUpdate(input: D.NotificationUpdateInput, id: string): Promise<NotificationPayload | undefined> {
-    return new NotificationUpdateMutation(this.request).fetch(input, id);
+  public notificationUpdate(input: D.NotificationUpdateInput, id: string): Fetch<NotificationPayload> {
+    return new NotificationUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation notificationDelete for ArchivePayload
@@ -13684,8 +13841,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to notificationDelete
    * @returns ArchivePayload
    */
-  public notificationDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new NotificationDeleteMutation(this.request).fetch(id);
+  public notificationDelete(id: string): Fetch<ArchivePayload> {
+    return new NotificationDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation notificationArchive for ArchivePayload
@@ -13693,8 +13850,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to notificationArchive
    * @returns ArchivePayload
    */
-  public notificationArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new NotificationArchiveMutation(this.request).fetch(id);
+  public notificationArchive(id: string): Fetch<ArchivePayload> {
+    return new NotificationArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation notificationUnarchive for ArchivePayload
@@ -13702,8 +13859,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to notificationUnarchive
    * @returns ArchivePayload
    */
-  public notificationUnarchive(id: string): Promise<ArchivePayload | undefined> {
-    return new NotificationUnarchiveMutation(this.request).fetch(id);
+  public notificationUnarchive(id: string): Fetch<ArchivePayload> {
+    return new NotificationUnarchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation notificationSubscriptionCreate for NotificationSubscriptionPayload
@@ -13713,8 +13870,8 @@ export class LinearSdk extends LinearRequest {
    */
   public notificationSubscriptionCreate(
     input: D.NotificationSubscriptionCreateInput
-  ): Promise<NotificationSubscriptionPayload | undefined> {
-    return new NotificationSubscriptionCreateMutation(this.request).fetch(input);
+  ): Fetch<NotificationSubscriptionPayload> {
+    return new NotificationSubscriptionCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation notificationSubscriptionDelete for ArchivePayload
@@ -13722,8 +13879,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to notificationSubscriptionDelete
    * @returns ArchivePayload
    */
-  public notificationSubscriptionDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new NotificationSubscriptionDeleteMutation(this.request).fetch(id);
+  public notificationSubscriptionDelete(id: string): Fetch<ArchivePayload> {
+    return new NotificationSubscriptionDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation oauthClientCreate for OauthClientPayload
@@ -13731,8 +13888,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to oauthClientCreate
    * @returns OauthClientPayload
    */
-  public oauthClientCreate(input: D.OauthClientCreateInput): Promise<OauthClientPayload | undefined> {
-    return new OauthClientCreateMutation(this.request).fetch(input);
+  public oauthClientCreate(input: D.OauthClientCreateInput): Fetch<OauthClientPayload> {
+    return new OauthClientCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation oauthClientUpdate for OauthClientPayload
@@ -13741,8 +13898,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to oauthClientUpdate
    * @returns OauthClientPayload
    */
-  public oauthClientUpdate(input: D.OauthClientUpdateInput, id: string): Promise<OauthClientPayload | undefined> {
-    return new OauthClientUpdateMutation(this.request).fetch(input, id);
+  public oauthClientUpdate(input: D.OauthClientUpdateInput, id: string): Fetch<OauthClientPayload> {
+    return new OauthClientUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation oauthClientArchive for ArchivePayload
@@ -13750,8 +13907,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to oauthClientArchive
    * @returns ArchivePayload
    */
-  public oauthClientArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new OauthClientArchiveMutation(this.request).fetch(id);
+  public oauthClientArchive(id: string): Fetch<ArchivePayload> {
+    return new OauthClientArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation oauthClientRotateSecret for RotateSecretPayload
@@ -13759,8 +13916,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to oauthClientRotateSecret
    * @returns RotateSecretPayload
    */
-  public oauthClientRotateSecret(id: string): Promise<RotateSecretPayload | undefined> {
-    return new OauthClientRotateSecretMutation(this.request).fetch(id);
+  public oauthClientRotateSecret(id: string): Fetch<RotateSecretPayload> {
+    return new OauthClientRotateSecretMutation(this._request).fetch(id);
   }
   /**
    * Mutation oauthTokenRevoke for OauthTokenRevokePayload
@@ -13769,8 +13926,8 @@ export class LinearSdk extends LinearRequest {
    * @param appId - required appId to pass to oauthTokenRevoke
    * @returns OauthTokenRevokePayload
    */
-  public oauthTokenRevoke(scope: string[], appId: string): Promise<OauthTokenRevokePayload | undefined> {
-    return new OauthTokenRevokeMutation(this.request).fetch(scope, appId);
+  public oauthTokenRevoke(scope: string[], appId: string): Fetch<OauthTokenRevokePayload> {
+    return new OauthTokenRevokeMutation(this._request).fetch(scope, appId);
   }
   /**
    * Mutation organizationDomainVerify for OrganizationDomainPayload
@@ -13778,10 +13935,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to organizationDomainVerify
    * @returns OrganizationDomainPayload
    */
-  public organizationDomainVerify(
-    input: D.OrganizationDomainVerificationInput
-  ): Promise<OrganizationDomainPayload | undefined> {
-    return new OrganizationDomainVerifyMutation(this.request).fetch(input);
+  public organizationDomainVerify(input: D.OrganizationDomainVerificationInput): Fetch<OrganizationDomainPayload> {
+    return new OrganizationDomainVerifyMutation(this._request).fetch(input);
   }
   /**
    * Mutation organizationDomainCreate for OrganizationDomainPayload
@@ -13789,10 +13944,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to organizationDomainCreate
    * @returns OrganizationDomainPayload
    */
-  public organizationDomainCreate(
-    input: D.OrganizationDomainCreateInput
-  ): Promise<OrganizationDomainPayload | undefined> {
-    return new OrganizationDomainCreateMutation(this.request).fetch(input);
+  public organizationDomainCreate(input: D.OrganizationDomainCreateInput): Fetch<OrganizationDomainPayload> {
+    return new OrganizationDomainCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation organizationDomainDelete for ArchivePayload
@@ -13800,8 +13953,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to organizationDomainDelete
    * @returns ArchivePayload
    */
-  public organizationDomainDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new OrganizationDomainDeleteMutation(this.request).fetch(id);
+  public organizationDomainDelete(id: string): Fetch<ArchivePayload> {
+    return new OrganizationDomainDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation organizationInviteCreate for OrganizationInvitePayload
@@ -13809,10 +13962,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to organizationInviteCreate
    * @returns OrganizationInvitePayload
    */
-  public organizationInviteCreate(
-    input: D.OrganizationInviteCreateInput
-  ): Promise<OrganizationInvitePayload | undefined> {
-    return new OrganizationInviteCreateMutation(this.request).fetch(input);
+  public organizationInviteCreate(input: D.OrganizationInviteCreateInput): Fetch<OrganizationInvitePayload> {
+    return new OrganizationInviteCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation resentOrganizationInvite for ArchivePayload
@@ -13820,8 +13971,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to resentOrganizationInvite
    * @returns ArchivePayload
    */
-  public resentOrganizationInvite(id: string): Promise<ArchivePayload | undefined> {
-    return new ResentOrganizationInviteMutation(this.request).fetch(id);
+  public resentOrganizationInvite(id: string): Fetch<ArchivePayload> {
+    return new ResentOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
    * Mutation organizationInviteDelete for ArchivePayload
@@ -13829,8 +13980,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to organizationInviteDelete
    * @returns ArchivePayload
    */
-  public organizationInviteDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new OrganizationInviteDeleteMutation(this.request).fetch(id);
+  public organizationInviteDelete(id: string): Fetch<ArchivePayload> {
+    return new OrganizationInviteDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation projectLinkCreate for ProjectLinkPayload
@@ -13838,8 +13989,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to projectLinkCreate
    * @returns ProjectLinkPayload
    */
-  public projectLinkCreate(input: D.ProjectLinkCreateInput): Promise<ProjectLinkPayload | undefined> {
-    return new ProjectLinkCreateMutation(this.request).fetch(input);
+  public projectLinkCreate(input: D.ProjectLinkCreateInput): Fetch<ProjectLinkPayload> {
+    return new ProjectLinkCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation projectLinkDelete for ArchivePayload
@@ -13847,8 +13998,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to projectLinkDelete
    * @returns ArchivePayload
    */
-  public projectLinkDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new ProjectLinkDeleteMutation(this.request).fetch(id);
+  public projectLinkDelete(id: string): Fetch<ArchivePayload> {
+    return new ProjectLinkDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation projectCreate for ProjectPayload
@@ -13856,8 +14007,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to projectCreate
    * @returns ProjectPayload
    */
-  public projectCreate(input: D.ProjectCreateInput): Promise<ProjectPayload | undefined> {
-    return new ProjectCreateMutation(this.request).fetch(input);
+  public projectCreate(input: D.ProjectCreateInput): Fetch<ProjectPayload> {
+    return new ProjectCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation projectUpdate for ProjectPayload
@@ -13866,8 +14017,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to projectUpdate
    * @returns ProjectPayload
    */
-  public projectUpdate(input: D.ProjectUpdateInput, id: string): Promise<ProjectPayload | undefined> {
-    return new ProjectUpdateMutation(this.request).fetch(input, id);
+  public projectUpdate(input: D.ProjectUpdateInput, id: string): Fetch<ProjectPayload> {
+    return new ProjectUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation projectArchive for ArchivePayload
@@ -13875,8 +14026,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to projectArchive
    * @returns ArchivePayload
    */
-  public projectArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new ProjectArchiveMutation(this.request).fetch(id);
+  public projectArchive(id: string): Fetch<ArchivePayload> {
+    return new ProjectArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation pushSubscriptionCreate for PushSubscriptionPayload
@@ -13884,8 +14035,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to pushSubscriptionCreate
    * @returns PushSubscriptionPayload
    */
-  public pushSubscriptionCreate(input: D.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload | undefined> {
-    return new PushSubscriptionCreateMutation(this.request).fetch(input);
+  public pushSubscriptionCreate(input: D.PushSubscriptionCreateInput): Fetch<PushSubscriptionPayload> {
+    return new PushSubscriptionCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation pushSubscriptionDelete for PushSubscriptionPayload
@@ -13893,8 +14044,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to pushSubscriptionDelete
    * @returns PushSubscriptionPayload
    */
-  public pushSubscriptionDelete(id: string): Promise<PushSubscriptionPayload | undefined> {
-    return new PushSubscriptionDeleteMutation(this.request).fetch(id);
+  public pushSubscriptionDelete(id: string): Fetch<PushSubscriptionPayload> {
+    return new PushSubscriptionDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation reactionCreate for ReactionPayload
@@ -13902,8 +14053,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to reactionCreate
    * @returns ReactionPayload
    */
-  public reactionCreate(input: D.ReactionCreateInput): Promise<ReactionPayload | undefined> {
-    return new ReactionCreateMutation(this.request).fetch(input);
+  public reactionCreate(input: D.ReactionCreateInput): Fetch<ReactionPayload> {
+    return new ReactionCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation reactionDelete for ArchivePayload
@@ -13911,16 +14062,16 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to reactionDelete
    * @returns ArchivePayload
    */
-  public reactionDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new ReactionDeleteMutation(this.request).fetch(id);
+  public reactionDelete(id: string): Fetch<ArchivePayload> {
+    return new ReactionDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation createCsvExportReport for CreateCsvExportReportPayload
    *
    * @returns CreateCsvExportReportPayload
    */
-  public get createCsvExportReport(): Promise<CreateCsvExportReportPayload | undefined> {
-    return new CreateCsvExportReportMutation(this.request).fetch();
+  public get createCsvExportReport(): Fetch<CreateCsvExportReportPayload> {
+    return new CreateCsvExportReportMutation(this._request).fetch();
   }
   /**
    * Mutation subscriptionSessionCreate for SubscriptionSessionPayload
@@ -13928,16 +14079,16 @@ export class LinearSdk extends LinearRequest {
    * @param plan - required plan to pass to subscriptionSessionCreate
    * @returns SubscriptionSessionPayload
    */
-  public subscriptionSessionCreate(plan: string): Promise<SubscriptionSessionPayload | undefined> {
-    return new SubscriptionSessionCreateMutation(this.request).fetch(plan);
+  public subscriptionSessionCreate(plan: string): Fetch<SubscriptionSessionPayload> {
+    return new SubscriptionSessionCreateMutation(this._request).fetch(plan);
   }
   /**
    * Mutation subscriptionUpdateSessionCreate for SubscriptionSessionPayload
    *
    * @returns SubscriptionSessionPayload
    */
-  public get subscriptionUpdateSessionCreate(): Promise<SubscriptionSessionPayload | undefined> {
-    return new SubscriptionUpdateSessionCreateMutation(this.request).fetch();
+  public get subscriptionUpdateSessionCreate(): Fetch<SubscriptionSessionPayload> {
+    return new SubscriptionUpdateSessionCreateMutation(this._request).fetch();
   }
   /**
    * Mutation subscriptionUpdate for SubscriptionPayload
@@ -13946,8 +14097,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to subscriptionUpdate
    * @returns SubscriptionPayload
    */
-  public subscriptionUpdate(input: D.SubscriptionUpdateInput, id: string): Promise<SubscriptionPayload | undefined> {
-    return new SubscriptionUpdateMutation(this.request).fetch(input, id);
+  public subscriptionUpdate(input: D.SubscriptionUpdateInput, id: string): Fetch<SubscriptionPayload> {
+    return new SubscriptionUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation subscriptionUpgrade for SubscriptionPayload
@@ -13956,8 +14107,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to subscriptionUpgrade
    * @returns SubscriptionPayload
    */
-  public subscriptionUpgrade(type: string, id: string): Promise<SubscriptionPayload | undefined> {
-    return new SubscriptionUpgradeMutation(this.request).fetch(type, id);
+  public subscriptionUpgrade(type: string, id: string): Fetch<SubscriptionPayload> {
+    return new SubscriptionUpgradeMutation(this._request).fetch(type, id);
   }
   /**
    * Mutation subscriptionArchive for ArchivePayload
@@ -13965,8 +14116,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to subscriptionArchive
    * @returns ArchivePayload
    */
-  public subscriptionArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new SubscriptionArchiveMutation(this.request).fetch(id);
+  public subscriptionArchive(id: string): Fetch<ArchivePayload> {
+    return new SubscriptionArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation teamMembershipCreate for TeamMembershipPayload
@@ -13974,8 +14125,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to teamMembershipCreate
    * @returns TeamMembershipPayload
    */
-  public teamMembershipCreate(input: D.TeamMembershipCreateInput): Promise<TeamMembershipPayload | undefined> {
-    return new TeamMembershipCreateMutation(this.request).fetch(input);
+  public teamMembershipCreate(input: D.TeamMembershipCreateInput): Fetch<TeamMembershipPayload> {
+    return new TeamMembershipCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation teamMembershipDelete for ArchivePayload
@@ -13983,21 +14134,21 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to teamMembershipDelete
    * @returns ArchivePayload
    */
-  public teamMembershipDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new TeamMembershipDeleteMutation(this.request).fetch(id);
+  public teamMembershipDelete(id: string): Fetch<ArchivePayload> {
+    return new TeamMembershipDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation teamCreate for TeamPayload
    *
    * @param input - required input to pass to teamCreate
-   * @param vars - variables without 'input' to pass into the TeamCreateMutation
+   * @param variables - variables without 'input' to pass into the TeamCreateMutation
    * @returns TeamPayload
    */
   public teamCreate(
     input: D.TeamCreateInput,
-    vars?: Omit<D.TeamCreateMutationVariables, "input">
-  ): Promise<TeamPayload | undefined> {
-    return new TeamCreateMutation(this.request).fetch(input, vars);
+    variables?: Omit<D.TeamCreateMutationVariables, "input">
+  ): Fetch<TeamPayload> {
+    return new TeamCreateMutation(this._request).fetch(input, variables);
   }
   /**
    * Mutation teamUpdate for TeamPayload
@@ -14006,8 +14157,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to teamUpdate
    * @returns TeamPayload
    */
-  public teamUpdate(input: D.TeamUpdateInput, id: string): Promise<TeamPayload | undefined> {
-    return new TeamUpdateMutation(this.request).fetch(input, id);
+  public teamUpdate(input: D.TeamUpdateInput, id: string): Fetch<TeamPayload> {
+    return new TeamUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation teamArchive for ArchivePayload
@@ -14015,8 +14166,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to teamArchive
    * @returns ArchivePayload
    */
-  public teamArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new TeamArchiveMutation(this.request).fetch(id);
+  public teamArchive(id: string): Fetch<ArchivePayload> {
+    return new TeamArchiveMutation(this._request).fetch(id);
   }
   /**
    * Mutation teamDelete for ArchivePayload
@@ -14024,8 +14175,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to teamDelete
    * @returns ArchivePayload
    */
-  public teamDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new TeamDeleteMutation(this.request).fetch(id);
+  public teamDelete(id: string): Fetch<ArchivePayload> {
+    return new TeamDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation templateCreate for TemplatePayload
@@ -14033,8 +14184,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to templateCreate
    * @returns TemplatePayload
    */
-  public templateCreate(input: D.TemplateCreateInput): Promise<TemplatePayload | undefined> {
-    return new TemplateCreateMutation(this.request).fetch(input);
+  public templateCreate(input: D.TemplateCreateInput): Fetch<TemplatePayload> {
+    return new TemplateCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation templateUpdate for TemplatePayload
@@ -14043,8 +14194,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to templateUpdate
    * @returns TemplatePayload
    */
-  public templateUpdate(input: D.TemplateUpdateInput, id: string): Promise<TemplatePayload | undefined> {
-    return new TemplateUpdateMutation(this.request).fetch(input, id);
+  public templateUpdate(input: D.TemplateUpdateInput, id: string): Fetch<TemplatePayload> {
+    return new TemplateUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation templateDelete for ArchivePayload
@@ -14052,8 +14203,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to templateDelete
    * @returns ArchivePayload
    */
-  public templateDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new TemplateDeleteMutation(this.request).fetch(id);
+  public templateDelete(id: string): Fetch<ArchivePayload> {
+    return new TemplateDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation userSettingsUpdate for UserSettingsPayload
@@ -14062,8 +14213,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to userSettingsUpdate
    * @returns UserSettingsPayload
    */
-  public userSettingsUpdate(input: D.UserSettingsUpdateInput, id: string): Promise<UserSettingsPayload | undefined> {
-    return new UserSettingsUpdateMutation(this.request).fetch(input, id);
+  public userSettingsUpdate(input: D.UserSettingsUpdateInput, id: string): Fetch<UserSettingsPayload> {
+    return new UserSettingsUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation userSettingsFlagIncrement for UserSettingsFlagPayload
@@ -14071,16 +14222,16 @@ export class LinearSdk extends LinearRequest {
    * @param flag - required flag to pass to userSettingsFlagIncrement
    * @returns UserSettingsFlagPayload
    */
-  public userSettingsFlagIncrement(flag: string): Promise<UserSettingsFlagPayload | undefined> {
-    return new UserSettingsFlagIncrementMutation(this.request).fetch(flag);
+  public userSettingsFlagIncrement(flag: string): Fetch<UserSettingsFlagPayload> {
+    return new UserSettingsFlagIncrementMutation(this._request).fetch(flag);
   }
   /**
    * Mutation userSettingsFlagsReset for UserSettingsFlagsResetPayload
    *
    * @returns UserSettingsFlagsResetPayload
    */
-  public get userSettingsFlagsReset(): Promise<UserSettingsFlagsResetPayload | undefined> {
-    return new UserSettingsFlagsResetMutation(this.request).fetch();
+  public get userSettingsFlagsReset(): Fetch<UserSettingsFlagsResetPayload> {
+    return new UserSettingsFlagsResetMutation(this._request).fetch();
   }
   /**
    * Mutation userFlagUpdate for UserSettingsFlagPayload
@@ -14089,19 +14240,16 @@ export class LinearSdk extends LinearRequest {
    * @param flag - required flag to pass to userFlagUpdate
    * @returns UserSettingsFlagPayload
    */
-  public userFlagUpdate(
-    operation: D.UserFlagUpdateOperation,
-    flag: D.UserFlagType
-  ): Promise<UserSettingsFlagPayload | undefined> {
-    return new UserFlagUpdateMutation(this.request).fetch(operation, flag);
+  public userFlagUpdate(operation: D.UserFlagUpdateOperation, flag: D.UserFlagType): Fetch<UserSettingsFlagPayload> {
+    return new UserFlagUpdateMutation(this._request).fetch(operation, flag);
   }
   /**
    * Mutation userSubscribeToNewsletter for UserSubscribeToNewsletterPayload
    *
    * @returns UserSubscribeToNewsletterPayload
    */
-  public get userSubscribeToNewsletter(): Promise<UserSubscribeToNewsletterPayload | undefined> {
-    return new UserSubscribeToNewsletterMutation(this.request).fetch();
+  public get userSubscribeToNewsletter(): Fetch<UserSubscribeToNewsletterPayload> {
+    return new UserSubscribeToNewsletterMutation(this._request).fetch();
   }
   /**
    * Mutation viewPreferencesCreate for ViewPreferencesPayload
@@ -14109,8 +14257,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to viewPreferencesCreate
    * @returns ViewPreferencesPayload
    */
-  public viewPreferencesCreate(input: D.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload | undefined> {
-    return new ViewPreferencesCreateMutation(this.request).fetch(input);
+  public viewPreferencesCreate(input: D.ViewPreferencesCreateInput): Fetch<ViewPreferencesPayload> {
+    return new ViewPreferencesCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation viewPreferencesUpdate for ViewPreferencesPayload
@@ -14119,11 +14267,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to viewPreferencesUpdate
    * @returns ViewPreferencesPayload
    */
-  public viewPreferencesUpdate(
-    input: D.ViewPreferencesUpdateInput,
-    id: string
-  ): Promise<ViewPreferencesPayload | undefined> {
-    return new ViewPreferencesUpdateMutation(this.request).fetch(input, id);
+  public viewPreferencesUpdate(input: D.ViewPreferencesUpdateInput, id: string): Fetch<ViewPreferencesPayload> {
+    return new ViewPreferencesUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation viewPreferencesDelete for ArchivePayload
@@ -14131,8 +14276,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to viewPreferencesDelete
    * @returns ArchivePayload
    */
-  public viewPreferencesDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new ViewPreferencesDeleteMutation(this.request).fetch(id);
+  public viewPreferencesDelete(id: string): Fetch<ArchivePayload> {
+    return new ViewPreferencesDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation webhookCreate for WebhookPayload
@@ -14140,8 +14285,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to webhookCreate
    * @returns WebhookPayload
    */
-  public webhookCreate(input: D.WebhookCreateInput): Promise<WebhookPayload | undefined> {
-    return new WebhookCreateMutation(this.request).fetch(input);
+  public webhookCreate(input: D.WebhookCreateInput): Fetch<WebhookPayload> {
+    return new WebhookCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation webhookUpdate for WebhookPayload
@@ -14150,8 +14295,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to webhookUpdate
    * @returns WebhookPayload
    */
-  public webhookUpdate(input: D.WebhookUpdateInput, id: string): Promise<WebhookPayload | undefined> {
-    return new WebhookUpdateMutation(this.request).fetch(input, id);
+  public webhookUpdate(input: D.WebhookUpdateInput, id: string): Fetch<WebhookPayload> {
+    return new WebhookUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation webhookDelete for ArchivePayload
@@ -14159,8 +14304,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to webhookDelete
    * @returns ArchivePayload
    */
-  public webhookDelete(id: string): Promise<ArchivePayload | undefined> {
-    return new WebhookDeleteMutation(this.request).fetch(id);
+  public webhookDelete(id: string): Fetch<ArchivePayload> {
+    return new WebhookDeleteMutation(this._request).fetch(id);
   }
   /**
    * Mutation workflowStateCreate for WorkflowStatePayload
@@ -14168,8 +14313,8 @@ export class LinearSdk extends LinearRequest {
    * @param input - required input to pass to workflowStateCreate
    * @returns WorkflowStatePayload
    */
-  public workflowStateCreate(input: D.WorkflowStateCreateInput): Promise<WorkflowStatePayload | undefined> {
-    return new WorkflowStateCreateMutation(this.request).fetch(input);
+  public workflowStateCreate(input: D.WorkflowStateCreateInput): Fetch<WorkflowStatePayload> {
+    return new WorkflowStateCreateMutation(this._request).fetch(input);
   }
   /**
    * Mutation workflowStateUpdate for WorkflowStatePayload
@@ -14178,8 +14323,8 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to workflowStateUpdate
    * @returns WorkflowStatePayload
    */
-  public workflowStateUpdate(input: D.WorkflowStateUpdateInput, id: string): Promise<WorkflowStatePayload | undefined> {
-    return new WorkflowStateUpdateMutation(this.request).fetch(input, id);
+  public workflowStateUpdate(input: D.WorkflowStateUpdateInput, id: string): Fetch<WorkflowStatePayload> {
+    return new WorkflowStateUpdateMutation(this._request).fetch(input, id);
   }
   /**
    * Mutation workflowStateArchive for ArchivePayload
@@ -14187,7 +14332,7 @@ export class LinearSdk extends LinearRequest {
    * @param id - required id to pass to workflowStateArchive
    * @returns ArchivePayload
    */
-  public workflowStateArchive(id: string): Promise<ArchivePayload | undefined> {
-    return new WorkflowStateArchiveMutation(this.request).fetch(id);
+  public workflowStateArchive(id: string): Fetch<ArchivePayload> {
+    return new WorkflowStateArchiveMutation(this._request).fetch(id);
   }
 }

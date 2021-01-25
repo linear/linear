@@ -1,4 +1,4 @@
-import { getKeyByValue, isScalarField, OperationType, PluginContext, printList } from "@linear/plugin-common";
+import { getKeyByValue, isScalarField, OperationType, PluginContext, printLines } from "@linear/plugin-common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { printOperations } from "./operation";
@@ -19,10 +19,7 @@ export class OperationVisitor {
   public Document = {
     /** Join all string definitions */
     leave: (node: DocumentNode): string => {
-      return printList(
-        (node.definitions ?? []).map(x => (typeof x === "string" ? x : "")),
-        "\n"
-      );
+      return printLines((node.definitions ?? []).map(definition => (typeof definition === "string" ? definition : "")));
     },
   };
 
@@ -36,11 +33,10 @@ export class OperationVisitor {
     /** Print all field operations */
     leave: (_node: ObjectTypeDefinitionNode): string | null => {
       const node = (_node as unknown) as ObjectTypeDefinitionNode & { operationType: OperationType };
-      return printList(
+      return printLines(
         node.fields?.map(field => {
           return field ? printOperations(this._context, node.operationType, [field]) : undefined;
-        }),
-        "\n\n"
+        })
       );
     },
   };

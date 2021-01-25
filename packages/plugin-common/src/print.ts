@@ -8,9 +8,17 @@ const argGraphqlVisitor = new ArgumentGraphqlVisitor();
 
 /**
  * Filter a list of strings and join into a single string
+ * Defaults to comma separated
  */
-export function printList(a: (string | undefined)[] = [], joinString = ""): string {
-  return a.filter(Boolean).join(joinString);
+export function printList(arr: (string | undefined)[] = [], joinString = ", "): string {
+  return arr.filter(Boolean).join(joinString);
+}
+
+/**
+ * Filter a list of strings and join by the new line character
+ */
+export function printLines(arr: (string | undefined)[] = []): string {
+  return printList(arr, "\n");
 }
 
 /**
@@ -42,8 +50,8 @@ function cleanNode(obj: any): any {
 /**
  * Wrap a string after the specified length
  */
-export function wrapString(s: string, length = 100): string {
-  return s.replace(new RegExp(`(?![^\\n]{1,${length}}$)([^\\n]{1,${length}})\\s`, "g"), "$1\n");
+export function wrapString(str: string, length = 100): string {
+  return str.replace(new RegExp(`(?![^\\n]{1,${length}}$)([^\\n]{1,${length}})\\s`, "g"), "$1\n");
 }
 
 /**
@@ -51,10 +59,10 @@ export function wrapString(s: string, length = 100): string {
  */
 export function printComment(lines: (string | undefined)[]): string {
   const parsed = lines
-    .filter(t => t && t !== "")
-    .reduce((prev, t) => [...prev, ...(t as string).split("\n")], [] as string[]);
+    .filter(line => line && line !== "")
+    .reduce((prev, line) => [...prev, ...(line as string).split("\n")], [] as string[]);
 
-  return parsed.length > 1 ? ["/**", ...parsed.map(line => ` * ${line}`), " */"].join("\n") : `/** ${parsed[0]} */`;
+  return parsed.length > 1 ? printLines(["/**", ...parsed.map(line => ` * ${line}`), " */"]) : `/** ${parsed[0]} */`;
 }
 
 /**
@@ -71,11 +79,10 @@ export function printDebug<T>(obj: T): string {
  */
 export function printGraphqlDescription(description?: string): string | undefined {
   return description
-    ? printList(
+    ? printLines(
         wrapString(description)
           .split("\n")
-          .map(s => `# ${s.trim()}`),
-        "\n"
+          .map(str => `# ${str.trim()}`)
       )
     : undefined;
 }
@@ -84,12 +91,12 @@ export function printGraphqlDescription(description?: string): string | undefine
  * Return a jsdoc formatted block for graphql files
  */
 export function printGraphqlComment(lines: string[]): string {
-  return [
+  return printLines([
     ...lines
-      .filter(t => t && t !== "")
-      .reduce((prev, t) => [...prev, ...t.split("\n")], [] as string[])
+      .filter(line => line && line !== "")
+      .reduce((prev, line) => [...prev, ...line.split("\n")], [] as string[])
       .map(line => `# ${line}`),
-  ].join("\n");
+  ]);
 }
 
 /**
@@ -122,7 +129,7 @@ export function printTypescriptType(context: PluginContext, node?: ASTNode | str
 export function printPascal(str?: string): string {
   return (str ?? "")
     .split("_")
-    .map(s => pascalCase(s))
+    .map(_str => pascalCase(_str))
     .join("_");
 }
 
@@ -131,4 +138,11 @@ export function printPascal(str?: string): string {
  */
 export function printTernary(_if?: string, _then?: string, _else = "undefined"): string {
   return _if ? `${_if} ? ${_then} : ${_else}` : _then ?? "";
+}
+
+/**
+ * Print a string setting the left, first arg to the right, second arg
+ */
+export function printSet(left: string, right: string): string {
+  return `${left} = ${right}`;
 }

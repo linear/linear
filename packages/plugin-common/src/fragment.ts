@@ -8,11 +8,11 @@ import { Named, NamedFields, PluginContext } from "./types";
  */
 export function findFragment(
   context: PluginContext,
-  field?: OperationTypeDefinitionNode | FieldDefinitionNode | Named<FieldDefinitionNode>
+  node?: OperationTypeDefinitionNode | FieldDefinitionNode | Named<FieldDefinitionNode>
 ): NamedFields<ObjectTypeDefinitionNode> | undefined {
-  if (field) {
-    const type = printTypescriptType(context, field.type);
-    return context.fragments.find(o => o.name === type);
+  if (node) {
+    const type = printTypescriptType(context, node.type);
+    return context.fragments.find(operation => operation.name === type);
   }
   return undefined;
 }

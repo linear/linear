@@ -11,7 +11,7 @@ export function findObject(
 ): ObjectTypeDefinitionNode | undefined {
   if (field) {
     const type = reduceTypeName(field.type);
-    return context.objects.find(o => o.name.value === type);
+    return context.objects.find(operation => operation.name.value === type);
   }
   return undefined;
 }
@@ -19,14 +19,18 @@ export function findObject(
 /**
  * Get the string value of the object name
  */
-export function getObjectName(object: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode>): string {
-  return typeof object.name === "string" ? object.name : object.name.value;
+export function getObjectName(
+  object: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode> | string
+): string {
+  return typeof object === "string" ? object : typeof object.name === "string" ? object.name : object.name.value;
 }
 
 /**
  * Is the object a connection type
  */
-export function isConnection(object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode>): boolean {
+export function isConnection(
+  object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode> | string
+): boolean {
   return object ? getObjectName(object).endsWith("Connection") : false;
 }
 

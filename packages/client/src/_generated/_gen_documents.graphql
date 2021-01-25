@@ -2392,7 +2392,6 @@ query users(
     ...UserConnection
   }
 }
-
 # One specific user.
 query user(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
@@ -2492,7 +2491,6 @@ query user_teamMemberships(
     }
   }
 }
-
 # The currently authenticated user.
 query viewer {
   viewer {
@@ -2583,7 +2581,6 @@ query viewer_teamMemberships(
     }
   }
 }
-
 # The user's organization.
 query organization {
   organization {
@@ -2702,14 +2699,12 @@ query organization_integrations(
     }
   }
 }
-
 # Does the organization exist.
 query organizationExists($urlKey: String!) {
   organizationExists(urlKey: $urlKey) {
     ...OrganizationExistsPayload
   }
 }
-
 # Fetch data to catch up the client to the state of the world.
 query syncBootstrap(
   # The version of the backend database the client has locally stored.
@@ -2721,7 +2716,6 @@ query syncBootstrap(
     ...SyncResponse
   }
 }
-
 # Fetches delta packets to catch up the user to the current state of the world.
 query syncUpdates(
   # The last sync id the client has seen.
@@ -2731,7 +2725,6 @@ query syncUpdates(
     ...SyncResponse
   }
 }
-
 # Fetches an archived model.
 query archivedModelSync(
   # The identifier of the model to load. What an identifier is specific to the model class.
@@ -2743,7 +2736,6 @@ query archivedModelSync(
     ...ArchiveResponse
   }
 }
-
 # Fetches archived models.
 query archivedModelsSync(
   # The class name of the models to load.
@@ -2759,7 +2751,6 @@ query archivedModelsSync(
     ...ArchiveResponse
   }
 }
-
 # Finds a user account by email or identifier. Super user required.
 query adminUserAccountLookup(
   # Email by which to search for the user account.
@@ -2771,7 +2762,6 @@ query adminUserAccountLookup(
     ...UserAccountAdminPrivileged
   }
 }
-
 # All API keys for the user.
 query apiKeys(
   # A cursor to be used with last for backward pagination.
@@ -2798,7 +2788,6 @@ query apiKeys(
     ...ApiKeyConnection
   }
 }
-
 # Get information for an application and whether a user has approved it for the given scopes.
 query applicationWithAuthorization(
   # Redirect URI for the application.
@@ -2812,7 +2801,6 @@ query applicationWithAuthorization(
     ...UserAuthorizedApplication
   }
 }
-
 # Get all authorized applications for a user
 query authorizedApplications {
   authorizedApplications {
@@ -2826,14 +2814,12 @@ query authorizedApplications {
     appId
   }
 }
-
 # Fetch users belonging to this user account.
 query availableUsers {
   availableUsers {
     ...AuthResolverResponse
   }
 }
-
 # Fetch SSO login URL for the email provided.
 query ssoUrlFromEmail(
   # Whether the client is the desktop app.
@@ -2845,7 +2831,6 @@ query ssoUrlFromEmail(
     ...SsoUrlFromEmailResponse
   }
 }
-
 # Billing details for the customer.
 query billingDetails {
   billingDetails {
@@ -2860,7 +2845,6 @@ query billingDetails_paymentMethod {
     }
   }
 }
-
 # Join collaborative document and get missing steps.
 query collaborativeDocumentJoin(
   # The identifier of the client.
@@ -2889,7 +2873,6 @@ query collaborativeDocumentJoin_steps(
     }
   }
 }
-
 # All comments.
 query comments(
   # A cursor to be used with last for backward pagination.
@@ -2916,7 +2899,6 @@ query comments(
     ...CommentConnection
   }
 }
-
 # A specific comment.
 query comment(
   # The identifier of the comment to retrieve.
@@ -2926,7 +2908,6 @@ query comment(
     ...Comment
   }
 }
-
 # Custom views for the user.
 query customViews(
   # A cursor to be used with last for backward pagination.
@@ -2953,14 +2934,12 @@ query customViews(
     ...CustomViewConnection
   }
 }
-
 # One specific custom view.
 query customView($id: String!) {
   customView(id: $id) {
     ...CustomView
   }
 }
-
 # All cycles.
 query cycles(
   # A cursor to be used with last for backward pagination.
@@ -2987,7 +2966,6 @@ query cycles(
     ...CycleConnection
   }
 }
-
 # One specific cycle.
 query cycle($id: String!) {
   cycle(id: $id) {
@@ -3052,7 +3030,6 @@ query cycle_uncompletedIssuesUponClose(
     }
   }
 }
-
 # All custom emojis.
 query emojis(
   # A cursor to be used with last for backward pagination.
@@ -3079,7 +3056,6 @@ query emojis(
     ...EmojiConnection
   }
 }
-
 # A specific emoji.
 query emoji(
   # The identifier of the emoji to retrieve.
@@ -3089,7 +3065,6 @@ query emoji(
     ...Emoji
   }
 }
-
 # The user's favorites.
 query favorites(
   # A cursor to be used with last for backward pagination.
@@ -3116,14 +3091,12 @@ query favorites(
     ...FavoriteConnection
   }
 }
-
 # One specific favorite.
 query favorite($id: String!) {
   favorite(id: $id) {
     ...Favorite
   }
 }
-
 # Fetch Figma screenshot and other information with file and node identifiers.
 query figmaEmbedInfo(
   # Figma node identifier.
@@ -3148,7 +3121,6 @@ query figmaEmbedInfo_figmaEmbed(
     }
   }
 }
-
 # All integrations.
 query integrations(
   # A cursor to be used with last for backward pagination.
@@ -3175,7 +3147,6 @@ query integrations(
     ...IntegrationConnection
   }
 }
-
 # One specific integration.
 query integration($id: String!) {
   integration(id: $id) {
@@ -3226,7 +3197,6 @@ query integration_settings_sentry($id: String!) {
     }
   }
 }
-
 # All integrations resources (e.g. linked GitHub pull requests for issues).
 query integrationResources(
   # A cursor to be used with last for backward pagination.
@@ -3253,7 +3223,6 @@ query integrationResources(
     ...IntegrationResourceConnection
   }
 }
-
 # One specific integration resource. (e.g. linked GitHub pull requests for an issue)
 query integrationResource($id: String!) {
   integrationResource(id: $id) {
@@ -3316,7 +3285,6 @@ query integrationResource_pullRequest($id: String!) {
     }
   }
 }
-
 # Retrieves information for the public invite page.
 query inviteInfo(
   # Team hash.
@@ -3341,7 +3309,6 @@ query inviteInfo_inviteData(
     }
   }
 }
-
 # All issue labels.
 query issueLabels(
   # A cursor to be used with last for backward pagination.
@@ -3368,7 +3335,6 @@ query issueLabels(
     ...IssueLabelConnection
   }
 }
-
 # One specific label.
 query issueLabel($id: String!) {
   issueLabel(id: $id) {
@@ -3404,7 +3370,6 @@ query issueLabel_issues(
     }
   }
 }
-
 # All issue relationships.
 query issueRelations(
   # A cursor to be used with last for backward pagination.
@@ -3431,14 +3396,12 @@ query issueRelations(
     ...IssueRelationConnection
   }
 }
-
 # One specific issue relation.
 query issueRelation($id: String!) {
   issueRelation(id: $id) {
     ...IssueRelation
   }
 }
-
 # All issues.
 query issues(
   # A cursor to be used with last for backward pagination.
@@ -3465,7 +3428,6 @@ query issues(
     ...IssueConnection
   }
 }
-
 # One specific issue.
 query issue($id: String!) {
   issue(id: $id) {
@@ -3704,7 +3666,6 @@ query issue_inverseRelations(
     }
   }
 }
-
 # [ALPHA] Search issues. This query is experimental and is subject to change without notice.
 query issueSearch(
   # A cursor to be used with last for backward pagination.
@@ -3734,7 +3695,6 @@ query issueSearch(
     ...IssueConnection
   }
 }
-
 # All milestones.
 query milestones(
   # A cursor to be used with last for backward pagination.
@@ -3761,7 +3721,6 @@ query milestones(
     ...MilestoneConnection
   }
 }
-
 # One specific milestone.
 query milestone($id: String!) {
   milestone(id: $id) {
@@ -3797,7 +3756,6 @@ query milestone_projects(
     }
   }
 }
-
 # All notifications.
 query notifications(
   # A cursor to be used with last for backward pagination.
@@ -3824,14 +3782,12 @@ query notifications(
     ...NotificationConnection
   }
 }
-
 # One specific notification.
 query notification($id: String!) {
   notification(id: $id) {
     ...Notification
   }
 }
-
 # The user's notification subscriptions.
 query notificationSubscriptions(
   # A cursor to be used with last for backward pagination.
@@ -3858,14 +3814,12 @@ query notificationSubscriptions(
     ...NotificationSubscriptionConnection
   }
 }
-
 # One specific notification subscription.
 query notificationSubscription($id: String!) {
   notificationSubscription(id: $id) {
     ...NotificationSubscription
   }
 }
-
 # All invites for the organization.
 query organizationInvites(
   # A cursor to be used with last for backward pagination.
@@ -3892,7 +3846,6 @@ query organizationInvites(
     ...OrganizationInviteConnection
   }
 }
-
 # One specific organization invite.
 query organizationInvite($id: String!) {
   organizationInvite(id: $id) {
@@ -3928,7 +3881,6 @@ query organizationInvite_issues(
     }
   }
 }
-
 # All links for the project.
 query projectLinks(
   # A cursor to be used with last for backward pagination.
@@ -3955,14 +3907,12 @@ query projectLinks(
     ...ProjectLinkConnection
   }
 }
-
 # One specific project link.
 query projectLink($id: String!) {
   projectLink(id: $id) {
     ...ProjectLink
   }
 }
-
 # All projects.
 query projects(
   # A cursor to be used with last for backward pagination.
@@ -3989,7 +3939,6 @@ query projects(
     ...ProjectConnection
   }
 }
-
 # One specific project.
 query project($id: String!) {
   project(id: $id) {
@@ -4112,14 +4061,12 @@ query project_links(
     }
   }
 }
-
 # Sends a test push message.
 query pushSubscriptionTest {
   pushSubscriptionTest {
     ...PushSubscriptionPayload
   }
 }
-
 # All comment emoji reactions.
 query reactions(
   # A cursor to be used with last for backward pagination.
@@ -4146,7 +4093,6 @@ query reactions(
     ...ReactionConnection
   }
 }
-
 # A specific reaction.
 query reaction(
   # The identifier to retrieve.
@@ -4156,14 +4102,12 @@ query reaction(
     ...Reaction
   }
 }
-
 # The organization's subscription.
 query subscription {
   subscription {
     ...Subscription
   }
 }
-
 # All team memberships.
 query teamMemberships(
   # A cursor to be used with last for backward pagination.
@@ -4190,14 +4134,12 @@ query teamMemberships(
     ...TeamMembershipConnection
   }
 }
-
 # One specific team membership.
 query teamMembership($id: String!) {
   teamMembership(id: $id) {
     ...TeamMembership
   }
 }
-
 # All teams.
 query teams(
   # A cursor to be used with last for backward pagination.
@@ -4224,7 +4166,6 @@ query teams(
     ...TeamConnection
   }
 }
-
 # One specific team.
 query team($id: String!) {
   team(id: $id) {
@@ -4463,7 +4404,6 @@ query team_webhooks(
     }
   }
 }
-
 # All templates from all users.
 query templates {
   templates {
@@ -4485,7 +4425,6 @@ query templates {
     }
   }
 }
-
 # A specific template.
 query template(
   # The identifier of the template to retrieve.
@@ -4495,14 +4434,12 @@ query template(
     ...Template
   }
 }
-
 # The user's settings.
 query userSettings {
   userSettings {
     ...UserSettings
   }
 }
-
 # All webhooks.
 query webhooks(
   # A cursor to be used with last for backward pagination.
@@ -4529,7 +4466,6 @@ query webhooks(
     ...WebhookConnection
   }
 }
-
 # A specific webhook.
 query webhook(
   # The identifier of the webhook to retrieve.
@@ -4539,7 +4475,6 @@ query webhook(
     ...Webhook
   }
 }
-
 # All issue workflow states.
 query workflowStates(
   # A cursor to be used with last for backward pagination.
@@ -4566,7 +4501,6 @@ query workflowStates(
     ...WorkflowStateConnection
   }
 }
-
 # One specific state.
 query workflowState($id: String!) {
   workflowState(id: $id) {
@@ -4613,7 +4547,6 @@ mutation userUpdate(
     ...UserPayload
   }
 }
-
 # Makes user an admin. Can only be called by an admin.
 mutation userPromoteAdmin(
   # The identifier of the user to make an admin.
@@ -4623,7 +4556,6 @@ mutation userPromoteAdmin(
     ...UserAdminPayload
   }
 }
-
 # Makes user a regular user. Can only be called by an admin.
 mutation userDemoteAdmin(
   # The identifier of the user to make a regular user.
@@ -4633,7 +4565,6 @@ mutation userDemoteAdmin(
     ...UserAdminPayload
   }
 }
-
 # Suspends a user. Can only be called by an admin.
 mutation userSuspend(
   # The identifier of the user to suspend.
@@ -4643,7 +4574,6 @@ mutation userSuspend(
     ...UserAdminPayload
   }
 }
-
 # Un-suspends a user. Can only be called by an admin.
 mutation userUnsuspend(
   # The identifier of the user to unsuspend.
@@ -4653,7 +4583,6 @@ mutation userUnsuspend(
     ...UserAdminPayload
   }
 }
-
 # Updates the user's organization.
 mutation organizationUpdate(
   # A partial organization object to update the organization with.
@@ -4663,14 +4592,12 @@ mutation organizationUpdate(
     ...OrganizationPayload
   }
 }
-
 # Get an organization's delete confirmation token. Administrator privileges required.
 mutation organizationDeleteChallenge {
   organizationDeleteChallenge {
     ...OrganizationDeletePayload
   }
 }
-
 # Delete's an organization. Administrator privileges required.
 mutation organizationDelete(
   # Information required to delete an organization.
@@ -4680,7 +4607,6 @@ mutation organizationDelete(
     ...OrganizationDeletePayload
   }
 }
-
 # Deletes an integration. Superuser privileges required.
 mutation adminDeleteIntegration(
   # The identifier of the integration to delete.
@@ -4690,7 +4616,6 @@ mutation adminDeleteIntegration(
     ...AdminIntegrationPayload
   }
 }
-
 # Disable organization access. Superuser privileges required.
 mutation organizationToggleAccess(
   # The identifier of the organization to update.
@@ -4700,7 +4625,6 @@ mutation organizationToggleAccess(
     ...OrganizationAccessPayload
   }
 }
-
 # Change email domain for all users and accounts in the organization.
 mutation organizationChangeEmailDomain(
   # The email domain to update to.
@@ -4714,7 +4638,6 @@ mutation organizationChangeEmailDomain(
     ...OrganizationAccessPayload
   }
 }
-
 # Toggle SAML authentication on or off for an organization. Superuser privileges required.
 mutation organizationToggleSamlEnabled(
   # The identifier of the organization to update.
@@ -4724,7 +4647,6 @@ mutation organizationToggleSamlEnabled(
     ...OrganizationSamlConfigurePayload
   }
 }
-
 # Configure SAML authentication for an organization. Superuser privileges required.
 mutation organizationConfigureSaml(
   # Saml configuration for the organization.
@@ -4736,7 +4658,6 @@ mutation organizationConfigureSaml(
     ...OrganizationSamlConfigurePayload
   }
 }
-
 # Executes admin command.
 mutation adminCommand(
   # The command to perform.
@@ -4746,7 +4667,6 @@ mutation adminCommand(
     ...AdminCommandPayload
   }
 }
-
 # Sends out emails in bulk to our users.
 mutation adminBulkEmail(
   # A random delay in seconds to add to the email task.
@@ -4762,7 +4682,6 @@ mutation adminBulkEmail(
     ...AdminCommandPayload
   }
 }
-
 # Creates a stripe customer for an organization.
 mutation adminCreateStripeCustomer(
   # The id of the organization to create the stripe customer for. If the organization already has a customer account, an error will be returned.
@@ -4772,7 +4691,6 @@ mutation adminCreateStripeCustomer(
     ...AdminCommandPayload
   }
 }
-
 # Schedules a task. Currently only anonymous tasks without any parameters can be scheduled.
 mutation adminScheduleAnonymousTask(
   # The name of the task to execute
@@ -4782,21 +4700,18 @@ mutation adminScheduleAnonymousTask(
     ...AdminCommandPayload
   }
 }
-
 # Changes the email address for the user account and all of its users.
 mutation adminUserAccountChangeEmail($newEmail: String!, $id: String!) {
   adminUserAccountChangeEmail(newEmail: $newEmail, id: $id) {
     ...UserAccountAdminPrivileged
   }
 }
-
 # Permanently deletes the user account and all associated data.
 mutation adminUserAccountDelete($deleteAllData: Boolean, $email: String!, $id: String!) {
   adminUserAccountDelete(deleteAllData: $deleteAllData, email: $email, id: $id) {
     ...AdminResponse
   }
 }
-
 # [Deprecated] Creates a new event.
 mutation eventCreate(
   # The event to create.
@@ -4806,7 +4721,6 @@ mutation eventCreate(
     ...EventPayload
   }
 }
-
 # Creates a new API key.
 mutation apiKeyCreate(
   # The api key object to create.
@@ -4816,7 +4730,6 @@ mutation apiKeyCreate(
     ...ApiKeyPayload
   }
 }
-
 # Deletes an API key.
 mutation apiKeyDelete(
   # The identifier of the API key to delete.
@@ -4826,7 +4739,6 @@ mutation apiKeyDelete(
     ...ArchivePayload
   }
 }
-
 # Finds or creates a new user account by email and sends an email with token.
 mutation emailUserAccountAuthChallenge(
   # The data used for email authentication.
@@ -4836,7 +4748,6 @@ mutation emailUserAccountAuthChallenge(
     ...EmailUserAccountAuthChallengeResponse
   }
 }
-
 # Authenticates a user account via email and authentication token.
 mutation emailTokenUserAccountAuth(
   # The data used for token authentication.
@@ -4846,7 +4757,6 @@ mutation emailTokenUserAccountAuth(
     ...AuthResolverResponse
   }
 }
-
 # Authenticates a user account via email and authentication token for SAML.
 mutation samlTokenUserAccountAuth(
   # The data used for token authentication.
@@ -4856,7 +4766,6 @@ mutation samlTokenUserAccountAuth(
     ...AuthResolverResponse
   }
 }
-
 # Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
 mutation googleUserAccountAuth(
   # The data used for Google authentication.
@@ -4866,7 +4775,6 @@ mutation googleUserAccountAuth(
     ...AuthResolverResponse
   }
 }
-
 # Creates an organization from onboarding.
 mutation createOrganizationFromOnboarding(
   # Onboarding survey.
@@ -4878,7 +4786,6 @@ mutation createOrganizationFromOnboarding(
     ...CreateOrJoinOrganizationResponse
   }
 }
-
 # Join an organization from onboarding.
 mutation joinOrganizationFromOnboarding(
   # Organization details for the organization to join.
@@ -4888,7 +4795,6 @@ mutation joinOrganizationFromOnboarding(
     ...CreateOrJoinOrganizationResponse
   }
 }
-
 # Leave an organization.
 mutation leaveOrganization(
   # ID of the organization to leave.
@@ -4898,7 +4804,6 @@ mutation leaveOrganization(
     ...CreateOrJoinOrganizationResponse
   }
 }
-
 # Updates the billing email address for the customer.
 mutation billingEmailUpdate(
   # The properties of the billing details.
@@ -4908,14 +4813,12 @@ mutation billingEmailUpdate(
     ...BillingEmailPayload
   }
 }
-
 # Update collaborative document with client steps.
 mutation collaborativeDocumentUpdate($input: CollaborationDocumentUpdateInput!) {
   collaborativeDocumentUpdate(input: $input) {
     ...CollaborationDocumentUpdatePayload
   }
 }
-
 # Creates a new comment.
 mutation commentCreate(
   # The comment object to create.
@@ -4925,7 +4828,6 @@ mutation commentCreate(
     ...CommentPayload
   }
 }
-
 # Updates a comment.
 mutation commentUpdate(
   # A partial comment object to update the issue with.
@@ -4937,7 +4839,6 @@ mutation commentUpdate(
     ...CommentPayload
   }
 }
-
 # Deletes a comment.
 mutation commentDelete(
   # The identifier of the comment to delete.
@@ -4947,7 +4848,6 @@ mutation commentDelete(
     ...ArchivePayload
   }
 }
-
 # Saves user message.
 mutation contactCreate(
   # The contact entry to create.
@@ -4957,7 +4857,6 @@ mutation contactCreate(
     ...ContactPayload
   }
 }
-
 # Creates a new custom view.
 mutation customViewCreate(
   # The properties of the custom view to create.
@@ -4967,7 +4866,6 @@ mutation customViewCreate(
     ...CustomViewPayload
   }
 }
-
 # Updates a custom view.
 mutation customViewUpdate(
   # The properties of the custom view to update.
@@ -4979,7 +4877,6 @@ mutation customViewUpdate(
     ...CustomViewPayload
   }
 }
-
 # Deletes a custom view.
 mutation customViewDelete(
   # The identifier of the custom view to delete.
@@ -4989,7 +4886,6 @@ mutation customViewDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new cycle.
 mutation cycleCreate(
   # The cycle object to create.
@@ -4999,7 +4895,6 @@ mutation cycleCreate(
     ...CyclePayload
   }
 }
-
 # Updates a cycle.
 mutation cycleUpdate(
   # A partial cycle object to update the cycle with.
@@ -5011,7 +4906,6 @@ mutation cycleUpdate(
     ...CyclePayload
   }
 }
-
 # Archives a cycle.
 mutation cycleArchive(
   # The identifier of the cycle to archive.
@@ -5021,28 +4915,24 @@ mutation cycleArchive(
     ...ArchivePayload
   }
 }
-
 # Always fails with internal error. Used to debug logging.
 mutation debugFailWithInternalError {
   debugFailWithInternalError {
     ...DebugPayload
   }
 }
-
 # Always logs an error to Sentry as warning. Used to debug logging.
 mutation debugFailWithWarning {
   debugFailWithWarning {
     ...DebugPayload
   }
 }
-
 # Create the SAML test organization in development.
 mutation debugCreateSAMLOrg {
   debugCreateSAMLOrg {
     ...DebugPayload
   }
 }
-
 # Unsubscribes the user from one type of emails.
 mutation emailUnsubscribe(
   # Unsubscription details.
@@ -5052,7 +4942,6 @@ mutation emailUnsubscribe(
     ...EmailUnsubscribePayload
   }
 }
-
 # Creates a custom emoji.
 mutation emojiCreate(
   # The emoji object to create.
@@ -5062,7 +4951,6 @@ mutation emojiCreate(
     ...EmojiPayload
   }
 }
-
 # Deletes an emoji.
 mutation emojiDelete(
   # The identifier of the emoji to delete.
@@ -5072,7 +4960,6 @@ mutation emojiDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new favorite (project, cycle etc).
 mutation favoriteCreate(
   # The favorite object to create.
@@ -5082,7 +4969,6 @@ mutation favoriteCreate(
     ...FavoritePayload
   }
 }
-
 # Updates a favorite.
 mutation favoriteUpdate(
   # A partial favorite object to update the favorite with.
@@ -5094,7 +4980,6 @@ mutation favoriteUpdate(
     ...FavoritePayload
   }
 }
-
 # Deletes a favorite reference.
 mutation favoriteDelete(
   # The identifier of the favorite reference to delete.
@@ -5104,7 +4989,6 @@ mutation favoriteDelete(
     ...ArchivePayload
   }
 }
-
 # Saves user feedback.
 mutation feedbackCreate(
   # The feedback entry to create.
@@ -5114,7 +4998,6 @@ mutation feedbackCreate(
     ...FeedbackPayload
   }
 }
-
 # XHR request payload to upload an images, video and other attachments directly to Linear's cloud
 # storage.
 mutation fileUpload(
@@ -5131,7 +5014,6 @@ mutation fileUpload(
     ...UploadPayload
   }
 }
-
 # Upload an image from an URL to Linear.
 mutation imageUploadFromUrl(
   # URL of the file to be uploaded to Linear.
@@ -5141,7 +5023,6 @@ mutation imageUploadFromUrl(
     ...ImageUploadFromUrlPayload
   }
 }
-
 # Connects the organization with the GitHub App.
 mutation integrationGithubConnect(
   # The GitHub data to connect with.
@@ -5151,7 +5032,6 @@ mutation integrationGithubConnect(
     ...IntegrationPayload
   }
 }
-
 # Connects the organization with a GitLab Access Token.
 mutation integrationGitlabConnect(
   # The URL of the GitLab installation
@@ -5163,7 +5043,6 @@ mutation integrationGitlabConnect(
     ...IntegrationPayload
   }
 }
-
 # Integrates the organization with Slack.
 mutation integrationSlack(
   # Whether or not v2 of Slack OAuth should be used
@@ -5177,7 +5056,6 @@ mutation integrationSlack(
     ...IntegrationPayload
   }
 }
-
 # Integrates your personal notifications with Slack.
 mutation integrationSlackPersonal(
   # The Slack OAuth redirect URI.
@@ -5189,7 +5067,6 @@ mutation integrationSlackPersonal(
     ...IntegrationPayload
   }
 }
-
 # Slack webhook integration.
 mutation integrationSlackPost(
   # Whether or not v2 of Slack OAuth should be used
@@ -5205,7 +5082,6 @@ mutation integrationSlackPost(
     ...IntegrationPayload
   }
 }
-
 # Slack integration for project notifications.
 mutation integrationSlackProjectPost(
   # The Slack OAuth redirect URI.
@@ -5219,7 +5095,6 @@ mutation integrationSlackProjectPost(
     ...IntegrationPayload
   }
 }
-
 # Imports custom emojis from your Slack workspace.
 mutation integrationSlackImportEmojis(
   # The Slack OAuth redirect URI.
@@ -5231,7 +5106,6 @@ mutation integrationSlackImportEmojis(
     ...IntegrationPayload
   }
 }
-
 # Integrates the organization with Figma.
 mutation integrationFigma(
   # The Figma OAuth redirect URI.
@@ -5243,7 +5117,6 @@ mutation integrationFigma(
     ...IntegrationPayload
   }
 }
-
 # Integrates the organization with Google Sheets.
 mutation integrationGoogleSheets(
   # The Google OAuth code.
@@ -5253,7 +5126,6 @@ mutation integrationGoogleSheets(
     ...IntegrationPayload
   }
 }
-
 # Manually update Google Sheets data.
 mutation refreshGoogleSheetsData(
   # The identifier of the Google Sheets integration to update.
@@ -5263,7 +5135,6 @@ mutation refreshGoogleSheetsData(
     ...IntegrationPayload
   }
 }
-
 # Integrates the organization with Sentry.
 mutation integrationSentryConnect(
   # The slug of the Sentry organization being connected.
@@ -5277,7 +5148,6 @@ mutation integrationSentryConnect(
     ...IntegrationPayload
   }
 }
-
 # Deletes an integration.
 mutation integrationDelete(
   # The identifier of the integration to delete.
@@ -5287,7 +5157,6 @@ mutation integrationDelete(
     ...ArchivePayload
   }
 }
-
 # Archives an integration resource.
 mutation integrationResourceArchive(
   # The identifier of the integration resource to archive.
@@ -5297,7 +5166,6 @@ mutation integrationResourceArchive(
     ...ArchivePayload
   }
 }
-
 # Creates a new label.
 mutation issueLabelCreate(
   # The issue label to create.
@@ -5307,7 +5175,6 @@ mutation issueLabelCreate(
     ...IssueLabelPayload
   }
 }
-
 # Updates an label.
 mutation issueLabelUpdate(
   # A partial label object to update.
@@ -5319,7 +5186,6 @@ mutation issueLabelUpdate(
     ...IssueLabelPayload
   }
 }
-
 # Archives an issue label.
 mutation issueLabelArchive(
   # The identifier of the label to archive.
@@ -5329,7 +5195,6 @@ mutation issueLabelArchive(
     ...ArchivePayload
   }
 }
-
 # Creates a new issue relation.
 mutation issueRelationCreate(
   # The issue relation to create.
@@ -5339,7 +5204,6 @@ mutation issueRelationCreate(
     ...IssueRelationPayload
   }
 }
-
 # Updates an issue relation.
 mutation issueRelationUpdate(
   # The properties of the issue relation to update.
@@ -5351,7 +5215,6 @@ mutation issueRelationUpdate(
     ...IssueRelationPayload
   }
 }
-
 # Deletes an issue relation.
 mutation issueRelationDelete(
   # The identifier of the issue relation to delete.
@@ -5361,7 +5224,6 @@ mutation issueRelationDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new issue.
 mutation issueCreate(
   # The issue object to create.
@@ -5371,7 +5233,6 @@ mutation issueCreate(
     ...IssuePayload
   }
 }
-
 # Updates an issue.
 mutation issueUpdate(
   # A partial issue object to update the issue with.
@@ -5383,7 +5244,6 @@ mutation issueUpdate(
     ...IssuePayload
   }
 }
-
 # Archives an issue.
 mutation issueArchive(
   # The identifier of the issue to archive.
@@ -5393,7 +5253,6 @@ mutation issueArchive(
     ...ArchivePayload
   }
 }
-
 # Unarchives an issue.
 mutation issueUnarchive(
   # The identifier of the issue to archive.
@@ -5403,7 +5262,6 @@ mutation issueUnarchive(
     ...ArchivePayload
   }
 }
-
 # Creates a new milestone.
 mutation milestoneCreate(
   # The issue object to create.
@@ -5413,7 +5271,6 @@ mutation milestoneCreate(
     ...MilestonePayload
   }
 }
-
 # Updates a milestone.
 mutation milestoneUpdate(
   # A partial milestone object to update the milestone with.
@@ -5425,7 +5282,6 @@ mutation milestoneUpdate(
     ...MilestonePayload
   }
 }
-
 # Deletes a milestone.
 mutation milestoneDelete(
   # The identifier of the milestone to delete. Only milestones without projects can be deleted.
@@ -5435,7 +5291,6 @@ mutation milestoneDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a notification.
 mutation notificationCreate(
   # A partial notification object to update the issue with.
@@ -5447,7 +5302,6 @@ mutation notificationCreate(
     ...NotificationPayload
   }
 }
-
 # Updates a notification.
 mutation notificationUpdate(
   # A partial notification object to update the issue with.
@@ -5459,7 +5313,6 @@ mutation notificationUpdate(
     ...NotificationPayload
   }
 }
-
 # [Deprecated] Deletes a notification.
 mutation notificationDelete(
   # The identifier of the notification to delete.
@@ -5469,7 +5322,6 @@ mutation notificationDelete(
     ...ArchivePayload
   }
 }
-
 # Archives a notification.
 mutation notificationArchive(
   # The id of the notification to archive.
@@ -5479,7 +5331,6 @@ mutation notificationArchive(
     ...ArchivePayload
   }
 }
-
 # Unarchives a notification.
 mutation notificationUnarchive(
   # The id of the notification to archive.
@@ -5489,7 +5340,6 @@ mutation notificationUnarchive(
     ...ArchivePayload
   }
 }
-
 # Creates a new notification subscription for a team or a project.
 mutation notificationSubscriptionCreate(
   # The subscription object to create.
@@ -5499,7 +5349,6 @@ mutation notificationSubscriptionCreate(
     ...NotificationSubscriptionPayload
   }
 }
-
 # Deletes a notification subscription reference.
 mutation notificationSubscriptionDelete(
   # The identifier of the notification subscription reference to delete.
@@ -5509,7 +5358,6 @@ mutation notificationSubscriptionDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new OAuth client.
 mutation oauthClientCreate(
   # The OAuth client application object to create.
@@ -5519,7 +5367,6 @@ mutation oauthClientCreate(
     ...OauthClientPayload
   }
 }
-
 # Updates an OAuth client.
 mutation oauthClientUpdate(
   # A partial client object to update the OAuth client with.
@@ -5531,7 +5378,6 @@ mutation oauthClientUpdate(
     ...OauthClientPayload
   }
 }
-
 # Archives an OAuth client.
 mutation oauthClientArchive(
   # The identifier of the OAuth client to archive.
@@ -5541,7 +5387,6 @@ mutation oauthClientArchive(
     ...ArchivePayload
   }
 }
-
 # Updates an OAuth client.
 mutation oauthClientRotateSecret(
   # The identifier of the OAuth client for which we want to rotate the secret.
@@ -5551,7 +5396,6 @@ mutation oauthClientRotateSecret(
     ...RotateSecretPayload
   }
 }
-
 # Revokes an OAuth token.
 mutation oauthTokenRevoke(
   # The group of scopes for the tokens to be revoked.
@@ -5563,7 +5407,6 @@ mutation oauthTokenRevoke(
     ...OauthTokenRevokePayload
   }
 }
-
 # Verifies a domain to be added to an organization.
 mutation organizationDomainVerify(
   # The organization domain to verify.
@@ -5573,7 +5416,6 @@ mutation organizationDomainVerify(
     ...OrganizationDomainPayload
   }
 }
-
 # Adds a domain to be allowed for an organization.
 mutation organizationDomainCreate(
   # The organization domain entry to create.
@@ -5583,7 +5425,6 @@ mutation organizationDomainCreate(
     ...OrganizationDomainPayload
   }
 }
-
 # Deletes a domain.
 mutation organizationDomainDelete(
   # The identifier of the domain to delete.
@@ -5593,7 +5434,6 @@ mutation organizationDomainDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new organization invite.
 mutation organizationInviteCreate(
   # The organization invite object to create.
@@ -5603,7 +5443,6 @@ mutation organizationInviteCreate(
     ...OrganizationInvitePayload
   }
 }
-
 # Re-send an organization invite.
 mutation resentOrganizationInvite(
   # The identifier of the organization invite to be re-send.
@@ -5613,7 +5452,6 @@ mutation resentOrganizationInvite(
     ...ArchivePayload
   }
 }
-
 # Deletes an organization invite.
 mutation organizationInviteDelete(
   # The identifier of the organization invite to delete.
@@ -5623,7 +5461,6 @@ mutation organizationInviteDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new project link.
 mutation projectLinkCreate(
   # The project link object to create.
@@ -5633,7 +5470,6 @@ mutation projectLinkCreate(
     ...ProjectLinkPayload
   }
 }
-
 # Deletes a project link.
 mutation projectLinkDelete(
   # The identifier of the project link to delete.
@@ -5643,7 +5479,6 @@ mutation projectLinkDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new project.
 mutation projectCreate(
   # The issue object to create.
@@ -5653,7 +5488,6 @@ mutation projectCreate(
     ...ProjectPayload
   }
 }
-
 # Updates a project.
 mutation projectUpdate(
   # A partial project object to update the project with.
@@ -5665,7 +5499,6 @@ mutation projectUpdate(
     ...ProjectPayload
   }
 }
-
 # Archives a project.
 mutation projectArchive(
   # The identifier of the project to archive. Also the identifier from the URL is accepted.
@@ -5675,7 +5508,6 @@ mutation projectArchive(
     ...ArchivePayload
   }
 }
-
 # Creates a push subscription.
 mutation pushSubscriptionCreate(
   # The push subscription to create.
@@ -5685,7 +5517,6 @@ mutation pushSubscriptionCreate(
     ...PushSubscriptionPayload
   }
 }
-
 # Deletes a push subscription.
 mutation pushSubscriptionDelete(
   # The identifier of the push subscription to delete.
@@ -5695,7 +5526,6 @@ mutation pushSubscriptionDelete(
     ...PushSubscriptionPayload
   }
 }
-
 # Creates a new reaction.
 mutation reactionCreate(
   # The reaction object to create.
@@ -5705,7 +5535,6 @@ mutation reactionCreate(
     ...ReactionPayload
   }
 }
-
 # Deletes a reaction.
 mutation reactionDelete(
   # The identifier of the reaction to delete.
@@ -5715,14 +5544,12 @@ mutation reactionDelete(
     ...ArchivePayload
   }
 }
-
 # Create CSV export report for the organization.
 mutation createCsvExportReport {
   createCsvExportReport {
     ...CreateCsvExportReportPayload
   }
 }
-
 # Creates a subscription session. Used internally to integrate with Stripe.
 mutation subscriptionSessionCreate(
   # The name of the plan.
@@ -5732,14 +5559,12 @@ mutation subscriptionSessionCreate(
     ...SubscriptionSessionPayload
   }
 }
-
 # Creates a subscription update session. Used internally to integrate with Stripe.
 mutation subscriptionUpdateSessionCreate {
   subscriptionUpdateSessionCreate {
     ...SubscriptionSessionPayload
   }
 }
-
 # Updates a subscription.
 mutation subscriptionUpdate(
   # The properties of the subscription.
@@ -5751,7 +5576,6 @@ mutation subscriptionUpdate(
     ...SubscriptionPayload
   }
 }
-
 # Upgrades a subscription plan.
 mutation subscriptionUpgrade(
   # The subscription type to upgrade to.
@@ -5763,7 +5587,6 @@ mutation subscriptionUpgrade(
     ...SubscriptionPayload
   }
 }
-
 # Archives a subscription.
 mutation subscriptionArchive(
   # The identifier of the subscription to archive.
@@ -5773,7 +5596,6 @@ mutation subscriptionArchive(
     ...ArchivePayload
   }
 }
-
 # Creates a new team membership.
 mutation teamMembershipCreate(
   # The team membership object to create.
@@ -5783,7 +5605,6 @@ mutation teamMembershipCreate(
     ...TeamMembershipPayload
   }
 }
-
 # Deletes a team membership.
 mutation teamMembershipDelete(
   # The identifier of the team membership to delete.
@@ -5793,7 +5614,6 @@ mutation teamMembershipDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new team. The user who creates the team will automatically be added as a member to the
 # newly created team.
 mutation teamCreate(
@@ -5806,7 +5626,6 @@ mutation teamCreate(
     ...TeamPayload
   }
 }
-
 # Updates a team.
 mutation teamUpdate(
   # A partial team object to update the team with.
@@ -5818,7 +5637,6 @@ mutation teamUpdate(
     ...TeamPayload
   }
 }
-
 # Archives a team.
 mutation teamArchive(
   # The identifier of the team to archive.
@@ -5828,7 +5646,6 @@ mutation teamArchive(
     ...ArchivePayload
   }
 }
-
 # Deletes a team.
 mutation teamDelete(
   # The identifier of the team to delete.
@@ -5838,7 +5655,6 @@ mutation teamDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new template.
 mutation templateCreate(
   # The template object to create.
@@ -5848,7 +5664,6 @@ mutation templateCreate(
     ...TemplatePayload
   }
 }
-
 # Updates an existing template.
 mutation templateUpdate(
   # The properties of the template to update.
@@ -5860,7 +5675,6 @@ mutation templateUpdate(
     ...TemplatePayload
   }
 }
-
 # Deletes a template.
 mutation templateDelete(
   # The identifier of the template to delete.
@@ -5870,7 +5684,6 @@ mutation templateDelete(
     ...ArchivePayload
   }
 }
-
 # Updates the user's settings.
 mutation userSettingsUpdate(
   # A partial notification object to update the settings with.
@@ -5882,7 +5695,6 @@ mutation userSettingsUpdate(
     ...UserSettingsPayload
   }
 }
-
 # [Deprecated] Updates a user's settings flag.
 mutation userSettingsFlagIncrement(
   # Flag to increment.
@@ -5892,14 +5704,12 @@ mutation userSettingsFlagIncrement(
     ...UserSettingsFlagPayload
   }
 }
-
 # Resets user's setting flags.
 mutation userSettingsFlagsReset {
   userSettingsFlagsReset {
     ...UserSettingsFlagsResetPayload
   }
 }
-
 # Updates a user's settings flag.
 mutation userFlagUpdate(
   # Flag operation to perform
@@ -5911,14 +5721,12 @@ mutation userFlagUpdate(
     ...UserSettingsFlagPayload
   }
 }
-
 # Subscribes user to changelog newsletter.
 mutation userSubscribeToNewsletter {
   userSubscribeToNewsletter {
     ...UserSubscribeToNewsletterPayload
   }
 }
-
 # Creates a new ViewPreferences object.
 mutation viewPreferencesCreate(
   # The ViewPreferences object to create.
@@ -5928,7 +5736,6 @@ mutation viewPreferencesCreate(
     ...ViewPreferencesPayload
   }
 }
-
 # Updates an existing ViewPreferences object.
 mutation viewPreferencesUpdate(
   # The properties of the view preferences.
@@ -5940,7 +5747,6 @@ mutation viewPreferencesUpdate(
     ...ViewPreferencesPayload
   }
 }
-
 # Deletes a ViewPreferences.
 mutation viewPreferencesDelete(
   # The identifier of the ViewPreferences to delete.
@@ -5950,7 +5756,6 @@ mutation viewPreferencesDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new webhook.
 mutation webhookCreate(
   # The webhook object to create.
@@ -5960,7 +5765,6 @@ mutation webhookCreate(
     ...WebhookPayload
   }
 }
-
 # Updates an existing Webhook.
 mutation webhookUpdate(
   # The properties of the Webhook.
@@ -5972,7 +5776,6 @@ mutation webhookUpdate(
     ...WebhookPayload
   }
 }
-
 # Deletes a Webhook.
 mutation webhookDelete(
   # The identifier of the Webhook to delete.
@@ -5982,7 +5785,6 @@ mutation webhookDelete(
     ...ArchivePayload
   }
 }
-
 # Creates a new state, adding it to the workflow of a team.
 mutation workflowStateCreate(
   # The state to create.
@@ -5992,7 +5794,6 @@ mutation workflowStateCreate(
     ...WorkflowStatePayload
   }
 }
-
 # Updates a state.
 mutation workflowStateUpdate(
   # A partial state object to update.
@@ -6004,7 +5805,6 @@ mutation workflowStateUpdate(
     ...WorkflowStatePayload
   }
 }
-
 # Archives a state. Only states with issues that have all been archived can be archived.
 mutation workflowStateArchive(
   # The identifier of the state to archive.

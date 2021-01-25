@@ -20,7 +20,7 @@ type MockContext = {
   /** Url to listen on */
   url: string;
   /** Mock result returned from the test server */
-  res: <S extends MockSpec>(spec: S) => MockResult<S>;
+  res: <Spec extends MockSpec>(spec: Spec) => MockResult<Spec>;
 };
 
 /**
@@ -65,7 +65,7 @@ export function createTestServer(): MockContext {
     ctx.url = `http://localhost:${port}`;
 
     /** Provide function for mocking the response */
-    ctx.res = function createMockResponse<S extends MockSpec>(spec: S) {
+    ctx.res = function createMockResponse<Spec extends MockSpec>(spec: Spec) {
       const requests: CapturedRequest[] = [];
 
       /** Listen to all routes */

@@ -1,7 +1,8 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, logger, nonNullable, PluginContext, printList } from "@linear/plugin-common";
+import { ContextVisitor, logger, nonNullable, PluginContext, printLines } from "@linear/plugin-common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { extname } from "path";
+import { printConnection } from "./connection";
 import c from "./constants";
 import { printModels } from "./model";
 import { ModelVisitor } from "./model-visitor";
@@ -62,19 +63,18 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
         /** Import document namespace */
         `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
       ].filter(nonNullable),
-      content: printList(
-        [
-          /** Print the requester function */
-          printRequest(),
-          /** Print the api models */
-          printedModels,
-          /** Print the api operations */
-          printedOperations,
-          /** Print the api root operations */
-          printedSdk,
-        ],
-        "\n\n"
-      ),
+      content: printLines([
+        /** Print the requester base class */
+        printRequest(),
+        /** Print the connection base class */
+        printConnection(),
+        /** Print the api models */
+        printedModels,
+        /** Print the api operations */
+        printedOperations,
+        /** Print the api root operations */
+        printedSdk,
+      ]),
     };
   } catch (e) {
     logger.fatal(e);

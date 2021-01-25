@@ -11,7 +11,7 @@ import {
   printGraphqlComment,
   printGraphqlDebug,
   printGraphqlDescription,
-  printList,
+  printLines,
   reduceTypeName,
 } from "@linear/plugin-common";
 import autoBind from "auto-bind";
@@ -48,10 +48,7 @@ export class FragmentVisitor {
   public Document = {
     /** Join all string definitions */
     leave: (node: DocumentNode): string => {
-      return printList(
-        (node.definitions ?? []).map(x => (typeof x === "string" ? x : ``)),
-        "\n"
-      );
+      return printLines((node.definitions ?? []).map(definition => (typeof definition === "string" ? definition : ``)));
     },
   };
 
@@ -66,17 +63,14 @@ export class FragmentVisitor {
         this._context.fragments = [...this._context.fragments, node];
 
         /** Print fragment */
-        return printList(
-          [
-            printGraphqlDescription(node.description?.value),
-            printGraphqlDebug(node),
-            `fragment ${node.name} on ${node.name} {
-              ${printList(node.fields, "\n")}
+        return printLines([
+          printGraphqlDescription(node.description?.value),
+          printGraphqlDebug(node),
+          `fragment ${node.name} on ${node.name} {
+              ${printLines(node.fields)}
             }`,
-            " ",
-          ],
-          "\n"
-        );
+          " ",
+        ]);
       }
 
       /** Ignore this object */
@@ -95,45 +89,39 @@ export class FragmentVisitor {
 
         /** Print field name if it is a scalar */
         if (Object.values(this._context.scalars).includes(type)) {
-          return printList([description, printGraphqlDebug(_node), node.name], "\n");
+          return printLines([description, printGraphqlDebug(_node), node.name]);
         }
 
         /** Print all fields required for matching query */
         const query = findQuery(this._context, node);
         if (query) {
-          const queryRequiredArgs = getRequiredArgs(query.arguments).map(a => a.name.value);
+          const queryRequiredArgs = getRequiredArgs(query.arguments).map(arg => arg.name.value);
 
           if (queryRequiredArgs.length) {
-            return printList(
-              [
-                description,
-                printGraphqlDebug(_node),
-                printGraphqlDebug(query),
-                queryRequiredArgs.length
-                  ? `${node.name} {
-                      ${printList(queryRequiredArgs, "\n")}
+            return printLines([
+              description,
+              printGraphqlDebug(_node),
+              printGraphqlDebug(query),
+              queryRequiredArgs.length
+                ? `${node.name} {
+                      ${printLines(queryRequiredArgs)}
                     }`
-                  : "",
-              ],
-              "\n"
-            );
+                : "",
+            ]);
           }
         } else {
           /** Print a matching fragment if no query */
           const fragment = findObject(this._context, node);
 
           if (fragment && !isConnection(fragment)) {
-            return printList(
-              [
-                description,
-                printGraphqlDebug(_node),
-                printGraphqlDebug(fragment),
-                `${node.name} {
+            return printLines([
+              description,
+              printGraphqlDebug(_node),
+              printGraphqlDebug(fragment),
+              `${node.name} {
                   ...${fragment.name.value}
                 }`,
-              ],
-              "\n"
-            );
+            ]);
           }
         }
       }

@@ -6,15 +6,15 @@ import { OperationType, PluginConfig, PluginContext } from "./types";
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
-export class ContextVisitor<C extends PluginConfig> {
+export class ContextVisitor<Config extends PluginConfig> {
   private _schema: GraphQLSchema;
-  private _config: C;
+  private _config: Config;
   private _scalars: typeof DEFAULT_SCALARS = DEFAULT_SCALARS;
   private _objects: ObjectTypeDefinitionNode[] = [];
   private _queries: readonly FieldDefinitionNode[] = [];
 
   /** Initialize the visitor */
-  public constructor(schema: GraphQLSchema, config: C) {
+  public constructor(schema: GraphQLSchema, config: Config) {
     autoBind(this);
 
     this._schema = schema;
@@ -24,7 +24,7 @@ export class ContextVisitor<C extends PluginConfig> {
   /**
    * Return a context object for recording state
    */
-  public get context(): Omit<PluginContext<C>, "fragments"> {
+  public get context(): Omit<PluginContext<Config>, "fragments"> {
     return {
       schema: this._schema,
       config: this._config,

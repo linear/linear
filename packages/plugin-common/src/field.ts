@@ -5,8 +5,8 @@ import { reduceTypeName } from "./utils";
 /**
  * Determine whether the node is a scalar field
  */
-export function isScalarField(context: PluginContext, node: FieldDefinitionNode): boolean {
-  return Object.keys(context.scalars).includes(reduceTypeName(node.type));
+export function isScalarField(context: PluginContext, field: FieldDefinitionNode): boolean {
+  return Object.keys(context.scalars).includes(reduceTypeName(field.type));
 }
 
 /**
@@ -18,7 +18,9 @@ export function isScalarField(context: PluginContext, node: FieldDefinitionNode)
 export function isValidField(context: PluginContext, field?: FieldDefinitionNode): field is FieldDefinitionNode {
   if (field && field.name.value !== "edges") {
     const skipFieldName = context.config.skipFields?.includes(field?.name.value ?? "");
-    const skipDirective = field?.directives?.find(d => context.config.skipDirectives?.includes(d.name.value));
+    const skipDirective = field?.directives?.find(directive =>
+      context.config.skipDirectives?.includes(directive.name.value)
+    );
     return Boolean(!skipDirective && !skipFieldName);
   } else {
     return false;
