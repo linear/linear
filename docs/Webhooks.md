@@ -1,18 +1,20 @@
 # Linear Webhooks
 
-Linear provides **webhooks** which allow you to receive HTTP(S) push notifications whenever data is created or updated. This allows you to build integrations on top of Linear. You could trigger CI builds, perform calculations on issue data, or send messages on specific conditions – you name it.
+Linear provides **webhooks** which allow you to receive HTTP push notifications whenever data is created or updated. This allows you to build integrations on top of Linear. You could trigger CI builds, perform calculations on issue data, or send messages on specific conditions – you name it.
 
-Webhooks are specific to a Team, so you can configure webhooks to satisfy the needs of each team in your organization. Webhook updates are currently supported for **Issues** and **Comments**.
+Webhooks are specific to a `Team`, so you can configure webhooks to satisfy the needs of each team in your organization. Webhook updates are currently supported for following models:
 
-The Webhooks are at an initial stage of implementation and will be developed further based on your feedback and ideas!
+- `**Issue**`
+- `**Commens**`
+- `**Reaction**` (comment emoji reactions)
 
 ## How does a Webhook work?
 
 A webhook push is simply a `HTTP POST` request, sent to the URL of your choosing. The push is automatically triggered by Linear when data updates. For an example of what data a payload contains, see [The Webhook Payload](#the-webhook-payload).
 
-Your webhook consumer is a simple HTTP(S) endpoint. It must satisfy the following conditions:
+Your webhook consumer is a simple HTTP endpoint. It must satisfy the following conditions:
 
-- It's available in a publicly accessible, non-localhost URL
+- It's available in a publicly accessible HTTPS, non-localhost URL
 - It will respond to the Linear Webhook push (HTTP POST request) with a `HTTP 200` ("OK") response
 
 If a delivery fails (i.e. server unavailable or responded with a non-200 HTTP status code), the push will be retried a couple of times. Here an exponential backoff delay is used: the attempt will be retried after approximately 10 minutes, then 30 minutes, and so on. If the webhook URL continues to be unresponsive the webhook might be disabled by Linear, and must be re-enabled again manually.
@@ -25,9 +27,9 @@ For additional information on Webhooks, there are a number of good resources:
 
 ## Getting started with Linear Webhooks
 
-You will first need to create a Webhook endpoint (_"consumer"_) to be called by the Linear Webhook agent. This can be a simple HTTP(S) server you deploy yourself, or a URL endpoint configured by a service such as [Zapier](https://zapier.com/) (or for testing purposes, [RequestBin](https://requestbin.com/)).
+You will first need to create a Webhook endpoint (_"consumer"_) to be called by the Linear Webhook agent. This can be a simple HTTP server you deploy yourself, or a URL endpoint configured by a service such as [Zapier](https://zapier.com/) (or for testing purposes, [RequestBin](https://requestbin.com/)).
 
-Once your consumer is ready to receive updates, you can enable it for your Linear team. Webhooks can be enabled in Linear both via the Team Settings UI, as well as via the [GraphQL API](API.md).
+Once your consumer is ready to receive updates, you can enable it for your Linear team. Webhooks can be enabled in Linear both via the Team Settings UI.
 
 ### Creating a simple Webhook consumer
 
@@ -74,7 +76,7 @@ Your newly created webhook will be listed and is ready to be used. Your defined 
 
 Refer to the [Linear GraphQL API](API.md) documentation for information on the endpoint and authentication.
 
-Once you've created an API token and found out the `teamId` that will own the Webhook, you're ready to roll.
+Once you've created an API token and found out the `teamId` that will own the Webhook, you're ready to get going.
 
 #### Creating a new Webhook
 
@@ -193,7 +195,7 @@ Where the custom headers include:
 | Name              | Description                                                       |
 | ----------------- | ----------------------------------------------------------------- |
 | `Linear-Delivery` | An UUID (v4) uniquely identifying this payload.                   |
-| `Linear-Event`    | The Entity type which triggered this event: `Issue` or `Comment`. |
+| `Linear-Event`    | The Entity type which triggered this event: `Issue`, `Comment` etc |
 
 The Payload body has the following structure:
 
