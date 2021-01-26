@@ -149,6 +149,8 @@ query {
 }
 ```
 
+To query the next 10, simply pass the value of `pageInfo.endCursor` as `after` parameter for the next request. You can do this as long as `pageInfo.hasNextPage` return true and you'll paginate through all the values in the collection.
+
 The first 50 results are returned by default without query arguments. Pagination also supports simpler syntax where instead of edges you can directly get all the nodes similar to GitHub's GraphQL API:
 
 ```graphql
