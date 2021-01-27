@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { createLinearClient } from "@linear/client";
+import { LinearClient } from "@linear/client";
 import chalk from "chalk";
 import * as inquirer from "inquirer";
 import _ from "lodash";
@@ -35,15 +35,15 @@ interface LabelCreateResponse {
  */
 export const importIssues = async (apiKey: string, importer: Importer) => {
   const linear = linearClient(apiKey);
-  const client = createLinearClient({ apiKey });
+  const client = new LinearClient({ apiKey });
   const importData = await importer.import();
 
   const teamsQuery = await client.teams();
-  const viewerQuery = await client.viewer();
+  const viewerQuery = await client.viewer;
   const usersQuery = await client.users();
 
   const teams = teamsQuery?.nodes ?? [];
-  const users = usersQuery?.nodes.filter(user => user.active) ?? [];
+  const users = usersQuery?.nodes?.filter(user => user.active) ?? [];
   const viewer = viewerQuery?.id;
 
   // Prompt the user to either get or create a team
@@ -68,7 +68,7 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
       name: "targetTeamId",
       message: "Import into team:",
       choices: async () => {
-        return teams.map((team: { id: string; name: string; key: string }) => ({
+        return teams.map(team => ({
           name: `[${team.key}] ${team.name}`,
           value: team.id,
         }));
@@ -88,9 +88,9 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
         }
 
         const team = await client.team(answers.targetTeamId);
-        const teamProjects = await team.projects();
+        const teamProjects = await team?.projects();
 
-        const projects = teamProjects.nodes ?? [];
+        const projects = teamProjects?.nodes ?? [];
         return projects.length > 0;
       },
     },
@@ -105,10 +105,10 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
         }
 
         const team = await client.team(answers.targetTeamId);
-        const teamProjects = await team.projects();
+        const teamProjects = await team?.projects();
 
-        const projects = teamProjects.nodes ?? [];
-        return projects.map((project: { id: string; name: string }) => ({
+        const projects = teamProjects?.nodes ?? [];
+        return projects.map(project => ({
           name: project.name,
           value: project.id,
         }));
@@ -136,7 +136,7 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
       name: "targetAssignee",
       message: "Assign to user:",
       choices: () => {
-        const map = users.map((user: { id: string; name: string }) => ({
+        const map = users.map(user => ({
           name: user.name,
           value: user.id,
         }));
@@ -178,17 +178,17 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
   }
 
   const teamQuery = await client.team(teamId);
-  const teamLabelsQuery = await teamQuery.labels();
-  const teamStatesQuery = await teamQuery.states();
+  const teamLabelsQuery = await teamQuery?.labels();
+  const teamStatesQuery = await teamQuery?.states();
 
-  const issueLabels = teamLabelsQuery.nodes ?? [];
-  const workflowStates = teamStatesQuery.nodes ?? [];
+  const issueLabels = teamLabelsQuery?.nodes ?? [];
+  const workflowStates = teamStatesQuery?.nodes ?? [];
 
   const existingLabelMap = {} as { [name: string]: string };
   for (const label of issueLabels) {
-    const labelName = label.name.toLowerCase();
+    const labelName = label.name?.toLowerCase() ?? "";
     if (!existingLabelMap[labelName]) {
-      existingLabelMap[labelName] = label.id;
+      existingLabelMap[labelName] = label.id ?? "";
     }
   }
 
@@ -229,17 +229,17 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
 
   const existingStateMap = {} as { [name: string]: string };
   for (const state of workflowStates) {
-    const stateName = state.name.toLowerCase();
+    const stateName = state.name?.toLowerCase() ?? "";
     if (!existingStateMap[stateName]) {
-      existingStateMap[stateName] = state.id;
+      existingStateMap[stateName] = state.id ?? "";
     }
   }
 
   const existingUserMap = {} as { [name: string]: string };
   for (const user of users) {
-    const userName = user.name.toLowerCase();
+    const userName = user.name?.toLowerCase() ?? "";
     if (!existingUserMap[userName]) {
-      existingUserMap[userName] = user.id;
+      existingUserMap[userName] = user.id ?? "";
     }
   }
 
