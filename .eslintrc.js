@@ -5,7 +5,7 @@ module.exports = {
   },
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: "./config/tsconfig.eslint.json",
+    project: "./tsconfig.eslint.json",
     sourceType: "module",
     extraFileExtensions: [".json"],
     ecmaFeatures: {

@@ -1,8 +1,8 @@
 import { getArgList, printComment, printDebug, printLines, printList, printSet, printTernary } from "@linear/common";
-import { isConnectionModel } from "./connection";
 import c from "./constants";
 import { printNamespaced } from "./print";
-import { getRequestArg } from "./request";
+import { isConnectionModel } from "./print-connection";
+import { getRequestArg } from "./print-request";
 import { SdkOperation, SdkPluginContext } from "./types";
 
 /**

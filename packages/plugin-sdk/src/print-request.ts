@@ -1,7 +1,14 @@
-import { ArgDefinition, getArgList, printComment, printLines, printList } from "@linear/common";
+import {
+  ArgDefinition,
+  getArgList,
+  getOptionalVariables,
+  getRequiredVariables,
+  printComment,
+  printLines,
+  printList,
+} from "@linear/common";
 import c from "./constants";
 import { SdkOperation } from "./types";
-import { getOptionalVariables, getRequiredVariables } from "./variable";
 
 /**
  * Get the argument definition for the requester

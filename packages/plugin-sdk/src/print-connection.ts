@@ -9,7 +9,7 @@ import {
   printTernary,
 } from "@linear/common";
 import c from "./constants";
-import { getRequestArg } from "./request";
+import { getRequestArg } from "./print-request";
 import { SdkModel, SdkPluginContext } from "./types";
 
 /**
