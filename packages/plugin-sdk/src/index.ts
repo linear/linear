@@ -108,5 +108,4 @@ export const validate: PluginValidateFn = async (
 
 /** Export all types */
 export * from "./types";
-/** Export functions required by @linear/plugin-test */
-export { parseOperations, ModelVisitor };
+export * from "./validate";

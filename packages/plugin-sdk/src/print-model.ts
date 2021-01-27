@@ -11,9 +11,9 @@ import {
   printTernary,
   printTypescriptType,
 } from "@linear/common";
-import { isConnectionModel, printConnectionModel } from "./connection";
 import c from "./constants";
-import { getRequestArg } from "./request";
+import { isConnectionModel, printConnectionModel } from "./print-connection";
+import { getRequestArg } from "./print-request";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
 
 /**

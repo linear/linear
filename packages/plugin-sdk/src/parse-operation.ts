@@ -2,6 +2,8 @@ import { Types } from "@graphql-codegen/plugin-helpers";
 import {
   ArgDefinition,
   getArgList,
+  getOptionalVariables,
+  getRequiredVariables,
   nonNullable,
   PluginContext,
   printList,
@@ -15,7 +17,6 @@ import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionN
 import c from "./constants";
 import { printNamespaced } from "./print";
 import { SdkDefinitions, SdkModel, SdkOperation, SdkOperationPrint, SdkPluginConfig } from "./types";
-import { getOptionalVariables, getRequiredVariables } from "./variable";
 
 /**
  * Get a list of all non null document notes

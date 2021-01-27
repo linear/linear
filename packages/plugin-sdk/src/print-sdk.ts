@@ -1,6 +1,6 @@
 import { getArgList, printComment, printDebug, printLines } from "@linear/common";
 import c from "./constants";
-import { getRequestArg } from "./request";
+import { getRequestArg } from "./print-request";
 import { SdkOperation, SdkPluginContext } from "./types";
 
 /**
