@@ -10,7 +10,7 @@ import {
   reduceListType,
   reduceTypeName,
   upperFirst,
-} from "@linear/plugin-common";
+} from "@linear/common";
 import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode } from "graphql";
 import c from "./constants";
 import { printNamespaced } from "./print";

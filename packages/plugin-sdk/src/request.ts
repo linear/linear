@@ -1,4 +1,4 @@
-import { ArgDefinition, getArgList, printComment, printLines, printList } from "@linear/plugin-common";
+import { ArgDefinition, getArgList, printComment, printLines, printList } from "@linear/common";
 import c from "./constants";
 import { SdkOperation } from "./types";
 import { getOptionalVariables, getRequiredVariables } from "./variable";

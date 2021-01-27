@@ -15,7 +15,7 @@ import {
   printLines,
   printList,
   reduceListType,
-} from "@linear/plugin-common";
+} from "@linear/common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 
 /**

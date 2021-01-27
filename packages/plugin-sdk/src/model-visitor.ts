@@ -9,7 +9,7 @@ import {
   PluginContext,
   printTypescriptType,
   reduceListType,
-} from "@linear/plugin-common";
+} from "@linear/common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import c from "./constants";

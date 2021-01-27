@@ -1,4 +1,4 @@
-import { getKeyByValue, isScalarField, OperationType, PluginContext, printLines } from "@linear/plugin-common";
+import { getKeyByValue, isScalarField, OperationType, PluginContext, printLines } from "@linear/common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { printOperations } from "./operation";

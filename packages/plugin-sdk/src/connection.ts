@@ -7,7 +7,7 @@ import {
   printList,
   printSet,
   printTernary,
-} from "@linear/plugin-common";
+} from "@linear/common";
 import c from "./constants";
 import { getRequestArg } from "./request";
 import { SdkModel, SdkPluginContext } from "./types";

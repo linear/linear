@@ -1,0 +1,21 @@
+overwrite: true
+schema: ./src/schema.graphql
+documents: ./src/_generated/**
+hooks:
+  afterOneFileWrite:
+    - prettier --write
+generates:
+  src/_generated/_gen.test.ts:
+    plugins:
+      - "@linear/plugin-test"
+    config:
+      documentFile: ./_gen_documents
+      skipFields:
+        - "disableReason"
+        - "defaultTemplateForMembersId"
+        - "defaultTemplateForNonMembersId"
+      skipObjects:
+        # - "UserSettings"
+      skipDirectives:
+        - "skipSdk"
+        - "deprecated"
