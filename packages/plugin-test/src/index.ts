@@ -38,7 +38,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
     logger.trace(sdkContext);
 
     logger.info("Printing tests");
-    const tests = "// some comment";
+    const tests = `it("pass empty generated test", () => undefined);`;
 
     return printLines([
       /** Print all tests */

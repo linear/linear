@@ -1,4 +1,4 @@
-import { getKeyByValue, printList } from "@linear/common";
+import { getKeyByValue, nonNullable, printList } from "@linear/common";
 import { LinearErrorRaw, LinearErrorType, LinearGraphQLErrorRaw } from "./types";
 import { capitalize } from "./utils";
 
@@ -53,7 +53,7 @@ export class LinearGraphQLError {
     this.userError = error?.extensions?.userError;
     this.path = error?.path;
 
-    /** Select best available message */
+    /** Select most readable message */
     this.message =
       error?.extensions?.userPresentableMessage ?? error?.message ?? error?.extensions?.type ?? defaultError;
   }
@@ -86,16 +86,25 @@ export class LinearError extends Error {
       return new LinearGraphQLError(graphqlError);
     });
 
-    /** Select best available message */
-    const message = capitalize(error?.message?.split(": {")?.[0]);
-
-    super(printList([message, error?.response?.error, errors[0]?.message], " - ") ?? defaultError);
+    /** Find messages, duplicate and join, or default */
+    super(
+      printList(
+        Array.from(
+          new Set(
+            [capitalize(error?.message?.split(": {")?.[0]), error?.response?.error, errors[0]?.message].filter(
+              nonNullable
+            )
+          )
+        ),
+        " - "
+      ) ?? defaultError
+    );
 
     /** Set error properties */
-    this.status = error?.response?.status;
     this.errors = errors;
     this.query = error?.request?.query;
     this.variables = error?.request?.variables;
+    this.status = error?.response?.status;
     this.data = error?.response?.data;
     this.raw = error;
 

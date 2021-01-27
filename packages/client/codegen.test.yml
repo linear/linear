@@ -17,5 +17,5 @@ generates:
       skipObjects:
         # - "UserSettings"
       skipDirectives:
-        - "skipSdk"
-        - "deprecated"
+        # - "skipSdk"
+        # - "deprecated"

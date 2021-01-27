@@ -1,1 +1,1 @@
-// some comment
+it("pass empty generated test", () => undefined);
