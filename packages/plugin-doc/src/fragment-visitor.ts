@@ -14,7 +14,7 @@ import {
   printGraphqlDescription,
   printLines,
   reduceTypeName,
-} from "@linear/plugin-common";
+} from "@linear/common";
 import autoBind from "auto-bind";
 import {
   DocumentNode,

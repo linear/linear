@@ -22,7 +22,7 @@
     "target": "es6",
     "incremental": true,
     "paths": {
-      "@linear/plugin-common": ["../packages/common/src"]
+      "@linear/common": ["../packages/common/src"]
     }
   },
   "exclude": ["../**/node_modules", "../**/build", "../**/dist", "./**/scripts", "./**/jest"]

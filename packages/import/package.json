@@ -14,10 +14,10 @@
     "linear-import": "bin/linear-import.js"
   },
   "scripts": {
-    "dev:import": "NODE_ENV=development run-s dev:import:update build:import",
-    "dev:import:update": "yalc update",
-    "build:import": "yarn build:import:clean && npx tsc",
-    "build:import:clean": "npx rimraf dist"
+    "dev:import": "NODE_ENV=development run-s dev:update build:import",
+    "dev:update": "yalc update",
+    "build:import": "yarn build:clean && npx tsc",
+    "build:clean": "npx rimraf dist"
   },
   "dependencies": {
     "@linear/client": "^1.0.0",

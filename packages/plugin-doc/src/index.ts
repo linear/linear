@@ -1,7 +1,6 @@
 import { PluginFunction, PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, logger, PluginConfig, printLines } from "@linear/plugin-common";
+import { ContextVisitor, logger, PluginConfig, printLines, validateExtension } from "@linear/common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
-import { extname } from "path";
 import { FragmentVisitor } from "./fragment-visitor";
 import { OperationVisitor } from "./operation-visitor";
 
@@ -53,10 +52,6 @@ export const validate: PluginValidateFn = async (
   logger.info(`Validating ${packageName}`);
   logger.info(config);
 
-  const prefix = `Plugin "${packageName}" config requires`;
-
   /** Check the output file extension */
-  if (extname(outputFile) !== ".graphql") {
-    throw new Error(`${prefix} output file extension to be ".graphql" but is "${outputFile}"`);
-  }
+  validateExtension(packageName, ".graphql", outputFile);
 };

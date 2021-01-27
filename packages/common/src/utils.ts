@@ -71,3 +71,19 @@ export function getKeyByValue<Key extends string, Value>(obj: Record<Key, Value>
   const keys = Object.keys(obj) as Key[];
   return keys.find(key => obj[key] === value);
 }
+
+/**
+ * Throw an error if the file extension is not expected
+ *
+ * @param packageName the name of the plugin package for use in the error message
+ * @param ext the extension to match
+ * @param outputFile the file name to match against
+ */
+export function validateExtension(packageName: string, ext: string, outputFile: string): void {
+  /** Check the output file extension */
+  if (!outputFile.endsWith(ext)) {
+    throw new Error(
+      `Plugin "${packageName}" config requires output file extension to be "${ext}" but is "${outputFile}"`
+    );
+  }
+}

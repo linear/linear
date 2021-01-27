@@ -1,12 +1,4 @@
-import {
-  getArgList,
-  printComment,
-  printDebug,
-  printLines,
-  printList,
-  printSet,
-  printTernary,
-} from "@linear/plugin-common";
+import { getArgList, printComment, printDebug, printLines, printList, printSet, printTernary } from "@linear/common";
 import { isConnectionModel } from "./connection";
 import c from "./constants";
 import { printNamespaced } from "./print";

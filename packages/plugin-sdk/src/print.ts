@@ -1,4 +1,4 @@
-import { PluginContext, printList } from "@linear/plugin-common";
+import { PluginContext, printList } from "@linear/common";
 import { SdkPluginConfig } from "types";
 import c from "./constants";
 

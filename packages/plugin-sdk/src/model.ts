@@ -10,7 +10,7 @@ import {
   printSet,
   printTernary,
   printTypescriptType,
-} from "@linear/plugin-common";
+} from "@linear/common";
 import { isConnectionModel, printConnectionModel } from "./connection";
 import c from "./constants";
 import { getRequestArg } from "./request";

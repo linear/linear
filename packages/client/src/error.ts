@@ -1,4 +1,4 @@
-import { getKeyByValue, printList } from "@linear/plugin-common";
+import { getKeyByValue, printList } from "@linear/common";
 import { LinearErrorRaw, LinearErrorType, LinearGraphQLErrorRaw } from "./types";
 import { capitalize } from "./utils";
 
