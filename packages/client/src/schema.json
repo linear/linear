@@ -18433,18 +18433,46 @@
             "deprecationReason": null
           },
           {
-            "name": "issueImportCreate",
+            "name": "issueImportCreateGithub",
             "description": "Kicks off a GitHub import job.",
             "args": [
               {
-                "name": "input",
-                "description": "The input to create an import.",
+                "name": "repoOwner",
+                "description": "Github owner (user or org) for the repository from which we will import data.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "ImportCreateInput",
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "repoName",
+                "description": "Github repository name from which we will import data.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "token",
+                "description": "Github token to fetch information from the Github API.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   }
                 },
@@ -23308,31 +23336,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "INPUT_OBJECT",
-        "name": "ImportCreateInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "service",
-            "description": "The external service from which we will import data.",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
         "name": "IssueImportPayload",
         "description": null,
@@ -23354,7 +23357,7 @@
             "deprecationReason": null
           },
           {
-            "name": "importJob",
+            "name": "issueImport",
             "description": "The import job that was created or updated.",
             "args": [],
             "type": {

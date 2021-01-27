@@ -2600,7 +2600,7 @@ export type Mutation = {
   /** Archives an integration resource. */
   integrationResourceArchive: ArchivePayload;
   /** Kicks off a GitHub import job. */
-  issueImportCreate: IssueImportPayload;
+  issueImportCreateGithub: IssueImportPayload;
   /** Creates a new label. */
   issueLabelCreate: IssueLabelPayload;
   /** Updates an label. */
@@ -2954,8 +2954,10 @@ export type MutationIntegrationResourceArchiveArgs = {
   id: Scalars["String"];
 };
 
-export type MutationIssueImportCreateArgs = {
-  input: ImportCreateInput;
+export type MutationIssueImportCreateGithubArgs = {
+  repoOwner: Scalars["String"];
+  repoName: Scalars["String"];
+  token: Scalars["String"];
 };
 
 export type MutationIssueLabelCreateArgs = {
@@ -3677,17 +3679,12 @@ export type IntegrationPayload = {
   success: Scalars["Boolean"];
 };
 
-export type ImportCreateInput = {
-  /** The external service from which we will import data. */
-  service: Scalars["String"];
-};
-
 export type IssueImportPayload = {
   __typename?: "IssueImportPayload";
   /** The identifier of the last sync operation. */
   lastSyncId: Scalars["Float"];
   /** The import job that was created or updated. */
-  importJob?: Maybe<IssueImport>;
+  issueImport?: Maybe<IssueImport>;
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
@@ -5118,7 +5115,6 @@ export type OrganizationFragment = { __typename?: "Organization" } & Pick<
   | "urlKey"
   | "logoUrl"
   | "periodUploadVolume"
-  | "gitBranchFormat"
   | "gitLinkbackMessagesEnabled"
   | "gitPublicLinkbackMessagesEnabled"
   | "roadmapEnabled"
@@ -5566,7 +5562,7 @@ export type IntegrationPayloadFragment = { __typename?: "IntegrationPayload" } &
 export type IssueImportPayloadFragment = { __typename?: "IssueImportPayload" } & Pick<
   IssueImportPayload,
   "lastSyncId" | "success"
-> & { importJob?: Maybe<{ __typename?: "IssueImport" } & IssueImportFragment> };
+> & { issueImport?: Maybe<{ __typename?: "IssueImport" } & IssueImportFragment> };
 
 export type IssueImportFragment = { __typename?: "IssueImport" } & Pick<
   IssueImport,
@@ -6731,12 +6727,6 @@ export type ReactionQueryVariables = Exact<{
 
 export type ReactionQuery = { __typename?: "Query" } & { reaction: { __typename?: "Reaction" } & ReactionFragment };
 
-export type SubscriptionQueryVariables = Exact<{ [key: string]: never }>;
-
-export type SubscriptionQuery = { __typename?: "Query" } & {
-  subscription: { __typename?: "Subscription" } & SubscriptionFragment;
-};
-
 export type TeamMembershipsQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
@@ -7479,12 +7469,14 @@ export type IntegrationResourceArchiveMutation = { __typename?: "Mutation" } & {
   integrationResourceArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
-export type IssueImportCreateMutationVariables = Exact<{
-  input: ImportCreateInput;
+export type IssueImportCreateGithubMutationVariables = Exact<{
+  repoOwner: Scalars["String"];
+  repoName: Scalars["String"];
+  token: Scalars["String"];
 }>;
 
-export type IssueImportCreateMutation = { __typename?: "Mutation" } & {
-  issueImportCreate: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+export type IssueImportCreateGithubMutation = { __typename?: "Mutation" } & {
+  issueImportCreateGithub: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
 };
 
 export type IssueLabelCreateMutationVariables = Exact<{
@@ -8331,7 +8323,6 @@ export const OrganizationFragmentDoc: DocumentNode<OrganizationFragment, unknown
           { kind: "Field", name: { kind: "Name", value: "urlKey" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "logoUrl" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "periodUploadVolume" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "gitBranchFormat" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "gitLinkbackMessagesEnabled" }, arguments: [], directives: [] },
           {
             kind: "Field",
@@ -11622,7 +11613,7 @@ export const IssueImportPayloadFragmentDoc: DocumentNode<IssueImportPayloadFragm
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "importJob" },
+            name: { kind: "Name", value: "issueImport" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -19338,34 +19329,6 @@ export const ReactionDocument: DocumentNode<ReactionQuery, ReactionQueryVariable
     ...ReactionFragmentDoc.definitions,
   ],
 };
-export const SubscriptionDocument: DocumentNode<SubscriptionQuery, SubscriptionQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "subscription" },
-      variableDefinitions: [],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "subscription" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Subscription" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...SubscriptionFragmentDoc.definitions,
-  ],
-};
 export const TeamMembershipsDocument: DocumentNode<TeamMembershipsQuery, TeamMembershipsQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -24335,21 +24298,33 @@ export const IntegrationResourceArchiveDocument: DocumentNode<
     ...ArchivePayloadFragmentDoc.definitions,
   ],
 };
-export const IssueImportCreateDocument: DocumentNode<IssueImportCreateMutation, IssueImportCreateMutationVariables> = {
+export const IssueImportCreateGithubDocument: DocumentNode<
+  IssueImportCreateGithubMutation,
+  IssueImportCreateGithubMutationVariables
+> = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "mutation",
-      name: { kind: "Name", value: "issueImportCreate" },
+      name: { kind: "Name", value: "issueImportCreateGithub" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ImportCreateInput" } },
-          },
+          variable: { kind: "Variable", name: { kind: "Name", value: "repoOwner" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "repoName" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "token" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
           directives: [],
         },
       ],
@@ -24359,12 +24334,22 @@ export const IssueImportCreateDocument: DocumentNode<IssueImportCreateMutation, 
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "issueImportCreate" },
+            name: { kind: "Name", value: "issueImportCreateGithub" },
             arguments: [
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+                name: { kind: "Name", value: "repoOwner" },
+                value: { kind: "Variable", name: { kind: "Name", value: "repoOwner" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "repoName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "repoName" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "token" },
+                value: { kind: "Variable", name: { kind: "Name", value: "token" } },
               },
             ],
             directives: [],

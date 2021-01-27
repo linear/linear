@@ -1203,7 +1203,6 @@ class Organization extends LinearRequest {
     this.urlKey = data.urlKey ?? undefined;
     this.logoUrl = data.logoUrl ?? undefined;
     this.periodUploadVolume = data.periodUploadVolume ?? undefined;
-    this.gitBranchFormat = data.gitBranchFormat ?? undefined;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled ?? undefined;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled ?? undefined;
     this.roadmapEnabled = data.roadmapEnabled ?? undefined;
@@ -1232,8 +1231,6 @@ class Organization extends LinearRequest {
   public logoUrl?: string;
   /** Rolling 30-day total upload volume for the organization, in megabytes. */
   public periodUploadVolume?: number;
-  /** How git branches are formatted. If null, default formatting will be used. */
-  public gitBranchFormat?: string;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
   public gitLinkbackMessagesEnabled?: boolean;
   /** Whether the Git integration linkback messages should be sent to public repositories. */
@@ -1248,10 +1245,7 @@ class Organization extends LinearRequest {
   public userCount?: number;
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
-  /** The organization's subscription to a paid plan. */
-  public get subscription(): Fetch<Subscription> {
-    return new SubscriptionQuery(this._request).fetch();
-  }
+
   /** Users associated with the organization. */
   public users(variables?: D.Organization_UsersQueryVariables) {
     return new Organization_UsersQuery(this._request).fetch(variables);
@@ -3775,7 +3769,7 @@ class IssueImportPayload extends LinearRequest {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this.importJob = data.importJob ? new IssueImport(request, data.importJob) : undefined;
+    this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
   }
 
   /** The identifier of the last sync operation. */
@@ -3783,7 +3777,7 @@ class IssueImportPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The import job that was created or updated. */
-  public importJob?: IssueImport;
+  public issueImport?: IssueImport;
 }
 /**
  * An import job for data from an external service
@@ -4350,10 +4344,6 @@ class SubscriptionPayload extends LinearRequest {
   public canceledAt?: D.Scalars["DateTime"];
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** The subscription entity being mutated. */
-  public get subscription(): Fetch<Subscription> {
-    return new SubscriptionQuery(this._request).fetch();
-  }
 }
 /**
  * TeamMembershipPayload model

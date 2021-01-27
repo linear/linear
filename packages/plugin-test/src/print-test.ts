@@ -16,9 +16,25 @@ export function printTests(context: SdkPluginContext): string {
  * Print tests for a query
  */
 function printQueryTest(context: SdkPluginContext, operation: SdkOperation): string {
-  return printLines([
-    `describe("Query ${operation.name}", () => {
+  const hasRequiredArgs = Boolean(operation.requiredArgs.args.length);
 
-    })`,
-  ]);
+  if (hasRequiredArgs) {
+    /** Skip queries with required args */
+    return `// requiredArgs ${operation.name} ${operation.requiredArgs.printInput}`;
+  } else {
+    if (operation.model) {
+      const hasOptionalArgs = Boolean(operation.optionalArgs.args.length);
+      const fieldName = operation.print.field;
+      return printLines([
+        `describe("${operation.name}", () => {
+          it("${fieldName}", async () => {
+            const ${fieldName} = await client.${fieldName}${hasOptionalArgs ? "()" : ""}
+            logger.trace(${fieldName})
+          })
+        })`,
+      ]);
+    } else {
+      return `// no model ${operation.name}`;
+    }
+  }
 }

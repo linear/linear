@@ -31,23 +31,6 @@ export type Fragment = NamedFields<ObjectTypeDefinitionNode>;
 
 export interface PluginConfig {
   /**
-   * @description A list of object names to omit
-   *
-   * @exampleMarkdown
-   * ```yml
-   * schema: ./src/schema.graphql
-   * generates:
-   *   src/_gen_documents.graphql:
-   *     plugins:
-   *       - "@linear/plugin-doc"
-   *     config:
-   *       skipObjects:
-   *         - "UserSettings"
-   *
-   * ```
-   */
-  skipObjects?: string[];
-  /**
    * @description A list of field names to omit
    *
    * @exampleMarkdown
