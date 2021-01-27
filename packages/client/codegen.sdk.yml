@@ -19,8 +19,8 @@ generates:
         - "disableReason"
         - "defaultTemplateForMembersId"
         - "defaultTemplateForNonMembersId"
-      skipObjects:
-        # - "UserSettings"
+        - "gitBranchFormat"
+        - "subscription"
       skipDirectives:
         # - "skipSdk"
         # - "deprecated"

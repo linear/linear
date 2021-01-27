@@ -1170,7 +1170,6 @@ class Organization extends LinearRequest {
     this.urlKey = data.urlKey ?? undefined;
     this.logoUrl = data.logoUrl ?? undefined;
     this.periodUploadVolume = data.periodUploadVolume ?? undefined;
-    this.gitBranchFormat = data.gitBranchFormat ?? undefined;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled ?? undefined;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled ?? undefined;
     this.roadmapEnabled = data.roadmapEnabled ?? undefined;
@@ -1199,8 +1198,6 @@ class Organization extends LinearRequest {
   public logoUrl?: string;
   /** Rolling 30-day total upload volume for the organization, in megabytes. */
   public periodUploadVolume?: number;
-  /** How git branches are formatted. If null, default formatting will be used. */
-  public gitBranchFormat?: string;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
   public gitLinkbackMessagesEnabled?: boolean;
   /** Whether the Git integration linkback messages should be sent to public repositories. */
@@ -1215,10 +1212,7 @@ class Organization extends LinearRequest {
   public userCount?: number;
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
-  /** The organization's subscription to a paid plan. */
-  public get subscription(): Fetch<Subscription> {
-    return new SubscriptionQuery(this._request).fetch();
-  }
+
   /** Users associated with the organization. */
   public users(variables?: D.Organization_UsersQueryVariables) {
     return new Organization_UsersQuery(this._request).fetch(variables);
@@ -3513,7 +3507,7 @@ class IssueImportPayload extends LinearRequest {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this.importJob = data.importJob ? new IssueImport(request, data.importJob) : undefined;
+    this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
   }
 
   /** The identifier of the last sync operation. */
@@ -3521,7 +3515,7 @@ class IssueImportPayload extends LinearRequest {
   /** Whether the operation was successful. */
   public success?: boolean;
   /** The import job that was created or updated. */
-  public importJob?: IssueImport;
+  public issueImport?: IssueImport;
 }
 /**
  * An import job for data from an external service
@@ -4068,10 +4062,6 @@ class SubscriptionPayload extends LinearRequest {
   public canceledAt?: D.Scalars["DateTime"];
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** The subscription entity being mutated. */
-  public get subscription(): Fetch<Subscription> {
-    return new SubscriptionQuery(this._request).fetch();
-  }
 }
 /**
  * TeamMembershipPayload model
@@ -6109,31 +6099,6 @@ class ReactionQuery extends LinearRequest {
 }
 
 /**
- * A fetchable Subscription Query
- *
- * @param request - function to call the graphql client
- */
-class SubscriptionQuery extends LinearRequest {
-  public constructor(request: Request) {
-    super(request);
-  }
-
-  /**
-   * Call the Subscription query and return a Subscription
-   *
-   * @returns parsed response from SubscriptionQuery
-   */
-  public async fetch(): Fetch<Subscription> {
-    return this._request<D.SubscriptionQuery, D.SubscriptionQueryVariables>(D.SubscriptionDocument, {}).then(
-      response => {
-        const data = response?.subscription;
-        return data ? new Subscription(this._request, data) : undefined;
-      }
-    );
-  }
-}
-
-/**
  * A fetchable TeamMemberships Query
  *
  * @param request - function to call the graphql client
@@ -7841,29 +7806,33 @@ class IntegrationResourceArchiveMutation extends LinearRequest {
 }
 
 /**
- * A fetchable IssueImportCreate Mutation
+ * A fetchable IssueImportCreateGithub Mutation
  *
  * @param request - function to call the graphql client
  */
-class IssueImportCreateMutation extends LinearRequest {
+class IssueImportCreateGithubMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
 
   /**
-   * Call the IssueImportCreate mutation and return a IssueImportPayload
+   * Call the IssueImportCreateGithub mutation and return a IssueImportPayload
    *
-   * @param input - required input to pass to issueImportCreate
-   * @returns parsed response from IssueImportCreateMutation
+   * @param repoOwner - required repoOwner to pass to issueImportCreateGithub
+   * @param repoName - required repoName to pass to issueImportCreateGithub
+   * @param token - required token to pass to issueImportCreateGithub
+   * @returns parsed response from IssueImportCreateGithubMutation
    */
-  public async fetch(input: D.ImportCreateInput): Fetch<IssueImportPayload> {
-    return this._request<D.IssueImportCreateMutation, D.IssueImportCreateMutationVariables>(
-      D.IssueImportCreateDocument,
+  public async fetch(repoOwner: string, repoName: string, token: string): Fetch<IssueImportPayload> {
+    return this._request<D.IssueImportCreateGithubMutation, D.IssueImportCreateGithubMutationVariables>(
+      D.IssueImportCreateGithubDocument,
       {
-        input,
+        repoOwner,
+        repoName,
+        token,
       }
     ).then(response => {
-      const data = response?.issueImportCreate;
+      const data = response?.issueImportCreateGithub;
       return data ? new IssueImportPayload(this._request, data) : undefined;
     });
   }
@@ -12099,15 +12068,6 @@ export class LinearSdk extends LinearRequest {
     return new ReactionQuery(this._request).fetch(id);
   }
   /**
-   * Query subscription for Subscription
-   * The organization's subscription.
-   *
-   * @returns Subscription
-   */
-  public get subscription(): Fetch<Subscription> {
-    return new SubscriptionQuery(this._request).fetch();
-  }
-  /**
    * Query teamMemberships for TeamMembershipConnection
    * All team memberships.
    *
@@ -12711,13 +12671,15 @@ export class LinearSdk extends LinearRequest {
     return new IntegrationResourceArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation issueImportCreate for IssueImportPayload
+   * Mutation issueImportCreateGithub for IssueImportPayload
    *
-   * @param input - required input to pass to issueImportCreate
+   * @param repoOwner - required repoOwner to pass to issueImportCreateGithub
+   * @param repoName - required repoName to pass to issueImportCreateGithub
+   * @param token - required token to pass to issueImportCreateGithub
    * @returns IssueImportPayload
    */
-  public issueImportCreate(input: D.ImportCreateInput): Fetch<IssueImportPayload> {
-    return new IssueImportCreateMutation(this._request).fetch(input);
+  public issueImportCreateGithub(repoOwner: string, repoName: string, token: string): Fetch<IssueImportPayload> {
+    return new IssueImportCreateGithubMutation(this._request).fetch(repoOwner, repoName, token);
   }
   /**
    * Mutation issueLabelCreate for IssueLabelPayload

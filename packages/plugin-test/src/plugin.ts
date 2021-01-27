@@ -44,8 +44,17 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
     return printLines([
       /** Disable empty functions */
       "/* eslint-disable @typescript-eslint/no-empty-function */",
-      /** Pass when empty */
-      `it("pass empty generated test", () => undefined);`,
+      /** Import logger and client */
+      "import { logger } from '@linear/common'",
+      "import { LinearClient } from '../client'",
+      'import dotenv from "dotenv"',
+      "\n",
+      /** Import env variables from .env file */
+      "dotenv.config()",
+      "\n",
+      /** Create the client configured with api key */
+      `const client = new LinearClient({ apiKey: process.env.E2E_API_KEY })`,
+      "\n",
       /** Print all tests */
       tests,
     ]);

@@ -4783,11 +4783,19 @@ type Mutation {
   """
   Kicks off a GitHub import job.
   """
-  issueImportCreate(
+  issueImportCreateGithub(
     """
-    The input to create an import.
+    Github owner (user or org) for the repository from which we will import data.
     """
-    input: ImportCreateInput!
+    repoOwner: String!
+    """
+    Github repository name from which we will import data.
+    """
+    repoName: String!
+    """
+    Github token to fetch information from the Github API.
+    """
+    token: String!
   ): IssueImportPayload!
   """
   Creates a new label.
@@ -6147,12 +6155,6 @@ type IntegrationPayload {
   """
   success: Boolean!
 }
-input ImportCreateInput {
-  """
-  The external service from which we will import data.
-  """
-  service: String!
-}
 type IssueImportPayload {
   """
   The identifier of the last sync operation.
@@ -6161,7 +6163,7 @@ type IssueImportPayload {
   """
   The import job that was created or updated.
   """
-  importJob: IssueImport
+  issueImport: IssueImport
   """
   Whether the operation was successful.
   """

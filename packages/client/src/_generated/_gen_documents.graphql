@@ -529,8 +529,6 @@ fragment Organization on Organization {
   logoUrl
   # Rolling 30-day total upload volume for the organization, in megabytes.
   periodUploadVolume
-  # How git branches are formatted. If null, default formatting will be used.
-  gitBranchFormat
   # Whether the Git integration linkback messages should be sent to private repositories.
   gitLinkbackMessagesEnabled
   # Whether the Git integration linkback messages should be sent to public repositories.
@@ -1674,7 +1672,7 @@ fragment IssueImportPayload on IssueImportPayload {
   # The identifier of the last sync operation.
   lastSyncId
   # The import job that was created or updated.
-  importJob {
+  issueImport {
     ...IssueImport
   }
   # Whether the operation was successful.
@@ -3682,12 +3680,6 @@ query reaction(
     ...Reaction
   }
 }
-# The organization's subscription.
-query subscription {
-  subscription {
-    ...Subscription
-  }
-}
 # All team memberships.
 query teamMemberships(
   # A cursor to be used with last for backward pagination.
@@ -4786,11 +4778,15 @@ mutation integrationResourceArchive(
   }
 }
 # Kicks off a GitHub import job.
-mutation issueImportCreate(
-  # The input to create an import.
-  $input: ImportCreateInput!
+mutation issueImportCreateGithub(
+  # Github owner (user or org) for the repository from which we will import data.
+  $repoOwner: String!
+  # Github repository name from which we will import data.
+  $repoName: String!
+  # Github token to fetch information from the Github API.
+  $token: String!
 ) {
-  issueImportCreate(input: $input) {
+  issueImportCreateGithub(repoOwner: $repoOwner, repoName: $repoName, token: $token) {
     ...IssueImportPayload
   }
 }
