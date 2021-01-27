@@ -2,6 +2,7 @@
 import dotenv from "dotenv";
 import { v4 as uuid } from "uuid";
 import { LinearClient } from "../index";
+import { LinearErrorType } from "./../types";
 
 dotenv.config();
 
@@ -50,11 +51,12 @@ async function getSomeIssue() {
 /**
  * Assert failure of the operation
  */
-async function expectError(shouldError: () => any, errorMessage: string) {
+async function expectError(shouldError: () => any, type: LinearErrorType, message: string) {
   try {
     await shouldError();
   } catch (error) {
-    expect(error.message).toEqual(expect.stringContaining(errorMessage));
+    expect(error.type).toEqual(type);
+    expect(error.message).toEqual(expect.stringContaining(message));
   }
 }
 
@@ -63,7 +65,11 @@ if (process.env.E2E_API_KEY) {
     it("throw auth error", async () => {
       const client = new LinearClient({ apiKey: "fake api key" });
 
-      expectError(() => client.viewer, "authentication failed");
+      expectError(
+        () => client.viewer,
+        LinearErrorType.AuthenticationError,
+        "Authentication failed - Authentication is required in order to run this query or mutation"
+      );
     });
 
     describe("queries", () => {
@@ -77,7 +83,11 @@ if (process.env.E2E_API_KEY) {
       });
 
       it("query for fake team", async () => {
-        expectError(() => getClient().team("not a real team id"), "Entity not found");
+        expectError(
+          () => getClient().team("not a real team id"),
+          LinearErrorType.InvalidInput,
+          "Entity not found - Could not find referenced Team"
+        );
       });
 
       it("query for an issue", async () => {
@@ -85,7 +95,11 @@ if (process.env.E2E_API_KEY) {
       });
 
       it("query for fake issue", async () => {
-        expectError(() => getClient().issue("not a real issue id"), "Entity not found");
+        expectError(
+          () => getClient().issue("not a real issue id"),
+          LinearErrorType.InvalidInput,
+          "Entity not found - Could not find referenced Issue"
+        );
       });
     });
 

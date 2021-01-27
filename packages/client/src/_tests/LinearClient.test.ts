@@ -1,4 +1,5 @@
 import { LinearClient } from "../index";
+import { LinearErrorType } from "./../types";
 import { createTestServer, MOCK_API_KEY } from "./_mock";
 
 const ctx = createTestServer();
@@ -43,7 +44,8 @@ describe("LinearClient", () => {
     try {
       await client.viewer;
     } catch (error) {
-      expect(error.message).toEqual(expect.stringContaining("401"));
+      expect(error.message).toEqual(expect.stringContaining("GraphQL Error (Code: 401) - Unauthorized"));
+      expect(error.type).toEqual(LinearErrorType.AuthenticationError);
     }
   });
 });

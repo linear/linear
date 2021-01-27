@@ -70,6 +70,8 @@ export interface LinearErrorRaw extends Error {
   };
   /** Error information for the response */
   response?: {
+    /** An error message */
+    error?: string;
     /** Any data returned by this request */
     data?: unknown;
     /** The http status of this request */

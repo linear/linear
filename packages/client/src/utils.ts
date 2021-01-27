@@ -10,3 +10,12 @@ export function serializeUserAgent(seed: Record<string, string>): string {
     return acc ? `${acc} ${encoded}` : encoded;
   }, "");
 }
+
+/**
+ * Capitalize the first character of a string
+ *
+ * @param str the string to capitalize
+ */
+export function capitalize(str?: string): string | undefined {
+  return str ? `${str.charAt(0).toUpperCase()}${str.slice(1)}` : undefined;
+}
