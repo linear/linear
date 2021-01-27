@@ -24,17 +24,57 @@ export interface LinearClientParsedOptions extends RequestInit {
  * The error types returned by the Linear API
  */
 export enum LinearErrorType {
-  "FeatureNotAccessible" = "feature not accessible",
-  "InvalidInput" = "invalid input",
-  "Ratelimited" = "ratelimited",
-  "NetworkError" = "network error",
-  "AuthenticationError" = "authentication error",
-  "Forbidden" = "forbidden",
-  "BootstrapError" = "bootstrap error",
-  "Unknown" = "unknown",
-  "InternalError" = "internal error",
-  "Other" = "other",
-  "UserError" = "user error",
-  "GraphqlError" = "graphql error",
-  "LockTimeout" = "lock timeout",
+  "FeatureNotAccessible" = "FeatureNotAccessible",
+  "InvalidInput" = "InvalidInput",
+  "Ratelimited" = "Ratelimited",
+  "NetworkError" = "NetworkError",
+  "AuthenticationError" = "AuthenticationError",
+  "Forbidden" = "Forbidden",
+  "BootstrapError" = "BootstrapError",
+  "Unknown" = "Unknown",
+  "InternalError" = "InternalError",
+  "Other" = "Other",
+  "UserError" = "UserError",
+  "GraphqlError" = "GraphqlError",
+  "LockTimeout" = "LockTimeout",
+}
+
+/**
+ * One of potentially many raw graphql errors returned by the Linear API
+ */
+export interface LinearGraphQLErrorRaw {
+  /** The error type */
+  message?: LinearErrorType;
+  /** The path to the graphql node at which the error occured */
+  path?: string[];
+  extensions?: {
+    /** The error type */
+    type?: LinearErrorType;
+    /** If caused by the user input */
+    userError?: boolean;
+    /** A friendly error message */
+    userPresentableMessage?: string;
+  };
+}
+
+/**
+ * The raw error returned by the Linear API
+ */
+export interface LinearErrorRaw extends Error {
+  /** Error information for the request */
+  request?: {
+    /** The graphql query that caused this error */
+    query?: string;
+    /** The graphql variables that caused this error */
+    variables?: Record<string, unknown>;
+  };
+  /** Error information for the response */
+  response?: {
+    /** Any data returned by this request */
+    data?: unknown;
+    /** The http status of this request */
+    status?: number;
+    /** A list of graphql errors returned by the Linear API */
+    errors?: LinearGraphQLErrorRaw[];
+  };
 }
