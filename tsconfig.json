@@ -20,10 +20,7 @@
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es6",
-    "incremental": true,
-    "paths": {
-      "@linear/common": ["../packages/common/src"]
-    }
+    "incremental": true
   },
   "exclude": ["../**/node_modules", "../**/build", "../**/dist", "./**/scripts", "./**/jest"]
 }

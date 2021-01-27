@@ -16,7 +16,7 @@
     "dev:client": "NODE_ENV=development run-s dev:update build:client dev:push",
     "dev:push": "yalc push",
     "dev:update": "yalc update",
-    "build:client": "yarn build:clean && npx tsc",
+    "build:client": "yarn build:clean && npx tsc -p tsconfig.build.json",
     "build:clean": "npx rimraf dist",
     "schema": "npx graphql-codegen --config codegen.schema.yml",
     "generate:doc": "npx graphql-codegen --config codegen.doc.yml",

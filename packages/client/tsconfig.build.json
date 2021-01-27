@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "dist"
+  },
+  "exclude": ["./src/_tests", "./src/_generated/_gen.test.ts", "./src/scratch.ts"]
+}
