@@ -110,25 +110,235 @@ class LinearConnection<Node> extends Connection<Node> {
   }
 }
 /**
- * UserConnection model
+ * Contains either the full serialized state of the application or delta packets that the requester can
+ *   apply to the local data set in order to be up-to-date.
  *
  * @param request - function to call the graphql client
- * @param fetch - function to trigger a refetch of this UserConnection model
- * @param data - UserConnection response data
+ * @param data - D.SyncResponseFragment response data
  */
-class UserConnection extends LinearConnection<User> {
+class SyncResponse extends LinearRequest {
+  public constructor(request: Request, data: D.SyncResponseFragment) {
+    super(request);
+    this.state = data.state ?? undefined;
+    this.delta = data.delta ?? undefined;
+    this.archive = data.archive ?? undefined;
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.databaseVersion = data.databaseVersion ?? undefined;
+  }
+
+  /**
+   * The full state of the organization as a serialized JSON object.
+   *     Mutually exclusive with the delta property
+   */
+  public state?: string;
+  /**
+   * JSON serialized delta changes that the client can apply to its local state
+   *     in order to catch up with the state of the world.
+   */
+  public delta?: string;
+  /** A JSON serialized collection of model objects loaded from the archive */
+  public archive?: string;
+  /** The last sync id covered by the response. */
+  public lastSyncId?: number;
+  /** The version of the remote database. Incremented by 1 for each migration run on the database. */
+  public databaseVersion?: number;
+}
+/**
+ * Contains requested archived model objects.
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.ArchiveResponseFragment response data
+ */
+class ArchiveResponse extends LinearRequest {
+  public constructor(request: Request, data: D.ArchiveResponseFragment) {
+    super(request);
+    this.archive = data.archive ?? undefined;
+    this.totalCount = data.totalCount ?? undefined;
+    this.databaseVersion = data.databaseVersion ?? undefined;
+  }
+
+  /** A JSON serialized collection of model objects loaded from the archive */
+  public archive?: string;
+  /** The total number of entities in the archive. */
+  public totalCount?: number;
+  /** The version of the remote database. Incremented by 1 for each migration run on the database. */
+  public databaseVersion?: number;
+}
+/**
+ * ApiKeyConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ApiKeyConnection model
+ * @param data - ApiKeyConnection response data
+ */
+class ApiKeyConnection extends LinearConnection<ApiKey> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<User>>,
-    data: D.UserConnectionFragment
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<ApiKey>>,
+    data: D.ApiKeyConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new User(request, node)) : undefined,
+      data?.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined,
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
+}
+/**
+ * An API key. Grants access to the user's resources.
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.ApiKeyFragment response data
+ */
+class ApiKey extends LinearRequest {
+  public constructor(request: Request, data: D.ApiKeyFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.label = data.label ?? undefined;
+  }
+
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** The time at which the entity was created. */
+  public createdAt?: D.Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: D.Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: D.Scalars["DateTime"];
+  /** The label of the API key. */
+  public label?: string;
+}
+/**
+ * PageInfo model
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.PageInfoFragment response data
+ */
+class PageInfo extends LinearRequest {
+  public constructor(request: Request, data: D.PageInfoFragment) {
+    super(request);
+    this.hasPreviousPage = data.hasPreviousPage ?? undefined;
+    this.hasNextPage = data.hasNextPage ?? undefined;
+    this.startCursor = data.startCursor ?? undefined;
+    this.endCursor = data.endCursor ?? undefined;
+  }
+
+  /** Indicates if there are more results when paginating backward. */
+  public hasPreviousPage?: boolean;
+  /** Indicates if there are more results when paginating forward. */
+  public hasNextPage?: boolean;
+  /** Cursor representing the first result in the paginated results. */
+  public startCursor?: string;
+  /** Cursor representing the last result in the paginated results. */
+  public endCursor?: string;
+}
+/**
+ * Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.UserAuthorizedApplicationFragment response data
+ */
+class UserAuthorizedApplication extends LinearRequest {
+  public constructor(request: Request, data: D.UserAuthorizedApplicationFragment) {
+    super(request);
+    this.clientId = data.clientId ?? undefined;
+    this.name = data.name ?? undefined;
+    this.description = data.description ?? undefined;
+    this.developer = data.developer ?? undefined;
+    this.developerUrl = data.developerUrl ?? undefined;
+    this.imageUrl = data.imageUrl ?? undefined;
+    this.isAuthorized = data.isAuthorized ?? undefined;
+  }
+
+  /** OAuth application's client ID. */
+  public clientId?: string;
+  /** Application name. */
+  public name?: string;
+  /** Information about the application. */
+  public description?: string;
+  /** Name of the developer. */
+  public developer?: string;
+  /** Url of the developer (homepage or docs). */
+  public developerUrl?: string;
+  /** Image of the application. */
+  public imageUrl?: string;
+  /** Whether the user has authorized the application for the given scopes. */
+  public isAuthorized?: boolean;
+}
+/**
+ * Public information of the OAuth application, plus the authorized scopes for a given user.
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.AuthorizedApplicationFragment response data
+ */
+class AuthorizedApplication extends LinearRequest {
+  public constructor(request: Request, data: D.AuthorizedApplicationFragment) {
+    super(request);
+    this.clientId = data.clientId ?? undefined;
+    this.name = data.name ?? undefined;
+    this.description = data.description ?? undefined;
+    this.developer = data.developer ?? undefined;
+    this.developerUrl = data.developerUrl ?? undefined;
+    this.imageUrl = data.imageUrl ?? undefined;
+    this.scope = data.scope ?? undefined;
+    this.appId = data.appId ?? undefined;
+  }
+
+  /** OAuth application's client ID. */
+  public clientId?: string;
+  /** Application name. */
+  public name?: string;
+  /** Information about the application. */
+  public description?: string;
+  /** Name of the developer. */
+  public developer?: string;
+  /** Url of the developer (homepage or docs). */
+  public developerUrl?: string;
+  /** Image of the application. */
+  public imageUrl?: string;
+  /** Scopes that are authorized for this application for a given user. */
+  public scope?: string[];
+  /** OAuth application's ID. */
+  public appId?: string;
+}
+/**
+ * AuthResolverResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.AuthResolverResponseFragment response data
+ */
+class AuthResolverResponse extends LinearRequest {
+  public constructor(request: Request, data: D.AuthResolverResponseFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.token = data.token ?? undefined;
+    this.email = data.email ?? undefined;
+    this.allowDomainAccess = data.allowDomainAccess ?? undefined;
+    this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
+    this.availableOrganizations = data.availableOrganizations
+      ? data.availableOrganizations.map(node => new Organization(request, node))
+      : undefined;
+  }
+
+  /** User account ID. */
+  public id?: string;
+  /** JWT token for authentication of the account. */
+  public token?: string;
+  /** Email for the authenticated account. */
+  public email?: string;
+  /** Should the signup flow allow access for the domain. */
+  public allowDomainAccess?: boolean;
+  /** Users belonging to this account. */
+  public users?: User[];
+  /** Organizations this account has access to, but is not yet a member. */
+  public availableOrganizations?: Organization[];
 }
 /**
  * A user that has access to the the resources of an organization.
@@ -183,10 +393,6 @@ class User extends LinearRequest {
   public active?: boolean;
   /** Number of issues created. */
   public createdIssueCount?: number;
-  /** Settings for the user. Only available for the authenticated user. */
-  public get settings(): Fetch<UserSettings> {
-    return new UserSettingsQuery(this._request).fetch();
-  }
   /** Organization in which the user belongs to. */
   public get organization(): Fetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -205,7 +411,7 @@ class User extends LinearRequest {
   }
 }
 /**
- * The settings of a user as a JSON object.
+ * IssueConnection model
  *
  * @param request - function to call the graphql client
  * @param data - the initial UserSettingsFragment response data
@@ -281,7 +487,6 @@ class Issue extends LinearRequest {
     this.number = data.number ?? undefined;
     this.title = data.title ?? undefined;
     this.description = data.description ?? undefined;
-    this.descriptionData = data.descriptionData ?? undefined;
     this.priority = data.priority ?? undefined;
     this.estimate = data.estimate ?? undefined;
     this.boardOrder = data.boardOrder ?? undefined;
@@ -323,8 +528,6 @@ class Issue extends LinearRequest {
   public title?: string;
   /** The issue's description in markdown format. */
   public description?: string;
-  /** The issue's description as a Prosemirror document. */
-  public descriptionData?: D.Scalars["JSON"];
   /** The priority of the issue. */
   public priority?: number;
   /** The estimate of the complexity of the issue.. */
@@ -999,7 +1202,6 @@ class Organization extends LinearRequest {
     this.name = data.name ?? undefined;
     this.urlKey = data.urlKey ?? undefined;
     this.logoUrl = data.logoUrl ?? undefined;
-    this.upgradeThresholdExceeded = data.upgradeThresholdExceeded ?? undefined;
     this.periodUploadVolume = data.periodUploadVolume ?? undefined;
     this.gitBranchFormat = data.gitBranchFormat ?? undefined;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled ?? undefined;
@@ -1028,7 +1230,6 @@ class Organization extends LinearRequest {
   public urlKey?: string;
   /** The organization's logo URL. */
   public logoUrl?: string;
-  public upgradeThresholdExceeded?: boolean;
   /** Rolling 30-day total upload volume for the organization, in megabytes. */
   public periodUploadVolume?: number;
   /** How git branches are formatted. If null, default formatting will be used. */
@@ -1141,7 +1342,6 @@ class Integration extends LinearRequest {
     this.updatedAt = data.updatedAt ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
     this.service = data.service ?? undefined;
-    this.serviceId = data.serviceId ?? undefined;
     this._team = data.team ?? undefined;
     this._creator = data.creator ?? undefined;
   }
@@ -1159,8 +1359,6 @@ class Integration extends LinearRequest {
   public archivedAt?: D.Scalars["DateTime"];
   /** The integration's type. */
   public service?: string;
-  /** The external service identifier. */
-  public serviceId?: string;
   /** The organization that the integration is associated with. */
   public get organization(): Fetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -1600,8 +1798,6 @@ class Comment extends LinearRequest {
     this.updatedAt = data.updatedAt ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
     this.body = data.body ?? undefined;
-    this.bodyData = data.bodyData ?? undefined;
-    this.reactionData = data.reactionData ?? undefined;
     this.editedAt = data.editedAt ?? undefined;
     this._user = data.user ?? undefined;
     this._issue = data.issue ?? undefined;
@@ -1620,10 +1816,6 @@ class Comment extends LinearRequest {
   public archivedAt?: D.Scalars["DateTime"];
   /** The comment content in markdown format. */
   public body?: string;
-  /** Comment content as a Prosemirror document. */
-  public bodyData?: D.Scalars["JSON"];
-  /** Emoji reactions on the comment. */
-  public reactionData?: D.Scalars["JSON"][];
   /** The time user edited the comment. */
   public editedAt?: D.Scalars["DateTime"];
   /** The user who wrote the comment. */
@@ -2071,266 +2263,175 @@ class IssueRelation extends LinearRequest {
   }
 }
 /**
- * OrganizationExistsPayload model
+ * SsoUrlFromEmailResponse model
  *
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationExistsPayloadFragment response data
  */
-class OrganizationExistsPayload extends LinearRequest {
-  public constructor(request: Request, data: D.OrganizationExistsPayloadFragment) {
+class SsoUrlFromEmailResponse extends LinearRequest {
+  public constructor(request: Request, data: D.SsoUrlFromEmailResponseFragment) {
     super(request);
     this.success = data.success ?? undefined;
-    this.exists = data.exists ?? undefined;
+    this.samlSsoUrl = data.samlSsoUrl ?? undefined;
   }
 
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** Whether the organization exists. */
-  public exists?: boolean;
+  /** SAML SSO sign-in URL. */
+  public samlSsoUrl?: string;
 }
 /**
- * Contains either the full serialized state of the application or delta packets that the requester can
- *   apply to the local data set in order to be up-to-date.
+ * BillingDetailsPayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial SyncResponseFragment response data
  */
-class SyncResponse extends LinearRequest {
-  public constructor(request: Request, data: D.SyncResponseFragment) {
+class BillingDetailsPayload extends LinearRequest {
+  public constructor(request: Request, data: D.BillingDetailsPayloadFragment) {
     super(request);
-    this.state = data.state ?? undefined;
-    this.delta = data.delta ?? undefined;
-    this.archive = data.archive ?? undefined;
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.databaseVersion = data.databaseVersion ?? undefined;
+    this.success = data.success ?? undefined;
+    this.email = data.email ?? undefined;
+    this.paymentMethod = data.paymentMethod ? new Card(request, data.paymentMethod) : undefined;
+    this.invoices = data.invoices ? data.invoices.map(node => new Invoice(request, node)) : undefined;
   }
 
-  /**
-   * The full state of the organization as a serialized JSON object.
-   *     Mutually exclusive with the delta property
-   */
-  public state?: string;
-  /**
-   * JSON serialized delta changes that the client can apply to its local state
-   *     in order to catch up with the state of the world.
-   */
-  public delta?: string;
-  /** A JSON serialized collection of model objects loaded from the archive */
-  public archive?: string;
-  /** The last sync id covered by the response. */
-  public lastSyncId?: number;
-  /** The version of the remote database. Incremented by 1 for each migration run on the database. */
-  public databaseVersion?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The customer's email address the invoices are sent to. */
+  public email?: string;
+  /** List of invoices, if any. */
+  public invoices?: Invoice[];
+  /** The payment method. */
+  public paymentMethod?: Card;
 }
 /**
- * Contains requested archived model objects.
+ * Invoice model
  *
  * @param request - function to call the graphql client
  * @param data - the initial ArchiveResponseFragment response data
  */
-class ArchiveResponse extends LinearRequest {
-  public constructor(request: Request, data: D.ArchiveResponseFragment) {
+class Invoice extends LinearRequest {
+  public constructor(request: Request, data: D.InvoiceFragment) {
     super(request);
-    this.archive = data.archive ?? undefined;
-    this.totalCount = data.totalCount ?? undefined;
-    this.databaseVersion = data.databaseVersion ?? undefined;
+    this.url = data.url ?? undefined;
+    this.created = data.created ?? undefined;
+    this.dueDate = data.dueDate ?? undefined;
+    this.status = data.status ?? undefined;
+    this.total = data.total ?? undefined;
   }
 
-  /** A JSON serialized collection of model objects loaded from the archive */
-  public archive?: string;
-  /** The total number of entities in the archive. */
-  public totalCount?: number;
-  /** The version of the remote database. Incremented by 1 for each migration run on the database. */
-  public databaseVersion?: number;
+  /** The URL at which the invoice can be viewed or paid. */
+  public url?: string;
+  /** The creation date of the invoice. */
+  public created?: D.Scalars["TimelessDateScalar"];
+  /** The due date of the invoice. */
+  public dueDate?: D.Scalars["TimelessDateScalar"];
+  /** The status of the invoice. */
+  public status?: string;
+  /** The invoice total, in cents. */
+  public total?: number;
 }
 /**
- * A user account. Super user required.
+ * Card model
  *
  * @param request - function to call the graphql client
  * @param data - the initial UserAccountAdminPrivilegedFragment response data
  */
-class UserAccountAdminPrivileged extends LinearRequest {
-  public constructor(request: Request, data: D.UserAccountAdminPrivilegedFragment) {
+class Card extends LinearRequest {
+  public constructor(request: Request, data: D.CardFragment) {
     super(request);
-    this.id = data.id ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.name = data.name ?? undefined;
-    this.email = data.email ?? undefined;
-    this.service = data.service ?? undefined;
-    this.users = data.users ? data.users.map(node => new UserAdminPrivileged(request, node)) : undefined;
+    this.brand = data.brand ?? undefined;
+    this.last4 = data.last4 ?? undefined;
   }
 
-  /** The models identifier. */
-  public id?: string;
-  /** The time at which the model was created. */
-  public createdAt?: D.Scalars["DateTime"];
-  /** The time at which the model was updated. */
-  public updatedAt?: D.Scalars["DateTime"];
-  /** The time at which the model was archived. */
-  public archivedAt?: D.Scalars["DateTime"];
-  /** The user's name. */
-  public name?: string;
-  /** The user's email address. */
-  public email?: string;
-  /** The authentication service used to create the account. */
-  public service?: string;
-  public users?: UserAdminPrivileged[];
+  /** The brand of the card, e.g. Visa. */
+  public brand?: string;
+  /** The last four digits used to identify the card. */
+  public last4?: string;
 }
 /**
- * A user that has access to the the resources of an organization. Super user required.
+ * CollaborationDocumentUpdatePayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial UserAdminPrivilegedFragment response data
  */
-class UserAdminPrivileged extends LinearRequest {
-  public constructor(request: Request, data: D.UserAdminPrivilegedFragment) {
+class CollaborationDocumentUpdatePayload extends LinearRequest {
+  public constructor(request: Request, data: D.CollaborationDocumentUpdatePayloadFragment) {
     super(request);
-    this.id = data.id ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.name = data.name ?? undefined;
-    this.displayName = data.displayName ?? undefined;
-    this.email = data.email ?? undefined;
-    this.avatarUrl = data.avatarUrl ?? undefined;
-    this.inviteHash = data.inviteHash ?? undefined;
-    this.lastSeen = data.lastSeen ?? undefined;
-    this.admin = data.admin ?? undefined;
-    this.active = data.active ?? undefined;
-    this.createdIssueCount = data.createdIssueCount ?? undefined;
-    this.organization = data.organization ? new OrganizationAdminPrivileged(request, data.organization) : undefined;
+    this.success = data.success ?? undefined;
+    this.steps = data.steps ? new StepsResponse(request, data.steps) : undefined;
   }
 
-  /** The unique identifier of the entity. */
-  public id?: string;
-  /** The time at which the entity was created. */
-  public createdAt?: D.Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  public updatedAt?: D.Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: D.Scalars["DateTime"];
-  /** The user's full name. */
-  public name?: string;
-  /** The user's display (nick) name. Unique within each organization. */
-  public displayName?: string;
-  /** The user's email address. */
-  public email?: string;
-  /** An URL to the user's avatar image. */
-  public avatarUrl?: string;
-  /** Unique hash for the user to be used in invite URLs. */
-  public inviteHash?: string;
-  /** The last time the user was seen online. If null, the user is currently online. */
-  public lastSeen?: D.Scalars["DateTime"];
-  /** Whether the user is an organization administrator. */
-  public admin?: boolean;
-  /** Whether the user account is active or disabled. */
-  public active?: boolean;
-  /** Number of issues created. */
-  public createdIssueCount?: number;
-  /** Organization in which the user belongs to. Super user required. */
-  public organization?: OrganizationAdminPrivileged;
-  /** Settings for the user. Only available for the authenticated user. */
-  public get settings(): Fetch<UserSettings> {
-    return new UserSettingsQuery(this._request).fetch();
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** Document steps the client has not seen yet and need to rebase it's local steps on. */
+  public steps?: StepsResponse;
+}
+/**
+ * StepsResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.StepsResponseFragment response data
+ */
+class StepsResponse extends LinearRequest {
+  public constructor(request: Request, data: D.StepsResponseFragment) {
+    super(request);
+    this.version = data.version ?? undefined;
+    this.steps = data.steps ?? undefined;
+    this.clientIds = data.clientIds ?? undefined;
+  }
+
+  /** Client's document version. */
+  public version?: number;
+  /** New document steps from the client. */
+  public steps?: D.Scalars["JSON"][];
+  /** List of client IDs for the document steps. */
+  public clientIds?: string[];
+}
+/**
+ * CustomViewConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this CustomViewConnection model
+ * @param data - CustomViewConnection response data
+ */
+class CustomViewConnection extends LinearConnection<CustomView> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<CustomView>>,
+    data: D.CustomViewConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
 }
 /**
- * An organization. Super user required.
+ * A custom view that has been saved by a user.
  *
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationAdminPrivilegedFragment response data
  */
-class OrganizationAdminPrivileged extends LinearRequest {
-  public constructor(request: Request, data: D.OrganizationAdminPrivilegedFragment) {
+class CustomView extends LinearRequest {
+  private _team?: D.CustomViewFragment["team"];
+  private _creator?: D.CustomViewFragment["creator"];
+
+  public constructor(request: Request, data: D.CustomViewFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
     this.updatedAt = data.updatedAt ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
     this.name = data.name ?? undefined;
-    this.urlKey = data.urlKey ?? undefined;
-    this.logoUrl = data.logoUrl ?? undefined;
-    this.upgradeThresholdExceeded = data.upgradeThresholdExceeded ?? undefined;
-    this.periodUploadVolume = data.periodUploadVolume ?? undefined;
-    this.gitBranchFormat = data.gitBranchFormat ?? undefined;
-    this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled ?? undefined;
-    this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled ?? undefined;
-    this.roadmapEnabled = data.roadmapEnabled ?? undefined;
-    this.samlEnabled = data.samlEnabled ?? undefined;
-    this.allowedAuthServices = data.allowedAuthServices ?? undefined;
-    this.userCount = data.userCount ?? undefined;
-    this.createdIssueCount = data.createdIssueCount ?? undefined;
-    this.stripeCustomerId = data.stripeCustomerId ?? undefined;
-    this.subscription = data.subscription ? new SubscriptionAdminPrivileged(request, data.subscription) : undefined;
-  }
-
-  /** The unique identifier of the entity. */
-  public id?: string;
-  /** The time at which the entity was created. */
-  public createdAt?: D.Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  public updatedAt?: D.Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: D.Scalars["DateTime"];
-  /** The organization's name. */
-  public name?: string;
-  /** The organization's unique URL key. */
-  public urlKey?: string;
-  /** The organization's logo URL. */
-  public logoUrl?: string;
-  public upgradeThresholdExceeded?: boolean;
-  /** Rolling 30-day total upload volume for the organization, in megabytes. */
-  public periodUploadVolume?: number;
-  /** How git branches are formatted. If null, default formatting will be used. */
-  public gitBranchFormat?: string;
-  /** Whether the Git integration linkback messages should be sent to private repositories. */
-  public gitLinkbackMessagesEnabled?: boolean;
-  /** Whether the Git integration linkback messages should be sent to public repositories. */
-  public gitPublicLinkbackMessagesEnabled?: boolean;
-  /** Whether the organization is using a roadmap. */
-  public roadmapEnabled?: boolean;
-  /** Whether SAML authentication is enabled for organization. */
-  public samlEnabled?: boolean;
-  /** Allowed authentication providers, empty array means all are allowed */
-  public allowedAuthServices?: string[];
-  /** Number of active users in the organization. */
-  public userCount?: number;
-  /** Number of issues in the organization. */
-  public createdIssueCount?: number;
-  /** The Stripe identifier for the organization. */
-  public stripeCustomerId?: string;
-  /** The organization's subscription to a paid plan. Super user required. */
-  public subscription?: SubscriptionAdminPrivileged;
-}
-/**
- * The subscription of an organization. Super user required.
- *
- * @param request - function to call the graphql client
- * @param data - the initial SubscriptionAdminPrivilegedFragment response data
- */
-class SubscriptionAdminPrivileged extends LinearRequest {
-  private _creator?: D.SubscriptionAdminPrivilegedFragment["creator"];
-
-  public constructor(request: Request, data: D.SubscriptionAdminPrivilegedFragment) {
-    super(request);
-    this.id = data.id ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.type = data.type ?? undefined;
-    this.seats = data.seats ?? undefined;
-    this.canceledAt = data.canceledAt ?? undefined;
-    this.pendingChangeType = data.pendingChangeType ?? undefined;
-    this.stripeSubscriptionId = data.stripeSubscriptionId ?? undefined;
-    this.stripeStatus = data.stripeStatus ?? undefined;
+    this.description = data.description ?? undefined;
+    this.icon = data.icon ?? undefined;
+    this.color = data.color ?? undefined;
+    this.filters = data.filters ?? undefined;
+    this.shared = data.shared ?? undefined;
+    this._team = data.team ?? undefined;
     this._creator = data.creator ?? undefined;
   }
 
@@ -2345,54 +2446,71 @@ class SubscriptionAdminPrivileged extends LinearRequest {
   public updatedAt?: D.Scalars["DateTime"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-  /** The subscription type. */
-  public type?: string;
-  /** The number of seats in the subscription. */
-  public seats?: number;
-  /** The date the subscription was canceled, if any. */
-  public canceledAt?: D.Scalars["DateTime"];
-  /** The subscription type of a pending change. Null if no change pending. */
-  public pendingChangeType?: string;
-  /** The Stripe identifier for the subscription. */
-  public stripeSubscriptionId?: string;
-  /** The Stripe status for the subscription. */
-  public stripeStatus?: string;
-  /** The creator of the subscription. */
-  public get creator(): Fetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
-  }
-  /** The organization that the subscription is associated with. */
+  /** The name of the custom view. */
+  public name?: string;
+  /** The description of the custom view. */
+  public description?: string;
+  /** The icon of the custom view. */
+  public icon?: string;
+  /** The color of the icon of the custom view. */
+  public color?: string;
+  /** The filters applied to issues in the custom view. */
+  public filters?: D.Scalars["JSONObject"];
+  /** Whether the custom view is shared with everyone in the organization. */
+  public shared?: boolean;
+  /** The organization of the custom view. */
   public get organization(): Fetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-}
-/**
- * ApiKeyConnection model
- *
- * @param request - function to call the graphql client
- * @param data - the initial ApiKeyConnectionFragment response data
- */
-class ApiKeyConnection extends LinearRequest {
-  public constructor(request: Request, data: D.ApiKeyConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined;
+  /** The team associated with the custom view. */
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The user who created the custom view. */
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 }
 /**
- * An API key. Grants access to the user's resources.
+ * EmojiConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ApiKeyFragment response data
+ * @param fetch - function to trigger a refetch of this EmojiConnection model
+ * @param data - EmojiConnection response data
  */
-class ApiKey extends LinearRequest {
-  public constructor(request: Request, data: D.ApiKeyFragment) {
+class EmojiConnection extends LinearConnection<Emoji> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Emoji>>,
+    data: D.EmojiConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
+  }
+}
+/**
+ * A custom emoji.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial SubscriptionAdminPrivilegedFragment response data
+ */
+class Emoji extends LinearRequest {
+  private _creator?: D.EmojiFragment["creator"];
+
+  public constructor(request: Request, data: D.EmojiFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
     this.updatedAt = data.updatedAt ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
-    this.label = data.label ?? undefined;
+    this.name = data.name ?? undefined;
+    this.url = data.url ?? undefined;
+    this.source = data.source ?? undefined;
+    this._creator = data.creator ?? undefined;
   }
 
   /** The unique identifier of the entity. */
@@ -2406,64 +2524,141 @@ class ApiKey extends LinearRequest {
   public updatedAt?: D.Scalars["DateTime"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: D.Scalars["DateTime"];
-  /** The label of the API key. */
-  public label?: string;
+  /** The emoji's name. */
+  public name?: string;
+  /** The emoji image URL. */
+  public url?: string;
+  /** The source of the emoji. */
+  public source?: string;
+  /** The user who created the emoji. */
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The organization that the emoji belongs to. */
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
 }
 /**
- * Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
+ * FavoriteConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ApiKeyConnectionFragment response data
+ */
+class ApiKeyConnection extends LinearRequest {
+  public constructor(request: Request, data: D.ApiKeyConnectionFragment) {
+    super(request);
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined;
+  }
+}
+/**
+ * User favorites presented in the sidebar.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ApiKeyFragment response data
+ */
+class Favorite extends LinearRequest {
+  private _user?: D.FavoriteFragment["user"];
+  private _issue?: D.FavoriteFragment["issue"];
+  private _project?: D.FavoriteFragment["project"];
+  private _projectTeam?: D.FavoriteFragment["projectTeam"];
+  private _cycle?: D.FavoriteFragment["cycle"];
+  private _label?: D.FavoriteFragment["label"];
+
+  public constructor(request: Request, data: D.FavoriteFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.type = data.type ?? undefined;
+    this.sortOrder = data.sortOrder ?? undefined;
+    this._user = data.user ?? undefined;
+    this._issue = data.issue ?? undefined;
+    this._project = data.project ?? undefined;
+    this._projectTeam = data.projectTeam ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._label = data.label ?? undefined;
+  }
+
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** The time at which the entity was created. */
+  public createdAt?: D.Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: D.Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: D.Scalars["DateTime"];
+  /** The type of the favorite. */
+  public type?: string;
+  /** The order of the item in the favorites list. */
+  public sortOrder?: number;
+  /** The owner of the favorite. */
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** Favorited issue. */
+  public get issue(): Fetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** Favorited project. */
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** Favorited project team. */
+  public get projectTeam(): Fetch<Project> | undefined {
+    return this._projectTeam?.id ? new ProjectQuery(this._request).fetch(this._projectTeam?.id) : undefined;
+  }
+  /** Favorited cycle. */
+  public get cycle(): Fetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** Favorited issue label. */
+  public get label(): Fetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+}
+/**
+ * FigmaEmbedPayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial UserAuthorizedApplicationFragment response data
  */
-class UserAuthorizedApplication extends LinearRequest {
-  public constructor(request: Request, data: D.UserAuthorizedApplicationFragment) {
+class FigmaEmbedPayload extends LinearRequest {
+  public constructor(request: Request, data: D.FigmaEmbedPayloadFragment) {
     super(request);
-    this.clientId = data.clientId ?? undefined;
-    this.name = data.name ?? undefined;
-    this.description = data.description ?? undefined;
-    this.developer = data.developer ?? undefined;
-    this.developerUrl = data.developerUrl ?? undefined;
-    this.imageUrl = data.imageUrl ?? undefined;
-    this.isAuthorized = data.isAuthorized ?? undefined;
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this.figmaEmbed = data.figmaEmbed ? new FigmaEmbed(request, data.figmaEmbed) : undefined;
   }
 
-  /** OAuth application's client ID. */
-  public clientId?: string;
-  /** Application name. */
-  public name?: string;
-  /** Information about the application. */
-  public description?: string;
-  /** Name of the developer. */
-  public developer?: string;
-  /** Url of the developer (homepage or docs). */
-  public developerUrl?: string;
-  /** Image of the application. */
-  public imageUrl?: string;
-  /** Whether the user has authorized the application for the given scopes. */
-  public isAuthorized?: boolean;
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** Figma embed information. */
+  public figmaEmbed?: FigmaEmbed;
 }
 /**
- * Public information of the OAuth application, plus the authorized scopes for a given user.
+ * Object representing Figma preview information.
  *
  * @param request - function to call the graphql client
  * @param data - the initial AuthorizedApplicationFragment response data
  */
-class AuthorizedApplication extends LinearRequest {
-  public constructor(request: Request, data: D.AuthorizedApplicationFragment) {
+class FigmaEmbed extends LinearRequest {
+  public constructor(request: Request, data: D.FigmaEmbedFragment) {
     super(request);
-    this.clientId = data.clientId ?? undefined;
     this.name = data.name ?? undefined;
-    this.description = data.description ?? undefined;
-    this.developer = data.developer ?? undefined;
-    this.developerUrl = data.developerUrl ?? undefined;
-    this.imageUrl = data.imageUrl ?? undefined;
-    this.scope = data.scope ?? undefined;
-    this.appId = data.appId ?? undefined;
+    this.lastModified = data.lastModified ?? undefined;
+    this.nodeName = data.nodeName ?? undefined;
+    this.url = data.url ?? undefined;
   }
 
-  /** OAuth application's client ID. */
-  public clientId?: string;
-  /** Application name. */
+  /** Figma file name. */
   public name?: string;
   /** Information about the application. */
   public description?: string;
@@ -2511,76 +2706,81 @@ class AuthResolverResponse extends LinearRequest {
   public availableOrganizations?: Organization[];
 }
 /**
- * SsoUrlFromEmailResponse model
+ * InvitePagePayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial SsoUrlFromEmailResponseFragment response data
  */
-class SsoUrlFromEmailResponse extends LinearRequest {
-  public constructor(request: Request, data: D.SsoUrlFromEmailResponseFragment) {
+class InvitePagePayload extends LinearRequest {
+  public constructor(request: Request, data: D.InvitePagePayloadFragment) {
     super(request);
     this.success = data.success ?? undefined;
-    this.samlSsoUrl = data.samlSsoUrl ?? undefined;
+    this.inviteData = data.inviteData ? new InviteData(request, data.inviteData) : undefined;
   }
 
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** SAML SSO sign-in URL. */
-  public samlSsoUrl?: string;
+  /** Invite data. */
+  public inviteData?: InviteData;
 }
 /**
- * BillingDetailsPayload model
+ * InviteData model
  *
  * @param request - function to call the graphql client
  * @param data - the initial BillingDetailsPayloadFragment response data
  */
-class BillingDetailsPayload extends LinearRequest {
-  public constructor(request: Request, data: D.BillingDetailsPayloadFragment) {
+class InviteData extends LinearRequest {
+  public constructor(request: Request, data: D.InviteDataFragment) {
     super(request);
-    this.success = data.success ?? undefined;
-    this.email = data.email ?? undefined;
-    this.paymentMethod = data.paymentMethod ? new Card(request, data.paymentMethod) : undefined;
-    this.invoices = data.invoices ? data.invoices.map(node => new Invoice(request, node)) : undefined;
+    this.inviterName = data.inviterName ?? undefined;
+    this.avatarURLs = data.avatarURLs ?? undefined;
+    this.teamNames = data.teamNames ?? undefined;
+    this.teamIds = data.teamIds ?? undefined;
+    this.organizationName = data.organizationName ?? undefined;
+    this.organizationDomain = data.organizationDomain ?? undefined;
+    this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
+    this.userCount = data.userCount ?? undefined;
   }
 
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The customer's email address the invoices are sent to. */
-  public email?: string;
-  /** List of invoices, if any. */
-  public invoices?: Invoice[];
-  /** The payment method. */
-  public paymentMethod?: Card;
+  /** The name of the inviter. */
+  public inviterName?: string;
+  /** Avatar URLs for the invitees. */
+  public avatarURLs?: string[];
+  /** Team names for the invitees. */
+  public teamNames?: string[];
+  /** Team identifiers for the invitees. */
+  public teamIds?: string[];
+  /** The name of the organization the users were invited to. */
+  public organizationName?: string;
+  /** The domain of the organization the users were invited to. */
+  public organizationDomain?: string;
+  /** The logo of the organization the users were invited to. */
+  public organizationLogoUrl?: string;
+  /** The user count of the organization. */
+  public userCount?: number;
 }
 /**
- * Invoice model
+ * NotificationConnection model
  *
  * @param request - function to call the graphql client
  * @param data - the initial InvoiceFragment response data
  */
-class Invoice extends LinearRequest {
-  public constructor(request: Request, data: D.InvoiceFragment) {
-    super(request);
-    this.url = data.url ?? undefined;
-    this.created = data.created ?? undefined;
-    this.dueDate = data.dueDate ?? undefined;
-    this.status = data.status ?? undefined;
-    this.total = data.total ?? undefined;
+class NotificationConnection extends LinearConnection<Notification> {
+  public constructor(
+    request: Request,
+    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Notification>>,
+    data: D.NotificationConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
   }
-
-  /** The URL at which the invoice can be viewed or paid. */
-  public url?: string;
-  /** The creation date of the invoice. */
-  public created?: D.Scalars["TimelessDateScalar"];
-  /** The due date of the invoice. */
-  public dueDate?: D.Scalars["TimelessDateScalar"];
-  /** The status of the invoice. */
-  public status?: string;
-  /** The invoice total, in cents. */
-  public total?: number;
 }
 /**
- * Card model
+ * A notification sent to a user.
  *
  * @param request - function to call the graphql client
  * @param data - the initial CardFragment response data
@@ -2663,340 +2863,6 @@ class CustomViewConnection extends LinearConnection<CustomView> {
  * @param request - function to call the graphql client
  * @param data - the initial CustomViewFragment response data
  */
-class CustomView extends LinearRequest {
-  private _team?: D.CustomViewFragment["team"];
-  private _creator?: D.CustomViewFragment["creator"];
-
-  public constructor(request: Request, data: D.CustomViewFragment) {
-    super(request);
-    this.id = data.id ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.name = data.name ?? undefined;
-    this.description = data.description ?? undefined;
-    this.icon = data.icon ?? undefined;
-    this.color = data.color ?? undefined;
-    this.filters = data.filters ?? undefined;
-    this.shared = data.shared ?? undefined;
-    this._team = data.team ?? undefined;
-    this._creator = data.creator ?? undefined;
-  }
-
-  /** The unique identifier of the entity. */
-  public id?: string;
-  /** The time at which the entity was created. */
-  public createdAt?: D.Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  public updatedAt?: D.Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: D.Scalars["DateTime"];
-  /** The name of the custom view. */
-  public name?: string;
-  /** The description of the custom view. */
-  public description?: string;
-  /** The icon of the custom view. */
-  public icon?: string;
-  /** The color of the icon of the custom view. */
-  public color?: string;
-  /** The filters applied to issues in the custom view. */
-  public filters?: D.Scalars["JSONObject"];
-  /** Whether the custom view is shared with everyone in the organization. */
-  public shared?: boolean;
-  /** The organization of the custom view. */
-  public get organization(): Fetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-  /** The team associated with the custom view. */
-  public get team(): Fetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
-  }
-  /** The user who created the custom view. */
-  public get creator(): Fetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
-  }
-}
-/**
- * EmojiConnection model
- *
- * @param request - function to call the graphql client
- * @param data - the initial CustomViewConnectionFragment response data
- */
-class EmojiConnection extends LinearRequest {
-  public constructor(request: Request, data: D.EmojiConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
-  }
-}
-/**
- * A custom emoji.
- *
- * @param request - function to call the graphql client
- * @param data - the initial EmojiFragment response data
- */
-class Emoji extends LinearRequest {
-  private _creator?: D.EmojiFragment["creator"];
-
-  public constructor(request: Request, data: D.EmojiFragment) {
-    super(request);
-    this.id = data.id ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.name = data.name ?? undefined;
-    this.url = data.url ?? undefined;
-    this.source = data.source ?? undefined;
-    this._creator = data.creator ?? undefined;
-  }
-
-  /** The unique identifier of the entity. */
-  public id?: string;
-  /** The time at which the entity was created. */
-  public createdAt?: D.Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  public updatedAt?: D.Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: D.Scalars["DateTime"];
-  /** The emoji's name. */
-  public name?: string;
-  /** The emoji image URL. */
-  public url?: string;
-  /** The source of the emoji. */
-  public source?: string;
-  /** The user who created the emoji. */
-  public get creator(): Fetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
-  }
-  /** The organization that the emoji belongs to. */
-  public get organization(): Fetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-}
-/**
- * FavoriteConnection model
- *
- * @param request - function to call the graphql client
- * @param data - the initial EmojiConnectionFragment response data
- */
-class FavoriteConnection extends LinearRequest {
-  public constructor(request: Request, data: D.FavoriteConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
-  }
-}
-/**
- * User favorites presented in the sidebar.
- *
- * @param request - function to call the graphql client
- * @param data - the initial FavoriteFragment response data
- */
-class Favorite extends LinearRequest {
-  private _user?: D.FavoriteFragment["user"];
-  private _issue?: D.FavoriteFragment["issue"];
-  private _project?: D.FavoriteFragment["project"];
-  private _projectTeam?: D.FavoriteFragment["projectTeam"];
-  private _cycle?: D.FavoriteFragment["cycle"];
-  private _label?: D.FavoriteFragment["label"];
-
-  public constructor(request: Request, data: D.FavoriteFragment) {
-    super(request);
-    this.id = data.id ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.type = data.type ?? undefined;
-    this.sortOrder = data.sortOrder ?? undefined;
-    this._user = data.user ?? undefined;
-    this._issue = data.issue ?? undefined;
-    this._project = data.project ?? undefined;
-    this._projectTeam = data.projectTeam ?? undefined;
-    this._cycle = data.cycle ?? undefined;
-    this._label = data.label ?? undefined;
-  }
-
-  /** The unique identifier of the entity. */
-  public id?: string;
-  /** The time at which the entity was created. */
-  public createdAt?: D.Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  public updatedAt?: D.Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: D.Scalars["DateTime"];
-  /** The type of the favorite. */
-  public type?: string;
-  /** The order of the item in the favorites list. */
-  public sortOrder?: number;
-  /** The owner of the favorite. */
-  public get user(): Fetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
-  }
-  /** Favorited issue. */
-  public get issue(): Fetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
-  }
-  /** Favorited project. */
-  public get project(): Fetch<Project> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
-  }
-  /** Favorited project team. */
-  public get projectTeam(): Fetch<Project> | undefined {
-    return this._projectTeam?.id ? new ProjectQuery(this._request).fetch(this._projectTeam?.id) : undefined;
-  }
-  /** Favorited cycle. */
-  public get cycle(): Fetch<Cycle> | undefined {
-    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
-  }
-  /** Favorited issue label. */
-  public get label(): Fetch<IssueLabel> | undefined {
-    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
-  }
-}
-/**
- * FavoriteConnection model
- *
- * @param request - function to call the graphql client
- * @param data - the initial FavoriteConnectionFragment response data
- */
-class FavoriteConnection extends LinearRequest {
-  public constructor(request: Request, data: D.FavoriteConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
-  }
-
-  public nodes?: Favorite[];
-  public pageInfo?: PageInfo;
-}
-
-/**
- * FigmaEmbedPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial FigmaEmbedPayloadFragment response data
- */
-class FigmaEmbedPayload extends LinearRequest {
-  public constructor(request: Request, data: D.FigmaEmbedPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this.figmaEmbed = data.figmaEmbed ? new FigmaEmbed(request, data.figmaEmbed) : undefined;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** Figma embed information. */
-  public figmaEmbed?: FigmaEmbed;
-}
-/**
- * Object representing Figma preview information.
- *
- * @param request - function to call the graphql client
- * @param data - the initial FigmaEmbedFragment response data
- */
-class FigmaEmbed extends LinearRequest {
-  public constructor(request: Request, data: D.FigmaEmbedFragment) {
-    super(request);
-    this.name = data.name ?? undefined;
-    this.lastModified = data.lastModified ?? undefined;
-    this.nodeName = data.nodeName ?? undefined;
-    this.url = data.url ?? undefined;
-  }
-
-  /** Figma file name. */
-  public name?: string;
-  /** Date when the file was updated at the time of embedding. */
-  public lastModified?: D.Scalars["DateTime"];
-  /** Node name. */
-  public nodeName?: string;
-  /** Figma screenshot URL. */
-  public url?: string;
-}
-/**
- * InvitePagePayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial InvitePagePayloadFragment response data
- */
-class InvitePagePayload extends LinearRequest {
-  public constructor(request: Request, data: D.InvitePagePayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-    this.inviteData = data.inviteData ? new InviteData(request, data.inviteData) : undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** Invite data. */
-  public inviteData?: InviteData;
-}
-/**
- * InviteData model
- *
- * @param request - function to call the graphql client
- * @param data - the initial InviteDataFragment response data
- */
-class InviteData extends LinearRequest {
-  public constructor(request: Request, data: D.InviteDataFragment) {
-    super(request);
-    this.inviterName = data.inviterName ?? undefined;
-    this.avatarURLs = data.avatarURLs ?? undefined;
-    this.teamNames = data.teamNames ?? undefined;
-    this.teamIds = data.teamIds ?? undefined;
-    this.organizationName = data.organizationName ?? undefined;
-    this.organizationDomain = data.organizationDomain ?? undefined;
-    this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
-    this.userCount = data.userCount ?? undefined;
-  }
-
-  /** The name of the inviter. */
-  public inviterName?: string;
-  /** Avatar URLs for the invitees. */
-  public avatarURLs?: string[];
-  /** Team names for the invitees. */
-  public teamNames?: string[];
-  /** Team identifiers for the invitees. */
-  public teamIds?: string[];
-  /** The name of the organization the users were invited to. */
-  public organizationName?: string;
-  /** The domain of the organization the users were invited to. */
-  public organizationDomain?: string;
-  /** The logo of the organization the users were invited to. */
-  public organizationLogoUrl?: string;
-  /** The user count of the organization. */
-  public userCount?: number;
-}
-/**
- * NotificationConnection model
- *
- * @param request - function to call the graphql client
- * @param data - the initial NotificationConnectionFragment response data
- */
-class NotificationConnection extends LinearRequest {
-  public constructor(request: Request, data: D.NotificationConnectionFragment) {
-    super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined;
-  }
-}
-/**
- * A notification sent to a user.
- *
- * @param request - function to call the graphql client
- * @param data - the initial NotificationFragment response data
- */
 class Notification extends LinearRequest {
   private _user?: D.NotificationFragment["user"];
   private _issue?: D.NotificationFragment["issue"];
@@ -3062,20 +2928,20 @@ class Notification extends LinearRequest {
  * NotificationSubscriptionConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationSubscriptionConnectionFragment response data
+ * @param data - the initial CustomViewConnectionFragment response data
  */
-class NotificationSubscriptionConnection extends LinearRequest {
-  public constructor(request: Request, data: D.NotificationSubscriptionConnectionFragment) {
+class EmojiConnection extends LinearRequest {
+  public constructor(request: Request, data: D.EmojiConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined;
   }
 }
 /**
  * Notification subscriptions for models.
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationSubscriptionFragment response data
+ * @param data - the initial EmojiFragment response data
  */
 class NotificationSubscription extends LinearRequest {
   private _user?: D.NotificationSubscriptionFragment["user"];
@@ -3124,20 +2990,20 @@ class NotificationSubscription extends LinearRequest {
  * OrganizationInviteConnection model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationInviteConnectionFragment response data
+ * @param data - the initial EmojiConnectionFragment response data
  */
-class OrganizationInviteConnection extends LinearRequest {
-  public constructor(request: Request, data: D.OrganizationInviteConnectionFragment) {
+class FavoriteConnection extends LinearRequest {
+  public constructor(request: Request, data: D.FavoriteConnectionFragment) {
     super(request);
     this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
-    this.nodes = data.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
   }
 }
 /**
  * An invitation to the organization that has been sent via email.
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationInviteFragment response data
+ * @param data - the initial FavoriteFragment response data
  */
 class OrganizationInvite extends LinearRequest {
   private _inviter?: D.OrganizationInviteFragment["inviter"];
@@ -3194,10 +3060,69 @@ class OrganizationInvite extends LinearRequest {
   }
 }
 /**
+ * FavoriteConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FavoriteConnectionFragment response data
+ */
+class FavoriteConnection extends LinearRequest {
+  public constructor(request: Request, data: D.FavoriteConnectionFragment) {
+    super(request);
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined;
+  }
+
+  public nodes?: Favorite[];
+  public pageInfo?: PageInfo;
+}
+
+/**
+ * FigmaEmbedPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FigmaEmbedPayloadFragment response data
+ */
+class OrganizationExistsPayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationExistsPayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+    this.exists = data.exists ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** Figma embed information. */
+  public figmaEmbed?: FigmaEmbed;
+}
+/**
+ * Object representing Figma preview information.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial FigmaEmbedFragment response data
+ */
+class FigmaEmbed extends LinearRequest {
+  public constructor(request: Request, data: D.FigmaEmbedFragment) {
+    super(request);
+    this.name = data.name ?? undefined;
+    this.lastModified = data.lastModified ?? undefined;
+    this.nodeName = data.nodeName ?? undefined;
+    this.url = data.url ?? undefined;
+  }
+
+  /** Figma file name. */
+  public name?: string;
+  /** Date when the file was updated at the time of embedding. */
+  public lastModified?: D.Scalars["DateTime"];
+  /** Node name. */
+  public nodeName?: string;
+  /** Figma screenshot URL. */
+  public url?: string;
+}
+/**
  * PushSubscriptionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial PushSubscriptionPayloadFragment response data
+ * @param data - the initial InvitePagePayloadFragment response data
  */
 class PushSubscriptionPayload extends LinearRequest {
   public constructor(request: Request, data: D.PushSubscriptionPayloadFragment) {
@@ -3210,33 +3135,63 @@ class PushSubscriptionPayload extends LinearRequest {
   public lastSyncId?: number;
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** Invite data. */
+  public inviteData?: InviteData;
+}
+/**
+ * InviteData model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial InviteDataFragment response data
+ */
+class InviteData extends LinearRequest {
+  public constructor(request: Request, data: D.InviteDataFragment) {
+    super(request);
+    this.inviterName = data.inviterName ?? undefined;
+    this.avatarURLs = data.avatarURLs ?? undefined;
+    this.teamNames = data.teamNames ?? undefined;
+    this.teamIds = data.teamIds ?? undefined;
+    this.organizationName = data.organizationName ?? undefined;
+    this.organizationDomain = data.organizationDomain ?? undefined;
+    this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
+    this.userCount = data.userCount ?? undefined;
+  }
+
+  /** The name of the inviter. */
+  public inviterName?: string;
+  /** Avatar URLs for the invitees. */
+  public avatarURLs?: string[];
+  /** Team names for the invitees. */
+  public teamNames?: string[];
+  /** Team identifiers for the invitees. */
+  public teamIds?: string[];
+  /** The name of the organization the users were invited to. */
+  public organizationName?: string;
+  /** The domain of the organization the users were invited to. */
+  public organizationDomain?: string;
+  /** The logo of the organization the users were invited to. */
+  public organizationLogoUrl?: string;
+  /** The user count of the organization. */
+  public userCount?: number;
 }
 /**
  * ReactionConnection model
  *
  * @param request - function to call the graphql client
- * @param fetch - function to trigger a refetch of this ReactionConnection model
- * @param data - ReactionConnection response data
+ * @param data - the initial NotificationConnectionFragment response data
  */
-class ReactionConnection extends LinearConnection<Reaction> {
-  public constructor(
-    request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Reaction>>,
-    data: D.ReactionConnectionFragment
-  ) {
-    super(
-      request,
-      fetch,
-      data?.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
-    );
+class NotificationConnection extends LinearRequest {
+  public constructor(request: Request, data: D.NotificationConnectionFragment) {
+    super(request);
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined;
   }
 }
 /**
  * A reaction associated with a comment.
  *
  * @param request - function to call the graphql client
- * @param data - the initial ReactionFragment response data
+ * @param data - the initial NotificationFragment response data
  */
 class Reaction extends LinearRequest {
   private _user?: D.ReactionFragment["user"];
@@ -3274,6 +3229,171 @@ class Reaction extends LinearRequest {
   public get comment(): Fetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
+}
+/**
+ * NotificationSubscriptionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationSubscriptionConnectionFragment response data
+ */
+class NotificationSubscriptionConnection extends LinearRequest {
+  public constructor(request: Request, data: D.NotificationSubscriptionConnectionFragment) {
+    super(request);
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined;
+  }
+}
+/**
+ * Notification subscriptions for models.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationSubscriptionFragment response data
+ */
+class UserSettings extends LinearRequest {
+  private _user?: D.UserSettingsFragment["user"];
+
+  public constructor(request: Request, data: D.UserSettingsFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.notificationPreferences = data.notificationPreferences ?? undefined;
+    this.unsubscribedFrom = data.unsubscribedFrom ?? undefined;
+    this._user = data.user ?? undefined;
+  }
+
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** The time at which the entity was created. */
+  public createdAt?: D.Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: D.Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: D.Scalars["DateTime"];
+  /** The notification channel settings the user has selected. */
+  public notificationPreferences?: D.Scalars["JSONObject"];
+  /** The email types the user has unsubscribed from. */
+  public unsubscribedFrom?: string[];
+  /** The user to whom this notification was targeted for. */
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+}
+/**
+ * EventPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationInviteConnectionFragment response data
+ */
+class OrganizationInviteConnection extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationInviteConnectionFragment) {
+    super(request);
+    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.nodes = data.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * ApiKeyPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationInviteFragment response data
+ */
+class ApiKeyPayload extends LinearRequest {
+  public constructor(request: Request, data: D.ApiKeyPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this.apiKey = data.apiKey ? new ApiKey(request, data.apiKey) : undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The API key that was created. */
+  public apiKey?: ApiKey;
+}
+/**
+ * ArchivePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial PushSubscriptionPayloadFragment response data
+ */
+class ArchivePayload extends LinearRequest {
+  public constructor(request: Request, data: D.ArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * EmailUserAccountAuthChallengeResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.EmailUserAccountAuthChallengeResponseFragment response data
+ */
+class EmailUserAccountAuthChallengeResponse extends LinearRequest {
+  public constructor(request: Request, data: D.EmailUserAccountAuthChallengeResponseFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+    this.authType = data.authType ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** Supported challenge for this user account. Can be either verificationCode or password. */
+  public authType?: string;
+}
+/**
+ * CreateOrJoinOrganizationResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ReactionFragment response data
+ */
+class CreateOrJoinOrganizationResponse extends LinearRequest {
+  private _user?: D.CreateOrJoinOrganizationResponseFragment["user"];
+
+  public constructor(request: Request, data: D.CreateOrJoinOrganizationResponseFragment) {
+    super(request);
+    this._user = data.user ?? undefined;
+  }
+
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+}
+/**
+ * BillingEmailPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.BillingEmailPayloadFragment response data
+ */
+class BillingEmailPayload extends LinearRequest {
+  public constructor(request: Request, data: D.BillingEmailPayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+    this.email = data.email ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The customer's email address the invoices are sent to. */
+  public email?: string;
 }
 /**
  * ReactionConnection model
@@ -3384,308 +3504,10 @@ class UserAdminPayload extends LinearRequest {
   public success?: boolean;
 }
 /**
- * OrganizationPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial OrganizationPayloadFragment response data
- */
-class OrganizationPayload extends LinearRequest {
-  public constructor(request: Request, data: D.OrganizationPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The organization that was created or updated. */
-  public get organization(): Fetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-}
-/**
- * OrganizationDeletePayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial OrganizationDeletePayloadFragment response data
- */
-class OrganizationDeletePayload extends LinearRequest {
-  public constructor(request: Request, data: D.OrganizationDeletePayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-}
-/**
- * AdminIntegrationPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial AdminIntegrationPayloadFragment response data
- */
-class AdminIntegrationPayload extends LinearRequest {
-  public constructor(request: Request, data: D.AdminIntegrationPayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-}
-/**
- * OrganizationAccessPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial OrganizationAccessPayloadFragment response data
- */
-class OrganizationAccessPayload extends LinearRequest {
-  public constructor(request: Request, data: D.OrganizationAccessPayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-}
-/**
- * OrganizationSamlConfigurePayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial OrganizationSamlConfigurePayloadFragment response data
- */
-class OrganizationSamlConfigurePayload extends LinearRequest {
-  public constructor(request: Request, data: D.OrganizationSamlConfigurePayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-    this.samlEnabled = data.samlEnabled ?? undefined;
-    this.samlConfiguration = data.samlConfiguration
-      ? new SamlConfiguration(request, data.samlConfiguration)
-      : undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** Whether SAML is enabled for the organization. */
-  public samlEnabled?: boolean;
-  /** Organization's current SAML configuration. */
-  public samlConfiguration?: SamlConfiguration;
-}
-/**
- * The integration resource's settings
- *
- * @param request - function to call the graphql client
- * @param data - the initial SamlConfigurationFragment response data
- */
-class SamlConfiguration extends LinearRequest {
-  public constructor(request: Request, data: D.SamlConfigurationFragment) {
-    super(request);
-    this.ssoSigningCert = data.ssoSigningCert ?? undefined;
-    this.ssoEndpoint = data.ssoEndpoint ?? undefined;
-    this.ssoBinding = data.ssoBinding ?? undefined;
-    this.ssoSignAlgo = data.ssoSignAlgo ?? undefined;
-    this.allowedDomains = data.allowedDomains ?? undefined;
-  }
-
-  /** X.509 Signing Certificate in string form. */
-  public ssoSigningCert?: string;
-  /** Sign in endpoint URL for the identity provider. */
-  public ssoEndpoint?: string;
-  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
-  public ssoBinding?: string;
-  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
-  public ssoSignAlgo?: string;
-  /** List of allowed email domains for SAML authentication. */
-  public allowedDomains?: string[];
-}
-/**
- * AdminCommandPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial AdminCommandPayloadFragment response data
- */
-class AdminCommandPayload extends LinearRequest {
-  public constructor(request: Request, data: D.AdminCommandPayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-}
-/**
- * Operation response.
- *
- * @param request - function to call the graphql client
- * @param data - D.AdminResponseFragment response data
- */
-class AdminResponse extends LinearRequest {
-  public constructor(request: Request, data: D.AdminResponseFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-}
-/**
- * EventPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial EventPayloadFragment response data
- */
-class EventPayload extends LinearRequest {
-  public constructor(request: Request, data: D.EventPayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-}
-/**
- * ApiKeyPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial ApiKeyPayloadFragment response data
- */
-class ApiKeyPayload extends LinearRequest {
-  public constructor(request: Request, data: D.ApiKeyPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this.apiKey = data.apiKey ? new ApiKey(request, data.apiKey) : undefined;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The API key that was created. */
-  public apiKey?: ApiKey;
-}
-/**
- * ArchivePayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial ArchivePayloadFragment response data
- */
-class ArchivePayload extends LinearRequest {
-  public constructor(request: Request, data: D.ArchivePayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-}
-/**
- * EmailUserAccountAuthChallengeResponse model
- *
- * @param request - function to call the graphql client
- * @param data - the initial EmailUserAccountAuthChallengeResponseFragment response data
- */
-class EmailUserAccountAuthChallengeResponse extends LinearRequest {
-  public constructor(request: Request, data: D.EmailUserAccountAuthChallengeResponseFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-    this.authType = data.authType ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** Supported challenge for this user account. Can be either verificationCode or password. */
-  public authType?: string;
-}
-/**
- * CreateOrJoinOrganizationResponse model
- *
- * @param request - function to call the graphql client
- * @param data - the initial CreateOrJoinOrganizationResponseFragment response data
- */
-class CreateOrJoinOrganizationResponse extends LinearRequest {
-  private _user?: D.CreateOrJoinOrganizationResponseFragment["user"];
-
-  public constructor(request: Request, data: D.CreateOrJoinOrganizationResponseFragment) {
-    super(request);
-    this._user = data.user ?? undefined;
-  }
-
-  public get organization(): Fetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-  public get user(): Fetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
-  }
-}
-/**
- * BillingEmailPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial BillingEmailPayloadFragment response data
- */
-class BillingEmailPayload extends LinearRequest {
-  public constructor(request: Request, data: D.BillingEmailPayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-    this.email = data.email ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The customer's email address the invoices are sent to. */
-  public email?: string;
-}
-/**
- * CommentPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial CommentPayloadFragment response data
- */
-class CommentPayload extends LinearRequest {
-  private _comment?: D.CommentPayloadFragment["comment"];
-
-  public constructor(request: Request, data: D.CommentPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._comment = data.comment ?? undefined;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The comment that was created or updated. */
-  public get comment(): Fetch<Comment> | undefined {
-    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
-  }
-}
-/**
- * ContactPayload model
- *
- * @param request - function to call the graphql client
- * @param data - the initial ContactPayloadFragment response data
- */
-class ContactPayload extends LinearRequest {
-  public constructor(request: Request, data: D.ContactPayloadFragment) {
-    super(request);
-    this.success = data.success ?? undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success?: boolean;
-}
-/**
  * CustomViewPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CustomViewPayloadFragment response data
+ * @param data - the initial OrganizationPayloadFragment response data
  */
 class CustomViewPayload extends LinearRequest {
   private _customView?: D.CustomViewPayloadFragment["customView"];
@@ -3710,7 +3532,7 @@ class CustomViewPayload extends LinearRequest {
  * CyclePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial CyclePayloadFragment response data
+ * @param data - the initial OrganizationDeletePayloadFragment response data
  */
 class CyclePayload extends LinearRequest {
   private _cycle?: D.CyclePayloadFragment["cycle"];
@@ -3735,7 +3557,7 @@ class CyclePayload extends LinearRequest {
  * DebugPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial DebugPayloadFragment response data
+ * @param data - the initial AdminIntegrationPayloadFragment response data
  */
 class DebugPayload extends LinearRequest {
   public constructor(request: Request, data: D.DebugPayloadFragment) {
@@ -3750,7 +3572,7 @@ class DebugPayload extends LinearRequest {
  * EmailUnsubscribePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial EmailUnsubscribePayloadFragment response data
+ * @param data - the initial OrganizationAccessPayloadFragment response data
  */
 class EmailUnsubscribePayload extends LinearRequest {
   public constructor(request: Request, data: D.EmailUnsubscribePayloadFragment) {
@@ -3765,7 +3587,7 @@ class EmailUnsubscribePayload extends LinearRequest {
  * EmojiPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial EmojiPayloadFragment response data
+ * @param data - the initial OrganizationSamlConfigurePayloadFragment response data
  */
 class EmojiPayload extends LinearRequest {
   private _emoji?: D.EmojiPayloadFragment["emoji"];
@@ -3790,7 +3612,7 @@ class EmojiPayload extends LinearRequest {
  * FavoritePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial FavoritePayloadFragment response data
+ * @param data - the initial SamlConfigurationFragment response data
  */
 class FavoritePayload extends LinearRequest {
   private _favorite?: D.FavoritePayloadFragment["favorite"];
@@ -3815,7 +3637,7 @@ class FavoritePayload extends LinearRequest {
  * FeedbackPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial FeedbackPayloadFragment response data
+ * @param data - the initial AdminCommandPayloadFragment response data
  */
 class FeedbackPayload extends LinearRequest {
   public constructor(request: Request, data: D.FeedbackPayloadFragment) {
@@ -3830,7 +3652,7 @@ class FeedbackPayload extends LinearRequest {
  * UploadPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UploadPayloadFragment response data
+ * @param data - D.UploadPayloadFragment response data
  */
 class UploadPayload extends LinearRequest {
   public constructor(request: Request, data: D.UploadPayloadFragment) {
@@ -3851,7 +3673,7 @@ class UploadPayload extends LinearRequest {
  * Object representing Google Cloud upload policy, plus additional data.
  *
  * @param request - function to call the graphql client
- * @param data - the initial UploadFileFragment response data
+ * @param data - the initial EventPayloadFragment response data
  */
 class UploadFile extends LinearRequest {
   public constructor(request: Request, data: D.UploadFileFragment) {
@@ -3882,7 +3704,7 @@ class UploadFile extends LinearRequest {
  * UploadFileHeader model
  *
  * @param request - function to call the graphql client
- * @param data - the initial UploadFileHeaderFragment response data
+ * @param data - the initial ApiKeyPayloadFragment response data
  */
 class UploadFileHeader extends LinearRequest {
   public constructor(request: Request, data: D.UploadFileHeaderFragment) {
@@ -3900,7 +3722,7 @@ class UploadFileHeader extends LinearRequest {
  * ImageUploadFromUrlPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial ImageUploadFromUrlPayloadFragment response data
+ * @param data - D.ImageUploadFromUrlPayloadFragment response data
  */
 class ImageUploadFromUrlPayload extends LinearRequest {
   public constructor(request: Request, data: D.ImageUploadFromUrlPayloadFragment) {
@@ -3921,7 +3743,7 @@ class ImageUploadFromUrlPayload extends LinearRequest {
  * IntegrationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IntegrationPayloadFragment response data
+ * @param data - the initial ArchivePayloadFragment response data
  */
 class IntegrationPayload extends LinearRequest {
   private _integration?: D.IntegrationPayloadFragment["integration"];
@@ -3943,10 +3765,70 @@ class IntegrationPayload extends LinearRequest {
   }
 }
 /**
+ * IssueImportPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial EmailUserAccountAuthChallengeResponseFragment response data
+ */
+class IssueImportPayload extends LinearRequest {
+  public constructor(request: Request, data: D.IssueImportPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this.importJob = data.importJob ? new IssueImport(request, data.importJob) : undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The import job that was created or updated. */
+  public importJob?: IssueImport;
+}
+/**
+ * An import job for data from an external service
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial CreateOrJoinOrganizationResponseFragment response data
+ */
+class IssueImport extends LinearRequest {
+  public constructor(request: Request, data: D.IssueImportFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.organizationId = data.organizationId ?? undefined;
+    this.creatorId = data.creatorId ?? undefined;
+    this.service = data.service ?? undefined;
+    this.status = data.status ?? undefined;
+  }
+
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** The time at which the entity was created. */
+  public createdAt?: D.Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: D.Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: D.Scalars["DateTime"];
+  /** The id for the organization where data will be imported. */
+  public organizationId?: string;
+  /** The id for the user that started the job. */
+  public creatorId?: string;
+  /** The service from which data will be imported. */
+  public service?: string;
+  /** The status for the import job. */
+  public status?: string;
+}
+/**
  * IssueLabelPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueLabelPayloadFragment response data
+ * @param data - the initial BillingEmailPayloadFragment response data
  */
 class IssueLabelPayload extends LinearRequest {
   private _issueLabel?: D.IssueLabelPayloadFragment["issueLabel"];
@@ -3971,7 +3853,7 @@ class IssueLabelPayload extends LinearRequest {
  * IssueRelationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssueRelationPayloadFragment response data
+ * @param data - the initial CommentPayloadFragment response data
  */
 class IssueRelationPayload extends LinearRequest {
   private _issueRelation?: D.IssueRelationPayloadFragment["issueRelation"];
@@ -3996,7 +3878,7 @@ class IssueRelationPayload extends LinearRequest {
  * IssuePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial IssuePayloadFragment response data
+ * @param data - the initial ContactPayloadFragment response data
  */
 class IssuePayload extends LinearRequest {
   private _issue?: D.IssuePayloadFragment["issue"];
@@ -4021,7 +3903,7 @@ class IssuePayload extends LinearRequest {
  * MilestonePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial MilestonePayloadFragment response data
+ * @param data - the initial CustomViewPayloadFragment response data
  */
 class MilestonePayload extends LinearRequest {
   private _milestone?: D.MilestonePayloadFragment["milestone"];
@@ -4046,7 +3928,7 @@ class MilestonePayload extends LinearRequest {
  * NotificationPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationPayloadFragment response data
+ * @param data - the initial CyclePayloadFragment response data
  */
 class NotificationPayload extends LinearRequest {
   private _notification?: D.NotificationPayloadFragment["notification"];
@@ -4071,7 +3953,7 @@ class NotificationPayload extends LinearRequest {
  * NotificationSubscriptionPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial NotificationSubscriptionPayloadFragment response data
+ * @param data - the initial DebugPayloadFragment response data
  */
 class NotificationSubscriptionPayload extends LinearRequest {
   private _notificationSubscription?: D.NotificationSubscriptionPayloadFragment["notificationSubscription"];
@@ -4098,7 +3980,7 @@ class NotificationSubscriptionPayload extends LinearRequest {
  * OauthClientPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OauthClientPayloadFragment response data
+ * @param data - the initial EmailUnsubscribePayloadFragment response data
  */
 class OauthClientPayload extends LinearRequest {
   public constructor(request: Request, data: D.OauthClientPayloadFragment) {
@@ -4119,7 +4001,7 @@ class OauthClientPayload extends LinearRequest {
  * OAuth2 client application
  *
  * @param request - function to call the graphql client
- * @param data - the initial OauthClientFragment response data
+ * @param data - the initial EmojiPayloadFragment response data
  */
 class OauthClient extends LinearRequest {
   public constructor(request: Request, data: D.OauthClientFragment) {
@@ -4170,7 +4052,7 @@ class OauthClient extends LinearRequest {
  * RotateSecretPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial RotateSecretPayloadFragment response data
+ * @param data - the initial FavoritePayloadFragment response data
  */
 class RotateSecretPayload extends LinearRequest {
   public constructor(request: Request, data: D.RotateSecretPayloadFragment) {
@@ -4188,7 +4070,7 @@ class RotateSecretPayload extends LinearRequest {
  * OauthTokenRevokePayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OauthTokenRevokePayloadFragment response data
+ * @param data - the initial FeedbackPayloadFragment response data
  */
 class OauthTokenRevokePayload extends LinearRequest {
   public constructor(request: Request, data: D.OauthTokenRevokePayloadFragment) {
@@ -4203,7 +4085,7 @@ class OauthTokenRevokePayload extends LinearRequest {
  * OrganizationDomainPayload model
  *
  * @param request - function to call the graphql client
- * @param data - the initial OrganizationDomainPayloadFragment response data
+ * @param data - the initial UploadPayloadFragment response data
  */
 class OrganizationDomainPayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationDomainPayloadFragment) {
@@ -4224,6 +4106,396 @@ class OrganizationDomainPayload extends LinearRequest {
 }
 /**
  * Defines the use of a domain by an organization.
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UploadFileFragment response data
+ */
+class OrganizationDomain extends LinearRequest {
+  private _creator?: D.OrganizationDomainFragment["creator"];
+
+  /** The filename. */
+  public filename?: string;
+  /** The content type. */
+  public contentType?: string;
+  /** The size of the uploaded file. */
+  public size?: number;
+  /** The signed URL the for the uploaded file. (assigned automatically) */
+  public uploadUrl?: string;
+  /** The asset URL for the uploaded file. (assigned automatically) */
+  public assetUrl?: string;
+  public metaData?: D.Scalars["JSON"];
+  public headers?: UploadFileHeader[];
+}
+/**
+ * UploadFileHeader model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial UploadFileHeaderFragment response data
+ */
+class UploadFileHeader extends LinearRequest {
+  public constructor(request: Request, data: D.UploadFileHeaderFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.name = data.name ?? undefined;
+    this.verified = data.verified ?? undefined;
+    this.verificationEmail = data.verificationEmail ?? undefined;
+    this._creator = data.creator ?? undefined;
+  }
+
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** The time at which the entity was created. */
+  public createdAt?: D.Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: D.Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: D.Scalars["DateTime"];
+  /** Domain name */
+  public name?: string;
+  /** Is this domain verified */
+  public verified?: boolean;
+  /** E-mail used to verify this domain */
+  public verificationEmail?: string;
+  /** The user who added the domain. */
+  public get creator(): Fetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+}
+/**
+ * OrganizationInvitePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial ImageUploadFromUrlPayloadFragment response data
+ */
+class OrganizationInvitePayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationInvitePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this.organizationInvite = data.organizationInvite
+      ? new OrganizationInvite(request, data.organizationInvite)
+      : undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The organization invite that was created or updated. */
+  public organizationInvite?: OrganizationInvite;
+}
+/**
+ * OrganizationPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IntegrationPayloadFragment response data
+ */
+class OrganizationPayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The organization that was created or updated. */
+  public get organization(): Fetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+}
+/**
+ * OrganizationDeletePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueLabelPayloadFragment response data
+ */
+class OrganizationDeletePayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationDeletePayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * ProjectLinkPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssueRelationPayloadFragment response data
+ */
+class ProjectLinkPayload extends LinearRequest {
+  private _projectLink?: D.ProjectLinkPayloadFragment["projectLink"];
+
+  public constructor(request: Request, data: D.ProjectLinkPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this._projectLink = data.projectLink ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The project that was created or updated. */
+  public get projectLink(): Fetch<ProjectLink> | undefined {
+    return this._projectLink?.id ? new ProjectLinkQuery(this._request).fetch(this._projectLink?.id) : undefined;
+  }
+}
+/**
+ * ProjectPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial IssuePayloadFragment response data
+ */
+class ProjectPayload extends LinearRequest {
+  private _project?: D.ProjectPayloadFragment["project"];
+
+  public constructor(request: Request, data: D.ProjectPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this._project = data.project ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The project that was created or updated. */
+  public get project(): Fetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+}
+/**
+ * ReactionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial MilestonePayloadFragment response data
+ */
+class ReactionPayload extends LinearRequest {
+  private _reaction?: D.ReactionPayloadFragment["reaction"];
+
+  public constructor(request: Request, data: D.ReactionPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this._reaction = data.reaction ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  public success?: boolean;
+  public get reaction(): Fetch<Reaction> | undefined {
+    return this._reaction?.id ? new ReactionQuery(this._request).fetch(this._reaction?.id) : undefined;
+  }
+}
+/**
+ * CreateCsvExportReportPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationPayloadFragment response data
+ */
+class CreateCsvExportReportPayload extends LinearRequest {
+  public constructor(request: Request, data: D.CreateCsvExportReportPayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * SubscriptionSessionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.SubscriptionSessionPayloadFragment response data
+ */
+class SubscriptionSessionPayload extends LinearRequest {
+  public constructor(request: Request, data: D.SubscriptionSessionPayloadFragment) {
+    super(request);
+    this.session = data.session ?? undefined;
+  }
+
+  /** The subscription session that was created or updated. */
+  public session?: string;
+}
+/**
+ * SubscriptionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.SubscriptionPayloadFragment response data
+ */
+class SubscriptionPayload extends LinearRequest {
+  public constructor(request: Request, data: D.SubscriptionPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.canceledAt = data.canceledAt ?? undefined;
+    this.success = data.success ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** The date the subscription was set to cancel at the end of the billing period, if any. */
+  public canceledAt?: D.Scalars["DateTime"];
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The subscription entity being mutated. */
+  public get subscription(): Fetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
+  }
+}
+/**
+ * TeamMembershipPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial NotificationSubscriptionPayloadFragment response data
+ */
+class TeamMembershipPayload extends LinearRequest {
+  private _teamMembership?: D.TeamMembershipPayloadFragment["teamMembership"];
+
+  public constructor(request: Request, data: D.TeamMembershipPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this._teamMembership = data.teamMembership ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The team membership that was created or updated. */
+  public get teamMembership(): Fetch<TeamMembership> | undefined {
+    return this._teamMembership?.id
+      ? new TeamMembershipQuery(this._request).fetch(this._teamMembership?.id)
+      : undefined;
+  }
+}
+/**
+ * TeamPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OauthClientPayloadFragment response data
+ */
+class TeamPayload extends LinearRequest {
+  private _team?: D.TeamPayloadFragment["team"];
+
+  public constructor(request: Request, data: D.TeamPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this._team = data.team ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The team that was created or updated. */
+  public get team(): Fetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+}
+/**
+ * TemplatePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OauthClientFragment response data
+ */
+class TemplatePayload extends LinearRequest {
+  private _template?: D.TemplatePayloadFragment["template"];
+
+  public constructor(request: Request, data: D.TemplatePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this._template = data.template ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The template that was created or updated. */
+  public get template(): Fetch<Template> | undefined {
+    return this._template?.id ? new TemplateQuery(this._request).fetch(this._template?.id) : undefined;
+  }
+}
+/**
+ * UserPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial RotateSecretPayloadFragment response data
+ */
+class UserPayload extends LinearRequest {
+  private _user?: D.UserPayloadFragment["user"];
+
+  public constructor(request: Request, data: D.UserPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this._user = data.user ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The user that was created or updated. */
+  public get user(): Fetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+}
+/**
+ * UserAdminPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OauthTokenRevokePayloadFragment response data
+ */
+class UserAdminPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserAdminPayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * UserSettingsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - the initial OrganizationDomainPayloadFragment response data
+ */
+class UserSettingsPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserSettingsPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The user's settings. */
+  public get userSettings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
+  }
+}
+/**
+ * UserSettingsFlagPayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial OrganizationDomainFragment response data
@@ -4275,83 +4547,65 @@ class OrganizationInvitePayload extends LinearRequest {
   public constructor(request: Request, data: D.OrganizationInvitePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
+    this.flag = data.flag ?? undefined;
+    this.value = data.value ?? undefined;
     this.success = data.success ?? undefined;
-    this.organizationInvite = data.organizationInvite
-      ? new OrganizationInvite(request, data.organizationInvite)
-      : undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
+  /** The flag key which was updated. */
+  public flag?: string;
+  /** The flag value after update. */
+  public value?: number;
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** The organization invite that was created or updated. */
-  public organizationInvite?: OrganizationInvite;
 }
 /**
- * ProjectLinkPayload model
+ * UserSettingsFlagsResetPayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial ProjectLinkPayloadFragment response data
  */
-class ProjectLinkPayload extends LinearRequest {
-  private _projectLink?: D.ProjectLinkPayloadFragment["projectLink"];
-
-  public constructor(request: Request, data: D.ProjectLinkPayloadFragment) {
+class UserSettingsFlagsResetPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserSettingsFlagsResetPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this._projectLink = data.projectLink ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** The project that was created or updated. */
-  public get projectLink(): Fetch<ProjectLink> | undefined {
-    return this._projectLink?.id ? new ProjectLinkQuery(this._request).fetch(this._projectLink?.id) : undefined;
-  }
 }
 /**
- * ProjectPayload model
+ * UserSubscribeToNewsletterPayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial ProjectPayloadFragment response data
  */
-class ProjectPayload extends LinearRequest {
-  private _project?: D.ProjectPayloadFragment["project"];
-
-  public constructor(request: Request, data: D.ProjectPayloadFragment) {
+class UserSubscribeToNewsletterPayload extends LinearRequest {
+  public constructor(request: Request, data: D.UserSubscribeToNewsletterPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this._project = data.project ?? undefined;
   }
 
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** The project that was created or updated. */
-  public get project(): Fetch<Project> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
-  }
 }
 /**
- * ReactionPayload model
+ * ViewPreferencesPayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial ReactionPayloadFragment response data
  */
-class ReactionPayload extends LinearRequest {
-  private _reaction?: D.ReactionPayloadFragment["reaction"];
-
-  public constructor(request: Request, data: D.ReactionPayloadFragment) {
+class ViewPreferencesPayload extends LinearRequest {
+  public constructor(request: Request, data: D.ViewPreferencesPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this._reaction = data.reaction ?? undefined;
+    this.viewPreferences = data.viewPreferences ? new ViewPreferences(request, data.viewPreferences) : undefined;
   }
 
   /** The identifier of the last sync operation. */
@@ -4375,132 +4629,151 @@ class CreateCsvExportReportPayload extends LinearRequest {
 
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The view preferences entity being mutated. */
+  public viewPreferences?: ViewPreferences;
 }
 /**
- * SubscriptionSessionPayload model
+ * View preferences.
  *
  * @param request - function to call the graphql client
  * @param data - the initial SubscriptionSessionPayloadFragment response data
  */
-class SubscriptionSessionPayload extends LinearRequest {
-  public constructor(request: Request, data: D.SubscriptionSessionPayloadFragment) {
+class ViewPreferences extends LinearRequest {
+  public constructor(request: Request, data: D.ViewPreferencesFragment) {
     super(request);
-    this.session = data.session ?? undefined;
+    this.id = data.id ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.type = data.type ?? undefined;
+    this.viewType = data.viewType ?? undefined;
   }
 
-  /** The subscription session that was created or updated. */
-  public session?: string;
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** The time at which the entity was created. */
+  public createdAt?: D.Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: D.Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: D.Scalars["DateTime"];
+  /** The view preference type. */
+  public type?: string;
+  /** The view type. */
+  public viewType?: string;
 }
 /**
- * SubscriptionPayload model
+ * WebhookPayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial SubscriptionPayloadFragment response data
  */
-class SubscriptionPayload extends LinearRequest {
-  public constructor(request: Request, data: D.SubscriptionPayloadFragment) {
+class WebhookPayload extends LinearRequest {
+  private _webhook?: D.WebhookPayloadFragment["webhook"];
+
+  public constructor(request: Request, data: D.WebhookPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
-    this.canceledAt = data.canceledAt ?? undefined;
     this.success = data.success ?? undefined;
+    this._webhook = data.webhook ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-  /** The date the subscription was set to cancel at the end of the billing period, if any. */
-  public canceledAt?: D.Scalars["DateTime"];
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** The subscription entity being mutated. */
-  public get subscription(): Fetch<Subscription> {
-    return new SubscriptionQuery(this._request).fetch();
+  /** The webhook entity being mutated. */
+  public get webhook(): Fetch<Webhook> | undefined {
+    return this._webhook?.id ? new WebhookQuery(this._request).fetch(this._webhook?.id) : undefined;
   }
 }
 /**
- * TeamMembershipPayload model
+ * WorkflowStatePayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial TeamMembershipPayloadFragment response data
  */
-class TeamMembershipPayload extends LinearRequest {
-  private _teamMembership?: D.TeamMembershipPayloadFragment["teamMembership"];
+class WorkflowStatePayload extends LinearRequest {
+  private _workflowState?: D.WorkflowStatePayloadFragment["workflowState"];
 
-  public constructor(request: Request, data: D.TeamMembershipPayloadFragment) {
+  public constructor(request: Request, data: D.WorkflowStatePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
-    this._teamMembership = data.teamMembership ?? undefined;
+    this._workflowState = data.workflowState ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
   /** Whether the operation was successful. */
   public success?: boolean;
-  /** The team membership that was created or updated. */
-  public get teamMembership(): Fetch<TeamMembership> | undefined {
-    return this._teamMembership?.id
-      ? new TeamMembershipQuery(this._request).fetch(this._teamMembership?.id)
-      : undefined;
+  /** The state that was created or updated. */
+  public get workflowState(): Fetch<WorkflowState> | undefined {
+    return this._workflowState?.id ? new WorkflowStateQuery(this._request).fetch(this._workflowState?.id) : undefined;
   }
 }
 /**
- * TeamPayload model
+ * SynchronizedPayload model
  *
  * @param request - function to call the graphql client
  * @param data - the initial TeamPayloadFragment response data
  */
-class TeamPayload extends LinearRequest {
-  private _team?: D.TeamPayloadFragment["team"];
-
-  public constructor(request: Request, data: D.TeamPayloadFragment) {
+class SynchronizedPayload extends LinearRequest {
+  public constructor(request: Request, data: D.SynchronizedPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._team = data.team ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The team that was created or updated. */
-  public get team(): Fetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
-  }
 }
 /**
- * TemplatePayload model
+ * Collaborative editing steps for documents.
  *
  * @param request - function to call the graphql client
  * @param data - the initial TemplatePayloadFragment response data
  */
-class TemplatePayload extends LinearRequest {
-  private _template?: D.TemplatePayloadFragment["template"];
-
-  public constructor(request: Request, data: D.TemplatePayloadFragment) {
+class DocumentStep extends LinearRequest {
+  public constructor(request: Request, data: D.DocumentStepFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._template = data.template ?? undefined;
+    this.id = data.id ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.step = data.step ?? undefined;
+    this.version = data.version ?? undefined;
+    this.clientId = data.clientId ?? undefined;
   }
 
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The template that was created or updated. */
-  public get template(): Fetch<Template> | undefined {
-    return this._template?.id ? new TemplateQuery(this._request).fetch(this._template?.id) : undefined;
-  }
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** The time at which the entity was created. */
+  public createdAt?: D.Scalars["DateTime"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: D.Scalars["DateTime"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: D.Scalars["DateTime"];
+  /** Step data. */
+  public step?: D.Scalars["JSON"];
+  /** Step version. */
+  public version?: number;
+  /** Connected client ID. */
+  public clientId?: string;
 }
 /**
- * UserSettingsPayload model
+ * The integration resource's settings
  *
  * @param request - function to call the graphql client
  * @param data - the initial UserSettingsPayloadFragment response data
  */
-class UserSettingsPayload extends LinearRequest {
-  public constructor(request: Request, data: D.UserSettingsPayloadFragment) {
+class SamlConfiguration extends LinearRequest {
+  public constructor(request: Request, data: D.SamlConfigurationFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
@@ -4586,146 +4859,125 @@ class ViewPreferencesPayload extends LinearRequest {
     this.viewPreferences = data.viewPreferences ? new ViewPreferences(request, data.viewPreferences) : undefined;
   }
 
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The view preferences entity being mutated. */
-  public viewPreferences?: ViewPreferences;
+  /** X.509 Signing Certificate in string form. */
+  public ssoSigningCert?: string;
+  /** Sign in endpoint URL for the identity provider. */
+  public ssoEndpoint?: string;
+  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
+  public ssoBinding?: string;
+  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
+  public ssoSignAlgo?: string;
+  /** List of allowed email domains for SAML authentication. */
+  public allowedDomains?: string[];
 }
 /**
- * View preferences.
+ * A user account.
  *
  * @param request - function to call the graphql client
- * @param data - D.ViewPreferencesFragment response data
+ * @param data - D.UserAccountFragment response data
  */
-class ViewPreferences extends LinearRequest {
-  public constructor(request: Request, data: D.ViewPreferencesFragment) {
+class UserAccount extends LinearRequest {
+  public constructor(request: Request, data: D.UserAccountFragment) {
     super(request);
     this.id = data.id ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
     this.updatedAt = data.updatedAt ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
-    this.type = data.type ?? undefined;
-    this.viewType = data.viewType ?? undefined;
+    this.name = data.name ?? undefined;
+    this.email = data.email ?? undefined;
+    this.service = data.service ?? undefined;
+    this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
   }
 
-  /** The unique identifier of the entity. */
+  /** The models identifier. */
   public id?: string;
-  /** The time at which the entity was created. */
+  /** The time at which the model was created. */
   public createdAt?: D.Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
+  /** The time at which the model was updated. */
   public updatedAt?: D.Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  /** The time at which the model was archived. */
   public archivedAt?: D.Scalars["DateTime"];
-  /** The view preference type. */
-  public type?: string;
-  /** The view type. */
-  public viewType?: string;
+  /** The user's name. */
+  public name?: string;
+  /** The user's email address. */
+  public email?: string;
+  /** The authentication service used to create the account. */
+  public service?: string;
+  /** Users belonging to the account. */
+  public users?: User[];
 }
 /**
- * WebhookPayload model
+ * Slack notification specific settings.
  *
  * @param request - function to call the graphql client
  * @param data - the initial WebhookPayloadFragment response data
  */
-class WebhookPayload extends LinearRequest {
-  private _webhook?: D.WebhookPayloadFragment["webhook"];
-
-  public constructor(request: Request, data: D.WebhookPayloadFragment) {
+class SlackPostSettings extends LinearRequest {
+  public constructor(request: Request, data: D.SlackPostSettingsFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._webhook = data.webhook ?? undefined;
+    this.channel = data.channel ?? undefined;
+    this.channelId = data.channelId ?? undefined;
+    this.configurationUrl = data.configurationUrl ?? undefined;
   }
 
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The webhook entity being mutated. */
-  public get webhook(): Fetch<Webhook> | undefined {
-    return this._webhook?.id ? new WebhookQuery(this._request).fetch(this._webhook?.id) : undefined;
-  }
+  public channel?: string;
+  public channelId?: string;
+  public configurationUrl?: string;
 }
 /**
- * WorkflowStatePayload model
+ * Google Sheets specific settings.
  *
  * @param request - function to call the graphql client
  * @param data - the initial WorkflowStatePayloadFragment response data
  */
-class WorkflowStatePayload extends LinearRequest {
-  private _workflowState?: D.WorkflowStatePayloadFragment["workflowState"];
-
-  public constructor(request: Request, data: D.WorkflowStatePayloadFragment) {
+class GoogleSheetsSettings extends LinearRequest {
+  public constructor(request: Request, data: D.GoogleSheetsSettingsFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._workflowState = data.workflowState ?? undefined;
+    this.spreadsheetId = data.spreadsheetId ?? undefined;
+    this.spreadsheetUrl = data.spreadsheetUrl ?? undefined;
+    this.sheetId = data.sheetId ?? undefined;
+    this.updatedIssuesAt = data.updatedIssuesAt ?? undefined;
   }
 
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  /** Whether the operation was successful. */
-  public success?: boolean;
-  /** The state that was created or updated. */
-  public get workflowState(): Fetch<WorkflowState> | undefined {
-    return this._workflowState?.id ? new WorkflowStateQuery(this._request).fetch(this._workflowState?.id) : undefined;
-  }
+  public spreadsheetId?: string;
+  public spreadsheetUrl?: string;
+  public sheetId?: number;
+  public updatedIssuesAt?: D.Scalars["DateTime"];
 }
 /**
- * SynchronizedPayload model
+ * Sentry specific settings.
  *
  * @param request - function to call the graphql client
- * @param data - D.SynchronizedPayloadFragment response data
+ * @param data - D.SentrySettingsFragment response data
  */
-class SynchronizedPayload extends LinearRequest {
-  public constructor(request: Request, data: D.SynchronizedPayloadFragment) {
+class SentrySettings extends LinearRequest {
+  public constructor(request: Request, data: D.SentrySettingsFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.organizationSlug = data.organizationSlug ?? undefined;
   }
 
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  /** The slug of the Sentry organization being connected. */
+  public organizationSlug?: string;
 }
 /**
- * Collaborative editing steps for documents.
+ * The integration resource's settings
  *
  * @param request - function to call the graphql client
  * @param data - the initial DocumentStepFragment response data
  */
-class DocumentStep extends LinearRequest {
-  public constructor(request: Request, data: D.DocumentStepFragment) {
+class IntegrationSettings extends LinearRequest {
+  public constructor(request: Request, data: D.IntegrationSettingsFragment) {
     super(request);
-    this.id = data.id ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.step = data.step ?? undefined;
-    this.version = data.version ?? undefined;
-    this.clientId = data.clientId ?? undefined;
+    this.slackPost = data.slackPost ? new SlackPostSettings(request, data.slackPost) : undefined;
+    this.slackProjectPost = data.slackProjectPost ? new SlackPostSettings(request, data.slackProjectPost) : undefined;
+    this.googleSheets = data.googleSheets ? new GoogleSheetsSettings(request, data.googleSheets) : undefined;
+    this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
   }
 
-  /** The unique identifier of the entity. */
-  public id?: string;
-  /** The time at which the entity was created. */
-  public createdAt?: D.Scalars["DateTime"];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  public updatedAt?: D.Scalars["DateTime"];
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: D.Scalars["DateTime"];
-  /** Step data. */
-  public step?: D.Scalars["JSON"];
-  /** Step version. */
-  public version?: number;
-  /** Connected client ID. */
-  public clientId?: string;
+  public slackPost?: SlackPostSettings;
+  public slackProjectPost?: SlackPostSettings;
+  public googleSheets?: GoogleSheetsSettings;
+  public sentry?: SentrySettings;
 }
 /**
  * A user's web browser push notification subscription.
@@ -5252,15 +5504,21 @@ class CollaborativeDocumentJoinQuery extends LinearRequest {
     });
   }
 }
-
 /**
  * Query CommentDocument for Comment
  *
  * @param request - function to call the graphql client
+ * @param data - D.ApplicationFragment response data
  */
-class CommentQuery extends LinearRequest {
-  public constructor(request: Request) {
+class Application extends LinearRequest {
+  public constructor(request: Request, data: D.ApplicationFragment) {
     super(request);
+    this.clientId = data.clientId ?? undefined;
+    this.name = data.name ?? undefined;
+    this.description = data.description ?? undefined;
+    this.developer = data.developer ?? undefined;
+    this.developerUrl = data.developerUrl ?? undefined;
+    this.imageUrl = data.imageUrl ?? undefined;
   }
 
   public async fetch(id: string): Promise<Comment | undefined> {
@@ -5272,13 +5530,27 @@ class CommentQuery extends LinearRequest {
     });
   }
 }
+/**
+ * OrganizationDomainSimplePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - D.OrganizationDomainSimplePayloadFragment response data
+ */
+class OrganizationDomainSimplePayload extends LinearRequest {
+  public constructor(request: Request, data: D.OrganizationDomainSimplePayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+  }
 
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
 /**
  * Query CommentsDocument for CommentConnection
  *
  * @param request - function to call the graphql client
  */
-class CustomViewsQuery extends LinearRequest {
+class SyncBootstrapQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5296,7 +5568,7 @@ class CustomViewsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class CustomViewQuery extends LinearRequest {
+class SyncUpdatesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5305,8 +5577,8 @@ class CustomViewQuery extends LinearRequest {
     return this.request<D.CustomViewQuery, D.CustomViewQueryVariables>(D.CustomViewDocument, {
       id,
     }).then(response => {
-      const data = response?.customView;
-      return data ? new CustomView(this._request, data) : undefined;
+      const data = response?.syncUpdates;
+      return data ? new SyncResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5316,7 +5588,7 @@ class CustomViewQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class CyclesQuery extends LinearRequest {
+class ArchivedModelSyncQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5334,7 +5606,7 @@ class CyclesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class CycleQuery extends LinearRequest {
+class ArchivedModelsSyncQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5343,8 +5615,8 @@ class CycleQuery extends LinearRequest {
     return this.request<D.CycleQuery, D.CycleQueryVariables>(D.CycleDocument, {
       id,
     }).then(response => {
-      const data = response?.cycle;
-      return data ? new Cycle(this._request, data) : undefined;
+      const data = response?.archivedModelsSync;
+      return data ? new ArchiveResponse(this._request, data) : undefined;
     });
   }
 }
@@ -5354,7 +5626,7 @@ class CycleQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class EmojisQuery extends LinearRequest {
+class ApiKeysQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5372,7 +5644,7 @@ class EmojisQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class EmojiQuery extends LinearRequest {
+class ApplicationWithAuthorizationQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5392,7 +5664,7 @@ class EmojiQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class FavoritesQuery extends LinearRequest {
+class AuthorizedApplicationsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5410,7 +5682,7 @@ class FavoritesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class FavoriteQuery extends LinearRequest {
+class AvailableUsersQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5448,7 +5720,7 @@ class FavoritesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class FigmaEmbedInfoQuery extends LinearRequest {
+class SsoUrlFromEmailQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5492,7 +5764,7 @@ class IntegrationQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IntegrationResourcesQuery extends LinearRequest {
+class CommentsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5535,7 +5807,7 @@ class IntegrationResourceQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class InviteInfoQuery extends LinearRequest {
+class CommentQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5580,7 +5852,7 @@ class InviteInfoQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssueLabelQuery extends LinearRequest {
+class CustomViewQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5589,8 +5861,8 @@ class IssueLabelQuery extends LinearRequest {
     return this.request<D.IssueLabelQuery, D.IssueLabelQueryVariables>(D.IssueLabelDocument, {
       id,
     }).then(response => {
-      const data = response?.issueLabel;
-      return data ? new IssueLabel(this._request, data) : undefined;
+      const data = response?.customView;
+      return data ? new CustomView(this._request, data) : undefined;
     });
   }
 }
@@ -5600,7 +5872,7 @@ class IssueLabelQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssueRelationsQuery extends LinearRequest {
+class CyclesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5618,7 +5890,7 @@ class IssueRelationsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssueRelationQuery extends LinearRequest {
+class CycleQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5627,8 +5899,8 @@ class IssueRelationQuery extends LinearRequest {
     return this.request<D.IssueRelationQuery, D.IssueRelationQueryVariables>(D.IssueRelationDocument, {
       id,
     }).then(response => {
-      const data = response?.issueRelation;
-      return data ? new IssueRelation(this._request, data) : undefined;
+      const data = response?.cycle;
+      return data ? new Cycle(this._request, data) : undefined;
     });
   }
 }
@@ -5638,7 +5910,7 @@ class IssueRelationQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssuesQuery extends LinearRequest {
+class EmojisQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5658,7 +5930,7 @@ class IssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssueQuery extends LinearRequest {
+class EmojiQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5667,8 +5939,8 @@ class IssueQuery extends LinearRequest {
     return this.request<D.IssueQuery, D.IssueQueryVariables>(D.IssueDocument, {
       id,
     }).then(response => {
-      const data = response?.issue;
-      return data ? new Issue(this._request, data) : undefined;
+      const data = response?.emoji;
+      return data ? new Emoji(this._request, data) : undefined;
     });
   }
 }
@@ -5678,7 +5950,7 @@ class IssueQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class IssueSearchQuery extends LinearRequest {
+class FavoritesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5693,7 +5965,7 @@ class IssueSearchQuery extends LinearRequest {
     }).then(response => {
       const data = response?.issueSearch;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch(query, { ...variables, ...pagination }), data)
+        ? new FavoriteConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
         : undefined;
     });
   }
@@ -5704,7 +5976,7 @@ class IssueSearchQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class MilestonesQuery extends LinearRequest {
+class FavoriteQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5722,7 +5994,7 @@ class MilestonesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class MilestoneQuery extends LinearRequest {
+class FigmaEmbedInfoQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5731,8 +6003,8 @@ class MilestoneQuery extends LinearRequest {
     return this.request<D.MilestoneQuery, D.MilestoneQueryVariables>(D.MilestoneDocument, {
       id,
     }).then(response => {
-      const data = response?.milestone;
-      return data ? new Milestone(this._request, data) : undefined;
+      const data = response?.figmaEmbedInfo;
+      return data ? new FigmaEmbedPayload(this._request, data) : undefined;
     });
   }
 }
@@ -5742,7 +6014,7 @@ class MilestoneQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class NotificationsQuery extends LinearRequest {
+class IntegrationsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5760,7 +6032,7 @@ class NotificationsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class NotificationQuery extends LinearRequest {
+class IntegrationQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5780,7 +6052,7 @@ class NotificationQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class NotificationSubscriptionsQuery extends LinearRequest {
+class IntegrationResourcesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5800,7 +6072,7 @@ class NotificationSubscriptionsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class NotificationSubscriptionQuery extends LinearRequest {
+class IntegrationResourceQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5872,7 +6144,7 @@ class OrganizationInvitesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class OrganizationInviteQuery extends LinearRequest {
+class InviteInfoQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5881,8 +6153,8 @@ class OrganizationInviteQuery extends LinearRequest {
     return this.request<D.ProjectLinkQuery, D.ProjectLinkQueryVariables>(D.ProjectLinkDocument, {
       id,
     }).then(response => {
-      const data = response?.organizationInvite;
-      return data ? new IssueLabel(this._request, data) : undefined;
+      const data = response?.inviteInfo;
+      return data ? new InvitePagePayload(this._request, data) : undefined;
     });
   }
 }
@@ -5892,7 +6164,7 @@ class OrganizationInviteQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ProjectLinksQuery extends LinearRequest {
+class IssueLabelsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5900,9 +6172,9 @@ class ProjectLinksQuery extends LinearRequest {
   public async fetch(vars?: D.ProjectLinksQueryVariables): Promise<ProjectLinkConnection | undefined> {
     return this.request<D.ProjectLinksQuery, D.ProjectLinksQueryVariables>(D.ProjectLinksDocument, vars).then(
       response => {
-        const data = response?.projectLinks;
+        const data = response?.issueLabels;
         return data
-          ? new ProjectLinkConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
           : undefined;
       }
     );
@@ -5914,7 +6186,7 @@ class ProjectLinksQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ProjectLinkQuery extends LinearRequest {
+class IssueLabelQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5923,8 +6195,8 @@ class ProjectLinkQuery extends LinearRequest {
     return this.request<D.ProjectQuery, D.ProjectQueryVariables>(D.ProjectDocument, {
       id,
     }).then(response => {
-      const data = response?.projectLink;
-      return data ? new ProjectLink(this._request, data) : undefined;
+      const data = response?.issueLabel;
+      return data ? new IssueLabel(this._request, data) : undefined;
     });
   }
 }
@@ -5934,7 +6206,7 @@ class ProjectLinkQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ProjectsQuery extends LinearRequest {
+class IssueRelationsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5943,7 +6215,7 @@ class ProjectsQuery extends LinearRequest {
     return this.request<D.ProjectsQuery, D.ProjectsQueryVariables>(D.ProjectsDocument, vars).then(response => {
       const data = response?.projects;
       return data
-        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
         : undefined;
     });
   }
@@ -5954,7 +6226,7 @@ class ProjectsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ProjectQuery extends LinearRequest {
+class IssueRelationQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5975,7 +6247,7 @@ class ProjectQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class PushSubscriptionTestQuery extends LinearRequest {
+class IssuesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -5995,7 +6267,7 @@ class PushSubscriptionTestQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ReactionsQuery extends LinearRequest {
+class IssueQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6015,7 +6287,7 @@ class ReactionsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ReactionQuery extends LinearRequest {
+class IssueSearchQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6035,7 +6307,7 @@ class ReactionQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class SubscriptionQuery extends LinearRequest {
+class MilestonesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6055,7 +6327,7 @@ class SubscriptionQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class TeamMembershipsQuery extends LinearRequest {
+class MilestoneQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6075,7 +6347,7 @@ class TeamMembershipsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class TeamMembershipQuery extends LinearRequest {
+class NotificationsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6084,8 +6356,8 @@ class TeamMembershipQuery extends LinearRequest {
     return this.request<D.TeamQuery, D.TeamQueryVariables>(D.TeamDocument, {
       id,
     }).then(response => {
-      const data = response?.teamMembership;
-      return data ? new TeamMembership(this._request, data) : undefined;
+      const data = response?.notification;
+      return data ? new Notification(this._request, data) : undefined;
     });
   }
 }
@@ -6095,7 +6367,7 @@ class TeamMembershipQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class TeamsQuery extends LinearRequest {
+class NotificationSubscriptionsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6104,7 +6376,11 @@ class TeamsQuery extends LinearRequest {
     return this.request<D.TeamsQuery, D.TeamsQueryVariables>(D.TeamsDocument, vars).then(response => {
       const data = response?.teams;
       return data
-        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new NotificationSubscriptionConnection(
+            this._request,
+            pagination => this.fetch({ ...variables, ...pagination }),
+            data
+          )
         : undefined;
     });
   }
@@ -6115,7 +6391,7 @@ class TeamsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class TemplatesQuery extends LinearRequest {
+class OrganizationInvitesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6133,7 +6409,7 @@ class TemplatesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class TemplateQuery extends LinearRequest {
+class OrganizationInviteQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6142,8 +6418,8 @@ class TemplateQuery extends LinearRequest {
     return this.request<D.TemplateQuery, D.TemplateQueryVariables>(D.TemplateDocument, {
       id,
     }).then(response => {
-      const data = response?.template;
-      return data ? new Template(this._request, data) : undefined;
+      const data = response?.organizationInvite;
+      return data ? new IssueLabel(this._request, data) : undefined;
     });
   }
 }
@@ -6153,7 +6429,7 @@ class TemplateQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class UserSettingsQuery extends LinearRequest {
+class OrganizationQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6161,8 +6437,8 @@ class UserSettingsQuery extends LinearRequest {
   public async fetch(vars?: D.ViewPreferencesQueryVariables): Promise<ViewPreferencesConnection | undefined> {
     return this.request<D.ViewPreferencesQuery, D.ViewPreferencesQueryVariables>(D.ViewPreferencesDocument, vars).then(
       response => {
-        const data = response?.userSettings;
-        return data ? new UserSettings(this._request, data) : undefined;
+        const data = response?.organization;
+        return data ? new Organization(this._request, data) : undefined;
       }
     );
   }
@@ -6193,7 +6469,7 @@ class WebhookQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WebhooksQuery extends LinearRequest {
+class OrganizationExistsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6213,7 +6489,7 @@ class WebhooksQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WebhookQuery extends LinearRequest {
+class ProjectLinksQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6233,7 +6509,7 @@ class WebhookQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WorkflowStatesQuery extends LinearRequest {
+class ProjectLinkQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6253,7 +6529,7 @@ class WorkflowStatesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class UserUpdateMutation extends LinearRequest {
+class ProjectQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6263,8 +6539,8 @@ class UserUpdateMutation extends LinearRequest {
       input,
       id,
     }).then(response => {
-      const data = response?.userUpdate;
-      return data ? new UserPayload(this._request, data) : undefined;
+      const data = response?.project;
+      return data ? new Project(this._request, data) : undefined;
     });
   }
 }
@@ -6274,7 +6550,7 @@ class UserUpdateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class UserPromoteAdminMutation extends LinearRequest {
+class PushSubscriptionTestQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6294,7 +6570,7 @@ class UserPromoteAdminMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class UserDemoteAdminMutation extends LinearRequest {
+class ReactionsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6314,7 +6590,7 @@ class UserDemoteAdminMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class UserSuspendMutation extends LinearRequest {
+class ReactionQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6323,8 +6599,8 @@ class UserSuspendMutation extends LinearRequest {
     return this.request<D.UserSuspendMutation, D.UserSuspendMutationVariables>(D.UserSuspendDocument, {
       id,
     }).then(response => {
-      const data = response?.userSuspend;
-      return data ? new UserAdminPayload(this._request, data) : undefined;
+      const data = response?.reaction;
+      return data ? new Reaction(this._request, data) : undefined;
     });
   }
 }
@@ -6334,7 +6610,7 @@ class UserSuspendMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class UserUnsuspendMutation extends LinearRequest {
+class SubscriptionQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6354,7 +6630,7 @@ class UserUnsuspendMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class OrganizationUpdateMutation extends LinearRequest {
+class TeamMembershipsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6366,8 +6642,10 @@ class OrganizationUpdateMutation extends LinearRequest {
         input,
       }
     ).then(response => {
-      const data = response?.organizationUpdate;
-      return data ? new OrganizationPayload(this._request, data) : undefined;
+      const data = response?.teamMemberships;
+      return data
+        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -6377,7 +6655,7 @@ class OrganizationUpdateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class OrganizationDeleteChallengeMutation extends LinearRequest {
+class TeamMembershipQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6398,7 +6676,7 @@ class OrganizationDeleteChallengeMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class OrganizationDeleteMutation extends LinearRequest {
+class TeamsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6421,7 +6699,7 @@ class OrganizationDeleteMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class AdminDeleteIntegrationMutation extends LinearRequest {
+class TeamQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6444,7 +6722,7 @@ class AdminDeleteIntegrationMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class OrganizationToggleAccessMutation extends LinearRequest {
+class TemplatesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6467,7 +6745,7 @@ class OrganizationToggleAccessMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class OrganizationChangeEmailDomainMutation extends LinearRequest {
+class TemplateQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6492,7 +6770,7 @@ class OrganizationChangeEmailDomainMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class OrganizationToggleSamlEnabledMutation extends LinearRequest {
+class UsersQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6515,7 +6793,7 @@ class OrganizationToggleSamlEnabledMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class OrganizationConfigureSamlMutation extends LinearRequest {
+class UserQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6542,7 +6820,7 @@ class OrganizationConfigureSamlMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class AdminCommandMutation extends LinearRequest {
+class ViewerQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6562,7 +6840,7 @@ class AdminCommandMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class AdminBulkEmailMutation extends LinearRequest {
+class UserSettingsQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6590,7 +6868,7 @@ class AdminBulkEmailMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class AdminCreateStripeCustomerMutation extends LinearRequest {
+class WebhooksQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6613,7 +6891,7 @@ class AdminCreateStripeCustomerMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class AdminScheduleAnonymousTaskMutation extends LinearRequest {
+class WebhookQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6636,7 +6914,7 @@ class AdminScheduleAnonymousTaskMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class AdminUserAccountChangeEmailMutation extends LinearRequest {
+class WorkflowStatesQuery extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -6649,8 +6927,10 @@ class AdminUserAccountChangeEmailMutation extends LinearRequest {
         id,
       }
     ).then(response => {
-      const data = response?.adminUserAccountChangeEmail;
-      return data ? new UserAccountAdminPrivileged(this._request, data) : undefined;
+      const data = response?.workflowStates;
+      return data
+        ? new WorkflowStateConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
     });
   }
 }
@@ -9007,8 +9287,8 @@ class UserFlagUpdateMutation extends LinearRequest {
       operation,
       flag,
     }).then(response => {
-      const data = response?.userFlagUpdate;
-      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
+      const data = response?.templateUpdate;
+      return data ? new TemplatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9018,7 +9298,7 @@ class UserFlagUpdateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class UserSubscribeToNewsletterMutation extends LinearRequest {
+class TemplateDeleteMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9039,7 +9319,7 @@ class UserSubscribeToNewsletterMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ViewPreferencesCreateMutation extends LinearRequest {
+class UserUpdateMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9062,7 +9342,7 @@ class ViewPreferencesCreateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ViewPreferencesUpdateMutation extends LinearRequest {
+class UserPromoteAdminMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9086,7 +9366,7 @@ class ViewPreferencesUpdateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class ViewPreferencesDeleteMutation extends LinearRequest {
+class UserDemoteAdminMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9109,7 +9389,7 @@ class ViewPreferencesDeleteMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WebhookCreateMutation extends LinearRequest {
+class UserSuspendMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9118,8 +9398,8 @@ class WebhookCreateMutation extends LinearRequest {
     return this.request<D.WebhookCreateMutation, D.WebhookCreateMutationVariables>(D.WebhookCreateDocument, {
       input,
     }).then(response => {
-      const data = response?.webhookCreate;
-      return data ? new WebhookPayload(this._request, data) : undefined;
+      const data = response?.userSuspend;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9129,7 +9409,7 @@ class WebhookCreateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WebhookUpdateMutation extends LinearRequest {
+class UserUnsuspendMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9139,8 +9419,8 @@ class WebhookUpdateMutation extends LinearRequest {
       input,
       id,
     }).then(response => {
-      const data = response?.webhookUpdate;
-      return data ? new WebhookPayload(this._request, data) : undefined;
+      const data = response?.userUnsuspend;
+      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9150,7 +9430,7 @@ class WebhookUpdateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WebhookDeleteMutation extends LinearRequest {
+class UserSettingsUpdateMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9170,7 +9450,7 @@ class WebhookDeleteMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WorkflowStateCreateMutation extends LinearRequest {
+class UserSettingsFlagIncrementMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9179,11 +9459,11 @@ class WorkflowStateCreateMutation extends LinearRequest {
     return this.request<D.WorkflowStateCreateMutation, D.WorkflowStateCreateMutationVariables>(
       D.WorkflowStateCreateDocument,
       {
-        input,
+        flag,
       }
     ).then(response => {
-      const data = response?.workflowStateCreate;
-      return data ? new WorkflowStatePayload(this._request, data) : undefined;
+      const data = response?.userSettingsFlagIncrement;
+      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9193,7 +9473,7 @@ class WorkflowStateCreateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WorkflowStateUpdateMutation extends LinearRequest {
+class UserSettingsFlagsResetMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9206,8 +9486,8 @@ class WorkflowStateUpdateMutation extends LinearRequest {
         id,
       }
     ).then(response => {
-      const data = response?.workflowStateUpdate;
-      return data ? new WorkflowStatePayload(this._request, data) : undefined;
+      const data = response?.userSettingsFlagsReset;
+      return data ? new UserSettingsFlagsResetPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9217,7 +9497,7 @@ class WorkflowStateUpdateMutation extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class WorkflowStateArchiveMutation extends LinearRequest {
+class UserFlagUpdateMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9239,14 +9519,10 @@ class WorkflowStateArchiveMutation extends LinearRequest {
  * Query User_AssignedIssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id to pass to user
  */
-class User_AssignedIssuesQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
+class UserSubscribeToNewsletterMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
-    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.User_AssignedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
@@ -9257,10 +9533,8 @@ class User_AssignedIssuesQuery extends LinearRequest {
         ...variables,
       }
     ).then(response => {
-      const data = response?.user?.assignedIssues;
-      return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-        : undefined;
+      const data = response?.userSubscribeToNewsletter;
+      return data ? new UserSubscribeToNewsletterPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9269,14 +9543,10 @@ class User_AssignedIssuesQuery extends LinearRequest {
  * Query User_CreatedIssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id to pass to user
  */
-class User_CreatedIssuesQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
+class ViewPreferencesCreateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
-    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.User_CreatedIssuesQueryVariables, "id">): Promise<IssueConnection | undefined> {
@@ -9296,14 +9566,10 @@ class User_CreatedIssuesQuery extends LinearRequest {
  * Query User_TeamMembershipsDocument for TeamMembershipConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id to pass to user
  */
-class User_TeamMembershipsQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
+class ViewPreferencesUpdateMutation extends LinearRequest {
+  public constructor(request: Request) {
     super(request);
-    this._id = id;
   }
 
   public async fetch(
@@ -9312,14 +9578,12 @@ class User_TeamMembershipsQuery extends LinearRequest {
     return this.request<D.User_TeamMembershipsQuery, D.User_TeamMembershipsQueryVariables>(
       D.User_TeamMembershipsDocument,
       {
-        id: this._id,
-        ...variables,
+        input,
+        id,
       }
     ).then(response => {
-      const data = response?.user?.teamMemberships;
-      return data
-        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-        : undefined;
+      const data = response?.viewPreferencesUpdate;
+      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
     });
   }
 }
@@ -9329,7 +9593,7 @@ class User_TeamMembershipsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class Viewer_AssignedIssuesQuery extends LinearRequest {
+class ViewPreferencesDeleteMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9339,10 +9603,8 @@ class Viewer_AssignedIssuesQuery extends LinearRequest {
       D.Viewer_AssignedIssuesDocument,
       variables
     ).then(response => {
-      const data = response?.viewer?.assignedIssues;
-      return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-        : undefined;
+      const data = response?.viewPreferencesDelete;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9352,7 +9614,7 @@ class Viewer_AssignedIssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class Viewer_CreatedIssuesQuery extends LinearRequest {
+class WebhookCreateMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9375,7 +9637,7 @@ class Viewer_CreatedIssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class Viewer_TeamMembershipsQuery extends LinearRequest {
+class WebhookUpdateMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9398,7 +9660,7 @@ class Viewer_TeamMembershipsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class Organization_UsersQuery extends LinearRequest {
+class WebhookDeleteMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9421,7 +9683,7 @@ class Organization_UsersQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class Organization_TeamsQuery extends LinearRequest {
+class WorkflowStateCreateMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9431,10 +9693,8 @@ class Organization_TeamsQuery extends LinearRequest {
       D.Organization_TeamsDocument,
       variables
     ).then(response => {
-      const data = response?.organization?.teams;
-      return data
-        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-        : undefined;
+      const data = response?.workflowStateCreate;
+      return data ? new WorkflowStatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9444,7 +9704,7 @@ class Organization_TeamsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class Organization_MilestonesQuery extends LinearRequest {
+class WorkflowStateUpdateMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9454,10 +9714,8 @@ class Organization_MilestonesQuery extends LinearRequest {
       D.Organization_MilestonesDocument,
       variables
     ).then(response => {
-      const data = response?.organization?.milestones;
-      return data
-        ? new MilestoneConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-        : undefined;
+      const data = response?.workflowStateUpdate;
+      return data ? new WorkflowStatePayload(this._request, data) : undefined;
     });
   }
 }
@@ -9467,7 +9725,7 @@ class Organization_MilestonesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  */
-class Organization_IntegrationsQuery extends LinearRequest {
+class WorkflowStateArchiveMutation extends LinearRequest {
   public constructor(request: Request) {
     super(request);
   }
@@ -9477,10 +9735,8 @@ class Organization_IntegrationsQuery extends LinearRequest {
       D.Organization_IntegrationsDocument,
       variables
     ).then(response => {
-      const data = response?.organization?.integrations;
-      return data
-        ? new IntegrationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-        : undefined;
+      const data = response?.workflowStateArchive;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -10238,7 +10494,6 @@ class Issue_SubscribersQuery extends LinearRequest {
 
   public constructor(request: Request, id: string) {
     super(request);
-    this._id = id;
   }
 
   public async fetch(vars?: Omit<D.Issue_SubscribersQueryVariables, "id">): Promise<UserConnection | undefined> {
@@ -10844,9 +11099,9 @@ class Team_WebhooksQuery extends LinearRequest {
  * Query WorkflowState_IssuesDocument for IssueConnection
  *
  * @param request - function to call the graphql client
- * @param id - required id to pass to workflowState
+ * @param id - required id to pass to user
  */
-class WorkflowState_IssuesQuery extends LinearRequest {
+class User_AssignedIssuesQuery extends LinearRequest {
   private _id: string;
 
   public constructor(request: Request, id: string) {
@@ -10862,7 +11117,7 @@ class WorkflowState_IssuesQuery extends LinearRequest {
         ...variables,
       }
     ).then(response => {
-      const data = response?.workflowState?.issues;
+      const data = response?.user?.assignedIssues;
       return data
         ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
         : undefined;

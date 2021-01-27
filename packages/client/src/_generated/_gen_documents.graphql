@@ -1,9 +1,120 @@
-fragment UserConnection on UserConnection {
+# Contains either the full serialized state of the application or delta packets that the requester can
+# apply to the local data set in order to be up-to-date.
+fragment SyncResponse on SyncResponse {
+  # The full state of the organization as a serialized JSON object.
+  #     Mutually exclusive with the delta property
+  state
+  # JSON serialized delta changes that the client can apply to its local state
+  #     in order to catch up with the state of the world.
+  delta
+  # A JSON serialized collection of model objects loaded from the archive
+  archive
+  # The last sync id covered by the response.
+  lastSyncId
+  # The version of the remote database. Incremented by 1 for each migration run on the database.
+  databaseVersion
+}
+
+# Contains requested archived model objects.
+fragment ArchiveResponse on ArchiveResponse {
+  # A JSON serialized collection of model objects loaded from the archive
+  archive
+  # The total number of entities in the archive.
+  totalCount
+  # The version of the remote database. Incremented by 1 for each migration run on the database.
+  databaseVersion
+}
+
+fragment ApiKeyConnection on ApiKeyConnection {
   nodes {
-    ...User
+    ...ApiKey
   }
   pageInfo {
     ...PageInfo
+  }
+}
+
+# An API key. Grants access to the user's resources.
+fragment ApiKey on ApiKey {
+  # The unique identifier of the entity.
+  id
+  # The time at which the entity was created.
+  createdAt
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The label of the API key.
+  label
+}
+
+fragment PageInfo on PageInfo {
+  # Indicates if there are more results when paginating backward.
+  hasPreviousPage
+  # Indicates if there are more results when paginating forward.
+  hasNextPage
+  # Cursor representing the first result in the paginated results.
+  startCursor
+  # Cursor representing the last result in the paginated results.
+  endCursor
+}
+
+# Public information of the OAuth application, plus whether the application has been authorized for
+# the given scopes.
+fragment UserAuthorizedApplication on UserAuthorizedApplication {
+  # OAuth application's client ID.
+  clientId
+  # Application name.
+  name
+  # Information about the application.
+  description
+  # Name of the developer.
+  developer
+  # Url of the developer (homepage or docs).
+  developerUrl
+  # Image of the application.
+  imageUrl
+  # Whether the user has authorized the application for the given scopes.
+  isAuthorized
+}
+
+# Public information of the OAuth application, plus the authorized scopes for a given user.
+fragment AuthorizedApplication on AuthorizedApplication {
+  # OAuth application's client ID.
+  clientId
+  # Application name.
+  name
+  # Information about the application.
+  description
+  # Name of the developer.
+  developer
+  # Url of the developer (homepage or docs).
+  developerUrl
+  # Image of the application.
+  imageUrl
+  # Scopes that are authorized for this application for a given user.
+  scope
+  # OAuth application's ID.
+  appId
+}
+
+fragment AuthResolverResponse on AuthResolverResponse {
+  # User account ID.
+  id
+  # JWT token for authentication of the account.
+  token
+  # Email for the authenticated account.
+  email
+  # Should the signup flow allow access for the domain.
+  allowDomainAccess
+  # Users belonging to this account.
+  users {
+    ...User
+  }
+  # Organizations this account has access to, but is not yet a member.
+  availableOrganizations {
+    ...Organization
   }
 }
 
@@ -38,27 +149,6 @@ fragment User on User {
   createdIssueCount
 }
 
-# The settings of a user as a JSON object.
-fragment UserSettings on UserSettings {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The notification channel settings the user has selected.
-  notificationPreferences
-  # The email types the user has unsubscribed from.
-  unsubscribedFrom
-  # The user to whom this notification was targeted for.
-  user {
-    id
-  }
-}
-
 fragment IssueConnection on IssueConnection {
   nodes {
     ...Issue
@@ -85,8 +175,6 @@ fragment Issue on Issue {
   title
   # The issue's description in markdown format.
   description
-  # The issue's description as a Prosemirror document.
-  descriptionData
   # The priority of the issue.
   priority
   # The estimate of the complexity of the issue..
@@ -305,17 +393,6 @@ fragment Cycle on Cycle {
   }
 }
 
-fragment PageInfo on PageInfo {
-  # Indicates if there are more results when paginating backward.
-  hasPreviousPage
-  # Indicates if there are more results when paginating forward.
-  hasNextPage
-  # Cursor representing the first result in the paginated results.
-  startCursor
-  # Cursor representing the last result in the paginated results.
-  endCursor
-}
-
 fragment TeamMembershipConnection on TeamMembershipConnection {
   nodes {
     ...TeamMembership
@@ -450,7 +527,6 @@ fragment Organization on Organization {
   urlKey
   # The organization's logo URL.
   logoUrl
-  upgradeThresholdExceeded
   # Rolling 30-day total upload volume for the organization, in megabytes.
   periodUploadVolume
   # How git branches are formatted. If null, default formatting will be used.
@@ -469,6 +545,15 @@ fragment Organization on Organization {
   userCount
   # Number of issues in the organization.
   createdIssueCount
+}
+
+fragment UserConnection on UserConnection {
+  nodes {
+    ...User
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment TeamConnection on TeamConnection {
@@ -511,12 +596,6 @@ fragment Integration on Integration {
   archivedAt
   # The integration's type.
   service
-  # The external service identifier.
-  serviceId
-  # Settings related to the integration.
-  settings {
-    ...IntegrationSettings
-  }
   # The team that the integration is associated with.
   team {
     id
@@ -525,43 +604,6 @@ fragment Integration on Integration {
   creator {
     id
   }
-}
-
-# The integration resource's settings
-fragment IntegrationSettings on IntegrationSettings {
-  slackPost {
-    ...SlackPostSettings
-  }
-  slackProjectPost {
-    ...SlackPostSettings
-  }
-  googleSheets {
-    ...GoogleSheetsSettings
-  }
-  sentry {
-    ...SentrySettings
-  }
-}
-
-# Slack notification specific settings.
-fragment SlackPostSettings on SlackPostSettings {
-  channel
-  channelId
-  configurationUrl
-}
-
-# Google Sheets specific settings.
-fragment GoogleSheetsSettings on GoogleSheetsSettings {
-  spreadsheetId
-  spreadsheetUrl
-  sheetId
-  updatedIssuesAt
-}
-
-# Sentry specific settings.
-fragment SentrySettings on SentrySettings {
-  # The slug of the Sentry organization being connected.
-  organizationSlug
 }
 
 # The subscription of an organization.
@@ -761,10 +803,6 @@ fragment Comment on Comment {
   archivedAt
   # The comment content in markdown format.
   body
-  # Comment content as a Prosemirror document.
-  bodyData
-  # Emoji reactions on the comment.
-  reactionData
   # The time user edited the comment.
   editedAt
   # The user who wrote the comment.
@@ -1032,251 +1070,6 @@ fragment IssueRelation on IssueRelation {
   # The related issue.
   relatedIssue {
     id
-  }
-}
-
-fragment OrganizationExistsPayload on OrganizationExistsPayload {
-  # Whether the operation was successful.
-  success
-  # Whether the organization exists.
-  exists
-}
-
-# Contains either the full serialized state of the application or delta packets that the requester can
-# apply to the local data set in order to be up-to-date.
-fragment SyncResponse on SyncResponse {
-  # The full state of the organization as a serialized JSON object.
-  #     Mutually exclusive with the delta property
-  state
-  # JSON serialized delta changes that the client can apply to its local state
-  #     in order to catch up with the state of the world.
-  delta
-  # A JSON serialized collection of model objects loaded from the archive
-  archive
-  # The last sync id covered by the response.
-  lastSyncId
-  # The version of the remote database. Incremented by 1 for each migration run on the database.
-  databaseVersion
-}
-
-# Contains requested archived model objects.
-fragment ArchiveResponse on ArchiveResponse {
-  # A JSON serialized collection of model objects loaded from the archive
-  archive
-  # The total number of entities in the archive.
-  totalCount
-  # The version of the remote database. Incremented by 1 for each migration run on the database.
-  databaseVersion
-}
-
-# A user account. Super user required.
-fragment UserAccountAdminPrivileged on UserAccountAdminPrivileged {
-  # The models identifier.
-  id
-  # The time at which the model was created.
-  createdAt
-  # The time at which the model was updated.
-  updatedAt
-  # The time at which the model was archived.
-  archivedAt
-  # The user's name.
-  name
-  # The user's email address.
-  email
-  # The authentication service used to create the account.
-  service
-  users {
-    ...UserAdminPrivileged
-  }
-}
-
-# A user that has access to the the resources of an organization. Super user required.
-fragment UserAdminPrivileged on UserAdminPrivileged {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The user's full name.
-  name
-  # The user's display (nick) name. Unique within each organization.
-  displayName
-  # The user's email address.
-  email
-  # An URL to the user's avatar image.
-  avatarUrl
-  # Unique hash for the user to be used in invite URLs.
-  inviteHash
-  # The last time the user was seen online. If null, the user is currently online.
-  lastSeen
-  # Whether the user is an organization administrator.
-  admin
-  # Whether the user account is active or disabled.
-  active
-  # Organization in which the user belongs to. Super user required.
-  organization {
-    ...OrganizationAdminPrivileged
-  }
-  # Number of issues created.
-  createdIssueCount
-}
-
-# An organization. Super user required.
-fragment OrganizationAdminPrivileged on OrganizationAdminPrivileged {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The organization's name.
-  name
-  # The organization's unique URL key.
-  urlKey
-  # The organization's logo URL.
-  logoUrl
-  upgradeThresholdExceeded
-  # Rolling 30-day total upload volume for the organization, in megabytes.
-  periodUploadVolume
-  # How git branches are formatted. If null, default formatting will be used.
-  gitBranchFormat
-  # Whether the Git integration linkback messages should be sent to private repositories.
-  gitLinkbackMessagesEnabled
-  # Whether the Git integration linkback messages should be sent to public repositories.
-  gitPublicLinkbackMessagesEnabled
-  # Whether the organization is using a roadmap.
-  roadmapEnabled
-  # Whether SAML authentication is enabled for organization.
-  samlEnabled
-  # Allowed authentication providers, empty array means all are allowed
-  allowedAuthServices
-  # The organization's subscription to a paid plan. Super user required.
-  subscription {
-    ...SubscriptionAdminPrivileged
-  }
-  # Number of active users in the organization.
-  userCount
-  # Number of issues in the organization.
-  createdIssueCount
-  # The Stripe identifier for the organization.
-  stripeCustomerId
-}
-
-# The subscription of an organization. Super user required.
-fragment SubscriptionAdminPrivileged on SubscriptionAdminPrivileged {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The subscription type.
-  type
-  # The number of seats in the subscription.
-  seats
-  # The creator of the subscription.
-  creator {
-    id
-  }
-  # The date the subscription was canceled, if any.
-  canceledAt
-  # The subscription type of a pending change. Null if no change pending.
-  pendingChangeType
-  # The Stripe identifier for the subscription.
-  stripeSubscriptionId
-  # The Stripe status for the subscription.
-  stripeStatus
-}
-
-fragment ApiKeyConnection on ApiKeyConnection {
-  nodes {
-    ...ApiKey
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# An API key. Grants access to the user's resources.
-fragment ApiKey on ApiKey {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The label of the API key.
-  label
-}
-
-# Public information of the OAuth application, plus whether the application has been authorized for
-# the given scopes.
-fragment UserAuthorizedApplication on UserAuthorizedApplication {
-  # OAuth application's client ID.
-  clientId
-  # Application name.
-  name
-  # Information about the application.
-  description
-  # Name of the developer.
-  developer
-  # Url of the developer (homepage or docs).
-  developerUrl
-  # Image of the application.
-  imageUrl
-  # Whether the user has authorized the application for the given scopes.
-  isAuthorized
-}
-
-# Public information of the OAuth application, plus the authorized scopes for a given user.
-fragment AuthorizedApplication on AuthorizedApplication {
-  # OAuth application's client ID.
-  clientId
-  # Application name.
-  name
-  # Information about the application.
-  description
-  # Name of the developer.
-  developer
-  # Url of the developer (homepage or docs).
-  developerUrl
-  # Image of the application.
-  imageUrl
-  # Scopes that are authorized for this application for a given user.
-  scope
-  # OAuth application's ID.
-  appId
-}
-
-fragment AuthResolverResponse on AuthResolverResponse {
-  # User account ID.
-  id
-  # JWT token for authentication of the account.
-  token
-  # Email for the authenticated account.
-  email
-  # Should the signup flow allow access for the domain.
-  allowDomainAccess
-  # Users belonging to this account.
-  users {
-    ...User
-  }
-  # Organizations this account has access to, but is not yet a member.
-  availableOrganizations {
-    ...Organization
   }
 }
 
@@ -1636,6 +1429,13 @@ fragment OrganizationInvite on OrganizationInvite {
   }
 }
 
+fragment OrganizationExistsPayload on OrganizationExistsPayload {
+  # Whether the operation was successful.
+  success
+  # Whether the organization exists.
+  exists
+}
+
 fragment PushSubscriptionPayload on PushSubscriptionPayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -1675,78 +1475,25 @@ fragment Reaction on Reaction {
   }
 }
 
-fragment UserPayload on UserPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # The user that was created or updated.
+# The settings of a user as a JSON object.
+fragment UserSettings on UserSettings {
+  # The unique identifier of the entity.
+  id
+  # The time at which the entity was created.
+  createdAt
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The notification channel settings the user has selected.
+  notificationPreferences
+  # The email types the user has unsubscribed from.
+  unsubscribedFrom
+  # The user to whom this notification was targeted for.
   user {
     id
   }
-  # Whether the operation was successful.
-  success
-}
-
-fragment UserAdminPayload on UserAdminPayload {
-  # Whether the operation was successful.
-  success
-}
-
-fragment OrganizationPayload on OrganizationPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment OrganizationDeletePayload on OrganizationDeletePayload {
-  # Whether the operation was successful.
-  success
-}
-
-fragment AdminIntegrationPayload on AdminIntegrationPayload {
-  # Whether the operation was successful.
-  success
-}
-
-fragment OrganizationAccessPayload on OrganizationAccessPayload {
-  # Whether the operation was successful.
-  success
-}
-
-fragment OrganizationSamlConfigurePayload on OrganizationSamlConfigurePayload {
-  # Whether the operation was successful.
-  success
-  # Organization's current SAML configuration.
-  samlConfiguration {
-    ...SamlConfiguration
-  }
-  # Whether SAML is enabled for the organization.
-  samlEnabled
-}
-
-# The integration resource's settings
-fragment SamlConfiguration on SamlConfiguration {
-  # X.509 Signing Certificate in string form.
-  ssoSigningCert
-  # Sign in endpoint URL for the identity provider.
-  ssoEndpoint
-  # Binding method for authentication call. Can be either `post` (default) or `redirect`.
-  ssoBinding
-  # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
-  ssoSignAlgo
-  # List of allowed email domains for SAML authentication.
-  allowedDomains
-}
-
-fragment AdminCommandPayload on AdminCommandPayload {
-  # Whether the operation was successful.
-  success
-}
-
-# Operation response.
-fragment AdminResponse on AdminResponse {
-  # Whether the operation was successful.
-  success
 }
 
 fragment EventPayload on EventPayload {
@@ -1923,6 +1670,38 @@ fragment IntegrationPayload on IntegrationPayload {
   success
 }
 
+fragment IssueImportPayload on IssueImportPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The import job that was created or updated.
+  importJob {
+    ...IssueImport
+  }
+  # Whether the operation was successful.
+  success
+}
+
+# An import job for data from an external service
+fragment IssueImport on IssueImport {
+  # The unique identifier of the entity.
+  id
+  # The time at which the entity was created.
+  createdAt
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The id for the organization where data will be imported.
+  organizationId
+  # The id for the user that started the job.
+  creatorId
+  # The service from which data will be imported.
+  service
+  # The status for the import job.
+  status
+}
+
 fragment IssueLabelPayload on IssueLabelPayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -2086,6 +1865,18 @@ fragment OrganizationInvitePayload on OrganizationInvitePayload {
   success
 }
 
+fragment OrganizationPayload on OrganizationPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment OrganizationDeletePayload on OrganizationDeletePayload {
+  # Whether the operation was successful.
+  success
+}
+
 fragment ProjectLinkPayload on ProjectLinkPayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -2165,6 +1956,22 @@ fragment TemplatePayload on TemplatePayload {
   template {
     id
   }
+  # Whether the operation was successful.
+  success
+}
+
+fragment UserPayload on UserPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The user that was created or updated.
+  user {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
+fragment UserAdminPayload on UserAdminPayload {
   # Whether the operation was successful.
   success
 }
@@ -2273,26 +2080,18 @@ fragment DocumentStep on DocumentStep {
   clientId
 }
 
-# A user's web browser push notification subscription.
-fragment PushSubscription on PushSubscription {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-}
-
-fragment PushSubscriptionConnection on PushSubscriptionConnection {
-  nodes {
-    ...PushSubscription
-  }
-  pageInfo {
-    ...PageInfo
-  }
+# The integration resource's settings
+fragment SamlConfiguration on SamlConfiguration {
+  # X.509 Signing Certificate in string form.
+  ssoSigningCert
+  # Sign in endpoint URL for the identity provider.
+  ssoEndpoint
+  # Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  ssoBinding
+  # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  ssoSignAlgo
+  # List of allowed email domains for SAML authentication.
+  allowedDomains
 }
 
 # A user account.
@@ -2314,6 +2113,65 @@ fragment UserAccount on UserAccount {
   # Users belonging to the account.
   users {
     ...User
+  }
+}
+
+# Slack notification specific settings.
+fragment SlackPostSettings on SlackPostSettings {
+  channel
+  channelId
+  configurationUrl
+}
+
+# Google Sheets specific settings.
+fragment GoogleSheetsSettings on GoogleSheetsSettings {
+  spreadsheetId
+  spreadsheetUrl
+  sheetId
+  updatedIssuesAt
+}
+
+# Sentry specific settings.
+fragment SentrySettings on SentrySettings {
+  # The slug of the Sentry organization being connected.
+  organizationSlug
+}
+
+# The integration resource's settings
+fragment IntegrationSettings on IntegrationSettings {
+  slackPost {
+    ...SlackPostSettings
+  }
+  slackProjectPost {
+    ...SlackPostSettings
+  }
+  googleSheets {
+    ...GoogleSheetsSettings
+  }
+  sentry {
+    ...SentrySettings
+  }
+}
+
+# A user's web browser push notification subscription.
+fragment PushSubscription on PushSubscription {
+  # The unique identifier of the entity.
+  id
+  # The time at which the entity was created.
+  createdAt
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+}
+
+fragment PushSubscriptionConnection on PushSubscriptionConnection {
+  nodes {
+    ...PushSubscription
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -2358,345 +2216,6 @@ fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
   success
 }
 
-# All users for the organization.
-query users(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  users(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...UserConnection
-  }
-}
-# One specific user.
-query user(
-  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
-  $id: String!
-) {
-  user(id: $id) {
-    ...User
-  }
-}
-# Issues assigned to the user.
-query user_assignedIssues(
-  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    assignedIssues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
-# Issues created by the user.
-query user_createdIssues(
-  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    createdIssues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
-# Memberships associated with the user.
-query user_teamMemberships(
-  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    teamMemberships(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...TeamMembershipConnection
-    }
-  }
-}
-# The currently authenticated user.
-query viewer {
-  viewer {
-    ...User
-  }
-}
-# Issues assigned to the user.
-query viewer_assignedIssues(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    assignedIssues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
-# Issues created by the user.
-query viewer_createdIssues(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    createdIssues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
-# Memberships associated with the user.
-query viewer_teamMemberships(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    teamMemberships(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...TeamMembershipConnection
-    }
-  }
-}
-# The user's organization.
-query organization {
-  organization {
-    ...Organization
-  }
-}
-# Users associated with the organization.
-query organization_users(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    users(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...UserConnection
-    }
-  }
-}
-# Teams associated with the organization.
-query organization_teams(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    teams(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...TeamConnection
-    }
-  }
-}
-# Milestones associated with the organization.
-query organization_milestones(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    milestones(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...MilestoneConnection
-    }
-  }
-}
-# Integrations associated with the organization.
-query organization_integrations(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    integrations(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IntegrationConnection
-    }
-  }
-}
-# Does the organization exist.
-query organizationExists($urlKey: String!) {
-  organizationExists(urlKey: $urlKey) {
-    ...OrganizationExistsPayload
-  }
-}
 # Fetch data to catch up the client to the state of the world.
 query syncBootstrap(
   # The version of the backend database the client has locally stored.
@@ -2741,17 +2260,6 @@ query archivedModelsSync(
 ) {
   archivedModelsSync(modelClass: $modelClass, teamId: $teamId, before: $before, last: $last) {
     ...ArchiveResponse
-  }
-}
-# Finds a user account by email or identifier. Super user required.
-query adminUserAccountLookup(
-  # Email by which to search for the user account.
-  $email: String
-  # The identifier by which to search for the user account.
-  $id: String
-) {
-  adminUserAccountLookup(email: $email, id: $id) {
-    ...UserAccountAdminPrivileged
   }
 }
 # All API keys for the user.
@@ -3143,50 +2651,6 @@ query integrations(
 query integration($id: String!) {
   integration(id: $id) {
     ...Integration
-  }
-}
-# Settings related to the integration.
-query integration_settings($id: String!) {
-  integration(id: $id) {
-    settings {
-      ...IntegrationSettings
-    }
-  }
-}
-query integration_settings_slackPost($id: String!) {
-  integration(id: $id) {
-    settings {
-      slackPost {
-        ...SlackPostSettings
-      }
-    }
-  }
-}
-query integration_settings_slackProjectPost($id: String!) {
-  integration(id: $id) {
-    settings {
-      slackProjectPost {
-        ...SlackPostSettings
-      }
-    }
-  }
-}
-query integration_settings_googleSheets($id: String!) {
-  integration(id: $id) {
-    settings {
-      googleSheets {
-        ...GoogleSheetsSettings
-      }
-    }
-  }
-}
-query integration_settings_sentry($id: String!) {
-  integration(id: $id) {
-    settings {
-      sentry {
-        ...SentrySettings
-      }
-    }
   }
 }
 # All integrations resources (e.g. linked GitHub pull requests for issues).
@@ -3873,6 +3337,130 @@ query organizationInvite_issues(
     }
   }
 }
+# The user's organization.
+query organization {
+  organization {
+    ...Organization
+  }
+}
+# Users associated with the organization.
+query organization_users(
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    users(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...UserConnection
+    }
+  }
+}
+# Teams associated with the organization.
+query organization_teams(
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    teams(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...TeamConnection
+    }
+  }
+}
+# Milestones associated with the organization.
+query organization_milestones(
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    milestones(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...MilestoneConnection
+    }
+  }
+}
+# Integrations associated with the organization.
+query organization_integrations(
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    integrations(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...IntegrationConnection
+    }
+  }
+}
+# Does the organization exist.
+query organizationExists($urlKey: String!) {
+  organizationExists(urlKey: $urlKey) {
+    ...OrganizationExistsPayload
+  }
+}
 # All links for the project.
 query projectLinks(
   # A cursor to be used with last for backward pagination.
@@ -4426,6 +4014,221 @@ query template(
     ...Template
   }
 }
+# All users for the organization.
+query users(
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  users(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    includeArchived: $includeArchived
+    orderBy: $orderBy
+  ) {
+    ...UserConnection
+  }
+}
+# One specific user.
+query user(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+) {
+  user(id: $id) {
+    ...User
+  }
+}
+# Issues assigned to the user.
+query user_assignedIssues(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    assignedIssues(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Issues created by the user.
+query user_createdIssues(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    createdIssues(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Memberships associated with the user.
+query user_teamMemberships(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    teamMemberships(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...TeamMembershipConnection
+    }
+  }
+}
+# The currently authenticated user.
+query viewer {
+  viewer {
+    ...User
+  }
+}
+# Issues assigned to the user.
+query viewer_assignedIssues(
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    assignedIssues(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Issues created by the user.
+query viewer_createdIssues(
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    createdIssues(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Memberships associated with the user.
+query viewer_teamMemberships(
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    teamMemberships(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      includeArchived: $includeArchived
+      orderBy: $orderBy
+    ) {
+      ...TeamMembershipConnection
+    }
+  }
+}
 # The user's settings.
 query userSettings {
   userSettings {
@@ -4526,182 +4329,6 @@ query workflowState_issues(
     ) {
       ...IssueConnection
     }
-  }
-}
-# Updates a user. Only available to organization admins and the user themselves.
-mutation userUpdate(
-  # A partial user object to update the user with.
-  $input: UpdateUserInput!
-  # The identifier of the user to update. Use `me` to reference currently authenticated user.
-  $id: String!
-) {
-  userUpdate(input: $input, id: $id) {
-    ...UserPayload
-  }
-}
-# Makes user an admin. Can only be called by an admin.
-mutation userPromoteAdmin(
-  # The identifier of the user to make an admin.
-  $id: String!
-) {
-  userPromoteAdmin(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Makes user a regular user. Can only be called by an admin.
-mutation userDemoteAdmin(
-  # The identifier of the user to make a regular user.
-  $id: String!
-) {
-  userDemoteAdmin(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Suspends a user. Can only be called by an admin.
-mutation userSuspend(
-  # The identifier of the user to suspend.
-  $id: String!
-) {
-  userSuspend(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Un-suspends a user. Can only be called by an admin.
-mutation userUnsuspend(
-  # The identifier of the user to unsuspend.
-  $id: String!
-) {
-  userUnsuspend(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Updates the user's organization.
-mutation organizationUpdate(
-  # A partial organization object to update the organization with.
-  $input: UpdateOrganizationInput!
-) {
-  organizationUpdate(input: $input) {
-    ...OrganizationPayload
-  }
-}
-# Get an organization's delete confirmation token. Administrator privileges required.
-mutation organizationDeleteChallenge {
-  organizationDeleteChallenge {
-    ...OrganizationDeletePayload
-  }
-}
-# Delete's an organization. Administrator privileges required.
-mutation organizationDelete(
-  # Information required to delete an organization.
-  $input: DeleteOrganizationInput!
-) {
-  organizationDelete(input: $input) {
-    ...OrganizationDeletePayload
-  }
-}
-# Deletes an integration. Superuser privileges required.
-mutation adminDeleteIntegration(
-  # The identifier of the integration to delete.
-  $id: String!
-) {
-  adminDeleteIntegration(id: $id) {
-    ...AdminIntegrationPayload
-  }
-}
-# Disable organization access. Superuser privileges required.
-mutation organizationToggleAccess(
-  # The identifier of the organization to update.
-  $id: String!
-) {
-  organizationToggleAccess(id: $id) {
-    ...OrganizationAccessPayload
-  }
-}
-# Change email domain for all users and accounts in the organization.
-mutation organizationChangeEmailDomain(
-  # The email domain to update to.
-  $toDomain: String!
-  # The email domain to update from.
-  $fromDomain: String!
-  # The identifier of the organization to update.
-  $id: String!
-) {
-  organizationChangeEmailDomain(toDomain: $toDomain, fromDomain: $fromDomain, id: $id) {
-    ...OrganizationAccessPayload
-  }
-}
-# Toggle SAML authentication on or off for an organization. Superuser privileges required.
-mutation organizationToggleSamlEnabled(
-  # The identifier of the organization to update.
-  $id: String!
-) {
-  organizationToggleSamlEnabled(id: $id) {
-    ...OrganizationSamlConfigurePayload
-  }
-}
-# Configure SAML authentication for an organization. Superuser privileges required.
-mutation organizationConfigureSaml(
-  # Saml configuration for the organization.
-  $samlConfiguration: SamlConfigurationInput!
-  # The identifier of the organization to update.
-  $id: String!
-) {
-  organizationConfigureSaml(samlConfiguration: $samlConfiguration, id: $id) {
-    ...OrganizationSamlConfigurePayload
-  }
-}
-# Executes admin command.
-mutation adminCommand(
-  # The command to perform.
-  $input: AdminCommandInput!
-) {
-  adminCommand(input: $input) {
-    ...AdminCommandPayload
-  }
-}
-# Sends out emails in bulk to our users.
-mutation adminBulkEmail(
-  # A random delay in seconds to add to the email task.
-  $randomDelay: Int
-  # The user emails to send the email to.
-  $emails: [String!]!
-  # The content of the email to send in markdown format.
-  $markdownContent: String!
-  # The subject of the email to send.
-  $subject: String!
-) {
-  adminBulkEmail(randomDelay: $randomDelay, emails: $emails, markdownContent: $markdownContent, subject: $subject) {
-    ...AdminCommandPayload
-  }
-}
-# Creates a stripe customer for an organization.
-mutation adminCreateStripeCustomer(
-  # The id of the organization to create the stripe customer for. If the organization already has a customer account, an error will be returned.
-  $organizationId: String!
-) {
-  adminCreateStripeCustomer(organizationId: $organizationId) {
-    ...AdminCommandPayload
-  }
-}
-# Schedules a task. Currently only anonymous tasks without any parameters can be scheduled.
-mutation adminScheduleAnonymousTask(
-  # The name of the task to execute
-  $taskName: String!
-) {
-  adminScheduleAnonymousTask(taskName: $taskName) {
-    ...AdminCommandPayload
-  }
-}
-# Changes the email address for the user account and all of its users.
-mutation adminUserAccountChangeEmail($newEmail: String!, $id: String!) {
-  adminUserAccountChangeEmail(newEmail: $newEmail, id: $id) {
-    ...UserAccountAdminPrivileged
-  }
-}
-# Permanently deletes the user account and all associated data.
-mutation adminUserAccountDelete($deleteAllData: Boolean, $email: String!, $id: String!) {
-  adminUserAccountDelete(deleteAllData: $deleteAllData, email: $email, id: $id) {
-    ...AdminResponse
   }
 }
 # [Deprecated] Creates a new event.
@@ -5158,6 +4785,15 @@ mutation integrationResourceArchive(
     ...ArchivePayload
   }
 }
+# Kicks off a GitHub import job.
+mutation issueImportCreate(
+  # The input to create an import.
+  $input: ImportCreateInput!
+) {
+  issueImportCreate(input: $input) {
+    ...IssueImportPayload
+  }
+}
 # Creates a new label.
 mutation issueLabelCreate(
   # The issue label to create.
@@ -5453,6 +5089,30 @@ mutation organizationInviteDelete(
     ...ArchivePayload
   }
 }
+# Updates the user's organization.
+mutation organizationUpdate(
+  # A partial organization object to update the organization with.
+  $input: UpdateOrganizationInput!
+) {
+  organizationUpdate(input: $input) {
+    ...OrganizationPayload
+  }
+}
+# Get an organization's delete confirmation token. Administrator privileges required.
+mutation organizationDeleteChallenge {
+  organizationDeleteChallenge {
+    ...OrganizationDeletePayload
+  }
+}
+# Delete's an organization. Administrator privileges required.
+mutation organizationDelete(
+  # Information required to delete an organization.
+  $input: DeleteOrganizationInput!
+) {
+  organizationDelete(input: $input) {
+    ...OrganizationDeletePayload
+  }
+}
 # Creates a new project link.
 mutation projectLinkCreate(
   # The project link object to create.
@@ -5674,6 +5334,53 @@ mutation templateDelete(
 ) {
   templateDelete(id: $id) {
     ...ArchivePayload
+  }
+}
+# Updates a user. Only available to organization admins and the user themselves.
+mutation userUpdate(
+  # A partial user object to update the user with.
+  $input: UpdateUserInput!
+  # The identifier of the user to update. Use `me` to reference currently authenticated user.
+  $id: String!
+) {
+  userUpdate(input: $input, id: $id) {
+    ...UserPayload
+  }
+}
+# Makes user an admin. Can only be called by an admin.
+mutation userPromoteAdmin(
+  # The identifier of the user to make an admin.
+  $id: String!
+) {
+  userPromoteAdmin(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Makes user a regular user. Can only be called by an admin.
+mutation userDemoteAdmin(
+  # The identifier of the user to make a regular user.
+  $id: String!
+) {
+  userDemoteAdmin(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Suspends a user. Can only be called by an admin.
+mutation userSuspend(
+  # The identifier of the user to suspend.
+  $id: String!
+) {
+  userSuspend(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Un-suspends a user. Can only be called by an admin.
+mutation userUnsuspend(
+  # The identifier of the user to unsuspend.
+  $id: String!
+) {
+  userUnsuspend(id: $id) {
+    ...UserAdminPayload
   }
 }
 # Updates the user's settings.

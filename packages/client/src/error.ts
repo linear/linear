@@ -1,5 +1,6 @@
-import { getKeyByValue } from "@linear/plugin-common";
+import { getKeyByValue, logger, printList } from "@linear/plugin-common";
 import { LinearErrorRaw, LinearErrorType, LinearGraphQLErrorRaw } from "./types";
+import { capitalize } from "./utils";
 
 /**
  * A map between the Linear API string type and the LinearErrorType enum
@@ -52,7 +53,7 @@ export class LinearGraphQLError {
     this.userError = error?.extensions?.userError;
     this.path = error?.path;
 
-    /** Set best available message */
+    /** Select best available message */
     this.message =
       error?.extensions?.userPresentableMessage ?? error?.message ?? error?.extensions?.type ?? defaultError;
   }
@@ -76,6 +77,8 @@ export class LinearError extends Error {
   public data?: unknown;
   /** The http status of this request */
   public status?: number;
+  /** The raw graphql-request error */
+  public raw?: LinearErrorRaw;
 
   public constructor(error?: LinearErrorRaw) {
     /** Parse graphql errors */
@@ -83,15 +86,36 @@ export class LinearError extends Error {
       return new LinearGraphQLError(graphqlError);
     });
 
-    /** Set best available message */
-    super(errors[0]?.message ?? error?.message ?? error?.name ?? defaultError);
+    /** Select best available message */
+    const message = capitalize(error?.message?.split(": {")?.[0]);
+
+    super(printList([message, error?.response?.error, errors[0]?.message], " - ") ?? defaultError);
 
     /** Set error properties */
-    this.type = errors[0]?.type ?? LinearErrorType.Unknown;
     this.status = error?.response?.status;
     this.errors = errors;
     this.query = error?.request?.query;
     this.variables = error?.request?.variables;
     this.data = error?.response?.data;
+    this.raw = error;
+
+    /** Set type based first graphql error or http status */
+    this.type =
+      errors[0]?.type ??
+      (this.status === 403
+        ? LinearErrorType.Forbidden
+        : this.status === 429
+        ? LinearErrorType.Ratelimited
+        : `${this.status}`.startsWith("4")
+        ? LinearErrorType.AuthenticationError
+        : this.status === 500
+        ? LinearErrorType.InternalError
+        : `${this.status}`.startsWith("5")
+        ? LinearErrorType.NetworkError
+        : LinearErrorType.Unknown);
+
+    if (process.env.NODE_ENV === "test") {
+      logger.error(this);
+    }
   }
 }
