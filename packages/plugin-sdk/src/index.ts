@@ -38,7 +38,6 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
 
     logger.info("Processing documents");
     const sdkDefinitions = parseDocuments(context, documents, models);
-    logger.debug(sdkDefinitions);
     const sdkContext: SdkPluginContext = {
       ...context,
       models,
