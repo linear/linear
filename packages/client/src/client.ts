@@ -53,7 +53,7 @@ export class LinearClient extends LinearSdk {
     super(<R, V>(doc: DocumentNode, vars?: V) =>
       /** Call the graphql-request client */
       this.client.request<R, V>(print(doc), vars).catch(error => {
-        /** Wrap any errors */
+        /** Catch and wrap errors from the graphql-request client */
         throw new LinearError(error);
       })
     );
