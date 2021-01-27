@@ -22,15 +22,17 @@
     "generate": "run-s generate:clean generate:doc generate:sdk",
     "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml",
     "generate:doc": "npx graphql-codegen --config codegen.documents.yml",
-    "generate:clean": "npx rimraf src/_generated"
+    "generate:clean": "npx rimraf src/_generated",
+    "scratch": "ts-node src/scratch.ts"
   },
   "dependencies": {
     "@graphql-codegen/introspection": "1.18.0",
-    "@graphql-codegen/schema-ast": "^1.18.1",
+    "@graphql-codegen/schema-ast": "1.18.1",
     "@graphql-codegen/typed-document-node": "1.17.10",
     "@graphql-codegen/typescript": "1.17.11",
     "@graphql-codegen/typescript-operations": "1.17.9",
     "@graphql-typed-document-node/core": "3.1.0",
+    "@linear/plugin-common": "^1.0.0",
     "@linear/plugin-doc": "^1.0.0",
     "@linear/plugin-sdk": "^1.0.0",
     "graphql": "15.4.0",
@@ -38,6 +40,7 @@
     "uuid": "8.3.1"
   },
   "devDependencies": {
-    "dotenv": "8.2.0"
+    "dotenv": "8.2.0",
+    "ts-node": "9.1.1"
   }
 }
