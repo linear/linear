@@ -2955,9 +2955,10 @@ export type MutationIntegrationResourceArchiveArgs = {
 };
 
 export type MutationIssueImportCreateGithubArgs = {
-  repoOwner: Scalars["String"];
-  repoName: Scalars["String"];
-  token: Scalars["String"];
+  githubRepoOwner: Scalars["String"];
+  githubRepoName: Scalars["String"];
+  githubToken: Scalars["String"];
+  teamId: Scalars["String"];
 };
 
 export type MutationIssueLabelCreateArgs = {
@@ -3703,8 +3704,6 @@ export type IssueImport = Node & {
   updatedAt: Scalars["DateTime"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The id for the organization where data will be imported. */
-  organizationId: Scalars["String"];
   /** The id for the user that started the job. */
   creatorId: Scalars["String"];
   /** The service from which data will be imported. */
@@ -4733,42 +4732,6 @@ export type DocumentStep = Node & {
   clientId: Scalars["String"];
 };
 
-/** The integration resource's settings */
-export type SamlConfiguration = {
-  __typename?: "SamlConfiguration";
-  /** X.509 Signing Certificate in string form. */
-  ssoSigningCert?: Maybe<Scalars["String"]>;
-  /** Sign in endpoint URL for the identity provider. */
-  ssoEndpoint?: Maybe<Scalars["String"]>;
-  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
-  ssoBinding?: Maybe<Scalars["String"]>;
-  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
-  ssoSignAlgo?: Maybe<Scalars["String"]>;
-  /** List of allowed email domains for SAML authentication. */
-  allowedDomains?: Maybe<Array<Scalars["String"]>>;
-};
-
-/** A user account. */
-export type UserAccount = {
-  __typename?: "UserAccount";
-  /** The models identifier. */
-  id: Scalars["ID"];
-  /** The time at which the model was created. */
-  createdAt: Scalars["DateTime"];
-  /** The time at which the model was updated. */
-  updatedAt: Scalars["DateTime"];
-  /** The time at which the model was archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The user's name. */
-  name?: Maybe<Scalars["String"]>;
-  /** The user's email address. */
-  email: Scalars["String"];
-  /** The authentication service used to create the account. */
-  service: Scalars["String"];
-  /** Users belonging to the account. */
-  users: Array<User>;
-};
-
 /** Slack notification specific settings. */
 export type SlackPostSettings = {
   __typename?: "SlackPostSettings";
@@ -4802,6 +4765,21 @@ export type IntegrationSettings = {
   sentry?: Maybe<SentrySettings>;
 };
 
+/** The integration resource's settings */
+export type SamlConfiguration = {
+  __typename?: "SamlConfiguration";
+  /** X.509 Signing Certificate in string form. */
+  ssoSigningCert?: Maybe<Scalars["String"]>;
+  /** Sign in endpoint URL for the identity provider. */
+  ssoEndpoint?: Maybe<Scalars["String"]>;
+  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
+  ssoBinding?: Maybe<Scalars["String"]>;
+  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
+  ssoSignAlgo?: Maybe<Scalars["String"]>;
+  /** List of allowed email domains for SAML authentication. */
+  allowedDomains?: Maybe<Array<Scalars["String"]>>;
+};
+
 /** A user's web browser push notification subscription. */
 export type PushSubscription = Node & {
   __typename?: "PushSubscription";
@@ -4830,6 +4808,27 @@ export type PushSubscriptionConnection = {
   edges: Array<PushSubscriptionEdge>;
   nodes: Array<PushSubscription>;
   pageInfo: PageInfo;
+};
+
+/** A user account. */
+export type UserAccount = {
+  __typename?: "UserAccount";
+  /** The models identifier. */
+  id: Scalars["ID"];
+  /** The time at which the model was created. */
+  createdAt: Scalars["DateTime"];
+  /** The time at which the model was updated. */
+  updatedAt: Scalars["DateTime"];
+  /** The time at which the model was archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The user's name. */
+  name?: Maybe<Scalars["String"]>;
+  /** The user's email address. */
+  email: Scalars["String"];
+  /** The authentication service used to create the account. */
+  service: Scalars["String"];
+  /** Users belonging to the account. */
+  users: Array<User>;
 };
 
 /** A recorded entry of a file uploaded by a user. */
@@ -4889,9 +4888,318 @@ export type SamlConfigurationInput = {
   allowedDomains?: Maybe<Array<Scalars["String"]>>;
 };
 
+export type CommentFragment = { __typename?: "Comment" } & Pick<
+  Comment,
+  "body" | "updatedAt" | "archivedAt" | "createdAt" | "editedAt" | "id"
+> & { issue: { __typename?: "Issue" } & Pick<Issue, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
+
+export type EmojiFragment = { __typename?: "Emoji" } & Pick<
+  Emoji,
+  "url" | "name" | "updatedAt" | "source" | "archivedAt" | "createdAt" | "id"
+> & { creator: { __typename?: "User" } & Pick<User, "id"> };
+
+export type CustomViewFragment = { __typename?: "CustomView" } & Pick<
+  CustomView,
+  "color" | "description" | "filters" | "icon" | "updatedAt" | "name" | "archivedAt" | "createdAt" | "id" | "shared"
+> & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
+
+export type MilestoneFragment = { __typename?: "Milestone" } & Pick<
+  Milestone,
+  "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
+>;
+
+export type NotificationFragment = { __typename?: "Notification" } & Pick<
+  Notification,
+  "reactionEmoji" | "type" | "updatedAt" | "emailedAt" | "readAt" | "archivedAt" | "createdAt" | "id"
+> & {
+    comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+    user: { __typename?: "User" } & Pick<User, "id">;
+    team: { __typename?: "Team" } & Pick<Team, "id">;
+  };
+
+export type ProjectFragment = { __typename?: "Project" } & Pick<
+  Project,
+  | "targetDate"
+  | "icon"
+  | "updatedAt"
+  | "completedScopeHistory"
+  | "completedIssueCountHistory"
+  | "color"
+  | "description"
+  | "name"
+  | "slugId"
+  | "sortOrder"
+  | "archivedAt"
+  | "createdAt"
+  | "canceledAt"
+  | "completedAt"
+  | "startedAt"
+  | "scopeHistory"
+  | "issueCountHistory"
+  | "state"
+  | "id"
+  | "slackIssueComments"
+  | "slackNewIssue"
+  | "slackIssueStatuses"
+> & {
+    milestone?: Maybe<{ __typename?: "Milestone" } & Pick<Milestone, "id">>;
+    lead?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    creator: { __typename?: "User" } & Pick<User, "id">;
+  };
+
+export type ReactionFragment = { __typename?: "Reaction" } & Pick<
+  Reaction,
+  "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+> & { comment: { __typename?: "Comment" } & Pick<Comment, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
+
+export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
+  IssueHistory,
+  | "relationChanges"
+  | "addedLabelIds"
+  | "removedLabelIds"
+  | "source"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "fromDueDate"
+  | "toDueDate"
+  | "fromEstimate"
+  | "toEstimate"
+  | "fromPriority"
+  | "toPriority"
+  | "fromTitle"
+  | "toTitle"
+  | "archived"
+  | "updatedDescription"
+  | "autoArchived"
+  | "autoClosed"
+> & {
+    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+    toCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    toParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    toProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    toState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    fromCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    fromParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    fromProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    fromState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    fromTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    toTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    fromAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    toAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+export type FileUploadFragment = { __typename?: "FileUpload" } & Pick<
+  FileUpload,
+  "metaData" | "size" | "contentType" | "assetUrl" | "filename" | "id"
+> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
+export type IssueRelationFragment = { __typename?: "IssueRelation" } & Pick<
+  IssueRelation,
+  "updatedAt" | "type" | "archivedAt" | "createdAt" | "id"
+> & { issue: { __typename?: "Issue" } & Pick<Issue, "id">; relatedIssue: { __typename?: "Issue" } & Pick<Issue, "id"> };
+
+export type CycleFragment = { __typename?: "Cycle" } & Pick<
+  Cycle,
+  | "completedAt"
+  | "name"
+  | "endsAt"
+  | "updatedAt"
+  | "completedScopeHistory"
+  | "completedIssueCountHistory"
+  | "number"
+  | "startsAt"
+  | "archivedAt"
+  | "createdAt"
+  | "scopeHistory"
+  | "issueCountHistory"
+  | "id"
+> & { team: { __typename?: "Team" } & Pick<Team, "id"> };
+
+export type WorkflowStateFragment = { __typename?: "WorkflowState" } & Pick<
+  WorkflowState,
+  "description" | "updatedAt" | "position" | "color" | "name" | "archivedAt" | "createdAt" | "type" | "id"
+> & { team: { __typename?: "Team" } & Pick<Team, "id"> };
+
+export type TemplateFragment = { __typename?: "Template" } & Pick<
+  Template,
+  "templateData" | "description" | "type" | "updatedAt" | "name" | "archivedAt" | "createdAt" | "id"
+> & { team: { __typename?: "Team" } & Pick<Team, "id">; creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
+export type UserAccountFragment = { __typename?: "UserAccount" } & Pick<
+  UserAccount,
+  "service" | "id" | "archivedAt" | "createdAt" | "updatedAt" | "email" | "name"
+> & { users: Array<{ __typename?: "User" } & UserFragment> };
+
+export type UserFragment = { __typename?: "User" } & Pick<
+  User,
+  | "avatarUrl"
+  | "createdIssueCount"
+  | "updatedAt"
+  | "lastSeen"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "displayName"
+  | "email"
+  | "name"
+  | "inviteHash"
+  | "active"
+  | "admin"
+>;
+
+export type PushSubscriptionFragment = { __typename?: "PushSubscription" } & Pick<
+  PushSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
+export type WebhookFragment = { __typename?: "Webhook" } & Pick<
+  Webhook,
+  "secret" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "url" | "enabled"
+> & { team: { __typename?: "Team" } & Pick<Team, "id">; creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
+export type ApiKeyFragment = { __typename?: "ApiKey" } & Pick<
+  ApiKey,
+  "label" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
+export type ProjectLinkFragment = { __typename?: "ProjectLink" } & Pick<
+  ProjectLink,
+  "updatedAt" | "url" | "label" | "archivedAt" | "createdAt" | "id"
+> & { project: { __typename?: "Project" } & Pick<Project, "id">; creator: { __typename?: "User" } & Pick<User, "id"> };
+
+export type IssueImportFragment = { __typename?: "IssueImport" } & Pick<
+  IssueImport,
+  "creatorId" | "updatedAt" | "service" | "status" | "archivedAt" | "createdAt" | "id"
+>;
+
+export type IntegrationResourceFragment = { __typename?: "IntegrationResource" } & Pick<
+  IntegrationResource,
+  "resourceId" | "resourceType" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+> & {
+    data: { __typename?: "IntegrationResourceData" } & IntegrationResourceDataFragment;
+    pullRequest: { __typename?: "PullRequestPayload" } & PullRequestPayloadFragment;
+    integration: { __typename?: "Integration" } & Pick<Integration, "id">;
+    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+  };
+
+export type IntegrationFragment = { __typename?: "Integration" } & Pick<
+  Integration,
+  "service" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+> & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
+
+export type OrganizationInviteFragment = { __typename?: "OrganizationInvite" } & Pick<
+  OrganizationInvite,
+  "external" | "email" | "updatedAt" | "archivedAt" | "createdAt" | "acceptedAt" | "expiresAt" | "id"
+> & {
+    inviter: { __typename?: "User" } & Pick<User, "id">;
+    invitee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+export type IssueFragment = { __typename?: "Issue" } & Pick<
+  Issue,
+  | "url"
+  | "identifier"
+  | "priorityLabel"
+  | "previousIdentifiers"
+  | "branchName"
+  | "dueDate"
+  | "estimate"
+  | "description"
+  | "title"
+  | "number"
+  | "updatedAt"
+  | "boardOrder"
+  | "subIssueSortOrder"
+  | "priority"
+  | "archivedAt"
+  | "createdAt"
+  | "autoArchivedAt"
+  | "autoClosedAt"
+  | "canceledAt"
+  | "completedAt"
+  | "startedAt"
+  | "id"
+> & {
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    parent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    team: { __typename?: "Team" } & Pick<Team, "id">;
+    assignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
+  };
+
+export type OrganizationFragment = { __typename?: "Organization" } & Pick<
+  Organization,
+  | "allowedAuthServices"
+  | "userCount"
+  | "createdIssueCount"
+  | "periodUploadVolume"
+  | "updatedAt"
+  | "logoUrl"
+  | "name"
+  | "urlKey"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "samlEnabled"
+  | "gitLinkbackMessagesEnabled"
+  | "gitPublicLinkbackMessagesEnabled"
+  | "roadmapEnabled"
+>;
+
+export type TeamFragment = { __typename?: "Team" } & Pick<
+  Team,
+  | "cycleIssueAutoAssignCompleted"
+  | "cycleIssueAutoAssignStarted"
+  | "cycleCalenderUrl"
+  | "upcomingCycleCount"
+  | "cycleLockToActive"
+  | "autoArchivePeriod"
+  | "autoClosePeriod"
+  | "autoCloseStateId"
+  | "cycleCooldownTime"
+  | "cycleStartDay"
+  | "cycleDuration"
+  | "issueEstimationType"
+  | "updatedAt"
+  | "description"
+  | "name"
+  | "key"
+  | "archivedAt"
+  | "createdAt"
+  | "timezone"
+  | "id"
+  | "inviteHash"
+  | "defaultIssueEstimate"
+  | "cyclesEnabled"
+  | "issueEstimationExtended"
+  | "issueEstimationAllowZero"
+  | "groupIssueHistory"
+  | "slackIssueComments"
+  | "slackNewIssue"
+  | "slackIssueStatuses"
+> & {
+    activeCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    mergeWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    draftWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    startWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    reviewWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    markedAsDuplicateWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+  };
+
+export type DocumentStepFragment = { __typename?: "DocumentStep" } & Pick<
+  DocumentStep,
+  "clientId" | "step" | "version" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
 export type SyncResponseFragment = { __typename?: "SyncResponse" } & Pick<
   SyncResponse,
-  "state" | "delta" | "archive" | "lastSyncId" | "databaseVersion"
+  "archive" | "delta" | "state" | "lastSyncId" | "databaseVersion"
 >;
 
 export type ArchiveResponseFragment = { __typename?: "ArchiveResponse" } & Pick<
@@ -4899,446 +5207,198 @@ export type ArchiveResponseFragment = { __typename?: "ArchiveResponse" } & Pick<
   "archive" | "totalCount" | "databaseVersion"
 >;
 
-export type ApiKeyConnectionFragment = { __typename?: "ApiKeyConnection" } & {
-  nodes: Array<{ __typename?: "ApiKey" } & ApiKeyFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type ApiKeyFragment = { __typename?: "ApiKey" } & Pick<
-  ApiKey,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "label"
->;
-
-export type PageInfoFragment = { __typename?: "PageInfo" } & Pick<
-  PageInfo,
-  "hasPreviousPage" | "hasNextPage" | "startCursor" | "endCursor"
->;
-
-export type UserAuthorizedApplicationFragment = { __typename?: "UserAuthorizedApplication" } & Pick<
-  UserAuthorizedApplication,
-  "clientId" | "name" | "description" | "developer" | "developerUrl" | "imageUrl" | "isAuthorized"
->;
-
-export type AuthorizedApplicationFragment = { __typename?: "AuthorizedApplication" } & Pick<
-  AuthorizedApplication,
-  "clientId" | "name" | "description" | "developer" | "developerUrl" | "imageUrl" | "scope" | "appId"
->;
-
-export type AuthResolverResponseFragment = { __typename?: "AuthResolverResponse" } & Pick<
-  AuthResolverResponse,
-  "id" | "token" | "email" | "allowDomainAccess"
-> & {
-    users: Array<{ __typename?: "User" } & UserFragment>;
-    availableOrganizations?: Maybe<Array<{ __typename?: "Organization" } & OrganizationFragment>>;
-  };
-
-export type UserFragment = { __typename?: "User" } & Pick<
-  User,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "archivedAt"
-  | "name"
-  | "displayName"
-  | "email"
-  | "avatarUrl"
-  | "inviteHash"
-  | "lastSeen"
-  | "admin"
-  | "active"
-  | "createdIssueCount"
->;
-
-export type IssueConnectionFragment = { __typename?: "IssueConnection" } & {
-  nodes: Array<{ __typename?: "Issue" } & IssueFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type IssueFragment = { __typename?: "Issue" } & Pick<
-  Issue,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "archivedAt"
-  | "number"
-  | "title"
-  | "description"
-  | "priority"
-  | "estimate"
-  | "boardOrder"
-  | "startedAt"
-  | "completedAt"
-  | "canceledAt"
-  | "autoClosedAt"
-  | "autoArchivedAt"
-  | "dueDate"
-  | "previousIdentifiers"
-  | "subIssueSortOrder"
-  | "identifier"
-  | "priorityLabel"
-  | "url"
-  | "branchName"
-> & {
-    team: { __typename?: "Team" } & Pick<Team, "id">;
-    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-    state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
-    assignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    parent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-  };
-
-export type TeamFragment = { __typename?: "Team" } & Pick<
-  Team,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "archivedAt"
-  | "name"
-  | "key"
-  | "description"
-  | "cyclesEnabled"
-  | "cycleStartDay"
-  | "cycleDuration"
-  | "cycleCooldownTime"
-  | "cycleIssueAutoAssignStarted"
-  | "cycleIssueAutoAssignCompleted"
-  | "cycleLockToActive"
-  | "upcomingCycleCount"
-  | "timezone"
-  | "inviteHash"
-  | "issueEstimationType"
-  | "issueEstimationAllowZero"
-  | "issueEstimationExtended"
-  | "defaultIssueEstimate"
-  | "groupIssueHistory"
-  | "slackNewIssue"
-  | "slackIssueComments"
-  | "slackIssueStatuses"
-  | "autoClosePeriod"
-  | "autoCloseStateId"
-  | "autoArchivePeriod"
-  | "cycleCalenderUrl"
-> & {
-    draftWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-    startWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-    reviewWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-    mergeWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-    markedAsDuplicateWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-    activeCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-  };
-
-export type WorkflowStateFragment = { __typename?: "WorkflowState" } & Pick<
-  WorkflowState,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "color" | "description" | "position" | "type"
-> & { team: { __typename?: "Team" } & Pick<Team, "id"> };
-
-export type CycleConnectionFragment = { __typename?: "CycleConnection" } & {
-  nodes: Array<{ __typename?: "Cycle" } & CycleFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type CycleFragment = { __typename?: "Cycle" } & Pick<
-  Cycle,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "archivedAt"
-  | "number"
-  | "name"
-  | "startsAt"
-  | "endsAt"
-  | "completedAt"
-  | "issueCountHistory"
-  | "completedIssueCountHistory"
-  | "scopeHistory"
-  | "completedScopeHistory"
-> & { team: { __typename?: "Team" } & Pick<Team, "id"> };
-
-export type TeamMembershipConnectionFragment = { __typename?: "TeamMembershipConnection" } & {
-  nodes: Array<{ __typename?: "TeamMembership" } & TeamMembershipFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
 export type TeamMembershipFragment = { __typename?: "TeamMembership" } & Pick<
   TeamMembership,
-  "id" | "createdAt" | "updatedAt" | "archivedAt"
-> & { user: { __typename?: "User" } & Pick<User, "id">; team: { __typename?: "Team" } & Pick<Team, "id"> };
+  "updatedAt" | "archivedAt" | "createdAt" | "id"
+> & { team: { __typename?: "Team" } & Pick<Team, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
 
-export type ProjectConnectionFragment = { __typename?: "ProjectConnection" } & {
-  nodes: Array<{ __typename?: "Project" } & ProjectFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type ProjectFragment = { __typename?: "Project" } & Pick<
-  Project,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "archivedAt"
-  | "name"
-  | "description"
-  | "slugId"
-  | "icon"
-  | "color"
-  | "state"
-  | "targetDate"
-  | "startedAt"
-  | "completedAt"
-  | "canceledAt"
-  | "sortOrder"
-  | "issueCountHistory"
-  | "completedIssueCountHistory"
-  | "scopeHistory"
-  | "completedScopeHistory"
-  | "slackNewIssue"
-  | "slackIssueComments"
-  | "slackIssueStatuses"
-> & {
-    creator: { __typename?: "User" } & Pick<User, "id">;
-    lead?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    milestone?: Maybe<{ __typename?: "Milestone" } & Pick<Milestone, "id">>;
-  };
-
-export type MilestoneFragment = { __typename?: "Milestone" } & Pick<
-  Milestone,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "sortOrder"
->;
-
-export type OrganizationFragment = { __typename?: "Organization" } & Pick<
-  Organization,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "archivedAt"
-  | "name"
-  | "urlKey"
-  | "logoUrl"
-  | "periodUploadVolume"
-  | "gitLinkbackMessagesEnabled"
-  | "gitPublicLinkbackMessagesEnabled"
-  | "roadmapEnabled"
-  | "samlEnabled"
-  | "allowedAuthServices"
-  | "userCount"
-  | "createdIssueCount"
->;
-
-export type UserConnectionFragment = { __typename?: "UserConnection" } & {
-  nodes: Array<{ __typename?: "User" } & UserFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type TeamConnectionFragment = { __typename?: "TeamConnection" } & {
-  nodes: Array<{ __typename?: "Team" } & TeamFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type MilestoneConnectionFragment = { __typename?: "MilestoneConnection" } & {
-  nodes: Array<{ __typename?: "Milestone" } & MilestoneFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type IntegrationConnectionFragment = { __typename?: "IntegrationConnection" } & {
-  nodes: Array<{ __typename?: "Integration" } & IntegrationFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type IntegrationFragment = { __typename?: "Integration" } & Pick<
-  Integration,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "service"
-> & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
-
-export type SubscriptionFragment = { __typename?: "Subscription" } & Pick<
-  Subscription,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type" | "seats" | "canceledAt" | "pendingChangeType"
+export type OrganizationDomainFragment = { __typename?: "OrganizationDomain" } & Pick<
+  OrganizationDomain,
+  "name" | "verificationEmail" | "verified" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
-export type ProjectLinkConnectionFragment = { __typename?: "ProjectLinkConnection" } & {
-  nodes: Array<{ __typename?: "ProjectLink" } & ProjectLinkFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
+export type CommitPayloadFragment = { __typename?: "CommitPayload" } & Pick<
+  CommitPayload,
+  "added" | "id" | "message" | "modified" | "removed" | "timestamp" | "url"
+>;
 
-export type ProjectLinkFragment = { __typename?: "ProjectLink" } & Pick<
-  ProjectLink,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "url" | "label"
-> & { creator: { __typename?: "User" } & Pick<User, "id">; project: { __typename?: "Project" } & Pick<Project, "id"> };
+export type GoogleSheetsSettingsFragment = { __typename?: "GoogleSheetsSettings" } & Pick<
+  GoogleSheetsSettings,
+  "sheetId" | "spreadsheetId" | "spreadsheetUrl" | "updatedIssuesAt"
+>;
 
-export type WorkflowStateConnectionFragment = { __typename?: "WorkflowStateConnection" } & {
-  nodes: Array<{ __typename?: "WorkflowState" } & WorkflowStateFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type TemplateConnectionFragment = { __typename?: "TemplateConnection" } & {
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type TemplateFragment = { __typename?: "Template" } & Pick<
-  Template,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type" | "name" | "description" | "templateData"
-> & { team: { __typename?: "Team" } & Pick<Team, "id">; creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
-
-export type IssueLabelConnectionFragment = { __typename?: "IssueLabelConnection" } & {
-  nodes: Array<{ __typename?: "IssueLabel" } & IssueLabelFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+export type IntegrationResourceDataFragment = { __typename?: "IntegrationResourceData" } & {
+  githubCommit?: Maybe<{ __typename?: "CommitPayload" } & CommitPayloadFragment>;
+  githubPullRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
+  gitlabMergeRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
+  sentryIssue?: Maybe<{ __typename?: "SentryIssuePayload" } & SentryIssuePayloadFragment>;
 };
 
 export type IssueLabelFragment = { __typename?: "IssueLabel" } & Pick<
   IssueLabel,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "description" | "color"
+  "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { team: { __typename?: "Team" } & Pick<Team, "id">; creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
-export type WebhookConnectionFragment = { __typename?: "WebhookConnection" } & {
-  nodes: Array<{ __typename?: "Webhook" } & WebhookFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
+export type NotificationSubscriptionFragment = { __typename?: "NotificationSubscription" } & Pick<
+  NotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "type" | "id"
+> & {
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    user: { __typename?: "User" } & Pick<User, "id">;
+  };
 
-export type WebhookFragment = { __typename?: "Webhook" } & Pick<
-  Webhook,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "url" | "enabled" | "secret"
-> & { team: { __typename?: "Team" } & Pick<Team, "id">; creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
-
-export type CommentConnectionFragment = { __typename?: "CommentConnection" } & {
-  nodes: Array<{ __typename?: "Comment" } & CommentFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type CommentFragment = { __typename?: "Comment" } & Pick<
-  Comment,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "body" | "editedAt"
-> & { user: { __typename?: "User" } & Pick<User, "id">; issue: { __typename?: "Issue" } & Pick<Issue, "id"> };
-
-export type IssueHistoryConnectionFragment = { __typename?: "IssueHistoryConnection" } & {
-  nodes: Array<{ __typename?: "IssueHistory" } & IssueHistoryFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
-  IssueHistory,
-  | "id"
-  | "createdAt"
+export type OauthClientFragment = { __typename?: "OauthClient" } & Pick<
+  OauthClient,
+  | "imageUrl"
+  | "description"
+  | "redirectUris"
+  | "developer"
+  | "clientId"
+  | "name"
+  | "clientSecret"
   | "updatedAt"
   | "archivedAt"
-  | "source"
-  | "updatedDescription"
-  | "fromTitle"
-  | "toTitle"
-  | "fromPriority"
-  | "toPriority"
-  | "fromEstimate"
-  | "toEstimate"
-  | "archived"
-  | "addedLabelIds"
-  | "removedLabelIds"
-  | "relationChanges"
-  | "autoClosed"
-  | "autoArchived"
-  | "fromDueDate"
-  | "toDueDate"
-> & {
-    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
-    actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    fromAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    toAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    fromTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-    toTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-    fromParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-    toParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-    fromState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-    toState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-    fromCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-    toCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-    fromProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    toProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-  };
+  | "createdAt"
+  | "id"
+  | "developerUrl"
+>;
 
-export type IntegrationResourceConnectionFragment = { __typename?: "IntegrationResourceConnection" } & {
-  nodes: Array<{ __typename?: "IntegrationResource" } & IntegrationResourceFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
+export type FigmaEmbedFragment = { __typename?: "FigmaEmbed" } & Pick<
+  FigmaEmbed,
+  "lastModified" | "name" | "url" | "nodeName"
+>;
 
-export type IntegrationResourceFragment = { __typename?: "IntegrationResource" } & Pick<
-  IntegrationResource,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "resourceType" | "resourceId"
-> & {
-    data: { __typename?: "IntegrationResourceData" } & IntegrationResourceDataFragment;
-    integration: { __typename?: "Integration" } & Pick<Integration, "id">;
-    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
-    pullRequest: { __typename?: "PullRequestPayload" } & PullRequestPayloadFragment;
-  };
+export type UploadFileFragment = { __typename?: "UploadFile" } & Pick<
+  UploadFile,
+  "assetUrl" | "contentType" | "filename" | "uploadUrl" | "size" | "metaData"
+> & { headers: Array<{ __typename?: "UploadFileHeader" } & UploadFileHeaderFragment> };
 
-export type IntegrationResourceDataFragment = { __typename?: "IntegrationResourceData" } & {
-  githubPullRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
-  gitlabMergeRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
-  githubCommit?: Maybe<{ __typename?: "CommitPayload" } & CommitPayloadFragment>;
-  sentryIssue?: Maybe<{ __typename?: "SentryIssuePayload" } & SentryIssuePayloadFragment>;
-};
+export type AuthorizedApplicationFragment = { __typename?: "AuthorizedApplication" } & Pick<
+  AuthorizedApplication,
+  "name" | "imageUrl" | "description" | "developer" | "appId" | "clientId" | "scope" | "developerUrl"
+>;
+
+export type UserAuthorizedApplicationFragment = { __typename?: "UserAuthorizedApplication" } & Pick<
+  UserAuthorizedApplication,
+  "name" | "imageUrl" | "description" | "developer" | "clientId" | "developerUrl" | "isAuthorized"
+>;
+
+export type ApplicationFragment = { __typename?: "Application" } & Pick<
+  Application,
+  "name" | "imageUrl" | "description" | "developer" | "clientId" | "developerUrl"
+>;
 
 export type PullRequestPayloadFragment = { __typename?: "PullRequestPayload" } & Pick<
   PullRequestPayload,
-  | "status"
-  | "number"
-  | "url"
+  | "branch"
+  | "closedAt"
+  | "createdAt"
   | "draft"
   | "id"
-  | "title"
-  | "branch"
-  | "userId"
-  | "userLogin"
+  | "mergedAt"
+  | "number"
   | "repoLogin"
   | "repoName"
-  | "createdAt"
+  | "status"
+  | "title"
   | "updatedAt"
-  | "closedAt"
-  | "mergedAt"
->;
-
-export type CommitPayloadFragment = { __typename?: "CommitPayload" } & Pick<
-  CommitPayload,
-  "id" | "message" | "timestamp" | "url" | "added" | "removed" | "modified"
+  | "url"
+  | "userId"
+  | "userLogin"
 >;
 
 export type SentryIssuePayloadFragment = { __typename?: "SentryIssuePayload" } & Pick<
   SentryIssuePayload,
   | "issueId"
-  | "webUrl"
-  | "actorType"
   | "actorId"
-  | "actorName"
   | "projectId"
+  | "firstSeen"
+  | "webUrl"
+  | "actorName"
+  | "firstVersion"
+  | "shortId"
   | "projectSlug"
   | "issueTitle"
-  | "shortId"
-  | "firstSeen"
-  | "firstVersion"
+  | "actorType"
 >;
 
-export type IssueRelationConnectionFragment = { __typename?: "IssueRelationConnection" } & {
-  nodes: Array<{ __typename?: "IssueRelation" } & IssueRelationFragment>;
+export type SentrySettingsFragment = { __typename?: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
+
+export type SlackPostSettingsFragment = { __typename?: "SlackPostSettings" } & Pick<
+  SlackPostSettings,
+  "channel" | "channelId" | "configurationUrl"
+>;
+
+export type IntegrationSettingsFragment = { __typename?: "IntegrationSettings" } & {
+  googleSheets?: Maybe<{ __typename?: "GoogleSheetsSettings" } & GoogleSheetsSettingsFragment>;
+  sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
+  slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
+  slackProjectPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
+};
+
+export type SamlConfigurationFragment = { __typename?: "SamlConfiguration" } & Pick<
+  SamlConfiguration,
+  "ssoBinding" | "allowedDomains" | "ssoEndpoint" | "ssoSignAlgo" | "ssoSigningCert"
+>;
+
+export type UserSettingsFragment = { __typename?: "UserSettings" } & Pick<
+  UserSettings,
+  "unsubscribedFrom" | "updatedAt" | "notificationPreferences" | "archivedAt" | "createdAt" | "id"
+> & { user: { __typename?: "User" } & Pick<User, "id"> };
+
+export type SubscriptionFragment = { __typename?: "Subscription" } & Pick<
+  Subscription,
+  "canceledAt" | "updatedAt" | "seats" | "pendingChangeType" | "type" | "archivedAt" | "createdAt" | "id"
+> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
+export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
+  Favorite,
+  "updatedAt" | "sortOrder" | "archivedAt" | "createdAt" | "type" | "id"
+> & {
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    projectTeam?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    user: { __typename?: "User" } & Pick<User, "id">;
+  };
+
+export type ViewPreferencesFragment = { __typename?: "ViewPreferences" } & Pick<
+  ViewPreferences,
+  "updatedAt" | "archivedAt" | "createdAt" | "id" | "type" | "viewType"
+>;
+
+export type ApiKeyConnectionFragment = { __typename?: "ApiKeyConnection" } & {
+  nodes: Array<{ __typename?: "ApiKey" } & ApiKeyFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type IssueRelationFragment = { __typename?: "IssueRelation" } & Pick<
-  IssueRelation,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type"
-> & { issue: { __typename?: "Issue" } & Pick<Issue, "id">; relatedIssue: { __typename?: "Issue" } & Pick<Issue, "id"> };
+export type ApiKeyPayloadFragment = { __typename?: "ApiKeyPayload" } & Pick<ApiKeyPayload, "lastSyncId" | "success"> & {
+    apiKey: { __typename?: "ApiKey" } & ApiKeyFragment;
+  };
 
-export type SsoUrlFromEmailResponseFragment = { __typename?: "SsoUrlFromEmailResponse" } & Pick<
-  SsoUrlFromEmailResponse,
-  "success" | "samlSsoUrl"
->;
+export type ArchivePayloadFragment = { __typename?: "ArchivePayload" } & Pick<ArchivePayload, "lastSyncId" | "success">;
+
+export type AuthResolverResponseFragment = { __typename?: "AuthResolverResponse" } & Pick<
+  AuthResolverResponse,
+  "email" | "token" | "allowDomainAccess" | "id"
+> & {
+    availableOrganizations?: Maybe<Array<{ __typename?: "Organization" } & OrganizationFragment>>;
+    users: Array<{ __typename?: "User" } & UserFragment>;
+  };
 
 export type BillingDetailsPayloadFragment = { __typename?: "BillingDetailsPayload" } & Pick<
   BillingDetailsPayload,
-  "success" | "email"
+  "email" | "success"
 > & {
     invoices: Array<{ __typename?: "Invoice" } & InvoiceFragment>;
     paymentMethod?: Maybe<{ __typename?: "Card" } & CardFragment>;
   };
 
-export type InvoiceFragment = { __typename?: "Invoice" } & Pick<
-  Invoice,
-  "url" | "created" | "dueDate" | "status" | "total"
+export type BillingEmailPayloadFragment = { __typename?: "BillingEmailPayload" } & Pick<
+  BillingEmailPayload,
+  "email" | "success"
 >;
 
 export type CardFragment = { __typename?: "Card" } & Pick<Card, "brand" | "last4">;
@@ -5348,161 +5408,10 @@ export type CollaborationDocumentUpdatePayloadFragment = { __typename?: "Collabo
   "success"
 > & { steps?: Maybe<{ __typename?: "StepsResponse" } & StepsResponseFragment> };
 
-export type StepsResponseFragment = { __typename?: "StepsResponse" } & Pick<
-  StepsResponse,
-  "version" | "steps" | "clientIds"
->;
-
-export type CustomViewConnectionFragment = { __typename?: "CustomViewConnection" } & {
-  nodes: Array<{ __typename?: "CustomView" } & CustomViewFragment>;
+export type CommentConnectionFragment = { __typename?: "CommentConnection" } & {
+  nodes: Array<{ __typename?: "Comment" } & CommentFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
-
-export type CustomViewFragment = { __typename?: "CustomView" } & Pick<
-  CustomView,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "description" | "icon" | "color" | "filters" | "shared"
-> & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
-
-export type EmojiConnectionFragment = { __typename?: "EmojiConnection" } & {
-  nodes: Array<{ __typename?: "Emoji" } & EmojiFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type EmojiFragment = { __typename?: "Emoji" } & Pick<
-  Emoji,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "url" | "source"
-> & { creator: { __typename?: "User" } & Pick<User, "id"> };
-
-export type FavoriteConnectionFragment = { __typename?: "FavoriteConnection" } & {
-  nodes: Array<{ __typename?: "Favorite" } & FavoriteFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
-  Favorite,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type" | "sortOrder"
-> & {
-    user: { __typename?: "User" } & Pick<User, "id">;
-    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    projectTeam?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-  };
-
-export type FigmaEmbedPayloadFragment = { __typename?: "FigmaEmbedPayload" } & Pick<
-  FigmaEmbedPayload,
-  "lastSyncId" | "success"
-> & { figmaEmbed?: Maybe<{ __typename?: "FigmaEmbed" } & FigmaEmbedFragment> };
-
-export type FigmaEmbedFragment = { __typename?: "FigmaEmbed" } & Pick<
-  FigmaEmbed,
-  "name" | "lastModified" | "nodeName" | "url"
->;
-
-export type InvitePagePayloadFragment = { __typename?: "InvitePagePayload" } & Pick<InvitePagePayload, "success"> & {
-    inviteData?: Maybe<{ __typename?: "InviteData" } & InviteDataFragment>;
-  };
-
-export type InviteDataFragment = { __typename?: "InviteData" } & Pick<
-  InviteData,
-  | "inviterName"
-  | "avatarURLs"
-  | "teamNames"
-  | "teamIds"
-  | "organizationName"
-  | "organizationDomain"
-  | "organizationLogoUrl"
-  | "userCount"
->;
-
-export type NotificationConnectionFragment = { __typename?: "NotificationConnection" } & {
-  nodes: Array<{ __typename?: "Notification" } & NotificationFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type NotificationFragment = { __typename?: "Notification" } & Pick<
-  Notification,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type" | "reactionEmoji" | "readAt" | "emailedAt"
-> & {
-    user: { __typename?: "User" } & Pick<User, "id">;
-    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
-    team: { __typename?: "Team" } & Pick<Team, "id">;
-    comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-  };
-
-export type NotificationSubscriptionConnectionFragment = { __typename?: "NotificationSubscriptionConnection" } & {
-  nodes: Array<{ __typename?: "NotificationSubscription" } & NotificationSubscriptionFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type NotificationSubscriptionFragment = { __typename?: "NotificationSubscription" } & Pick<
-  NotificationSubscription,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type"
-> & {
-    user: { __typename?: "User" } & Pick<User, "id">;
-    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-  };
-
-export type OrganizationInviteConnectionFragment = { __typename?: "OrganizationInviteConnection" } & {
-  nodes: Array<{ __typename?: "OrganizationInvite" } & OrganizationInviteFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type OrganizationInviteFragment = { __typename?: "OrganizationInvite" } & Pick<
-  OrganizationInvite,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "email" | "external" | "acceptedAt" | "expiresAt"
-> & {
-    inviter: { __typename?: "User" } & Pick<User, "id">;
-    invitee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-  };
-
-export type OrganizationExistsPayloadFragment = { __typename?: "OrganizationExistsPayload" } & Pick<
-  OrganizationExistsPayload,
-  "success" | "exists"
->;
-
-export type PushSubscriptionPayloadFragment = { __typename?: "PushSubscriptionPayload" } & Pick<
-  PushSubscriptionPayload,
-  "lastSyncId" | "success"
->;
-
-export type ReactionConnectionFragment = { __typename?: "ReactionConnection" } & {
-  nodes: Array<{ __typename?: "Reaction" } & ReactionFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type ReactionFragment = { __typename?: "Reaction" } & Pick<
-  Reaction,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "emoji"
-> & { user: { __typename?: "User" } & Pick<User, "id">; comment: { __typename?: "Comment" } & Pick<Comment, "id"> };
-
-export type UserSettingsFragment = { __typename?: "UserSettings" } & Pick<
-  UserSettings,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "notificationPreferences" | "unsubscribedFrom"
-> & { user: { __typename?: "User" } & Pick<User, "id"> };
-
-export type EventPayloadFragment = { __typename?: "EventPayload" } & Pick<EventPayload, "success">;
-
-export type ApiKeyPayloadFragment = { __typename?: "ApiKeyPayload" } & Pick<ApiKeyPayload, "lastSyncId" | "success"> & {
-    apiKey: { __typename?: "ApiKey" } & ApiKeyFragment;
-  };
-
-export type ArchivePayloadFragment = { __typename?: "ArchivePayload" } & Pick<ArchivePayload, "lastSyncId" | "success">;
-
-export type EmailUserAccountAuthChallengeResponseFragment = {
-  __typename?: "EmailUserAccountAuthChallengeResponse";
-} & Pick<EmailUserAccountAuthChallengeResponse, "success" | "authType">;
-
-export type CreateOrJoinOrganizationResponseFragment = { __typename?: "CreateOrJoinOrganizationResponse" } & {
-  user: { __typename?: "User" } & Pick<User, "id">;
-};
-
-export type BillingEmailPayloadFragment = { __typename?: "BillingEmailPayload" } & Pick<
-  BillingEmailPayload,
-  "success" | "email"
->;
 
 export type CommentPayloadFragment = { __typename?: "CommentPayload" } & Pick<
   CommentPayload,
@@ -5511,10 +5420,29 @@ export type CommentPayloadFragment = { __typename?: "CommentPayload" } & Pick<
 
 export type ContactPayloadFragment = { __typename?: "ContactPayload" } & Pick<ContactPayload, "success">;
 
+export type CreateCsvExportReportPayloadFragment = { __typename?: "CreateCsvExportReportPayload" } & Pick<
+  CreateCsvExportReportPayload,
+  "success"
+>;
+
+export type CreateOrJoinOrganizationResponseFragment = { __typename?: "CreateOrJoinOrganizationResponse" } & {
+  user: { __typename?: "User" } & Pick<User, "id">;
+};
+
+export type CustomViewConnectionFragment = { __typename?: "CustomViewConnection" } & {
+  nodes: Array<{ __typename?: "CustomView" } & CustomViewFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type CustomViewPayloadFragment = { __typename?: "CustomViewPayload" } & Pick<
   CustomViewPayload,
   "lastSyncId" | "success"
 > & { customView: { __typename?: "CustomView" } & Pick<CustomView, "id"> };
+
+export type CycleConnectionFragment = { __typename?: "CycleConnection" } & {
+  nodes: Array<{ __typename?: "Cycle" } & CycleFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type CyclePayloadFragment = { __typename?: "CyclePayload" } & Pick<CyclePayload, "lastSyncId" | "success"> & {
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -5527,9 +5455,25 @@ export type EmailUnsubscribePayloadFragment = { __typename?: "EmailUnsubscribePa
   "success"
 >;
 
+export type EmailUserAccountAuthChallengeResponseFragment = {
+  __typename?: "EmailUserAccountAuthChallengeResponse";
+} & Pick<EmailUserAccountAuthChallengeResponse, "authType" | "success">;
+
+export type EmojiConnectionFragment = { __typename?: "EmojiConnection" } & {
+  nodes: Array<{ __typename?: "Emoji" } & EmojiFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type EmojiPayloadFragment = { __typename?: "EmojiPayload" } & Pick<EmojiPayload, "lastSyncId" | "success"> & {
     emoji: { __typename?: "Emoji" } & Pick<Emoji, "id">;
   };
+
+export type EventPayloadFragment = { __typename?: "EventPayload" } & Pick<EventPayload, "success">;
+
+export type FavoriteConnectionFragment = { __typename?: "FavoriteConnection" } & {
+  nodes: Array<{ __typename?: "Favorite" } & FavoriteFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type FavoritePayloadFragment = { __typename?: "FavoritePayload" } & Pick<
   FavoritePayload,
@@ -5538,60 +5482,115 @@ export type FavoritePayloadFragment = { __typename?: "FavoritePayload" } & Pick<
 
 export type FeedbackPayloadFragment = { __typename?: "FeedbackPayload" } & Pick<FeedbackPayload, "success">;
 
-export type UploadPayloadFragment = { __typename?: "UploadPayload" } & Pick<UploadPayload, "lastSyncId" | "success"> & {
-    uploadFile?: Maybe<{ __typename?: "UploadFile" } & UploadFileFragment>;
-  };
-
-export type UploadFileFragment = { __typename?: "UploadFile" } & Pick<
-  UploadFile,
-  "filename" | "contentType" | "size" | "uploadUrl" | "assetUrl" | "metaData"
-> & { headers: Array<{ __typename?: "UploadFileHeader" } & UploadFileHeaderFragment> };
-
-export type UploadFileHeaderFragment = { __typename?: "UploadFileHeader" } & Pick<UploadFileHeader, "key" | "value">;
+export type FigmaEmbedPayloadFragment = { __typename?: "FigmaEmbedPayload" } & Pick<
+  FigmaEmbedPayload,
+  "lastSyncId" | "success"
+> & { figmaEmbed?: Maybe<{ __typename?: "FigmaEmbed" } & FigmaEmbedFragment> };
 
 export type ImageUploadFromUrlPayloadFragment = { __typename?: "ImageUploadFromUrlPayload" } & Pick<
   ImageUploadFromUrlPayload,
-  "lastSyncId" | "url" | "success"
+  "url" | "lastSyncId" | "success"
 >;
+
+export type IntegrationConnectionFragment = { __typename?: "IntegrationConnection" } & {
+  nodes: Array<{ __typename?: "Integration" } & IntegrationFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type IntegrationPayloadFragment = { __typename?: "IntegrationPayload" } & Pick<
   IntegrationPayload,
   "lastSyncId" | "success"
 > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 
+export type IntegrationResourceConnectionFragment = { __typename?: "IntegrationResourceConnection" } & {
+  nodes: Array<{ __typename?: "IntegrationResource" } & IntegrationResourceFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type InviteDataFragment = { __typename?: "InviteData" } & Pick<
+  InviteData,
+  | "avatarURLs"
+  | "teamIds"
+  | "teamNames"
+  | "organizationDomain"
+  | "organizationLogoUrl"
+  | "inviterName"
+  | "organizationName"
+  | "userCount"
+>;
+
+export type InvitePagePayloadFragment = { __typename?: "InvitePagePayload" } & Pick<InvitePagePayload, "success"> & {
+    inviteData?: Maybe<{ __typename?: "InviteData" } & InviteDataFragment>;
+  };
+
+export type InvoiceFragment = { __typename?: "Invoice" } & Pick<
+  Invoice,
+  "url" | "created" | "dueDate" | "total" | "status"
+>;
+
+export type IssueConnectionFragment = { __typename?: "IssueConnection" } & {
+  nodes: Array<{ __typename?: "Issue" } & IssueFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type IssueHistoryConnectionFragment = { __typename?: "IssueHistoryConnection" } & {
+  nodes: Array<{ __typename?: "IssueHistory" } & IssueHistoryFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type IssueImportPayloadFragment = { __typename?: "IssueImportPayload" } & Pick<
   IssueImportPayload,
   "lastSyncId" | "success"
 > & { issueImport?: Maybe<{ __typename?: "IssueImport" } & IssueImportFragment> };
 
-export type IssueImportFragment = { __typename?: "IssueImport" } & Pick<
-  IssueImport,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "organizationId" | "creatorId" | "service" | "status"
->;
+export type IssueLabelConnectionFragment = { __typename?: "IssueLabelConnection" } & {
+  nodes: Array<{ __typename?: "IssueLabel" } & IssueLabelFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type IssueLabelPayloadFragment = { __typename?: "IssueLabelPayload" } & Pick<
   IssueLabelPayload,
   "lastSyncId" | "success"
 > & { issueLabel: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id"> };
 
+export type IssuePayloadFragment = { __typename?: "IssuePayload" } & Pick<IssuePayload, "lastSyncId" | "success"> & {
+    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+  };
+
+export type IssueRelationConnectionFragment = { __typename?: "IssueRelationConnection" } & {
+  nodes: Array<{ __typename?: "IssueRelation" } & IssueRelationFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type IssueRelationPayloadFragment = { __typename?: "IssueRelationPayload" } & Pick<
   IssueRelationPayload,
   "lastSyncId" | "success"
 > & { issueRelation: { __typename?: "IssueRelation" } & Pick<IssueRelation, "id"> };
 
-export type IssuePayloadFragment = { __typename?: "IssuePayload" } & Pick<IssuePayload, "lastSyncId" | "success"> & {
-    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-  };
+export type MilestoneConnectionFragment = { __typename?: "MilestoneConnection" } & {
+  nodes: Array<{ __typename?: "Milestone" } & MilestoneFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type MilestonePayloadFragment = { __typename?: "MilestonePayload" } & Pick<
   MilestonePayload,
   "lastSyncId" | "success"
 > & { milestone?: Maybe<{ __typename?: "Milestone" } & Pick<Milestone, "id">> };
 
+export type NotificationConnectionFragment = { __typename?: "NotificationConnection" } & {
+  nodes: Array<{ __typename?: "Notification" } & NotificationFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type NotificationPayloadFragment = { __typename?: "NotificationPayload" } & Pick<
   NotificationPayload,
   "lastSyncId" | "success"
 > & { notification: { __typename?: "Notification" } & Pick<Notification, "id"> };
+
+export type NotificationSubscriptionConnectionFragment = { __typename?: "NotificationSubscriptionConnection" } & {
+  nodes: Array<{ __typename?: "NotificationSubscription" } & NotificationSubscriptionFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type NotificationSubscriptionPayloadFragment = { __typename?: "NotificationSubscriptionPayload" } & Pick<
   NotificationSubscriptionPayload,
@@ -5603,29 +5602,13 @@ export type OauthClientPayloadFragment = { __typename?: "OauthClientPayload" } &
   "lastSyncId" | "success"
 > & { oauthClient: { __typename?: "OauthClient" } & OauthClientFragment };
 
-export type OauthClientFragment = { __typename?: "OauthClient" } & Pick<
-  OauthClient,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "archivedAt"
-  | "clientId"
-  | "name"
-  | "description"
-  | "developer"
-  | "developerUrl"
-  | "imageUrl"
-  | "clientSecret"
-  | "redirectUris"
->;
-
-export type RotateSecretPayloadFragment = { __typename?: "RotateSecretPayload" } & Pick<
-  RotateSecretPayload,
-  "lastSyncId" | "success"
->;
-
 export type OauthTokenRevokePayloadFragment = { __typename?: "OauthTokenRevokePayload" } & Pick<
   OauthTokenRevokePayload,
+  "success"
+>;
+
+export type OrganizationDeletePayloadFragment = { __typename?: "OrganizationDeletePayload" } & Pick<
+  OrganizationDeletePayload,
   "success"
 >;
 
@@ -5634,10 +5617,20 @@ export type OrganizationDomainPayloadFragment = { __typename?: "OrganizationDoma
   "lastSyncId" | "success"
 > & { organizationDomain: { __typename?: "OrganizationDomain" } & OrganizationDomainFragment };
 
-export type OrganizationDomainFragment = { __typename?: "OrganizationDomain" } & Pick<
-  OrganizationDomain,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "verified" | "verificationEmail"
-> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+export type OrganizationDomainSimplePayloadFragment = { __typename?: "OrganizationDomainSimplePayload" } & Pick<
+  OrganizationDomainSimplePayload,
+  "success"
+>;
+
+export type OrganizationExistsPayloadFragment = { __typename?: "OrganizationExistsPayload" } & Pick<
+  OrganizationExistsPayload,
+  "success" | "exists"
+>;
+
+export type OrganizationInviteConnectionFragment = { __typename?: "OrganizationInviteConnection" } & {
+  nodes: Array<{ __typename?: "OrganizationInvite" } & OrganizationInviteFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type OrganizationInvitePayloadFragment = { __typename?: "OrganizationInvitePayload" } & Pick<
   OrganizationInvitePayload,
@@ -5649,10 +5642,20 @@ export type OrganizationPayloadFragment = { __typename?: "OrganizationPayload" }
   "lastSyncId" | "success"
 >;
 
-export type OrganizationDeletePayloadFragment = { __typename?: "OrganizationDeletePayload" } & Pick<
-  OrganizationDeletePayload,
-  "success"
+export type PageInfoFragment = { __typename?: "PageInfo" } & Pick<
+  PageInfo,
+  "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
 >;
+
+export type ProjectConnectionFragment = { __typename?: "ProjectConnection" } & {
+  nodes: Array<{ __typename?: "Project" } & ProjectFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type ProjectLinkConnectionFragment = { __typename?: "ProjectLinkConnection" } & {
+  nodes: Array<{ __typename?: "ProjectLink" } & ProjectLinkFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type ProjectLinkPayloadFragment = { __typename?: "ProjectLinkPayload" } & Pick<
   ProjectLinkPayload,
@@ -5664,14 +5667,44 @@ export type ProjectPayloadFragment = { __typename?: "ProjectPayload" } & Pick<
   "lastSyncId" | "success"
 > & { project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">> };
 
+export type PushSubscriptionConnectionFragment = { __typename?: "PushSubscriptionConnection" } & {
+  nodes: Array<{ __typename?: "PushSubscription" } & PushSubscriptionFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type PushSubscriptionPayloadFragment = { __typename?: "PushSubscriptionPayload" } & Pick<
+  PushSubscriptionPayload,
+  "lastSyncId" | "success"
+>;
+
+export type ReactionConnectionFragment = { __typename?: "ReactionConnection" } & {
+  nodes: Array<{ __typename?: "Reaction" } & ReactionFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type ReactionPayloadFragment = { __typename?: "ReactionPayload" } & Pick<
   ReactionPayload,
   "lastSyncId" | "success"
 > & { reaction: { __typename?: "Reaction" } & Pick<Reaction, "id"> };
 
-export type CreateCsvExportReportPayloadFragment = { __typename?: "CreateCsvExportReportPayload" } & Pick<
-  CreateCsvExportReportPayload,
-  "success"
+export type RotateSecretPayloadFragment = { __typename?: "RotateSecretPayload" } & Pick<
+  RotateSecretPayload,
+  "lastSyncId" | "success"
+>;
+
+export type SsoUrlFromEmailResponseFragment = { __typename?: "SsoUrlFromEmailResponse" } & Pick<
+  SsoUrlFromEmailResponse,
+  "samlSsoUrl" | "success"
+>;
+
+export type StepsResponseFragment = { __typename?: "StepsResponse" } & Pick<
+  StepsResponse,
+  "version" | "clientIds" | "steps"
+>;
+
+export type SubscriptionPayloadFragment = { __typename?: "SubscriptionPayload" } & Pick<
+  SubscriptionPayload,
+  "canceledAt" | "lastSyncId" | "success"
 >;
 
 export type SubscriptionSessionPayloadFragment = { __typename?: "SubscriptionSessionPayload" } & Pick<
@@ -5679,10 +5712,20 @@ export type SubscriptionSessionPayloadFragment = { __typename?: "SubscriptionSes
   "session"
 >;
 
-export type SubscriptionPayloadFragment = { __typename?: "SubscriptionPayload" } & Pick<
-  SubscriptionPayload,
-  "lastSyncId" | "canceledAt" | "success"
+export type SynchronizedPayloadFragment = { __typename?: "SynchronizedPayload" } & Pick<
+  SynchronizedPayload,
+  "lastSyncId"
 >;
+
+export type TeamConnectionFragment = { __typename?: "TeamConnection" } & {
+  nodes: Array<{ __typename?: "Team" } & TeamFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type TeamMembershipConnectionFragment = { __typename?: "TeamMembershipConnection" } & {
+  nodes: Array<{ __typename?: "TeamMembership" } & TeamMembershipFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type TeamMembershipPayloadFragment = { __typename?: "TeamMembershipPayload" } & Pick<
   TeamMembershipPayload,
@@ -5693,29 +5736,44 @@ export type TeamPayloadFragment = { __typename?: "TeamPayload" } & Pick<TeamPayl
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
   };
 
+export type TemplateConnectionFragment = { __typename?: "TemplateConnection" } & {
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type TemplatePayloadFragment = { __typename?: "TemplatePayload" } & Pick<
   TemplatePayload,
   "lastSyncId" | "success"
 > & { template: { __typename?: "Template" } & Pick<Template, "id"> };
 
-export type UserPayloadFragment = { __typename?: "UserPayload" } & Pick<UserPayload, "lastSyncId" | "success"> & {
-    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+export type UploadFileHeaderFragment = { __typename?: "UploadFileHeader" } & Pick<UploadFileHeader, "key" | "value">;
+
+export type UploadPayloadFragment = { __typename?: "UploadPayload" } & Pick<UploadPayload, "lastSyncId" | "success"> & {
+    uploadFile?: Maybe<{ __typename?: "UploadFile" } & UploadFileFragment>;
   };
 
 export type UserAdminPayloadFragment = { __typename?: "UserAdminPayload" } & Pick<UserAdminPayload, "success">;
 
-export type UserSettingsPayloadFragment = { __typename?: "UserSettingsPayload" } & Pick<
-  UserSettingsPayload,
-  "lastSyncId" | "success"
->;
+export type UserConnectionFragment = { __typename?: "UserConnection" } & {
+  nodes: Array<{ __typename?: "User" } & UserFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type UserPayloadFragment = { __typename?: "UserPayload" } & Pick<UserPayload, "lastSyncId" | "success"> & {
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
 
 export type UserSettingsFlagPayloadFragment = { __typename?: "UserSettingsFlagPayload" } & Pick<
   UserSettingsFlagPayload,
-  "lastSyncId" | "flag" | "value" | "success"
+  "flag" | "value" | "lastSyncId" | "success"
 >;
 
 export type UserSettingsFlagsResetPayloadFragment = { __typename?: "UserSettingsFlagsResetPayload" } & Pick<
   UserSettingsFlagsResetPayload,
+  "lastSyncId" | "success"
+>;
+
+export type UserSettingsPayloadFragment = { __typename?: "UserSettingsPayload" } & Pick<
+  UserSettingsPayload,
   "lastSyncId" | "success"
 >;
 
@@ -5729,84 +5787,25 @@ export type ViewPreferencesPayloadFragment = { __typename?: "ViewPreferencesPayl
   "lastSyncId" | "success"
 > & { viewPreferences: { __typename?: "ViewPreferences" } & ViewPreferencesFragment };
 
-export type ViewPreferencesFragment = { __typename?: "ViewPreferences" } & Pick<
-  ViewPreferences,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "type" | "viewType"
->;
+export type WebhookConnectionFragment = { __typename?: "WebhookConnection" } & {
+  nodes: Array<{ __typename?: "Webhook" } & WebhookFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type WebhookPayloadFragment = { __typename?: "WebhookPayload" } & Pick<
   WebhookPayload,
   "lastSyncId" | "success"
 > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> };
 
+export type WorkflowStateConnectionFragment = { __typename?: "WorkflowStateConnection" } & {
+  nodes: Array<{ __typename?: "WorkflowState" } & WorkflowStateFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type WorkflowStatePayloadFragment = { __typename?: "WorkflowStatePayload" } & Pick<
   WorkflowStatePayload,
   "lastSyncId" | "success"
 > & { workflowState: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id"> };
-
-export type SynchronizedPayloadFragment = { __typename?: "SynchronizedPayload" } & Pick<
-  SynchronizedPayload,
-  "lastSyncId"
->;
-
-export type DocumentStepFragment = { __typename?: "DocumentStep" } & Pick<
-  DocumentStep,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "step" | "version" | "clientId"
->;
-
-export type SamlConfigurationFragment = { __typename?: "SamlConfiguration" } & Pick<
-  SamlConfiguration,
-  "ssoSigningCert" | "ssoEndpoint" | "ssoBinding" | "ssoSignAlgo" | "allowedDomains"
->;
-
-export type UserAccountFragment = { __typename?: "UserAccount" } & Pick<
-  UserAccount,
-  "id" | "createdAt" | "updatedAt" | "archivedAt" | "name" | "email" | "service"
-> & { users: Array<{ __typename?: "User" } & UserFragment> };
-
-export type SlackPostSettingsFragment = { __typename?: "SlackPostSettings" } & Pick<
-  SlackPostSettings,
-  "channel" | "channelId" | "configurationUrl"
->;
-
-export type GoogleSheetsSettingsFragment = { __typename?: "GoogleSheetsSettings" } & Pick<
-  GoogleSheetsSettings,
-  "spreadsheetId" | "spreadsheetUrl" | "sheetId" | "updatedIssuesAt"
->;
-
-export type SentrySettingsFragment = { __typename?: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
-
-export type IntegrationSettingsFragment = { __typename?: "IntegrationSettings" } & {
-  slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
-  slackProjectPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
-  googleSheets?: Maybe<{ __typename?: "GoogleSheetsSettings" } & GoogleSheetsSettingsFragment>;
-  sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
-};
-
-export type PushSubscriptionFragment = { __typename?: "PushSubscription" } & Pick<
-  PushSubscription,
-  "id" | "createdAt" | "updatedAt" | "archivedAt"
->;
-
-export type PushSubscriptionConnectionFragment = { __typename?: "PushSubscriptionConnection" } & {
-  nodes: Array<{ __typename?: "PushSubscription" } & PushSubscriptionFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type FileUploadFragment = { __typename?: "FileUpload" } & Pick<
-  FileUpload,
-  "id" | "assetUrl" | "contentType" | "filename" | "metaData" | "size"
-> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
-
-export type ApplicationFragment = { __typename?: "Application" } & Pick<
-  Application,
-  "clientId" | "name" | "description" | "developer" | "developerUrl" | "imageUrl"
->;
-
-export type OrganizationDomainSimplePayloadFragment = { __typename?: "OrganizationDomainSimplePayload" } & Pick<
-  OrganizationDomainSimplePayload,
-  "success"
->;
 
 export type SyncBootstrapQueryVariables = Exact<{
   databaseVersion: Scalars["Int"];
@@ -7470,9 +7469,10 @@ export type IntegrationResourceArchiveMutation = { __typename?: "Mutation" } & {
 };
 
 export type IssueImportCreateGithubMutationVariables = Exact<{
-  repoOwner: Scalars["String"];
-  repoName: Scalars["String"];
-  token: Scalars["String"];
+  githubRepoOwner: Scalars["String"];
+  githubRepoName: Scalars["String"];
+  githubToken: Scalars["String"];
+  teamId: Scalars["String"];
 }>;
 
 export type IssueImportCreateGithubMutation = { __typename?: "Mutation" } & {
@@ -8109,6 +8109,168 @@ export type WorkflowStateArchiveMutation = { __typename?: "Mutation" } & {
   workflowStateArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
+export const FileUploadFragmentDoc: DocumentNode<FileUploadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "FileUpload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FileUpload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "metaData" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "size" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "contentType" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "assetUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "filename" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const TemplateFragmentDoc: DocumentNode<TemplateFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Template" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Template" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "templateData" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "User" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "avatarUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSeen" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "displayName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "active" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "admin" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const UserAccountFragmentDoc: DocumentNode<UserAccountFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserAccount" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAccount" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "users" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserFragmentDoc.definitions,
+  ],
+};
+export const DocumentStepFragmentDoc: DocumentNode<DocumentStepFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DocumentStep" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DocumentStep" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "step" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "version" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
 export const SyncResponseFragmentDoc: DocumentNode<SyncResponseFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -8120,9 +8282,9 @@ export const SyncResponseFragmentDoc: DocumentNode<SyncResponseFragment, unknown
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "state" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "delta" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "archive" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "delta" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "state" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "databaseVersion" }, arguments: [], directives: [] },
         ],
@@ -8149,6 +8311,283 @@ export const ArchiveResponseFragmentDoc: DocumentNode<ArchiveResponseFragment, u
     },
   ],
 };
+export const AuthorizedApplicationFragmentDoc: DocumentNode<AuthorizedApplicationFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AuthorizedApplication" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuthorizedApplication" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "appId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "scope" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const UserAuthorizedApplicationFragmentDoc: DocumentNode<UserAuthorizedApplicationFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserAuthorizedApplication" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAuthorizedApplication" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "isAuthorized" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Application" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Application" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const GoogleSheetsSettingsFragmentDoc: DocumentNode<GoogleSheetsSettingsFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "GoogleSheetsSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "GoogleSheetsSettings" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "sheetId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "spreadsheetId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "spreadsheetUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedIssuesAt" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const SentrySettingsFragmentDoc: DocumentNode<SentrySettingsFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SentrySettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SentrySettings" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "organizationSlug" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const SlackPostSettingsFragmentDoc: DocumentNode<SlackPostSettingsFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SlackPostSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SlackPostSettings" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "channel" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "channelId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "configurationUrl" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const IntegrationSettingsFragmentDoc: DocumentNode<IntegrationSettingsFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntegrationSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationSettings" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "googleSheets" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "GoogleSheetsSettings" }, directives: [] },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sentry" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentrySettings" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "slackPost" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" }, directives: [] },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "slackProjectPost" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...GoogleSheetsSettingsFragmentDoc.definitions,
+    ...SentrySettingsFragmentDoc.definitions,
+    ...SlackPostSettingsFragmentDoc.definitions,
+  ],
+};
+export const SamlConfigurationFragmentDoc: DocumentNode<SamlConfigurationFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SamlConfiguration" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SamlConfiguration" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "ssoBinding" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "allowedDomains" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "ssoSignAlgo" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const UserSettingsFragmentDoc: DocumentNode<UserSettingsFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettings" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "unsubscribedFrom" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "notificationPreferences" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const SubscriptionFragmentDoc: DocumentNode<SubscriptionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Subscription" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Subscription" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "seats" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "pendingChangeType" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
 export const ApiKeyFragmentDoc: DocumentNode<ApiKeyFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -8160,11 +8599,11 @@ export const ApiKeyFragmentDoc: DocumentNode<ApiKeyFragment, unknown> = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "label" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "label" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -8181,10 +8620,10 @@ export const PageInfoFragmentDoc: DocumentNode<PageInfoFragment, unknown> = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "hasPreviousPage" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "hasNextPage" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "startCursor" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "endCursor" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "hasPreviousPage" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "hasNextPage" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -8228,77 +8667,48 @@ export const ApiKeyConnectionFragmentDoc: DocumentNode<ApiKeyConnectionFragment,
     ...PageInfoFragmentDoc.definitions,
   ],
 };
-export const UserAuthorizedApplicationFragmentDoc: DocumentNode<UserAuthorizedApplicationFragment, unknown> = {
+export const ApiKeyPayloadFragmentDoc: DocumentNode<ApiKeyPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserAuthorizedApplication" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAuthorizedApplication" } },
+      name: { kind: "Name", value: "ApiKeyPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyPayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "isAuthorized" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "apiKey" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKey" }, directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
+    ...ApiKeyFragmentDoc.definitions,
   ],
 };
-export const AuthorizedApplicationFragmentDoc: DocumentNode<AuthorizedApplicationFragment, unknown> = {
+export const ArchivePayloadFragmentDoc: DocumentNode<ArchivePayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AuthorizedApplication" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuthorizedApplication" } },
+      name: { kind: "Name", value: "ArchivePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ArchivePayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "scope" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "appId" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "User" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "displayName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "avatarUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "lastSeen" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "admin" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "active" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -8315,14 +8725,18 @@ export const OrganizationFragmentDoc: DocumentNode<OrganizationFragment, unknown
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "userCount" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "periodUploadVolume" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "logoUrl" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "urlKey" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "logoUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "periodUploadVolume" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "samlEnabled" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "gitLinkbackMessagesEnabled" }, arguments: [], directives: [] },
           {
             kind: "Field",
@@ -8331,10 +8745,6 @@ export const OrganizationFragmentDoc: DocumentNode<OrganizationFragment, unknown
             directives: [],
           },
           { kind: "Field", name: { kind: "Name", value: "roadmapEnabled" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "samlEnabled" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "userCount" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -8351,20 +8761,8 @@ export const AuthResolverResponseFragmentDoc: DocumentNode<AuthResolverResponseF
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "token" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "allowDomainAccess" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "users" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
-            },
-          },
+          { kind: "Field", name: { kind: "Name", value: "token" }, arguments: [], directives: [] },
           {
             kind: "Field",
             name: { kind: "Name", value: "availableOrganizations" },
@@ -8375,434 +8773,11 @@ export const AuthResolverResponseFragmentDoc: DocumentNode<AuthResolverResponseF
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Organization" }, directives: [] }],
             },
           },
-        ],
-      },
-    },
-    ...UserFragmentDoc.definitions,
-    ...OrganizationFragmentDoc.definitions,
-  ],
-};
-export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Issue" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Issue" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
+          { kind: "Field", name: { kind: "Name", value: "allowDomainAccess" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "title" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "priority" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "estimate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "boardOrder" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "startedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoClosedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoArchivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "dueDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "previousIdentifiers" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "subIssueSortOrder" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "identifier" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "priorityLabel" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycle" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "state" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "assignee" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "parent" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "project" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "branchName" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const IssueConnectionFragmentDoc: DocumentNode<IssueConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Issue" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const CycleFragmentDoc: DocumentNode<CycleFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Cycle" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Cycle" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "startsAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "endsAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueCountHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "scopeHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const CycleConnectionFragmentDoc: DocumentNode<CycleConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CycleConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CycleConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Cycle" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...CycleFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const TeamMembershipFragmentDoc: DocumentNode<TeamMembershipFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "TeamMembership" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamMembership" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const TeamMembershipConnectionFragmentDoc: DocumentNode<TeamMembershipConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "TeamMembershipConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembership" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamMembershipFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const ProjectFragmentDoc: DocumentNode<ProjectFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Project" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Project" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slugId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "icon" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "state" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "lead" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestone" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "targetDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "startedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueCountHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "scopeHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackNewIssue" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackIssueComments" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const ProjectConnectionFragmentDoc: DocumentNode<ProjectConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ProjectConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Project" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const UserConnectionFragmentDoc: DocumentNode<UserConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
+            name: { kind: "Name", value: "users" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -8810,733 +8785,158 @@ export const UserConnectionFragmentDoc: DocumentNode<UserConnectionFragment, unk
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
             },
           },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
         ],
       },
     },
+    ...OrganizationFragmentDoc.definitions,
     ...UserFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 };
-export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
+export const InvoiceFragmentDoc: DocumentNode<InvoiceFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Team" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Team" } },
+      name: { kind: "Name", value: "Invoice" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Invoice" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "key" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cyclesEnabled" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cycleStartDay" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cycleDuration" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cycleCooldownTime" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycleIssueAutoAssignStarted" },
-            arguments: [],
-            directives: [],
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycleIssueAutoAssignCompleted" },
-            arguments: [],
-            directives: [],
-          },
-          { kind: "Field", name: { kind: "Name", value: "cycleLockToActive" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "upcomingCycleCount" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "timezone" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueEstimationType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueEstimationAllowZero" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueEstimationExtended" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "draftWorkflowState" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "startWorkflowState" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "reviewWorkflowState" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "mergeWorkflowState" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "groupIssueHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackNewIssue" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackIssueComments" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoClosePeriod" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoCloseStateId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoArchivePeriod" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "markedAsDuplicateWorkflowState" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "activeCycle" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "cycleCalenderUrl" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const TeamConnectionFragmentDoc: DocumentNode<TeamConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "TeamConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const MilestoneFragmentDoc: DocumentNode<MilestoneFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Milestone" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Milestone" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const MilestoneConnectionFragmentDoc: DocumentNode<MilestoneConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "MilestoneConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestoneConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Milestone" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...MilestoneFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const IntegrationFragmentDoc: DocumentNode<IntegrationFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Integration" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Integration" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const IntegrationConnectionFragmentDoc: DocumentNode<IntegrationConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Integration" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const SubscriptionFragmentDoc: DocumentNode<SubscriptionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Subscription" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Subscription" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "seats" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "pendingChangeType" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const ProjectLinkFragmentDoc: DocumentNode<ProjectLinkFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ProjectLink" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLink" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "label" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "project" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
+          { kind: "Field", name: { kind: "Name", value: "created" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "dueDate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "total" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
         ],
       },
     },
   ],
 };
-export const ProjectLinkConnectionFragmentDoc: DocumentNode<ProjectLinkConnectionFragment, unknown> = {
+export const CardFragmentDoc: DocumentNode<CardFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ProjectLinkConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkConnection" } },
+      name: { kind: "Name", value: "Card" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Card" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "brand" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "last4" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const BillingDetailsPayloadFragmentDoc: DocumentNode<BillingDetailsPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "BillingDetailsPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "BillingDetailsPayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "nodes" },
+            name: { kind: "Name", value: "invoices" },
             arguments: [],
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLink" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Invoice" }, directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
+            name: { kind: "Name", value: "paymentMethod" },
             arguments: [],
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Card" }, directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
-    ...ProjectLinkFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
+    ...InvoiceFragmentDoc.definitions,
+    ...CardFragmentDoc.definitions,
   ],
 };
-export const WorkflowStateFragmentDoc: DocumentNode<WorkflowStateFragment, unknown> = {
+export const BillingEmailPayloadFragmentDoc: DocumentNode<BillingEmailPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "WorkflowState" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowState" } },
+      name: { kind: "Name", value: "BillingEmailPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "BillingEmailPayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "position" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
+          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
   ],
 };
-export const WorkflowStateConnectionFragmentDoc: DocumentNode<WorkflowStateConnectionFragment, unknown> = {
+export const StepsResponseFragmentDoc: DocumentNode<StepsResponseFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "WorkflowStateConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateConnection" } },
+      name: { kind: "Name", value: "StepsResponse" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "StepsResponse" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowState" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
+          { kind: "Field", name: { kind: "Name", value: "version" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "clientIds" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "steps" }, arguments: [], directives: [] },
         ],
       },
     },
-    ...WorkflowStateFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 };
-export const TemplateConnectionFragmentDoc: DocumentNode<TemplateConnectionFragment, unknown> = {
+export const CollaborationDocumentUpdatePayloadFragmentDoc: DocumentNode<
+  CollaborationDocumentUpdatePayloadFragment,
+  unknown
+> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "TemplateConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TemplateConnection" } },
+      name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
+            name: { kind: "Name", value: "steps" },
             arguments: [],
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "StepsResponse" }, directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const TemplateFragmentDoc: DocumentNode<TemplateFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Template" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Template" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "templateData" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const IssueLabelFragmentDoc: DocumentNode<IssueLabelFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueLabel" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabel" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const IssueLabelConnectionFragmentDoc: DocumentNode<IssueLabelConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueLabelConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabel" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueLabelFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const WebhookFragmentDoc: DocumentNode<WebhookFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Webhook" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Webhook" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "enabled" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "secret" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const WebhookConnectionFragmentDoc: DocumentNode<WebhookConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "WebhookConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WebhookConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Webhook" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...WebhookFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
+    ...StepsResponseFragmentDoc.definitions,
   ],
 };
 export const CommentFragmentDoc: DocumentNode<CommentFragment, unknown> = {
@@ -9550,15 +8950,10 @@ export const CommentFragmentDoc: DocumentNode<CommentFragment, unknown> = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "body" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "editedAt" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "user" },
+            name: { kind: "Name", value: "issue" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -9566,9 +8961,14 @@ export const CommentFragmentDoc: DocumentNode<CommentFragment, unknown> = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "editedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "issue" },
+            name: { kind: "Name", value: "user" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -9619,398 +9019,20 @@ export const CommentConnectionFragmentDoc: DocumentNode<CommentConnectionFragmen
     ...PageInfoFragmentDoc.definitions,
   ],
 };
-export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown> = {
+export const CommentPayloadFragmentDoc: DocumentNode<CommentPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueHistory" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueHistory" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "actor" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "source" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedDescription" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "fromTitle" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "toTitle" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "fromAssignee" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "toAssignee" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "fromPriority" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "toPriority" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "fromTeam" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "toTeam" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "fromParent" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "toParent" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "fromState" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "toState" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "fromCycle" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "toCycle" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "fromProject" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "toProject" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "fromEstimate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "toEstimate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archived" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "addedLabelIds" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "removedLabelIds" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "relationChanges" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoClosed" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoArchived" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "fromDueDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "toDueDate" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const IssueHistoryConnectionFragmentDoc: DocumentNode<IssueHistoryConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueHistoryConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueHistoryConnection" } },
+      name: { kind: "Name", value: "CommentPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommentPayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueHistory" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueHistoryFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const PullRequestPayloadFragmentDoc: DocumentNode<PullRequestPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "PullRequestPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PullRequestPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "draft" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "title" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "branch" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "userId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "userLogin" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "repoLogin" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "repoName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "closedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "mergedAt" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const CommitPayloadFragmentDoc: DocumentNode<CommitPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CommitPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommitPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "message" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "timestamp" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "added" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "removed" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "modified" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const SentryIssuePayloadFragmentDoc: DocumentNode<SentryIssuePayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SentryIssuePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SentryIssuePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "issueId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "webUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "actorType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "actorId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "actorName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "projectId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "projectSlug" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueTitle" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "shortId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "firstSeen" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "firstVersion" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const IntegrationResourceDataFragmentDoc: DocumentNode<IntegrationResourceDataFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationResourceData" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResourceData" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "githubPullRequest" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "gitlabMergeRequest" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "githubCommit" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommitPayload" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "sentryIssue" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SentryIssuePayload" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...PullRequestPayloadFragmentDoc.definitions,
-    ...CommitPayloadFragmentDoc.definitions,
-    ...SentryIssuePayloadFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResourceFragmentDoc: DocumentNode<IntegrationResourceFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationResource" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResource" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "resourceType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "resourceId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "data" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceData" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integration" },
+            name: { kind: "Name", value: "comment" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -10018,299 +9040,70 @@ export const IntegrationResourceFragmentDoc: DocumentNode<IntegrationResourceFra
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pullRequest" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceDataFragmentDoc.definitions,
-    ...PullRequestPayloadFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResourceConnectionFragmentDoc: DocumentNode<IntegrationResourceConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationResourceConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResourceConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResource" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const IssueRelationFragmentDoc: DocumentNode<IssueRelationFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueRelation" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelation" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "relatedIssue" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const IssueRelationConnectionFragmentDoc: DocumentNode<IssueRelationConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueRelationConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelation" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueRelationFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const SsoUrlFromEmailResponseFragmentDoc: DocumentNode<SsoUrlFromEmailResponseFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SsoUrlFromEmailResponse" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SsoUrlFromEmailResponse" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "samlSsoUrl" }, arguments: [], directives: [] },
         ],
       },
     },
   ],
 };
-export const InvoiceFragmentDoc: DocumentNode<InvoiceFragment, unknown> = {
+export const ContactPayloadFragmentDoc: DocumentNode<ContactPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Invoice" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Invoice" } },
+      name: { kind: "Name", value: "ContactPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ContactPayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "created" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "dueDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "total" }, arguments: [], directives: [] },
-        ],
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
       },
     },
   ],
 };
-export const CardFragmentDoc: DocumentNode<CardFragment, unknown> = {
+export const CreateCsvExportReportPayloadFragmentDoc: DocumentNode<CreateCsvExportReportPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Card" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Card" } },
+      name: { kind: "Name", value: "CreateCsvExportReportPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CreateCsvExportReportPayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "brand" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "last4" }, arguments: [], directives: [] },
-        ],
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
       },
     },
   ],
 };
-export const BillingDetailsPayloadFragmentDoc: DocumentNode<BillingDetailsPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "BillingDetailsPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "BillingDetailsPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "invoices" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Invoice" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "paymentMethod" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Card" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...InvoiceFragmentDoc.definitions,
-    ...CardFragmentDoc.definitions,
-  ],
-};
-export const StepsResponseFragmentDoc: DocumentNode<StepsResponseFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "StepsResponse" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "StepsResponse" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "version" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "steps" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientIds" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const CollaborationDocumentUpdatePayloadFragmentDoc: DocumentNode<
-  CollaborationDocumentUpdatePayloadFragment,
+export const CreateOrJoinOrganizationResponseFragmentDoc: DocumentNode<
+  CreateOrJoinOrganizationResponseFragment,
   unknown
 > = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" } },
+      name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "steps" },
+            name: { kind: "Name", value: "user" },
             arguments: [],
             directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "StepsResponse" }, directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
-    ...StepsResponseFragmentDoc.definitions,
   ],
 };
 export const CustomViewFragmentDoc: DocumentNode<CustomViewFragment, unknown> = {
@@ -10324,14 +9117,12 @@ export const CustomViewFragmentDoc: DocumentNode<CustomViewFragment, unknown> = 
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "icon" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "filters" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "icon" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
@@ -10342,6 +9133,9 @@ export const CustomViewFragmentDoc: DocumentNode<CustomViewFragment, unknown> = 
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
@@ -10352,7 +9146,6 @@ export const CustomViewFragmentDoc: DocumentNode<CustomViewFragment, unknown> = 
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "filters" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "shared" }, arguments: [], directives: [] },
         ],
       },
@@ -10397,6 +9190,190 @@ export const CustomViewConnectionFragmentDoc: DocumentNode<CustomViewConnectionF
     ...PageInfoFragmentDoc.definitions,
   ],
 };
+export const CustomViewPayloadFragmentDoc: DocumentNode<CustomViewPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CustomViewPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomViewPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "customView" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const CycleFragmentDoc: DocumentNode<CycleFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Cycle" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Cycle" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "endsAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "startsAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "scopeHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "issueCountHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const CycleConnectionFragmentDoc: DocumentNode<CycleConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CycleConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CycleConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Cycle" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...CycleFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const CyclePayloadFragmentDoc: DocumentNode<CyclePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CyclePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CyclePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycle" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const DebugPayloadFragmentDoc: DocumentNode<DebugPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DebugPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DebugPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
+export const EmailUnsubscribePayloadFragmentDoc: DocumentNode<EmailUnsubscribePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "EmailUnsubscribePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailUnsubscribePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
+export const EmailUserAccountAuthChallengeResponseFragmentDoc: DocumentNode<
+  EmailUserAccountAuthChallengeResponseFragment,
+  unknown
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "authType" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
 export const EmojiFragmentDoc: DocumentNode<EmojiFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -10408,13 +9385,13 @@ export const EmojiFragmentDoc: DocumentNode<EmojiFragment, unknown> = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "source" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
@@ -10468,6 +9445,49 @@ export const EmojiConnectionFragmentDoc: DocumentNode<EmojiConnectionFragment, u
     ...PageInfoFragmentDoc.definitions,
   ],
 };
+export const EmojiPayloadFragmentDoc: DocumentNode<EmojiPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "EmojiPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmojiPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "emoji" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const EventPayloadFragmentDoc: DocumentNode<EventPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "EventPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EventPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
 export const FavoriteFragmentDoc: DocumentNode<FavoriteFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -10479,52 +9499,6 @@ export const FavoriteFragmentDoc: DocumentNode<FavoriteFragment, unknown> = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "project" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectTeam" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
           {
             kind: "Field",
             name: { kind: "Name", value: "cycle" },
@@ -10545,6 +9519,52 @@ export const FavoriteFragmentDoc: DocumentNode<FavoriteFragment, unknown> = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectTeam" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -10588,6 +9608,49 @@ export const FavoriteConnectionFragmentDoc: DocumentNode<FavoriteConnectionFragm
     ...PageInfoFragmentDoc.definitions,
   ],
 };
+export const FavoritePayloadFragmentDoc: DocumentNode<FavoritePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "FavoritePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FavoritePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "favorite" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const FeedbackPayloadFragmentDoc: DocumentNode<FeedbackPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "FeedbackPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FeedbackPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
 export const FigmaEmbedFragmentDoc: DocumentNode<FigmaEmbedFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -10599,10 +9662,10 @@ export const FigmaEmbedFragmentDoc: DocumentNode<FigmaEmbedFragment, unknown> = 
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "lastModified" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "nodeName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "nodeName" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -10619,7 +9682,6 @@ export const FigmaEmbedPayloadFragmentDoc: DocumentNode<FigmaEmbedPayloadFragmen
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
           {
             kind: "Field",
             name: { kind: "Name", value: "figmaEmbed" },
@@ -10630,11 +9692,392 @@ export const FigmaEmbedPayloadFragmentDoc: DocumentNode<FigmaEmbedPayloadFragmen
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FigmaEmbed" }, directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
     },
     ...FigmaEmbedFragmentDoc.definitions,
+  ],
+};
+export const ImageUploadFromUrlPayloadFragmentDoc: DocumentNode<ImageUploadFromUrlPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ImageUploadFromUrlPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ImageUploadFromUrlPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const IntegrationFragmentDoc: DocumentNode<IntegrationFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Integration" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Integration" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const IntegrationConnectionFragmentDoc: DocumentNode<IntegrationConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntegrationConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Integration" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const IntegrationPayloadFragmentDoc: DocumentNode<IntegrationPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntegrationPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integration" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const CommitPayloadFragmentDoc: DocumentNode<CommitPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CommitPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommitPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "added" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "message" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "modified" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "removed" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "timestamp" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const PullRequestPayloadFragmentDoc: DocumentNode<PullRequestPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "PullRequestPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PullRequestPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "branch" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "closedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "draft" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "mergedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "repoLogin" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "repoName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "title" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "userId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "userLogin" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const SentryIssuePayloadFragmentDoc: DocumentNode<SentryIssuePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SentryIssuePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SentryIssuePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "issueId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "actorId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "projectId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "firstSeen" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "webUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "actorName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "firstVersion" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "shortId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "projectSlug" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "issueTitle" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "actorType" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const IntegrationResourceDataFragmentDoc: DocumentNode<IntegrationResourceDataFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntegrationResourceData" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResourceData" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "githubCommit" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommitPayload" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "githubPullRequest" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "gitlabMergeRequest" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sentryIssue" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "SentryIssuePayload" }, directives: [] },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CommitPayloadFragmentDoc.definitions,
+    ...PullRequestPayloadFragmentDoc.definitions,
+    ...SentryIssuePayloadFragmentDoc.definitions,
+  ],
+};
+export const IntegrationResourceFragmentDoc: DocumentNode<IntegrationResourceFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntegrationResource" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResource" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "data" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceData" }, directives: [] },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pullRequest" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "resourceId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integration" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "resourceType" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+    ...IntegrationResourceDataFragmentDoc.definitions,
+    ...PullRequestPayloadFragmentDoc.definitions,
+  ],
+};
+export const IntegrationResourceConnectionFragmentDoc: DocumentNode<IntegrationResourceConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntegrationResourceConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResourceConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResource" }, directives: [] },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationResourceFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 };
 export const InviteDataFragmentDoc: DocumentNode<InviteDataFragment, unknown> = {
@@ -10648,13 +10091,13 @@ export const InviteDataFragmentDoc: DocumentNode<InviteDataFragment, unknown> = 
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "inviterName" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "avatarURLs" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "teamNames" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "teamIds" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "organizationName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "teamNames" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "organizationDomain" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "organizationLogoUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "inviterName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "organizationName" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "userCount" }, arguments: [], directives: [] },
         ],
       },
@@ -10689,28 +10132,25 @@ export const InvitePagePayloadFragmentDoc: DocumentNode<InvitePagePayloadFragmen
     ...InviteDataFragmentDoc.definitions,
   ],
 };
-export const NotificationFragmentDoc: DocumentNode<NotificationFragment, unknown> = {
+export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Notification" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Notification" } },
+      name: { kind: "Name", value: "Issue" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Issue" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "reactionEmoji" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "readAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "emailedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "identifier" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "priorityLabel" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "previousIdentifiers" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "branchName" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "user" },
+            name: { kind: "Name", value: "cycle" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -10718,9 +10158,28 @@ export const NotificationFragmentDoc: DocumentNode<NotificationFragment, unknown
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "dueDate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "estimate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "title" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "boardOrder" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "subIssueSortOrder" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "issue" },
+            name: { kind: "Name", value: "parent" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "priority" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -10738,6 +10197,698 @@ export const NotificationFragmentDoc: DocumentNode<NotificationFragment, unknown
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "autoArchivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "autoClosedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "startedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "assignee" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "state" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const IssueConnectionFragmentDoc: DocumentNode<IssueConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Issue" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueHistory" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueHistory" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "relationChanges" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "addedLabelIds" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "removedLabelIds" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "source" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "toCycle" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "toParent" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "toProject" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "toState" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "fromCycle" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "fromParent" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "fromProject" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "fromState" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "fromTeam" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "toTeam" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "fromAssignee" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "toAssignee" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "actor" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "fromDueDate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "toDueDate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "fromEstimate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "toEstimate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "fromPriority" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "toPriority" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "fromTitle" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "toTitle" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archived" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedDescription" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "autoArchived" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "autoClosed" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const IssueHistoryConnectionFragmentDoc: DocumentNode<IssueHistoryConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueHistoryConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueHistoryConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueHistory" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueHistoryFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const IssueImportFragmentDoc: DocumentNode<IssueImportFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueImport" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueImport" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "creatorId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const IssueImportPayloadFragmentDoc: DocumentNode<IssueImportPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueImportPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueImportPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImport" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImport" }, directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+    ...IssueImportFragmentDoc.definitions,
+  ],
+};
+export const IssueLabelFragmentDoc: DocumentNode<IssueLabelFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueLabel" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabel" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const IssueLabelConnectionFragmentDoc: DocumentNode<IssueLabelConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueLabelConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabel" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueLabelFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const IssueLabelPayloadFragmentDoc: DocumentNode<IssueLabelPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueLabelPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueLabel" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const IssuePayloadFragmentDoc: DocumentNode<IssuePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssuePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssuePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const IssueRelationFragmentDoc: DocumentNode<IssueRelationFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueRelation" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelation" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "relatedIssue" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const IssueRelationConnectionFragmentDoc: DocumentNode<IssueRelationConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueRelationConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelation" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const IssueRelationPayloadFragmentDoc: DocumentNode<IssueRelationPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueRelationPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueRelation" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const MilestoneFragmentDoc: DocumentNode<MilestoneFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Milestone" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Milestone" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const MilestoneConnectionFragmentDoc: DocumentNode<MilestoneConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "MilestoneConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestoneConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Milestone" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...MilestoneFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const MilestonePayloadFragmentDoc: DocumentNode<MilestonePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "MilestonePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestonePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "milestone" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const NotificationFragmentDoc: DocumentNode<NotificationFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Notification" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Notification" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "reactionEmoji" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
@@ -10748,6 +10899,42 @@ export const NotificationFragmentDoc: DocumentNode<NotificationFragment, unknown
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "emailedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "readAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
         ],
       },
     },
@@ -10791,6 +10978,34 @@ export const NotificationConnectionFragmentDoc: DocumentNode<NotificationConnect
     ...PageInfoFragmentDoc.definitions,
   ],
 };
+export const NotificationPayloadFragmentDoc: DocumentNode<NotificationPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "NotificationPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notification" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
 export const NotificationSubscriptionFragmentDoc: DocumentNode<NotificationSubscriptionFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -10802,14 +11017,9 @@ export const NotificationSubscriptionFragmentDoc: DocumentNode<NotificationSubsc
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "user" },
+            name: { kind: "Name", value: "project" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -10827,9 +11037,14 @@ export const NotificationSubscriptionFragmentDoc: DocumentNode<NotificationSubsc
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
           {
             kind: "Field",
-            name: { kind: "Name", value: "project" },
+            name: { kind: "Name", value: "user" },
             arguments: [],
             directives: [],
             selectionSet: {
@@ -10885,6 +11100,224 @@ export const NotificationSubscriptionConnectionFragmentDoc: DocumentNode<
     ...PageInfoFragmentDoc.definitions,
   ],
 };
+export const NotificationSubscriptionPayloadFragmentDoc: DocumentNode<
+  NotificationSubscriptionPayloadFragment,
+  unknown
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "NotificationSubscriptionPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationSubscription" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const OauthClientFragmentDoc: DocumentNode<OauthClientFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OauthClient" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClient" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "redirectUris" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "clientSecret" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const OauthClientPayloadFragmentDoc: DocumentNode<OauthClientPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OauthClientPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClientPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "oauthClient" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthClient" }, directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+    ...OauthClientFragmentDoc.definitions,
+  ],
+};
+export const OauthTokenRevokePayloadFragmentDoc: DocumentNode<OauthTokenRevokePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OauthTokenRevokePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthTokenRevokePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
+export const OrganizationDeletePayloadFragmentDoc: DocumentNode<OrganizationDeletePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationDeletePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDeletePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
+export const OrganizationDomainFragmentDoc: DocumentNode<OrganizationDomainFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationDomain" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomain" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "verificationEmail" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "verified" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const OrganizationDomainPayloadFragmentDoc: DocumentNode<OrganizationDomainPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationDomainPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationDomain" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomain" }, directives: [] },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+    ...OrganizationDomainFragmentDoc.definitions,
+  ],
+};
+export const OrganizationDomainSimplePayloadFragmentDoc: DocumentNode<
+  OrganizationDomainSimplePayloadFragment,
+  unknown
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationDomainSimplePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainSimplePayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
+export const OrganizationExistsPayloadFragmentDoc: DocumentNode<OrganizationExistsPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationExistsPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationExistsPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "exists" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
 export const OrganizationInviteFragmentDoc: DocumentNode<OrganizationInviteFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -10896,14 +11329,14 @@ export const OrganizationInviteFragmentDoc: DocumentNode<OrganizationInviteFragm
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "external" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "external" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "acceptedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "expiresAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
           {
             kind: "Field",
             name: { kind: "Name", value: "inviter" },
@@ -10969,990 +11402,6 @@ export const OrganizationInviteConnectionFragmentDoc: DocumentNode<OrganizationI
     ...PageInfoFragmentDoc.definitions,
   ],
 };
-export const OrganizationExistsPayloadFragmentDoc: DocumentNode<OrganizationExistsPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationExistsPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationExistsPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "exists" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const PushSubscriptionPayloadFragmentDoc: DocumentNode<PushSubscriptionPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "PushSubscriptionPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const ReactionFragmentDoc: DocumentNode<ReactionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Reaction" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Reaction" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "emoji" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "comment" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const ReactionConnectionFragmentDoc: DocumentNode<ReactionConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ReactionConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ReactionConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Reaction" }, directives: [] }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...ReactionFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const UserSettingsFragmentDoc: DocumentNode<UserSettingsFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserSettings" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettings" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "notificationPreferences" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "unsubscribedFrom" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const EventPayloadFragmentDoc: DocumentNode<EventPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "EventPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EventPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
-export const ApiKeyPayloadFragmentDoc: DocumentNode<ApiKeyPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ApiKeyPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "apiKey" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKey" }, directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-    ...ApiKeyFragmentDoc.definitions,
-  ],
-};
-export const ArchivePayloadFragmentDoc: DocumentNode<ArchivePayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ArchivePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ArchivePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const EmailUserAccountAuthChallengeResponseFragmentDoc: DocumentNode<
-  EmailUserAccountAuthChallengeResponseFragment,
-  unknown
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "authType" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const CreateOrJoinOrganizationResponseFragmentDoc: DocumentNode<
-  CreateOrJoinOrganizationResponseFragment,
-  unknown
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-export const BillingEmailPayloadFragmentDoc: DocumentNode<BillingEmailPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "BillingEmailPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "BillingEmailPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const CommentPayloadFragmentDoc: DocumentNode<CommentPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CommentPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommentPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "comment" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const ContactPayloadFragmentDoc: DocumentNode<ContactPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ContactPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ContactPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
-export const CustomViewPayloadFragmentDoc: DocumentNode<CustomViewPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CustomViewPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomViewPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "customView" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const CyclePayloadFragmentDoc: DocumentNode<CyclePayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CyclePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CyclePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycle" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const DebugPayloadFragmentDoc: DocumentNode<DebugPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "DebugPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DebugPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
-export const EmailUnsubscribePayloadFragmentDoc: DocumentNode<EmailUnsubscribePayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "EmailUnsubscribePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailUnsubscribePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
-export const EmojiPayloadFragmentDoc: DocumentNode<EmojiPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "EmojiPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmojiPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "emoji" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const FavoritePayloadFragmentDoc: DocumentNode<FavoritePayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "FavoritePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FavoritePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "favorite" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const FeedbackPayloadFragmentDoc: DocumentNode<FeedbackPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "FeedbackPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FeedbackPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
-export const UploadFileHeaderFragmentDoc: DocumentNode<UploadFileHeaderFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UploadFileHeader" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadFileHeader" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "key" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "value" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const UploadFileFragmentDoc: DocumentNode<UploadFileFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UploadFile" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadFile" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "filename" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "contentType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "size" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "uploadUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "assetUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "metaData" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "headers" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UploadFileHeader" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...UploadFileHeaderFragmentDoc.definitions,
-  ],
-};
-export const UploadPayloadFragmentDoc: DocumentNode<UploadPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UploadPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "uploadFile" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadFile" }, directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-    ...UploadFileFragmentDoc.definitions,
-  ],
-};
-export const ImageUploadFromUrlPayloadFragmentDoc: DocumentNode<ImageUploadFromUrlPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ImageUploadFromUrlPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ImageUploadFromUrlPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const IntegrationPayloadFragmentDoc: DocumentNode<IntegrationPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integration" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const IssueImportFragmentDoc: DocumentNode<IssueImportFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueImport" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueImport" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "organizationId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "creatorId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const IssueImportPayloadFragmentDoc: DocumentNode<IssueImportPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueImportPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueImportPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueImport" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImport" }, directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-    ...IssueImportFragmentDoc.definitions,
-  ],
-};
-export const IssueLabelPayloadFragmentDoc: DocumentNode<IssueLabelPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueLabelPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueLabel" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const IssueRelationPayloadFragmentDoc: DocumentNode<IssueRelationPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueRelationPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueRelation" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const IssuePayloadFragmentDoc: DocumentNode<IssuePayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssuePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssuePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const MilestonePayloadFragmentDoc: DocumentNode<MilestonePayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "MilestonePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestonePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestone" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const NotificationPayloadFragmentDoc: DocumentNode<NotificationPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "NotificationPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notification" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const NotificationSubscriptionPayloadFragmentDoc: DocumentNode<
-  NotificationSubscriptionPayloadFragment,
-  unknown
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "NotificationSubscriptionPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notificationSubscription" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const OauthClientFragmentDoc: DocumentNode<OauthClientFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OauthClient" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClient" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientSecret" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "redirectUris" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const OauthClientPayloadFragmentDoc: DocumentNode<OauthClientPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OauthClientPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClientPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "oauthClient" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthClient" }, directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-    ...OauthClientFragmentDoc.definitions,
-  ],
-};
-export const RotateSecretPayloadFragmentDoc: DocumentNode<RotateSecretPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "RotateSecretPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "RotateSecretPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const OauthTokenRevokePayloadFragmentDoc: DocumentNode<OauthTokenRevokePayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OauthTokenRevokePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthTokenRevokePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
-export const OrganizationDomainFragmentDoc: DocumentNode<OrganizationDomainFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationDomain" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomain" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "verified" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "verificationEmail" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const OrganizationDomainPayloadFragmentDoc: DocumentNode<OrganizationDomainPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationDomainPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDomain" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomain" }, directives: [] },
-              ],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-    ...OrganizationDomainFragmentDoc.definitions,
-  ],
-};
 export const OrganizationInvitePayloadFragmentDoc: DocumentNode<OrganizationInvitePayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -12002,19 +11451,190 @@ export const OrganizationPayloadFragmentDoc: DocumentNode<OrganizationPayloadFra
     },
   ],
 };
-export const OrganizationDeletePayloadFragmentDoc: DocumentNode<OrganizationDeletePayloadFragment, unknown> = {
+export const ProjectFragmentDoc: DocumentNode<ProjectFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationDeletePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDeletePayload" } },
+      name: { kind: "Name", value: "Project" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Project" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "targetDate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "icon" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "milestone" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "lead" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "slugId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "startedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "scopeHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "issueCountHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "state" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueComments" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "slackNewIssue" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" }, arguments: [], directives: [] },
+        ],
       },
     },
+  ],
+};
+export const ProjectConnectionFragmentDoc: DocumentNode<ProjectConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Project" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const ProjectLinkFragmentDoc: DocumentNode<ProjectLinkFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectLink" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLink" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "label" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const ProjectLinkConnectionFragmentDoc: DocumentNode<ProjectLinkConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectLinkConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLink" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectLinkFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 };
 export const ProjectLinkPayloadFragmentDoc: DocumentNode<ProjectLinkPayloadFragment, unknown> = {
@@ -12073,6 +11693,163 @@ export const ProjectPayloadFragmentDoc: DocumentNode<ProjectPayloadFragment, unk
     },
   ],
 };
+export const PushSubscriptionFragmentDoc: DocumentNode<PushSubscriptionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "PushSubscription" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscription" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const PushSubscriptionConnectionFragmentDoc: DocumentNode<PushSubscriptionConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "PushSubscriptionConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscription" }, directives: [] },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...PushSubscriptionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const PushSubscriptionPayloadFragmentDoc: DocumentNode<PushSubscriptionPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "PushSubscriptionPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const ReactionFragmentDoc: DocumentNode<ReactionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Reaction" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Reaction" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "emoji" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "comment" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const ReactionConnectionFragmentDoc: DocumentNode<ReactionConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ReactionConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ReactionConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Reaction" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...ReactionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
 export const ReactionPayloadFragmentDoc: DocumentNode<ReactionPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -12101,17 +11878,57 @@ export const ReactionPayloadFragmentDoc: DocumentNode<ReactionPayloadFragment, u
     },
   ],
 };
-export const CreateCsvExportReportPayloadFragmentDoc: DocumentNode<CreateCsvExportReportPayloadFragment, unknown> = {
+export const RotateSecretPayloadFragmentDoc: DocumentNode<RotateSecretPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CreateCsvExportReportPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CreateCsvExportReportPayload" } },
+      name: { kind: "Name", value: "RotateSecretPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "RotateSecretPayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const SsoUrlFromEmailResponseFragmentDoc: DocumentNode<SsoUrlFromEmailResponseFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SsoUrlFromEmailResponse" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SsoUrlFromEmailResponse" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "samlSsoUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const SubscriptionPayloadFragmentDoc: DocumentNode<SubscriptionPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SubscriptionPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SubscriptionPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
       },
     },
   ],
@@ -12131,23 +11948,250 @@ export const SubscriptionSessionPayloadFragmentDoc: DocumentNode<SubscriptionSes
     },
   ],
 };
-export const SubscriptionPayloadFragmentDoc: DocumentNode<SubscriptionPayloadFragment, unknown> = {
+export const SynchronizedPayloadFragmentDoc: DocumentNode<SynchronizedPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SubscriptionPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SubscriptionPayload" } },
+      name: { kind: "Name", value: "SynchronizedPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SynchronizedPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
+export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Team" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Team" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycleIssueAutoAssignCompleted" },
+            arguments: [],
+            directives: [],
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycleIssueAutoAssignStarted" },
+            arguments: [],
+            directives: [],
+          },
+          { kind: "Field", name: { kind: "Name", value: "cycleCalenderUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "upcomingCycleCount" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "cycleLockToActive" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "autoArchivePeriod" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "autoClosePeriod" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "activeCycle" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "autoCloseStateId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "cycleCooldownTime" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "cycleStartDay" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "cycleDuration" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "issueEstimationType" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "key" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "timezone" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "mergeWorkflowState" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "draftWorkflowState" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "startWorkflowState" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "reviewWorkflowState" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "markedAsDuplicateWorkflowState" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "cyclesEnabled" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "issueEstimationExtended" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "issueEstimationAllowZero" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "groupIssueHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueComments" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "slackNewIssue" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" }, arguments: [], directives: [] },
         ],
       },
     },
+  ],
+};
+export const TeamConnectionFragmentDoc: DocumentNode<TeamConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TeamConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const TeamMembershipFragmentDoc: DocumentNode<TeamMembershipFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TeamMembership" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamMembership" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+export const TeamMembershipConnectionFragmentDoc: DocumentNode<TeamMembershipConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TeamMembershipConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembership" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamMembershipFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 };
 export const TeamMembershipPayloadFragmentDoc: DocumentNode<TeamMembershipPayloadFragment, unknown> = {
@@ -12206,6 +12250,33 @@ export const TeamPayloadFragmentDoc: DocumentNode<TeamPayloadFragment, unknown> 
     },
   ],
 };
+export const TemplateConnectionFragmentDoc: DocumentNode<TemplateConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TemplateConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TemplateConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
 export const TemplatePayloadFragmentDoc: DocumentNode<TemplatePayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -12232,6 +12303,141 @@ export const TemplatePayloadFragmentDoc: DocumentNode<TemplatePayloadFragment, u
         ],
       },
     },
+  ],
+};
+export const UploadFileHeaderFragmentDoc: DocumentNode<UploadFileHeaderFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UploadFileHeader" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadFileHeader" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "key" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "value" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const UploadFileFragmentDoc: DocumentNode<UploadFileFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UploadFile" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadFile" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "assetUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "contentType" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "filename" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "uploadUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "size" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "headers" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "UploadFileHeader" }, directives: [] },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "metaData" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+    ...UploadFileHeaderFragmentDoc.definitions,
+  ],
+};
+export const UploadPayloadFragmentDoc: DocumentNode<UploadPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UploadPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "uploadFile" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadFile" }, directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+    ...UploadFileFragmentDoc.definitions,
+  ],
+};
+export const UserAdminPayloadFragmentDoc: DocumentNode<UserAdminPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserAdminPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAdminPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
+      },
+    },
+  ],
+};
+export const UserConnectionFragmentDoc: DocumentNode<UserConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 };
 export const UserPayloadFragmentDoc: DocumentNode<UserPayloadFragment, unknown> = {
@@ -12262,39 +12468,6 @@ export const UserPayloadFragmentDoc: DocumentNode<UserPayloadFragment, unknown> 
     },
   ],
 };
-export const UserAdminPayloadFragmentDoc: DocumentNode<UserAdminPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserAdminPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAdminPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
-export const UserSettingsPayloadFragmentDoc: DocumentNode<UserSettingsPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserSettingsPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
 export const UserSettingsFlagPayloadFragmentDoc: DocumentNode<UserSettingsFlagPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -12306,9 +12479,9 @@ export const UserSettingsFlagPayloadFragmentDoc: DocumentNode<UserSettingsFlagPa
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "flag" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "value" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
       },
@@ -12322,6 +12495,24 @@ export const UserSettingsFlagsResetPayloadFragmentDoc: DocumentNode<UserSettings
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserSettingsFlagsResetPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsFlagsResetPayload" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const UserSettingsPayloadFragmentDoc: DocumentNode<UserSettingsPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserSettingsPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsPayload" } },
       directives: [],
       selectionSet: {
         kind: "SelectionSet",
@@ -12362,10 +12553,10 @@ export const ViewPreferencesFragmentDoc: DocumentNode<ViewPreferencesFragment, u
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
           { kind: "Field", name: { kind: "Name", value: "viewType" }, arguments: [], directives: [] },
         ],
@@ -12404,6 +12595,87 @@ export const ViewPreferencesPayloadFragmentDoc: DocumentNode<ViewPreferencesPayl
     ...ViewPreferencesFragmentDoc.definitions,
   ],
 };
+export const WebhookFragmentDoc: DocumentNode<WebhookFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Webhook" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Webhook" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "secret" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "enabled" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const WebhookConnectionFragmentDoc: DocumentNode<WebhookConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WebhookConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WebhookConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Webhook" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...WebhookFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
 export const WebhookPayloadFragmentDoc: DocumentNode<WebhookPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -12432,6 +12704,79 @@ export const WebhookPayloadFragmentDoc: DocumentNode<WebhookPayloadFragment, unk
     },
   ],
 };
+export const WorkflowStateFragmentDoc: DocumentNode<WorkflowStateFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WorkflowState" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowState" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "position" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+        ],
+      },
+    },
+  ],
+};
+export const WorkflowStateConnectionFragmentDoc: DocumentNode<WorkflowStateConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WorkflowStateConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateConnection" } },
+      directives: [],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowState" }, directives: [] }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            arguments: [],
+            directives: [],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+            },
+          },
+        ],
+      },
+    },
+    ...WorkflowStateFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
 export const WorkflowStatePayloadFragmentDoc: DocumentNode<WorkflowStatePayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -12456,352 +12801,6 @@ export const WorkflowStatePayloadFragmentDoc: DocumentNode<WorkflowStatePayloadF
           },
           { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
         ],
-      },
-    },
-  ],
-};
-export const SynchronizedPayloadFragmentDoc: DocumentNode<SynchronizedPayloadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SynchronizedPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SynchronizedPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] }],
-      },
-    },
-  ],
-};
-export const DocumentStepFragmentDoc: DocumentNode<DocumentStepFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "DocumentStep" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DocumentStep" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "step" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "version" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const SamlConfigurationFragmentDoc: DocumentNode<SamlConfigurationFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SamlConfiguration" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SamlConfiguration" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "ssoBinding" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "ssoSignAlgo" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "allowedDomains" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const UserAccountFragmentDoc: DocumentNode<UserAccountFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserAccount" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAccount" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "users" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserFragmentDoc.definitions,
-  ],
-};
-export const SlackPostSettingsFragmentDoc: DocumentNode<SlackPostSettingsFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SlackPostSettings" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SlackPostSettings" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "channel" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "channelId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "configurationUrl" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const GoogleSheetsSettingsFragmentDoc: DocumentNode<GoogleSheetsSettingsFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "GoogleSheetsSettings" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "GoogleSheetsSettings" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "spreadsheetId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "spreadsheetUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "sheetId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedIssuesAt" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const SentrySettingsFragmentDoc: DocumentNode<SentrySettingsFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SentrySettings" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SentrySettings" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "organizationSlug" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const IntegrationSettingsFragmentDoc: DocumentNode<IntegrationSettingsFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationSettings" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationSettings" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "slackPost" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "slackProjectPost" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "googleSheets" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "GoogleSheetsSettings" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "sentry" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentrySettings" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...SlackPostSettingsFragmentDoc.definitions,
-    ...GoogleSheetsSettingsFragmentDoc.definitions,
-    ...SentrySettingsFragmentDoc.definitions,
-  ],
-};
-export const PushSubscriptionFragmentDoc: DocumentNode<PushSubscriptionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "PushSubscription" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscription" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const PushSubscriptionConnectionFragmentDoc: DocumentNode<PushSubscriptionConnectionFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "PushSubscriptionConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionConnection" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscription" }, directives: [] },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...PushSubscriptionFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-};
-export const FileUploadFragmentDoc: DocumentNode<FileUploadFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "FileUpload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FileUpload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "assetUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "contentType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "filename" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "metaData" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "size" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Application" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Application" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-        ],
-      },
-    },
-  ],
-};
-export const OrganizationDomainSimplePayloadFragmentDoc: DocumentNode<
-  OrganizationDomainSimplePayloadFragment,
-  unknown
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationDomainSimplePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainSimplePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
       },
     },
   ],
@@ -24311,19 +24310,25 @@ export const IssueImportCreateGithubDocument: DocumentNode<
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "repoOwner" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
           directives: [],
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "repoName" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
           directives: [],
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "token" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          directives: [],
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
           directives: [],
         },
@@ -24338,18 +24343,23 @@ export const IssueImportCreateGithubDocument: DocumentNode<
             arguments: [
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "repoOwner" },
-                value: { kind: "Variable", name: { kind: "Name", value: "repoOwner" } },
+                name: { kind: "Name", value: "githubRepoOwner" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
               },
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "repoName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "repoName" } },
+                name: { kind: "Name", value: "githubRepoName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
               },
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "token" },
-                value: { kind: "Variable", name: { kind: "Name", value: "token" } },
+                name: { kind: "Name", value: "githubToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
             ],
             directives: [],

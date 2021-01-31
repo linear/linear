@@ -18,6 +18,7 @@
     "noImplicitReturns": true,
     "resolveJsonModule": true,
     "noImplicitThis": false,
+    "isolatedModules": true,
     "noUnusedLocals": false,
     "resolveJsonModule": true,
     "sourceMap": true,

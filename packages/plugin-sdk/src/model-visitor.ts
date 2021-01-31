@@ -9,6 +9,7 @@ import {
   PluginContext,
   printTypescriptType,
   reduceListType,
+  sortBy,
 } from "@linear/common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
@@ -48,8 +49,9 @@ export class ModelVisitor {
   public Document = {
     /** Return the definitions */
     leave: (node: DocumentNode): SdkModel[] => {
-      return ((node.definitions ?? []).filter(
-        definition => typeof ((definition as unknown) as SdkModel).name === "string"
+      return (sortBy(
+        "name",
+        (node.definitions ?? []).filter(definition => typeof ((definition as unknown) as SdkModel).name === "string")
       ) as unknown) as SdkModel[];
     },
   };
@@ -60,23 +62,21 @@ export class ModelVisitor {
       if (isValidModel(_node) && _node.fields?.length) {
         const node = _node as SdkModelNode;
         const name = node.name.value;
+        const fields = sortBy("name", node.fields);
 
         return {
           name,
           fragment: `${printNamespaced(this._context, name)}Fragment`,
           node,
           fields: {
-            all: node.fields ?? [],
-            scalar: (node.fields?.filter(field => field.__typename === SdkModelFieldType.scalar) ??
-              []) as SdkScalarField[],
-            query: (node.fields?.filter(field => field.__typename === SdkModelFieldType.query) ??
-              []) as SdkQueryField[],
-            object: (node.fields?.filter(field => field.__typename === SdkModelFieldType.object) ??
-              []) as SdkObjectField[],
-            list: (node.fields?.filter(field => field.__typename === SdkModelFieldType.list) ?? []) as SdkListField[],
-            scalarList: (node.fields?.filter(field => field.__typename === SdkModelFieldType.scalarList) ??
+            all: fields ?? [],
+            scalar: (fields?.filter(field => field.__typename === SdkModelFieldType.scalar) ?? []) as SdkScalarField[],
+            query: (fields?.filter(field => field.__typename === SdkModelFieldType.query) ?? []) as SdkQueryField[],
+            object: (fields?.filter(field => field.__typename === SdkModelFieldType.object) ?? []) as SdkObjectField[],
+            list: (fields?.filter(field => field.__typename === SdkModelFieldType.list) ?? []) as SdkListField[],
+            scalarList: (fields?.filter(field => field.__typename === SdkModelFieldType.scalarList) ??
               []) as SdkScalarListField[],
-            connection: (node.fields?.filter(field => field.__typename === SdkModelFieldType.connection) ??
+            connection: (fields?.filter(field => field.__typename === SdkModelFieldType.connection) ??
               []) as SdkConnectionField[],
           },
         };
