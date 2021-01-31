@@ -9,7 +9,6 @@ import {
   PluginContext,
   printTypescriptType,
   reduceListType,
-  sortBy,
 } from "@linear/common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
@@ -49,9 +48,8 @@ export class ModelVisitor {
   public Document = {
     /** Return the definitions */
     leave: (node: DocumentNode): SdkModel[] => {
-      return (sortBy(
-        "name",
-        (node.definitions ?? []).filter(definition => typeof ((definition as unknown) as SdkModel).name === "string")
+      return ((node.definitions ?? []).filter(
+        definition => typeof ((definition as unknown) as SdkModel).name === "string"
       ) as unknown) as SdkModel[];
     },
   };
@@ -62,7 +60,7 @@ export class ModelVisitor {
       if (isValidModel(_node) && _node.fields?.length) {
         const node = _node as SdkModelNode;
         const name = node.name.value;
-        const fields = sortBy("name", node.fields);
+        const fields = node.fields;
 
         return {
           name,

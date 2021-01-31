@@ -2212,24 +2212,58 @@ fragment WorkflowStatePayload on WorkflowStatePayload {
   success
 }
 
-# Fetch data to catch up the client to the state of the world.
-query syncBootstrap(
-  # The version of the backend database the client has locally stored.
-  $databaseVersion: Int!
-  # The last sync id the client has seen.
-  $sinceSyncId: Int!
+# All API keys for the user.
+query apiKeys(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
 ) {
-  syncBootstrap(databaseVersion: $databaseVersion, sinceSyncId: $sinceSyncId) {
-    ...SyncResponse
+  apiKeys(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ApiKeyConnection
   }
 }
-# Fetches delta packets to catch up the user to the current state of the world.
-query syncUpdates(
-  # The last sync id the client has seen.
-  $sinceSyncId: Float!
+# Get information for an application and whether a user has approved it for the given scopes.
+query applicationWithAuthorization(
+  # The client ID of the application.
+  $clientId: String!
+  # Redirect URI for the application.
+  $redirectUri: String
+  # Scopes being requested by the application
+  $scope: [String!]!
 ) {
-  syncUpdates(sinceSyncId: $sinceSyncId) {
-    ...SyncResponse
+  applicationWithAuthorization(clientId: $clientId, redirectUri: $redirectUri, scope: $scope) {
+    ...UserAuthorizedApplication
+  }
+}
+# Fetches archived models.
+query archivedModelsSync(
+  # Retrieve issues that have been archived before this date.
+  $before: DateTime
+  # The number of issues to load.
+  $last: Int
+  # The class name of the models to load.
+  $modelClass: String!
+  # The teamId for which to load archived models.
+  $teamId: String!
+) {
+  archivedModelsSync(before: $before, last: $last, modelClass: $modelClass, teamId: $teamId) {
+    ...ArchiveResponse
   }
 }
 # Fetches an archived model.
@@ -2243,88 +2277,23 @@ query archivedModelSync(
     ...ArchiveResponse
   }
 }
-# Fetches archived models.
-query archivedModelsSync(
-  # The class name of the models to load.
-  $modelClass: String!
-  # The teamId for which to load archived models.
-  $teamId: String!
-  # Retrieve issues that have been archived before this date.
-  $before: DateTime
-  # The number of issues to load.
-  $last: Int
-) {
-  archivedModelsSync(modelClass: $modelClass, teamId: $teamId, before: $before, last: $last) {
-    ...ArchiveResponse
-  }
-}
-# All API keys for the user.
-query apiKeys(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  apiKeys(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...ApiKeyConnection
-  }
-}
-# Get information for an application and whether a user has approved it for the given scopes.
-query applicationWithAuthorization(
-  # Redirect URI for the application.
-  $redirectUri: String
-  # Scopes being requested by the application
-  $scope: [String!]!
-  # The client ID of the application.
-  $clientId: String!
-) {
-  applicationWithAuthorization(redirectUri: $redirectUri, scope: $scope, clientId: $clientId) {
-    ...UserAuthorizedApplication
-  }
-}
 # Get all authorized applications for a user
 query authorizedApplications {
   authorizedApplications {
+    appId
     clientId
-    name
     description
     developer
     developerUrl
     imageUrl
+    name
     scope
-    appId
   }
 }
 # Fetch users belonging to this user account.
 query availableUsers {
   availableUsers {
     ...AuthResolverResponse
-  }
-}
-# Fetch SSO login URL for the email provided.
-query ssoUrlFromEmail(
-  # Whether the client is the desktop app.
-  $isDesktop: Boolean
-  # Email to query the SSO login URL by.
-  $email: String!
-) {
-  ssoUrlFromEmail(isDesktop: $isDesktop, email: $email) {
-    ...SsoUrlFromEmailResponse
   }
 }
 # Billing details for the customer.
@@ -2369,32 +2338,6 @@ query collaborativeDocumentJoin_steps(
     }
   }
 }
-# All comments.
-query comments(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  comments(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...CommentConnection
-  }
-}
 # A specific comment.
 query comment(
   # The identifier of the comment to retrieve.
@@ -2404,30 +2347,30 @@ query comment(
     ...Comment
   }
 }
-# Custom views for the user.
-query customViews(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All comments.
+query comments(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  customViews(
-    before: $before
+  comments(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...CustomViewConnection
+    ...CommentConnection
   }
 }
 # One specific custom view.
@@ -2436,30 +2379,30 @@ query customView($id: String!) {
     ...CustomView
   }
 }
-# All cycles.
-query cycles(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# Custom views for the user.
+query customViews(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  cycles(
-    before: $before
+  customViews(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...CycleConnection
+    ...CustomViewConnection
   }
 }
 # One specific cycle.
@@ -2471,26 +2414,26 @@ query cycle($id: String!) {
 # Issues associated with the cycle.
 query cycle_issues(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   cycle(id: $id) {
     issues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
@@ -2500,56 +2443,56 @@ query cycle_issues(
 # Issues that weren't completed when the cycle was closed.
 query cycle_uncompletedIssuesUponClose(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   cycle(id: $id) {
     uncompletedIssuesUponClose(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
     }
   }
 }
-# All custom emojis.
-query emojis(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All cycles.
+query cycles(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  emojis(
-    before: $before
+  cycles(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...EmojiConnection
+    ...CycleConnection
   }
 }
 # A specific emoji.
@@ -2561,30 +2504,30 @@ query emoji(
     ...Emoji
   }
 }
-# The user's favorites.
-query favorites(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All custom emojis.
+query emojis(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  favorites(
-    before: $before
+  emojis(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...FavoriteConnection
+    ...EmojiConnection
   }
 }
 # One specific favorite.
@@ -2593,86 +2536,60 @@ query favorite($id: String!) {
     ...Favorite
   }
 }
+# The user's favorites.
+query favorites(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  favorites(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...FavoriteConnection
+  }
+}
 # Fetch Figma screenshot and other information with file and node identifiers.
 query figmaEmbedInfo(
-  # Figma node identifier.
-  $nodeId: String
   # Figma file identifier.
   $fileId: String!
+  # Figma node identifier.
+  $nodeId: String
 ) {
-  figmaEmbedInfo(nodeId: $nodeId, fileId: $fileId) {
+  figmaEmbedInfo(fileId: $fileId, nodeId: $nodeId) {
     ...FigmaEmbedPayload
   }
 }
 # Figma embed information.
 query figmaEmbedInfo_figmaEmbed(
-  # Figma node identifier.
-  $nodeId: String
   # Figma file identifier.
   $fileId: String!
+  # Figma node identifier.
+  $nodeId: String
 ) {
-  figmaEmbedInfo(nodeId: $nodeId, fileId: $fileId) {
+  figmaEmbedInfo(fileId: $fileId, nodeId: $nodeId) {
     figmaEmbed {
       ...FigmaEmbed
     }
-  }
-}
-# All integrations.
-query integrations(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  integrations(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...IntegrationConnection
   }
 }
 # One specific integration.
 query integration($id: String!) {
   integration(id: $id) {
     ...Integration
-  }
-}
-# All integrations resources (e.g. linked GitHub pull requests for issues).
-query integrationResources(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  integrationResources(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...IntegrationResourceConnection
   }
 }
 # One specific integration resource. (e.g. linked GitHub pull requests for an issue)
@@ -2686,6 +2603,16 @@ query integrationResource_data($id: String!) {
   integrationResource(id: $id) {
     data {
       ...IntegrationResourceData
+    }
+  }
+}
+# The payload for an IntegrationResource of type 'githubCommit'
+query integrationResource_data_githubCommit($id: String!) {
+  integrationResource(id: $id) {
+    data {
+      githubCommit {
+        ...CommitPayload
+      }
     }
   }
 }
@@ -2709,16 +2636,6 @@ query integrationResource_data_gitlabMergeRequest($id: String!) {
     }
   }
 }
-# The payload for an IntegrationResource of type 'githubCommit'
-query integrationResource_data_githubCommit($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      githubCommit {
-        ...CommitPayload
-      }
-    }
-  }
-}
 # The payload for an IntegrationResource of type 'sentryIssue'
 query integrationResource_data_sentryIssue($id: String!) {
   integrationResource(id: $id) {
@@ -2735,6 +2652,58 @@ query integrationResource_pullRequest($id: String!) {
     pullRequest {
       ...PullRequestPayload
     }
+  }
+}
+# All integrations resources (e.g. linked GitHub pull requests for issues).
+query integrationResources(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  integrationResources(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...IntegrationResourceConnection
+  }
+}
+# All integrations.
+query integrations(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  integrations(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...IntegrationConnection
   }
 }
 # Retrieves information for the public invite page.
@@ -2761,30 +2730,242 @@ query inviteInfo_inviteData(
     }
   }
 }
-# All issue labels.
-query issueLabels(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# One specific issue.
+query issue($id: String!) {
+  issue(id: $id) {
+    ...Issue
+  }
+}
+# Children of the issue.
+query issue_children(
+  $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  issueLabels(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...IssueLabelConnection
+  issue(id: $id) {
+    children(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Comments associated with the issue.
+query issue_comments(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    comments(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CommentConnection
+    }
+  }
+}
+# History entries associated with the issue.
+query issue_history(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    history(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueHistoryConnection
+    }
+  }
+}
+# Integration resources for this issue.
+query issue_integrationResources(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    integrationResources(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IntegrationResourceConnection
+    }
+  }
+}
+# Inverse relations associated with this issue.
+query issue_inverseRelations(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    inverseRelations(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueRelationConnection
+    }
+  }
+}
+# Labels associated with this issue.
+query issue_labels(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    labels(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueLabelConnection
+    }
+  }
+}
+# Relations associated with this issue.
+query issue_relations(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    relations(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueRelationConnection
+    }
+  }
+}
+# Users who are subscribed to the issue.
+query issue_subscribers(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    subscribers(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...UserConnection
+    }
   }
 }
 # One specific label.
@@ -2796,56 +2977,56 @@ query issueLabel($id: String!) {
 # Issues associated with the label.
 query issueLabel_issues(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   issueLabel(id: $id) {
     issues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
     }
   }
 }
-# All issue relationships.
-query issueRelations(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All issue labels.
+query issueLabels(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  issueRelations(
-    before: $before
+  issueLabels(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...IssueRelationConnection
+    ...IssueLabelConnection
   }
 }
 # One specific issue relation.
@@ -2854,323 +3035,85 @@ query issueRelation($id: String!) {
     ...IssueRelation
   }
 }
-# All issues.
-query issues(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All issue relationships.
+query issueRelations(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueRelations(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...IssueRelationConnection
+  }
+}
+# All issues.
+query issues(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   issues(
-    before: $before
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
     ...IssueConnection
   }
 }
-# One specific issue.
-query issue($id: String!) {
-  issue(id: $id) {
-    ...Issue
-  }
-}
-# Users who are subscribed to the issue.
-query issue_subscribers(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    subscribers(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...UserConnection
-    }
-  }
-}
-# Children of the issue.
-query issue_children(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    children(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
-# Comments associated with the issue.
-query issue_comments(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    comments(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...CommentConnection
-    }
-  }
-}
-# History entries associated with the issue.
-query issue_history(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    history(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueHistoryConnection
-    }
-  }
-}
-# Labels associated with this issue.
-query issue_labels(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    labels(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueLabelConnection
-    }
-  }
-}
-# Integration resources for this issue.
-query issue_integrationResources(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    integrationResources(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IntegrationResourceConnection
-    }
-  }
-}
-# Relations associated with this issue.
-query issue_relations(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    relations(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueRelationConnection
-    }
-  }
-}
-# Inverse relations associated with this issue.
-query issue_inverseRelations(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    inverseRelations(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueRelationConnection
-    }
-  }
-}
 # [ALPHA] Search issues. This query is experimental and is subject to change without notice.
 query issueSearch(
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
   # Search string to look for.
   $query: String!
 ) {
   issueSearch(
-    before: $before
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
     query: $query
   ) {
     ...IssueConnection
-  }
-}
-# All milestones.
-query milestones(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  milestones(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...MilestoneConnection
   }
 }
 # One specific milestone.
@@ -3182,56 +3125,56 @@ query milestone($id: String!) {
 # Projects associated with the milestone.
 query milestone_projects(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   milestone(id: $id) {
     projects(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...ProjectConnection
     }
   }
 }
-# All notifications.
-query notifications(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All milestones.
+query milestones(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  notifications(
-    before: $before
+  milestones(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...NotificationConnection
+    ...MilestoneConnection
   }
 }
 # One specific notification.
@@ -3240,30 +3183,30 @@ query notification($id: String!) {
     ...Notification
   }
 }
-# The user's notification subscriptions.
-query notificationSubscriptions(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All notifications.
+query notifications(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  notificationSubscriptions(
-    before: $before
+  notifications(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...NotificationSubscriptionConnection
+    ...NotificationConnection
   }
 }
 # One specific notification subscription.
@@ -3272,30 +3215,154 @@ query notificationSubscription($id: String!) {
     ...NotificationSubscription
   }
 }
-# All invites for the organization.
-query organizationInvites(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# The user's notification subscriptions.
+query notificationSubscriptions(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  organizationInvites(
-    before: $before
+  notificationSubscriptions(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...OrganizationInviteConnection
+    ...NotificationSubscriptionConnection
+  }
+}
+# The user's organization.
+query organization {
+  organization {
+    ...Organization
+  }
+}
+# Integrations associated with the organization.
+query organization_integrations(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    integrations(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IntegrationConnection
+    }
+  }
+}
+# Milestones associated with the organization.
+query organization_milestones(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    milestones(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...MilestoneConnection
+    }
+  }
+}
+# Teams associated with the organization.
+query organization_teams(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    teams(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...TeamConnection
+    }
+  }
+}
+# Users associated with the organization.
+query organization_users(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    users(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...UserConnection
+    }
+  }
+}
+# Does the organization exist.
+query organizationExists($urlKey: String!) {
+  organizationExists(urlKey: $urlKey) {
+    ...OrganizationExistsPayload
   }
 }
 # One specific organization invite.
@@ -3307,212 +3374,56 @@ query organizationInvite($id: String!) {
 # Issues associated with the label.
 query organizationInvite_issues(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   organizationInvite(id: $id) {
     issues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
     }
   }
 }
-# The user's organization.
-query organization {
-  organization {
-    ...Organization
-  }
-}
-# Users associated with the organization.
-query organization_users(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All invites for the organization.
+query organizationInvites(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  organization {
-    users(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...UserConnection
-    }
-  }
-}
-# Teams associated with the organization.
-query organization_teams(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    teams(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...TeamConnection
-    }
-  }
-}
-# Milestones associated with the organization.
-query organization_milestones(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    milestones(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...MilestoneConnection
-    }
-  }
-}
-# Integrations associated with the organization.
-query organization_integrations(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    integrations(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IntegrationConnection
-    }
-  }
-}
-# Does the organization exist.
-query organizationExists($urlKey: String!) {
-  organizationExists(urlKey: $urlKey) {
-    ...OrganizationExistsPayload
-  }
-}
-# All links for the project.
-query projectLinks(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  projectLinks(
-    before: $before
+  organizationInvites(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...ProjectLinkConnection
-  }
-}
-# One specific project link.
-query projectLink($id: String!) {
-  projectLink(id: $id) {
-    ...ProjectLink
-  }
-}
-# All projects.
-query projects(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  projects(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...ProjectConnection
+    ...OrganizationInviteConnection
   }
 }
 # One specific project.
@@ -3521,87 +3432,29 @@ query project($id: String!) {
     ...Project
   }
 }
-# Teams associated with this project.
-query project_teams(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  project(id: $id) {
-    teams(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...TeamConnection
-    }
-  }
-}
-# Users that are members of the project.
-query project_members(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  project(id: $id) {
-    members(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...UserConnection
-    }
-  }
-}
 # Issues associated with the project.
 query project_issues(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   project(id: $id) {
     issues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
@@ -3611,62 +3464,152 @@ query project_issues(
 # Links associated with the project.
 query project_links(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   project(id: $id) {
     links(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...ProjectLinkConnection
     }
   }
 }
+# Users that are members of the project.
+query project_members(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    members(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...UserConnection
+    }
+  }
+}
+# Teams associated with this project.
+query project_teams(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    teams(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...TeamConnection
+    }
+  }
+}
+# One specific project link.
+query projectLink($id: String!) {
+  projectLink(id: $id) {
+    ...ProjectLink
+  }
+}
+# All links for the project.
+query projectLinks(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectLinks(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectLinkConnection
+  }
+}
+# All projects.
+query projects(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projects(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectConnection
+  }
+}
 # Sends a test push message.
 query pushSubscriptionTest {
   pushSubscriptionTest {
     ...PushSubscriptionPayload
-  }
-}
-# All comment emoji reactions.
-query reactions(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  reactions(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...ReactionConnection
   }
 }
 # A specific reaction.
@@ -3678,62 +3621,61 @@ query reaction(
     ...Reaction
   }
 }
-# All team memberships.
-query teamMemberships(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All comment emoji reactions.
+query reactions(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  teamMemberships(
-    before: $before
+  reactions(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...TeamMembershipConnection
+    ...ReactionConnection
   }
 }
-# One specific team membership.
-query teamMembership($id: String!) {
-  teamMembership(id: $id) {
-    ...TeamMembership
-  }
-}
-# All teams.
-query teams(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
+# Fetch SSO login URL for the email provided.
+query ssoUrlFromEmail(
+  # Email to query the SSO login URL by.
+  $email: String!
+  # Whether the client is the desktop app.
+  $isDesktop: Boolean
 ) {
-  teams(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...TeamConnection
+  ssoUrlFromEmail(email: $email, isDesktop: $isDesktop) {
+    ...SsoUrlFromEmailResponse
+  }
+}
+# Fetch data to catch up the client to the state of the world.
+query syncBootstrap(
+  # The version of the backend database the client has locally stored.
+  $databaseVersion: Int!
+  # The last sync id the client has seen.
+  $sinceSyncId: Int!
+) {
+  syncBootstrap(databaseVersion: $databaseVersion, sinceSyncId: $sinceSyncId) {
+    ...SyncResponse
+  }
+}
+# Fetches delta packets to catch up the user to the current state of the world.
+query syncUpdates(
+  # The last sync id the client has seen.
+  $sinceSyncId: Float!
+) {
+  syncUpdates(sinceSyncId: $sinceSyncId) {
+    ...SyncResponse
   }
 }
 # One specific team.
@@ -3742,87 +3684,116 @@ query team($id: String!) {
     ...Team
   }
 }
-# Issues associated with the team.
-query team_issues(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    issues(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
 # Cycles associated with the team.
 query team_cycles(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   team(id: $id) {
     cycles(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...CycleConnection
     }
   }
 }
+# Issues associated with the team.
+query team_issues(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  team(id: $id) {
+    issues(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Labels associated with the team.
+query team_labels(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  team(id: $id) {
+    labels(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueLabelConnection
+    }
+  }
+}
 # Memberships associated with the team.
 query team_memberships(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   team(id: $id) {
     memberships(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...TeamMembershipConnection
@@ -3832,26 +3803,26 @@ query team_memberships(
 # Projects associated with the team.
 query team_projects(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   team(id: $id) {
     projects(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...ProjectConnection
@@ -3861,26 +3832,26 @@ query team_projects(
 # The states that define the workflow associated with the team.
 query team_states(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   team(id: $id) {
     states(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...WorkflowStateConnection
@@ -3890,109 +3861,117 @@ query team_states(
 # Templates associated with the team.
 query team_templates(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   team(id: $id) {
     templates(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...TemplateConnection
     }
   }
 }
-# Labels associated with the team.
-query team_labels(
-  $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  team(id: $id) {
-    labels(
-      before: $before
-      after: $after
-      first: $first
-      last: $last
-      includeArchived: $includeArchived
-      orderBy: $orderBy
-    ) {
-      ...IssueLabelConnection
-    }
-  }
-}
 # Webhooks associated with the team.
 query team_webhooks(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   team(id: $id) {
     webhooks(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...WebhookConnection
     }
   }
 }
-# All templates from all users.
-query templates {
-  templates {
-    id
-    createdAt
-    updatedAt
-    archivedAt
-    type
-    name
-    description
-    templateData
-    # The team that the template is associated with.
-    team {
-      ...Team
-    }
-    # The user who created the template.
-    creator {
-      ...User
-    }
+# One specific team membership.
+query teamMembership($id: String!) {
+  teamMembership(id: $id) {
+    ...TeamMembership
+  }
+}
+# All team memberships.
+query teamMemberships(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  teamMemberships(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...TeamMembershipConnection
+  }
+}
+# All teams.
+query teams(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  teams(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...TeamConnection
   }
 }
 # A specific template.
@@ -4004,30 +3983,25 @@ query template(
     ...Template
   }
 }
-# All users for the organization.
-query users(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  users(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...UserConnection
+# All templates from all users.
+query templates {
+  templates {
+    archivedAt
+    createdAt
+    # The user who created the template.
+    creator {
+      ...User
+    }
+    description
+    id
+    name
+    # The team that the template is associated with.
+    team {
+      ...Team
+    }
+    templateData
+    type
+    updatedAt
   }
 }
 # One specific user.
@@ -4043,26 +4017,26 @@ query user(
 query user_assignedIssues(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   user(id: $id) {
     assignedIssues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
@@ -4073,26 +4047,26 @@ query user_assignedIssues(
 query user_createdIssues(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   user(id: $id) {
     createdIssues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
@@ -4103,30 +4077,62 @@ query user_createdIssues(
 query user_teamMemberships(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   user(id: $id) {
     teamMemberships(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...TeamMembershipConnection
     }
+  }
+}
+# All users for the organization.
+query users(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  users(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...UserConnection
+  }
+}
+# The user's settings.
+query userSettings {
+  userSettings {
+    ...UserSettings
   }
 }
 # The currently authenticated user.
@@ -4137,26 +4143,26 @@ query viewer {
 }
 # Issues assigned to the user.
 query viewer_assignedIssues(
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   viewer {
     assignedIssues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
@@ -4165,26 +4171,26 @@ query viewer_assignedIssues(
 }
 # Issues created by the user.
 query viewer_createdIssues(
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   viewer {
     createdIssues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
@@ -4193,62 +4199,30 @@ query viewer_createdIssues(
 }
 # Memberships associated with the user.
 query viewer_teamMemberships(
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   viewer {
     teamMemberships(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...TeamMembershipConnection
     }
-  }
-}
-# The user's settings.
-query userSettings {
-  userSettings {
-    ...UserSettings
-  }
-}
-# All webhooks.
-query webhooks(
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  webhooks(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    includeArchived: $includeArchived
-    orderBy: $orderBy
-  ) {
-    ...WebhookConnection
   }
 }
 # A specific webhook.
@@ -4260,30 +4234,30 @@ query webhook(
     ...Webhook
   }
 }
-# All issue workflow states.
-query workflowStates(
-  # A cursor to be used with last for backward pagination.
-  $before: String
+# All webhooks.
+query webhooks(
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  workflowStates(
-    before: $before
+  webhooks(
     after: $after
+    before: $before
     first: $first
-    last: $last
     includeArchived: $includeArchived
+    last: $last
     orderBy: $orderBy
   ) {
-    ...WorkflowStateConnection
+    ...WebhookConnection
   }
 }
 # One specific state.
@@ -4295,39 +4269,56 @@ query workflowState($id: String!) {
 # Issues belonging in this state.
 query workflowState_issues(
   $id: String!
-  # A cursor to be used with last for backward pagination.
-  $before: String
   # A cursor to be used with first for forward pagination
   $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
   workflowState(id: $id) {
     issues(
-      before: $before
       after: $after
+      before: $before
       first: $first
-      last: $last
       includeArchived: $includeArchived
+      last: $last
       orderBy: $orderBy
     ) {
       ...IssueConnection
     }
   }
 }
-# [Deprecated] Creates a new event.
-mutation eventCreate(
-  # The event to create.
-  $input: EventCreateInput!
+# All issue workflow states.
+query workflowStates(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
 ) {
-  eventCreate(input: $input) {
-    ...EventPayload
+  workflowStates(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...WorkflowStateConnection
   }
 }
 # Creates a new API key.
@@ -4346,71 +4337,6 @@ mutation apiKeyDelete(
 ) {
   apiKeyDelete(id: $id) {
     ...ArchivePayload
-  }
-}
-# Finds or creates a new user account by email and sends an email with token.
-mutation emailUserAccountAuthChallenge(
-  # The data used for email authentication.
-  $input: EmailUserAccountAuthChallengeInput!
-) {
-  emailUserAccountAuthChallenge(input: $input) {
-    ...EmailUserAccountAuthChallengeResponse
-  }
-}
-# Authenticates a user account via email and authentication token.
-mutation emailTokenUserAccountAuth(
-  # The data used for token authentication.
-  $input: TokenUserAccountAuthInput!
-) {
-  emailTokenUserAccountAuth(input: $input) {
-    ...AuthResolverResponse
-  }
-}
-# Authenticates a user account via email and authentication token for SAML.
-mutation samlTokenUserAccountAuth(
-  # The data used for token authentication.
-  $input: TokenUserAccountAuthInput!
-) {
-  samlTokenUserAccountAuth(input: $input) {
-    ...AuthResolverResponse
-  }
-}
-# Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
-mutation googleUserAccountAuth(
-  # The data used for Google authentication.
-  $input: GoogleUserAccountAuthInput!
-) {
-  googleUserAccountAuth(input: $input) {
-    ...AuthResolverResponse
-  }
-}
-# Creates an organization from onboarding.
-mutation createOrganizationFromOnboarding(
-  # Onboarding survey.
-  $survey: OnboardingCustomerSurvey
-  # Organization details for the new organization.
-  $input: CreateOrganizationInput!
-) {
-  createOrganizationFromOnboarding(survey: $survey, input: $input) {
-    ...CreateOrJoinOrganizationResponse
-  }
-}
-# Join an organization from onboarding.
-mutation joinOrganizationFromOnboarding(
-  # Organization details for the organization to join.
-  $input: JoinOrganizationInput!
-) {
-  joinOrganizationFromOnboarding(input: $input) {
-    ...CreateOrJoinOrganizationResponse
-  }
-}
-# Leave an organization.
-mutation leaveOrganization(
-  # ID of the organization to leave.
-  $organizationId: String!
-) {
-  leaveOrganization(organizationId: $organizationId) {
-    ...CreateOrJoinOrganizationResponse
   }
 }
 # Updates the billing email address for the customer.
@@ -4437,17 +4363,6 @@ mutation commentCreate(
     ...CommentPayload
   }
 }
-# Updates a comment.
-mutation commentUpdate(
-  # A partial comment object to update the issue with.
-  $input: CommentUpdateInput!
-  # The identifier of the comment to update.
-  $id: String!
-) {
-  commentUpdate(input: $input, id: $id) {
-    ...CommentPayload
-  }
-}
 # Deletes a comment.
 mutation commentDelete(
   # The identifier of the comment to delete.
@@ -4455,6 +4370,17 @@ mutation commentDelete(
 ) {
   commentDelete(id: $id) {
     ...ArchivePayload
+  }
+}
+# Updates a comment.
+mutation commentUpdate(
+  # The identifier of the comment to update.
+  $id: String!
+  # A partial comment object to update the issue with.
+  $input: CommentUpdateInput!
+) {
+  commentUpdate(id: $id, input: $input) {
+    ...CommentPayload
   }
 }
 # Saves user message.
@@ -4466,6 +4392,23 @@ mutation contactCreate(
     ...ContactPayload
   }
 }
+# Create CSV export report for the organization.
+mutation createCsvExportReport {
+  createCsvExportReport {
+    ...CreateCsvExportReportPayload
+  }
+}
+# Creates an organization from onboarding.
+mutation createOrganizationFromOnboarding(
+  # Organization details for the new organization.
+  $input: CreateOrganizationInput!
+  # Onboarding survey.
+  $survey: OnboardingCustomerSurvey
+) {
+  createOrganizationFromOnboarding(input: $input, survey: $survey) {
+    ...CreateOrJoinOrganizationResponse
+  }
+}
 # Creates a new custom view.
 mutation customViewCreate(
   # The properties of the custom view to create.
@@ -4475,23 +4418,32 @@ mutation customViewCreate(
     ...CustomViewPayload
   }
 }
-# Updates a custom view.
-mutation customViewUpdate(
-  # The properties of the custom view to update.
-  $input: CustomViewUpdateInput!
-  # The identifier of the custom view to update.
-  $id: String!
-) {
-  customViewUpdate(input: $input, id: $id) {
-    ...CustomViewPayload
-  }
-}
 # Deletes a custom view.
 mutation customViewDelete(
   # The identifier of the custom view to delete.
   $id: String!
 ) {
   customViewDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a custom view.
+mutation customViewUpdate(
+  # The identifier of the custom view to update.
+  $id: String!
+  # The properties of the custom view to update.
+  $input: CustomViewUpdateInput!
+) {
+  customViewUpdate(id: $id, input: $input) {
+    ...CustomViewPayload
+  }
+}
+# Archives a cycle.
+mutation cycleArchive(
+  # The identifier of the cycle to archive.
+  $id: String!
+) {
+  cycleArchive(id: $id) {
     ...ArchivePayload
   }
 }
@@ -4506,22 +4458,19 @@ mutation cycleCreate(
 }
 # Updates a cycle.
 mutation cycleUpdate(
-  # A partial cycle object to update the cycle with.
-  $input: CycleUpdateInput!
   # The identifier of the cycle to update.
   $id: String!
+  # A partial cycle object to update the cycle with.
+  $input: CycleUpdateInput!
 ) {
-  cycleUpdate(input: $input, id: $id) {
+  cycleUpdate(id: $id, input: $input) {
     ...CyclePayload
   }
 }
-# Archives a cycle.
-mutation cycleArchive(
-  # The identifier of the cycle to archive.
-  $id: String!
-) {
-  cycleArchive(id: $id) {
-    ...ArchivePayload
+# Create the SAML test organization in development.
+mutation debugCreateSAMLOrg {
+  debugCreateSAMLOrg {
+    ...DebugPayload
   }
 }
 # Always fails with internal error. Used to debug logging.
@@ -4536,10 +4485,13 @@ mutation debugFailWithWarning {
     ...DebugPayload
   }
 }
-# Create the SAML test organization in development.
-mutation debugCreateSAMLOrg {
-  debugCreateSAMLOrg {
-    ...DebugPayload
+# Authenticates a user account via email and authentication token.
+mutation emailTokenUserAccountAuth(
+  # The data used for token authentication.
+  $input: TokenUserAccountAuthInput!
+) {
+  emailTokenUserAccountAuth(input: $input) {
+    ...AuthResolverResponse
   }
 }
 # Unsubscribes the user from one type of emails.
@@ -4549,6 +4501,15 @@ mutation emailUnsubscribe(
 ) {
   emailUnsubscribe(input: $input) {
     ...EmailUnsubscribePayload
+  }
+}
+# Finds or creates a new user account by email and sends an email with token.
+mutation emailUserAccountAuthChallenge(
+  # The data used for email authentication.
+  $input: EmailUserAccountAuthChallengeInput!
+) {
+  emailUserAccountAuthChallenge(input: $input) {
+    ...EmailUserAccountAuthChallengeResponse
   }
 }
 # Creates a custom emoji.
@@ -4569,23 +4530,21 @@ mutation emojiDelete(
     ...ArchivePayload
   }
 }
+# [Deprecated] Creates a new event.
+mutation eventCreate(
+  # The event to create.
+  $input: EventCreateInput!
+) {
+  eventCreate(input: $input) {
+    ...EventPayload
+  }
+}
 # Creates a new favorite (project, cycle etc).
 mutation favoriteCreate(
   # The favorite object to create.
   $input: FavoriteCreateInput!
 ) {
   favoriteCreate(input: $input) {
-    ...FavoritePayload
-  }
-}
-# Updates a favorite.
-mutation favoriteUpdate(
-  # A partial favorite object to update the favorite with.
-  $input: FavoriteUpdateInput!
-  # The identifier of the favorite to update.
-  $id: String!
-) {
-  favoriteUpdate(input: $input, id: $id) {
     ...FavoritePayload
   }
 }
@@ -4596,6 +4555,17 @@ mutation favoriteDelete(
 ) {
   favoriteDelete(id: $id) {
     ...ArchivePayload
+  }
+}
+# Updates a favorite.
+mutation favoriteUpdate(
+  # The identifier of the favorite to update.
+  $id: String!
+  # A partial favorite object to update the favorite with.
+  $input: FavoriteUpdateInput!
+) {
+  favoriteUpdate(id: $id, input: $input) {
+    ...FavoritePayload
   }
 }
 # Saves user feedback.
@@ -4610,17 +4580,26 @@ mutation feedbackCreate(
 # XHR request payload to upload an images, video and other attachments directly to Linear's cloud
 # storage.
 mutation fileUpload(
-  # Optional metadata.
-  $metaData: JSON
-  # File size of the uploaded file.
-  $size: Int!
   # MIME type of the uploaded file.
   $contentType: String!
   # Filename of the uploaded file.
   $filename: String!
+  # Optional metadata.
+  $metaData: JSON
+  # File size of the uploaded file.
+  $size: Int!
 ) {
-  fileUpload(metaData: $metaData, size: $size, contentType: $contentType, filename: $filename) {
+  fileUpload(contentType: $contentType, filename: $filename, metaData: $metaData, size: $size) {
     ...UploadPayload
+  }
+}
+# Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
+mutation googleUserAccountAuth(
+  # The data used for Google authentication.
+  $input: GoogleUserAccountAuthInput!
+) {
+  googleUserAccountAuth(input: $input) {
+    ...AuthResolverResponse
   }
 }
 # Upload an image from an URL to Linear.
@@ -4630,6 +4609,26 @@ mutation imageUploadFromUrl(
 ) {
   imageUploadFromUrl(url: $url) {
     ...ImageUploadFromUrlPayload
+  }
+}
+# Deletes an integration.
+mutation integrationDelete(
+  # The identifier of the integration to delete.
+  $id: String!
+) {
+  integrationDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Integrates the organization with Figma.
+mutation integrationFigma(
+  # The Figma OAuth code.
+  $code: String!
+  # The Figma OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationFigma(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
   }
 }
 # Connects the organization with the GitHub App.
@@ -4643,86 +4642,12 @@ mutation integrationGithubConnect(
 }
 # Connects the organization with a GitLab Access Token.
 mutation integrationGitlabConnect(
-  # The URL of the GitLab installation
-  $gitlabUrl: String!
   # The GitLab Access Token to connect with.
   $accessToken: String!
+  # The URL of the GitLab installation
+  $gitlabUrl: String!
 ) {
-  integrationGitlabConnect(gitlabUrl: $gitlabUrl, accessToken: $accessToken) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Slack.
-mutation integrationSlack(
-  # Whether or not v2 of Slack OAuth should be used
-  $shouldUseV2Auth: Boolean
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-  # The Slack OAuth code.
-  $code: String!
-) {
-  integrationSlack(shouldUseV2Auth: $shouldUseV2Auth, redirectUri: $redirectUri, code: $code) {
-    ...IntegrationPayload
-  }
-}
-# Integrates your personal notifications with Slack.
-mutation integrationSlackPersonal(
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-  # The Slack OAuth code.
-  $code: String!
-) {
-  integrationSlackPersonal(redirectUri: $redirectUri, code: $code) {
-    ...IntegrationPayload
-  }
-}
-# Slack webhook integration.
-mutation integrationSlackPost(
-  # Whether or not v2 of Slack OAuth should be used
-  $shouldUseV2Auth: Boolean
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-  # Integration's associated team.
-  $teamId: String!
-  # The Slack OAuth code.
-  $code: String!
-) {
-  integrationSlackPost(shouldUseV2Auth: $shouldUseV2Auth, redirectUri: $redirectUri, teamId: $teamId, code: $code) {
-    ...IntegrationPayload
-  }
-}
-# Slack integration for project notifications.
-mutation integrationSlackProjectPost(
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-  # Integration's associated project.
-  $projectId: String!
-  # The Slack OAuth code.
-  $code: String!
-) {
-  integrationSlackProjectPost(redirectUri: $redirectUri, projectId: $projectId, code: $code) {
-    ...IntegrationPayload
-  }
-}
-# Imports custom emojis from your Slack workspace.
-mutation integrationSlackImportEmojis(
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-  # The Slack OAuth code.
-  $code: String!
-) {
-  integrationSlackImportEmojis(redirectUri: $redirectUri, code: $code) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Figma.
-mutation integrationFigma(
-  # The Figma OAuth redirect URI.
-  $redirectUri: String!
-  # The Figma OAuth code.
-  $code: String!
-) {
-  integrationFigma(redirectUri: $redirectUri, code: $code) {
+  integrationGitlabConnect(accessToken: $accessToken, gitlabUrl: $gitlabUrl) {
     ...IntegrationPayload
   }
 }
@@ -4735,37 +4660,6 @@ mutation integrationGoogleSheets(
     ...IntegrationPayload
   }
 }
-# Manually update Google Sheets data.
-mutation refreshGoogleSheetsData(
-  # The identifier of the Google Sheets integration to update.
-  $id: String!
-) {
-  refreshGoogleSheetsData(id: $id) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Sentry.
-mutation integrationSentryConnect(
-  # The slug of the Sentry organization being connected.
-  $organizationSlug: String!
-  # The Sentry grant code that's exchanged for OAuth tokens.
-  $code: String!
-  # The Sentry installationId to connect with.
-  $installationId: String!
-) {
-  integrationSentryConnect(organizationSlug: $organizationSlug, code: $code, installationId: $installationId) {
-    ...IntegrationPayload
-  }
-}
-# Deletes an integration.
-mutation integrationDelete(
-  # The identifier of the integration to delete.
-  $id: String!
-) {
-  integrationDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
 # Archives an integration resource.
 mutation integrationResourceArchive(
   # The identifier of the integration resource to archive.
@@ -4775,24 +4669,127 @@ mutation integrationResourceArchive(
     ...ArchivePayload
   }
 }
+# Integrates the organization with Sentry.
+mutation integrationSentryConnect(
+  # The Sentry grant code that's exchanged for OAuth tokens.
+  $code: String!
+  # The Sentry installationId to connect with.
+  $installationId: String!
+  # The slug of the Sentry organization being connected.
+  $organizationSlug: String!
+) {
+  integrationSentryConnect(code: $code, installationId: $installationId, organizationSlug: $organizationSlug) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Slack.
+mutation integrationSlack(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+  # Whether or not v2 of Slack OAuth should be used
+  $shouldUseV2Auth: Boolean
+) {
+  integrationSlack(code: $code, redirectUri: $redirectUri, shouldUseV2Auth: $shouldUseV2Auth) {
+    ...IntegrationPayload
+  }
+}
+# Imports custom emojis from your Slack workspace.
+mutation integrationSlackImportEmojis(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackImportEmojis(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Integrates your personal notifications with Slack.
+mutation integrationSlackPersonal(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackPersonal(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Slack webhook integration.
+mutation integrationSlackPost(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+  # Whether or not v2 of Slack OAuth should be used
+  $shouldUseV2Auth: Boolean
+  # Integration's associated team.
+  $teamId: String!
+) {
+  integrationSlackPost(code: $code, redirectUri: $redirectUri, shouldUseV2Auth: $shouldUseV2Auth, teamId: $teamId) {
+    ...IntegrationPayload
+  }
+}
+# Slack integration for project notifications.
+mutation integrationSlackProjectPost(
+  # The Slack OAuth code.
+  $code: String!
+  # Integration's associated project.
+  $projectId: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackProjectPost(code: $code, projectId: $projectId, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Archives an issue.
+mutation issueArchive(
+  # The identifier of the issue to archive.
+  $id: String!
+) {
+  issueArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new issue.
+mutation issueCreate(
+  # The issue object to create.
+  $input: IssueCreateInput!
+) {
+  issueCreate(input: $input) {
+    ...IssuePayload
+  }
+}
 # Kicks off a GitHub import job.
 mutation issueImportCreateGithub(
-  # Github owner (user or org) for the repository from which we will import data.
-  $githubRepoOwner: String!
   # Github repository name from which we will import data.
   $githubRepoName: String!
+  # Github owner (user or org) for the repository from which we will import data.
+  $githubRepoOwner: String!
   # Github token to fetch information from the Github API.
   $githubToken: String!
   # ID of the team into which to import data.
   $teamId: String!
 ) {
   issueImportCreateGithub(
-    githubRepoOwner: $githubRepoOwner
     githubRepoName: $githubRepoName
+    githubRepoOwner: $githubRepoOwner
     githubToken: $githubToken
     teamId: $teamId
   ) {
     ...IssueImportPayload
+  }
+}
+# Archives an issue label.
+mutation issueLabelArchive(
+  # The identifier of the label to archive.
+  $id: String!
+) {
+  issueLabelArchive(id: $id) {
+    ...ArchivePayload
   }
 }
 # Creates a new label.
@@ -4806,22 +4803,13 @@ mutation issueLabelCreate(
 }
 # Updates an label.
 mutation issueLabelUpdate(
-  # A partial label object to update.
-  $input: IssueLabelUpdateInput!
   # The identifier of the label to update.
   $id: String!
+  # A partial label object to update.
+  $input: IssueLabelUpdateInput!
 ) {
-  issueLabelUpdate(input: $input, id: $id) {
+  issueLabelUpdate(id: $id, input: $input) {
     ...IssueLabelPayload
-  }
-}
-# Archives an issue label.
-mutation issueLabelArchive(
-  # The identifier of the label to archive.
-  $id: String!
-) {
-  issueLabelArchive(id: $id) {
-    ...ArchivePayload
   }
 }
 # Creates a new issue relation.
@@ -4830,17 +4818,6 @@ mutation issueRelationCreate(
   $input: IssueRelationCreateInput!
 ) {
   issueRelationCreate(input: $input) {
-    ...IssueRelationPayload
-  }
-}
-# Updates an issue relation.
-mutation issueRelationUpdate(
-  # The properties of the issue relation to update.
-  $input: IssueRelationUpdateInput!
-  # The identifier of the issue relation to update.
-  $id: String!
-) {
-  issueRelationUpdate(input: $input, id: $id) {
     ...IssueRelationPayload
   }
 }
@@ -4853,33 +4830,15 @@ mutation issueRelationDelete(
     ...ArchivePayload
   }
 }
-# Creates a new issue.
-mutation issueCreate(
-  # The issue object to create.
-  $input: IssueCreateInput!
-) {
-  issueCreate(input: $input) {
-    ...IssuePayload
-  }
-}
-# Updates an issue.
-mutation issueUpdate(
-  # A partial issue object to update the issue with.
-  $input: IssueUpdateInput!
-  # The identifier of the issue to update.
+# Updates an issue relation.
+mutation issueRelationUpdate(
+  # The identifier of the issue relation to update.
   $id: String!
+  # The properties of the issue relation to update.
+  $input: IssueRelationUpdateInput!
 ) {
-  issueUpdate(input: $input, id: $id) {
-    ...IssuePayload
-  }
-}
-# Archives an issue.
-mutation issueArchive(
-  # The identifier of the issue to archive.
-  $id: String!
-) {
-  issueArchive(id: $id) {
-    ...ArchivePayload
+  issueRelationUpdate(id: $id, input: $input) {
+    ...IssueRelationPayload
   }
 }
 # Unarchives an issue.
@@ -4891,23 +4850,41 @@ mutation issueUnarchive(
     ...ArchivePayload
   }
 }
+# Updates an issue.
+mutation issueUpdate(
+  # The identifier of the issue to update.
+  $id: String!
+  # A partial issue object to update the issue with.
+  $input: IssueUpdateInput!
+) {
+  issueUpdate(id: $id, input: $input) {
+    ...IssuePayload
+  }
+}
+# Join an organization from onboarding.
+mutation joinOrganizationFromOnboarding(
+  # Organization details for the organization to join.
+  $input: JoinOrganizationInput!
+) {
+  joinOrganizationFromOnboarding(input: $input) {
+    ...CreateOrJoinOrganizationResponse
+  }
+}
+# Leave an organization.
+mutation leaveOrganization(
+  # ID of the organization to leave.
+  $organizationId: String!
+) {
+  leaveOrganization(organizationId: $organizationId) {
+    ...CreateOrJoinOrganizationResponse
+  }
+}
 # Creates a new milestone.
 mutation milestoneCreate(
   # The issue object to create.
   $input: MilestoneCreateInput!
 ) {
   milestoneCreate(input: $input) {
-    ...MilestonePayload
-  }
-}
-# Updates a milestone.
-mutation milestoneUpdate(
-  # A partial milestone object to update the milestone with.
-  $input: MilestoneUpdateInput!
-  # The identifier of the milestone to update.
-  $id: String!
-) {
-  milestoneUpdate(input: $input, id: $id) {
     ...MilestonePayload
   }
 }
@@ -4920,35 +4897,15 @@ mutation milestoneDelete(
     ...ArchivePayload
   }
 }
-# Creates a notification.
-mutation notificationCreate(
-  # A partial notification object to update the issue with.
-  $input: NotificationUpdateInput!
-  # The identifier of the notification to update.
+# Updates a milestone.
+mutation milestoneUpdate(
+  # The identifier of the milestone to update.
   $id: String!
+  # A partial milestone object to update the milestone with.
+  $input: MilestoneUpdateInput!
 ) {
-  notificationCreate(input: $input, id: $id) {
-    ...NotificationPayload
-  }
-}
-# Updates a notification.
-mutation notificationUpdate(
-  # A partial notification object to update the issue with.
-  $input: NotificationUpdateInput!
-  # The identifier of the notification to update.
-  $id: String!
-) {
-  notificationUpdate(input: $input, id: $id) {
-    ...NotificationPayload
-  }
-}
-# [Deprecated] Deletes a notification.
-mutation notificationDelete(
-  # The identifier of the notification to delete.
-  $id: String!
-) {
-  notificationDelete(id: $id) {
-    ...ArchivePayload
+  milestoneUpdate(id: $id, input: $input) {
+    ...MilestonePayload
   }
 }
 # Archives a notification.
@@ -4960,12 +4917,23 @@ mutation notificationArchive(
     ...ArchivePayload
   }
 }
-# Unarchives a notification.
-mutation notificationUnarchive(
-  # The id of the notification to archive.
+# Creates a notification.
+mutation notificationCreate(
+  # The identifier of the notification to update.
+  $id: String!
+  # A partial notification object to update the issue with.
+  $input: NotificationUpdateInput!
+) {
+  notificationCreate(id: $id, input: $input) {
+    ...NotificationPayload
+  }
+}
+# [Deprecated] Deletes a notification.
+mutation notificationDelete(
+  # The identifier of the notification to delete.
   $id: String!
 ) {
-  notificationUnarchive(id: $id) {
+  notificationDelete(id: $id) {
     ...ArchivePayload
   }
 }
@@ -4987,24 +4955,24 @@ mutation notificationSubscriptionDelete(
     ...ArchivePayload
   }
 }
-# Creates a new OAuth client.
-mutation oauthClientCreate(
-  # The OAuth client application object to create.
-  $input: OauthClientCreateInput!
-) {
-  oauthClientCreate(input: $input) {
-    ...OauthClientPayload
-  }
-}
-# Updates an OAuth client.
-mutation oauthClientUpdate(
-  # A partial client object to update the OAuth client with.
-  $input: OauthClientUpdateInput!
-  # The identifier of the OAuth client to update.
+# Unarchives a notification.
+mutation notificationUnarchive(
+  # The id of the notification to archive.
   $id: String!
 ) {
-  oauthClientUpdate(input: $input, id: $id) {
-    ...OauthClientPayload
+  notificationUnarchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a notification.
+mutation notificationUpdate(
+  # The identifier of the notification to update.
+  $id: String!
+  # A partial notification object to update the issue with.
+  $input: NotificationUpdateInput!
+) {
+  notificationUpdate(id: $id, input: $input) {
+    ...NotificationPayload
   }
 }
 # Archives an OAuth client.
@@ -5016,6 +4984,15 @@ mutation oauthClientArchive(
     ...ArchivePayload
   }
 }
+# Creates a new OAuth client.
+mutation oauthClientCreate(
+  # The OAuth client application object to create.
+  $input: OauthClientCreateInput!
+) {
+  oauthClientCreate(input: $input) {
+    ...OauthClientPayload
+  }
+}
 # Updates an OAuth client.
 mutation oauthClientRotateSecret(
   # The identifier of the OAuth client for which we want to rotate the secret.
@@ -5025,24 +5002,41 @@ mutation oauthClientRotateSecret(
     ...RotateSecretPayload
   }
 }
+# Updates an OAuth client.
+mutation oauthClientUpdate(
+  # The identifier of the OAuth client to update.
+  $id: String!
+  # A partial client object to update the OAuth client with.
+  $input: OauthClientUpdateInput!
+) {
+  oauthClientUpdate(id: $id, input: $input) {
+    ...OauthClientPayload
+  }
+}
 # Revokes an OAuth token.
 mutation oauthTokenRevoke(
-  # The group of scopes for the tokens to be revoked.
-  $scope: [String!]!
   # The identifier of the OAuth client for the tokens to be revoked.
   $appId: String!
+  # The group of scopes for the tokens to be revoked.
+  $scope: [String!]!
 ) {
-  oauthTokenRevoke(scope: $scope, appId: $appId) {
+  oauthTokenRevoke(appId: $appId, scope: $scope) {
     ...OauthTokenRevokePayload
   }
 }
-# Verifies a domain to be added to an organization.
-mutation organizationDomainVerify(
-  # The organization domain to verify.
-  $input: OrganizationDomainVerificationInput!
+# Delete's an organization. Administrator privileges required.
+mutation organizationDelete(
+  # Information required to delete an organization.
+  $input: DeleteOrganizationInput!
 ) {
-  organizationDomainVerify(input: $input) {
-    ...OrganizationDomainPayload
+  organizationDelete(input: $input) {
+    ...OrganizationDeletePayload
+  }
+}
+# Get an organization's delete confirmation token. Administrator privileges required.
+mutation organizationDeleteChallenge {
+  organizationDeleteChallenge {
+    ...OrganizationDeletePayload
   }
 }
 # Adds a domain to be allowed for an organization.
@@ -5063,6 +5057,15 @@ mutation organizationDomainDelete(
     ...ArchivePayload
   }
 }
+# Verifies a domain to be added to an organization.
+mutation organizationDomainVerify(
+  # The organization domain to verify.
+  $input: OrganizationDomainVerificationInput!
+) {
+  organizationDomainVerify(input: $input) {
+    ...OrganizationDomainPayload
+  }
+}
 # Creates a new organization invite.
 mutation organizationInviteCreate(
   # The organization invite object to create.
@@ -5070,15 +5073,6 @@ mutation organizationInviteCreate(
 ) {
   organizationInviteCreate(input: $input) {
     ...OrganizationInvitePayload
-  }
-}
-# Re-send an organization invite.
-mutation resentOrganizationInvite(
-  # The identifier of the organization invite to be re-send.
-  $id: String!
-) {
-  resentOrganizationInvite(id: $id) {
-    ...ArchivePayload
   }
 }
 # Deletes an organization invite.
@@ -5099,19 +5093,22 @@ mutation organizationUpdate(
     ...OrganizationPayload
   }
 }
-# Get an organization's delete confirmation token. Administrator privileges required.
-mutation organizationDeleteChallenge {
-  organizationDeleteChallenge {
-    ...OrganizationDeletePayload
+# Archives a project.
+mutation projectArchive(
+  # The identifier of the project to archive. Also the identifier from the URL is accepted.
+  $id: String!
+) {
+  projectArchive(id: $id) {
+    ...ArchivePayload
   }
 }
-# Delete's an organization. Administrator privileges required.
-mutation organizationDelete(
-  # Information required to delete an organization.
-  $input: DeleteOrganizationInput!
+# Creates a new project.
+mutation projectCreate(
+  # The issue object to create.
+  $input: ProjectCreateInput!
 ) {
-  organizationDelete(input: $input) {
-    ...OrganizationDeletePayload
+  projectCreate(input: $input) {
+    ...ProjectPayload
   }
 }
 # Creates a new project link.
@@ -5132,33 +5129,15 @@ mutation projectLinkDelete(
     ...ArchivePayload
   }
 }
-# Creates a new project.
-mutation projectCreate(
-  # The issue object to create.
-  $input: ProjectCreateInput!
-) {
-  projectCreate(input: $input) {
-    ...ProjectPayload
-  }
-}
 # Updates a project.
 mutation projectUpdate(
-  # A partial project object to update the project with.
-  $input: ProjectUpdateInput!
   # The identifier of the project to update. Also the identifier from the URL is accepted.
   $id: String!
+  # A partial project object to update the project with.
+  $input: ProjectUpdateInput!
 ) {
-  projectUpdate(input: $input, id: $id) {
+  projectUpdate(id: $id, input: $input) {
     ...ProjectPayload
-  }
-}
-# Archives a project.
-mutation projectArchive(
-  # The identifier of the project to archive. Also the identifier from the URL is accepted.
-  $id: String!
-) {
-  projectArchive(id: $id) {
-    ...ArchivePayload
   }
 }
 # Creates a push subscription.
@@ -5197,10 +5176,40 @@ mutation reactionDelete(
     ...ArchivePayload
   }
 }
-# Create CSV export report for the organization.
-mutation createCsvExportReport {
-  createCsvExportReport {
-    ...CreateCsvExportReportPayload
+# Manually update Google Sheets data.
+mutation refreshGoogleSheetsData(
+  # The identifier of the Google Sheets integration to update.
+  $id: String!
+) {
+  refreshGoogleSheetsData(id: $id) {
+    ...IntegrationPayload
+  }
+}
+# Re-send an organization invite.
+mutation resentOrganizationInvite(
+  # The identifier of the organization invite to be re-send.
+  $id: String!
+) {
+  resentOrganizationInvite(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Authenticates a user account via email and authentication token for SAML.
+mutation samlTokenUserAccountAuth(
+  # The data used for token authentication.
+  $input: TokenUserAccountAuthInput!
+) {
+  samlTokenUserAccountAuth(input: $input) {
+    ...AuthResolverResponse
+  }
+}
+# Archives a subscription.
+mutation subscriptionArchive(
+  # The identifier of the subscription to archive.
+  $id: String!
+) {
+  subscriptionArchive(id: $id) {
+    ...ArchivePayload
   }
 }
 # Creates a subscription session. Used internally to integrate with Stripe.
@@ -5212,40 +5221,61 @@ mutation subscriptionSessionCreate(
     ...SubscriptionSessionPayload
   }
 }
+# Updates a subscription.
+mutation subscriptionUpdate(
+  # The identifier of the subscription.
+  $id: String!
+  # The properties of the subscription.
+  $input: SubscriptionUpdateInput!
+) {
+  subscriptionUpdate(id: $id, input: $input) {
+    ...SubscriptionPayload
+  }
+}
 # Creates a subscription update session. Used internally to integrate with Stripe.
 mutation subscriptionUpdateSessionCreate {
   subscriptionUpdateSessionCreate {
     ...SubscriptionSessionPayload
   }
 }
-# Updates a subscription.
-mutation subscriptionUpdate(
-  # The properties of the subscription.
-  $input: SubscriptionUpdateInput!
-  # The identifier of the subscription.
-  $id: String!
-) {
-  subscriptionUpdate(input: $input, id: $id) {
-    ...SubscriptionPayload
-  }
-}
 # Upgrades a subscription plan.
 mutation subscriptionUpgrade(
-  # The subscription type to upgrade to.
-  $type: String!
   # The identifier of the subscription.
   $id: String!
+  # The subscription type to upgrade to.
+  $type: String!
 ) {
-  subscriptionUpgrade(type: $type, id: $id) {
+  subscriptionUpgrade(id: $id, type: $type) {
     ...SubscriptionPayload
   }
 }
-# Archives a subscription.
-mutation subscriptionArchive(
-  # The identifier of the subscription to archive.
+# Archives a team.
+mutation teamArchive(
+  # The identifier of the team to archive.
   $id: String!
 ) {
-  subscriptionArchive(id: $id) {
+  teamArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new team. The user who creates the team will automatically be added as a member to the
+# newly created team.
+mutation teamCreate(
+  # The team id to copy settings from.
+  $copySettingsFromTeamId: String
+  # The team object to create.
+  $input: TeamCreateInput!
+) {
+  teamCreate(copySettingsFromTeamId: $copySettingsFromTeamId, input: $input) {
+    ...TeamPayload
+  }
+}
+# Deletes a team.
+mutation teamDelete(
+  # The identifier of the team to delete.
+  $id: String!
+) {
+  teamDelete(id: $id) {
     ...ArchivePayload
   }
 }
@@ -5267,45 +5297,15 @@ mutation teamMembershipDelete(
     ...ArchivePayload
   }
 }
-# Creates a new team. The user who creates the team will automatically be added as a member to the
-# newly created team.
-mutation teamCreate(
-  # The team id to copy settings from.
-  $copySettingsFromTeamId: String
-  # The team object to create.
-  $input: TeamCreateInput!
-) {
-  teamCreate(copySettingsFromTeamId: $copySettingsFromTeamId, input: $input) {
-    ...TeamPayload
-  }
-}
 # Updates a team.
 mutation teamUpdate(
-  # A partial team object to update the team with.
-  $input: TeamUpdateInput!
   # The identifier of the team to update.
   $id: String!
+  # A partial team object to update the team with.
+  $input: TeamUpdateInput!
 ) {
-  teamUpdate(input: $input, id: $id) {
+  teamUpdate(id: $id, input: $input) {
     ...TeamPayload
-  }
-}
-# Archives a team.
-mutation teamArchive(
-  # The identifier of the team to archive.
-  $id: String!
-) {
-  teamArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Deletes a team.
-mutation teamDelete(
-  # The identifier of the team to delete.
-  $id: String!
-) {
-  teamDelete(id: $id) {
-    ...ArchivePayload
   }
 }
 # Creates a new template.
@@ -5314,17 +5314,6 @@ mutation templateCreate(
   $input: TemplateCreateInput!
 ) {
   templateCreate(input: $input) {
-    ...TemplatePayload
-  }
-}
-# Updates an existing template.
-mutation templateUpdate(
-  # The properties of the template to update.
-  $input: TemplateUpdateInput!
-  # The identifier of the template.
-  $id: String!
-) {
-  templateUpdate(input: $input, id: $id) {
     ...TemplatePayload
   }
 }
@@ -5337,15 +5326,35 @@ mutation templateDelete(
     ...ArchivePayload
   }
 }
-# Updates a user. Only available to organization admins and the user themselves.
-mutation userUpdate(
-  # A partial user object to update the user with.
-  $input: UpdateUserInput!
-  # The identifier of the user to update. Use `me` to reference currently authenticated user.
+# Updates an existing template.
+mutation templateUpdate(
+  # The identifier of the template.
+  $id: String!
+  # The properties of the template to update.
+  $input: TemplateUpdateInput!
+) {
+  templateUpdate(id: $id, input: $input) {
+    ...TemplatePayload
+  }
+}
+# Makes user a regular user. Can only be called by an admin.
+mutation userDemoteAdmin(
+  # The identifier of the user to make a regular user.
   $id: String!
 ) {
-  userUpdate(input: $input, id: $id) {
-    ...UserPayload
+  userDemoteAdmin(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Updates a user's settings flag.
+mutation userFlagUpdate(
+  # Settings flag to increment.
+  $flag: UserFlagType!
+  # Flag operation to perform
+  $operation: UserFlagUpdateOperation!
+) {
+  userFlagUpdate(flag: $flag, operation: $operation) {
+    ...UserSettingsFlagPayload
   }
 }
 # Makes user an admin. Can only be called by an admin.
@@ -5357,13 +5366,36 @@ mutation userPromoteAdmin(
     ...UserAdminPayload
   }
 }
-# Makes user a regular user. Can only be called by an admin.
-mutation userDemoteAdmin(
-  # The identifier of the user to make a regular user.
-  $id: String!
+# [Deprecated] Updates a user's settings flag.
+mutation userSettingsFlagIncrement(
+  # Flag to increment.
+  $flag: String!
 ) {
-  userDemoteAdmin(id: $id) {
-    ...UserAdminPayload
+  userSettingsFlagIncrement(flag: $flag) {
+    ...UserSettingsFlagPayload
+  }
+}
+# Resets user's setting flags.
+mutation userSettingsFlagsReset {
+  userSettingsFlagsReset {
+    ...UserSettingsFlagsResetPayload
+  }
+}
+# Updates the user's settings.
+mutation userSettingsUpdate(
+  # The identifier of the userSettings to update.
+  $id: String!
+  # A partial notification object to update the settings with.
+  $input: UserSettingsUpdateInput!
+) {
+  userSettingsUpdate(id: $id, input: $input) {
+    ...UserSettingsPayload
+  }
+}
+# Subscribes user to changelog newsletter.
+mutation userSubscribeToNewsletter {
+  userSubscribeToNewsletter {
+    ...UserSubscribeToNewsletterPayload
   }
 }
 # Suspends a user. Can only be called by an admin.
@@ -5384,47 +5416,15 @@ mutation userUnsuspend(
     ...UserAdminPayload
   }
 }
-# Updates the user's settings.
-mutation userSettingsUpdate(
-  # A partial notification object to update the settings with.
-  $input: UserSettingsUpdateInput!
-  # The identifier of the userSettings to update.
+# Updates a user. Only available to organization admins and the user themselves.
+mutation userUpdate(
+  # The identifier of the user to update. Use `me` to reference currently authenticated user.
   $id: String!
+  # A partial user object to update the user with.
+  $input: UpdateUserInput!
 ) {
-  userSettingsUpdate(input: $input, id: $id) {
-    ...UserSettingsPayload
-  }
-}
-# [Deprecated] Updates a user's settings flag.
-mutation userSettingsFlagIncrement(
-  # Flag to increment.
-  $flag: String!
-) {
-  userSettingsFlagIncrement(flag: $flag) {
-    ...UserSettingsFlagPayload
-  }
-}
-# Resets user's setting flags.
-mutation userSettingsFlagsReset {
-  userSettingsFlagsReset {
-    ...UserSettingsFlagsResetPayload
-  }
-}
-# Updates a user's settings flag.
-mutation userFlagUpdate(
-  # Flag operation to perform
-  $operation: UserFlagUpdateOperation!
-  # Settings flag to increment.
-  $flag: UserFlagType!
-) {
-  userFlagUpdate(operation: $operation, flag: $flag) {
-    ...UserSettingsFlagPayload
-  }
-}
-# Subscribes user to changelog newsletter.
-mutation userSubscribeToNewsletter {
-  userSubscribeToNewsletter {
-    ...UserSubscribeToNewsletterPayload
+  userUpdate(id: $id, input: $input) {
+    ...UserPayload
   }
 }
 # Creates a new ViewPreferences object.
@@ -5433,17 +5433,6 @@ mutation viewPreferencesCreate(
   $input: ViewPreferencesCreateInput!
 ) {
   viewPreferencesCreate(input: $input) {
-    ...ViewPreferencesPayload
-  }
-}
-# Updates an existing ViewPreferences object.
-mutation viewPreferencesUpdate(
-  # The properties of the view preferences.
-  $input: ViewPreferencesUpdateInput!
-  # The identifier of the ViewPreferences object.
-  $id: String!
-) {
-  viewPreferencesUpdate(input: $input, id: $id) {
     ...ViewPreferencesPayload
   }
 }
@@ -5456,6 +5445,17 @@ mutation viewPreferencesDelete(
     ...ArchivePayload
   }
 }
+# Updates an existing ViewPreferences object.
+mutation viewPreferencesUpdate(
+  # The identifier of the ViewPreferences object.
+  $id: String!
+  # The properties of the view preferences.
+  $input: ViewPreferencesUpdateInput!
+) {
+  viewPreferencesUpdate(id: $id, input: $input) {
+    ...ViewPreferencesPayload
+  }
+}
 # Creates a new webhook.
 mutation webhookCreate(
   # The webhook object to create.
@@ -5465,23 +5465,32 @@ mutation webhookCreate(
     ...WebhookPayload
   }
 }
-# Updates an existing Webhook.
-mutation webhookUpdate(
-  # The properties of the Webhook.
-  $input: WebhookUpdateInput!
-  # The identifier of the Webhook.
-  $id: String!
-) {
-  webhookUpdate(input: $input, id: $id) {
-    ...WebhookPayload
-  }
-}
 # Deletes a Webhook.
 mutation webhookDelete(
   # The identifier of the Webhook to delete.
   $id: String!
 ) {
   webhookDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates an existing Webhook.
+mutation webhookUpdate(
+  # The identifier of the Webhook.
+  $id: String!
+  # The properties of the Webhook.
+  $input: WebhookUpdateInput!
+) {
+  webhookUpdate(id: $id, input: $input) {
+    ...WebhookPayload
+  }
+}
+# Archives a state. Only states with issues that have all been archived can be archived.
+mutation workflowStateArchive(
+  # The identifier of the state to archive.
+  $id: String!
+) {
+  workflowStateArchive(id: $id) {
     ...ArchivePayload
   }
 }
@@ -5496,21 +5505,12 @@ mutation workflowStateCreate(
 }
 # Updates a state.
 mutation workflowStateUpdate(
-  # A partial state object to update.
-  $input: WorkflowStateUpdateInput!
   # The identifier of the state to update.
   $id: String!
+  # A partial state object to update.
+  $input: WorkflowStateUpdateInput!
 ) {
-  workflowStateUpdate(input: $input, id: $id) {
+  workflowStateUpdate(id: $id, input: $input) {
     ...WorkflowStatePayload
-  }
-}
-# Archives a state. Only states with issues that have all been archived can be archived.
-mutation workflowStateArchive(
-  # The identifier of the state to archive.
-  $id: String!
-) {
-  workflowStateArchive(id: $id) {
-    ...ArchivePayload
   }
 }

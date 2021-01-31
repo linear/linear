@@ -12,3 +12,4 @@ generates:
       - schema-ast
     config:
       includeDirectives: true
+      sort: true

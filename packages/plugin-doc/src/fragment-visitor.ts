@@ -15,7 +15,6 @@ import {
   printGraphqlDescription,
   printLines,
   reduceTypeName,
-  sortBy,
 } from "@linear/common";
 import autoBind from "auto-bind";
 import {
@@ -48,7 +47,7 @@ export class FragmentVisitor {
   public get context(): PluginContext {
     return {
       ...this._context,
-      fragments: sortBy("name", this._fragments),
+      fragments: this._fragments,
     };
   }
 

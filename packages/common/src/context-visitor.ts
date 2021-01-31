@@ -2,7 +2,6 @@ import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
 import { FieldDefinitionNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode } from "graphql";
 import { OperationType, PluginConfig, PluginContext } from "./types";
-import { sortBy } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
@@ -30,8 +29,8 @@ export class ContextVisitor<Config extends PluginConfig> {
       schema: this._schema,
       config: this._config,
       scalars: this._scalars,
-      objects: sortBy("name.value", this._objects),
-      queries: sortBy("name.value", this._queries),
+      objects: this._objects,
+      queries: this._queries,
       operationMap: {
         [OperationType.query]: this._schema.getQueryType()?.name ?? "Query",
         [OperationType.mutation]: this._schema.getMutationType()?.name ?? "Mutation",
@@ -56,7 +55,7 @@ export class ContextVisitor<Config extends PluginConfig> {
 
       if (node.name.value === this.context.operationMap[OperationType.query]) {
         /** Record all queries */
-        this._queries = sortBy("name.value", node.fields as FieldDefinitionNode[]);
+        this._queries = node.fields as FieldDefinitionNode[];
       }
 
       return node;

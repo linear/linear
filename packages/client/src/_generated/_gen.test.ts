@@ -1,12 +1,12 @@
 import { logger } from "@linear/common";
-import * as D from "../index";
+import * as L from "../index";
 import dotenv from "dotenv";
 
 /** Load environment variables */
 dotenv.config();
 
-/** Initialize Linear client with the api key */
-const client = new D.LinearClient({
+/** Initialize Linear client with environment api key and url */
+const client = new L.LinearClient({
   apiKey: process.env.E2E_API_KEY,
   apiUrl: process.env.E2E_API_URL,
 });
@@ -20,11 +20,11 @@ describe("ApiKeys", () => {
   });
 });
 
-// ApplicationWithAuthorization scope: string[], clientId: string - has required args
-
-// ArchivedModelSync identifier: string, modelClass: string - has required args
+// ApplicationWithAuthorization clientId: string, scope: string[] - has required args
 
 // ArchivedModelsSync modelClass: string, teamId: string - has required args
+
+// ArchivedModelSync identifier: string, modelClass: string - has required args
 
 // AuthorizedApplications - no model for query
 
@@ -50,7 +50,7 @@ describe("BillingDetails", () => {
 
 /** Test all Comment queries */
 describe("Comments", () => {
-  let _comment: D.Comment | undefined;
+  let _comment: L.Comment | undefined;
   let _comment_id: string | undefined;
 
   /** Test the root query for the Comment connection */
@@ -72,7 +72,7 @@ describe("Comments", () => {
     }
   });
 
-  /** Test the comment.issue query for D.Issue */
+  /** Test the comment.issue query for L.Issue */
   it("comment.issue", async () => {
     if (_comment) {
       const comment_issue = await _comment.issue;
@@ -82,7 +82,7 @@ describe("Comments", () => {
     }
   });
 
-  /** Test the comment.user query for D.User */
+  /** Test the comment.user query for L.User */
   it("comment.user", async () => {
     if (_comment) {
       const comment_user = await _comment.user;
@@ -95,7 +95,7 @@ describe("Comments", () => {
 
 /** Test all CustomView queries */
 describe("CustomViews", () => {
-  let _customView: D.CustomView | undefined;
+  let _customView: L.CustomView | undefined;
   let _customView_id: string | undefined;
 
   /** Test the root query for the CustomView connection */
@@ -117,7 +117,7 @@ describe("CustomViews", () => {
     }
   });
 
-  /** Test the customView.creator query for D.User */
+  /** Test the customView.creator query for L.User */
   it("customView.creator", async () => {
     if (_customView) {
       const customView_creator = await _customView.creator;
@@ -127,7 +127,7 @@ describe("CustomViews", () => {
     }
   });
 
-  /** Test the customView.organization query for D.Organization */
+  /** Test the customView.organization query for L.Organization */
   it("customView.organization", async () => {
     if (_customView) {
       const customView_organization = await _customView.organization;
@@ -137,7 +137,7 @@ describe("CustomViews", () => {
     }
   });
 
-  /** Test the customView.team query for D.Team */
+  /** Test the customView.team query for L.Team */
   it("customView.team", async () => {
     if (_customView) {
       const customView_team = await _customView.team;
@@ -150,7 +150,7 @@ describe("CustomViews", () => {
 
 /** Test all Cycle queries */
 describe("Cycles", () => {
-  let _cycle: D.Cycle | undefined;
+  let _cycle: L.Cycle | undefined;
   let _cycle_id: string | undefined;
 
   /** Test the root query for the Cycle connection */
@@ -172,7 +172,7 @@ describe("Cycles", () => {
     }
   });
 
-  /** Test the cycle.team query for D.Team */
+  /** Test the cycle.team query for L.Team */
   it("cycle.team", async () => {
     if (_cycle) {
       const cycle_team = await _cycle.team;
@@ -182,7 +182,7 @@ describe("Cycles", () => {
     }
   });
 
-  /** Test the cycle.issues connection query for D.IssueConnection */
+  /** Test the cycle.issues connection query for L.IssueConnection */
   it("cycle.issues", async () => {
     if (_cycle) {
       const cycle_issues = await _cycle.issues();
@@ -192,7 +192,7 @@ describe("Cycles", () => {
     }
   });
 
-  /** Test the cycle.uncompletedIssuesUponClose connection query for D.IssueConnection */
+  /** Test the cycle.uncompletedIssuesUponClose connection query for L.IssueConnection */
   it("cycle.uncompletedIssuesUponClose", async () => {
     if (_cycle) {
       const cycle_uncompletedIssuesUponClose = await _cycle.uncompletedIssuesUponClose();
@@ -207,7 +207,7 @@ describe("Cycles", () => {
 
 /** Test all Emoji queries */
 describe("Emojis", () => {
-  let _emoji: D.Emoji | undefined;
+  let _emoji: L.Emoji | undefined;
   let _emoji_id: string | undefined;
 
   /** Test the root query for the Emoji connection */
@@ -229,7 +229,7 @@ describe("Emojis", () => {
     }
   });
 
-  /** Test the emoji.creator query for D.User */
+  /** Test the emoji.creator query for L.User */
   it("emoji.creator", async () => {
     if (_emoji) {
       const emoji_creator = await _emoji.creator;
@@ -239,7 +239,7 @@ describe("Emojis", () => {
     }
   });
 
-  /** Test the emoji.organization query for D.Organization */
+  /** Test the emoji.organization query for L.Organization */
   it("emoji.organization", async () => {
     if (_emoji) {
       const emoji_organization = await _emoji.organization;
@@ -252,7 +252,7 @@ describe("Emojis", () => {
 
 /** Test all Favorite queries */
 describe("Favorites", () => {
-  let _favorite: D.Favorite | undefined;
+  let _favorite: L.Favorite | undefined;
   let _favorite_id: string | undefined;
 
   /** Test the root query for the Favorite connection */
@@ -274,7 +274,7 @@ describe("Favorites", () => {
     }
   });
 
-  /** Test the favorite.cycle query for D.Cycle */
+  /** Test the favorite.cycle query for L.Cycle */
   it("favorite.cycle", async () => {
     if (_favorite) {
       const favorite_cycle = await _favorite.cycle;
@@ -284,7 +284,7 @@ describe("Favorites", () => {
     }
   });
 
-  /** Test the favorite.issue query for D.Issue */
+  /** Test the favorite.issue query for L.Issue */
   it("favorite.issue", async () => {
     if (_favorite) {
       const favorite_issue = await _favorite.issue;
@@ -294,7 +294,7 @@ describe("Favorites", () => {
     }
   });
 
-  /** Test the favorite.label query for D.IssueLabel */
+  /** Test the favorite.label query for L.IssueLabel */
   it("favorite.label", async () => {
     if (_favorite) {
       const favorite_label = await _favorite.label;
@@ -304,7 +304,7 @@ describe("Favorites", () => {
     }
   });
 
-  /** Test the favorite.project query for D.Project */
+  /** Test the favorite.project query for L.Project */
   it("favorite.project", async () => {
     if (_favorite) {
       const favorite_project = await _favorite.project;
@@ -314,7 +314,7 @@ describe("Favorites", () => {
     }
   });
 
-  /** Test the favorite.projectTeam query for D.Project */
+  /** Test the favorite.projectTeam query for L.Project */
   it("favorite.projectTeam", async () => {
     if (_favorite) {
       const favorite_projectTeam = await _favorite.projectTeam;
@@ -324,7 +324,7 @@ describe("Favorites", () => {
     }
   });
 
-  /** Test the favorite.user query for D.User */
+  /** Test the favorite.user query for L.User */
   it("favorite.user", async () => {
     if (_favorite) {
       const favorite_user = await _favorite.user;
@@ -339,7 +339,7 @@ describe("Favorites", () => {
 
 /** Test all IntegrationResource queries */
 describe("IntegrationResources", () => {
-  let _integrationResource: D.IntegrationResource | undefined;
+  let _integrationResource: L.IntegrationResource | undefined;
   let _integrationResource_id: string | undefined;
 
   /** Test the root query for the IntegrationResource connection */
@@ -363,7 +363,7 @@ describe("IntegrationResources", () => {
     }
   });
 
-  /** Test the integrationResource.integration query for D.Integration */
+  /** Test the integrationResource.integration query for L.Integration */
   it("integrationResource.integration", async () => {
     if (_integrationResource) {
       const integrationResource_integration = await _integrationResource.integration;
@@ -375,7 +375,7 @@ describe("IntegrationResources", () => {
     }
   });
 
-  /** Test the integrationResource.issue query for D.Issue */
+  /** Test the integrationResource.issue query for L.Issue */
   it("integrationResource.issue", async () => {
     if (_integrationResource) {
       const integrationResource_issue = await _integrationResource.issue;
@@ -390,7 +390,7 @@ describe("IntegrationResources", () => {
 
 /** Test all Integration queries */
 describe("Integrations", () => {
-  let _integration: D.Integration | undefined;
+  let _integration: L.Integration | undefined;
   let _integration_id: string | undefined;
 
   /** Test the root query for the Integration connection */
@@ -412,7 +412,7 @@ describe("Integrations", () => {
     }
   });
 
-  /** Test the integration.creator query for D.User */
+  /** Test the integration.creator query for L.User */
   it("integration.creator", async () => {
     if (_integration) {
       const integration_creator = await _integration.creator;
@@ -422,7 +422,7 @@ describe("Integrations", () => {
     }
   });
 
-  /** Test the integration.organization query for D.Organization */
+  /** Test the integration.organization query for L.Organization */
   it("integration.organization", async () => {
     if (_integration) {
       const integration_organization = await _integration.organization;
@@ -432,7 +432,7 @@ describe("Integrations", () => {
     }
   });
 
-  /** Test the integration.team query for D.Team */
+  /** Test the integration.team query for L.Team */
   it("integration.team", async () => {
     if (_integration) {
       const integration_team = await _integration.team;
@@ -447,7 +447,7 @@ describe("Integrations", () => {
 
 /** Test all IssueLabel queries */
 describe("IssueLabels", () => {
-  let _issueLabel: D.IssueLabel | undefined;
+  let _issueLabel: L.IssueLabel | undefined;
   let _issueLabel_id: string | undefined;
 
   /** Test the root query for the IssueLabel connection */
@@ -469,7 +469,7 @@ describe("IssueLabels", () => {
     }
   });
 
-  /** Test the issueLabel.creator query for D.User */
+  /** Test the issueLabel.creator query for L.User */
   it("issueLabel.creator", async () => {
     if (_issueLabel) {
       const issueLabel_creator = await _issueLabel.creator;
@@ -479,7 +479,7 @@ describe("IssueLabels", () => {
     }
   });
 
-  /** Test the issueLabel.team query for D.Team */
+  /** Test the issueLabel.team query for L.Team */
   it("issueLabel.team", async () => {
     if (_issueLabel) {
       const issueLabel_team = await _issueLabel.team;
@@ -489,7 +489,7 @@ describe("IssueLabels", () => {
     }
   });
 
-  /** Test the issueLabel.issues connection query for D.IssueConnection */
+  /** Test the issueLabel.issues connection query for L.IssueConnection */
   it("issueLabel.issues", async () => {
     if (_issueLabel) {
       const issueLabel_issues = await _issueLabel.issues();
@@ -502,7 +502,7 @@ describe("IssueLabels", () => {
 
 /** Test all IssueRelation queries */
 describe("IssueRelations", () => {
-  let _issueRelation: D.IssueRelation | undefined;
+  let _issueRelation: L.IssueRelation | undefined;
   let _issueRelation_id: string | undefined;
 
   /** Test the root query for the IssueRelation connection */
@@ -526,7 +526,7 @@ describe("IssueRelations", () => {
     }
   });
 
-  /** Test the issueRelation.issue query for D.Issue */
+  /** Test the issueRelation.issue query for L.Issue */
   it("issueRelation.issue", async () => {
     if (_issueRelation) {
       const issueRelation_issue = await _issueRelation.issue;
@@ -536,7 +536,7 @@ describe("IssueRelations", () => {
     }
   });
 
-  /** Test the issueRelation.relatedIssue query for D.Issue */
+  /** Test the issueRelation.relatedIssue query for L.Issue */
   it("issueRelation.relatedIssue", async () => {
     if (_issueRelation) {
       const issueRelation_relatedIssue = await _issueRelation.relatedIssue;
@@ -547,11 +547,9 @@ describe("IssueRelations", () => {
   });
 });
 
-// IssueSearch query: string - has required args
-
 /** Test all Issue queries */
 describe("Issues", () => {
-  let _issue: D.Issue | undefined;
+  let _issue: L.Issue | undefined;
   let _issue_id: string | undefined;
 
   /** Test the root query for the Issue connection */
@@ -573,7 +571,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.assignee query for D.User */
+  /** Test the issue.assignee query for L.User */
   it("issue.assignee", async () => {
     if (_issue) {
       const issue_assignee = await _issue.assignee;
@@ -583,7 +581,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.creator query for D.User */
+  /** Test the issue.creator query for L.User */
   it("issue.creator", async () => {
     if (_issue) {
       const issue_creator = await _issue.creator;
@@ -593,7 +591,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.cycle query for D.Cycle */
+  /** Test the issue.cycle query for L.Cycle */
   it("issue.cycle", async () => {
     if (_issue) {
       const issue_cycle = await _issue.cycle;
@@ -603,7 +601,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.parent query for D.Issue */
+  /** Test the issue.parent query for L.Issue */
   it("issue.parent", async () => {
     if (_issue) {
       const issue_parent = await _issue.parent;
@@ -613,7 +611,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.project query for D.Project */
+  /** Test the issue.project query for L.Project */
   it("issue.project", async () => {
     if (_issue) {
       const issue_project = await _issue.project;
@@ -623,7 +621,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.state query for D.WorkflowState */
+  /** Test the issue.state query for L.WorkflowState */
   it("issue.state", async () => {
     if (_issue) {
       const issue_state = await _issue.state;
@@ -633,7 +631,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.team query for D.Team */
+  /** Test the issue.team query for L.Team */
   it("issue.team", async () => {
     if (_issue) {
       const issue_team = await _issue.team;
@@ -643,7 +641,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.children connection query for D.IssueConnection */
+  /** Test the issue.children connection query for L.IssueConnection */
   it("issue.children", async () => {
     if (_issue) {
       const issue_children = await _issue.children();
@@ -653,7 +651,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.comments connection query for D.CommentConnection */
+  /** Test the issue.comments connection query for L.CommentConnection */
   it("issue.comments", async () => {
     if (_issue) {
       const issue_comments = await _issue.comments();
@@ -663,7 +661,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.history connection query for D.IssueHistoryConnection */
+  /** Test the issue.history connection query for L.IssueHistoryConnection */
   it("issue.history", async () => {
     if (_issue) {
       const issue_history = await _issue.history();
@@ -673,7 +671,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.integrationResources connection query for D.IntegrationResourceConnection */
+  /** Test the issue.integrationResources connection query for L.IntegrationResourceConnection */
   it("issue.integrationResources", async () => {
     if (_issue) {
       const issue_integrationResources = await _issue.integrationResources();
@@ -683,7 +681,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.inverseRelations connection query for D.IssueRelationConnection */
+  /** Test the issue.inverseRelations connection query for L.IssueRelationConnection */
   it("issue.inverseRelations", async () => {
     if (_issue) {
       const issue_inverseRelations = await _issue.inverseRelations();
@@ -693,7 +691,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.labels connection query for D.IssueLabelConnection */
+  /** Test the issue.labels connection query for L.IssueLabelConnection */
   it("issue.labels", async () => {
     if (_issue) {
       const issue_labels = await _issue.labels();
@@ -703,7 +701,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.relations connection query for D.IssueRelationConnection */
+  /** Test the issue.relations connection query for L.IssueRelationConnection */
   it("issue.relations", async () => {
     if (_issue) {
       const issue_relations = await _issue.relations();
@@ -713,7 +711,7 @@ describe("Issues", () => {
     }
   });
 
-  /** Test the issue.subscribers connection query for D.UserConnection */
+  /** Test the issue.subscribers connection query for L.UserConnection */
   it("issue.subscribers", async () => {
     if (_issue) {
       const issue_subscribers = await _issue.subscribers();
@@ -724,9 +722,11 @@ describe("Issues", () => {
   });
 });
 
+// IssueSearch query: string - has required args
+
 /** Test all Milestone queries */
 describe("Milestones", () => {
-  let _milestone: D.Milestone | undefined;
+  let _milestone: L.Milestone | undefined;
   let _milestone_id: string | undefined;
 
   /** Test the root query for the Milestone connection */
@@ -748,7 +748,7 @@ describe("Milestones", () => {
     }
   });
 
-  /** Test the milestone.organization query for D.Organization */
+  /** Test the milestone.organization query for L.Organization */
   it("milestone.organization", async () => {
     if (_milestone) {
       const milestone_organization = await _milestone.organization;
@@ -758,7 +758,7 @@ describe("Milestones", () => {
     }
   });
 
-  /** Test the milestone.projects connection query for D.ProjectConnection */
+  /** Test the milestone.projects connection query for L.ProjectConnection */
   it("milestone.projects", async () => {
     if (_milestone) {
       const milestone_projects = await _milestone.projects();
@@ -769,72 +769,9 @@ describe("Milestones", () => {
   });
 });
 
-/** Test all NotificationSubscription queries */
-describe("NotificationSubscriptions", () => {
-  let _notificationSubscription: D.NotificationSubscription | undefined;
-  let _notificationSubscription_id: string | undefined;
-
-  /** Test the root query for the NotificationSubscription connection */
-  it("notificationSubscriptions", async () => {
-    const notificationSubscriptions = await client.notificationSubscriptions();
-    const notificationSubscription = notificationSubscriptions?.nodes?.[0];
-    _notificationSubscription_id = notificationSubscription?.id;
-    logger.trace(notificationSubscriptions);
-  });
-
-  /** Test the root query for a single NotificationSubscription */
-  it("notificationSubscription", async () => {
-    if (_notificationSubscription_id) {
-      const notificationSubscription = await client.notificationSubscription(_notificationSubscription_id);
-      _notificationSubscription = notificationSubscription;
-      logger.trace(notificationSubscription);
-    } else {
-      throw new Error(
-        "No first NotificationSubscription found from notificationSubscriptions connection query - cannot test notificationSubscription query"
-      );
-    }
-  });
-
-  /** Test the notificationSubscription.project query for D.Project */
-  it("notificationSubscription.project", async () => {
-    if (_notificationSubscription) {
-      const notificationSubscription_project = await _notificationSubscription.project;
-      logger.trace(notificationSubscription_project);
-    } else {
-      throw new Error(
-        "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.project query"
-      );
-    }
-  });
-
-  /** Test the notificationSubscription.team query for D.Team */
-  it("notificationSubscription.team", async () => {
-    if (_notificationSubscription) {
-      const notificationSubscription_team = await _notificationSubscription.team;
-      logger.trace(notificationSubscription_team);
-    } else {
-      throw new Error(
-        "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.team query"
-      );
-    }
-  });
-
-  /** Test the notificationSubscription.user query for D.User */
-  it("notificationSubscription.user", async () => {
-    if (_notificationSubscription) {
-      const notificationSubscription_user = await _notificationSubscription.user;
-      logger.trace(notificationSubscription_user);
-    } else {
-      throw new Error(
-        "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.user query"
-      );
-    }
-  });
-});
-
 /** Test all Notification queries */
 describe("Notifications", () => {
-  let _notification: D.Notification | undefined;
+  let _notification: L.Notification | undefined;
   let _notification_id: string | undefined;
 
   /** Test the root query for the Notification connection */
@@ -858,7 +795,7 @@ describe("Notifications", () => {
     }
   });
 
-  /** Test the notification.comment query for D.Comment */
+  /** Test the notification.comment query for L.Comment */
   it("notification.comment", async () => {
     if (_notification) {
       const notification_comment = await _notification.comment;
@@ -868,7 +805,7 @@ describe("Notifications", () => {
     }
   });
 
-  /** Test the notification.issue query for D.Issue */
+  /** Test the notification.issue query for L.Issue */
   it("notification.issue", async () => {
     if (_notification) {
       const notification_issue = await _notification.issue;
@@ -878,7 +815,7 @@ describe("Notifications", () => {
     }
   });
 
-  /** Test the notification.team query for D.Team */
+  /** Test the notification.team query for L.Team */
   it("notification.team", async () => {
     if (_notification) {
       const notification_team = await _notification.team;
@@ -888,13 +825,76 @@ describe("Notifications", () => {
     }
   });
 
-  /** Test the notification.user query for D.User */
+  /** Test the notification.user query for L.User */
   it("notification.user", async () => {
     if (_notification) {
       const notification_user = await _notification.user;
       logger.trace(notification_user);
     } else {
       throw new Error("No Notification found from notification query - cannot test notification.user query");
+    }
+  });
+});
+
+/** Test all NotificationSubscription queries */
+describe("NotificationSubscriptions", () => {
+  let _notificationSubscription: L.NotificationSubscription | undefined;
+  let _notificationSubscription_id: string | undefined;
+
+  /** Test the root query for the NotificationSubscription connection */
+  it("notificationSubscriptions", async () => {
+    const notificationSubscriptions = await client.notificationSubscriptions();
+    const notificationSubscription = notificationSubscriptions?.nodes?.[0];
+    _notificationSubscription_id = notificationSubscription?.id;
+    logger.trace(notificationSubscriptions);
+  });
+
+  /** Test the root query for a single NotificationSubscription */
+  it("notificationSubscription", async () => {
+    if (_notificationSubscription_id) {
+      const notificationSubscription = await client.notificationSubscription(_notificationSubscription_id);
+      _notificationSubscription = notificationSubscription;
+      logger.trace(notificationSubscription);
+    } else {
+      throw new Error(
+        "No first NotificationSubscription found from notificationSubscriptions connection query - cannot test notificationSubscription query"
+      );
+    }
+  });
+
+  /** Test the notificationSubscription.project query for L.Project */
+  it("notificationSubscription.project", async () => {
+    if (_notificationSubscription) {
+      const notificationSubscription_project = await _notificationSubscription.project;
+      logger.trace(notificationSubscription_project);
+    } else {
+      throw new Error(
+        "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.project query"
+      );
+    }
+  });
+
+  /** Test the notificationSubscription.team query for L.Team */
+  it("notificationSubscription.team", async () => {
+    if (_notificationSubscription) {
+      const notificationSubscription_team = await _notificationSubscription.team;
+      logger.trace(notificationSubscription_team);
+    } else {
+      throw new Error(
+        "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.team query"
+      );
+    }
+  });
+
+  /** Test the notificationSubscription.user query for L.User */
+  it("notificationSubscription.user", async () => {
+    if (_notificationSubscription) {
+      const notificationSubscription_user = await _notificationSubscription.user;
+      logger.trace(notificationSubscription_user);
+    } else {
+      throw new Error(
+        "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.user query"
+      );
     }
   });
 });
@@ -921,7 +921,7 @@ describe("OrganizationInvites", () => {
 
 /** Test all ProjectLink queries */
 describe("ProjectLinks", () => {
-  let _projectLink: D.ProjectLink | undefined;
+  let _projectLink: L.ProjectLink | undefined;
   let _projectLink_id: string | undefined;
 
   /** Test the root query for the ProjectLink connection */
@@ -943,7 +943,7 @@ describe("ProjectLinks", () => {
     }
   });
 
-  /** Test the projectLink.creator query for D.User */
+  /** Test the projectLink.creator query for L.User */
   it("projectLink.creator", async () => {
     if (_projectLink) {
       const projectLink_creator = await _projectLink.creator;
@@ -953,7 +953,7 @@ describe("ProjectLinks", () => {
     }
   });
 
-  /** Test the projectLink.project query for D.Project */
+  /** Test the projectLink.project query for L.Project */
   it("projectLink.project", async () => {
     if (_projectLink) {
       const projectLink_project = await _projectLink.project;
@@ -966,7 +966,7 @@ describe("ProjectLinks", () => {
 
 /** Test all Project queries */
 describe("Projects", () => {
-  let _project: D.Project | undefined;
+  let _project: L.Project | undefined;
   let _project_id: string | undefined;
 
   /** Test the root query for the Project connection */
@@ -988,7 +988,7 @@ describe("Projects", () => {
     }
   });
 
-  /** Test the project.creator query for D.User */
+  /** Test the project.creator query for L.User */
   it("project.creator", async () => {
     if (_project) {
       const project_creator = await _project.creator;
@@ -998,7 +998,7 @@ describe("Projects", () => {
     }
   });
 
-  /** Test the project.lead query for D.User */
+  /** Test the project.lead query for L.User */
   it("project.lead", async () => {
     if (_project) {
       const project_lead = await _project.lead;
@@ -1008,7 +1008,7 @@ describe("Projects", () => {
     }
   });
 
-  /** Test the project.milestone query for D.Milestone */
+  /** Test the project.milestone query for L.Milestone */
   it("project.milestone", async () => {
     if (_project) {
       const project_milestone = await _project.milestone;
@@ -1018,7 +1018,7 @@ describe("Projects", () => {
     }
   });
 
-  /** Test the project.issues connection query for D.IssueConnection */
+  /** Test the project.issues connection query for L.IssueConnection */
   it("project.issues", async () => {
     if (_project) {
       const project_issues = await _project.issues();
@@ -1028,7 +1028,7 @@ describe("Projects", () => {
     }
   });
 
-  /** Test the project.links connection query for D.ProjectLinkConnection */
+  /** Test the project.links connection query for L.ProjectLinkConnection */
   it("project.links", async () => {
     if (_project) {
       const project_links = await _project.links();
@@ -1038,7 +1038,7 @@ describe("Projects", () => {
     }
   });
 
-  /** Test the project.members connection query for D.UserConnection */
+  /** Test the project.members connection query for L.UserConnection */
   it("project.members", async () => {
     if (_project) {
       const project_members = await _project.members();
@@ -1048,7 +1048,7 @@ describe("Projects", () => {
     }
   });
 
-  /** Test the project.teams connection query for D.TeamConnection */
+  /** Test the project.teams connection query for L.TeamConnection */
   it("project.teams", async () => {
     if (_project) {
       const project_teams = await _project.teams();
@@ -1070,7 +1070,7 @@ describe("PushSubscriptionTest", () => {
 
 /** Test all Reaction queries */
 describe("Reactions", () => {
-  let _reaction: D.Reaction | undefined;
+  let _reaction: L.Reaction | undefined;
   let _reaction_id: string | undefined;
 
   /** Test the root query for the Reaction connection */
@@ -1092,7 +1092,7 @@ describe("Reactions", () => {
     }
   });
 
-  /** Test the reaction.comment query for D.Comment */
+  /** Test the reaction.comment query for L.Comment */
   it("reaction.comment", async () => {
     if (_reaction) {
       const reaction_comment = await _reaction.comment;
@@ -1102,7 +1102,7 @@ describe("Reactions", () => {
     }
   });
 
-  /** Test the reaction.user query for D.User */
+  /** Test the reaction.user query for L.User */
   it("reaction.user", async () => {
     if (_reaction) {
       const reaction_user = await _reaction.user;
@@ -1121,7 +1121,7 @@ describe("Reactions", () => {
 
 /** Test all TeamMembership queries */
 describe("TeamMemberships", () => {
-  let _teamMembership: D.TeamMembership | undefined;
+  let _teamMembership: L.TeamMembership | undefined;
   let _teamMembership_id: string | undefined;
 
   /** Test the root query for the TeamMembership connection */
@@ -1145,7 +1145,7 @@ describe("TeamMemberships", () => {
     }
   });
 
-  /** Test the teamMembership.team query for D.Team */
+  /** Test the teamMembership.team query for L.Team */
   it("teamMembership.team", async () => {
     if (_teamMembership) {
       const teamMembership_team = await _teamMembership.team;
@@ -1155,7 +1155,7 @@ describe("TeamMemberships", () => {
     }
   });
 
-  /** Test the teamMembership.user query for D.User */
+  /** Test the teamMembership.user query for L.User */
   it("teamMembership.user", async () => {
     if (_teamMembership) {
       const teamMembership_user = await _teamMembership.user;
@@ -1168,7 +1168,7 @@ describe("TeamMemberships", () => {
 
 /** Test all Team queries */
 describe("Teams", () => {
-  let _team: D.Team | undefined;
+  let _team: L.Team | undefined;
   let _team_id: string | undefined;
 
   /** Test the root query for the Team connection */
@@ -1190,7 +1190,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.activeCycle query for D.Cycle */
+  /** Test the team.activeCycle query for L.Cycle */
   it("team.activeCycle", async () => {
     if (_team) {
       const team_activeCycle = await _team.activeCycle;
@@ -1200,7 +1200,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.draftWorkflowState query for D.WorkflowState */
+  /** Test the team.draftWorkflowState query for L.WorkflowState */
   it("team.draftWorkflowState", async () => {
     if (_team) {
       const team_draftWorkflowState = await _team.draftWorkflowState;
@@ -1210,7 +1210,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.markedAsDuplicateWorkflowState query for D.WorkflowState */
+  /** Test the team.markedAsDuplicateWorkflowState query for L.WorkflowState */
   it("team.markedAsDuplicateWorkflowState", async () => {
     if (_team) {
       const team_markedAsDuplicateWorkflowState = await _team.markedAsDuplicateWorkflowState;
@@ -1220,7 +1220,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.mergeWorkflowState query for D.WorkflowState */
+  /** Test the team.mergeWorkflowState query for L.WorkflowState */
   it("team.mergeWorkflowState", async () => {
     if (_team) {
       const team_mergeWorkflowState = await _team.mergeWorkflowState;
@@ -1230,7 +1230,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.organization query for D.Organization */
+  /** Test the team.organization query for L.Organization */
   it("team.organization", async () => {
     if (_team) {
       const team_organization = await _team.organization;
@@ -1240,7 +1240,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.reviewWorkflowState query for D.WorkflowState */
+  /** Test the team.reviewWorkflowState query for L.WorkflowState */
   it("team.reviewWorkflowState", async () => {
     if (_team) {
       const team_reviewWorkflowState = await _team.reviewWorkflowState;
@@ -1250,7 +1250,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.startWorkflowState query for D.WorkflowState */
+  /** Test the team.startWorkflowState query for L.WorkflowState */
   it("team.startWorkflowState", async () => {
     if (_team) {
       const team_startWorkflowState = await _team.startWorkflowState;
@@ -1260,7 +1260,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.cycles connection query for D.CycleConnection */
+  /** Test the team.cycles connection query for L.CycleConnection */
   it("team.cycles", async () => {
     if (_team) {
       const team_cycles = await _team.cycles();
@@ -1270,7 +1270,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.issues connection query for D.IssueConnection */
+  /** Test the team.issues connection query for L.IssueConnection */
   it("team.issues", async () => {
     if (_team) {
       const team_issues = await _team.issues();
@@ -1280,7 +1280,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.labels connection query for D.IssueLabelConnection */
+  /** Test the team.labels connection query for L.IssueLabelConnection */
   it("team.labels", async () => {
     if (_team) {
       const team_labels = await _team.labels();
@@ -1290,7 +1290,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.memberships connection query for D.TeamMembershipConnection */
+  /** Test the team.memberships connection query for L.TeamMembershipConnection */
   it("team.memberships", async () => {
     if (_team) {
       const team_memberships = await _team.memberships();
@@ -1300,7 +1300,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.projects connection query for D.ProjectConnection */
+  /** Test the team.projects connection query for L.ProjectConnection */
   it("team.projects", async () => {
     if (_team) {
       const team_projects = await _team.projects();
@@ -1310,7 +1310,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.states connection query for D.WorkflowStateConnection */
+  /** Test the team.states connection query for L.WorkflowStateConnection */
   it("team.states", async () => {
     if (_team) {
       const team_states = await _team.states();
@@ -1320,7 +1320,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.templates connection query for D.TemplateConnection */
+  /** Test the team.templates connection query for L.TemplateConnection */
   it("team.templates", async () => {
     if (_team) {
       const team_templates = await _team.templates();
@@ -1330,7 +1330,7 @@ describe("Teams", () => {
     }
   });
 
-  /** Test the team.webhooks connection query for D.WebhookConnection */
+  /** Test the team.webhooks connection query for L.WebhookConnection */
   it("team.webhooks", async () => {
     if (_team) {
       const team_webhooks = await _team.webhooks();
@@ -1345,18 +1345,9 @@ describe("Teams", () => {
 
 // Templates - no model for query
 
-/** Test UserSettings query */
-describe("UserSettings", () => {
-  /** Test the root query for UserSettings */
-  it("userSettings", async () => {
-    const userSettings = await client.userSettings;
-    logger.trace(userSettings);
-  });
-});
-
 /** Test all User queries */
 describe("Users", () => {
-  let _user: D.User | undefined;
+  let _user: L.User | undefined;
   let _user_id: string | undefined;
 
   /** Test the root query for the User connection */
@@ -1378,7 +1369,7 @@ describe("Users", () => {
     }
   });
 
-  /** Test the user.organization query for D.Organization */
+  /** Test the user.organization query for L.Organization */
   it("user.organization", async () => {
     if (_user) {
       const user_organization = await _user.organization;
@@ -1388,7 +1379,7 @@ describe("Users", () => {
     }
   });
 
-  /** Test the user.assignedIssues connection query for D.IssueConnection */
+  /** Test the user.assignedIssues connection query for L.IssueConnection */
   it("user.assignedIssues", async () => {
     if (_user) {
       const user_assignedIssues = await _user.assignedIssues();
@@ -1398,7 +1389,7 @@ describe("Users", () => {
     }
   });
 
-  /** Test the user.createdIssues connection query for D.IssueConnection */
+  /** Test the user.createdIssues connection query for L.IssueConnection */
   it("user.createdIssues", async () => {
     if (_user) {
       const user_createdIssues = await _user.createdIssues();
@@ -1408,7 +1399,7 @@ describe("Users", () => {
     }
   });
 
-  /** Test the user.teamMemberships connection query for D.TeamMembershipConnection */
+  /** Test the user.teamMemberships connection query for L.TeamMembershipConnection */
   it("user.teamMemberships", async () => {
     if (_user) {
       const user_teamMemberships = await _user.teamMemberships();
@@ -1416,6 +1407,15 @@ describe("Users", () => {
     } else {
       throw new Error("No User found from user query - cannot test user.teamMemberships connection query");
     }
+  });
+});
+
+/** Test UserSettings query */
+describe("UserSettings", () => {
+  /** Test the root query for UserSettings */
+  it("userSettings", async () => {
+    const userSettings = await client.userSettings;
+    logger.trace(userSettings);
   });
 });
 
@@ -1430,7 +1430,7 @@ describe("Viewer", () => {
 
 /** Test all Webhook queries */
 describe("Webhooks", () => {
-  let _webhook: D.Webhook | undefined;
+  let _webhook: L.Webhook | undefined;
   let _webhook_id: string | undefined;
 
   /** Test the root query for the Webhook connection */
@@ -1452,7 +1452,7 @@ describe("Webhooks", () => {
     }
   });
 
-  /** Test the webhook.creator query for D.User */
+  /** Test the webhook.creator query for L.User */
   it("webhook.creator", async () => {
     if (_webhook) {
       const webhook_creator = await _webhook.creator;
@@ -1462,7 +1462,7 @@ describe("Webhooks", () => {
     }
   });
 
-  /** Test the webhook.team query for D.Team */
+  /** Test the webhook.team query for L.Team */
   it("webhook.team", async () => {
     if (_webhook) {
       const webhook_team = await _webhook.team;
@@ -1475,7 +1475,7 @@ describe("Webhooks", () => {
 
 /** Test all WorkflowState queries */
 describe("WorkflowStates", () => {
-  let _workflowState: D.WorkflowState | undefined;
+  let _workflowState: L.WorkflowState | undefined;
   let _workflowState_id: string | undefined;
 
   /** Test the root query for the WorkflowState connection */
@@ -1499,7 +1499,7 @@ describe("WorkflowStates", () => {
     }
   });
 
-  /** Test the workflowState.team query for D.Team */
+  /** Test the workflowState.team query for L.Team */
   it("workflowState.team", async () => {
     if (_workflowState) {
       const workflowState_team = await _workflowState.team;
@@ -1509,7 +1509,7 @@ describe("WorkflowStates", () => {
     }
   });
 
-  /** Test the workflowState.issues connection query for D.IssueConnection */
+  /** Test the workflowState.issues connection query for L.IssueConnection */
   it("workflowState.issues", async () => {
     if (_workflowState) {
       const workflowState_issues = await _workflowState.issues();
