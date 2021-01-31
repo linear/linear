@@ -59,8 +59,11 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       "dotenv.config()",
       "\n",
       /** Create the client configured with api key */
-      printComment(["Initialize Linear client with the api key"]),
-      `const client = new ${SdkConstants.NAMESPACE}.LinearClient({ apiKey: process.env.E2E_API_KEY })`,
+      printComment(["Initialize Linear client with environment api key and url"]),
+      `const client = new ${SdkConstants.NAMESPACE}.LinearClient({
+        apiKey: process.env.E2E_API_KEY,
+        apiUrl: process.env.E2E_API_URL,
+      })`,
       "\n",
       /** Print all tests */
       tests,

@@ -9,7 +9,7 @@ export interface LinearClientOptions extends RequestInit {
   /** The access token returned from oauth endpoints configured in https://linear.app/settings/api */
   accessToken?: string;
   /** The url to the Linear graphql api */
-  baseUrl?: string;
+  apiUrl?: string;
 }
 
 /**
@@ -17,7 +17,7 @@ export interface LinearClientOptions extends RequestInit {
  */
 export interface LinearClientParsedOptions extends RequestInit {
   /** The url to the Linear graphql api defaulted to production */
-  baseUrl: string;
+  apiUrl: string;
 }
 
 /**

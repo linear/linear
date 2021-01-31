@@ -6,7 +6,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 /** Initialize Linear client with the api key */
-const client = new D.LinearClient({ apiKey: process.env.E2E_API_KEY });
+const client = new D.LinearClient({
+  apiKey: process.env.E2E_API_KEY,
+  apiUrl: process.env.E2E_API_URL,
+});
 
 /** Test all ApiKey queries */
 describe("ApiKeys", () => {

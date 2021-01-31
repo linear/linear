@@ -31,6 +31,9 @@
     "test": "npx jest -w 4",
     "test:watch": "yarn test --watch",
     "test:update": "yarn test -u",
+    "mock": "npx graphql-faker packages/client/src/schema.graphql",
+    "test:mock": "E2E_API_URL=http://localhost:9002/graphql npx jest gen.test",
+    "test:e2e": "npx jest gen.test",
     "test:ci": "npx jest -w 1",
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
     "prettier": "npx prettier --write **/*.{json,ts,js}"
@@ -55,6 +58,7 @@
     "express": "4.17.1",
     "get-port": "5.1.1",
     "graphql": "15.4.0",
+    "graphql-faker": "^2.0.0-rc.23",
     "husky": "4.3.0",
     "jest": "26.6.3",
     "lerna": "3.22.1",

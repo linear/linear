@@ -11,7 +11,7 @@ import { LinearSdk } from "./_generated/_gen_sdk";
  * @param options initial request options to pass to the graphql client
  * @returns parsed graphql client options
  */
-function parseClientOptions({ apiKey, accessToken, baseUrl, ...opts }: LinearClientOptions): LinearClientParsedOptions {
+function parseClientOptions({ apiKey, accessToken, apiUrl, ...opts }: LinearClientOptions): LinearClientParsedOptions {
   if (!accessToken && !apiKey) {
     throw new Error("No accessToken or apiKey provided to the LinearClient");
   }
@@ -32,7 +32,7 @@ function parseClientOptions({ apiKey, accessToken, baseUrl, ...opts }: LinearCli
       }),
     },
     /** Default to production linear api */
-    baseUrl: baseUrl ?? "https://api.linear.app/graphql",
+    apiUrl: apiUrl ?? "https://api.linear.app/graphql",
     ...opts,
   };
 }
@@ -48,7 +48,7 @@ export class LinearClient extends LinearSdk {
 
   public constructor(options: LinearClientOptions) {
     const parsedOptions = parseClientOptions(options);
-    const graphQLClient = new GraphQLClient(parsedOptions.baseUrl, parsedOptions);
+    const graphQLClient = new GraphQLClient(parsedOptions.apiUrl, parsedOptions);
 
     super(<R, V>(doc: DocumentNode, vars?: V) =>
       /** Call the graphql-request client */
