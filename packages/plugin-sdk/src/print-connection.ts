@@ -35,7 +35,7 @@ function printAbstractConnection(): string {
       "Abstract class for connection models containing a list of nodes and pagination information",
       "Follows the Relay spec",
     ]),
-    `abstract class ${c.CONNECTION_TYPE}<${c.NODE_TYPE}> extends ${c.REQUEST_CLASS} {
+    `export abstract class ${c.CONNECTION_TYPE}<${c.NODE_TYPE}> extends ${c.REQUEST_CLASS} {
       public ${c.PAGEINFO_NAME}?: ${c.PAGEINFO_TYPE}
       public ${c.NODE_NAME}?: ${c.NODE_TYPE}[]
     }`,
@@ -48,7 +48,7 @@ function printAbstractConnection(): string {
 function printConnectionVariables(): string {
   return printLines([
     printComment(["Variables required for pagination", "Follows the Relay spec"]),
-    `type ${c.CONNECTION_TYPE}${c.VARIABLE_TYPE} = { after?: string; before?: string }`,
+    `export type ${c.CONNECTION_TYPE}${c.VARIABLE_TYPE} = { after?: string; before?: string }`,
   ]);
 }
 
@@ -58,7 +58,7 @@ function printConnectionVariables(): string {
 function printFetchType(): string {
   return printLines([
     printComment(["Fetch return type wrapped in a promise"]),
-    `type ${c.FETCH_TYPE}<Response> = Promise<Response | undefined>`,
+    `export type ${c.FETCH_TYPE}<Response> = Promise<Response | undefined>`,
   ]);
 }
 
@@ -98,7 +98,7 @@ export function printConnection(): string {
     printAbstractConnection(),
     "\n",
     printComment([`The base connection class to provide pagination`, "Follows the Relay spec", ...args.jsdoc]),
-    `class ${c.CONNECTION_CLASS}<${c.NODE_TYPE}> extends ${c.CONNECTION_TYPE}<${c.NODE_TYPE}> {
+    `export class ${c.CONNECTION_CLASS}<${c.NODE_TYPE}> extends ${c.CONNECTION_TYPE}<${c.NODE_TYPE}> {
       private _${c.FETCH_NAME}: ${fetchType}
     
       public constructor(${args.printInput}) {
@@ -207,7 +207,7 @@ export function printConnectionModel(context: SdkPluginContext, model: SdkModel)
   return printLines([
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
-    `class ${model.name} extends ${c.CONNECTION_CLASS}<${modelType}> {
+    `export class ${model.name} extends ${c.CONNECTION_CLASS}<${modelType}> {
         public constructor(${args.printInput}) {
           super(${printList([
             c.REQUEST_NAME,

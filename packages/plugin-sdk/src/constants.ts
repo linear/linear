@@ -3,7 +3,7 @@ export default {
   CONNECTION_TYPE: "Connection",
   DATA_NAME: "data",
   DATA_TYPE: "Data",
-  NAMESPACE_DOCUMENT: "D",
+  NAMESPACE: "D",
   NODE_NAME: "nodes",
   NODE_TYPE: "Node",
   FETCH_NAME: "fetch",

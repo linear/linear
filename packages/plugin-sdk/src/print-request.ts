@@ -57,7 +57,7 @@ export function printRequest(): string {
     }?: ${c.VARIABLE_TYPE}) => Promise<${c.RESPONSE_TYPE}>`,
     "\n",
     printComment(["Base class to provide a request function", ...args.jsdoc]),
-    `class ${c.REQUEST_CLASS} {
+    `export class ${c.REQUEST_CLASS} {
         protected _${c.REQUEST_NAME}: ${c.REQUEST_TYPE}
 
         public constructor(${args.printInput}) {

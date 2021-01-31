@@ -56,7 +56,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
   return printLines([
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
-    `class ${model.name} extends ${c.REQUEST_CLASS} {
+    `export class ${model.name} extends ${c.REQUEST_CLASS} {
       ${printLines([
         printDebug("fields.query"),
         printLines(

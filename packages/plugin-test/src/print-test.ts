@@ -51,6 +51,9 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
   const itemOperation = context.sdkDefinitions[""].operations.find(rootOperation => {
     return rootOperation.print.model === listType;
   });
+  const itemField = itemOperation?.print.field;
+  const itemArgs = itemOperation?.requiredArgs.args ?? [];
+  const itemQueries = itemOperation?.model?.fields.query ?? [];
 
   if (hasRequiredArgs) {
     const connectionOperation = context.sdkDefinitions[""].operations.find(rootOperation => {
@@ -70,10 +73,13 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
         printDescribe(
           operation.name,
           printLines([
-            ...(itemOperation?.requiredArgs.args.map(
-              arg => `let _${itemOperation.print.field}_${arg.name}: ${arg.type} | undefined`
-            ) ?? []),
-            "\n",
+            itemOperation
+              ? printLines([
+                  `let _${itemField}: ${SdkConstants.NAMESPACE}.${itemOperation.print.model} | undefined`,
+                  ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
+                  "\n",
+                ])
+              : undefined,
             printComment([`Test the root query for the ${listType} connection`]),
             printIt(
               fieldName,
@@ -83,39 +89,60 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                 }`,
                 itemOperation
                   ? printLines([
-                      `const first${listType} = ${fieldName}?.${SdkConstants.NODE_NAME}?.[0]`,
-                      ...(itemOperation?.requiredArgs.args.map(arg =>
-                        printSet(`_${itemOperation.print.field}_${arg.name}`, `first${listType}?.${arg.name}`)
-                      ) ?? []),
+                      `const ${itemField} = ${fieldName}?.${SdkConstants.NODE_NAME}?.[0]`,
+                      ...(itemArgs.map(arg => printSet(`_${itemField}_${arg.name}`, `${itemField}?.${arg.name}`)) ??
+                        []),
                     ])
                   : undefined,
                 `logger.trace(${fieldName})`,
               ])
             ),
             "\n",
-            ...(itemOperation
+            ...(itemField
               ? [
                   printComment([`Test the root query for a single ${listType}`]),
                   printIt(
-                    itemOperation.print.field,
+                    itemField,
                     `if (${printList(
-                      itemOperation?.requiredArgs.args.map(arg => `_${itemOperation.print.field}_${arg.name}`),
+                      itemArgs.map(arg => `_${itemField}_${arg.name}`),
                       " && "
                     )}) {
                       ${printLines([
-                        `const ${itemOperation.print.field} = await client.${
-                          itemOperation.print.field
-                        }(${itemOperation?.requiredArgs.args.map(arg => `_${itemOperation.print.field}_${arg.name}`)})`,
-                        `logger.trace(${itemOperation.print.field})`,
+                        `const ${itemField} = await client.${itemField}(${printList(
+                          itemArgs.map(arg => `_${itemField}_${arg.name}`)
+                        )})`,
+                        printSet(`_${itemField}`, itemField),
+                        `logger.trace(${itemField})`,
                       ])}
                     } else {
-                      throw new Error('No first ${listType} found from ${fieldName} connection query - cannot test ${
-                      itemOperation.print.field
-                    } query')
+                      throw new Error('No first ${listType} found from ${fieldName} connection query - cannot test ${itemField} query')
                     }`
                   ),
                 ]
               : []),
+            "\n",
+            itemQueries.length
+              ? printLines(
+                  itemQueries.map(field => {
+                    return printLines([
+                      printComment([`Test the ${itemField}.${field.name} query for ${field.type}`]),
+                      printIt(
+                        `${itemField}.${field.name}`,
+                        `if (_${itemField}) {
+                          ${printLines([
+                            `const ${itemField}_${field.name} = await _${itemField}.${field.name}`,
+                            `logger.trace(${itemField}_${field.name})`,
+                          ])}
+                        } else {
+                          throw new Error('No ${listType} found from ${itemField} query - cannot test ${itemField}.${
+                          field.name
+                        } query')
+                        }`
+                      ),
+                    ]);
+                  })
+                )
+              : undefined,
           ])
         ),
       ]);

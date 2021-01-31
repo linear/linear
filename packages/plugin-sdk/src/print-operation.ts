@@ -26,7 +26,7 @@ function printOperation(context: SdkPluginContext, operation: SdkOperation): str
   return printLines([
     printComment([`A fetchable ${operation.name} ${operation.print.type}`, ...constructorArgs.jsdoc]),
     printDebug(operation),
-    `class ${operation.print.response} extends ${c.REQUEST_CLASS} {
+    `export class ${operation.print.response} extends ${c.REQUEST_CLASS} {
         ${printLines(operation.parentArgs.args.map(arg => `private _${arg.name}: ${arg.type}`))}
 
         public constructor(${constructorArgs.printInput}) {

@@ -92,7 +92,7 @@ export class ModelVisitor {
     leave: (node: FieldDefinitionNode): SdkModelField | null => {
       if (isValidField(this._context, node)) {
         const name = node.name.value;
-        const type = printTypescriptType(this._context, node.type, c.NAMESPACE_DOCUMENT);
+        const type = printTypescriptType(this._context, node.type, c.NAMESPACE);
         const query = findQuery(this._context, node);
 
         /** Identify query fields */
@@ -100,7 +100,7 @@ export class ModelVisitor {
           const args =
             query.arguments?.map(arg => ({
               name: arg.name.value,
-              type: printTypescriptType(this._context, node.type, c.NAMESPACE_DOCUMENT),
+              type: printTypescriptType(this._context, node.type, c.NAMESPACE),
               optional: arg.type.kind !== Kind.NON_NULL_TYPE,
               description: `${arg.name.value} to be passed to ${query.name.value}`,
             })) ?? [];

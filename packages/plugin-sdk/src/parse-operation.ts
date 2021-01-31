@@ -117,7 +117,7 @@ export function parseOperations(
     /** Argument definition for each required variable */
     const requiredVariables: ArgDefinition[] = getRequiredVariables(node).map(variable => ({
       name: variable.variable.name.value,
-      type: printTypescriptType(context, variable.type, c.NAMESPACE_DOCUMENT),
+      type: printTypescriptType(context, variable.type, c.NAMESPACE),
       optional: false,
       description: `required ${variable.variable.name.value} to pass to ${print.field}`,
     }));

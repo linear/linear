@@ -59,7 +59,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
         /** Import DocumentNode */
         "import { DocumentNode } from 'graphql'",
         /** Import document namespace */
-        `import * as ${c.NAMESPACE_DOCUMENT} from '${config.documentFile}'`,
+        `import * as ${c.NAMESPACE} from '${config.documentFile}'`,
       ].filter(nonNullable),
       content: printLines([
         /** Print the requester base class */

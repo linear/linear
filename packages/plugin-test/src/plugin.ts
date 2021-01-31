@@ -1,6 +1,13 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
 import { ContextVisitor, logger, PluginContext, printComment, printLines } from "@linear/common";
-import { ModelVisitor, parseOperations, SdkModel, SdkPluginConfig, SdkPluginContext } from "@linear/plugin-sdk";
+import {
+  ModelVisitor,
+  parseOperations,
+  SdkConstants,
+  SdkModel,
+  SdkPluginConfig,
+  SdkPluginContext,
+} from "@linear/plugin-sdk";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { printTests } from "./print-test";
 
@@ -42,11 +49,9 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
     const tests = printTests(sdkContext);
 
     return printLines([
-      /** Disable empty functions */
-      "/* eslint-disable @typescript-eslint/no-empty-function */",
       /** Import logger and client */
       "import { logger } from '@linear/common'",
-      "import { LinearClient } from '../client'",
+      `import * as ${SdkConstants.NAMESPACE} from '../index'`,
       'import dotenv from "dotenv"',
       "\n",
       /** Import env variables from .env file */
@@ -54,8 +59,8 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       "dotenv.config()",
       "\n",
       /** Create the client configured with api key */
-      printComment(["Initialize the linear client with the api key"]),
-      `const client = new LinearClient({ apiKey: process.env.E2E_API_KEY })`,
+      printComment(["Initialize Linear client with the api key"]),
+      `const client = new ${SdkConstants.NAMESPACE}.LinearClient({ apiKey: process.env.E2E_API_KEY })`,
       "\n",
       /** Print all tests */
       tests,
