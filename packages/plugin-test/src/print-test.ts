@@ -54,6 +54,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
   const itemField = itemOperation?.print.field;
   const itemArgs = itemOperation?.requiredArgs.args ?? [];
   const itemQueries = itemOperation?.model?.fields.query ?? [];
+  const itemConnections = itemOperation?.model?.fields.connection ?? [];
 
   if (hasRequiredArgs) {
     const connectionOperation = context.sdkDefinitions[""].operations.find(rootOperation => {
@@ -138,6 +139,29 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                           field.name
                         } query')
                         }`
+                      ),
+                    ]);
+                  })
+                )
+              : undefined,
+
+            itemConnections.length
+              ? printLines(
+                  itemConnections.map(field => {
+                    return printLines([
+                      printComment([`Test the ${itemField}.${field.name} connection query for ${field.type}`]),
+                      printIt(
+                        `${itemField}.${field.name}`,
+                        `if (_${itemField}) {
+                        ${printLines([
+                          `const ${itemField}_${field.name} = await _${itemField}.${field.name}()`,
+                          `logger.trace(${itemField}_${field.name})`,
+                        ])}
+                      } else {
+                        throw new Error('No ${listType} found from ${itemField} query - cannot test ${itemField}.${
+                          field.name
+                        } connection query')
+                      }`
                       ),
                     ]);
                   })

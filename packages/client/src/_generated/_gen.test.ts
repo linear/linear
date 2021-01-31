@@ -178,6 +178,28 @@ describe("Cycles", () => {
       throw new Error("No Cycle found from cycle query - cannot test cycle.team query");
     }
   });
+
+  /** Test the cycle.issues connection query for D.IssueConnection */
+  it("cycle.issues", async () => {
+    if (_cycle) {
+      const cycle_issues = await _cycle.issues();
+      logger.trace(cycle_issues);
+    } else {
+      throw new Error("No Cycle found from cycle query - cannot test cycle.issues connection query");
+    }
+  });
+
+  /** Test the cycle.uncompletedIssuesUponClose connection query for D.IssueConnection */
+  it("cycle.uncompletedIssuesUponClose", async () => {
+    if (_cycle) {
+      const cycle_uncompletedIssuesUponClose = await _cycle.uncompletedIssuesUponClose();
+      logger.trace(cycle_uncompletedIssuesUponClose);
+    } else {
+      throw new Error(
+        "No Cycle found from cycle query - cannot test cycle.uncompletedIssuesUponClose connection query"
+      );
+    }
+  });
 });
 
 /** Test all Emoji queries */
@@ -463,6 +485,16 @@ describe("IssueLabels", () => {
       throw new Error("No IssueLabel found from issueLabel query - cannot test issueLabel.team query");
     }
   });
+
+  /** Test the issueLabel.issues connection query for D.IssueConnection */
+  it("issueLabel.issues", async () => {
+    if (_issueLabel) {
+      const issueLabel_issues = await _issueLabel.issues();
+      logger.trace(issueLabel_issues);
+    } else {
+      throw new Error("No IssueLabel found from issueLabel query - cannot test issueLabel.issues connection query");
+    }
+  });
 });
 
 /** Test all IssueRelation queries */
@@ -607,6 +639,86 @@ describe("Issues", () => {
       throw new Error("No Issue found from issue query - cannot test issue.team query");
     }
   });
+
+  /** Test the issue.children connection query for D.IssueConnection */
+  it("issue.children", async () => {
+    if (_issue) {
+      const issue_children = await _issue.children();
+      logger.trace(issue_children);
+    } else {
+      throw new Error("No Issue found from issue query - cannot test issue.children connection query");
+    }
+  });
+
+  /** Test the issue.comments connection query for D.CommentConnection */
+  it("issue.comments", async () => {
+    if (_issue) {
+      const issue_comments = await _issue.comments();
+      logger.trace(issue_comments);
+    } else {
+      throw new Error("No Issue found from issue query - cannot test issue.comments connection query");
+    }
+  });
+
+  /** Test the issue.history connection query for D.IssueHistoryConnection */
+  it("issue.history", async () => {
+    if (_issue) {
+      const issue_history = await _issue.history();
+      logger.trace(issue_history);
+    } else {
+      throw new Error("No Issue found from issue query - cannot test issue.history connection query");
+    }
+  });
+
+  /** Test the issue.integrationResources connection query for D.IntegrationResourceConnection */
+  it("issue.integrationResources", async () => {
+    if (_issue) {
+      const issue_integrationResources = await _issue.integrationResources();
+      logger.trace(issue_integrationResources);
+    } else {
+      throw new Error("No Issue found from issue query - cannot test issue.integrationResources connection query");
+    }
+  });
+
+  /** Test the issue.inverseRelations connection query for D.IssueRelationConnection */
+  it("issue.inverseRelations", async () => {
+    if (_issue) {
+      const issue_inverseRelations = await _issue.inverseRelations();
+      logger.trace(issue_inverseRelations);
+    } else {
+      throw new Error("No Issue found from issue query - cannot test issue.inverseRelations connection query");
+    }
+  });
+
+  /** Test the issue.labels connection query for D.IssueLabelConnection */
+  it("issue.labels", async () => {
+    if (_issue) {
+      const issue_labels = await _issue.labels();
+      logger.trace(issue_labels);
+    } else {
+      throw new Error("No Issue found from issue query - cannot test issue.labels connection query");
+    }
+  });
+
+  /** Test the issue.relations connection query for D.IssueRelationConnection */
+  it("issue.relations", async () => {
+    if (_issue) {
+      const issue_relations = await _issue.relations();
+      logger.trace(issue_relations);
+    } else {
+      throw new Error("No Issue found from issue query - cannot test issue.relations connection query");
+    }
+  });
+
+  /** Test the issue.subscribers connection query for D.UserConnection */
+  it("issue.subscribers", async () => {
+    if (_issue) {
+      const issue_subscribers = await _issue.subscribers();
+      logger.trace(issue_subscribers);
+    } else {
+      throw new Error("No Issue found from issue query - cannot test issue.subscribers connection query");
+    }
+  });
 });
 
 /** Test all Milestone queries */
@@ -640,6 +752,16 @@ describe("Milestones", () => {
       logger.trace(milestone_organization);
     } else {
       throw new Error("No Milestone found from milestone query - cannot test milestone.organization query");
+    }
+  });
+
+  /** Test the milestone.projects connection query for D.ProjectConnection */
+  it("milestone.projects", async () => {
+    if (_milestone) {
+      const milestone_projects = await _milestone.projects();
+      logger.trace(milestone_projects);
+    } else {
+      throw new Error("No Milestone found from milestone query - cannot test milestone.projects connection query");
     }
   });
 });
@@ -892,6 +1014,46 @@ describe("Projects", () => {
       throw new Error("No Project found from project query - cannot test project.milestone query");
     }
   });
+
+  /** Test the project.issues connection query for D.IssueConnection */
+  it("project.issues", async () => {
+    if (_project) {
+      const project_issues = await _project.issues();
+      logger.trace(project_issues);
+    } else {
+      throw new Error("No Project found from project query - cannot test project.issues connection query");
+    }
+  });
+
+  /** Test the project.links connection query for D.ProjectLinkConnection */
+  it("project.links", async () => {
+    if (_project) {
+      const project_links = await _project.links();
+      logger.trace(project_links);
+    } else {
+      throw new Error("No Project found from project query - cannot test project.links connection query");
+    }
+  });
+
+  /** Test the project.members connection query for D.UserConnection */
+  it("project.members", async () => {
+    if (_project) {
+      const project_members = await _project.members();
+      logger.trace(project_members);
+    } else {
+      throw new Error("No Project found from project query - cannot test project.members connection query");
+    }
+  });
+
+  /** Test the project.teams connection query for D.TeamConnection */
+  it("project.teams", async () => {
+    if (_project) {
+      const project_teams = await _project.teams();
+      logger.trace(project_teams);
+    } else {
+      throw new Error("No Project found from project query - cannot test project.teams connection query");
+    }
+  });
 });
 
 /** Test PushSubscriptionTest query */
@@ -1094,6 +1256,86 @@ describe("Teams", () => {
       throw new Error("No Team found from team query - cannot test team.startWorkflowState query");
     }
   });
+
+  /** Test the team.cycles connection query for D.CycleConnection */
+  it("team.cycles", async () => {
+    if (_team) {
+      const team_cycles = await _team.cycles();
+      logger.trace(team_cycles);
+    } else {
+      throw new Error("No Team found from team query - cannot test team.cycles connection query");
+    }
+  });
+
+  /** Test the team.issues connection query for D.IssueConnection */
+  it("team.issues", async () => {
+    if (_team) {
+      const team_issues = await _team.issues();
+      logger.trace(team_issues);
+    } else {
+      throw new Error("No Team found from team query - cannot test team.issues connection query");
+    }
+  });
+
+  /** Test the team.labels connection query for D.IssueLabelConnection */
+  it("team.labels", async () => {
+    if (_team) {
+      const team_labels = await _team.labels();
+      logger.trace(team_labels);
+    } else {
+      throw new Error("No Team found from team query - cannot test team.labels connection query");
+    }
+  });
+
+  /** Test the team.memberships connection query for D.TeamMembershipConnection */
+  it("team.memberships", async () => {
+    if (_team) {
+      const team_memberships = await _team.memberships();
+      logger.trace(team_memberships);
+    } else {
+      throw new Error("No Team found from team query - cannot test team.memberships connection query");
+    }
+  });
+
+  /** Test the team.projects connection query for D.ProjectConnection */
+  it("team.projects", async () => {
+    if (_team) {
+      const team_projects = await _team.projects();
+      logger.trace(team_projects);
+    } else {
+      throw new Error("No Team found from team query - cannot test team.projects connection query");
+    }
+  });
+
+  /** Test the team.states connection query for D.WorkflowStateConnection */
+  it("team.states", async () => {
+    if (_team) {
+      const team_states = await _team.states();
+      logger.trace(team_states);
+    } else {
+      throw new Error("No Team found from team query - cannot test team.states connection query");
+    }
+  });
+
+  /** Test the team.templates connection query for D.TemplateConnection */
+  it("team.templates", async () => {
+    if (_team) {
+      const team_templates = await _team.templates();
+      logger.trace(team_templates);
+    } else {
+      throw new Error("No Team found from team query - cannot test team.templates connection query");
+    }
+  });
+
+  /** Test the team.webhooks connection query for D.WebhookConnection */
+  it("team.webhooks", async () => {
+    if (_team) {
+      const team_webhooks = await _team.webhooks();
+      logger.trace(team_webhooks);
+    } else {
+      throw new Error("No Team found from team query - cannot test team.webhooks connection query");
+    }
+  });
 });
 
 // Template id: string - has required args
@@ -1140,6 +1382,36 @@ describe("Users", () => {
       logger.trace(user_organization);
     } else {
       throw new Error("No User found from user query - cannot test user.organization query");
+    }
+  });
+
+  /** Test the user.assignedIssues connection query for D.IssueConnection */
+  it("user.assignedIssues", async () => {
+    if (_user) {
+      const user_assignedIssues = await _user.assignedIssues();
+      logger.trace(user_assignedIssues);
+    } else {
+      throw new Error("No User found from user query - cannot test user.assignedIssues connection query");
+    }
+  });
+
+  /** Test the user.createdIssues connection query for D.IssueConnection */
+  it("user.createdIssues", async () => {
+    if (_user) {
+      const user_createdIssues = await _user.createdIssues();
+      logger.trace(user_createdIssues);
+    } else {
+      throw new Error("No User found from user query - cannot test user.createdIssues connection query");
+    }
+  });
+
+  /** Test the user.teamMemberships connection query for D.TeamMembershipConnection */
+  it("user.teamMemberships", async () => {
+    if (_user) {
+      const user_teamMemberships = await _user.teamMemberships();
+      logger.trace(user_teamMemberships);
+    } else {
+      throw new Error("No User found from user query - cannot test user.teamMemberships connection query");
     }
   });
 });
@@ -1231,6 +1503,18 @@ describe("WorkflowStates", () => {
       logger.trace(workflowState_team);
     } else {
       throw new Error("No WorkflowState found from workflowState query - cannot test workflowState.team query");
+    }
+  });
+
+  /** Test the workflowState.issues connection query for D.IssueConnection */
+  it("workflowState.issues", async () => {
+    if (_workflowState) {
+      const workflowState_issues = await _workflowState.issues();
+      logger.trace(workflowState_issues);
+    } else {
+      throw new Error(
+        "No WorkflowState found from workflowState query - cannot test workflowState.issues connection query"
+      );
     }
   });
 });
