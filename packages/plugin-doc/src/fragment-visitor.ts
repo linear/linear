@@ -1,6 +1,7 @@
 import {
   findObject,
   findQuery,
+  Fragment,
   getRequiredArgs,
   isConnection,
   isValidField,
@@ -14,6 +15,7 @@ import {
   printGraphqlDescription,
   printLines,
   reduceTypeName,
+  sortBy,
 } from "@linear/common";
 import autoBind from "auto-bind";
 import {
@@ -31,6 +33,7 @@ import {
  */
 export class FragmentVisitor {
   private _context: PluginContext;
+  private _fragments: Fragment[] = [];
 
   /** Initialize the visitor */
   public constructor(context: Omit<PluginContext, "fragments">) {
@@ -43,13 +46,18 @@ export class FragmentVisitor {
    * Return the plugin context with fragments
    */
   public get context(): PluginContext {
-    return this._context;
+    return {
+      ...this._context,
+      fragments: sortBy("name", this._fragments),
+    };
   }
 
   public Document = {
     /** Join all string definitions */
     leave: (node: DocumentNode): string => {
-      return printLines((node.definitions ?? []).map(definition => (typeof definition === "string" ? definition : ``)));
+      return printLines(
+        (node.definitions ?? []).map(definition => (typeof definition === "string" ? definition : ``)).sort()
+      );
     },
   };
 
@@ -61,15 +69,15 @@ export class FragmentVisitor {
       /** Process non empty object definitions */
       if (isValidFragment(this._context, node)) {
         /** Record fragment on context */
-        this._context.fragments = [...this._context.fragments, node];
+        this._fragments = [...this._fragments, node];
 
         /** Print fragment */
         return printLines([
           printGraphqlDescription(node.description?.value),
           printGraphqlDebug(node),
           `fragment ${node.name} on ${node.name} {
-              ${printLines(node.fields)}
-            }`,
+            ${printLines(node.fields.sort())}
+          }`,
           " ",
         ]);
       }
@@ -84,7 +92,7 @@ export class FragmentVisitor {
       const type = reduceTypeName(_node.type);
 
       /** Skip objects defined in constants */
-      if (isValidField(this.context, _node)) {
+      if (isValidField(this._context, _node)) {
         const node = (_node as unknown) as Named<FieldDefinitionNode>;
         const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
 
@@ -96,7 +104,9 @@ export class FragmentVisitor {
         /** Print all fields required for matching query */
         const query = findQuery(this._context, node);
         if (query) {
-          const queryRequiredArgs = getRequiredArgs(query.arguments).map(arg => arg.name.value);
+          const queryRequiredArgs = getRequiredArgs(query.arguments)
+            .map(arg => arg.name.value)
+            .sort();
 
           if (queryRequiredArgs.length) {
             return printLines([

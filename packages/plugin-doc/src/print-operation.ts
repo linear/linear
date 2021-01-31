@@ -15,6 +15,7 @@ import {
   printLines,
   printList,
   reduceListType,
+  sortBy,
 } from "@linear/common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 
@@ -153,7 +154,7 @@ export function printOperations(
       /** Find an object matching the type of this query */
       const object = findObject(context, lastField);
 
-      const fieldOperations = (object?.fields ?? [])?.map(field => {
+      const fieldOperations = sortBy("name.value", object?.fields as FieldDefinitionNode[]).map(field => {
         if (
           /** No need to go further than scalar fields */
           isScalarField(context, field) ||

@@ -4787,15 +4787,19 @@ type Mutation {
     """
     Github owner (user or org) for the repository from which we will import data.
     """
-    repoOwner: String!
+    githubRepoOwner: String!
     """
     Github repository name from which we will import data.
     """
-    repoName: String!
+    githubRepoName: String!
     """
     Github token to fetch information from the Github API.
     """
-    token: String!
+    githubToken: String!
+    """
+    ID of the team into which to import data.
+    """
+    teamId: String!
   ): IssueImportPayload!
   """
   Creates a new label.
@@ -6190,10 +6194,6 @@ type IssueImport implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
-  """
-  The id for the organization where data will be imported.
-  """
-  organizationId: String!
   """
   The id for the user that started the job.
   """
@@ -7819,6 +7819,41 @@ type DocumentStep implements Node {
   clientId: String!
 }
 """
+Slack notification specific settings.
+"""
+type SlackPostSettings {
+  channel: String!
+  channelId: String!
+  configurationUrl: String!
+}
+"""
+Google Sheets specific settings.
+"""
+type GoogleSheetsSettings {
+  spreadsheetId: String!
+  spreadsheetUrl: String!
+  sheetId: Float!
+  updatedIssuesAt: DateTime!
+}
+"""
+Sentry specific settings.
+"""
+type SentrySettings {
+  """
+  The slug of the Sentry organization being connected.
+  """
+  organizationSlug: String!
+}
+"""
+The integration resource's settings
+"""
+type IntegrationSettings {
+  slackPost: SlackPostSettings
+  slackProjectPost: SlackPostSettings
+  googleSheets: GoogleSheetsSettings
+  sentry: SentrySettings
+}
+"""
 The integration resource's settings
 """
 type SamlConfiguration {
@@ -7842,6 +7877,40 @@ type SamlConfiguration {
   List of allowed email domains for SAML authentication.
   """
   allowedDomains: [String!]
+}
+"""
+A user's web browser push notification subscription.
+"""
+type PushSubscription implements Node {
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The last time at which the entity was updated. This is the same as the creation time if the
+      entity hasn't been update after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+}
+type PushSubscriptionEdge {
+  node: PushSubscription!
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+}
+type PushSubscriptionConnection {
+  edges: [PushSubscriptionEdge!]!
+  nodes: [PushSubscription!]!
+  pageInfo: PageInfo!
 }
 """
 A user account.
@@ -7879,75 +7948,6 @@ type UserAccount {
   Users belonging to the account.
   """
   users: [User!]!
-}
-"""
-Slack notification specific settings.
-"""
-type SlackPostSettings {
-  channel: String!
-  channelId: String!
-  configurationUrl: String!
-}
-"""
-Google Sheets specific settings.
-"""
-type GoogleSheetsSettings {
-  spreadsheetId: String!
-  spreadsheetUrl: String!
-  sheetId: Float!
-  updatedIssuesAt: DateTime!
-}
-"""
-Sentry specific settings.
-"""
-type SentrySettings {
-  """
-  The slug of the Sentry organization being connected.
-  """
-  organizationSlug: String!
-}
-"""
-The integration resource's settings
-"""
-type IntegrationSettings {
-  slackPost: SlackPostSettings
-  slackProjectPost: SlackPostSettings
-  googleSheets: GoogleSheetsSettings
-  sentry: SentrySettings
-}
-"""
-A user's web browser push notification subscription.
-"""
-type PushSubscription implements Node {
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-}
-type PushSubscriptionEdge {
-  node: PushSubscription!
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-}
-type PushSubscriptionConnection {
-  edges: [PushSubscriptionEdge!]!
-  nodes: [PushSubscription!]!
-  pageInfo: PageInfo!
 }
 """
 A recorded entry of a file uploaded by a user.

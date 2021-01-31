@@ -11,6 +11,7 @@ import {
   printTypescriptType,
   reduceListType,
   reduceTypeName,
+  sortBy,
   upperFirst,
 } from "@linear/common";
 import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode } from "graphql";
@@ -174,7 +175,7 @@ export function parseOperations(
       ...acc,
       [sdkKey]: {
         sdkPath,
-        operations: [...(acc[sdkKey]?.operations ?? []), sdkOperation],
+        operations: [...sortBy("name", acc[sdkKey]?.operations), sdkOperation],
       },
     };
   }, {});

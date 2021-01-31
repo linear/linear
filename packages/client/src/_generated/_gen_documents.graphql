@@ -1,14 +1,922 @@
+# A comment associated with an issue.
+fragment Comment on Comment {
+  # The comment content in markdown format.
+  body
+  # The issue that the comment is associated with.
+  issue {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time user edited the comment.
+  editedAt
+  # The unique identifier of the entity.
+  id
+  # The user who wrote the comment.
+  user {
+    id
+  }
+}
+
+# A custom emoji.
+fragment Emoji on Emoji {
+  # The emoji image URL.
+  url
+  # The emoji's name.
+  name
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The source of the emoji.
+  source
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the emoji.
+  creator {
+    id
+  }
+}
+
+# A custom view that has been saved by a user.
+fragment CustomView on CustomView {
+  # The color of the icon of the custom view.
+  color
+  # The description of the custom view.
+  description
+  # The filters applied to issues in the custom view.
+  filters
+  # The icon of the custom view.
+  icon
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The name of the custom view.
+  name
+  # The team associated with the custom view.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the custom view.
+  creator {
+    id
+  }
+  # Whether the custom view is shared with everyone in the organization.
+  shared
+}
+
+# A milestone that contains projects.
+fragment Milestone on Milestone {
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The name of the milestone.
+  name
+  # The sort order for the milestone.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# A notification sent to a user.
+fragment Notification on Notification {
+  # Name of the reaction emoji associated with the notification.
+  reactionEmoji
+  # Notification type
+  type
+  # The comment which the notification is associated with.
+  comment {
+    id
+  }
+  # The issue that the notification is associated with.
+  issue {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The recipient of the notification.
+  user {
+    id
+  }
+  # The team which the notification is associated with.
+  team {
+    id
+  }
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# A project.
+fragment Project on Project {
+  # The estimated completion date of the project.
+  targetDate
+  # The icon of the project.
+  icon
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The milestone that this project is associated with.
+  milestone {
+    id
+  }
+  # The number of completed estimation points after each week.
+  completedScopeHistory
+  # The number of completed issues in the project after each week.
+  completedIssueCountHistory
+  # The project lead.
+  lead {
+    id
+  }
+  # The project's color.
+  color
+  # The project's description.
+  description
+  # The project's name.
+  name
+  # The project's unique URL slug.
+  slugId
+  # The sort order for the project within its milestone.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the project was moved into canceled state.
+  canceledAt
+  # The time at which the project was moved into completed state.
+  completedAt
+  # The time at which the project was moved into started state.
+  startedAt
+  # The total number of estimation points after each week.
+  scopeHistory
+  # The total number of issues in the project after each week.
+  issueCountHistory
+  # The type of the state.
+  state
+  # The unique identifier of the entity.
+  id
+  # The user who created the project.
+  creator {
+    id
+  }
+  # Whether to send new issue comment notifications to Slack.
+  slackIssueComments
+  # Whether to send new issue notifications to Slack.
+  slackNewIssue
+  # Whether to send new issue status updates to Slack.
+  slackIssueStatuses
+}
+
+# A reaction associated with a comment.
+fragment Reaction on Reaction {
+  # Name of the reaction's emoji.
+  emoji
+  # The comment that the reaction is associated with.
+  comment {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who reacted.
+  user {
+    id
+  }
+}
+
+# A record of changes to an issue.
+fragment IssueHistory on IssueHistory {
+  # Changed issue relationships.
+  relationChanges
+  # ID's of labels that were added.
+  addedLabelIds
+  # ID's of labels that were removed.
+  removedLabelIds
+  # Information about the integration or application which created this history entry.
+  source
+  # The issue that was changed.
+  issue {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The new cycle of the issue.
+  toCycle {
+    id
+  }
+  # The new parent of the issue.
+  toParent {
+    id
+  }
+  # The new project of the issue.
+  toProject {
+    id
+  }
+  # The new workflow state of the issue.
+  toState {
+    id
+  }
+  # The previous cycle of the issue.
+  fromCycle {
+    id
+  }
+  # The previous parent of the issue.
+  fromParent {
+    id
+  }
+  # The previous project of the issue.
+  fromProject {
+    id
+  }
+  # The previous workflow state of the issue.
+  fromState {
+    id
+  }
+  # The team from which the issue was moved from.
+  fromTeam {
+    id
+  }
+  # The team to which the issue was moved to.
+  toTeam {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user from whom the issue was re-assigned from.
+  fromAssignee {
+    id
+  }
+  # The user to whom the issue was assigned to.
+  toAssignee {
+    id
+  }
+  # The user who made these changes. If null, possibly means that the change made by an integration.
+  actor {
+    id
+  }
+  # What the due date was changed from
+  fromDueDate
+  # What the due date was changed to
+  toDueDate
+  # What the estimate was changed from.
+  fromEstimate
+  # What the estimate was changed to.
+  toEstimate
+  # What the priority was changed from.
+  fromPriority
+  # What the priority was changed to.
+  toPriority
+  # What the title was changed from.
+  fromTitle
+  # What the title was changed to.
+  toTitle
+  # Whether the issue was archived or un-archived.
+  archived
+  # Whether the issue's description was updated.
+  updatedDescription
+  autoArchived
+  autoClosed
+}
+
+# A recorded entry of a file uploaded by a user.
+fragment FileUpload on FileUpload {
+  # Additional metadata of the file.
+  metaData
+  # Size of the uploaded file in bytes.
+  size
+  # The MIME type of the uploaded file.
+  contentType
+  # The asset URL this file is available at.
+  assetUrl
+  # The name of the uploaded file.
+  filename
+  # The unique identifier of the entity.
+  id
+  # The user who uploaded the file.
+  creator {
+    id
+  }
+}
+
+# A relation between two issues.
+fragment IssueRelation on IssueRelation {
+  # The issue whose relationship is being described.
+  issue {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The related issue.
+  relatedIssue {
+    id
+  }
+  # The relationship of the issue with the related issue.
+  type
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# A set of issues to be resolved in a specified amount of time.
+fragment Cycle on Cycle {
+  # The completion time of the cycle. If null, the cycle hasn't been completed.
+  completedAt
+  # The custom name of the cycle.
+  name
+  # The end time of the cycle.
+  endsAt
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The number of completed estimation points after each day.
+  completedScopeHistory
+  # The number of completed issues in the cycle after each day.
+  completedIssueCountHistory
+  # The number of the cycle.
+  number
+  # The start time of the cycle.
+  startsAt
+  # The team that the cycle is associated with.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The total number of estimation points after each day.
+  scopeHistory
+  # The total number of issues in the cycle after each day.
+  issueCountHistory
+  # The unique identifier of the entity.
+  id
+}
+
+# A state in a team workflow.
+fragment WorkflowState on WorkflowState {
+  # Description of the state.
+  description
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The position of the state in the team flow.
+  position
+  # The state's UI color as a HEX string.
+  color
+  # The state's name.
+  name
+  # The team to which this state belongs to.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of the state.
+  type
+  # The unique identifier of the entity.
+  id
+}
+
+# A template object used for creating new issues faster.
+fragment Template on Template {
+  # Template data.
+  templateData
+  # Template description.
+  description
+  # The entity type this template is for.
+  type
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The name of the template.
+  name
+  # The team that the template is associated with.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the template.
+  creator {
+    id
+  }
+}
+
+# A user account.
+fragment UserAccount on UserAccount {
+  # The authentication service used to create the account.
+  service
+  # The models identifier.
+  id
+  # The time at which the model was archived.
+  archivedAt
+  # The time at which the model was created.
+  createdAt
+  # The time at which the model was updated.
+  updatedAt
+  # The user's email address.
+  email
+  # The user's name.
+  name
+  # Users belonging to the account.
+  users {
+    ...User
+  }
+}
+
+# A user that has access to the the resources of an organization.
+fragment User on User {
+  # An URL to the user's avatar image.
+  avatarUrl
+  # Number of issues created.
+  createdIssueCount
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The last time the user was seen online. If null, the user is currently online.
+  lastSeen
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user's display (nick) name. Unique within each organization.
+  displayName
+  # The user's email address.
+  email
+  # The user's full name.
+  name
+  # Unique hash for the user to be used in invite URLs.
+  inviteHash
+  # Whether the user account is active or disabled.
+  active
+  # Whether the user is an organization administrator.
+  admin
+}
+
+# A user's web browser push notification subscription.
+fragment PushSubscription on PushSubscription {
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# A webhook used to send HTTP notifications over data updates
+fragment Webhook on Webhook {
+  # Secret token for verifying the origin on the recipient side.
+  secret
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The team that the webhook is associated with.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the webhook.
+  creator {
+    id
+  }
+  # Webhook URL
+  url
+  # Whether the Webhook is enabled.
+  enabled
+}
+
+# An API key. Grants access to the user's resources.
+fragment ApiKey on ApiKey {
+  # The label of the API key.
+  label
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# An external link for a project.
+fragment ProjectLink on ProjectLink {
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The link's URL.
+  url
+  # The link's label.
+  label
+  # The project that the link is associated with.
+  project {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the link.
+  creator {
+    id
+  }
+}
+
+# An import job for data from an external service
+fragment IssueImport on IssueImport {
+  # The id for the user that started the job.
+  creatorId
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The service from which data will be imported.
+  service
+  # The status for the import job.
+  status
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# An integration resource created by an external service.
+fragment IntegrationResource on IntegrationResource {
+  # Detailed information about the external resource.
+  data {
+    ...IntegrationResourceData
+  }
+  # Pull request information for GitHub pull requests and GitLab merge requests.
+  pullRequest {
+    ...PullRequestPayload
+  }
+  # The external service resource ID.
+  resourceId
+  # The integration that the resource is associated with.
+  integration {
+    id
+  }
+  # The integration's type.
+  resourceType
+  # The issue that the resource is associated with.
+  issue {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# An integration with an external service.
+fragment Integration on Integration {
+  # The integration's type.
+  service
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The team that the integration is associated with.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user that added the integration.
+  creator {
+    id
+  }
+}
+
+# An invitation to the organization that has been sent via email.
+fragment OrganizationInvite on OrganizationInvite {
+  # The invite was sent to external address.
+  external
+  # The invitees email address.
+  email
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the invite was accepted. Null, if the invite hasn't been accepted
+  acceptedAt
+  # The time at which the invite will be expiring. Null, if the invite shouldn't expire
+  expiresAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the invitation.
+  inviter {
+    id
+  }
+  # The user who has accepted the invite. Null, if the invite hasn't been accepted.
+  invitee {
+    id
+  }
+}
+
+# An issue.
+fragment Issue on Issue {
+  # Issue URL.
+  url
+  # Issue's human readable identifier (e.g. ENG-123).
+  identifier
+  # Label for the priority.
+  priorityLabel
+  # Previous identifiers of the issue if it has been moved between teams.
+  previousIdentifiers
+  # Suggested branch name for the issue.
+  branchName
+  # The cycle that the issue is associated with.
+  cycle {
+    id
+  }
+  # The date at which the issue is due.
+  dueDate
+  # The estimate of the complexity of the issue..
+  estimate
+  # The issue's description in markdown format.
+  description
+  # The issue's title.
+  title
+  # The issue's unique number.
+  number
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The order of the item in its column on the board.
+  boardOrder
+  # The order of the item in the sub-issue list. Only set if the issue has a parent.
+  subIssueSortOrder
+  # The parent of the issue.
+  parent {
+    id
+  }
+  # The priority of the issue.
+  priority
+  # The project that the issue is associated with.
+  project {
+    id
+  }
+  # The team that the issue is associated with.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the issue was automatically archived by the auto pruning process.
+  autoArchivedAt
+  # The time at which the issue was automatically closed by the auto pruning process.
+  autoClosedAt
+  # The time at which the issue was moved into canceled state.
+  canceledAt
+  # The time at which the issue was moved into completed state.
+  completedAt
+  # The time at which the issue was moved into started state.
+  startedAt
+  # The unique identifier of the entity.
+  id
+  # The user to whom the issue is assigned to.
+  assignee {
+    id
+  }
+  # The user who created the issue.
+  creator {
+    id
+  }
+  # The workflow state that the issue is associated with.
+  state {
+    id
+  }
+}
+
+# An organization. Organizations are root-level objects that contain user accounts and teams.
+fragment Organization on Organization {
+  # Allowed authentication providers, empty array means all are allowed
+  allowedAuthServices
+  # Number of active users in the organization.
+  userCount
+  # Number of issues in the organization.
+  createdIssueCount
+  # Rolling 30-day total upload volume for the organization, in megabytes.
+  periodUploadVolume
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The organization's logo URL.
+  logoUrl
+  # The organization's name.
+  name
+  # The organization's unique URL key.
+  urlKey
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # Whether SAML authentication is enabled for organization.
+  samlEnabled
+  # Whether the Git integration linkback messages should be sent to private repositories.
+  gitLinkbackMessagesEnabled
+  # Whether the Git integration linkback messages should be sent to public repositories.
+  gitPublicLinkbackMessagesEnabled
+  # Whether the organization is using a roadmap.
+  roadmapEnabled
+}
+
+# An organizational unit that contains issues.
+fragment Team on Team {
+  # Auto assign completed issues to current cycle.
+  cycleIssueAutoAssignCompleted
+  # Auto assign started issues to current cycle.
+  cycleIssueAutoAssignStarted
+  # Calender feed (iCal) for cycles.
+  cycleCalenderUrl
+  # How many upcoming cycles to create.
+  upcomingCycleCount
+  # Only allow issues issues with cycles in Active Issues.
+  cycleLockToActive
+  # Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.
+  autoArchivePeriod
+  # Period after which issues are automatically closed in months. Null/undefined means disabled.
+  autoClosePeriod
+  # Team's currently active cycle.
+  activeCycle {
+    id
+  }
+  # The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state.
+  autoCloseStateId
+  # The cooldown time after each cycle in weeks.
+  cycleCooldownTime
+  # The day of the week that a new cycle starts.
+  cycleStartDay
+  # The duration of a cycle in weeks.
+  cycleDuration
+  # The issue estimation type to use.
+  issueEstimationType
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The team's description.
+  description
+  # The team's name.
+  name
+  # The team's unique key. The key is used in URLs.
+  key
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The timezone of the team. Defaults to "America/Los_Angeles"
+  timezone
+  # The unique identifier of the entity.
+  id
+  # The workflow state into which issues are moved when a PR has been merged.
+  mergeWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when a PR has been opened as draft.
+  draftWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when a PR has been opened.
+  startWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when a review has been requested for the PR.
+  reviewWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state.
+  markedAsDuplicateWorkflowState {
+    id
+  }
+  # Unique hash for the team to be used in invite URLs.
+  inviteHash
+  # What to use as an default estimate for unestimated issues.
+  defaultIssueEstimate
+  # Whether the team uses cycles.
+  cyclesEnabled
+  # Whether to add additional points to the estimate scale.
+  issueEstimationExtended
+  # Whether to allow zeros in issues estimates.
+  issueEstimationAllowZero
+  # Whether to group recent issue history entries.
+  groupIssueHistory
+  # Whether to send new issue comment notifications to Slack.
+  slackIssueComments
+  # Whether to send new issue notifications to Slack.
+  slackNewIssue
+  # Whether to send new issue status updates to Slack.
+  slackIssueStatuses
+}
+
+# Collaborative editing steps for documents.
+fragment DocumentStep on DocumentStep {
+  # Connected client ID.
+  clientId
+  # Step data.
+  step
+  # Step version.
+  version
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # Contains either the full serialized state of the application or delta packets that the requester can
 # apply to the local data set in order to be up-to-date.
 fragment SyncResponse on SyncResponse {
-  # The full state of the organization as a serialized JSON object.
-  #     Mutually exclusive with the delta property
-  state
+  # A JSON serialized collection of model objects loaded from the archive
+  archive
   # JSON serialized delta changes that the client can apply to its local state
   #     in order to catch up with the state of the world.
   delta
-  # A JSON serialized collection of model objects loaded from the archive
-  archive
+  # The full state of the organization as a serialized JSON object.
+  #     Mutually exclusive with the delta property
+  state
   # The last sync id covered by the response.
   lastSyncId
   # The version of the remote database. Incremented by 1 for each migration run on the database.
@@ -25,6 +933,449 @@ fragment ArchiveResponse on ArchiveResponse {
   databaseVersion
 }
 
+# Defines the membership of a user to a team.
+fragment TeamMembership on TeamMembership {
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The team that the membership is associated with.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user that the membership is associated with.
+  user {
+    id
+  }
+}
+
+# Defines the use of a domain by an organization.
+fragment OrganizationDomain on OrganizationDomain {
+  # Domain name
+  name
+  # E-mail used to verify this domain
+  verificationEmail
+  # Is this domain verified
+  verified
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who added the domain.
+  creator {
+    id
+  }
+}
+
+# GitHub's commit data
+fragment CommitPayload on CommitPayload {
+  added
+  id
+  message
+  modified
+  removed
+  timestamp
+  url
+}
+
+# Google Sheets specific settings.
+fragment GoogleSheetsSettings on GoogleSheetsSettings {
+  sheetId
+  spreadsheetId
+  spreadsheetUrl
+  updatedIssuesAt
+}
+
+# Integration resource's payload
+fragment IntegrationResourceData on IntegrationResourceData {
+  # The payload for an IntegrationResource of type 'githubCommit'
+  githubCommit {
+    ...CommitPayload
+  }
+  # The payload for an IntegrationResource of type 'githubPullRequest'
+  githubPullRequest {
+    ...PullRequestPayload
+  }
+  # The payload for an IntegrationResource of type 'gitlabMergeRequest'
+  gitlabMergeRequest {
+    ...PullRequestPayload
+  }
+  # The payload for an IntegrationResource of type 'sentryIssue'
+  sentryIssue {
+    ...SentryIssuePayload
+  }
+}
+
+# Labels that can be associated with issues.
+fragment IssueLabel on IssueLabel {
+  # The label's color as a HEX string.
+  color
+  # The label's description.
+  description
+  # The label's name.
+  name
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The team to which the label belongs to.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the label.
+  creator {
+    id
+  }
+}
+
+# Notification subscriptions for models.
+fragment NotificationSubscription on NotificationSubscription {
+  # Subscribed project.
+  project {
+    id
+  }
+  # Subscribed team.
+  team {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of the subscription.
+  type
+  # The unique identifier of the entity.
+  id
+  # The user associated with notification subscriptions.
+  user {
+    id
+  }
+}
+
+# OAuth2 client application
+fragment OauthClient on OauthClient {
+  # Image of the application.
+  imageUrl
+  # Information about the application.
+  description
+  # List of allowed redirect URIs for the application.
+  redirectUris
+  # Name of the developer.
+  developer
+  # OAuth application's client ID.
+  clientId
+  # OAuth application's client name.
+  name
+  # OAuth application's client secret.
+  clientSecret
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # Url of the developer.
+  developerUrl
+}
+
+# Object representing Figma preview information.
+fragment FigmaEmbed on FigmaEmbed {
+  # Date when the file was updated at the time of embedding.
+  lastModified
+  # Figma file name.
+  name
+  # Figma screenshot URL.
+  url
+  # Node name.
+  nodeName
+}
+
+# Object representing Google Cloud upload policy, plus additional data.
+fragment UploadFile on UploadFile {
+  # The asset URL for the uploaded file. (assigned automatically)
+  assetUrl
+  # The content type.
+  contentType
+  # The filename.
+  filename
+  # The signed URL the for the uploaded file. (assigned automatically)
+  uploadUrl
+  # The size of the uploaded file.
+  size
+  headers {
+    ...UploadFileHeader
+  }
+  metaData
+}
+
+# Public information of the OAuth application, plus the authorized scopes for a given user.
+fragment AuthorizedApplication on AuthorizedApplication {
+  # Application name.
+  name
+  # Image of the application.
+  imageUrl
+  # Information about the application.
+  description
+  # Name of the developer.
+  developer
+  # OAuth application's ID.
+  appId
+  # OAuth application's client ID.
+  clientId
+  # Scopes that are authorized for this application for a given user.
+  scope
+  # Url of the developer (homepage or docs).
+  developerUrl
+}
+
+# Public information of the OAuth application, plus whether the application has been authorized for
+# the given scopes.
+fragment UserAuthorizedApplication on UserAuthorizedApplication {
+  # Application name.
+  name
+  # Image of the application.
+  imageUrl
+  # Information about the application.
+  description
+  # Name of the developer.
+  developer
+  # OAuth application's client ID.
+  clientId
+  # Url of the developer (homepage or docs).
+  developerUrl
+  # Whether the user has authorized the application for the given scopes.
+  isAuthorized
+}
+
+# Public information of the OAuth application.
+fragment Application on Application {
+  # Application name.
+  name
+  # Image of the application.
+  imageUrl
+  # Information about the application.
+  description
+  # Name of the developer.
+  developer
+  # OAuth application's client ID.
+  clientId
+  # Url of the developer (homepage or docs).
+  developerUrl
+}
+
+# Pull request data
+fragment PullRequestPayload on PullRequestPayload {
+  branch
+  closedAt
+  createdAt
+  draft
+  id
+  mergedAt
+  number
+  repoLogin
+  repoName
+  status
+  title
+  updatedAt
+  url
+  userId
+  userLogin
+}
+
+# Sentry issue data
+fragment SentryIssuePayload on SentryIssuePayload {
+  # The Sentry identifier for the issue.
+  issueId
+  # The Sentry identifier of the actor who created the issue.
+  actorId
+  # The Sentry identifier of the project this issue belongs to.
+  projectId
+  # The date this issue was first seen.
+  firstSeen
+  # The description of the issue.
+  webUrl
+  # The name of the Sentry actor who created this issue.
+  actorName
+  # The name of the first release version this issue appeared on, if available.
+  firstVersion
+  # The shortId of the issue.
+  shortId
+  # The slug of the project this issue belongs to.
+  projectSlug
+  # The title of the issue.
+  issueTitle
+  # The type of the actor who created the issue.
+  actorType
+}
+
+# Sentry specific settings.
+fragment SentrySettings on SentrySettings {
+  # The slug of the Sentry organization being connected.
+  organizationSlug
+}
+
+# Slack notification specific settings.
+fragment SlackPostSettings on SlackPostSettings {
+  channel
+  channelId
+  configurationUrl
+}
+
+# The integration resource's settings
+fragment IntegrationSettings on IntegrationSettings {
+  googleSheets {
+    ...GoogleSheetsSettings
+  }
+  sentry {
+    ...SentrySettings
+  }
+  slackPost {
+    ...SlackPostSettings
+  }
+  slackProjectPost {
+    ...SlackPostSettings
+  }
+}
+
+# The integration resource's settings
+fragment SamlConfiguration on SamlConfiguration {
+  # Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  ssoBinding
+  # List of allowed email domains for SAML authentication.
+  allowedDomains
+  # Sign in endpoint URL for the identity provider.
+  ssoEndpoint
+  # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  ssoSignAlgo
+  # X.509 Signing Certificate in string form.
+  ssoSigningCert
+}
+
+# The settings of a user as a JSON object.
+fragment UserSettings on UserSettings {
+  # The email types the user has unsubscribed from.
+  unsubscribedFrom
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The notification channel settings the user has selected.
+  notificationPreferences
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user to whom this notification was targeted for.
+  user {
+    id
+  }
+}
+
+# The subscription of an organization.
+fragment Subscription on Subscription {
+  # The creator of the subscription.
+  creator {
+    id
+  }
+  # The date the subscription was canceled, if any.
+  canceledAt
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The number of seats in the subscription.
+  seats
+  # The subscription type of a pending change. Null if no change pending.
+  pendingChangeType
+  # The subscription type.
+  type
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# User favorites presented in the sidebar.
+fragment Favorite on Favorite {
+  # Favorited cycle.
+  cycle {
+    id
+  }
+  # Favorited issue label.
+  label {
+    id
+  }
+  # Favorited issue.
+  issue {
+    id
+  }
+  # Favorited project team.
+  projectTeam {
+    id
+  }
+  # Favorited project.
+  project {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The order of the item in the favorites list.
+  sortOrder
+  # The owner of the favorite.
+  user {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of the favorite.
+  type
+  # The unique identifier of the entity.
+  id
+}
+
+# View preferences.
+fragment ViewPreferences on ViewPreferences {
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The view preference type.
+  type
+  # The view type.
+  viewType
+}
+
 fragment ApiKeyConnection on ApiKeyConnection {
   nodes {
     ...ApiKey
@@ -34,1076 +1385,63 @@ fragment ApiKeyConnection on ApiKeyConnection {
   }
 }
 
-# An API key. Grants access to the user's resources.
-fragment ApiKey on ApiKey {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The label of the API key.
-  label
+fragment ApiKeyPayload on ApiKeyPayload {
+  # The API key that was created.
+  apiKey {
+    ...ApiKey
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
-fragment PageInfo on PageInfo {
-  # Indicates if there are more results when paginating backward.
-  hasPreviousPage
-  # Indicates if there are more results when paginating forward.
-  hasNextPage
-  # Cursor representing the first result in the paginated results.
-  startCursor
-  # Cursor representing the last result in the paginated results.
-  endCursor
-}
-
-# Public information of the OAuth application, plus whether the application has been authorized for
-# the given scopes.
-fragment UserAuthorizedApplication on UserAuthorizedApplication {
-  # OAuth application's client ID.
-  clientId
-  # Application name.
-  name
-  # Information about the application.
-  description
-  # Name of the developer.
-  developer
-  # Url of the developer (homepage or docs).
-  developerUrl
-  # Image of the application.
-  imageUrl
-  # Whether the user has authorized the application for the given scopes.
-  isAuthorized
-}
-
-# Public information of the OAuth application, plus the authorized scopes for a given user.
-fragment AuthorizedApplication on AuthorizedApplication {
-  # OAuth application's client ID.
-  clientId
-  # Application name.
-  name
-  # Information about the application.
-  description
-  # Name of the developer.
-  developer
-  # Url of the developer (homepage or docs).
-  developerUrl
-  # Image of the application.
-  imageUrl
-  # Scopes that are authorized for this application for a given user.
-  scope
-  # OAuth application's ID.
-  appId
+fragment ArchivePayload on ArchivePayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
 fragment AuthResolverResponse on AuthResolverResponse {
-  # User account ID.
-  id
-  # JWT token for authentication of the account.
-  token
   # Email for the authenticated account.
   email
-  # Should the signup flow allow access for the domain.
-  allowDomainAccess
-  # Users belonging to this account.
-  users {
-    ...User
-  }
+  # JWT token for authentication of the account.
+  token
   # Organizations this account has access to, but is not yet a member.
   availableOrganizations {
     ...Organization
   }
-}
-
-# A user that has access to the the resources of an organization.
-fragment User on User {
-  # The unique identifier of the entity.
+  # Should the signup flow allow access for the domain.
+  allowDomainAccess
+  # User account ID.
   id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The user's full name.
-  name
-  # The user's display (nick) name. Unique within each organization.
-  displayName
-  # The user's email address.
-  email
-  # An URL to the user's avatar image.
-  avatarUrl
-  # Unique hash for the user to be used in invite URLs.
-  inviteHash
-  # The last time the user was seen online. If null, the user is currently online.
-  lastSeen
-  # Whether the user is an organization administrator.
-  admin
-  # Whether the user account is active or disabled.
-  active
-  # Number of issues created.
-  createdIssueCount
-}
-
-fragment IssueConnection on IssueConnection {
-  nodes {
-    ...Issue
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# An issue.
-fragment Issue on Issue {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The issue's unique number.
-  number
-  # The issue's title.
-  title
-  # The issue's description in markdown format.
-  description
-  # The priority of the issue.
-  priority
-  # The estimate of the complexity of the issue..
-  estimate
-  # The order of the item in its column on the board.
-  boardOrder
-  # The time at which the issue was moved into started state.
-  startedAt
-  # The time at which the issue was moved into completed state.
-  completedAt
-  # The time at which the issue was moved into canceled state.
-  canceledAt
-  # The time at which the issue was automatically closed by the auto pruning process.
-  autoClosedAt
-  # The time at which the issue was automatically archived by the auto pruning process.
-  autoArchivedAt
-  # The date at which the issue is due.
-  dueDate
-  # Previous identifiers of the issue if it has been moved between teams.
-  previousIdentifiers
-  # The order of the item in the sub-issue list. Only set if the issue has a parent.
-  subIssueSortOrder
-  # Issue's human readable identifier (e.g. ENG-123).
-  identifier
-  # Label for the priority.
-  priorityLabel
-  # Issue URL.
-  url
-  # The team that the issue is associated with.
-  team {
-    id
-  }
-  # The cycle that the issue is associated with.
-  cycle {
-    id
-  }
-  # The workflow state that the issue is associated with.
-  state {
-    id
-  }
-  # The user to whom the issue is assigned to.
-  assignee {
-    id
-  }
-  # The parent of the issue.
-  parent {
-    id
-  }
-  # The project that the issue is associated with.
-  project {
-    id
-  }
-  # Suggested branch name for the issue.
-  branchName
-  # The user who created the issue.
-  creator {
-    id
-  }
-}
-
-# An organizational unit that contains issues.
-fragment Team on Team {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The team's name.
-  name
-  # The team's unique key. The key is used in URLs.
-  key
-  # The team's description.
-  description
-  # Whether the team uses cycles.
-  cyclesEnabled
-  # The day of the week that a new cycle starts.
-  cycleStartDay
-  # The duration of a cycle in weeks.
-  cycleDuration
-  # The cooldown time after each cycle in weeks.
-  cycleCooldownTime
-  # Auto assign started issues to current cycle.
-  cycleIssueAutoAssignStarted
-  # Auto assign completed issues to current cycle.
-  cycleIssueAutoAssignCompleted
-  # Only allow issues issues with cycles in Active Issues.
-  cycleLockToActive
-  # How many upcoming cycles to create.
-  upcomingCycleCount
-  # The timezone of the team. Defaults to "America/Los_Angeles"
-  timezone
-  # Unique hash for the team to be used in invite URLs.
-  inviteHash
-  # The issue estimation type to use.
-  issueEstimationType
-  # Whether to allow zeros in issues estimates.
-  issueEstimationAllowZero
-  # Whether to add additional points to the estimate scale.
-  issueEstimationExtended
-  # What to use as an default estimate for unestimated issues.
-  defaultIssueEstimate
-  # The workflow state into which issues are moved when a PR has been opened as draft.
-  draftWorkflowState {
-    id
-  }
-  # The workflow state into which issues are moved when a PR has been opened.
-  startWorkflowState {
-    id
-  }
-  # The workflow state into which issues are moved when a review has been requested for the PR.
-  reviewWorkflowState {
-    id
-  }
-  # The workflow state into which issues are moved when a PR has been merged.
-  mergeWorkflowState {
-    id
-  }
-  # Whether to group recent issue history entries.
-  groupIssueHistory
-  # Whether to send new issue notifications to Slack.
-  slackNewIssue
-  # Whether to send new issue comment notifications to Slack.
-  slackIssueComments
-  # Whether to send new issue status updates to Slack.
-  slackIssueStatuses
-  # Period after which issues are automatically closed in months. Null/undefined means disabled.
-  autoClosePeriod
-  # The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state.
-  autoCloseStateId
-  # Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.
-  autoArchivePeriod
-  # The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state.
-  markedAsDuplicateWorkflowState {
-    id
-  }
-  # Team's currently active cycle.
-  activeCycle {
-    id
-  }
-  # Calender feed (iCal) for cycles.
-  cycleCalenderUrl
-}
-
-# A state in a team workflow.
-fragment WorkflowState on WorkflowState {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The state's name.
-  name
-  # The state's UI color as a HEX string.
-  color
-  # Description of the state.
-  description
-  # The position of the state in the team flow.
-  position
-  # The type of the state.
-  type
-  # The team to which this state belongs to.
-  team {
-    id
-  }
-}
-
-fragment CycleConnection on CycleConnection {
-  nodes {
-    ...Cycle
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A set of issues to be resolved in a specified amount of time.
-fragment Cycle on Cycle {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The number of the cycle.
-  number
-  # The custom name of the cycle.
-  name
-  # The start time of the cycle.
-  startsAt
-  # The end time of the cycle.
-  endsAt
-  # The completion time of the cycle. If null, the cycle hasn't been completed.
-  completedAt
-  # The total number of issues in the cycle after each day.
-  issueCountHistory
-  # The number of completed issues in the cycle after each day.
-  completedIssueCountHistory
-  # The total number of estimation points after each day.
-  scopeHistory
-  # The number of completed estimation points after each day.
-  completedScopeHistory
-  # The team that the cycle is associated with.
-  team {
-    id
-  }
-}
-
-fragment TeamMembershipConnection on TeamMembershipConnection {
-  nodes {
-    ...TeamMembership
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# Defines the membership of a user to a team.
-fragment TeamMembership on TeamMembership {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The user that the membership is associated with.
-  user {
-    id
-  }
-  # The team that the membership is associated with.
-  team {
-    id
-  }
-}
-
-fragment ProjectConnection on ProjectConnection {
-  nodes {
-    ...Project
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A project.
-fragment Project on Project {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The project's name.
-  name
-  # The project's description.
-  description
-  # The project's unique URL slug.
-  slugId
-  # The icon of the project.
-  icon
-  # The project's color.
-  color
-  # The type of the state.
-  state
-  # The user who created the project.
-  creator {
-    id
-  }
-  # The project lead.
-  lead {
-    id
-  }
-  # The milestone that this project is associated with.
-  milestone {
-    id
-  }
-  # The estimated completion date of the project.
-  targetDate
-  # The time at which the project was moved into started state.
-  startedAt
-  # The time at which the project was moved into completed state.
-  completedAt
-  # The time at which the project was moved into canceled state.
-  canceledAt
-  # The sort order for the project within its milestone.
-  sortOrder
-  # The total number of issues in the project after each week.
-  issueCountHistory
-  # The number of completed issues in the project after each week.
-  completedIssueCountHistory
-  # The total number of estimation points after each week.
-  scopeHistory
-  # The number of completed estimation points after each week.
-  completedScopeHistory
-  # Whether to send new issue notifications to Slack.
-  slackNewIssue
-  # Whether to send new issue comment notifications to Slack.
-  slackIssueComments
-  # Whether to send new issue status updates to Slack.
-  slackIssueStatuses
-}
-
-# A milestone that contains projects.
-fragment Milestone on Milestone {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The name of the milestone.
-  name
-  # The sort order for the milestone.
-  sortOrder
-}
-
-# An organization. Organizations are root-level objects that contain user accounts and teams.
-fragment Organization on Organization {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The organization's name.
-  name
-  # The organization's unique URL key.
-  urlKey
-  # The organization's logo URL.
-  logoUrl
-  # Rolling 30-day total upload volume for the organization, in megabytes.
-  periodUploadVolume
-  # Whether the Git integration linkback messages should be sent to private repositories.
-  gitLinkbackMessagesEnabled
-  # Whether the Git integration linkback messages should be sent to public repositories.
-  gitPublicLinkbackMessagesEnabled
-  # Whether the organization is using a roadmap.
-  roadmapEnabled
-  # Whether SAML authentication is enabled for organization.
-  samlEnabled
-  # Allowed authentication providers, empty array means all are allowed
-  allowedAuthServices
-  # Number of active users in the organization.
-  userCount
-  # Number of issues in the organization.
-  createdIssueCount
-}
-
-fragment UserConnection on UserConnection {
-  nodes {
+  # Users belonging to this account.
+  users {
     ...User
   }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment TeamConnection on TeamConnection {
-  nodes {
-    ...Team
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment MilestoneConnection on MilestoneConnection {
-  nodes {
-    ...Milestone
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment IntegrationConnection on IntegrationConnection {
-  nodes {
-    ...Integration
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# An integration with an external service.
-fragment Integration on Integration {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The integration's type.
-  service
-  # The team that the integration is associated with.
-  team {
-    id
-  }
-  # The user that added the integration.
-  creator {
-    id
-  }
-}
-
-# The subscription of an organization.
-fragment Subscription on Subscription {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The subscription type.
-  type
-  # The number of seats in the subscription.
-  seats
-  # The creator of the subscription.
-  creator {
-    id
-  }
-  # The date the subscription was canceled, if any.
-  canceledAt
-  # The subscription type of a pending change. Null if no change pending.
-  pendingChangeType
-}
-
-fragment ProjectLinkConnection on ProjectLinkConnection {
-  nodes {
-    ...ProjectLink
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# An external link for a project.
-fragment ProjectLink on ProjectLink {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The link's URL.
-  url
-  # The link's label.
-  label
-  # The user who created the link.
-  creator {
-    id
-  }
-  # The project that the link is associated with.
-  project {
-    id
-  }
-}
-
-fragment WorkflowStateConnection on WorkflowStateConnection {
-  nodes {
-    ...WorkflowState
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment TemplateConnection on TemplateConnection {
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A template object used for creating new issues faster.
-fragment Template on Template {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The entity type this template is for.
-  type
-  # The name of the template.
-  name
-  # Template description.
-  description
-  # Template data.
-  templateData
-  # The team that the template is associated with.
-  team {
-    id
-  }
-  # The user who created the template.
-  creator {
-    id
-  }
-}
-
-fragment IssueLabelConnection on IssueLabelConnection {
-  nodes {
-    ...IssueLabel
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# Labels that can be associated with issues.
-fragment IssueLabel on IssueLabel {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The label's name.
-  name
-  # The label's description.
-  description
-  # The label's color as a HEX string.
-  color
-  # The team to which the label belongs to.
-  team {
-    id
-  }
-  # The user who created the label.
-  creator {
-    id
-  }
-}
-
-fragment WebhookConnection on WebhookConnection {
-  nodes {
-    ...Webhook
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A webhook used to send HTTP notifications over data updates
-fragment Webhook on Webhook {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # Webhook URL
-  url
-  # Whether the Webhook is enabled.
-  enabled
-  # The team that the webhook is associated with.
-  team {
-    id
-  }
-  # The user who created the webhook.
-  creator {
-    id
-  }
-  # Secret token for verifying the origin on the recipient side.
-  secret
-}
-
-fragment CommentConnection on CommentConnection {
-  nodes {
-    ...Comment
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A comment associated with an issue.
-fragment Comment on Comment {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The comment content in markdown format.
-  body
-  # The time user edited the comment.
-  editedAt
-  # The user who wrote the comment.
-  user {
-    id
-  }
-  # The issue that the comment is associated with.
-  issue {
-    id
-  }
-}
-
-fragment IssueHistoryConnection on IssueHistoryConnection {
-  nodes {
-    ...IssueHistory
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A record of changes to an issue.
-fragment IssueHistory on IssueHistory {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The issue that was changed.
-  issue {
-    id
-  }
-  # The user who made these changes. If null, possibly means that the change made by an integration.
-  actor {
-    id
-  }
-  # Information about the integration or application which created this history entry.
-  source
-  # Whether the issue's description was updated.
-  updatedDescription
-  # What the title was changed from.
-  fromTitle
-  # What the title was changed to.
-  toTitle
-  # The user from whom the issue was re-assigned from.
-  fromAssignee {
-    id
-  }
-  # The user to whom the issue was assigned to.
-  toAssignee {
-    id
-  }
-  # What the priority was changed from.
-  fromPriority
-  # What the priority was changed to.
-  toPriority
-  # The team from which the issue was moved from.
-  fromTeam {
-    id
-  }
-  # The team to which the issue was moved to.
-  toTeam {
-    id
-  }
-  # The previous parent of the issue.
-  fromParent {
-    id
-  }
-  # The new parent of the issue.
-  toParent {
-    id
-  }
-  # The previous workflow state of the issue.
-  fromState {
-    id
-  }
-  # The new workflow state of the issue.
-  toState {
-    id
-  }
-  # The previous cycle of the issue.
-  fromCycle {
-    id
-  }
-  # The new cycle of the issue.
-  toCycle {
-    id
-  }
-  # The previous project of the issue.
-  fromProject {
-    id
-  }
-  # The new project of the issue.
-  toProject {
-    id
-  }
-  # What the estimate was changed from.
-  fromEstimate
-  # What the estimate was changed to.
-  toEstimate
-  # Whether the issue was archived or un-archived.
-  archived
-  # ID's of labels that were added.
-  addedLabelIds
-  # ID's of labels that were removed.
-  removedLabelIds
-  # Changed issue relationships.
-  relationChanges
-  autoClosed
-  autoArchived
-  # What the due date was changed from
-  fromDueDate
-  # What the due date was changed to
-  toDueDate
-}
-
-fragment IntegrationResourceConnection on IntegrationResourceConnection {
-  nodes {
-    ...IntegrationResource
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# An integration resource created by an external service.
-fragment IntegrationResource on IntegrationResource {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The integration's type.
-  resourceType
-  # The external service resource ID.
-  resourceId
-  # Detailed information about the external resource.
-  data {
-    ...IntegrationResourceData
-  }
-  # The integration that the resource is associated with.
-  integration {
-    id
-  }
-  # The issue that the resource is associated with.
-  issue {
-    id
-  }
-  # Pull request information for GitHub pull requests and GitLab merge requests.
-  pullRequest {
-    ...PullRequestPayload
-  }
-}
-
-# Integration resource's payload
-fragment IntegrationResourceData on IntegrationResourceData {
-  # The payload for an IntegrationResource of type 'githubPullRequest'
-  githubPullRequest {
-    ...PullRequestPayload
-  }
-  # The payload for an IntegrationResource of type 'gitlabMergeRequest'
-  gitlabMergeRequest {
-    ...PullRequestPayload
-  }
-  # The payload for an IntegrationResource of type 'githubCommit'
-  githubCommit {
-    ...CommitPayload
-  }
-  # The payload for an IntegrationResource of type 'sentryIssue'
-  sentryIssue {
-    ...SentryIssuePayload
-  }
-}
-
-# Pull request data
-fragment PullRequestPayload on PullRequestPayload {
-  status
-  number
-  url
-  draft
-  id
-  title
-  branch
-  userId
-  userLogin
-  repoLogin
-  repoName
-  createdAt
-  updatedAt
-  closedAt
-  mergedAt
-}
-
-# GitHub's commit data
-fragment CommitPayload on CommitPayload {
-  id
-  message
-  timestamp
-  url
-  added
-  removed
-  modified
-}
-
-# Sentry issue data
-fragment SentryIssuePayload on SentryIssuePayload {
-  # The Sentry identifier for the issue.
-  issueId
-  # The description of the issue.
-  webUrl
-  # The type of the actor who created the issue.
-  actorType
-  # The Sentry identifier of the actor who created the issue.
-  actorId
-  # The name of the Sentry actor who created this issue.
-  actorName
-  # The Sentry identifier of the project this issue belongs to.
-  projectId
-  # The slug of the project this issue belongs to.
-  projectSlug
-  # The title of the issue.
-  issueTitle
-  # The shortId of the issue.
-  shortId
-  # The date this issue was first seen.
-  firstSeen
-  # The name of the first release version this issue appeared on, if available.
-  firstVersion
-}
-
-fragment IssueRelationConnection on IssueRelationConnection {
-  nodes {
-    ...IssueRelation
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A relation between two issues.
-fragment IssueRelation on IssueRelation {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The relationship of the issue with the related issue.
-  type
-  # The issue whose relationship is being described.
-  issue {
-    id
-  }
-  # The related issue.
-  relatedIssue {
-    id
-  }
-}
-
-fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
-  # Whether the operation was successful.
-  success
-  # SAML SSO sign-in URL.
-  samlSsoUrl
 }
 
 fragment BillingDetailsPayload on BillingDetailsPayload {
-  # Whether the operation was successful.
-  success
-  # The customer's email address the invoices are sent to.
-  email
   # List of invoices, if any.
   invoices {
     ...Invoice
   }
+  # The customer's email address the invoices are sent to.
+  email
   # The payment method.
   paymentMethod {
     ...Card
   }
+  # Whether the operation was successful.
+  success
 }
 
-fragment Invoice on Invoice {
-  # The URL at which the invoice can be viewed or paid.
-  url
-  # The creation date of the invoice.
-  created
-  # The due date of the invoice.
-  dueDate
-  # The status of the invoice.
-  status
-  # The invoice total, in cents.
-  total
+fragment BillingEmailPayload on BillingEmailPayload {
+  # The customer's email address the invoices are sent to.
+  email
+  # Whether the operation was successful.
+  success
 }
 
 fragment Card on Card {
@@ -1122,13 +1460,40 @@ fragment CollaborationDocumentUpdatePayload on CollaborationDocumentUpdatePayloa
   success
 }
 
-fragment StepsResponse on StepsResponse {
-  # Client's document version.
-  version
-  # New document steps from the client.
-  steps
-  # List of client IDs for the document steps.
-  clientIds
+fragment CommentConnection on CommentConnection {
+  nodes {
+    ...Comment
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment CommentPayload on CommentPayload {
+  # The comment that was created or updated.
+  comment {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment ContactPayload on ContactPayload {
+  # Whether the operation was successful.
+  success
+}
+
+fragment CreateCsvExportReportPayload on CreateCsvExportReportPayload {
+  # Whether the operation was successful.
+  success
+}
+
+fragment CreateOrJoinOrganizationResponse on CreateOrJoinOrganizationResponse {
+  user {
+    id
+  }
 }
 
 fragment CustomViewConnection on CustomViewConnection {
@@ -1140,437 +1505,33 @@ fragment CustomViewConnection on CustomViewConnection {
   }
 }
 
-# A custom view that has been saved by a user.
-fragment CustomView on CustomView {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The name of the custom view.
-  name
-  # The description of the custom view.
-  description
-  # The icon of the custom view.
-  icon
-  # The color of the icon of the custom view.
-  color
-  # The team associated with the custom view.
-  team {
-    id
-  }
-  # The user who created the custom view.
-  creator {
-    id
-  }
-  # The filters applied to issues in the custom view.
-  filters
-  # Whether the custom view is shared with everyone in the organization.
-  shared
-}
-
-fragment EmojiConnection on EmojiConnection {
-  nodes {
-    ...Emoji
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A custom emoji.
-fragment Emoji on Emoji {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The emoji's name.
-  name
-  # The emoji image URL.
-  url
-  # The source of the emoji.
-  source
-  # The user who created the emoji.
-  creator {
-    id
-  }
-}
-
-fragment FavoriteConnection on FavoriteConnection {
-  nodes {
-    ...Favorite
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# User favorites presented in the sidebar.
-fragment Favorite on Favorite {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The type of the favorite.
-  type
-  # The order of the item in the favorites list.
-  sortOrder
-  # The owner of the favorite.
-  user {
-    id
-  }
-  # Favorited issue.
-  issue {
-    id
-  }
-  # Favorited project.
-  project {
-    id
-  }
-  # Favorited project team.
-  projectTeam {
-    id
-  }
-  # Favorited cycle.
-  cycle {
-    id
-  }
-  # Favorited issue label.
-  label {
-    id
-  }
-}
-
-fragment FigmaEmbedPayload on FigmaEmbedPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Figma embed information.
-  figmaEmbed {
-    ...FigmaEmbed
-  }
-  # Whether the operation was successful.
-  success
-}
-
-# Object representing Figma preview information.
-fragment FigmaEmbed on FigmaEmbed {
-  # Figma file name.
-  name
-  # Date when the file was updated at the time of embedding.
-  lastModified
-  # Node name.
-  nodeName
-  # Figma screenshot URL.
-  url
-}
-
-fragment InvitePagePayload on InvitePagePayload {
-  # Invite data.
-  inviteData {
-    ...InviteData
-  }
-  # Whether the operation was successful.
-  success
-}
-
-fragment InviteData on InviteData {
-  # The name of the inviter.
-  inviterName
-  # Avatar URLs for the invitees.
-  avatarURLs
-  # Team names for the invitees.
-  teamNames
-  # Team identifiers for the invitees.
-  teamIds
-  # The name of the organization the users were invited to.
-  organizationName
-  # The domain of the organization the users were invited to.
-  organizationDomain
-  # The logo of the organization the users were invited to.
-  organizationLogoUrl
-  # The user count of the organization.
-  userCount
-}
-
-fragment NotificationConnection on NotificationConnection {
-  nodes {
-    ...Notification
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A notification sent to a user.
-fragment Notification on Notification {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # Notification type
-  type
-  # Name of the reaction emoji associated with the notification.
-  reactionEmoji
-  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
-  readAt
-  # The time at when an email reminder for this notification was sent to the user. Null, if no email
-  #     reminder has been sent.
-  emailedAt
-  # The recipient of the notification.
-  user {
-    id
-  }
-  # The issue that the notification is associated with.
-  issue {
-    id
-  }
-  # The team which the notification is associated with.
-  team {
-    id
-  }
-  # The comment which the notification is associated with.
-  comment {
-    id
-  }
-}
-
-fragment NotificationSubscriptionConnection on NotificationSubscriptionConnection {
-  nodes {
-    ...NotificationSubscription
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# Notification subscriptions for models.
-fragment NotificationSubscription on NotificationSubscription {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The type of the subscription.
-  type
-  # The user associated with notification subscriptions.
-  user {
-    id
-  }
-  # Subscribed team.
-  team {
-    id
-  }
-  # Subscribed project.
-  project {
-    id
-  }
-}
-
-fragment OrganizationInviteConnection on OrganizationInviteConnection {
-  nodes {
-    ...OrganizationInvite
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# An invitation to the organization that has been sent via email.
-fragment OrganizationInvite on OrganizationInvite {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The invitees email address.
-  email
-  # The invite was sent to external address.
-  external
-  # The time at which the invite was accepted. Null, if the invite hasn't been accepted
-  acceptedAt
-  # The time at which the invite will be expiring. Null, if the invite shouldn't expire
-  expiresAt
-  # The user who created the invitation.
-  inviter {
-    id
-  }
-  # The user who has accepted the invite. Null, if the invite hasn't been accepted.
-  invitee {
-    id
-  }
-}
-
-fragment OrganizationExistsPayload on OrganizationExistsPayload {
-  # Whether the operation was successful.
-  success
-  # Whether the organization exists.
-  exists
-}
-
-fragment PushSubscriptionPayload on PushSubscriptionPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment ReactionConnection on ReactionConnection {
-  nodes {
-    ...Reaction
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A reaction associated with a comment.
-fragment Reaction on Reaction {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # Name of the reaction's emoji.
-  emoji
-  # The user who reacted.
-  user {
-    id
-  }
-  # The comment that the reaction is associated with.
-  comment {
-    id
-  }
-}
-
-# The settings of a user as a JSON object.
-fragment UserSettings on UserSettings {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The notification channel settings the user has selected.
-  notificationPreferences
-  # The email types the user has unsubscribed from.
-  unsubscribedFrom
-  # The user to whom this notification was targeted for.
-  user {
-    id
-  }
-}
-
-fragment EventPayload on EventPayload {
-  # Whether the operation was successful.
-  success
-}
-
-fragment ApiKeyPayload on ApiKeyPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # The API key that was created.
-  apiKey {
-    ...ApiKey
-  }
-  # Whether the operation was successful.
-  success
-}
-
-fragment ArchivePayload on ArchivePayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeResponse {
-  # Whether the operation was successful.
-  success
-  # Supported challenge for this user account. Can be either verificationCode or password.
-  authType
-}
-
-fragment CreateOrJoinOrganizationResponse on CreateOrJoinOrganizationResponse {
-  user {
-    id
-  }
-}
-
-fragment BillingEmailPayload on BillingEmailPayload {
-  # Whether the operation was successful.
-  success
-  # The customer's email address the invoices are sent to.
-  email
-}
-
-fragment CommentPayload on CommentPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # The comment that was created or updated.
-  comment {
-    id
-  }
-  # Whether the operation was successful.
-  success
-}
-
-fragment ContactPayload on ContactPayload {
-  # Whether the operation was successful.
-  success
-}
-
 fragment CustomViewPayload on CustomViewPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
   # The custom view that was created or updated.
   customView {
     id
   }
+  # The identifier of the last sync operation.
+  lastSyncId
   # Whether the operation was successful.
   success
 }
 
+fragment CycleConnection on CycleConnection {
+  nodes {
+    ...Cycle
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment CyclePayload on CyclePayload {
-  # The identifier of the last sync operation.
-  lastSyncId
   # The Cycle that was created or updated.
   cycle {
     id
   }
+  # The identifier of the last sync operation.
+  lastSyncId
   # Whether the operation was successful.
   success
 }
@@ -1585,15 +1546,45 @@ fragment EmailUnsubscribePayload on EmailUnsubscribePayload {
   success
 }
 
+fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeResponse {
+  # Supported challenge for this user account. Can be either verificationCode or password.
+  authType
+  # Whether the operation was successful.
+  success
+}
+
+fragment EmojiConnection on EmojiConnection {
+  nodes {
+    ...Emoji
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment EmojiPayload on EmojiPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
   # The emoji that was created.
   emoji {
     id
   }
+  # The identifier of the last sync operation.
+  lastSyncId
   # Whether the operation was successful.
   success
+}
+
+fragment EventPayload on EventPayload {
+  # Whether the operation was successful.
+  success
+}
+
+fragment FavoriteConnection on FavoriteConnection {
+  nodes {
+    ...Favorite
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment FavoritePayload on FavoritePayload {
@@ -1612,49 +1603,33 @@ fragment FeedbackPayload on FeedbackPayload {
   success
 }
 
-fragment UploadPayload on UploadPayload {
+fragment FigmaEmbedPayload on FigmaEmbedPayload {
+  # Figma embed information.
+  figmaEmbed {
+    ...FigmaEmbed
+  }
   # The identifier of the last sync operation.
   lastSyncId
-  # Object describing the file to be uploaded.
-  uploadFile {
-    ...UploadFile
-  }
   # Whether the operation was successful.
   success
-}
-
-# Object representing Google Cloud upload policy, plus additional data.
-fragment UploadFile on UploadFile {
-  # The filename.
-  filename
-  # The content type.
-  contentType
-  # The size of the uploaded file.
-  size
-  # The signed URL the for the uploaded file. (assigned automatically)
-  uploadUrl
-  # The asset URL for the uploaded file. (assigned automatically)
-  assetUrl
-  metaData
-  headers {
-    ...UploadFileHeader
-  }
-}
-
-fragment UploadFileHeader on UploadFileHeader {
-  # Upload file header key.
-  key
-  # Upload file header value.
-  value
 }
 
 fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
   # The URL containing the image.
   url
+  # The identifier of the last sync operation.
+  lastSyncId
   # Whether the operation was successful.
   success
+}
+
+fragment IntegrationConnection on IntegrationConnection {
+  nodes {
+    ...Integration
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment IntegrationPayload on IntegrationPayload {
@@ -1668,6 +1643,74 @@ fragment IntegrationPayload on IntegrationPayload {
   success
 }
 
+fragment IntegrationResourceConnection on IntegrationResourceConnection {
+  nodes {
+    ...IntegrationResource
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment InviteData on InviteData {
+  # Avatar URLs for the invitees.
+  avatarURLs
+  # Team identifiers for the invitees.
+  teamIds
+  # Team names for the invitees.
+  teamNames
+  # The domain of the organization the users were invited to.
+  organizationDomain
+  # The logo of the organization the users were invited to.
+  organizationLogoUrl
+  # The name of the inviter.
+  inviterName
+  # The name of the organization the users were invited to.
+  organizationName
+  # The user count of the organization.
+  userCount
+}
+
+fragment InvitePagePayload on InvitePagePayload {
+  # Invite data.
+  inviteData {
+    ...InviteData
+  }
+  # Whether the operation was successful.
+  success
+}
+
+fragment Invoice on Invoice {
+  # The URL at which the invoice can be viewed or paid.
+  url
+  # The creation date of the invoice.
+  created
+  # The due date of the invoice.
+  dueDate
+  # The invoice total, in cents.
+  total
+  # The status of the invoice.
+  status
+}
+
+fragment IssueConnection on IssueConnection {
+  nodes {
+    ...Issue
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment IssueHistoryConnection on IssueHistoryConnection {
+  nodes {
+    ...IssueHistory
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment IssueImportPayload on IssueImportPayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -1679,25 +1722,13 @@ fragment IssueImportPayload on IssueImportPayload {
   success
 }
 
-# An import job for data from an external service
-fragment IssueImport on IssueImport {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The id for the organization where data will be imported.
-  organizationId
-  # The id for the user that started the job.
-  creatorId
-  # The service from which data will be imported.
-  service
-  # The status for the import job.
-  status
+fragment IssueLabelConnection on IssueLabelConnection {
+  nodes {
+    ...IssueLabel
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment IssueLabelPayload on IssueLabelPayload {
@@ -1705,17 +1736,6 @@ fragment IssueLabelPayload on IssueLabelPayload {
   lastSyncId
   # The label that was created or updated.
   issueLabel {
-    id
-  }
-  # Whether the operation was successful.
-  success
-}
-
-fragment IssueRelationPayload on IssueRelationPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # The issue relation that was created or updated.
-  issueRelation {
     id
   }
   # Whether the operation was successful.
@@ -1733,6 +1753,35 @@ fragment IssuePayload on IssuePayload {
   success
 }
 
+fragment IssueRelationConnection on IssueRelationConnection {
+  nodes {
+    ...IssueRelation
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment IssueRelationPayload on IssueRelationPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The issue relation that was created or updated.
+  issueRelation {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
+fragment MilestoneConnection on MilestoneConnection {
+  nodes {
+    ...Milestone
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment MilestonePayload on MilestonePayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -1744,6 +1793,15 @@ fragment MilestonePayload on MilestonePayload {
   success
 }
 
+fragment NotificationConnection on NotificationConnection {
+  nodes {
+    ...Notification
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment NotificationPayload on NotificationPayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -1753,6 +1811,15 @@ fragment NotificationPayload on NotificationPayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment NotificationSubscriptionConnection on NotificationSubscriptionConnection {
+  nodes {
+    ...NotificationSubscription
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
@@ -1767,46 +1834,10 @@ fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
 }
 
 fragment OauthClientPayload on OauthClientPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
   # The OAuth client application that was created or updated.
   oauthClient {
     ...OauthClient
   }
-  # Whether the operation was successful.
-  success
-}
-
-# OAuth2 client application
-fragment OauthClient on OauthClient {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # OAuth application's client ID.
-  clientId
-  # OAuth application's client name.
-  name
-  # Information about the application.
-  description
-  # Name of the developer.
-  developer
-  # Url of the developer.
-  developerUrl
-  # Image of the application.
-  imageUrl
-  # OAuth application's client secret.
-  clientSecret
-  # List of allowed redirect URIs for the application.
-  redirectUris
-}
-
-fragment RotateSecretPayload on RotateSecretPayload {
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -1814,6 +1845,11 @@ fragment RotateSecretPayload on RotateSecretPayload {
 }
 
 fragment OauthTokenRevokePayload on OauthTokenRevokePayload {
+  # Whether the operation was successful.
+  success
+}
+
+fragment OrganizationDeletePayload on OrganizationDeletePayload {
   # Whether the operation was successful.
   success
 }
@@ -1829,27 +1865,25 @@ fragment OrganizationDomainPayload on OrganizationDomainPayload {
   success
 }
 
-# Defines the use of a domain by an organization.
-fragment OrganizationDomain on OrganizationDomain {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # Domain name
-  name
-  # Is this domain verified
-  verified
-  # The user who added the domain.
-  creator {
-    id
+fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
+  # Whether the operation was successful.
+  success
+}
+
+fragment OrganizationExistsPayload on OrganizationExistsPayload {
+  # Whether the operation was successful.
+  success
+  # Whether the organization exists.
+  exists
+}
+
+fragment OrganizationInviteConnection on OrganizationInviteConnection {
+  nodes {
+    ...OrganizationInvite
   }
-  # E-mail used to verify this domain
-  verificationEmail
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment OrganizationInvitePayload on OrganizationInvitePayload {
@@ -1870,9 +1904,33 @@ fragment OrganizationPayload on OrganizationPayload {
   success
 }
 
-fragment OrganizationDeletePayload on OrganizationDeletePayload {
-  # Whether the operation was successful.
-  success
+fragment PageInfo on PageInfo {
+  # Cursor representing the first result in the paginated results.
+  startCursor
+  # Cursor representing the last result in the paginated results.
+  endCursor
+  # Indicates if there are more results when paginating backward.
+  hasPreviousPage
+  # Indicates if there are more results when paginating forward.
+  hasNextPage
+}
+
+fragment ProjectConnection on ProjectConnection {
+  nodes {
+    ...Project
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectLinkConnection on ProjectLinkConnection {
+  nodes {
+    ...ProjectLink
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment ProjectLinkPayload on ProjectLinkPayload {
@@ -1897,6 +1955,31 @@ fragment ProjectPayload on ProjectPayload {
   success
 }
 
+fragment PushSubscriptionConnection on PushSubscriptionConnection {
+  nodes {
+    ...PushSubscription
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment PushSubscriptionPayload on PushSubscriptionPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment ReactionConnection on ReactionConnection {
+  nodes {
+    ...Reaction
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment ReactionPayload on ReactionPayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -1906,7 +1989,34 @@ fragment ReactionPayload on ReactionPayload {
   success
 }
 
-fragment CreateCsvExportReportPayload on CreateCsvExportReportPayload {
+fragment RotateSecretPayload on RotateSecretPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
+  # SAML SSO sign-in URL.
+  samlSsoUrl
+  # Whether the operation was successful.
+  success
+}
+
+fragment StepsResponse on StepsResponse {
+  # Client's document version.
+  version
+  # List of client IDs for the document steps.
+  clientIds
+  # New document steps from the client.
+  steps
+}
+
+fragment SubscriptionPayload on SubscriptionPayload {
+  # The date the subscription was set to cancel at the end of the billing period, if any.
+  canceledAt
+  # The identifier of the last sync operation.
+  lastSyncId
   # Whether the operation was successful.
   success
 }
@@ -1916,13 +2026,27 @@ fragment SubscriptionSessionPayload on SubscriptionSessionPayload {
   session
 }
 
-fragment SubscriptionPayload on SubscriptionPayload {
+fragment SynchronizedPayload on SynchronizedPayload {
   # The identifier of the last sync operation.
   lastSyncId
-  # The date the subscription was set to cancel at the end of the billing period, if any.
-  canceledAt
-  # Whether the operation was successful.
-  success
+}
+
+fragment TeamConnection on TeamConnection {
+  nodes {
+    ...Team
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment TeamMembershipConnection on TeamMembershipConnection {
+  nodes {
+    ...TeamMembership
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment TeamMembershipPayload on TeamMembershipPayload {
@@ -1947,6 +2071,12 @@ fragment TeamPayload on TeamPayload {
   success
 }
 
+fragment TemplateConnection on TemplateConnection {
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment TemplatePayload on TemplatePayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -1956,6 +2086,38 @@ fragment TemplatePayload on TemplatePayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment UploadFileHeader on UploadFileHeader {
+  # Upload file header key.
+  key
+  # Upload file header value.
+  value
+}
+
+fragment UploadPayload on UploadPayload {
+  # Object describing the file to be uploaded.
+  uploadFile {
+    ...UploadFile
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment UserAdminPayload on UserAdminPayload {
+  # Whether the operation was successful.
+  success
+}
+
+fragment UserConnection on UserConnection {
+  nodes {
+    ...User
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment UserPayload on UserPayload {
@@ -1969,30 +2131,25 @@ fragment UserPayload on UserPayload {
   success
 }
 
-fragment UserAdminPayload on UserAdminPayload {
-  # Whether the operation was successful.
-  success
-}
-
-fragment UserSettingsPayload on UserSettingsPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
 fragment UserSettingsFlagPayload on UserSettingsFlagPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
   # The flag key which was updated.
   flag
   # The flag value after update.
   value
+  # The identifier of the last sync operation.
+  lastSyncId
   # Whether the operation was successful.
   success
 }
 
 fragment UserSettingsFlagsResetPayload on UserSettingsFlagsResetPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment UserSettingsPayload on UserSettingsPayload {
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -2015,21 +2172,13 @@ fragment ViewPreferencesPayload on ViewPreferencesPayload {
   success
 }
 
-# View preferences.
-fragment ViewPreferences on ViewPreferences {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The view preference type.
-  type
-  # The view type.
-  viewType
+fragment WebhookConnection on WebhookConnection {
+  nodes {
+    ...Webhook
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment WebhookPayload on WebhookPayload {
@@ -2043,6 +2192,15 @@ fragment WebhookPayload on WebhookPayload {
   success
 }
 
+fragment WorkflowStateConnection on WorkflowStateConnection {
+  nodes {
+    ...WorkflowState
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment WorkflowStatePayload on WorkflowStatePayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -2050,166 +2208,6 @@ fragment WorkflowStatePayload on WorkflowStatePayload {
   workflowState {
     id
   }
-  # Whether the operation was successful.
-  success
-}
-
-fragment SynchronizedPayload on SynchronizedPayload {
-  # The identifier of the last sync operation.
-  lastSyncId
-}
-
-# Collaborative editing steps for documents.
-fragment DocumentStep on DocumentStep {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # Step data.
-  step
-  # Step version.
-  version
-  # Connected client ID.
-  clientId
-}
-
-# The integration resource's settings
-fragment SamlConfiguration on SamlConfiguration {
-  # X.509 Signing Certificate in string form.
-  ssoSigningCert
-  # Sign in endpoint URL for the identity provider.
-  ssoEndpoint
-  # Binding method for authentication call. Can be either `post` (default) or `redirect`.
-  ssoBinding
-  # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
-  ssoSignAlgo
-  # List of allowed email domains for SAML authentication.
-  allowedDomains
-}
-
-# A user account.
-fragment UserAccount on UserAccount {
-  # The models identifier.
-  id
-  # The time at which the model was created.
-  createdAt
-  # The time at which the model was updated.
-  updatedAt
-  # The time at which the model was archived.
-  archivedAt
-  # The user's name.
-  name
-  # The user's email address.
-  email
-  # The authentication service used to create the account.
-  service
-  # Users belonging to the account.
-  users {
-    ...User
-  }
-}
-
-# Slack notification specific settings.
-fragment SlackPostSettings on SlackPostSettings {
-  channel
-  channelId
-  configurationUrl
-}
-
-# Google Sheets specific settings.
-fragment GoogleSheetsSettings on GoogleSheetsSettings {
-  spreadsheetId
-  spreadsheetUrl
-  sheetId
-  updatedIssuesAt
-}
-
-# Sentry specific settings.
-fragment SentrySettings on SentrySettings {
-  # The slug of the Sentry organization being connected.
-  organizationSlug
-}
-
-# The integration resource's settings
-fragment IntegrationSettings on IntegrationSettings {
-  slackPost {
-    ...SlackPostSettings
-  }
-  slackProjectPost {
-    ...SlackPostSettings
-  }
-  googleSheets {
-    ...GoogleSheetsSettings
-  }
-  sentry {
-    ...SentrySettings
-  }
-}
-
-# A user's web browser push notification subscription.
-fragment PushSubscription on PushSubscription {
-  # The unique identifier of the entity.
-  id
-  # The time at which the entity was created.
-  createdAt
-  # The last time at which the entity was updated. This is the same as the creation time if the
-  #     entity hasn't been update after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-}
-
-fragment PushSubscriptionConnection on PushSubscriptionConnection {
-  nodes {
-    ...PushSubscription
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-# A recorded entry of a file uploaded by a user.
-fragment FileUpload on FileUpload {
-  # The unique identifier of the entity.
-  id
-  # The user who uploaded the file.
-  creator {
-    id
-  }
-  # The asset URL this file is available at.
-  assetUrl
-  # The MIME type of the uploaded file.
-  contentType
-  # The name of the uploaded file.
-  filename
-  # Additional metadata of the file.
-  metaData
-  # Size of the uploaded file in bytes.
-  size
-}
-
-# Public information of the OAuth application.
-fragment Application on Application {
-  # OAuth application's client ID.
-  clientId
-  # Application name.
-  name
-  # Information about the application.
-  description
-  # Name of the developer.
-  developer
-  # Url of the developer (homepage or docs).
-  developerUrl
-  # Image of the application.
-  imageUrl
-}
-
-fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
   # Whether the operation was successful.
   success
 }
@@ -4780,13 +4778,20 @@ mutation integrationResourceArchive(
 # Kicks off a GitHub import job.
 mutation issueImportCreateGithub(
   # Github owner (user or org) for the repository from which we will import data.
-  $repoOwner: String!
+  $githubRepoOwner: String!
   # Github repository name from which we will import data.
-  $repoName: String!
+  $githubRepoName: String!
   # Github token to fetch information from the Github API.
-  $token: String!
+  $githubToken: String!
+  # ID of the team into which to import data.
+  $teamId: String!
 ) {
-  issueImportCreateGithub(repoOwner: $repoOwner, repoName: $repoName, token: $token) {
+  issueImportCreateGithub(
+    githubRepoOwner: $githubRepoOwner
+    githubRepoName: $githubRepoName
+    githubToken: $githubToken
+    teamId: $teamId
+  ) {
     ...IssueImportPayload
   }
 }

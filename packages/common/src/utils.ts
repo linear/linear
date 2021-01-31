@@ -87,3 +87,13 @@ export function validateExtension(packageName: string, ext: string, outputFile: 
     );
   }
 }
+
+/**
+ * Sort an object array by the value of a property
+ *
+ * @param arr the array of objects to sort
+ * @param key the key to sort by
+ */
+export function sortBy<T>(key: string, arr?: T[]): T[] {
+  return arr?.sort((a, b) => (a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0)) ?? [];
+}
