@@ -20,11 +20,7 @@
     "build:clean": "npx rimraf dist"
   },
   "dependencies": {
-    "pascal-case": "^3.1.2",
     "tracer": "^1.1.4"
-  },
-  "peerDependencies": {
-    "graphql": "^15.4.0"
   },
   "devDependencies": {
     "typescript": "^4.0.5"

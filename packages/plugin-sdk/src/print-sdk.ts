@@ -1,5 +1,5 @@
-import { getArgList, printComment, printDebug, printLines } from "@linear/common";
-import c from "./constants";
+import { getArgList, printComment, printDebug, printLines } from "@linear/plugin-doc";
+import { Sdk } from "./constants";
 import { getRequestArg } from "./print-request";
 import { SdkOperation, SdkPluginContext } from "./types";
 
@@ -15,9 +15,9 @@ export function printSdk(context: SdkPluginContext): string {
 
   return printLines([
     printComment(["The SDK class containing all root operations", ...args.jsdoc]),
-    `export class ${c.SDK_CLASS} extends ${c.REQUEST_CLASS} {
+    `export class ${Sdk.SDK_CLASS} extends ${Sdk.REQUEST_CLASS} {
         public constructor(${args.printInput}) {
-          super(${c.REQUEST_NAME})
+          super(${Sdk.REQUEST_NAME})
         }
 
         ${operations}
@@ -40,7 +40,7 @@ export function printSdkOperation(operation: SdkOperation): string {
     `public ${operation.args.args.length ? "" : "get"} ${operation.print.field}(${operation.args.printInput}): ${
       operation.print.promise
     } {
-        return new ${operation.print.response}(this._${c.REQUEST_NAME}).fetch(${operation.args.printOutput})
+        return new ${operation.print.response}(this._${Sdk.REQUEST_NAME}).fetch(${operation.args.printOutput})
       }`,
   ]);
 }

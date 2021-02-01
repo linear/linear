@@ -7,8 +7,8 @@ import {
   printList,
   printSet,
   printTernary,
-} from "@linear/common";
-import c from "./constants";
+} from "@linear/plugin-doc";
+import { Sdk } from "./constants";
 import { getRequestArg } from "./print-request";
 import { SdkModel, SdkPluginContext } from "./types";
 
@@ -20,8 +20,8 @@ export function isConnectionModel(model?: SdkModel): boolean {
   return model
     ? Boolean(
         isConnection(model.name) &&
-          model.fields.list.find(field => field.name === c.NODE_NAME) &&
-          model.fields.object.find(field => field.name === c.PAGEINFO_NAME)
+          model.fields.list.find(field => field.name === Sdk.NODE_NAME) &&
+          model.fields.object.find(field => field.name === Sdk.PAGEINFO_NAME)
       )
     : false;
 }
@@ -35,9 +35,9 @@ function printAbstractConnection(): string {
       "Abstract class for connection models containing a list of nodes and pagination information",
       "Follows the Relay spec",
     ]),
-    `export abstract class ${c.CONNECTION_TYPE}<${c.NODE_TYPE}> extends ${c.REQUEST_CLASS} {
-      public ${c.PAGEINFO_NAME}?: ${c.PAGEINFO_TYPE}
-      public ${c.NODE_NAME}?: ${c.NODE_TYPE}[]
+    `export abstract class ${Sdk.CONNECTION_TYPE}<${Sdk.NODE_TYPE}> extends ${Sdk.REQUEST_CLASS} {
+      public ${Sdk.PAGEINFO_NAME}?: ${Sdk.PAGEINFO_TYPE}
+      public ${Sdk.NODE_NAME}?: ${Sdk.NODE_TYPE}[]
     }`,
   ]);
 }
@@ -48,7 +48,7 @@ function printAbstractConnection(): string {
 function printConnectionVariables(): string {
   return printLines([
     printComment(["Variables required for pagination", "Follows the Relay spec"]),
-    `export type ${c.CONNECTION_TYPE}${c.VARIABLE_TYPE} = { after?: string; before?: string }`,
+    `export type ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE} = { after?: string; before?: string }`,
   ]);
 }
 
@@ -58,7 +58,7 @@ function printConnectionVariables(): string {
 function printFetchType(): string {
   return printLines([
     printComment(["Fetch return type wrapped in a promise"]),
-    `export type ${c.FETCH_TYPE}<Response> = Promise<Response | undefined>`,
+    `export type ${Sdk.FETCH_TYPE}<Response> = Promise<Response | undefined>`,
   ]);
 }
 
@@ -66,25 +66,25 @@ function printFetchType(): string {
  * Print the connection base class to provide fetch helper functions
  */
 export function printConnection(): string {
-  const fetchType = `(${c.VARIABLE_NAME}?: ${c.CONNECTION_TYPE}${c.VARIABLE_TYPE}) => ${c.FETCH_TYPE}<${c.CONNECTION_TYPE}<${c.NODE_TYPE}>>`;
+  const fetchType = `(${Sdk.VARIABLE_NAME}?: ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE}) => ${Sdk.FETCH_TYPE}<${Sdk.CONNECTION_TYPE}<${Sdk.NODE_TYPE}>>`;
 
   const args = getArgList([
     getRequestArg(),
     {
-      name: c.FETCH_NAME,
+      name: Sdk.FETCH_NAME,
       type: fetchType,
       optional: false,
       description: `Function to refetch the connection given different pagination variables`,
     },
     {
-      name: c.NODE_NAME,
-      type: `${c.NODE_TYPE}[]`,
+      name: Sdk.NODE_NAME,
+      type: `${Sdk.NODE_TYPE}[]`,
       optional: true,
       description: "The list of models to initialize the connection",
     },
     {
-      name: c.PAGEINFO_NAME,
-      type: c.PAGEINFO_TYPE,
+      name: Sdk.PAGEINFO_NAME,
+      type: Sdk.PAGEINFO_TYPE,
       optional: true,
       description: "The pagination information to initialize the connection",
     },
@@ -98,67 +98,75 @@ export function printConnection(): string {
     printAbstractConnection(),
     "\n",
     printComment([`The base connection class to provide pagination`, "Follows the Relay spec", ...args.jsdoc]),
-    `export class ${c.CONNECTION_CLASS}<${c.NODE_TYPE}> extends ${c.CONNECTION_TYPE}<${c.NODE_TYPE}> {
-      private _${c.FETCH_NAME}: ${fetchType}
+    `export class ${Sdk.CONNECTION_CLASS}<${Sdk.NODE_TYPE}> extends ${Sdk.CONNECTION_TYPE}<${Sdk.NODE_TYPE}> {
+      private _${Sdk.FETCH_NAME}: ${fetchType}
     
       public constructor(${args.printInput}) {
-        super(${c.REQUEST_NAME})
-        ${printSet(`this._${c.FETCH_NAME}`, c.FETCH_NAME)}
-        ${printSet(`this.${c.NODE_NAME}`, c.NODE_NAME)}
-        ${printSet(`this.${c.PAGEINFO_NAME}`, c.PAGEINFO_NAME)}
+        super(${Sdk.REQUEST_NAME})
+        ${printSet(`this._${Sdk.FETCH_NAME}`, Sdk.FETCH_NAME)}
+        ${printSet(`this.${Sdk.NODE_NAME}`, Sdk.NODE_NAME)}
+        ${printSet(`this.${Sdk.PAGEINFO_NAME}`, Sdk.PAGEINFO_NAME)}
       }
       
       ${printComment(["Add nodes to the end of the existing nodes"])}
-      private _appendNodes(${c.NODE_NAME}?: ${c.NODE_TYPE}[]) {
+      private _appendNodes(${Sdk.NODE_NAME}?: ${Sdk.NODE_TYPE}[]) {
         ${printSet(
-          `this.${c.NODE_NAME}`,
-          printTernary(c.NODE_NAME, `[...(this.${c.NODE_NAME} ?? []), ...${c.NODE_NAME}]`, `this.${c.NODE_NAME}`)
+          `this.${Sdk.NODE_NAME}`,
+          printTernary(
+            Sdk.NODE_NAME,
+            `[...(this.${Sdk.NODE_NAME} ?? []), ...${Sdk.NODE_NAME}]`,
+            `this.${Sdk.NODE_NAME}`
+          )
         )}
       }
     
       ${printComment(["Add nodes to the start of the existing nodes"])}
-      private _prependNodes(${c.NODE_NAME}?: ${c.NODE_TYPE}[]) {
+      private _prependNodes(${Sdk.NODE_NAME}?: ${Sdk.NODE_TYPE}[]) {
         ${printSet(
-          `this.${c.NODE_NAME}`,
-          printTernary(c.NODE_NAME, `[...${c.NODE_NAME}, ...(this.${c.NODE_NAME} ?? [])]`, `this.${c.NODE_NAME}`)
+          `this.${Sdk.NODE_NAME}`,
+          printTernary(
+            Sdk.NODE_NAME,
+            `[...${Sdk.NODE_NAME}, ...(this.${Sdk.NODE_NAME} ?? [])]`,
+            `this.${Sdk.NODE_NAME}`
+          )
         )}
       }
 
       ${printComment(["Update the pagination end cursor"])}
-      private _appendPageInfo(${c.PAGEINFO_NAME}?: ${c.PAGEINFO_TYPE}) {
-        if (this.${c.PAGEINFO_NAME}) {
+      private _appendPageInfo(${Sdk.PAGEINFO_NAME}?: ${Sdk.PAGEINFO_TYPE}) {
+        if (this.${Sdk.PAGEINFO_NAME}) {
           ${printSet(
-            `this.${c.PAGEINFO_NAME}.endCursor`,
-            `${c.PAGEINFO_NAME}?.endCursor ?? this.${c.PAGEINFO_NAME}.startCursor`
+            `this.${Sdk.PAGEINFO_NAME}.endCursor`,
+            `${Sdk.PAGEINFO_NAME}?.endCursor ?? this.${Sdk.PAGEINFO_NAME}.startCursor`
           )}
           ${printSet(
-            `this.${c.PAGEINFO_NAME}.hasNextPage`,
-            `${c.PAGEINFO_NAME}?.hasNextPage ?? this.${c.PAGEINFO_NAME}.hasNextPage`
+            `this.${Sdk.PAGEINFO_NAME}.hasNextPage`,
+            `${Sdk.PAGEINFO_NAME}?.hasNextPage ?? this.${Sdk.PAGEINFO_NAME}.hasNextPage`
           )}
         }
       }
     
       ${printComment(["Update the pagination start cursor"])}
-      private _prependPageInfo(${c.PAGEINFO_NAME}?: ${c.PAGEINFO_TYPE}) {
-        if (this.${c.PAGEINFO_NAME}) {
+      private _prependPageInfo(${Sdk.PAGEINFO_NAME}?: ${Sdk.PAGEINFO_TYPE}) {
+        if (this.${Sdk.PAGEINFO_NAME}) {
           ${printSet(
-            `this.${c.PAGEINFO_NAME}.startCursor`,
-            `${c.PAGEINFO_NAME}?.startCursor ?? this.${c.PAGEINFO_NAME}.startCursor`
+            `this.${Sdk.PAGEINFO_NAME}.startCursor`,
+            `${Sdk.PAGEINFO_NAME}?.startCursor ?? this.${Sdk.PAGEINFO_NAME}.startCursor`
           )}
           ${printSet(
-            `this.${c.PAGEINFO_NAME}.hasPreviousPage`,
-            `${c.PAGEINFO_NAME}?.hasPreviousPage ?? this.${c.PAGEINFO_NAME}.hasPreviousPage`
+            `this.${Sdk.PAGEINFO_NAME}.hasPreviousPage`,
+            `${Sdk.PAGEINFO_NAME}?.hasPreviousPage ?? this.${Sdk.PAGEINFO_NAME}.hasPreviousPage`
           )}
         }
       }
     
       ${printComment(["Fetch the next page of results and append to nodes"])}
-      public get ${c.FETCH_NAME}Next(): Promise<this> {
+      public get ${Sdk.FETCH_NAME}Next(): Promise<this> {
         return ${printTernary(
-          `this.${c.PAGEINFO_NAME}?.hasNextPage`,
-          `this._${c.FETCH_NAME}({ after: this.${c.PAGEINFO_NAME}?.endCursor }).then(${c.RESPONSE_NAME} => {
-            this._appendNodes(${c.RESPONSE_NAME}?.${c.NODE_NAME})
-            this._appendPageInfo(${c.RESPONSE_NAME}?.${c.PAGEINFO_NAME})
+          `this.${Sdk.PAGEINFO_NAME}?.hasNextPage`,
+          `this._${Sdk.FETCH_NAME}({ after: this.${Sdk.PAGEINFO_NAME}?.endCursor }).then(${Sdk.RESPONSE_NAME} => {
+            this._appendNodes(${Sdk.RESPONSE_NAME}?.${Sdk.NODE_NAME})
+            this._appendPageInfo(${Sdk.RESPONSE_NAME}?.${Sdk.PAGEINFO_NAME})
             return this
           })`,
           `Promise.resolve(this)`
@@ -166,12 +174,12 @@ export function printConnection(): string {
       }
     
       ${printComment(["Fetch the previous page of results and prepend to nodes"])}
-      public get ${c.FETCH_NAME}Previous(): Promise<this> {
+      public get ${Sdk.FETCH_NAME}Previous(): Promise<this> {
         return ${printTernary(
-          `this.${c.PAGEINFO_NAME}?.hasPreviousPage`,
-          `this._${c.FETCH_NAME}({ before: this.${c.PAGEINFO_NAME}?.startCursor }).then(${c.RESPONSE_NAME} => {
-            this._prependNodes(${c.RESPONSE_NAME}?.${c.NODE_NAME})
-            this._prependPageInfo(${c.RESPONSE_NAME}?.${c.PAGEINFO_NAME})
+          `this.${Sdk.PAGEINFO_NAME}?.hasPreviousPage`,
+          `this._${Sdk.FETCH_NAME}({ before: this.${Sdk.PAGEINFO_NAME}?.startCursor }).then(${Sdk.RESPONSE_NAME} => {
+            this._prependNodes(${Sdk.RESPONSE_NAME}?.${Sdk.NODE_NAME})
+            this._prependPageInfo(${Sdk.RESPONSE_NAME}?.${Sdk.PAGEINFO_NAME})
             return this
           })`,
           `Promise.resolve(this)`
@@ -185,19 +193,19 @@ export function printConnection(): string {
  * Print the model class for a connection
  */
 export function printConnectionModel(context: SdkPluginContext, model: SdkModel): string {
-  const nodesField = model.fields.list.find(field => field.name === c.NODE_NAME);
+  const nodesField = model.fields.list.find(field => field.name === Sdk.NODE_NAME);
   const modelType = nodesField?.listType;
 
   const args = getArgList([
     getRequestArg(),
     {
-      name: c.FETCH_NAME,
+      name: Sdk.FETCH_NAME,
       optional: false,
-      type: `(${c.VARIABLE_NAME}?: ${c.CONNECTION_TYPE}${c.VARIABLE_TYPE}) => ${c.FETCH_TYPE}<${c.CONNECTION_TYPE}<${modelType}>>`,
+      type: `(${Sdk.VARIABLE_NAME}?: ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE}) => ${Sdk.FETCH_TYPE}<${Sdk.CONNECTION_TYPE}<${modelType}>>`,
       description: `function to trigger a refetch of this ${model.name} model`,
     },
     {
-      name: c.DATA_NAME,
+      name: Sdk.DATA_NAME,
       optional: false,
       type: model.fragment,
       description: `${model.name} response data`,
@@ -207,18 +215,18 @@ export function printConnectionModel(context: SdkPluginContext, model: SdkModel)
   return printLines([
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
-    `export class ${model.name} extends ${c.CONNECTION_CLASS}<${modelType}> {
+    `export class ${model.name} extends ${Sdk.CONNECTION_CLASS}<${modelType}> {
         public constructor(${args.printInput}) {
           super(${printList([
-            c.REQUEST_NAME,
-            c.FETCH_NAME,
+            Sdk.REQUEST_NAME,
+            Sdk.FETCH_NAME,
             printTernary(
-              `${c.DATA_NAME}?.${c.NODE_NAME}`,
-              `${c.DATA_NAME}.${c.NODE_NAME}.map(node => new ${modelType}(${c.REQUEST_NAME}, node))`
+              `${Sdk.DATA_NAME}?.${Sdk.NODE_NAME}`,
+              `${Sdk.DATA_NAME}.${Sdk.NODE_NAME}.map(node => new ${modelType}(${Sdk.REQUEST_NAME}, node))`
             ),
             printTernary(
-              `${c.DATA_NAME}?.${c.PAGEINFO_NAME}`,
-              `new ${c.PAGEINFO_TYPE}(${c.REQUEST_NAME}, ${c.DATA_NAME}.${c.PAGEINFO_NAME})`
+              `${Sdk.DATA_NAME}?.${Sdk.PAGEINFO_NAME}`,
+              `new ${Sdk.PAGEINFO_TYPE}(${Sdk.REQUEST_NAME}, ${Sdk.DATA_NAME}.${Sdk.PAGEINFO_NAME})`
             ),
           ])})
         }

@@ -1,13 +1,7 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, logger, PluginContext, printComment, printLines } from "@linear/common";
-import {
-  ModelVisitor,
-  parseOperations,
-  SdkConstants,
-  SdkModel,
-  SdkPluginConfig,
-  SdkPluginContext,
-} from "@linear/plugin-sdk";
+import { logger } from "@linear/common";
+import { ContextVisitor, PluginContext, printComment, printLines } from "@linear/plugin-doc";
+import { ModelVisitor, parseOperations, Sdk, SdkModel, SdkPluginConfig, SdkPluginContext } from "@linear/plugin-sdk";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { printTests } from "./print-test";
 
@@ -54,7 +48,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       'import execa, { ExecaChildProcess } from "execa"',
       'import getPort from "get-port"',
       'import { promisify } from "util"',
-      `import * as ${SdkConstants.NAMESPACE} from '../index'`,
+      `import * as ${Sdk.NAMESPACE} from '../index'`,
       "\n",
       printComment(["Load environment variables"]),
       "dotenv.config()",

@@ -1,8 +1,11 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, logger, PluginConfig, printLines } from "@linear/common";
+import { logger } from "@linear/common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
+import { ContextVisitor } from "./context-visitor";
 import { FragmentVisitor } from "./fragment-visitor";
 import { OperationVisitor } from "./operation-visitor";
+import { printLines } from "./print";
+import { PluginConfig } from "./types";
 
 /**
  * Graphql-codegen plugin for outputting the typed Linear documents

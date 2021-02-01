@@ -1,21 +1,4 @@
-import {
-  findObject,
-  findQuery,
-  Fragment,
-  getRequiredArgs,
-  isConnection,
-  isValidField,
-  isValidFragment,
-  Named,
-  NamedFields,
-  nonNullable,
-  PluginContext,
-  printGraphqlComment,
-  printGraphqlDebug,
-  printGraphqlDescription,
-  printLines,
-  reduceTypeName,
-} from "@linear/common";
+import { nonNullable } from "@linear/common";
 import autoBind from "auto-bind";
 import {
   DocumentNode,
@@ -26,6 +9,14 @@ import {
   NonNullTypeNode,
   ObjectTypeDefinitionNode,
 } from "graphql";
+import { getRequiredArgs } from "./args";
+import { isValidField } from "./field";
+import { isValidFragment } from "./fragment";
+import { findObject, isConnection } from "./object";
+import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printLines } from "./print";
+import { findQuery } from "./query";
+import { Fragment, Named, NamedFields, PluginContext } from "./types";
+import { reduceTypeName } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments

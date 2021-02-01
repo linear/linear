@@ -1,7 +1,8 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, logger, nonNullable, PluginContext, printLines } from "@linear/common";
+import { logger, nonNullable } from "@linear/common";
+import { ContextVisitor, PluginContext, printLines } from "@linear/plugin-doc";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
-import c from "./constants";
+import { Sdk } from "./constants";
 import { ModelVisitor } from "./model-visitor";
 import { parseOperations } from "./parse-operation";
 import { printConnection } from "./print-connection";
@@ -59,7 +60,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
         /** Import DocumentNode */
         "import { DocumentNode } from 'graphql'",
         /** Import document namespace */
-        `import * as ${c.NAMESPACE} from '${config.documentFile}'`,
+        `import * as ${Sdk.NAMESPACE} from '${config.documentFile}'`,
       ].filter(nonNullable),
       content: printLines([
         /** Print the requester base class */

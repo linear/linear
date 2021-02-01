@@ -6,8 +6,8 @@ import {
   printComment,
   printLines,
   printList,
-} from "@linear/common";
-import c from "./constants";
+} from "@linear/plugin-doc";
+import { Sdk } from "./constants";
 import { SdkOperation } from "./types";
 
 /**
@@ -15,9 +15,9 @@ import { SdkOperation } from "./types";
  */
 export function getRequestArg(): ArgDefinition {
   return {
-    name: c.REQUEST_NAME,
+    name: Sdk.REQUEST_NAME,
     optional: false,
-    type: c.REQUEST_TYPE,
+    type: Sdk.REQUEST_TYPE,
     description: "function to call the graphql client",
   };
 }
@@ -34,13 +34,13 @@ export function printRequestArgs(operation: SdkOperation): string {
   if (requiredArg) {
     /** Merge id variable into requester variables */
     if (optionalVariables.length) {
-      return `{ ${requiredArg}, ...${c.VARIABLE_NAME} }`;
+      return `{ ${requiredArg}, ...${Sdk.VARIABLE_NAME} }`;
     } else {
       return `{ ${requiredArg} }`;
     }
   }
 
-  return optionalVariables.length ? c.VARIABLE_NAME : "{}";
+  return optionalVariables.length ? Sdk.VARIABLE_NAME : "{}";
 }
 
 /**
@@ -52,16 +52,16 @@ export function printRequest(): string {
   return printLines([
     "\n",
     printComment([`The function for calling the graphql client`]),
-    `export type ${c.REQUEST_TYPE} = <${printList([c.RESPONSE_TYPE, c.VARIABLE_TYPE])}>(doc: DocumentNode, ${
-      c.VARIABLE_NAME
-    }?: ${c.VARIABLE_TYPE}) => Promise<${c.RESPONSE_TYPE}>`,
+    `export type ${Sdk.REQUEST_TYPE} = <${printList([Sdk.RESPONSE_TYPE, Sdk.VARIABLE_TYPE])}>(doc: DocumentNode, ${
+      Sdk.VARIABLE_NAME
+    }?: ${Sdk.VARIABLE_TYPE}) => Promise<${Sdk.RESPONSE_TYPE}>`,
     "\n",
     printComment(["Base class to provide a request function", ...args.jsdoc]),
-    `export class ${c.REQUEST_CLASS} {
-        protected _${c.REQUEST_NAME}: ${c.REQUEST_TYPE}
+    `export class ${Sdk.REQUEST_CLASS} {
+        protected _${Sdk.REQUEST_NAME}: ${Sdk.REQUEST_TYPE}
 
         public constructor(${args.printInput}) {
-          this._${c.REQUEST_NAME} = ${c.REQUEST_NAME}
+          this._${Sdk.REQUEST_NAME} = ${Sdk.REQUEST_NAME}
         }
       }`,
     "\n",

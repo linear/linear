@@ -1,18 +1,18 @@
+import { lowerFirst } from "@linear/common";
 import {
   findObject,
   findQuery,
   isConnection,
   isScalarField,
   isValidField,
-  lowerFirst,
   OperationType,
   PluginContext,
   printTypescriptType,
   reduceListType,
-} from "@linear/common";
+} from "@linear/plugin-doc";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
-import c from "./constants";
+import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import {
   SdkConnectionField,
@@ -28,6 +28,9 @@ import {
   SdkScalarListField,
 } from "./types";
 
+/**
+ * Ensure the models is not a root operation or edge
+ */
 function isValidModel(model: ObjectTypeDefinitionNode) {
   return !Object.keys(OperationType).includes(lowerFirst(model.name.value)) && !model.name.value.endsWith("Edge");
 }
@@ -90,7 +93,7 @@ export class ModelVisitor {
     leave: (node: FieldDefinitionNode): SdkModelField | null => {
       if (isValidField(this._context, node)) {
         const name = node.name.value;
-        const type = printTypescriptType(this._context, node.type, c.NAMESPACE);
+        const type = printTypescriptType(this._context, node.type, Sdk.NAMESPACE);
         const query = findQuery(this._context, node);
 
         /** Identify query fields */
@@ -98,7 +101,7 @@ export class ModelVisitor {
           const args =
             query.arguments?.map(arg => ({
               name: arg.name.value,
-              type: printTypescriptType(this._context, node.type, c.NAMESPACE),
+              type: printTypescriptType(this._context, node.type, Sdk.NAMESPACE),
               optional: arg.type.kind !== Kind.NON_NULL_TYPE,
               description: `${arg.name.value} to be passed to ${query.name.value}`,
             })) ?? [];

@@ -1,5 +1,13 @@
-import { getArgList, printComment, printDebug, printLines, printList, printSet, printTernary } from "@linear/common";
-import c from "./constants";
+import {
+  getArgList,
+  printComment,
+  printDebug,
+  printLines,
+  printList,
+  printSet,
+  printTernary,
+} from "@linear/plugin-doc";
+import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import { isConnectionModel } from "./print-connection";
 import { getRequestArg } from "./print-request";
@@ -26,11 +34,11 @@ function printOperation(context: SdkPluginContext, operation: SdkOperation): str
   return printLines([
     printComment([`A fetchable ${operation.name} ${operation.print.type}`, ...constructorArgs.jsdoc]),
     printDebug(operation),
-    `export class ${operation.print.response} extends ${c.REQUEST_CLASS} {
+    `export class ${operation.print.response} extends ${Sdk.REQUEST_CLASS} {
         ${printLines(operation.parentArgs.args.map(arg => `private _${arg.name}: ${arg.type}`))}
 
         public constructor(${constructorArgs.printInput}) {
-          super(${c.REQUEST_NAME})
+          super(${Sdk.REQUEST_NAME})
           ${printLines(operation.parentArgs.args.map(arg => printSet(`this._${arg.name}`, `${arg.name}`)))}
         }
 
@@ -41,30 +49,30 @@ function printOperation(context: SdkPluginContext, operation: SdkOperation): str
           ...operation.fetchArgs.jsdoc,
           `@returns parsed response from ${operation.print.response}`,
         ])}
-        public async ${c.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
-          return ${`this._${c.REQUEST_NAME}<${printNamespaced(context, operation.print.response)}, ${
+        public async ${Sdk.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
+          return ${`this._${Sdk.REQUEST_NAME}<${printNamespaced(context, operation.print.response)}, ${
             operation.print.variables
-          }>(${printList([operation.print.document, printOperationArgs(operation)])}).then(${c.RESPONSE_NAME} => {
-            ${printSet(`const ${c.DATA_NAME}`, `${printList([c.RESPONSE_NAME, ...operation.path], "?.")}`)}
+          }>(${printList([operation.print.document, printOperationArgs(operation)])}).then(${Sdk.RESPONSE_NAME} => {
+            ${printSet(`const ${Sdk.DATA_NAME}`, `${printList([Sdk.RESPONSE_NAME, ...operation.path], "?.")}`)}
             return ${printTernary(
-              c.DATA_NAME,
+              Sdk.DATA_NAME,
               operation.print.list
-                ? `${c.DATA_NAME}.map(node => new ${operation.print.list}(${printList([
-                    `this._${c.REQUEST_NAME}`,
+                ? `${Sdk.DATA_NAME}.map(node => new ${operation.print.list}(${printList([
+                    `this._${Sdk.REQUEST_NAME}`,
                     "node",
                   ])}))`
                 : isConnectionModel(operation.model)
                 ? `new ${operation.print.model}(${printList([
-                    `this._${c.REQUEST_NAME}`,
-                    `pagination => this.${c.FETCH_NAME}(${printList([
+                    `this._${Sdk.REQUEST_NAME}`,
+                    `pagination => this.${Sdk.FETCH_NAME}(${printList([
                       ...operation.requiredArgs.args
                         .filter(arg => !parentArgNames.includes(arg.name))
                         .map(arg => arg.name),
-                      `{ ${printList([`...${c.VARIABLE_NAME}`, `...pagination`])} }`,
+                      `{ ${printList([`...${Sdk.VARIABLE_NAME}`, `...pagination`])} }`,
                     ])})`,
-                    c.DATA_NAME,
+                    Sdk.DATA_NAME,
                   ])})`
-                : `new ${operation.print.model}(${printList([`this._${c.REQUEST_NAME}`, c.DATA_NAME])})`
+                : `new ${operation.print.model}(${printList([`this._${Sdk.REQUEST_NAME}`, Sdk.DATA_NAME])})`
             )}
           })`}
         }
@@ -89,10 +97,10 @@ export function printOperationArgs(operation: SdkOperation): string {
           parentVariableNames.includes(variable.name) ? undefined : variable.name
         ),
         /** Spread optional variables */
-        operation.optionalArgs.args.length ? `...${c.VARIABLE_NAME}` : undefined,
+        operation.optionalArgs.args.length ? `...${Sdk.VARIABLE_NAME}` : undefined,
       ])}
     }`;
   }
 
-  return operation.optionalArgs.args.length ? c.VARIABLE_NAME : "{}";
+  return operation.optionalArgs.args.length ? Sdk.VARIABLE_NAME : "{}";
 }

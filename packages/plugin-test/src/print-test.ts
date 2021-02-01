@@ -1,5 +1,5 @@
-import { OperationType, printComment, printLines, printList, printSet } from "@linear/common";
-import { SdkConstants, SdkListField, SdkOperation, SdkPluginContext } from "@linear/plugin-sdk";
+import { OperationType, printComment, printLines, printList, printSet } from "@linear/plugin-doc";
+import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/plugin-sdk";
 import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
 
 /**
@@ -44,7 +44,7 @@ function printIt(name: string, content: string): string {
 }
 
 function getConnectionNode(operation: SdkOperation): SdkListField | undefined {
-  return operation.model?.fields.list.find(field => field.name === SdkConstants.NODE_NAME);
+  return operation.model?.fields.list.find(field => field.name === Sdk.NODE_NAME);
 }
 
 /**
@@ -82,7 +82,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
           printLines([
             itemOperation
               ? printLines([
-                  `let _${itemField}: ${SdkConstants.NAMESPACE}.${itemOperation.print.model} | undefined`,
+                  `let _${itemField}: ${Sdk.NAMESPACE}.${itemOperation.print.model} | undefined`,
                   ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
                   "\n",
                 ])
@@ -96,7 +96,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                 }`,
                 itemOperation
                   ? printLines([
-                      `const ${itemField} = ${fieldName}?.${SdkConstants.NODE_NAME}?.[0]`,
+                      `const ${itemField} = ${fieldName}?.${Sdk.NODE_NAME}?.[0]`,
                       ...(itemArgs.map(arg => printSet(`_${itemField}_${arg.name}`, `${itemField}?.${arg.name}`)) ??
                         []),
                     ])

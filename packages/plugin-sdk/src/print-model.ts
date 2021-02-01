@@ -1,7 +1,6 @@
+import { getLast, lowerFirst } from "@linear/common";
 import {
   getArgList,
-  getLast,
-  lowerFirst,
   printComment,
   printDebug,
   printLines,
@@ -10,8 +9,8 @@ import {
   printSet,
   printTernary,
   printTypescriptType,
-} from "@linear/common";
-import c from "./constants";
+} from "@linear/plugin-doc";
+import { Sdk } from "./constants";
 import { isConnectionModel, printConnectionModel } from "./print-connection";
 import { getRequestArg } from "./print-request";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
@@ -46,7 +45,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
   const args = getArgList([
     getRequestArg(),
     {
-      name: c.DATA_NAME,
+      name: Sdk.DATA_NAME,
       optional: false,
       type: model.fragment,
       description: `${model.fragment} response data`,
@@ -56,7 +55,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
   return printLines([
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
-    `export class ${model.name} extends ${c.REQUEST_CLASS} {
+    `export class ${model.name} extends ${Sdk.REQUEST_CLASS} {
       ${printLines([
         printDebug("fields.query"),
         printLines(
@@ -70,17 +69,17 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
 
       public constructor(${args.printInput}) {
         ${printLines([
-          `super(${c.REQUEST_NAME})`,
+          `super(${Sdk.REQUEST_NAME})`,
           printDebug("fields.scalar"),
           printLines(
             model.fields.scalar.map(field =>
-              printSet(`this.${field.name}`, `${c.DATA_NAME}.${field.name} ?? undefined`)
+              printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name} ?? undefined`)
             )
           ),
           printDebug("fields.scalarList"),
           printLines(
             model.fields.scalarList.map(field =>
-              printSet(`this.${field.name}`, `${c.DATA_NAME}.${field.name} ?? undefined`)
+              printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name} ?? undefined`)
             )
           ),
           printDebug("fields.object"),
@@ -90,8 +89,8 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               operationFieldNames.includes(field.name)
                 ? undefined
                 : printTernary(
-                    printSet(`this.${field.name}`, `${c.DATA_NAME}.${field.name}`),
-                    `new ${field.object.name.value}(${c.REQUEST_NAME}, ${c.DATA_NAME}.${field.name}) `
+                    printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`),
+                    `new ${field.object.name.value}(${Sdk.REQUEST_NAME}, ${Sdk.DATA_NAME}.${field.name}) `
                   )
             )
           ),
@@ -99,8 +98,8 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           printLines(
             model.fields.list.map(field =>
               printTernary(
-                printSet(`this.${field.name}`, `${c.DATA_NAME}.${field.name}`),
-                `${c.DATA_NAME}.${field.name}.map(node => new ${field.listType}(${c.REQUEST_NAME}, node))`
+                printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`),
+                `${Sdk.DATA_NAME}.${field.name}.map(node => new ${field.listType}(${Sdk.REQUEST_NAME}, node))`
               )
             )
           ),
@@ -108,7 +107,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           printLines(
             model.fields.query.map(field =>
               field.args.some(arg => !arg.optional)
-                ? printSet(`this._${field.name}`, `${c.DATA_NAME}.${field.name} ?? undefined`)
+                ? printSet(`this._${field.name}`, `${Sdk.DATA_NAME}.${field.name} ?? undefined`)
                 : undefined
             )
           ),
@@ -146,18 +145,20 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             if (fieldQueryArgs.length) {
               return printModelField(
                 field,
-                `public get ${field.name}(): ${c.FETCH_TYPE}<${typeName}> | undefined {
+                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}> | undefined {
                   return ${printTernary(
                     printList(fieldQueryArgs, " && "),
-                    `new ${fieldQueryName}(this._${c.REQUEST_NAME}).${c.FETCH_NAME}(${printList(fieldQueryArgs)})`
+                    `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${printList(fieldQueryArgs)})`
                   )}
                 }`
               );
             } else {
               return printModelField(
                 field,
-                `public get ${field.name}(): ${c.FETCH_TYPE}<${typeName}> {
-                  return new ${fieldQueryName}(this._${c.REQUEST_NAME}).${c.FETCH_NAME}(${printList(fieldQueryArgs)})
+                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}> {
+                  return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${printList(
+                  fieldQueryArgs
+                )})
                 }`
               );
             }
@@ -172,7 +173,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             const field = model.fields.all.find(_field => _field.name === fieldName);
 
             const operationArgs = printList([
-              `this._${c.REQUEST_NAME}`,
+              `this._${Sdk.REQUEST_NAME}`,
               ...operation.requiredArgs.args.map(variable => `this.${variable.name}`),
               ,
             ]);
@@ -181,7 +182,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               " && "
             );
             const operationCall = `new ${operation.print.name}${operation.print.type}(${operationArgs}).${
-              c.FETCH_NAME
+              Sdk.FETCH_NAME
             }(${operation.optionalArgs.printOutput ?? ""})`;
 
             return printLines([

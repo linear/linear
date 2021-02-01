@@ -1,4 +1,4 @@
-import { getKeyByValue, logger, nonNullable, printList } from "@linear/common";
+import { getKeyByValue, logger, nonNullable } from "@linear/common";
 import { LinearErrorRaw, LinearErrorType, LinearGraphQLErrorRaw } from "./types";
 import { capitalize } from "./utils";
 
@@ -88,16 +88,15 @@ export class LinearError extends Error {
 
     /** Find messages, duplicate and join, or default */
     super(
-      printList(
-        Array.from(
-          new Set(
-            [capitalize(error?.message?.split(": {")?.[0]), error?.response?.error, errors[0]?.message].filter(
-              nonNullable
-            )
+      Array.from(
+        new Set(
+          [capitalize(error?.message?.split(": {")?.[0]), error?.response?.error, errors[0]?.message].filter(
+            nonNullable
           )
-        ),
-        " - "
-      ) ?? defaultError
+        )
+      )
+        .filter(nonNullable)
+        .join(" - ") ?? defaultError
     );
 
     /** Set error properties */

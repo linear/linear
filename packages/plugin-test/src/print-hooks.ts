@@ -1,5 +1,5 @@
-import { printComment, printLines } from "@linear/common";
-import { SdkConstants } from "@linear/plugin-sdk";
+import { printComment, printLines } from "@linear/plugin-doc";
+import { Sdk } from "@linear/plugin-sdk";
 
 /**
  * Prints code required before tests
@@ -10,7 +10,7 @@ export function printBeforeSuite(): string {
     `let mockServer: ExecaChildProcess`,
     "\n",
     printComment(["Initialize Linear client variable"]),
-    `let client: ${SdkConstants.NAMESPACE}.LinearClient`,
+    `let client: ${Sdk.NAMESPACE}.LinearClient`,
     "\n",
   ]);
 }
@@ -27,7 +27,7 @@ export function printBeforeAll(): string {
         `if (Boolean(process.env.E2E)) {
           ${printLines([
             printComment(["Create Linear client with production server endpoint"]),
-            `client = new ${SdkConstants.NAMESPACE}.LinearClient({
+            `client = new ${Sdk.NAMESPACE}.LinearClient({
               apiKey: process.env.E2E_API_KEY,
             })`,
           ])}
@@ -51,7 +51,7 @@ export function printBeforeAll(): string {
             `await sleep(1000)`,
             "\n",
             printComment(["Create Linear client with mock server endpoint"]),
-            `client = new ${SdkConstants.NAMESPACE}.LinearClient({
+            `client = new ${Sdk.NAMESPACE}.LinearClient({
               apiKey: 'test',
               apiUrl: \`http://localhost:\$\{port\}/graphql\`,
             })`,

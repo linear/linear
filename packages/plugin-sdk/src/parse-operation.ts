@@ -1,20 +1,19 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
+import { nonNullable, upperFirst } from "@linear/common";
 import {
   ArgDefinition,
   getArgList,
   getOptionalVariables,
   getRequiredVariables,
-  nonNullable,
   PluginContext,
   printList,
   printPascal,
   printTypescriptType,
   reduceListType,
   reduceTypeName,
-  upperFirst,
-} from "@linear/common";
+} from "@linear/plugin-doc";
 import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode } from "graphql";
-import c from "./constants";
+import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import { SdkDefinitions, SdkModel, SdkOperation, SdkOperationPrint, SdkPluginConfig } from "./types";
 
@@ -97,7 +96,7 @@ export function parseOperations(
       /** The name of the model in a list, if a list */
       list: listName,
       /** The returned promise result from fetch  */
-      promise: `${c.FETCH_TYPE}<${modelName}${listName ? "[]" : ""}>`,
+      promise: `${Sdk.FETCH_TYPE}<${modelName}${listName ? "[]" : ""}>`,
     };
 
     /** Find a matching model */
@@ -116,7 +115,7 @@ export function parseOperations(
     /** Argument definition for each required variable */
     const requiredVariables: ArgDefinition[] = getRequiredVariables(node).map(variable => ({
       name: variable.variable.name.value,
-      type: printTypescriptType(context, variable.type, c.NAMESPACE),
+      type: printTypescriptType(context, variable.type, Sdk.NAMESPACE),
       optional: false,
       description: `required ${variable.variable.name.value} to pass to ${print.field}`,
     }));
@@ -129,13 +128,13 @@ export function parseOperations(
     ]);
     const optionalArg = requiredVariables.length
       ? {
-          name: c.VARIABLE_NAME,
+          name: Sdk.VARIABLE_NAME,
           optional: true,
           type: `Omit<${print.variables}, ${printList([...omittedVariableNames], " | ")}>`,
           description: `variables without ${printList([...omittedVariableNames])} to pass into the ${print.response}`,
         }
       : {
-          name: c.VARIABLE_NAME,
+          name: Sdk.VARIABLE_NAME,
           optional: true,
           type: print.variables,
           description: `variables to pass into the ${print.response}`,

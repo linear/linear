@@ -1,22 +1,13 @@
-import {
-  findFragment,
-  findObject,
-  findQuery,
-  getLast,
-  isScalarField,
-  isValidField,
-  logger,
-  OperationType,
-  PluginContext,
-  printGraphqlDebug,
-  printGraphqlDescription,
-  printGraphqlInputArgs,
-  printGraphqlResponseArgs,
-  printLines,
-  printList,
-  reduceListType,
-} from "@linear/common";
+import { getLast, logger } from "@linear/common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
+import { printGraphqlInputArgs, printGraphqlResponseArgs } from "./args";
+import { isScalarField, isValidField } from "./field";
+import { findFragment } from "./fragment";
+import { findObject } from "./object";
+import { printGraphqlDebug, printGraphqlDescription, printLines, printList } from "./print";
+import { findQuery } from "./query";
+import { OperationType, PluginContext } from "./types";
+import { reduceListType } from "./utils";
 
 /**
  * Print the operation wrapper

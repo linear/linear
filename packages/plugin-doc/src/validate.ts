@@ -1,6 +1,8 @@
 import { PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { logger, PluginConfig, validateExtension } from "@linear/common";
+import { logger } from "@linear/common";
 import { GraphQLSchema } from "graphql";
+import { PluginConfig } from "./types";
+import { validateExtension } from "./utils";
 
 /**
  * Validate use of the plugin

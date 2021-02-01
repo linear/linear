@@ -1,7 +1,10 @@
-import { getKeyByValue, isScalarField, OperationType, PluginContext, printLines } from "@linear/common";
+import { getKeyByValue } from "@linear/common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
+import { isScalarField } from "./field";
+import { printLines } from "./print";
 import { printOperations } from "./print-operation";
+import { OperationType, PluginContext } from "./types";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating operations

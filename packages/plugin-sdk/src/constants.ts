@@ -1,4 +1,4 @@
-export default {
+export const Sdk = {
   CONNECTION_CLASS: "LinearConnection",
   CONNECTION_TYPE: "Connection",
   DATA_NAME: "data",
