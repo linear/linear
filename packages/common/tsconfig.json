@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig",
   "compilerOptions": {
-    "baseUrl": "src",
-    "outDir": "dist"
-  }
+    "rootDir": "src",
+    "outDir": "dist",
+    "declarationDir": "dist",
+    "removeComments": true
+  },
+  "exclude": ["./src/_tests"]
 }

@@ -68,7 +68,7 @@ webpack-stats.json
 .DS_Store
 
 # TS
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 
 *.provisionprofile
 
@@ -76,4 +76,9 @@ tsconfig.tsbuildinfo
 .yalc
 yalc.*
 
+# Local test script
 scratch.ts
+
+# Rollup
+.rollup.cache
+.size-snapshot.json
