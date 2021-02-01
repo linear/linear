@@ -1,4 +1,3 @@
-import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import gzip from "rollup-plugin-gzip";
 import { sizeSnapshot } from "rollup-plugin-size-snapshot";
@@ -23,7 +22,6 @@ export default [
       },
     ],
     plugins: [
-      nodeResolve(),
       typescript(),
       sizeSnapshot(),
       terser(),
@@ -50,6 +48,6 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [nodeResolve(), typescript()],
+    plugins: [typescript()],
   },
 ];
