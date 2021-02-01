@@ -74,27 +74,27 @@ describe("generated", () => {
     });
   });
 
-  /** Test ApplicationWithAuthorization query with mock data */
+  /** Test ApplicationWithAuthorization query */
   describe("ApplicationWithAuthorization", () => {
-    /** Test the root query for the ApplicationWithAuthorization using mock data */
+    /** Test the root query for ApplicationWithAuthorization */
     it("applicationWithAuthorization", async () => {
       const applicationWithAuthorization = await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
       expect(applicationWithAuthorization instanceof L.UserAuthorizedApplication);
     });
   });
 
-  /** Test ArchivedModelSync query with mock data */
+  /** Test ArchivedModelSync query */
   describe("ArchivedModelSync", () => {
-    /** Test the root query for the ArchivedModelSync using mock data */
+    /** Test the root query for ArchivedModelSync */
     it("archivedModelSync", async () => {
       const archivedModelSync = await client.archivedModelSync("mock-identifier", "mock-modelClass");
       expect(archivedModelSync instanceof L.ArchiveResponse);
     });
   });
 
-  /** Test ArchivedModelsSync query with mock data */
+  /** Test ArchivedModelsSync query */
   describe("ArchivedModelsSync", () => {
-    /** Test the root query for the ArchivedModelsSync using mock data */
+    /** Test the root query for ArchivedModelsSync */
     it("archivedModelsSync", async () => {
       const archivedModelsSync = await client.archivedModelsSync("mock-modelClass", "mock-teamId");
       expect(archivedModelsSync instanceof L.ArchiveResponse);
@@ -133,20 +133,20 @@ describe("generated", () => {
     });
   });
 
-  /** Test CollaborativeDocumentJoin query with mock data */
+  /** Test CollaborativeDocumentJoin query */
   describe("CollaborativeDocumentJoin", () => {
     let _collaborativeDocumentJoin: L.CollaborationDocumentUpdatePayload;
 
-    /** Test the root query for the CollaborativeDocumentJoin using mock data */
+    /** Test the root query for CollaborativeDocumentJoin */
     it("collaborativeDocumentJoin", async () => {
       const collaborativeDocumentJoin = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
       _collaborativeDocumentJoin = collaborativeDocumentJoin;
       expect(collaborativeDocumentJoin instanceof L.CollaborationDocumentUpdatePayload);
     });
 
-    /** Test CollaborativeDocumentJoin_Steps query with mock data */
+    /** Test CollaborativeDocumentJoin_Steps query */
     describe("CollaborativeDocumentJoin_Steps", () => {
-      /** Test the collaborativeDocumentJoin query for the CollaborativeDocumentJoin_Steps using mock data */
+      /** Test the collaborativeDocumentJoin query for CollaborativeDocumentJoin_Steps */
       it("steps", async () => {
         const steps = await _collaborativeDocumentJoin.steps;
         expect(steps instanceof L.StepsResponse);
@@ -441,22 +441,22 @@ describe("generated", () => {
     });
   });
 
-  /** Test FigmaEmbedInfo query with mock data */
+  /** Test FigmaEmbedInfo query */
   describe("FigmaEmbedInfo", () => {
     let _figmaEmbedInfo: L.FigmaEmbedPayload;
 
-    /** Test the root query for the FigmaEmbedInfo using mock data */
+    /** Test the root query for FigmaEmbedInfo */
     it("figmaEmbedInfo", async () => {
       const figmaEmbedInfo = await client.figmaEmbedInfo("mock-fileId");
       _figmaEmbedInfo = figmaEmbedInfo;
       expect(figmaEmbedInfo instanceof L.FigmaEmbedPayload);
     });
 
-    /** Test FigmaEmbedInfo_FigmaEmbed query with mock data */
+    /** Test FigmaEmbedInfo_FigmaEmbed query */
     describe("FigmaEmbedInfo_FigmaEmbed", () => {
-      /** Test the figmaEmbedInfo query for the FigmaEmbedInfo_FigmaEmbed using mock data */
+      /** Test the figmaEmbedInfo query for FigmaEmbedInfo_FigmaEmbed */
       it("figmaEmbed", async () => {
-        const figmaEmbed = await _figmaEmbedInfo.figmaEmbed;
+        const figmaEmbed = await _figmaEmbedInfo.figmaEmbed();
         expect(figmaEmbed instanceof L.FigmaEmbed);
       });
     });
@@ -570,22 +570,22 @@ describe("generated", () => {
     });
   });
 
-  /** Test InviteInfo query with mock data */
+  /** Test InviteInfo query */
   describe("InviteInfo", () => {
     let _inviteInfo: L.InvitePagePayload;
 
-    /** Test the root query for the InviteInfo using mock data */
+    /** Test the root query for InviteInfo */
     it("inviteInfo", async () => {
       const inviteInfo = await client.inviteInfo("mock-userHash");
       _inviteInfo = inviteInfo;
       expect(inviteInfo instanceof L.InvitePagePayload);
     });
 
-    /** Test InviteInfo_InviteData query with mock data */
+    /** Test InviteInfo_InviteData query */
     describe("InviteInfo_InviteData", () => {
-      /** Test the inviteInfo query for the InviteInfo_InviteData using mock data */
+      /** Test the inviteInfo query for InviteInfo_InviteData */
       it("inviteData", async () => {
-        const inviteData = await _inviteInfo.inviteData;
+        const inviteData = await _inviteInfo.inviteData();
         expect(inviteData instanceof L.InviteData);
       });
     });
@@ -695,12 +695,178 @@ describe("generated", () => {
     });
   });
 
-  /** Test IssueSearch query with mock data */
+  /** Test all Issue queries */
   describe("IssueSearch", () => {
-    /** Test the root query for the IssueSearch using mock data */
+    let _issue: L.Issue | undefined;
+    let _issue_id: string | undefined;
+
+    /** Test the root query for the Issue connection */
     it("issueSearch", async () => {
       const issueSearch = await client.issueSearch("mock-query");
+      const issue = issueSearch?.nodes?.[0];
+      _issue_id = issue?.id;
       expect(issueSearch instanceof L.IssueConnection);
+    });
+
+    /** Test the root query for a single Issue */
+    it("issue", async () => {
+      if (_issue_id) {
+        const issue = await client.issue(_issue_id);
+        _issue = issue;
+        expect(issue instanceof L.Issue);
+      } else {
+        throw new Error("No first Issue found from issueSearch connection query - cannot test issue query");
+      }
+    });
+
+    /** Test the issue.assignee query for L.User */
+    it("issue.assignee", async () => {
+      if (_issue) {
+        const issue_assignee = await _issue.assignee;
+        expect(issue_assignee instanceof L.User);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.assignee query");
+      }
+    });
+
+    /** Test the issue.creator query for L.User */
+    it("issue.creator", async () => {
+      if (_issue) {
+        const issue_creator = await _issue.creator;
+        expect(issue_creator instanceof L.User);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.creator query");
+      }
+    });
+
+    /** Test the issue.cycle query for L.Cycle */
+    it("issue.cycle", async () => {
+      if (_issue) {
+        const issue_cycle = await _issue.cycle;
+        expect(issue_cycle instanceof L.Cycle);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.cycle query");
+      }
+    });
+
+    /** Test the issue.parent query for L.Issue */
+    it("issue.parent", async () => {
+      if (_issue) {
+        const issue_parent = await _issue.parent;
+        expect(issue_parent instanceof L.Issue);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.parent query");
+      }
+    });
+
+    /** Test the issue.project query for L.Project */
+    it("issue.project", async () => {
+      if (_issue) {
+        const issue_project = await _issue.project;
+        expect(issue_project instanceof L.Project);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.project query");
+      }
+    });
+
+    /** Test the issue.state query for L.WorkflowState */
+    it("issue.state", async () => {
+      if (_issue) {
+        const issue_state = await _issue.state;
+        expect(issue_state instanceof L.WorkflowState);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.state query");
+      }
+    });
+
+    /** Test the issue.team query for L.Team */
+    it("issue.team", async () => {
+      if (_issue) {
+        const issue_team = await _issue.team;
+        expect(issue_team instanceof L.Team);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.team query");
+      }
+    });
+
+    /** Test the issue.children connection query for L.IssueConnection */
+    it("issue.children", async () => {
+      if (_issue) {
+        const issue_children = await _issue.children("mock-query");
+        expect(issue_children instanceof L.IssueConnection);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.children connection query");
+      }
+    });
+
+    /** Test the issue.comments connection query for L.CommentConnection */
+    it("issue.comments", async () => {
+      if (_issue) {
+        const issue_comments = await _issue.comments("mock-query");
+        expect(issue_comments instanceof L.CommentConnection);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.comments connection query");
+      }
+    });
+
+    /** Test the issue.history connection query for L.IssueHistoryConnection */
+    it("issue.history", async () => {
+      if (_issue) {
+        const issue_history = await _issue.history("mock-query");
+        expect(issue_history instanceof L.IssueHistoryConnection);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.history connection query");
+      }
+    });
+
+    /** Test the issue.integrationResources connection query for L.IntegrationResourceConnection */
+    it("issue.integrationResources", async () => {
+      if (_issue) {
+        const issue_integrationResources = await _issue.integrationResources("mock-query");
+        expect(issue_integrationResources instanceof L.IntegrationResourceConnection);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.integrationResources connection query");
+      }
+    });
+
+    /** Test the issue.inverseRelations connection query for L.IssueRelationConnection */
+    it("issue.inverseRelations", async () => {
+      if (_issue) {
+        const issue_inverseRelations = await _issue.inverseRelations("mock-query");
+        expect(issue_inverseRelations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.inverseRelations connection query");
+      }
+    });
+
+    /** Test the issue.labels connection query for L.IssueLabelConnection */
+    it("issue.labels", async () => {
+      if (_issue) {
+        const issue_labels = await _issue.labels("mock-query");
+        expect(issue_labels instanceof L.IssueLabelConnection);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.labels connection query");
+      }
+    });
+
+    /** Test the issue.relations connection query for L.IssueRelationConnection */
+    it("issue.relations", async () => {
+      if (_issue) {
+        const issue_relations = await _issue.relations("mock-query");
+        expect(issue_relations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.relations connection query");
+      }
+    });
+
+    /** Test the issue.subscribers connection query for L.UserConnection */
+    it("issue.subscribers", async () => {
+      if (_issue) {
+        const issue_subscribers = await _issue.subscribers("mock-query");
+        expect(issue_subscribers instanceof L.UserConnection);
+      } else {
+        throw new Error("No Issue found from issue query - cannot test issue.subscribers connection query");
+      }
     });
   });
 
@@ -1102,9 +1268,9 @@ describe("generated", () => {
     });
   });
 
-  /** Test OrganizationExists query with mock data */
+  /** Test OrganizationExists query */
   describe("OrganizationExists", () => {
-    /** Test the root query for the OrganizationExists using mock data */
+    /** Test the root query for OrganizationExists */
     it("organizationExists", async () => {
       const organizationExists = await client.organizationExists("mock-urlKey");
       expect(organizationExists instanceof L.OrganizationExistsPayload);
@@ -1316,27 +1482,27 @@ describe("generated", () => {
     });
   });
 
-  /** Test SsoUrlFromEmail query with mock data */
+  /** Test SsoUrlFromEmail query */
   describe("SsoUrlFromEmail", () => {
-    /** Test the root query for the SsoUrlFromEmail using mock data */
+    /** Test the root query for SsoUrlFromEmail */
     it("ssoUrlFromEmail", async () => {
       const ssoUrlFromEmail = await client.ssoUrlFromEmail("mock-email");
       expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
     });
   });
 
-  /** Test SyncBootstrap query with mock data */
+  /** Test SyncBootstrap query */
   describe("SyncBootstrap", () => {
-    /** Test the root query for the SyncBootstrap using mock data */
+    /** Test the root query for SyncBootstrap */
     it("syncBootstrap", async () => {
       const syncBootstrap = await client.syncBootstrap(123, 123);
       expect(syncBootstrap instanceof L.SyncResponse);
     });
   });
 
-  /** Test SyncUpdates query with mock data */
+  /** Test SyncUpdates query */
   describe("SyncUpdates", () => {
-    /** Test the root query for the SyncUpdates using mock data */
+    /** Test the root query for SyncUpdates */
     it("syncUpdates", async () => {
       const syncUpdates = await client.syncUpdates(123);
       expect(syncUpdates instanceof L.SyncResponse);
@@ -1565,9 +1731,9 @@ describe("generated", () => {
     });
   });
 
-  /** Test Template query with mock data */
+  /** Test Template query */
   describe("Template", () => {
-    /** Test the root query for the Template using mock data */
+    /** Test the root query for Template */
     it("template", async () => {
       const template = await client.template("mock-id");
       expect(template instanceof L.Template);
