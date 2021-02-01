@@ -66,12 +66,40 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
     const connectionOperation = context.sdkDefinitions[""].operations.find(rootOperation => {
       return getConnectionNode(rootOperation)?.listType === operation.name;
     });
+
     if (connectionOperation) {
       /** This operation is handled by the connection test */
       return "";
     } else {
-      /** Skip queries with required args */
-      return printLines([`// ${operation.name} ${operation.requiredArgs.printInput} - has required args`, "\n"]);
+      /** Mock data for any queries with required variables that cannot be sourced via a connection */
+      return printLines([
+        printComment([`Test ${operation.name} query with mock data`]),
+        printDescribe(
+          operation.name,
+          printLines([
+            printComment([`Test the root query for the ${operation.name} using mock data`]),
+            printIt(
+              fieldName,
+              printLines([
+                `const ${fieldName} = await client.${fieldName}(${printList(
+                  operation.requiredArgs.args.map(arg =>
+                    arg.type === "string"
+                      ? `"mock-${arg.name}"`
+                      : arg.type === "string[]"
+                      ? `["mock-${arg.name}"]`
+                      : arg.type === "number"
+                      ? `123`
+                      : arg.type === "number[]"
+                      ? `[123]`
+                      : "UNMAPPED_MOCK_TYPE"
+                  )
+                )})`,
+                `expect(${fieldName}).toBeDefined()`,
+              ])
+            ),
+          ])
+        ),
+      ]);
     }
   } else {
     if (listType) {

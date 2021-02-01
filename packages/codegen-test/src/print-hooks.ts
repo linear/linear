@@ -26,6 +26,8 @@ export function printBeforeAll(): string {
         printComment(["Determine whether to use production or a mock server"]),
         `if (Boolean(process.env.E2E)) {
           ${printLines([
+            'logger.info("Using Linear API production endpoint for end-to-end test")',
+            "\n",
             printComment(["Create Linear client with production server endpoint"]),
             `client = new ${Sdk.NAMESPACE}.LinearClient({
               apiKey: process.env.E2E_API_KEY,
@@ -33,6 +35,7 @@ export function printBeforeAll(): string {
           ])}
         } else {
           ${printLines([
+            "\n",
             printComment([`Create sleep function`]),
             "const sleep = promisify(setTimeout)",
             "\n",
@@ -41,6 +44,7 @@ export function printBeforeAll(): string {
             "\n",
             printComment(["Start the mock server"]),
             `try {
+              logger.info(\`Using mock server on http://localhost:\$\{port\}/graphql\`)
               mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", \`-p \$\{port\}\`])
             } catch (error) {
               logger.fatal(error)

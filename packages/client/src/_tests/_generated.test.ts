@@ -18,6 +18,8 @@ describe("generated", () => {
   beforeAll(async () => {
     /** Determine whether to use production or a mock server */
     if (Boolean(process.env.E2E)) {
+      logger.info("Using Linear API production endpoint for end-to-end test");
+
       /** Create Linear client with production server endpoint */
       client = new L.LinearClient({
         apiKey: process.env.E2E_API_KEY,
@@ -31,6 +33,7 @@ describe("generated", () => {
 
       /** Start the mock server */
       try {
+        logger.info(`Using mock server on http://localhost:${port}/graphql`);
         mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", `-p ${port}`]);
       } catch (error) {
         logger.fatal(error);
@@ -71,11 +74,32 @@ describe("generated", () => {
     });
   });
 
-  // ApplicationWithAuthorization clientId: string, scope: string[] - has required args
+  /** Test ApplicationWithAuthorization query with mock data */
+  describe("ApplicationWithAuthorization", () => {
+    /** Test the root query for the ApplicationWithAuthorization using mock data */
+    it("applicationWithAuthorization", async () => {
+      const applicationWithAuthorization = await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
+      expect(applicationWithAuthorization).toBeDefined();
+    });
+  });
 
-  // ArchivedModelSync identifier: string, modelClass: string - has required args
+  /** Test ArchivedModelSync query with mock data */
+  describe("ArchivedModelSync", () => {
+    /** Test the root query for the ArchivedModelSync using mock data */
+    it("archivedModelSync", async () => {
+      const archivedModelSync = await client.archivedModelSync("mock-identifier", "mock-modelClass");
+      expect(archivedModelSync).toBeDefined();
+    });
+  });
 
-  // ArchivedModelsSync modelClass: string, teamId: string - has required args
+  /** Test ArchivedModelsSync query with mock data */
+  describe("ArchivedModelsSync", () => {
+    /** Test the root query for the ArchivedModelsSync using mock data */
+    it("archivedModelsSync", async () => {
+      const archivedModelsSync = await client.archivedModelsSync("mock-modelClass", "mock-teamId");
+      expect(archivedModelsSync).toBeDefined();
+    });
+  });
 
   // AuthorizedApplications - no model for query
 
@@ -97,7 +121,14 @@ describe("generated", () => {
     });
   });
 
-  // CollaborativeDocumentJoin clientId: string, issueId: string, version: number - has required args
+  /** Test CollaborativeDocumentJoin query with mock data */
+  describe("CollaborativeDocumentJoin", () => {
+    /** Test the root query for the CollaborativeDocumentJoin using mock data */
+    it("collaborativeDocumentJoin", async () => {
+      const collaborativeDocumentJoin = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
+      expect(collaborativeDocumentJoin).toBeDefined();
+    });
+  });
 
   /** Test all Comment queries */
   describe("Comments", () => {
@@ -386,7 +417,14 @@ describe("generated", () => {
     });
   });
 
-  // FigmaEmbedInfo fileId: string - has required args
+  /** Test FigmaEmbedInfo query with mock data */
+  describe("FigmaEmbedInfo", () => {
+    /** Test the root query for the FigmaEmbedInfo using mock data */
+    it("figmaEmbedInfo", async () => {
+      const figmaEmbedInfo = await client.figmaEmbedInfo("mock-fileId");
+      expect(figmaEmbedInfo).toBeDefined();
+    });
+  });
 
   /** Test all IntegrationResource queries */
   describe("IntegrationResources", () => {
@@ -496,7 +534,14 @@ describe("generated", () => {
     });
   });
 
-  // InviteInfo userHash: string - has required args
+  /** Test InviteInfo query with mock data */
+  describe("InviteInfo", () => {
+    /** Test the root query for the InviteInfo using mock data */
+    it("inviteInfo", async () => {
+      const inviteInfo = await client.inviteInfo("mock-userHash");
+      expect(inviteInfo).toBeDefined();
+    });
+  });
 
   /** Test all IssueLabel queries */
   describe("IssueLabels", () => {
@@ -602,7 +647,14 @@ describe("generated", () => {
     });
   });
 
-  // IssueSearch query: string - has required args
+  /** Test IssueSearch query with mock data */
+  describe("IssueSearch", () => {
+    /** Test the root query for the IssueSearch using mock data */
+    it("issueSearch", async () => {
+      const issueSearch = await client.issueSearch("mock-query");
+      expect(issueSearch).toBeDefined();
+    });
+  });
 
   /** Test all Issue queries */
   describe("Issues", () => {
@@ -963,7 +1015,14 @@ describe("generated", () => {
     });
   });
 
-  // OrganizationExists urlKey: string - has required args
+  /** Test OrganizationExists query with mock data */
+  describe("OrganizationExists", () => {
+    /** Test the root query for the OrganizationExists using mock data */
+    it("organizationExists", async () => {
+      const organizationExists = await client.organizationExists("mock-urlKey");
+      expect(organizationExists).toBeDefined();
+    });
+  });
 
   /** Test all OrganizationInvite queries */
   describe("OrganizationInvites", () => {
@@ -1170,11 +1229,32 @@ describe("generated", () => {
     });
   });
 
-  // SsoUrlFromEmail email: string - has required args
+  /** Test SsoUrlFromEmail query with mock data */
+  describe("SsoUrlFromEmail", () => {
+    /** Test the root query for the SsoUrlFromEmail using mock data */
+    it("ssoUrlFromEmail", async () => {
+      const ssoUrlFromEmail = await client.ssoUrlFromEmail("mock-email");
+      expect(ssoUrlFromEmail).toBeDefined();
+    });
+  });
 
-  // SyncBootstrap databaseVersion: number, sinceSyncId: number - has required args
+  /** Test SyncBootstrap query with mock data */
+  describe("SyncBootstrap", () => {
+    /** Test the root query for the SyncBootstrap using mock data */
+    it("syncBootstrap", async () => {
+      const syncBootstrap = await client.syncBootstrap(123, 123);
+      expect(syncBootstrap).toBeDefined();
+    });
+  });
 
-  // SyncUpdates sinceSyncId: number - has required args
+  /** Test SyncUpdates query with mock data */
+  describe("SyncUpdates", () => {
+    /** Test the root query for the SyncUpdates using mock data */
+    it("syncUpdates", async () => {
+      const syncUpdates = await client.syncUpdates(123);
+      expect(syncUpdates).toBeDefined();
+    });
+  });
 
   /** Test all TeamMembership queries */
   describe("TeamMemberships", () => {
@@ -1398,7 +1478,14 @@ describe("generated", () => {
     });
   });
 
-  // Template id: string - has required args
+  /** Test Template query with mock data */
+  describe("Template", () => {
+    /** Test the root query for the Template using mock data */
+    it("template", async () => {
+      const template = await client.template("mock-id");
+      expect(template).toBeDefined();
+    });
+  });
 
   // Templates - no model for query
 
