@@ -37,8 +37,6 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       sdkDefinitions,
     };
 
-    logger.trace(sdkContext);
-
     logger.info("Printing tests");
     const tests = printTests(sdkContext);
 

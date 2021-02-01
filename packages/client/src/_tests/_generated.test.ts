@@ -114,19 +114,43 @@ describe("generated", () => {
 
   /** Test BillingDetails query */
   describe("BillingDetails", () => {
+    let _billingDetails: L.BillingDetailsPayload;
+
     /** Test the root query for BillingDetails */
     it("billingDetails", async () => {
       const billingDetails = await client.billingDetails;
+      _billingDetails = billingDetails;
       expect(billingDetails instanceof L.BillingDetailsPayload);
+    });
+
+    /** Test BillingDetails_PaymentMethod query */
+    describe("BillingDetails_PaymentMethod", () => {
+      /** Test the billingDetails query for BillingDetails_PaymentMethod */
+      it("paymentMethod", async () => {
+        const paymentMethod = await _billingDetails.paymentMethod;
+        expect(paymentMethod instanceof L.Card);
+      });
     });
   });
 
   /** Test CollaborativeDocumentJoin query with mock data */
   describe("CollaborativeDocumentJoin", () => {
+    let _collaborativeDocumentJoin: L.CollaborationDocumentUpdatePayload;
+
     /** Test the root query for the CollaborativeDocumentJoin using mock data */
     it("collaborativeDocumentJoin", async () => {
       const collaborativeDocumentJoin = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
+      _collaborativeDocumentJoin = collaborativeDocumentJoin;
       expect(collaborativeDocumentJoin instanceof L.CollaborationDocumentUpdatePayload);
+    });
+
+    /** Test CollaborativeDocumentJoin_Steps query with mock data */
+    describe("CollaborativeDocumentJoin_Steps", () => {
+      /** Test the collaborativeDocumentJoin query for the CollaborativeDocumentJoin_Steps using mock data */
+      it("steps", async () => {
+        const steps = await _collaborativeDocumentJoin.steps;
+        expect(steps instanceof L.StepsResponse);
+      });
     });
   });
 
@@ -419,10 +443,22 @@ describe("generated", () => {
 
   /** Test FigmaEmbedInfo query with mock data */
   describe("FigmaEmbedInfo", () => {
+    let _figmaEmbedInfo: L.FigmaEmbedPayload;
+
     /** Test the root query for the FigmaEmbedInfo using mock data */
     it("figmaEmbedInfo", async () => {
       const figmaEmbedInfo = await client.figmaEmbedInfo("mock-fileId");
+      _figmaEmbedInfo = figmaEmbedInfo;
       expect(figmaEmbedInfo instanceof L.FigmaEmbedPayload);
+    });
+
+    /** Test FigmaEmbedInfo_FigmaEmbed query with mock data */
+    describe("FigmaEmbedInfo_FigmaEmbed", () => {
+      /** Test the figmaEmbedInfo query for the FigmaEmbedInfo_FigmaEmbed using mock data */
+      it("figmaEmbed", async () => {
+        const figmaEmbed = await _figmaEmbedInfo.figmaEmbed;
+        expect(figmaEmbed instanceof L.FigmaEmbed);
+      });
     });
   });
 
@@ -536,10 +572,22 @@ describe("generated", () => {
 
   /** Test InviteInfo query with mock data */
   describe("InviteInfo", () => {
+    let _inviteInfo: L.InvitePagePayload;
+
     /** Test the root query for the InviteInfo using mock data */
     it("inviteInfo", async () => {
       const inviteInfo = await client.inviteInfo("mock-userHash");
+      _inviteInfo = inviteInfo;
       expect(inviteInfo instanceof L.InvitePagePayload);
+    });
+
+    /** Test InviteInfo_InviteData query with mock data */
+    describe("InviteInfo_InviteData", () => {
+      /** Test the inviteInfo query for the InviteInfo_InviteData using mock data */
+      it("inviteData", async () => {
+        const inviteData = await _inviteInfo.inviteData;
+        expect(inviteData instanceof L.InviteData);
+      });
     });
   });
 
@@ -1008,10 +1056,49 @@ describe("generated", () => {
 
   /** Test Organization query */
   describe("Organization", () => {
+    let _organization: L.Organization;
+
     /** Test the root query for Organization */
     it("organization", async () => {
       const organization = await client.organization;
+      _organization = organization;
       expect(organization instanceof L.Organization);
+    });
+
+    /** Test all Integration queries */
+    describe("Organization_Integrations", () => {
+      /** Test the root query for the Integration connection */
+      it("integrations", async () => {
+        const integrations = await _organization.integrations();
+        expect(integrations instanceof L.IntegrationConnection);
+      });
+    });
+
+    /** Test all Milestone queries */
+    describe("Organization_Milestones", () => {
+      /** Test the root query for the Milestone connection */
+      it("milestones", async () => {
+        const milestones = await _organization.milestones();
+        expect(milestones instanceof L.MilestoneConnection);
+      });
+    });
+
+    /** Test all Team queries */
+    describe("Organization_Teams", () => {
+      /** Test the root query for the Team connection */
+      it("teams", async () => {
+        const teams = await _organization.teams();
+        expect(teams instanceof L.TeamConnection);
+      });
+    });
+
+    /** Test all User queries */
+    describe("Organization_Users", () => {
+      /** Test the root query for the User connection */
+      it("users", async () => {
+        const users = await _organization.users();
+        expect(users instanceof L.UserConnection);
+      });
     });
   });
 
@@ -1565,10 +1652,40 @@ describe("generated", () => {
 
   /** Test Viewer query */
   describe("Viewer", () => {
+    let _viewer: L.User;
+
     /** Test the root query for Viewer */
     it("viewer", async () => {
       const viewer = await client.viewer;
+      _viewer = viewer;
       expect(viewer instanceof L.User);
+    });
+
+    /** Test all Issue queries */
+    describe("Viewer_AssignedIssues", () => {
+      /** Test the root query for the Issue connection */
+      it("assignedIssues", async () => {
+        const assignedIssues = await _viewer.assignedIssues();
+        expect(assignedIssues instanceof L.IssueConnection);
+      });
+    });
+
+    /** Test all Issue queries */
+    describe("Viewer_CreatedIssues", () => {
+      /** Test the root query for the Issue connection */
+      it("createdIssues", async () => {
+        const createdIssues = await _viewer.createdIssues();
+        expect(createdIssues instanceof L.IssueConnection);
+      });
+    });
+
+    /** Test all TeamMembership queries */
+    describe("Viewer_TeamMemberships", () => {
+      /** Test the root query for the TeamMembership connection */
+      it("teamMemberships", async () => {
+        const teamMemberships = await _viewer.teamMemberships();
+        expect(teamMemberships instanceof L.TeamMembershipConnection);
+      });
     });
   });
 

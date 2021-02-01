@@ -1,6 +1,6 @@
 import { OperationType, printComment, printLines, printList, printSet } from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
-import { logger } from "@linear/common";
+import { getLast, nonNullable } from "@linear/common";
 import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
 
 /**
@@ -44,6 +44,9 @@ function printIt(name: string, content: string): string {
   ]);
 }
 
+/**
+ * Find the model field for the connection nodes
+ */
 function getConnectionNode(operation: SdkOperation): SdkListField | undefined {
   return operation.model?.fields.list.find(field => field.name === Sdk.NODE_NAME);
 }
@@ -51,14 +54,22 @@ function getConnectionNode(operation: SdkOperation): SdkListField | undefined {
 /**
  * Print tests for a query
  */
-function printQueryTest(context: SdkPluginContext, operation: SdkOperation): string {
+function printQueryTest(context: SdkPluginContext, operation: SdkOperation, index = 0): string {
+  if (index > 2) {
+    return "";
+  }
+
+  const sdkKey = operation.sdkPath.join("_");
+  const sdkOperations = context.sdkDefinitions[operation.path.join("_")]?.operations ?? [];
+  const clientName = getLast(operation.sdkPath) ? `_${getLast(operation.sdkPath)}` : "client";
+
   const hasRequiredArgs = Boolean(operation.requiredArgs.args.length);
-  const fieldName = operation.print.field;
+  const fieldName = getLast(operation.path) ?? "UNKNOWN_FIELD_NAME";
   const fieldType = printList([Sdk.NAMESPACE, operation.print.model], ".");
-  logger.trace(operation.print);
+
   const listType = getConnectionNode(operation)?.listType;
-  const itemOperation = context.sdkDefinitions[""].operations.find(rootOperation => {
-    return rootOperation.print.model === listType;
+  const itemOperation = context.sdkDefinitions[sdkKey].operations.find(sdkOperation => {
+    return sdkOperation.print.model === listType;
   });
   const itemField = itemOperation?.print.field;
   const itemType = printList([Sdk.NAMESPACE, itemOperation?.print.model], ".");
@@ -67,40 +78,51 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
   const itemConnections = itemOperation?.model?.fields.connection ?? [];
 
   if (hasRequiredArgs) {
-    const connectionOperation = context.sdkDefinitions[""].operations.find(rootOperation => {
-      return getConnectionNode(rootOperation)?.listType === operation.name;
+    const connectionOperation = context.sdkDefinitions[sdkKey].operations.find(sdkOperation => {
+      return getConnectionNode(sdkOperation)?.listType === operation.name;
     });
 
     if (connectionOperation) {
       /** This operation is handled by the connection test */
       return "";
     } else {
+      const parentArgNames = operation.parent?.requiredArgs.args.map(arg => arg.name) ?? [];
+      const fieldArgs = operation.requiredArgs.args
+        .map(arg =>
+          parentArgNames.includes(arg.name)
+            ? undefined
+            : arg.type === "string"
+            ? `"mock-${arg.name}"`
+            : arg.type === "string[]"
+            ? `["mock-${arg.name}"]`
+            : arg.type === "number"
+            ? `123`
+            : arg.type === "number[]"
+            ? `[123]`
+            : "UNMAPPED_MOCK_TYPE"
+        )
+        .filter(nonNullable);
+
       /** Mock data for any queries with required variables that cannot be sourced via a connection */
       return printLines([
         printComment([`Test ${operation.name} query with mock data`]),
         printDescribe(
           operation.name,
           printLines([
-            printComment([`Test the root query for the ${operation.name} using mock data`]),
+            sdkOperations.length ? `let _${fieldName}: ${fieldType}` : undefined,
+            "\n",
+            printComment([`Test the ${sdkKey || "root"} query for the ${operation.name} using mock data`]),
             printIt(
               fieldName,
               printLines([
-                `const ${fieldName} = await client.${fieldName}(${printList(
-                  operation.requiredArgs.args.map(arg =>
-                    arg.type === "string"
-                      ? `"mock-${arg.name}"`
-                      : arg.type === "string[]"
-                      ? `["mock-${arg.name}"]`
-                      : arg.type === "number"
-                      ? `123`
-                      : arg.type === "number[]"
-                      ? `[123]`
-                      : "UNMAPPED_MOCK_TYPE"
-                  )
-                )})`,
+                `const ${fieldName} = await ${clientName}.${fieldName}${
+                  fieldArgs.length ? `(${printList(fieldArgs)})` : ""
+                }`,
+                sdkOperations.length ? printSet(`_${fieldName}`, fieldName) : undefined,
                 `expect(${fieldName} instanceof ${fieldType})`,
               ])
             ),
+            printLines(sdkOperations.map(sdkOperation => printQueryTest(context, sdkOperation, index + 1))),
           ])
         ),
       ]);
@@ -123,7 +145,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
             printIt(
               fieldName,
               printLines([
-                `const ${fieldName} = await client.${fieldName}${
+                `const ${fieldName} = await ${clientName}.${fieldName}${
                   Boolean(operation.optionalArgs.args.length) ? "()" : ""
                 }`,
                 itemOperation
@@ -147,7 +169,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                       " && "
                     )}) {
                       ${printLines([
-                        `const ${itemField} = await client.${itemField}(${printList(
+                        `const ${itemField} = await ${clientName}.${itemField}(${printList(
                           itemArgs.map(arg => `_${itemField}_${arg.name}`)
                         )})`,
                         printSet(`_${itemField}`, itemField),
@@ -160,6 +182,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                 ]
               : []),
             "\n",
+
             itemQueries.length
               ? printLines(
                   itemQueries.map(field => {
@@ -214,16 +237,20 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
         printDescribe(
           operation.name,
           printLines([
-            printComment([`Test the root query for ${operation.name}`]),
+            sdkOperations.length ? `let _${fieldName}: ${fieldType}` : undefined,
+            "\n",
+            printComment([`Test the ${sdkKey || "root"} query for ${operation.name}`]),
             printIt(
               fieldName,
               printLines([
-                `const ${fieldName} = await client.${fieldName}${
+                `const ${fieldName} = await ${clientName}.${fieldName}${
                   Boolean(operation.optionalArgs.args.length) ? "()" : ""
                 }`,
+                sdkOperations.length ? printSet(`_${fieldName}`, fieldName) : undefined,
                 `expect(${fieldName} instanceof ${fieldType})`,
               ])
             ),
+            printLines(sdkOperations.map(sdkOperation => printQueryTest(context, sdkOperation, index + 1))),
           ])
         ),
       ]);
