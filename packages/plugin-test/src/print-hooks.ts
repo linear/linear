@@ -41,7 +41,7 @@ export function printBeforeAll(): string {
             "\n",
             printComment(["Start the mock server"]),
             `try {
-              mockServer = execa("npx", ["graphql-faker", "packages/client/src/schema.graphql", \`-p \$\{port\}\`])
+              mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", \`-p \$\{port\}\`])
             } catch (error) {
               logger.fatal(error)
               throw new Error('Failed to start the mock server')

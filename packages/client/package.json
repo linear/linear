@@ -14,33 +14,25 @@
     "dist"
   ],
   "scripts": {
+    "build:clean": "npx rimraf dist",
     "build:client": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",
-    "build:clean": "npx rimraf dist",
-    "schema": "npx graphql-codegen --config codegen.schema.yml",
-    "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
-    "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml",
+    "generate:clean": "npx rimraf src/**/_generated*",
     "generate:test": "npx graphql-codegen --config codegen.test.yml",
-    "generate:clean": "npx rimraf src/_generated",
+    "schema": "npx graphql-codegen --config codegen.schema.yml",
     "scratch": "ts-node src/scratch.ts"
   },
   "dependencies": {
-    "@linear/common": "^1.0.0"
+    "@linear/common": "^1.0.0",
+    "@linear/sdk": "^1.0.0"
   },
   "peerDependencies": {
     "graphql": "^15.4.0",
     "graphql-request": "^3.3.0"
   },
   "devDependencies": {
-    "@graphql-codegen/introspection": "^1.18.0",
-    "@graphql-codegen/schema-ast": "^1.18.1",
-    "@graphql-codegen/typed-document-node": "^1.17.10",
-    "@graphql-codegen/typescript": "^1.17.11",
-    "@graphql-codegen/typescript-operations": "^1.17.9",
-    "@graphql-typed-document-node/core": "^3.1.0",
-    "@linear/plugin-doc": "^1.0.0",
-    "@linear/plugin-sdk": "^1.0.0",
     "@linear/plugin-test": "^1.0.0",
+    "@rollup/plugin-typescript": "^8.1.1",
     "dotenv": "^8.2.0",
     "execa": "^5.0.0",
     "get-port": "^5.1.1",

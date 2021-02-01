@@ -5,5 +5,5 @@
     "outDir": "dist",
     "declarationDir": "dist"
   },
-  "exclude": ["./**/*.test.*", "./src/_tests"]
+  "exclude": ["./src/_tests"]
 }

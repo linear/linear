@@ -1,21 +1,10 @@
 overwrite: true
-schema: ./src/schema.graphql
-documents: ./src/_generated/**
+schema: "../sdk/src/schema.graphql"
+documents: "../sdk/src/**"
 hooks:
   afterOneFileWrite:
     - prettier --write
 generates:
-  src/_generated/_gen.test.ts:
+  src/_tests/_generated.test.ts:
     plugins:
       - "@linear/plugin-test"
-    config:
-      documentFile: ./_gen_documents
-      skipFields:
-        - "disableReason"
-        - "defaultTemplateForMembersId"
-        - "defaultTemplateForNonMembersId"
-        - "gitBranchFormat"
-        - "subscription"
-      skipDirectives:
-        # - "skipSdk"
-        # - "deprecated"

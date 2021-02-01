@@ -1,0 +1,43 @@
+{
+  "name": "@linear/sdk",
+  "version": "1.0.0",
+  "author": "Linear Orbit, Inc",
+  "license": "MIT",
+  "main": "dist/index-cjs.min.js",
+  "module": "dist/index-es.min.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=12.x",
+    "yarn": "1.x"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:clean": "npx rimraf dist",
+    "build:sdk": "run-s build:clean build:rollup",
+    "build:rollup": "npx rollup -c",
+    "generate:clean": "npx rimraf src/_generated_*",
+    "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
+    "generate:schema": "npx graphql-codegen --config codegen.schema.yml",
+    "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml"
+  },
+  "peerDependencies": {
+    "graphql": "^15.4.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/introspection": "^1.18.0",
+    "@graphql-codegen/schema-ast": "^1.18.1",
+    "@graphql-codegen/typed-document-node": "^1.17.10",
+    "@graphql-codegen/typescript": "^1.17.11",
+    "@graphql-codegen/typescript-operations": "^1.17.9",
+    "@graphql-typed-document-node/core": "^3.1.0",
+    "@linear/plugin-doc": "^1.0.0",
+    "@linear/plugin-sdk": "^1.0.0",
+    "@rollup/plugin-typescript": "^8.1.1",
+    "rollup": "^2.38.3",
+    "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-size-snapshot": "^0.12.0",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}

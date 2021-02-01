@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { DocumentNode } from "graphql";
-import * as L from "./_gen_documents";
+import * as L from "./_generated_documents";
 
 /** The function for calling the graphql client */
 export type Request = <Response, Variables>(doc: DocumentNode, variables?: Variables) => Promise<Response>;

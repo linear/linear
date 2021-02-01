@@ -1,0 +1,16 @@
+overwrite: true
+schema: ./src/schema.graphql
+hooks:
+  afterOneFileWrite:
+    - prettier --write
+config:
+  skipFields:
+    - "disableReason"
+    - "defaultTemplateForMembersId"
+    - "defaultTemplateForNonMembersId"
+    - "gitBranchFormat"
+    - "subscription"
+generates:
+  src/_generated_documents.graphql:
+    plugins:
+      - "@linear/plugin-doc"

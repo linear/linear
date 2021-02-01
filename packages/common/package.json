@@ -14,14 +14,15 @@
     "dist"
   ],
   "scripts": {
+    "build:clean": "npx rimraf dist",
     "build:common": "run-s build:clean build:rollup",
-    "build:rollup": "npx rollup -c",
-    "build:clean": "npx rimraf dist"
+    "build:rollup": "npx rollup -c"
   },
   "dependencies": {
     "tracer": "^1.1.4"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^8.1.1",
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-size-snapshot": "^0.12.0",

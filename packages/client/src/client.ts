@@ -1,9 +1,9 @@
+import { LinearSdk } from "@linear/sdk";
 import { DocumentNode, print } from "graphql";
 import { GraphQLClient } from "graphql-request";
 import { LinearError } from "./error";
 import { LinearClientOptions, LinearClientParsedOptions } from "./types";
 import { serializeUserAgent } from "./utils";
-import { LinearSdk } from "./_generated/_gen_sdk";
 
 /**
  * Validate and return default graphql-request client options

@@ -93,7 +93,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["**/_generated/**/*.ts"],
+      files: ["**/_generated*"],
       rules: {
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-explicit-any": "off",
