@@ -146,3 +146,16 @@ export function printTernary(_if?: string, _then?: string, _else = "undefined"):
 export function printSet(left: string, right: string): string {
   return `${left} = ${right}`;
 }
+
+/**
+ * Print a string wrapping the content in an if and throwing an error if invalid
+ */
+export function printElseThrow(_if: string, content: string, error: string, omit = false): string {
+  return omit
+    ? content
+    : `if (${_if}) {
+        ${content}
+      } else {
+        throw new Error('${error}')
+      }`;
+}

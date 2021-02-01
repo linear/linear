@@ -8,6 +8,7 @@ import * as L from "../index";
 /** Load environment variables */
 dotenv.config();
 
+/** Auto generated API tests */
 describe("generated", () => {
   /** Initialize mock server variable */
   let mockServer: ExecaChildProcess;
@@ -69,8 +70,12 @@ describe("generated", () => {
   describe("ApiKeys", () => {
     /** Test the root query for the ApiKey connection */
     it("apiKeys", async () => {
-      const apiKeys = await client.apiKeys();
-      expect(apiKeys instanceof L.ApiKeyConnection);
+      if (client) {
+        const apiKeys = await client.apiKeys();
+        expect(apiKeys instanceof L.ApiKeyConnection);
+      } else {
+        throw new Error("No undefined found from apiKeys query - cannot test client.apiKeys query");
+      }
     });
   });
 
@@ -78,8 +83,14 @@ describe("generated", () => {
   describe("ApplicationWithAuthorization", () => {
     /** Test the root query for ApplicationWithAuthorization */
     it("applicationWithAuthorization", async () => {
-      const applicationWithAuthorization = await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
-      expect(applicationWithAuthorization instanceof L.UserAuthorizedApplication);
+      if (client) {
+        const applicationWithAuthorization = await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
+        expect(applicationWithAuthorization instanceof L.UserAuthorizedApplication);
+      } else {
+        throw new Error(
+          "No undefined found from applicationWithAuthorization query - cannot test client.applicationWithAuthorization query"
+        );
+      }
     });
   });
 
@@ -87,8 +98,12 @@ describe("generated", () => {
   describe("ArchivedModelSync", () => {
     /** Test the root query for ArchivedModelSync */
     it("archivedModelSync", async () => {
-      const archivedModelSync = await client.archivedModelSync("mock-identifier", "mock-modelClass");
-      expect(archivedModelSync instanceof L.ArchiveResponse);
+      if (client) {
+        const archivedModelSync = await client.archivedModelSync("mock-identifier", "mock-modelClass");
+        expect(archivedModelSync instanceof L.ArchiveResponse);
+      } else {
+        throw new Error("No undefined found from archivedModelSync query - cannot test client.archivedModelSync query");
+      }
     });
   });
 
@@ -96,8 +111,14 @@ describe("generated", () => {
   describe("ArchivedModelsSync", () => {
     /** Test the root query for ArchivedModelsSync */
     it("archivedModelsSync", async () => {
-      const archivedModelsSync = await client.archivedModelsSync("mock-modelClass", "mock-teamId");
-      expect(archivedModelsSync instanceof L.ArchiveResponse);
+      if (client) {
+        const archivedModelsSync = await client.archivedModelsSync("mock-modelClass", "mock-teamId");
+        expect(archivedModelsSync instanceof L.ArchiveResponse);
+      } else {
+        throw new Error(
+          "No undefined found from archivedModelsSync query - cannot test client.archivedModelsSync query"
+        );
+      }
     });
   });
 
@@ -107,8 +128,12 @@ describe("generated", () => {
   describe("AvailableUsers", () => {
     /** Test the root query for AvailableUsers */
     it("availableUsers", async () => {
-      const availableUsers = await client.availableUsers;
-      expect(availableUsers instanceof L.AuthResolverResponse);
+      if (client) {
+        const availableUsers = await client.availableUsers;
+        expect(availableUsers instanceof L.AuthResolverResponse);
+      } else {
+        throw new Error("No undefined found from availableUsers query - cannot test client.availableUsers query");
+      }
     });
   });
 
@@ -118,18 +143,25 @@ describe("generated", () => {
 
     /** Test the root query for BillingDetails */
     it("billingDetails", async () => {
-      const billingDetails = await client.billingDetails;
-      _billingDetails = billingDetails;
-      expect(billingDetails instanceof L.BillingDetailsPayload);
+      if (client) {
+        const billingDetails = await client.billingDetails;
+        _billingDetails = billingDetails;
+        expect(billingDetails instanceof L.BillingDetailsPayload);
+      } else {
+        throw new Error("No undefined found from billingDetails query - cannot test client.billingDetails query");
+      }
     });
 
-    /** Test BillingDetails_PaymentMethod query */
-    describe("BillingDetails_PaymentMethod", () => {
-      /** Test the billingDetails query for BillingDetails_PaymentMethod */
-      it("paymentMethod", async () => {
+    /** Test the billingDetails query for BillingDetails_PaymentMethod */
+    it("paymentMethod", async () => {
+      if (_billingDetails) {
         const paymentMethod = await _billingDetails.paymentMethod;
         expect(paymentMethod instanceof L.Card);
-      });
+      } else {
+        throw new Error(
+          "No billingDetails found from paymentMethod query - cannot test _billingDetails.paymentMethod query"
+        );
+      }
     });
   });
 
@@ -139,18 +171,27 @@ describe("generated", () => {
 
     /** Test the root query for CollaborativeDocumentJoin */
     it("collaborativeDocumentJoin", async () => {
-      const collaborativeDocumentJoin = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
-      _collaborativeDocumentJoin = collaborativeDocumentJoin;
-      expect(collaborativeDocumentJoin instanceof L.CollaborationDocumentUpdatePayload);
+      if (client) {
+        const collaborativeDocumentJoin = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
+        _collaborativeDocumentJoin = collaborativeDocumentJoin;
+        expect(collaborativeDocumentJoin instanceof L.CollaborationDocumentUpdatePayload);
+      } else {
+        throw new Error(
+          "No undefined found from collaborativeDocumentJoin query - cannot test client.collaborativeDocumentJoin query"
+        );
+      }
     });
 
-    /** Test CollaborativeDocumentJoin_Steps query */
-    describe("CollaborativeDocumentJoin_Steps", () => {
-      /** Test the collaborativeDocumentJoin query for CollaborativeDocumentJoin_Steps */
-      it("steps", async () => {
+    /** Test the collaborativeDocumentJoin query for CollaborativeDocumentJoin_Steps */
+    it("steps", async () => {
+      if (_collaborativeDocumentJoin) {
         const steps = await _collaborativeDocumentJoin.steps;
         expect(steps instanceof L.StepsResponse);
-      });
+      } else {
+        throw new Error(
+          "No collaborativeDocumentJoin found from steps query - cannot test _collaborativeDocumentJoin.steps query"
+        );
+      }
     });
   });
 
@@ -161,17 +202,20 @@ describe("generated", () => {
 
     /** Test the root query for the Comment connection */
     it("comments", async () => {
-      const comments = await client.comments();
-      const comment = comments?.nodes?.[0];
-      _comment_id = comment?.id;
-      expect(comments instanceof L.CommentConnection);
+      if (client) {
+        const comments = await client.comments();
+        const comment = comments?.nodes?.[0];
+        _comment_id = comment?.id;
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        throw new Error("No undefined found from comments query - cannot test client.comments query");
+      }
     });
 
     /** Test the root query for a single Comment */
     it("comment", async () => {
       if (_comment_id) {
         const comment = await client.comment(_comment_id);
-        _comment = comment;
         expect(comment instanceof L.Comment);
       } else {
         throw new Error("No first Comment found from comments connection query - cannot test comment query");
@@ -206,17 +250,20 @@ describe("generated", () => {
 
     /** Test the root query for the CustomView connection */
     it("customViews", async () => {
-      const customViews = await client.customViews();
-      const customView = customViews?.nodes?.[0];
-      _customView_id = customView?.id;
-      expect(customViews instanceof L.CustomViewConnection);
+      if (client) {
+        const customViews = await client.customViews();
+        const customView = customViews?.nodes?.[0];
+        _customView_id = customView?.id;
+        expect(customViews instanceof L.CustomViewConnection);
+      } else {
+        throw new Error("No undefined found from customViews query - cannot test client.customViews query");
+      }
     });
 
     /** Test the root query for a single CustomView */
     it("customView", async () => {
       if (_customView_id) {
         const customView = await client.customView(_customView_id);
-        _customView = customView;
         expect(customView instanceof L.CustomView);
       } else {
         throw new Error("No first CustomView found from customViews connection query - cannot test customView query");
@@ -261,10 +308,14 @@ describe("generated", () => {
 
     /** Test the root query for the Cycle connection */
     it("cycles", async () => {
-      const cycles = await client.cycles();
-      const cycle = cycles?.nodes?.[0];
-      _cycle_id = cycle?.id;
-      expect(cycles instanceof L.CycleConnection);
+      if (client) {
+        const cycles = await client.cycles();
+        const cycle = cycles?.nodes?.[0];
+        _cycle_id = cycle?.id;
+        expect(cycles instanceof L.CycleConnection);
+      } else {
+        throw new Error("No undefined found from cycles query - cannot test client.cycles query");
+      }
     });
 
     /** Test the root query for a single Cycle */
@@ -278,6 +329,28 @@ describe("generated", () => {
       }
     });
 
+    /** Test the cycle query for the Issue connection */
+    it("cycle.issues", async () => {
+      if (_cycle) {
+        const issues = await _cycle.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        throw new Error("No cycle found from issues query - cannot test _cycle.issues query");
+      }
+    });
+
+    /** Test the cycle query for the Issue connection */
+    it("cycle.uncompletedIssuesUponClose", async () => {
+      if (_cycle) {
+        const uncompletedIssuesUponClose = await _cycle.uncompletedIssuesUponClose();
+        expect(uncompletedIssuesUponClose instanceof L.IssueConnection);
+      } else {
+        throw new Error(
+          "No cycle found from uncompletedIssuesUponClose query - cannot test _cycle.uncompletedIssuesUponClose query"
+        );
+      }
+    });
+
     /** Test the cycle.team query for L.Team */
     it("cycle.team", async () => {
       if (_cycle) {
@@ -285,28 +358,6 @@ describe("generated", () => {
         expect(cycle_team instanceof L.Team);
       } else {
         throw new Error("No Cycle found from cycle query - cannot test cycle.team query");
-      }
-    });
-
-    /** Test the cycle.issues connection query for L.IssueConnection */
-    it("cycle.issues", async () => {
-      if (_cycle) {
-        const cycle_issues = await _cycle.issues();
-        expect(cycle_issues instanceof L.IssueConnection);
-      } else {
-        throw new Error("No Cycle found from cycle query - cannot test cycle.issues connection query");
-      }
-    });
-
-    /** Test the cycle.uncompletedIssuesUponClose connection query for L.IssueConnection */
-    it("cycle.uncompletedIssuesUponClose", async () => {
-      if (_cycle) {
-        const cycle_uncompletedIssuesUponClose = await _cycle.uncompletedIssuesUponClose();
-        expect(cycle_uncompletedIssuesUponClose instanceof L.IssueConnection);
-      } else {
-        throw new Error(
-          "No Cycle found from cycle query - cannot test cycle.uncompletedIssuesUponClose connection query"
-        );
       }
     });
   });
@@ -318,17 +369,20 @@ describe("generated", () => {
 
     /** Test the root query for the Emoji connection */
     it("emojis", async () => {
-      const emojis = await client.emojis();
-      const emoji = emojis?.nodes?.[0];
-      _emoji_id = emoji?.id;
-      expect(emojis instanceof L.EmojiConnection);
+      if (client) {
+        const emojis = await client.emojis();
+        const emoji = emojis?.nodes?.[0];
+        _emoji_id = emoji?.id;
+        expect(emojis instanceof L.EmojiConnection);
+      } else {
+        throw new Error("No undefined found from emojis query - cannot test client.emojis query");
+      }
     });
 
     /** Test the root query for a single Emoji */
     it("emoji", async () => {
       if (_emoji_id) {
         const emoji = await client.emoji(_emoji_id);
-        _emoji = emoji;
         expect(emoji instanceof L.Emoji);
       } else {
         throw new Error("No first Emoji found from emojis connection query - cannot test emoji query");
@@ -363,17 +417,20 @@ describe("generated", () => {
 
     /** Test the root query for the Favorite connection */
     it("favorites", async () => {
-      const favorites = await client.favorites();
-      const favorite = favorites?.nodes?.[0];
-      _favorite_id = favorite?.id;
-      expect(favorites instanceof L.FavoriteConnection);
+      if (client) {
+        const favorites = await client.favorites();
+        const favorite = favorites?.nodes?.[0];
+        _favorite_id = favorite?.id;
+        expect(favorites instanceof L.FavoriteConnection);
+      } else {
+        throw new Error("No undefined found from favorites query - cannot test client.favorites query");
+      }
     });
 
     /** Test the root query for a single Favorite */
     it("favorite", async () => {
       if (_favorite_id) {
         const favorite = await client.favorite(_favorite_id);
-        _favorite = favorite;
         expect(favorite instanceof L.Favorite);
       } else {
         throw new Error("No first Favorite found from favorites connection query - cannot test favorite query");
@@ -447,18 +504,23 @@ describe("generated", () => {
 
     /** Test the root query for FigmaEmbedInfo */
     it("figmaEmbedInfo", async () => {
-      const figmaEmbedInfo = await client.figmaEmbedInfo("mock-fileId");
-      _figmaEmbedInfo = figmaEmbedInfo;
-      expect(figmaEmbedInfo instanceof L.FigmaEmbedPayload);
+      if (client) {
+        const figmaEmbedInfo = await client.figmaEmbedInfo("mock-fileId");
+        _figmaEmbedInfo = figmaEmbedInfo;
+        expect(figmaEmbedInfo instanceof L.FigmaEmbedPayload);
+      } else {
+        throw new Error("No undefined found from figmaEmbedInfo query - cannot test client.figmaEmbedInfo query");
+      }
     });
 
-    /** Test FigmaEmbedInfo_FigmaEmbed query */
-    describe("FigmaEmbedInfo_FigmaEmbed", () => {
-      /** Test the figmaEmbedInfo query for FigmaEmbedInfo_FigmaEmbed */
-      it("figmaEmbed", async () => {
+    /** Test the figmaEmbedInfo query for FigmaEmbedInfo_FigmaEmbed */
+    it("figmaEmbed", async () => {
+      if (_figmaEmbedInfo) {
         const figmaEmbed = await _figmaEmbedInfo.figmaEmbed();
         expect(figmaEmbed instanceof L.FigmaEmbed);
-      });
+      } else {
+        throw new Error("No figmaEmbedInfo found from figmaEmbed query - cannot test _figmaEmbedInfo.figmaEmbed query");
+      }
     });
   });
 
@@ -469,10 +531,16 @@ describe("generated", () => {
 
     /** Test the root query for the IntegrationResource connection */
     it("integrationResources", async () => {
-      const integrationResources = await client.integrationResources();
-      const integrationResource = integrationResources?.nodes?.[0];
-      _integrationResource_id = integrationResource?.id;
-      expect(integrationResources instanceof L.IntegrationResourceConnection);
+      if (client) {
+        const integrationResources = await client.integrationResources();
+        const integrationResource = integrationResources?.nodes?.[0];
+        _integrationResource_id = integrationResource?.id;
+        expect(integrationResources instanceof L.IntegrationResourceConnection);
+      } else {
+        throw new Error(
+          "No undefined found from integrationResources query - cannot test client.integrationResources query"
+        );
+      }
     });
 
     /** Test the root query for a single IntegrationResource */
@@ -484,6 +552,71 @@ describe("generated", () => {
       } else {
         throw new Error(
           "No first IntegrationResource found from integrationResources connection query - cannot test integrationResource query"
+        );
+      }
+    });
+
+    let _data: L.IntegrationResourceData;
+
+    /** Test the integrationResource query for IntegrationResource_Data */
+    it("data", async () => {
+      if (_integrationResource) {
+        const data = await _integrationResource.data;
+        _data = data;
+        expect(data instanceof L.IntegrationResourceData);
+      } else {
+        throw new Error("No integrationResource found from data query - cannot test _integrationResource.data query");
+      }
+    });
+
+    /** Test the integrationResource_data query for IntegrationResource_Data_GithubCommit */
+    it("githubCommit", async () => {
+      if (_data) {
+        const githubCommit = await _data.githubCommit;
+        expect(githubCommit instanceof L.CommitPayload);
+      } else {
+        throw new Error("No data found from githubCommit query - cannot test _data.githubCommit query");
+      }
+    });
+
+    /** Test the integrationResource_data query for IntegrationResource_Data_GithubPullRequest */
+    it("githubPullRequest", async () => {
+      if (_data) {
+        const githubPullRequest = await _data.githubPullRequest;
+        expect(githubPullRequest instanceof L.PullRequestPayload);
+      } else {
+        throw new Error("No data found from githubPullRequest query - cannot test _data.githubPullRequest query");
+      }
+    });
+
+    /** Test the integrationResource_data query for IntegrationResource_Data_GitlabMergeRequest */
+    it("gitlabMergeRequest", async () => {
+      if (_data) {
+        const gitlabMergeRequest = await _data.gitlabMergeRequest;
+        expect(gitlabMergeRequest instanceof L.PullRequestPayload);
+      } else {
+        throw new Error("No data found from gitlabMergeRequest query - cannot test _data.gitlabMergeRequest query");
+      }
+    });
+
+    /** Test the integrationResource_data query for IntegrationResource_Data_SentryIssue */
+    it("sentryIssue", async () => {
+      if (_data) {
+        const sentryIssue = await _data.sentryIssue;
+        expect(sentryIssue instanceof L.SentryIssuePayload);
+      } else {
+        throw new Error("No data found from sentryIssue query - cannot test _data.sentryIssue query");
+      }
+    });
+
+    /** Test the integrationResource query for IntegrationResource_PullRequest */
+    it("pullRequest", async () => {
+      if (_integrationResource) {
+        const pullRequest = await _integrationResource.pullRequest;
+        expect(pullRequest instanceof L.PullRequestPayload);
+      } else {
+        throw new Error(
+          "No integrationResource found from pullRequest query - cannot test _integrationResource.pullRequest query"
         );
       }
     });
@@ -520,17 +653,20 @@ describe("generated", () => {
 
     /** Test the root query for the Integration connection */
     it("integrations", async () => {
-      const integrations = await client.integrations();
-      const integration = integrations?.nodes?.[0];
-      _integration_id = integration?.id;
-      expect(integrations instanceof L.IntegrationConnection);
+      if (client) {
+        const integrations = await client.integrations();
+        const integration = integrations?.nodes?.[0];
+        _integration_id = integration?.id;
+        expect(integrations instanceof L.IntegrationConnection);
+      } else {
+        throw new Error("No undefined found from integrations query - cannot test client.integrations query");
+      }
     });
 
     /** Test the root query for a single Integration */
     it("integration", async () => {
       if (_integration_id) {
         const integration = await client.integration(_integration_id);
-        _integration = integration;
         expect(integration instanceof L.Integration);
       } else {
         throw new Error(
@@ -576,18 +712,23 @@ describe("generated", () => {
 
     /** Test the root query for InviteInfo */
     it("inviteInfo", async () => {
-      const inviteInfo = await client.inviteInfo("mock-userHash");
-      _inviteInfo = inviteInfo;
-      expect(inviteInfo instanceof L.InvitePagePayload);
+      if (client) {
+        const inviteInfo = await client.inviteInfo("mock-userHash");
+        _inviteInfo = inviteInfo;
+        expect(inviteInfo instanceof L.InvitePagePayload);
+      } else {
+        throw new Error("No undefined found from inviteInfo query - cannot test client.inviteInfo query");
+      }
     });
 
-    /** Test InviteInfo_InviteData query */
-    describe("InviteInfo_InviteData", () => {
-      /** Test the inviteInfo query for InviteInfo_InviteData */
-      it("inviteData", async () => {
+    /** Test the inviteInfo query for InviteInfo_InviteData */
+    it("inviteData", async () => {
+      if (_inviteInfo) {
         const inviteData = await _inviteInfo.inviteData();
         expect(inviteData instanceof L.InviteData);
-      });
+      } else {
+        throw new Error("No inviteInfo found from inviteData query - cannot test _inviteInfo.inviteData query");
+      }
     });
   });
 
@@ -598,10 +739,14 @@ describe("generated", () => {
 
     /** Test the root query for the IssueLabel connection */
     it("issueLabels", async () => {
-      const issueLabels = await client.issueLabels();
-      const issueLabel = issueLabels?.nodes?.[0];
-      _issueLabel_id = issueLabel?.id;
-      expect(issueLabels instanceof L.IssueLabelConnection);
+      if (client) {
+        const issueLabels = await client.issueLabels();
+        const issueLabel = issueLabels?.nodes?.[0];
+        _issueLabel_id = issueLabel?.id;
+        expect(issueLabels instanceof L.IssueLabelConnection);
+      } else {
+        throw new Error("No undefined found from issueLabels query - cannot test client.issueLabels query");
+      }
     });
 
     /** Test the root query for a single IssueLabel */
@@ -612,6 +757,16 @@ describe("generated", () => {
         expect(issueLabel instanceof L.IssueLabel);
       } else {
         throw new Error("No first IssueLabel found from issueLabels connection query - cannot test issueLabel query");
+      }
+    });
+
+    /** Test the issueLabel query for the Issue connection */
+    it("issueLabel.issues", async () => {
+      if (_issueLabel) {
+        const issues = await _issueLabel.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        throw new Error("No issueLabel found from issues query - cannot test _issueLabel.issues query");
       }
     });
 
@@ -634,16 +789,6 @@ describe("generated", () => {
         throw new Error("No IssueLabel found from issueLabel query - cannot test issueLabel.team query");
       }
     });
-
-    /** Test the issueLabel.issues connection query for L.IssueConnection */
-    it("issueLabel.issues", async () => {
-      if (_issueLabel) {
-        const issueLabel_issues = await _issueLabel.issues();
-        expect(issueLabel_issues instanceof L.IssueConnection);
-      } else {
-        throw new Error("No IssueLabel found from issueLabel query - cannot test issueLabel.issues connection query");
-      }
-    });
   });
 
   /** Test all IssueRelation queries */
@@ -653,17 +798,20 @@ describe("generated", () => {
 
     /** Test the root query for the IssueRelation connection */
     it("issueRelations", async () => {
-      const issueRelations = await client.issueRelations();
-      const issueRelation = issueRelations?.nodes?.[0];
-      _issueRelation_id = issueRelation?.id;
-      expect(issueRelations instanceof L.IssueRelationConnection);
+      if (client) {
+        const issueRelations = await client.issueRelations();
+        const issueRelation = issueRelations?.nodes?.[0];
+        _issueRelation_id = issueRelation?.id;
+        expect(issueRelations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error("No undefined found from issueRelations query - cannot test client.issueRelations query");
+      }
     });
 
     /** Test the root query for a single IssueRelation */
     it("issueRelation", async () => {
       if (_issueRelation_id) {
         const issueRelation = await client.issueRelation(_issueRelation_id);
-        _issueRelation = issueRelation;
         expect(issueRelation instanceof L.IssueRelation);
       } else {
         throw new Error(
@@ -702,10 +850,14 @@ describe("generated", () => {
 
     /** Test the root query for the Issue connection */
     it("issueSearch", async () => {
-      const issueSearch = await client.issueSearch("mock-query");
-      const issue = issueSearch?.nodes?.[0];
-      _issue_id = issue?.id;
-      expect(issueSearch instanceof L.IssueConnection);
+      if (client) {
+        const issueSearch = await client.issueSearch("mock-query");
+        const issue = issueSearch?.nodes?.[0];
+        _issue_id = issue?.id;
+        expect(issueSearch instanceof L.IssueConnection);
+      } else {
+        throw new Error("No undefined found from issueSearch query - cannot test client.issueSearch query");
+      }
     });
 
     /** Test the root query for a single Issue */
@@ -719,6 +871,88 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue query for the Issue connection */
+    it("issue.children", async () => {
+      if (_issue) {
+        const children = await _issue.children();
+        expect(children instanceof L.IssueConnection);
+      } else {
+        throw new Error("No issue found from children query - cannot test _issue.children query");
+      }
+    });
+
+    /** Test the issue query for the Comment connection */
+    it("issue.comments", async () => {
+      if (_issue) {
+        const comments = await _issue.comments();
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        throw new Error("No issue found from comments query - cannot test _issue.comments query");
+      }
+    });
+
+    /** Test the issue query for the IssueHistory connection */
+    it("issue.history", async () => {
+      if (_issue) {
+        const history = await _issue.history();
+        expect(history instanceof L.IssueHistoryConnection);
+      } else {
+        throw new Error("No issue found from history query - cannot test _issue.history query");
+      }
+    });
+
+    /** Test the issue query for the IntegrationResource connection */
+    it("issue.integrationResources", async () => {
+      if (_issue) {
+        const integrationResources = await _issue.integrationResources();
+        expect(integrationResources instanceof L.IntegrationResourceConnection);
+      } else {
+        throw new Error(
+          "No issue found from integrationResources query - cannot test _issue.integrationResources query"
+        );
+      }
+    });
+
+    /** Test the issue query for the IssueRelation connection */
+    it("issue.inverseRelations", async () => {
+      if (_issue) {
+        const inverseRelations = await _issue.inverseRelations();
+        expect(inverseRelations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error("No issue found from inverseRelations query - cannot test _issue.inverseRelations query");
+      }
+    });
+
+    /** Test the issue query for the IssueLabel connection */
+    it("issue.labels", async () => {
+      if (_issue) {
+        const labels = await _issue.labels();
+        expect(labels instanceof L.IssueLabelConnection);
+      } else {
+        throw new Error("No issue found from labels query - cannot test _issue.labels query");
+      }
+    });
+
+    /** Test the issue query for the IssueRelation connection */
+    it("issue.relations", async () => {
+      if (_issue) {
+        const relations = await _issue.relations();
+        expect(relations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error("No issue found from relations query - cannot test _issue.relations query");
+      }
+    });
+
+    /** Test the issue query for the User connection */
+    it("issue.subscribers", async () => {
+      if (_issue) {
+        const subscribers = await _issue.subscribers();
+        expect(subscribers instanceof L.UserConnection);
+      } else {
+        throw new Error("No issue found from subscribers query - cannot test _issue.subscribers query");
+      }
+    });
+
     /** Test the issue.assignee query for L.User */
     it("issue.assignee", async () => {
       if (_issue) {
@@ -788,86 +1022,6 @@ describe("generated", () => {
         throw new Error("No Issue found from issue query - cannot test issue.team query");
       }
     });
-
-    /** Test the issue.children connection query for L.IssueConnection */
-    it("issue.children", async () => {
-      if (_issue) {
-        const issue_children = await _issue.children("mock-query");
-        expect(issue_children instanceof L.IssueConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.children connection query");
-      }
-    });
-
-    /** Test the issue.comments connection query for L.CommentConnection */
-    it("issue.comments", async () => {
-      if (_issue) {
-        const issue_comments = await _issue.comments("mock-query");
-        expect(issue_comments instanceof L.CommentConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.comments connection query");
-      }
-    });
-
-    /** Test the issue.history connection query for L.IssueHistoryConnection */
-    it("issue.history", async () => {
-      if (_issue) {
-        const issue_history = await _issue.history("mock-query");
-        expect(issue_history instanceof L.IssueHistoryConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.history connection query");
-      }
-    });
-
-    /** Test the issue.integrationResources connection query for L.IntegrationResourceConnection */
-    it("issue.integrationResources", async () => {
-      if (_issue) {
-        const issue_integrationResources = await _issue.integrationResources("mock-query");
-        expect(issue_integrationResources instanceof L.IntegrationResourceConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.integrationResources connection query");
-      }
-    });
-
-    /** Test the issue.inverseRelations connection query for L.IssueRelationConnection */
-    it("issue.inverseRelations", async () => {
-      if (_issue) {
-        const issue_inverseRelations = await _issue.inverseRelations("mock-query");
-        expect(issue_inverseRelations instanceof L.IssueRelationConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.inverseRelations connection query");
-      }
-    });
-
-    /** Test the issue.labels connection query for L.IssueLabelConnection */
-    it("issue.labels", async () => {
-      if (_issue) {
-        const issue_labels = await _issue.labels("mock-query");
-        expect(issue_labels instanceof L.IssueLabelConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.labels connection query");
-      }
-    });
-
-    /** Test the issue.relations connection query for L.IssueRelationConnection */
-    it("issue.relations", async () => {
-      if (_issue) {
-        const issue_relations = await _issue.relations("mock-query");
-        expect(issue_relations instanceof L.IssueRelationConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.relations connection query");
-      }
-    });
-
-    /** Test the issue.subscribers connection query for L.UserConnection */
-    it("issue.subscribers", async () => {
-      if (_issue) {
-        const issue_subscribers = await _issue.subscribers("mock-query");
-        expect(issue_subscribers instanceof L.UserConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.subscribers connection query");
-      }
-    });
   });
 
   /** Test all Issue queries */
@@ -877,10 +1031,14 @@ describe("generated", () => {
 
     /** Test the root query for the Issue connection */
     it("issues", async () => {
-      const issues = await client.issues();
-      const issue = issues?.nodes?.[0];
-      _issue_id = issue?.id;
-      expect(issues instanceof L.IssueConnection);
+      if (client) {
+        const issues = await client.issues();
+        const issue = issues?.nodes?.[0];
+        _issue_id = issue?.id;
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        throw new Error("No undefined found from issues query - cannot test client.issues query");
+      }
     });
 
     /** Test the root query for a single Issue */
@@ -894,6 +1052,88 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue query for the Issue connection */
+    it("issue.children", async () => {
+      if (_issue) {
+        const children = await _issue.children();
+        expect(children instanceof L.IssueConnection);
+      } else {
+        throw new Error("No issue found from children query - cannot test _issue.children query");
+      }
+    });
+
+    /** Test the issue query for the Comment connection */
+    it("issue.comments", async () => {
+      if (_issue) {
+        const comments = await _issue.comments();
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        throw new Error("No issue found from comments query - cannot test _issue.comments query");
+      }
+    });
+
+    /** Test the issue query for the IssueHistory connection */
+    it("issue.history", async () => {
+      if (_issue) {
+        const history = await _issue.history();
+        expect(history instanceof L.IssueHistoryConnection);
+      } else {
+        throw new Error("No issue found from history query - cannot test _issue.history query");
+      }
+    });
+
+    /** Test the issue query for the IntegrationResource connection */
+    it("issue.integrationResources", async () => {
+      if (_issue) {
+        const integrationResources = await _issue.integrationResources();
+        expect(integrationResources instanceof L.IntegrationResourceConnection);
+      } else {
+        throw new Error(
+          "No issue found from integrationResources query - cannot test _issue.integrationResources query"
+        );
+      }
+    });
+
+    /** Test the issue query for the IssueRelation connection */
+    it("issue.inverseRelations", async () => {
+      if (_issue) {
+        const inverseRelations = await _issue.inverseRelations();
+        expect(inverseRelations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error("No issue found from inverseRelations query - cannot test _issue.inverseRelations query");
+      }
+    });
+
+    /** Test the issue query for the IssueLabel connection */
+    it("issue.labels", async () => {
+      if (_issue) {
+        const labels = await _issue.labels();
+        expect(labels instanceof L.IssueLabelConnection);
+      } else {
+        throw new Error("No issue found from labels query - cannot test _issue.labels query");
+      }
+    });
+
+    /** Test the issue query for the IssueRelation connection */
+    it("issue.relations", async () => {
+      if (_issue) {
+        const relations = await _issue.relations();
+        expect(relations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error("No issue found from relations query - cannot test _issue.relations query");
+      }
+    });
+
+    /** Test the issue query for the User connection */
+    it("issue.subscribers", async () => {
+      if (_issue) {
+        const subscribers = await _issue.subscribers();
+        expect(subscribers instanceof L.UserConnection);
+      } else {
+        throw new Error("No issue found from subscribers query - cannot test _issue.subscribers query");
+      }
+    });
+
     /** Test the issue.assignee query for L.User */
     it("issue.assignee", async () => {
       if (_issue) {
@@ -963,86 +1203,6 @@ describe("generated", () => {
         throw new Error("No Issue found from issue query - cannot test issue.team query");
       }
     });
-
-    /** Test the issue.children connection query for L.IssueConnection */
-    it("issue.children", async () => {
-      if (_issue) {
-        const issue_children = await _issue.children();
-        expect(issue_children instanceof L.IssueConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.children connection query");
-      }
-    });
-
-    /** Test the issue.comments connection query for L.CommentConnection */
-    it("issue.comments", async () => {
-      if (_issue) {
-        const issue_comments = await _issue.comments();
-        expect(issue_comments instanceof L.CommentConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.comments connection query");
-      }
-    });
-
-    /** Test the issue.history connection query for L.IssueHistoryConnection */
-    it("issue.history", async () => {
-      if (_issue) {
-        const issue_history = await _issue.history();
-        expect(issue_history instanceof L.IssueHistoryConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.history connection query");
-      }
-    });
-
-    /** Test the issue.integrationResources connection query for L.IntegrationResourceConnection */
-    it("issue.integrationResources", async () => {
-      if (_issue) {
-        const issue_integrationResources = await _issue.integrationResources();
-        expect(issue_integrationResources instanceof L.IntegrationResourceConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.integrationResources connection query");
-      }
-    });
-
-    /** Test the issue.inverseRelations connection query for L.IssueRelationConnection */
-    it("issue.inverseRelations", async () => {
-      if (_issue) {
-        const issue_inverseRelations = await _issue.inverseRelations();
-        expect(issue_inverseRelations instanceof L.IssueRelationConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.inverseRelations connection query");
-      }
-    });
-
-    /** Test the issue.labels connection query for L.IssueLabelConnection */
-    it("issue.labels", async () => {
-      if (_issue) {
-        const issue_labels = await _issue.labels();
-        expect(issue_labels instanceof L.IssueLabelConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.labels connection query");
-      }
-    });
-
-    /** Test the issue.relations connection query for L.IssueRelationConnection */
-    it("issue.relations", async () => {
-      if (_issue) {
-        const issue_relations = await _issue.relations();
-        expect(issue_relations instanceof L.IssueRelationConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.relations connection query");
-      }
-    });
-
-    /** Test the issue.subscribers connection query for L.UserConnection */
-    it("issue.subscribers", async () => {
-      if (_issue) {
-        const issue_subscribers = await _issue.subscribers();
-        expect(issue_subscribers instanceof L.UserConnection);
-      } else {
-        throw new Error("No Issue found from issue query - cannot test issue.subscribers connection query");
-      }
-    });
   });
 
   /** Test all Milestone queries */
@@ -1052,10 +1212,14 @@ describe("generated", () => {
 
     /** Test the root query for the Milestone connection */
     it("milestones", async () => {
-      const milestones = await client.milestones();
-      const milestone = milestones?.nodes?.[0];
-      _milestone_id = milestone?.id;
-      expect(milestones instanceof L.MilestoneConnection);
+      if (client) {
+        const milestones = await client.milestones();
+        const milestone = milestones?.nodes?.[0];
+        _milestone_id = milestone?.id;
+        expect(milestones instanceof L.MilestoneConnection);
+      } else {
+        throw new Error("No undefined found from milestones query - cannot test client.milestones query");
+      }
     });
 
     /** Test the root query for a single Milestone */
@@ -1069,6 +1233,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the milestone query for the Project connection */
+    it("milestone.projects", async () => {
+      if (_milestone) {
+        const projects = await _milestone.projects();
+        expect(projects instanceof L.ProjectConnection);
+      } else {
+        throw new Error("No milestone found from projects query - cannot test _milestone.projects query");
+      }
+    });
+
     /** Test the milestone.organization query for L.Organization */
     it("milestone.organization", async () => {
       if (_milestone) {
@@ -1076,16 +1250,6 @@ describe("generated", () => {
         expect(milestone_organization instanceof L.Organization);
       } else {
         throw new Error("No Milestone found from milestone query - cannot test milestone.organization query");
-      }
-    });
-
-    /** Test the milestone.projects connection query for L.ProjectConnection */
-    it("milestone.projects", async () => {
-      if (_milestone) {
-        const milestone_projects = await _milestone.projects();
-        expect(milestone_projects instanceof L.ProjectConnection);
-      } else {
-        throw new Error("No Milestone found from milestone query - cannot test milestone.projects connection query");
       }
     });
   });
@@ -1097,17 +1261,22 @@ describe("generated", () => {
 
     /** Test the root query for the NotificationSubscription connection */
     it("notificationSubscriptions", async () => {
-      const notificationSubscriptions = await client.notificationSubscriptions();
-      const notificationSubscription = notificationSubscriptions?.nodes?.[0];
-      _notificationSubscription_id = notificationSubscription?.id;
-      expect(notificationSubscriptions instanceof L.NotificationSubscriptionConnection);
+      if (client) {
+        const notificationSubscriptions = await client.notificationSubscriptions();
+        const notificationSubscription = notificationSubscriptions?.nodes?.[0];
+        _notificationSubscription_id = notificationSubscription?.id;
+        expect(notificationSubscriptions instanceof L.NotificationSubscriptionConnection);
+      } else {
+        throw new Error(
+          "No undefined found from notificationSubscriptions query - cannot test client.notificationSubscriptions query"
+        );
+      }
     });
 
     /** Test the root query for a single NotificationSubscription */
     it("notificationSubscription", async () => {
       if (_notificationSubscription_id) {
         const notificationSubscription = await client.notificationSubscription(_notificationSubscription_id);
-        _notificationSubscription = notificationSubscription;
         expect(notificationSubscription instanceof L.NotificationSubscription);
       } else {
         throw new Error(
@@ -1160,17 +1329,20 @@ describe("generated", () => {
 
     /** Test the root query for the Notification connection */
     it("notifications", async () => {
-      const notifications = await client.notifications();
-      const notification = notifications?.nodes?.[0];
-      _notification_id = notification?.id;
-      expect(notifications instanceof L.NotificationConnection);
+      if (client) {
+        const notifications = await client.notifications();
+        const notification = notifications?.nodes?.[0];
+        _notification_id = notification?.id;
+        expect(notifications instanceof L.NotificationConnection);
+      } else {
+        throw new Error("No undefined found from notifications query - cannot test client.notifications query");
+      }
     });
 
     /** Test the root query for a single Notification */
     it("notification", async () => {
       if (_notification_id) {
         const notification = await client.notification(_notification_id);
-        _notification = notification;
         expect(notification instanceof L.Notification);
       } else {
         throw new Error(
@@ -1226,45 +1398,53 @@ describe("generated", () => {
 
     /** Test the root query for Organization */
     it("organization", async () => {
-      const organization = await client.organization;
-      _organization = organization;
-      expect(organization instanceof L.Organization);
+      if (client) {
+        const organization = await client.organization;
+        _organization = organization;
+        expect(organization instanceof L.Organization);
+      } else {
+        throw new Error("No undefined found from organization query - cannot test client.organization query");
+      }
     });
 
-    /** Test all Integration queries */
-    describe("Organization_Integrations", () => {
-      /** Test the root query for the Integration connection */
-      it("integrations", async () => {
+    /** Test the organization query for the Integration connection */
+    it("organization.integrations", async () => {
+      if (_organization) {
         const integrations = await _organization.integrations();
         expect(integrations instanceof L.IntegrationConnection);
-      });
+      } else {
+        throw new Error("No organization found from integrations query - cannot test _organization.integrations query");
+      }
     });
 
-    /** Test all Milestone queries */
-    describe("Organization_Milestones", () => {
-      /** Test the root query for the Milestone connection */
-      it("milestones", async () => {
+    /** Test the organization query for the Milestone connection */
+    it("organization.milestones", async () => {
+      if (_organization) {
         const milestones = await _organization.milestones();
         expect(milestones instanceof L.MilestoneConnection);
-      });
+      } else {
+        throw new Error("No organization found from milestones query - cannot test _organization.milestones query");
+      }
     });
 
-    /** Test all Team queries */
-    describe("Organization_Teams", () => {
-      /** Test the root query for the Team connection */
-      it("teams", async () => {
+    /** Test the organization query for the Team connection */
+    it("organization.teams", async () => {
+      if (_organization) {
         const teams = await _organization.teams();
         expect(teams instanceof L.TeamConnection);
-      });
+      } else {
+        throw new Error("No organization found from teams query - cannot test _organization.teams query");
+      }
     });
 
-    /** Test all User queries */
-    describe("Organization_Users", () => {
-      /** Test the root query for the User connection */
-      it("users", async () => {
+    /** Test the organization query for the User connection */
+    it("organization.users", async () => {
+      if (_organization) {
         const users = await _organization.users();
         expect(users instanceof L.UserConnection);
-      });
+      } else {
+        throw new Error("No organization found from users query - cannot test _organization.users query");
+      }
     });
   });
 
@@ -1272,8 +1452,14 @@ describe("generated", () => {
   describe("OrganizationExists", () => {
     /** Test the root query for OrganizationExists */
     it("organizationExists", async () => {
-      const organizationExists = await client.organizationExists("mock-urlKey");
-      expect(organizationExists instanceof L.OrganizationExistsPayload);
+      if (client) {
+        const organizationExists = await client.organizationExists("mock-urlKey");
+        expect(organizationExists instanceof L.OrganizationExistsPayload);
+      } else {
+        throw new Error(
+          "No undefined found from organizationExists query - cannot test client.organizationExists query"
+        );
+      }
     });
   });
 
@@ -1281,8 +1467,14 @@ describe("generated", () => {
   describe("OrganizationInvites", () => {
     /** Test the root query for the OrganizationInvite connection */
     it("organizationInvites", async () => {
-      const organizationInvites = await client.organizationInvites();
-      expect(organizationInvites instanceof L.OrganizationInviteConnection);
+      if (client) {
+        const organizationInvites = await client.organizationInvites();
+        expect(organizationInvites instanceof L.OrganizationInviteConnection);
+      } else {
+        throw new Error(
+          "No undefined found from organizationInvites query - cannot test client.organizationInvites query"
+        );
+      }
     });
   });
 
@@ -1293,17 +1485,20 @@ describe("generated", () => {
 
     /** Test the root query for the ProjectLink connection */
     it("projectLinks", async () => {
-      const projectLinks = await client.projectLinks();
-      const projectLink = projectLinks?.nodes?.[0];
-      _projectLink_id = projectLink?.id;
-      expect(projectLinks instanceof L.ProjectLinkConnection);
+      if (client) {
+        const projectLinks = await client.projectLinks();
+        const projectLink = projectLinks?.nodes?.[0];
+        _projectLink_id = projectLink?.id;
+        expect(projectLinks instanceof L.ProjectLinkConnection);
+      } else {
+        throw new Error("No undefined found from projectLinks query - cannot test client.projectLinks query");
+      }
     });
 
     /** Test the root query for a single ProjectLink */
     it("projectLink", async () => {
       if (_projectLink_id) {
         const projectLink = await client.projectLink(_projectLink_id);
-        _projectLink = projectLink;
         expect(projectLink instanceof L.ProjectLink);
       } else {
         throw new Error(
@@ -1340,10 +1535,14 @@ describe("generated", () => {
 
     /** Test the root query for the Project connection */
     it("projects", async () => {
-      const projects = await client.projects();
-      const project = projects?.nodes?.[0];
-      _project_id = project?.id;
-      expect(projects instanceof L.ProjectConnection);
+      if (client) {
+        const projects = await client.projects();
+        const project = projects?.nodes?.[0];
+        _project_id = project?.id;
+        expect(projects instanceof L.ProjectConnection);
+      } else {
+        throw new Error("No undefined found from projects query - cannot test client.projects query");
+      }
     });
 
     /** Test the root query for a single Project */
@@ -1354,6 +1553,46 @@ describe("generated", () => {
         expect(project instanceof L.Project);
       } else {
         throw new Error("No first Project found from projects connection query - cannot test project query");
+      }
+    });
+
+    /** Test the project query for the Issue connection */
+    it("project.issues", async () => {
+      if (_project) {
+        const issues = await _project.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        throw new Error("No project found from issues query - cannot test _project.issues query");
+      }
+    });
+
+    /** Test the project query for the ProjectLink connection */
+    it("project.links", async () => {
+      if (_project) {
+        const links = await _project.links();
+        expect(links instanceof L.ProjectLinkConnection);
+      } else {
+        throw new Error("No project found from links query - cannot test _project.links query");
+      }
+    });
+
+    /** Test the project query for the User connection */
+    it("project.members", async () => {
+      if (_project) {
+        const members = await _project.members();
+        expect(members instanceof L.UserConnection);
+      } else {
+        throw new Error("No project found from members query - cannot test _project.members query");
+      }
+    });
+
+    /** Test the project query for the Team connection */
+    it("project.teams", async () => {
+      if (_project) {
+        const teams = await _project.teams();
+        expect(teams instanceof L.TeamConnection);
+      } else {
+        throw new Error("No project found from teams query - cannot test _project.teams query");
       }
     });
 
@@ -1386,54 +1625,20 @@ describe("generated", () => {
         throw new Error("No Project found from project query - cannot test project.milestone query");
       }
     });
-
-    /** Test the project.issues connection query for L.IssueConnection */
-    it("project.issues", async () => {
-      if (_project) {
-        const project_issues = await _project.issues();
-        expect(project_issues instanceof L.IssueConnection);
-      } else {
-        throw new Error("No Project found from project query - cannot test project.issues connection query");
-      }
-    });
-
-    /** Test the project.links connection query for L.ProjectLinkConnection */
-    it("project.links", async () => {
-      if (_project) {
-        const project_links = await _project.links();
-        expect(project_links instanceof L.ProjectLinkConnection);
-      } else {
-        throw new Error("No Project found from project query - cannot test project.links connection query");
-      }
-    });
-
-    /** Test the project.members connection query for L.UserConnection */
-    it("project.members", async () => {
-      if (_project) {
-        const project_members = await _project.members();
-        expect(project_members instanceof L.UserConnection);
-      } else {
-        throw new Error("No Project found from project query - cannot test project.members connection query");
-      }
-    });
-
-    /** Test the project.teams connection query for L.TeamConnection */
-    it("project.teams", async () => {
-      if (_project) {
-        const project_teams = await _project.teams();
-        expect(project_teams instanceof L.TeamConnection);
-      } else {
-        throw new Error("No Project found from project query - cannot test project.teams connection query");
-      }
-    });
   });
 
   /** Test PushSubscriptionTest query */
   describe("PushSubscriptionTest", () => {
     /** Test the root query for PushSubscriptionTest */
     it("pushSubscriptionTest", async () => {
-      const pushSubscriptionTest = await client.pushSubscriptionTest;
-      expect(pushSubscriptionTest instanceof L.PushSubscriptionPayload);
+      if (client) {
+        const pushSubscriptionTest = await client.pushSubscriptionTest;
+        expect(pushSubscriptionTest instanceof L.PushSubscriptionPayload);
+      } else {
+        throw new Error(
+          "No undefined found from pushSubscriptionTest query - cannot test client.pushSubscriptionTest query"
+        );
+      }
     });
   });
 
@@ -1444,17 +1649,20 @@ describe("generated", () => {
 
     /** Test the root query for the Reaction connection */
     it("reactions", async () => {
-      const reactions = await client.reactions();
-      const reaction = reactions?.nodes?.[0];
-      _reaction_id = reaction?.id;
-      expect(reactions instanceof L.ReactionConnection);
+      if (client) {
+        const reactions = await client.reactions();
+        const reaction = reactions?.nodes?.[0];
+        _reaction_id = reaction?.id;
+        expect(reactions instanceof L.ReactionConnection);
+      } else {
+        throw new Error("No undefined found from reactions query - cannot test client.reactions query");
+      }
     });
 
     /** Test the root query for a single Reaction */
     it("reaction", async () => {
       if (_reaction_id) {
         const reaction = await client.reaction(_reaction_id);
-        _reaction = reaction;
         expect(reaction instanceof L.Reaction);
       } else {
         throw new Error("No first Reaction found from reactions connection query - cannot test reaction query");
@@ -1486,8 +1694,12 @@ describe("generated", () => {
   describe("SsoUrlFromEmail", () => {
     /** Test the root query for SsoUrlFromEmail */
     it("ssoUrlFromEmail", async () => {
-      const ssoUrlFromEmail = await client.ssoUrlFromEmail("mock-email");
-      expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
+      if (client) {
+        const ssoUrlFromEmail = await client.ssoUrlFromEmail("mock-email");
+        expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
+      } else {
+        throw new Error("No undefined found from ssoUrlFromEmail query - cannot test client.ssoUrlFromEmail query");
+      }
     });
   });
 
@@ -1495,8 +1707,12 @@ describe("generated", () => {
   describe("SyncBootstrap", () => {
     /** Test the root query for SyncBootstrap */
     it("syncBootstrap", async () => {
-      const syncBootstrap = await client.syncBootstrap(123, 123);
-      expect(syncBootstrap instanceof L.SyncResponse);
+      if (client) {
+        const syncBootstrap = await client.syncBootstrap(123, 123);
+        expect(syncBootstrap instanceof L.SyncResponse);
+      } else {
+        throw new Error("No undefined found from syncBootstrap query - cannot test client.syncBootstrap query");
+      }
     });
   });
 
@@ -1504,8 +1720,12 @@ describe("generated", () => {
   describe("SyncUpdates", () => {
     /** Test the root query for SyncUpdates */
     it("syncUpdates", async () => {
-      const syncUpdates = await client.syncUpdates(123);
-      expect(syncUpdates instanceof L.SyncResponse);
+      if (client) {
+        const syncUpdates = await client.syncUpdates(123);
+        expect(syncUpdates instanceof L.SyncResponse);
+      } else {
+        throw new Error("No undefined found from syncUpdates query - cannot test client.syncUpdates query");
+      }
     });
   });
 
@@ -1516,17 +1736,20 @@ describe("generated", () => {
 
     /** Test the root query for the TeamMembership connection */
     it("teamMemberships", async () => {
-      const teamMemberships = await client.teamMemberships();
-      const teamMembership = teamMemberships?.nodes?.[0];
-      _teamMembership_id = teamMembership?.id;
-      expect(teamMemberships instanceof L.TeamMembershipConnection);
+      if (client) {
+        const teamMemberships = await client.teamMemberships();
+        const teamMembership = teamMemberships?.nodes?.[0];
+        _teamMembership_id = teamMembership?.id;
+        expect(teamMemberships instanceof L.TeamMembershipConnection);
+      } else {
+        throw new Error("No undefined found from teamMemberships query - cannot test client.teamMemberships query");
+      }
     });
 
     /** Test the root query for a single TeamMembership */
     it("teamMembership", async () => {
       if (_teamMembership_id) {
         const teamMembership = await client.teamMembership(_teamMembership_id);
-        _teamMembership = teamMembership;
         expect(teamMembership instanceof L.TeamMembership);
       } else {
         throw new Error(
@@ -1563,10 +1786,14 @@ describe("generated", () => {
 
     /** Test the root query for the Team connection */
     it("teams", async () => {
-      const teams = await client.teams();
-      const team = teams?.nodes?.[0];
-      _team_id = team?.id;
-      expect(teams instanceof L.TeamConnection);
+      if (client) {
+        const teams = await client.teams();
+        const team = teams?.nodes?.[0];
+        _team_id = team?.id;
+        expect(teams instanceof L.TeamConnection);
+      } else {
+        throw new Error("No undefined found from teams query - cannot test client.teams query");
+      }
     });
 
     /** Test the root query for a single Team */
@@ -1577,6 +1804,86 @@ describe("generated", () => {
         expect(team instanceof L.Team);
       } else {
         throw new Error("No first Team found from teams connection query - cannot test team query");
+      }
+    });
+
+    /** Test the team query for the Cycle connection */
+    it("team.cycles", async () => {
+      if (_team) {
+        const cycles = await _team.cycles();
+        expect(cycles instanceof L.CycleConnection);
+      } else {
+        throw new Error("No team found from cycles query - cannot test _team.cycles query");
+      }
+    });
+
+    /** Test the team query for the Issue connection */
+    it("team.issues", async () => {
+      if (_team) {
+        const issues = await _team.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        throw new Error("No team found from issues query - cannot test _team.issues query");
+      }
+    });
+
+    /** Test the team query for the IssueLabel connection */
+    it("team.labels", async () => {
+      if (_team) {
+        const labels = await _team.labels();
+        expect(labels instanceof L.IssueLabelConnection);
+      } else {
+        throw new Error("No team found from labels query - cannot test _team.labels query");
+      }
+    });
+
+    /** Test the team query for the TeamMembership connection */
+    it("team.memberships", async () => {
+      if (_team) {
+        const memberships = await _team.memberships();
+        expect(memberships instanceof L.TeamMembershipConnection);
+      } else {
+        throw new Error("No team found from memberships query - cannot test _team.memberships query");
+      }
+    });
+
+    /** Test the team query for the Project connection */
+    it("team.projects", async () => {
+      if (_team) {
+        const projects = await _team.projects();
+        expect(projects instanceof L.ProjectConnection);
+      } else {
+        throw new Error("No team found from projects query - cannot test _team.projects query");
+      }
+    });
+
+    /** Test the team query for the WorkflowState connection */
+    it("team.states", async () => {
+      if (_team) {
+        const states = await _team.states();
+        expect(states instanceof L.WorkflowStateConnection);
+      } else {
+        throw new Error("No team found from states query - cannot test _team.states query");
+      }
+    });
+
+    /** Test the team query for Team_Templates */
+    it("templates", async () => {
+      if (_team) {
+        const templates = await _team.templates();
+        expect(templates instanceof L.TemplateConnection);
+      } else {
+        throw new Error("No team found from templates query - cannot test _team.templates query");
+      }
+    });
+
+    /** Test the team query for the Webhook connection */
+    it("team.webhooks", async () => {
+      if (_team) {
+        const webhooks = await _team.webhooks();
+        expect(webhooks instanceof L.WebhookConnection);
+      } else {
+        throw new Error("No team found from webhooks query - cannot test _team.webhooks query");
       }
     });
 
@@ -1649,94 +1956,18 @@ describe("generated", () => {
         throw new Error("No Team found from team query - cannot test team.startWorkflowState query");
       }
     });
-
-    /** Test the team.cycles connection query for L.CycleConnection */
-    it("team.cycles", async () => {
-      if (_team) {
-        const team_cycles = await _team.cycles();
-        expect(team_cycles instanceof L.CycleConnection);
-      } else {
-        throw new Error("No Team found from team query - cannot test team.cycles connection query");
-      }
-    });
-
-    /** Test the team.issues connection query for L.IssueConnection */
-    it("team.issues", async () => {
-      if (_team) {
-        const team_issues = await _team.issues();
-        expect(team_issues instanceof L.IssueConnection);
-      } else {
-        throw new Error("No Team found from team query - cannot test team.issues connection query");
-      }
-    });
-
-    /** Test the team.labels connection query for L.IssueLabelConnection */
-    it("team.labels", async () => {
-      if (_team) {
-        const team_labels = await _team.labels();
-        expect(team_labels instanceof L.IssueLabelConnection);
-      } else {
-        throw new Error("No Team found from team query - cannot test team.labels connection query");
-      }
-    });
-
-    /** Test the team.memberships connection query for L.TeamMembershipConnection */
-    it("team.memberships", async () => {
-      if (_team) {
-        const team_memberships = await _team.memberships();
-        expect(team_memberships instanceof L.TeamMembershipConnection);
-      } else {
-        throw new Error("No Team found from team query - cannot test team.memberships connection query");
-      }
-    });
-
-    /** Test the team.projects connection query for L.ProjectConnection */
-    it("team.projects", async () => {
-      if (_team) {
-        const team_projects = await _team.projects();
-        expect(team_projects instanceof L.ProjectConnection);
-      } else {
-        throw new Error("No Team found from team query - cannot test team.projects connection query");
-      }
-    });
-
-    /** Test the team.states connection query for L.WorkflowStateConnection */
-    it("team.states", async () => {
-      if (_team) {
-        const team_states = await _team.states();
-        expect(team_states instanceof L.WorkflowStateConnection);
-      } else {
-        throw new Error("No Team found from team query - cannot test team.states connection query");
-      }
-    });
-
-    /** Test the team.templates connection query for L.TemplateConnection */
-    it("team.templates", async () => {
-      if (_team) {
-        const team_templates = await _team.templates();
-        expect(team_templates instanceof L.TemplateConnection);
-      } else {
-        throw new Error("No Team found from team query - cannot test team.templates connection query");
-      }
-    });
-
-    /** Test the team.webhooks connection query for L.WebhookConnection */
-    it("team.webhooks", async () => {
-      if (_team) {
-        const team_webhooks = await _team.webhooks();
-        expect(team_webhooks instanceof L.WebhookConnection);
-      } else {
-        throw new Error("No Team found from team query - cannot test team.webhooks connection query");
-      }
-    });
   });
 
   /** Test Template query */
   describe("Template", () => {
     /** Test the root query for Template */
     it("template", async () => {
-      const template = await client.template("mock-id");
-      expect(template instanceof L.Template);
+      if (client) {
+        const template = await client.template("mock-id");
+        expect(template instanceof L.Template);
+      } else {
+        throw new Error("No undefined found from template query - cannot test client.template query");
+      }
     });
   });
 
@@ -1746,8 +1977,12 @@ describe("generated", () => {
   describe("UserSettings", () => {
     /** Test the root query for UserSettings */
     it("userSettings", async () => {
-      const userSettings = await client.userSettings;
-      expect(userSettings instanceof L.UserSettings);
+      if (client) {
+        const userSettings = await client.userSettings;
+        expect(userSettings instanceof L.UserSettings);
+      } else {
+        throw new Error("No undefined found from userSettings query - cannot test client.userSettings query");
+      }
     });
   });
 
@@ -1758,10 +1993,14 @@ describe("generated", () => {
 
     /** Test the root query for the User connection */
     it("users", async () => {
-      const users = await client.users();
-      const user = users?.nodes?.[0];
-      _user_id = user?.id;
-      expect(users instanceof L.UserConnection);
+      if (client) {
+        const users = await client.users();
+        const user = users?.nodes?.[0];
+        _user_id = user?.id;
+        expect(users instanceof L.UserConnection);
+      } else {
+        throw new Error("No undefined found from users query - cannot test client.users query");
+      }
     });
 
     /** Test the root query for a single User */
@@ -1775,6 +2014,36 @@ describe("generated", () => {
       }
     });
 
+    /** Test the user query for the Issue connection */
+    it("user.assignedIssues", async () => {
+      if (_user) {
+        const assignedIssues = await _user.assignedIssues();
+        expect(assignedIssues instanceof L.IssueConnection);
+      } else {
+        throw new Error("No user found from assignedIssues query - cannot test _user.assignedIssues query");
+      }
+    });
+
+    /** Test the user query for the Issue connection */
+    it("user.createdIssues", async () => {
+      if (_user) {
+        const createdIssues = await _user.createdIssues();
+        expect(createdIssues instanceof L.IssueConnection);
+      } else {
+        throw new Error("No user found from createdIssues query - cannot test _user.createdIssues query");
+      }
+    });
+
+    /** Test the user query for the TeamMembership connection */
+    it("user.teamMemberships", async () => {
+      if (_user) {
+        const teamMemberships = await _user.teamMemberships();
+        expect(teamMemberships instanceof L.TeamMembershipConnection);
+      } else {
+        throw new Error("No user found from teamMemberships query - cannot test _user.teamMemberships query");
+      }
+    });
+
     /** Test the user.organization query for L.Organization */
     it("user.organization", async () => {
       if (_user) {
@@ -1782,36 +2051,6 @@ describe("generated", () => {
         expect(user_organization instanceof L.Organization);
       } else {
         throw new Error("No User found from user query - cannot test user.organization query");
-      }
-    });
-
-    /** Test the user.assignedIssues connection query for L.IssueConnection */
-    it("user.assignedIssues", async () => {
-      if (_user) {
-        const user_assignedIssues = await _user.assignedIssues();
-        expect(user_assignedIssues instanceof L.IssueConnection);
-      } else {
-        throw new Error("No User found from user query - cannot test user.assignedIssues connection query");
-      }
-    });
-
-    /** Test the user.createdIssues connection query for L.IssueConnection */
-    it("user.createdIssues", async () => {
-      if (_user) {
-        const user_createdIssues = await _user.createdIssues();
-        expect(user_createdIssues instanceof L.IssueConnection);
-      } else {
-        throw new Error("No User found from user query - cannot test user.createdIssues connection query");
-      }
-    });
-
-    /** Test the user.teamMemberships connection query for L.TeamMembershipConnection */
-    it("user.teamMemberships", async () => {
-      if (_user) {
-        const user_teamMemberships = await _user.teamMemberships();
-        expect(user_teamMemberships instanceof L.TeamMembershipConnection);
-      } else {
-        throw new Error("No User found from user query - cannot test user.teamMemberships connection query");
       }
     });
   });
@@ -1822,36 +2061,43 @@ describe("generated", () => {
 
     /** Test the root query for Viewer */
     it("viewer", async () => {
-      const viewer = await client.viewer;
-      _viewer = viewer;
-      expect(viewer instanceof L.User);
+      if (client) {
+        const viewer = await client.viewer;
+        _viewer = viewer;
+        expect(viewer instanceof L.User);
+      } else {
+        throw new Error("No undefined found from viewer query - cannot test client.viewer query");
+      }
     });
 
-    /** Test all Issue queries */
-    describe("Viewer_AssignedIssues", () => {
-      /** Test the root query for the Issue connection */
-      it("assignedIssues", async () => {
+    /** Test the viewer query for the Issue connection */
+    it("viewer.assignedIssues", async () => {
+      if (_viewer) {
         const assignedIssues = await _viewer.assignedIssues();
         expect(assignedIssues instanceof L.IssueConnection);
-      });
+      } else {
+        throw new Error("No viewer found from assignedIssues query - cannot test _viewer.assignedIssues query");
+      }
     });
 
-    /** Test all Issue queries */
-    describe("Viewer_CreatedIssues", () => {
-      /** Test the root query for the Issue connection */
-      it("createdIssues", async () => {
+    /** Test the viewer query for the Issue connection */
+    it("viewer.createdIssues", async () => {
+      if (_viewer) {
         const createdIssues = await _viewer.createdIssues();
         expect(createdIssues instanceof L.IssueConnection);
-      });
+      } else {
+        throw new Error("No viewer found from createdIssues query - cannot test _viewer.createdIssues query");
+      }
     });
 
-    /** Test all TeamMembership queries */
-    describe("Viewer_TeamMemberships", () => {
-      /** Test the root query for the TeamMembership connection */
-      it("teamMemberships", async () => {
+    /** Test the viewer query for the TeamMembership connection */
+    it("viewer.teamMemberships", async () => {
+      if (_viewer) {
         const teamMemberships = await _viewer.teamMemberships();
         expect(teamMemberships instanceof L.TeamMembershipConnection);
-      });
+      } else {
+        throw new Error("No viewer found from teamMemberships query - cannot test _viewer.teamMemberships query");
+      }
     });
   });
 
@@ -1862,17 +2108,20 @@ describe("generated", () => {
 
     /** Test the root query for the Webhook connection */
     it("webhooks", async () => {
-      const webhooks = await client.webhooks();
-      const webhook = webhooks?.nodes?.[0];
-      _webhook_id = webhook?.id;
-      expect(webhooks instanceof L.WebhookConnection);
+      if (client) {
+        const webhooks = await client.webhooks();
+        const webhook = webhooks?.nodes?.[0];
+        _webhook_id = webhook?.id;
+        expect(webhooks instanceof L.WebhookConnection);
+      } else {
+        throw new Error("No undefined found from webhooks query - cannot test client.webhooks query");
+      }
     });
 
     /** Test the root query for a single Webhook */
     it("webhook", async () => {
       if (_webhook_id) {
         const webhook = await client.webhook(_webhook_id);
-        _webhook = webhook;
         expect(webhook instanceof L.Webhook);
       } else {
         throw new Error("No first Webhook found from webhooks connection query - cannot test webhook query");
@@ -1907,10 +2156,14 @@ describe("generated", () => {
 
     /** Test the root query for the WorkflowState connection */
     it("workflowStates", async () => {
-      const workflowStates = await client.workflowStates();
-      const workflowState = workflowStates?.nodes?.[0];
-      _workflowState_id = workflowState?.id;
-      expect(workflowStates instanceof L.WorkflowStateConnection);
+      if (client) {
+        const workflowStates = await client.workflowStates();
+        const workflowState = workflowStates?.nodes?.[0];
+        _workflowState_id = workflowState?.id;
+        expect(workflowStates instanceof L.WorkflowStateConnection);
+      } else {
+        throw new Error("No undefined found from workflowStates query - cannot test client.workflowStates query");
+      }
     });
 
     /** Test the root query for a single WorkflowState */
@@ -1926,6 +2179,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the workflowState query for the Issue connection */
+    it("workflowState.issues", async () => {
+      if (_workflowState) {
+        const issues = await _workflowState.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        throw new Error("No workflowState found from issues query - cannot test _workflowState.issues query");
+      }
+    });
+
     /** Test the workflowState.team query for L.Team */
     it("workflowState.team", async () => {
       if (_workflowState) {
@@ -1933,18 +2196,6 @@ describe("generated", () => {
         expect(workflowState_team instanceof L.Team);
       } else {
         throw new Error("No WorkflowState found from workflowState query - cannot test workflowState.team query");
-      }
-    });
-
-    /** Test the workflowState.issues connection query for L.IssueConnection */
-    it("workflowState.issues", async () => {
-      if (_workflowState) {
-        const workflowState_issues = await _workflowState.issues();
-        expect(workflowState_issues instanceof L.IssueConnection);
-      } else {
-        throw new Error(
-          "No WorkflowState found from workflowState query - cannot test workflowState.issues connection query"
-        );
       }
     });
   });

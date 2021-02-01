@@ -1,4 +1,4 @@
-import { OperationType, printComment, printLines, printList, printSet } from "@linear/codegen-doc";
+import { OperationType, printComment, printElseThrow, printLines, printList, printSet } from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
 import { getLast, nonNullable } from "@linear/common";
 import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
@@ -9,6 +9,7 @@ import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
 export function printTests(context: SdkPluginContext): string {
   return printDescribe(
     "generated",
+    ["Auto generated API tests"],
     printLines([
       printBeforeSuite(),
       printBeforeAll(),
@@ -23,13 +24,16 @@ export function printTests(context: SdkPluginContext): string {
 /**
  * Print a jest describe block
  */
-function printDescribe(name: string, content: string): string {
-  return printLines([
-    `describe("${name}", () => {
-      ${content}
-    })`,
-    "\n",
-  ]);
+function printDescribe(name: string, description: string[], content: string, omit = false): string {
+  return omit
+    ? content
+    : printLines([
+        printComment(description),
+        `describe("${name}", () => {
+          ${content}
+        })`,
+        "\n",
+      ]);
 }
 
 /**
@@ -75,15 +79,50 @@ function printOperationArgs(operation: SdkOperation): string {
 }
 
 /**
- * Print tests for a query
+ * Prints the test for a query with associated SdkModel
  */
-function printQueryTest(context: SdkPluginContext, operation: SdkOperation, index = 0): string {
-  if (index > 2) {
-    return "";
-  }
-
+function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation, index = 1): string {
   const sdkKey = operation.sdkPath.join("_");
   const sdkOperations = context.sdkDefinitions[operation.path.join("_")]?.operations ?? [];
+  const clientName = getLast(operation.sdkPath) ? `_${getLast(operation.sdkPath)}` : "client";
+
+  const fieldName = getLast(operation.path) ?? "UNKNOWN_FIELD_NAME";
+  const fieldType = printList([Sdk.NAMESPACE, operation.print.model], ".");
+
+  /** Mock data for any queries with required variables that cannot be sourced via a connection */
+  return printDescribe(
+    operation.name,
+    [`Test ${operation.name} query`],
+    printLines([
+      sdkOperations.length ? `let _${fieldName}: ${fieldType}` : undefined,
+      "\n",
+      printComment([`Test the ${sdkKey || "root"} query for ${operation.name}`]),
+      printIt(
+        fieldName,
+        printElseThrow(
+          clientName,
+          printLines([
+            `const ${fieldName} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
+            sdkOperations.length ? printSet(`_${fieldName}`, fieldName) : undefined,
+            `expect(${fieldName} instanceof ${fieldType})`,
+          ]),
+          `No ${getLast(
+            operation.sdkPath
+          )} found from ${fieldName} query - cannot test ${clientName}.${fieldName} query`,
+          operation.sdkPath.length > 0
+        )
+      ),
+      printLines(sdkOperations.map(sdkOperation => printQueryTest(context, sdkOperation, index))),
+    ]),
+    operation.path.length > 1
+  );
+}
+
+/**
+ * Prints the test for a connection query
+ */
+function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOperation, index = 1): string {
+  const sdkKey = operation.sdkPath.join("_");
   const clientName = getLast(operation.sdkPath) ? `_${getLast(operation.sdkPath)}` : "client";
 
   const fieldName = getLast(operation.path) ?? "UNKNOWN_FIELD_NAME";
@@ -95,143 +134,146 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation, inde
     return sdkOperation.print.model === connectionType;
   });
   const itemField = itemOperation?.print.field;
+  const itemSdkKey = itemOperation?.path.join("_");
+  const itemOperations = itemSdkKey ? context.sdkDefinitions[itemSdkKey]?.operations ?? [] : [];
   const itemType = printList([Sdk.NAMESPACE, itemOperation?.print.model], ".");
   const itemArgs = itemOperation?.requiredArgs.args ?? [];
+  const itemOperationArgs = itemArgs.length ? `(${printList(itemArgs.map(arg => `_${itemField}_${arg.name}`))})` : "";
   const itemQueries = itemOperation?.model?.fields.query ?? [];
-  const itemConnections = itemOperation?.model?.fields.connection ?? [];
 
+  return printDescribe(
+    operation.name,
+    [`Test all ${connectionType} queries`],
+    printLines([
+      itemOperation
+        ? printLines([
+            `let _${itemField}: ${itemType} | undefined`,
+            ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
+            "\n",
+          ])
+        : undefined,
+      printComment([`Test the ${sdkKey || "root"} query for the ${connectionType} connection`]),
+      printIt(
+        printList([sdkKey ? sdkKey : undefined, fieldName], "."),
+        printElseThrow(
+          clientName,
+          printLines([
+            `const ${fieldName} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
+            itemOperation
+              ? printLines([
+                  `const ${itemField} = ${fieldName}?.${Sdk.NODE_NAME}?.[0]`,
+                  ...(itemArgs.map(arg => printSet(`_${itemField}_${arg.name}`, `${itemField}?.${arg.name}`)) ?? []),
+                ])
+              : undefined,
+            `expect(${fieldName} instanceof ${fieldType})`,
+          ]),
+          `No ${getLast(
+            operation.sdkPath
+          )} found from ${fieldName} query - cannot test ${clientName}.${fieldName} query`,
+          operation.sdkPath.length > 0
+        )
+      ),
+
+      "\n",
+
+      ...(itemField
+        ? [
+            printComment([`Test the root query for a single ${connectionType}`]),
+            printIt(
+              printList([sdkKey ? sdkKey : undefined, itemField], "."),
+              printElseThrow(
+                printList(
+                  itemArgs.map(arg => `_${itemField}_${arg.name}`),
+                  " && "
+                ),
+                printLines([
+                  `const ${itemField} = await ${clientName}.${itemField}${itemOperationArgs}`,
+                  itemOperations.length ? printSet(`_${itemField}`, itemField) : undefined,
+                  `expect(${itemField} instanceof ${itemType})`,
+                ]),
+                `No first ${connectionType} found from ${fieldName} connection query - cannot test ${itemField} query`
+              )
+            ),
+          ]
+        : []),
+      "\n",
+
+      printLines(itemOperations?.map(sdkOperation => printQueryTest(context, sdkOperation, index))),
+
+      itemQueries.length
+        ? printLines(
+            itemQueries.map(field => {
+              return printLines([
+                printComment([`Test the ${itemField}.${field.name} query for ${field.type}`]),
+                printIt(
+                  `${itemField}.${field.name}`,
+                  printElseThrow(
+                    `_${itemField}`,
+                    printLines([
+                      `const ${itemField}_${field.name} = await _${itemField}.${field.name}`,
+                      `expect(${itemField}_${field.name} instanceof ${field.type})`,
+                    ]),
+                    `No ${connectionType} found from ${itemField} query - cannot test ${itemField}.${field.name} query`
+                  )
+                ),
+              ]);
+            })
+          )
+        : undefined,
+
+      //   itemConnections.length
+      //     ? printLines(
+      //         itemConnections.map(field => {
+      //           return printLines([
+      //             printComment([`Test the ${itemField}.${field.name} connection query for ${field.type}`]),
+      //             printIt(
+      //               `${itemField}.${field.name}`,
+      //               `if (_${itemField}) {
+      //                   ${printLines([
+      //                     `const ${itemField}_${field.name} = await _${itemField}.${field.name}${printOperationArgs(
+      //                       operation
+      //                     )}`,
+      //                     `expect(${itemField}_${field.name} instanceof ${field.type})`,
+      //                   ])}
+      //                 } else {
+      //                   throw new Error('No ${connectionType} found from ${itemField} query - cannot test ${itemField}.${
+      //                 field.name
+      //               } connection query')
+      //                 }`
+      //             ),
+      //           ]);
+      //         })
+      //       )
+      //     : undefined,
+    ]),
+    operation.path.length > 1
+  );
+}
+
+/**
+ * Print tests for a query
+ */
+function printQueryTest(context: SdkPluginContext, operation: SdkOperation, index = 0): string {
+  if (index > 2) {
+    return "";
+  }
+
+  const sdkKey = operation.sdkPath.join("_");
+
+  const connectionType = getConnectionNode(operation)?.listType;
   const connectionOperation = context.sdkDefinitions[sdkKey].operations.find(sdkOperation => {
     return getConnectionNode(sdkOperation)?.listType === operation.name;
   });
 
-  if (connectionOperation) {
+  if (connectionType) {
+    /** Handle connection queries specifically */
+    return printConnectionQueryTest(context, operation, index + 1);
+  } else if (connectionOperation) {
     /** This operation is handled by the connection test */
     return "";
-  } else if (connectionType) {
-    /** This is a connection */
-    return printLines([
-      printComment([`Test all ${connectionType} queries`]),
-      printDescribe(
-        operation.name,
-        printLines([
-          itemOperation
-            ? printLines([
-                `let _${itemField}: ${itemType} | undefined`,
-                ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
-                "\n",
-              ])
-            : undefined,
-          printComment([`Test the root query for the ${connectionType} connection`]),
-          printIt(
-            fieldName,
-            printLines([
-              `const ${fieldName} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
-              itemOperation
-                ? printLines([
-                    `const ${itemField} = ${fieldName}?.${Sdk.NODE_NAME}?.[0]`,
-                    ...(itemArgs.map(arg => printSet(`_${itemField}_${arg.name}`, `${itemField}?.${arg.name}`)) ?? []),
-                  ])
-                : undefined,
-              `expect(${fieldName} instanceof ${fieldType})`,
-            ])
-          ),
-          "\n",
-          ...(itemField
-            ? [
-                printComment([`Test the root query for a single ${connectionType}`]),
-                printIt(
-                  itemField,
-                  `if (${printList(
-                    itemArgs.map(arg => `_${itemField}_${arg.name}`),
-                    " && "
-                  )}) {
-                      ${printLines([
-                        `const ${itemField} = await ${clientName}.${itemField}(${printList(
-                          itemArgs.map(arg => `_${itemField}_${arg.name}`)
-                        )})`,
-                        printSet(`_${itemField}`, itemField),
-                        `expect(${itemField} instanceof ${itemType})`,
-                      ])}
-                    } else {
-                      throw new Error('No first ${connectionType} found from ${fieldName} connection query - cannot test ${itemField} query')
-                    }`
-                ),
-              ]
-            : []),
-          "\n",
-
-          itemQueries.length
-            ? printLines(
-                itemQueries.map(field => {
-                  return printLines([
-                    printComment([`Test the ${itemField}.${field.name} query for ${field.type}`]),
-                    printIt(
-                      `${itemField}.${field.name}`,
-                      `if (_${itemField}) {
-                          ${printLines([
-                            `const ${itemField}_${field.name} = await _${itemField}.${field.name}`,
-                            `expect(${itemField}_${field.name} instanceof ${field.type})`,
-                          ])}
-                        } else {
-                          throw new Error('No ${connectionType} found from ${itemField} query - cannot test ${itemField}.${
-                        field.name
-                      } query')
-                        }`
-                    ),
-                  ]);
-                })
-              )
-            : undefined,
-
-          itemConnections.length
-            ? printLines(
-                itemConnections.map(field => {
-                  return printLines([
-                    printComment([`Test the ${itemField}.${field.name} connection query for ${field.type}`]),
-                    printIt(
-                      `${itemField}.${field.name}`,
-                      `if (_${itemField}) {
-                        ${printLines([
-                          `const ${itemField}_${field.name} = await _${itemField}.${field.name}${printOperationArgs(
-                            operation
-                          )}`,
-                          `expect(${itemField}_${field.name} instanceof ${field.type})`,
-                        ])}
-                      } else {
-                        throw new Error('No ${connectionType} found from ${itemField} query - cannot test ${itemField}.${
-                        field.name
-                      } connection query')
-                      }`
-                    ),
-                  ]);
-                })
-              )
-            : undefined,
-        ])
-      ),
-    ]);
   } else if (operation.model) {
-    /** Mock data for any queries with required variables that cannot be sourced via a connection */
-    return printLines([
-      printComment([`Test ${operation.name} query`]),
-      printDescribe(
-        operation.name,
-        printLines([
-          sdkOperations.length ? `let _${fieldName}: ${fieldType}` : undefined,
-          "\n",
-          printComment([`Test the ${sdkKey || "root"} query for ${operation.name}`]),
-          printIt(
-            fieldName,
-            printLines([
-              `const ${fieldName} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
-              sdkOperations.length ? printSet(`_${fieldName}`, fieldName) : undefined,
-              `expect(${fieldName} instanceof ${fieldType})`,
-            ])
-          ),
-          printLines(sdkOperations.map(sdkOperation => printQueryTest(context, sdkOperation, index + 1))),
-        ])
-      ),
-    ]);
+    /** Handle models without connections */
+    return printModelQueryTest(context, operation, index + 1);
   } else {
     return printLines([`// ${operation.name} - no model for query`, "\n"]);
   }
