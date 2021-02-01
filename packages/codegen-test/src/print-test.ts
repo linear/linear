@@ -1,5 +1,6 @@
 import { OperationType, printComment, printLines, printList, printSet } from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
+import { logger } from "@linear/common";
 import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
 
 /**
@@ -53,11 +54,14 @@ function getConnectionNode(operation: SdkOperation): SdkListField | undefined {
 function printQueryTest(context: SdkPluginContext, operation: SdkOperation): string {
   const hasRequiredArgs = Boolean(operation.requiredArgs.args.length);
   const fieldName = operation.print.field;
+  const fieldType = printList([Sdk.NAMESPACE, operation.print.model], ".");
+  logger.trace(operation.print);
   const listType = getConnectionNode(operation)?.listType;
   const itemOperation = context.sdkDefinitions[""].operations.find(rootOperation => {
     return rootOperation.print.model === listType;
   });
   const itemField = itemOperation?.print.field;
+  const itemType = printList([Sdk.NAMESPACE, itemOperation?.print.model], ".");
   const itemArgs = itemOperation?.requiredArgs.args ?? [];
   const itemQueries = itemOperation?.model?.fields.query ?? [];
   const itemConnections = itemOperation?.model?.fields.connection ?? [];
@@ -94,7 +98,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                       : "UNMAPPED_MOCK_TYPE"
                   )
                 )})`,
-                `expect(${fieldName}).toBeDefined()`,
+                `expect(${fieldName} instanceof ${fieldType})`,
               ])
             ),
           ])
@@ -110,7 +114,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
           printLines([
             itemOperation
               ? printLines([
-                  `let _${itemField}: ${Sdk.NAMESPACE}.${itemOperation.print.model} | undefined`,
+                  `let _${itemField}: ${itemType} | undefined`,
                   ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
                   "\n",
                 ])
@@ -129,7 +133,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                         []),
                     ])
                   : undefined,
-                `expect(${fieldName}).toBeDefined()`,
+                `expect(${fieldName} instanceof ${fieldType})`,
               ])
             ),
             "\n",
@@ -147,7 +151,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                           itemArgs.map(arg => `_${itemField}_${arg.name}`)
                         )})`,
                         printSet(`_${itemField}`, itemField),
-                        `expect(${itemField}).toBeDefined()`,
+                        `expect(${itemField} instanceof ${itemType})`,
                       ])}
                     } else {
                       throw new Error('No first ${listType} found from ${fieldName} connection query - cannot test ${itemField} query')
@@ -166,7 +170,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                         `if (_${itemField}) {
                           ${printLines([
                             `const ${itemField}_${field.name} = await _${itemField}.${field.name}`,
-                            `expect(${itemField}_${field.name}).toBeDefined()`,
+                            `expect(${itemField}_${field.name} instanceof ${field.type})`,
                           ])}
                         } else {
                           throw new Error('No ${listType} found from ${itemField} query - cannot test ${itemField}.${
@@ -189,7 +193,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                         `if (_${itemField}) {
                         ${printLines([
                           `const ${itemField}_${field.name} = await _${itemField}.${field.name}()`,
-                          `expect(${itemField}_${field.name}).toBeDefined()`,
+                          `expect(${itemField}_${field.name} instanceof ${field.type})`,
                         ])}
                       } else {
                         throw new Error('No ${listType} found from ${itemField} query - cannot test ${itemField}.${
@@ -217,7 +221,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                 `const ${fieldName} = await client.${fieldName}${
                   Boolean(operation.optionalArgs.args.length) ? "()" : ""
                 }`,
-                `expect(${fieldName}).toBeDefined()`,
+                `expect(${fieldName} instanceof ${fieldType})`,
               ])
             ),
           ])

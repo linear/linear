@@ -70,7 +70,7 @@ describe("generated", () => {
     /** Test the root query for the ApiKey connection */
     it("apiKeys", async () => {
       const apiKeys = await client.apiKeys();
-      expect(apiKeys).toBeDefined();
+      expect(apiKeys instanceof L.ApiKeyConnection);
     });
   });
 
@@ -79,7 +79,7 @@ describe("generated", () => {
     /** Test the root query for the ApplicationWithAuthorization using mock data */
     it("applicationWithAuthorization", async () => {
       const applicationWithAuthorization = await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
-      expect(applicationWithAuthorization).toBeDefined();
+      expect(applicationWithAuthorization instanceof L.UserAuthorizedApplication);
     });
   });
 
@@ -88,7 +88,7 @@ describe("generated", () => {
     /** Test the root query for the ArchivedModelSync using mock data */
     it("archivedModelSync", async () => {
       const archivedModelSync = await client.archivedModelSync("mock-identifier", "mock-modelClass");
-      expect(archivedModelSync).toBeDefined();
+      expect(archivedModelSync instanceof L.ArchiveResponse);
     });
   });
 
@@ -97,7 +97,7 @@ describe("generated", () => {
     /** Test the root query for the ArchivedModelsSync using mock data */
     it("archivedModelsSync", async () => {
       const archivedModelsSync = await client.archivedModelsSync("mock-modelClass", "mock-teamId");
-      expect(archivedModelsSync).toBeDefined();
+      expect(archivedModelsSync instanceof L.ArchiveResponse);
     });
   });
 
@@ -108,7 +108,7 @@ describe("generated", () => {
     /** Test the root query for AvailableUsers */
     it("availableUsers", async () => {
       const availableUsers = await client.availableUsers;
-      expect(availableUsers).toBeDefined();
+      expect(availableUsers instanceof L.AuthResolverResponse);
     });
   });
 
@@ -117,7 +117,7 @@ describe("generated", () => {
     /** Test the root query for BillingDetails */
     it("billingDetails", async () => {
       const billingDetails = await client.billingDetails;
-      expect(billingDetails).toBeDefined();
+      expect(billingDetails instanceof L.BillingDetailsPayload);
     });
   });
 
@@ -126,7 +126,7 @@ describe("generated", () => {
     /** Test the root query for the CollaborativeDocumentJoin using mock data */
     it("collaborativeDocumentJoin", async () => {
       const collaborativeDocumentJoin = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
-      expect(collaborativeDocumentJoin).toBeDefined();
+      expect(collaborativeDocumentJoin instanceof L.CollaborationDocumentUpdatePayload);
     });
   });
 
@@ -140,7 +140,7 @@ describe("generated", () => {
       const comments = await client.comments();
       const comment = comments?.nodes?.[0];
       _comment_id = comment?.id;
-      expect(comments).toBeDefined();
+      expect(comments instanceof L.CommentConnection);
     });
 
     /** Test the root query for a single Comment */
@@ -148,7 +148,7 @@ describe("generated", () => {
       if (_comment_id) {
         const comment = await client.comment(_comment_id);
         _comment = comment;
-        expect(comment).toBeDefined();
+        expect(comment instanceof L.Comment);
       } else {
         throw new Error("No first Comment found from comments connection query - cannot test comment query");
       }
@@ -158,7 +158,7 @@ describe("generated", () => {
     it("comment.issue", async () => {
       if (_comment) {
         const comment_issue = await _comment.issue;
-        expect(comment_issue).toBeDefined();
+        expect(comment_issue instanceof L.Issue);
       } else {
         throw new Error("No Comment found from comment query - cannot test comment.issue query");
       }
@@ -168,7 +168,7 @@ describe("generated", () => {
     it("comment.user", async () => {
       if (_comment) {
         const comment_user = await _comment.user;
-        expect(comment_user).toBeDefined();
+        expect(comment_user instanceof L.User);
       } else {
         throw new Error("No Comment found from comment query - cannot test comment.user query");
       }
@@ -185,7 +185,7 @@ describe("generated", () => {
       const customViews = await client.customViews();
       const customView = customViews?.nodes?.[0];
       _customView_id = customView?.id;
-      expect(customViews).toBeDefined();
+      expect(customViews instanceof L.CustomViewConnection);
     });
 
     /** Test the root query for a single CustomView */
@@ -193,7 +193,7 @@ describe("generated", () => {
       if (_customView_id) {
         const customView = await client.customView(_customView_id);
         _customView = customView;
-        expect(customView).toBeDefined();
+        expect(customView instanceof L.CustomView);
       } else {
         throw new Error("No first CustomView found from customViews connection query - cannot test customView query");
       }
@@ -203,7 +203,7 @@ describe("generated", () => {
     it("customView.creator", async () => {
       if (_customView) {
         const customView_creator = await _customView.creator;
-        expect(customView_creator).toBeDefined();
+        expect(customView_creator instanceof L.User);
       } else {
         throw new Error("No CustomView found from customView query - cannot test customView.creator query");
       }
@@ -213,7 +213,7 @@ describe("generated", () => {
     it("customView.organization", async () => {
       if (_customView) {
         const customView_organization = await _customView.organization;
-        expect(customView_organization).toBeDefined();
+        expect(customView_organization instanceof L.Organization);
       } else {
         throw new Error("No CustomView found from customView query - cannot test customView.organization query");
       }
@@ -223,7 +223,7 @@ describe("generated", () => {
     it("customView.team", async () => {
       if (_customView) {
         const customView_team = await _customView.team;
-        expect(customView_team).toBeDefined();
+        expect(customView_team instanceof L.Team);
       } else {
         throw new Error("No CustomView found from customView query - cannot test customView.team query");
       }
@@ -240,7 +240,7 @@ describe("generated", () => {
       const cycles = await client.cycles();
       const cycle = cycles?.nodes?.[0];
       _cycle_id = cycle?.id;
-      expect(cycles).toBeDefined();
+      expect(cycles instanceof L.CycleConnection);
     });
 
     /** Test the root query for a single Cycle */
@@ -248,7 +248,7 @@ describe("generated", () => {
       if (_cycle_id) {
         const cycle = await client.cycle(_cycle_id);
         _cycle = cycle;
-        expect(cycle).toBeDefined();
+        expect(cycle instanceof L.Cycle);
       } else {
         throw new Error("No first Cycle found from cycles connection query - cannot test cycle query");
       }
@@ -258,7 +258,7 @@ describe("generated", () => {
     it("cycle.team", async () => {
       if (_cycle) {
         const cycle_team = await _cycle.team;
-        expect(cycle_team).toBeDefined();
+        expect(cycle_team instanceof L.Team);
       } else {
         throw new Error("No Cycle found from cycle query - cannot test cycle.team query");
       }
@@ -268,7 +268,7 @@ describe("generated", () => {
     it("cycle.issues", async () => {
       if (_cycle) {
         const cycle_issues = await _cycle.issues();
-        expect(cycle_issues).toBeDefined();
+        expect(cycle_issues instanceof L.IssueConnection);
       } else {
         throw new Error("No Cycle found from cycle query - cannot test cycle.issues connection query");
       }
@@ -278,7 +278,7 @@ describe("generated", () => {
     it("cycle.uncompletedIssuesUponClose", async () => {
       if (_cycle) {
         const cycle_uncompletedIssuesUponClose = await _cycle.uncompletedIssuesUponClose();
-        expect(cycle_uncompletedIssuesUponClose).toBeDefined();
+        expect(cycle_uncompletedIssuesUponClose instanceof L.IssueConnection);
       } else {
         throw new Error(
           "No Cycle found from cycle query - cannot test cycle.uncompletedIssuesUponClose connection query"
@@ -297,7 +297,7 @@ describe("generated", () => {
       const emojis = await client.emojis();
       const emoji = emojis?.nodes?.[0];
       _emoji_id = emoji?.id;
-      expect(emojis).toBeDefined();
+      expect(emojis instanceof L.EmojiConnection);
     });
 
     /** Test the root query for a single Emoji */
@@ -305,7 +305,7 @@ describe("generated", () => {
       if (_emoji_id) {
         const emoji = await client.emoji(_emoji_id);
         _emoji = emoji;
-        expect(emoji).toBeDefined();
+        expect(emoji instanceof L.Emoji);
       } else {
         throw new Error("No first Emoji found from emojis connection query - cannot test emoji query");
       }
@@ -315,7 +315,7 @@ describe("generated", () => {
     it("emoji.creator", async () => {
       if (_emoji) {
         const emoji_creator = await _emoji.creator;
-        expect(emoji_creator).toBeDefined();
+        expect(emoji_creator instanceof L.User);
       } else {
         throw new Error("No Emoji found from emoji query - cannot test emoji.creator query");
       }
@@ -325,7 +325,7 @@ describe("generated", () => {
     it("emoji.organization", async () => {
       if (_emoji) {
         const emoji_organization = await _emoji.organization;
-        expect(emoji_organization).toBeDefined();
+        expect(emoji_organization instanceof L.Organization);
       } else {
         throw new Error("No Emoji found from emoji query - cannot test emoji.organization query");
       }
@@ -342,7 +342,7 @@ describe("generated", () => {
       const favorites = await client.favorites();
       const favorite = favorites?.nodes?.[0];
       _favorite_id = favorite?.id;
-      expect(favorites).toBeDefined();
+      expect(favorites instanceof L.FavoriteConnection);
     });
 
     /** Test the root query for a single Favorite */
@@ -350,7 +350,7 @@ describe("generated", () => {
       if (_favorite_id) {
         const favorite = await client.favorite(_favorite_id);
         _favorite = favorite;
-        expect(favorite).toBeDefined();
+        expect(favorite instanceof L.Favorite);
       } else {
         throw new Error("No first Favorite found from favorites connection query - cannot test favorite query");
       }
@@ -360,7 +360,7 @@ describe("generated", () => {
     it("favorite.cycle", async () => {
       if (_favorite) {
         const favorite_cycle = await _favorite.cycle;
-        expect(favorite_cycle).toBeDefined();
+        expect(favorite_cycle instanceof L.Cycle);
       } else {
         throw new Error("No Favorite found from favorite query - cannot test favorite.cycle query");
       }
@@ -370,7 +370,7 @@ describe("generated", () => {
     it("favorite.issue", async () => {
       if (_favorite) {
         const favorite_issue = await _favorite.issue;
-        expect(favorite_issue).toBeDefined();
+        expect(favorite_issue instanceof L.Issue);
       } else {
         throw new Error("No Favorite found from favorite query - cannot test favorite.issue query");
       }
@@ -380,7 +380,7 @@ describe("generated", () => {
     it("favorite.label", async () => {
       if (_favorite) {
         const favorite_label = await _favorite.label;
-        expect(favorite_label).toBeDefined();
+        expect(favorite_label instanceof L.IssueLabel);
       } else {
         throw new Error("No Favorite found from favorite query - cannot test favorite.label query");
       }
@@ -390,7 +390,7 @@ describe("generated", () => {
     it("favorite.project", async () => {
       if (_favorite) {
         const favorite_project = await _favorite.project;
-        expect(favorite_project).toBeDefined();
+        expect(favorite_project instanceof L.Project);
       } else {
         throw new Error("No Favorite found from favorite query - cannot test favorite.project query");
       }
@@ -400,7 +400,7 @@ describe("generated", () => {
     it("favorite.projectTeam", async () => {
       if (_favorite) {
         const favorite_projectTeam = await _favorite.projectTeam;
-        expect(favorite_projectTeam).toBeDefined();
+        expect(favorite_projectTeam instanceof L.Project);
       } else {
         throw new Error("No Favorite found from favorite query - cannot test favorite.projectTeam query");
       }
@@ -410,7 +410,7 @@ describe("generated", () => {
     it("favorite.user", async () => {
       if (_favorite) {
         const favorite_user = await _favorite.user;
-        expect(favorite_user).toBeDefined();
+        expect(favorite_user instanceof L.User);
       } else {
         throw new Error("No Favorite found from favorite query - cannot test favorite.user query");
       }
@@ -422,7 +422,7 @@ describe("generated", () => {
     /** Test the root query for the FigmaEmbedInfo using mock data */
     it("figmaEmbedInfo", async () => {
       const figmaEmbedInfo = await client.figmaEmbedInfo("mock-fileId");
-      expect(figmaEmbedInfo).toBeDefined();
+      expect(figmaEmbedInfo instanceof L.FigmaEmbedPayload);
     });
   });
 
@@ -436,7 +436,7 @@ describe("generated", () => {
       const integrationResources = await client.integrationResources();
       const integrationResource = integrationResources?.nodes?.[0];
       _integrationResource_id = integrationResource?.id;
-      expect(integrationResources).toBeDefined();
+      expect(integrationResources instanceof L.IntegrationResourceConnection);
     });
 
     /** Test the root query for a single IntegrationResource */
@@ -444,7 +444,7 @@ describe("generated", () => {
       if (_integrationResource_id) {
         const integrationResource = await client.integrationResource(_integrationResource_id);
         _integrationResource = integrationResource;
-        expect(integrationResource).toBeDefined();
+        expect(integrationResource instanceof L.IntegrationResource);
       } else {
         throw new Error(
           "No first IntegrationResource found from integrationResources connection query - cannot test integrationResource query"
@@ -456,7 +456,7 @@ describe("generated", () => {
     it("integrationResource.integration", async () => {
       if (_integrationResource) {
         const integrationResource_integration = await _integrationResource.integration;
-        expect(integrationResource_integration).toBeDefined();
+        expect(integrationResource_integration instanceof L.Integration);
       } else {
         throw new Error(
           "No IntegrationResource found from integrationResource query - cannot test integrationResource.integration query"
@@ -468,7 +468,7 @@ describe("generated", () => {
     it("integrationResource.issue", async () => {
       if (_integrationResource) {
         const integrationResource_issue = await _integrationResource.issue;
-        expect(integrationResource_issue).toBeDefined();
+        expect(integrationResource_issue instanceof L.Issue);
       } else {
         throw new Error(
           "No IntegrationResource found from integrationResource query - cannot test integrationResource.issue query"
@@ -487,7 +487,7 @@ describe("generated", () => {
       const integrations = await client.integrations();
       const integration = integrations?.nodes?.[0];
       _integration_id = integration?.id;
-      expect(integrations).toBeDefined();
+      expect(integrations instanceof L.IntegrationConnection);
     });
 
     /** Test the root query for a single Integration */
@@ -495,7 +495,7 @@ describe("generated", () => {
       if (_integration_id) {
         const integration = await client.integration(_integration_id);
         _integration = integration;
-        expect(integration).toBeDefined();
+        expect(integration instanceof L.Integration);
       } else {
         throw new Error(
           "No first Integration found from integrations connection query - cannot test integration query"
@@ -507,7 +507,7 @@ describe("generated", () => {
     it("integration.creator", async () => {
       if (_integration) {
         const integration_creator = await _integration.creator;
-        expect(integration_creator).toBeDefined();
+        expect(integration_creator instanceof L.User);
       } else {
         throw new Error("No Integration found from integration query - cannot test integration.creator query");
       }
@@ -517,7 +517,7 @@ describe("generated", () => {
     it("integration.organization", async () => {
       if (_integration) {
         const integration_organization = await _integration.organization;
-        expect(integration_organization).toBeDefined();
+        expect(integration_organization instanceof L.Organization);
       } else {
         throw new Error("No Integration found from integration query - cannot test integration.organization query");
       }
@@ -527,7 +527,7 @@ describe("generated", () => {
     it("integration.team", async () => {
       if (_integration) {
         const integration_team = await _integration.team;
-        expect(integration_team).toBeDefined();
+        expect(integration_team instanceof L.Team);
       } else {
         throw new Error("No Integration found from integration query - cannot test integration.team query");
       }
@@ -539,7 +539,7 @@ describe("generated", () => {
     /** Test the root query for the InviteInfo using mock data */
     it("inviteInfo", async () => {
       const inviteInfo = await client.inviteInfo("mock-userHash");
-      expect(inviteInfo).toBeDefined();
+      expect(inviteInfo instanceof L.InvitePagePayload);
     });
   });
 
@@ -553,7 +553,7 @@ describe("generated", () => {
       const issueLabels = await client.issueLabels();
       const issueLabel = issueLabels?.nodes?.[0];
       _issueLabel_id = issueLabel?.id;
-      expect(issueLabels).toBeDefined();
+      expect(issueLabels instanceof L.IssueLabelConnection);
     });
 
     /** Test the root query for a single IssueLabel */
@@ -561,7 +561,7 @@ describe("generated", () => {
       if (_issueLabel_id) {
         const issueLabel = await client.issueLabel(_issueLabel_id);
         _issueLabel = issueLabel;
-        expect(issueLabel).toBeDefined();
+        expect(issueLabel instanceof L.IssueLabel);
       } else {
         throw new Error("No first IssueLabel found from issueLabels connection query - cannot test issueLabel query");
       }
@@ -571,7 +571,7 @@ describe("generated", () => {
     it("issueLabel.creator", async () => {
       if (_issueLabel) {
         const issueLabel_creator = await _issueLabel.creator;
-        expect(issueLabel_creator).toBeDefined();
+        expect(issueLabel_creator instanceof L.User);
       } else {
         throw new Error("No IssueLabel found from issueLabel query - cannot test issueLabel.creator query");
       }
@@ -581,7 +581,7 @@ describe("generated", () => {
     it("issueLabel.team", async () => {
       if (_issueLabel) {
         const issueLabel_team = await _issueLabel.team;
-        expect(issueLabel_team).toBeDefined();
+        expect(issueLabel_team instanceof L.Team);
       } else {
         throw new Error("No IssueLabel found from issueLabel query - cannot test issueLabel.team query");
       }
@@ -591,7 +591,7 @@ describe("generated", () => {
     it("issueLabel.issues", async () => {
       if (_issueLabel) {
         const issueLabel_issues = await _issueLabel.issues();
-        expect(issueLabel_issues).toBeDefined();
+        expect(issueLabel_issues instanceof L.IssueConnection);
       } else {
         throw new Error("No IssueLabel found from issueLabel query - cannot test issueLabel.issues connection query");
       }
@@ -608,7 +608,7 @@ describe("generated", () => {
       const issueRelations = await client.issueRelations();
       const issueRelation = issueRelations?.nodes?.[0];
       _issueRelation_id = issueRelation?.id;
-      expect(issueRelations).toBeDefined();
+      expect(issueRelations instanceof L.IssueRelationConnection);
     });
 
     /** Test the root query for a single IssueRelation */
@@ -616,7 +616,7 @@ describe("generated", () => {
       if (_issueRelation_id) {
         const issueRelation = await client.issueRelation(_issueRelation_id);
         _issueRelation = issueRelation;
-        expect(issueRelation).toBeDefined();
+        expect(issueRelation instanceof L.IssueRelation);
       } else {
         throw new Error(
           "No first IssueRelation found from issueRelations connection query - cannot test issueRelation query"
@@ -628,7 +628,7 @@ describe("generated", () => {
     it("issueRelation.issue", async () => {
       if (_issueRelation) {
         const issueRelation_issue = await _issueRelation.issue;
-        expect(issueRelation_issue).toBeDefined();
+        expect(issueRelation_issue instanceof L.Issue);
       } else {
         throw new Error("No IssueRelation found from issueRelation query - cannot test issueRelation.issue query");
       }
@@ -638,7 +638,7 @@ describe("generated", () => {
     it("issueRelation.relatedIssue", async () => {
       if (_issueRelation) {
         const issueRelation_relatedIssue = await _issueRelation.relatedIssue;
-        expect(issueRelation_relatedIssue).toBeDefined();
+        expect(issueRelation_relatedIssue instanceof L.Issue);
       } else {
         throw new Error(
           "No IssueRelation found from issueRelation query - cannot test issueRelation.relatedIssue query"
@@ -652,7 +652,7 @@ describe("generated", () => {
     /** Test the root query for the IssueSearch using mock data */
     it("issueSearch", async () => {
       const issueSearch = await client.issueSearch("mock-query");
-      expect(issueSearch).toBeDefined();
+      expect(issueSearch instanceof L.IssueConnection);
     });
   });
 
@@ -666,7 +666,7 @@ describe("generated", () => {
       const issues = await client.issues();
       const issue = issues?.nodes?.[0];
       _issue_id = issue?.id;
-      expect(issues).toBeDefined();
+      expect(issues instanceof L.IssueConnection);
     });
 
     /** Test the root query for a single Issue */
@@ -674,7 +674,7 @@ describe("generated", () => {
       if (_issue_id) {
         const issue = await client.issue(_issue_id);
         _issue = issue;
-        expect(issue).toBeDefined();
+        expect(issue instanceof L.Issue);
       } else {
         throw new Error("No first Issue found from issues connection query - cannot test issue query");
       }
@@ -684,7 +684,7 @@ describe("generated", () => {
     it("issue.assignee", async () => {
       if (_issue) {
         const issue_assignee = await _issue.assignee;
-        expect(issue_assignee).toBeDefined();
+        expect(issue_assignee instanceof L.User);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.assignee query");
       }
@@ -694,7 +694,7 @@ describe("generated", () => {
     it("issue.creator", async () => {
       if (_issue) {
         const issue_creator = await _issue.creator;
-        expect(issue_creator).toBeDefined();
+        expect(issue_creator instanceof L.User);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.creator query");
       }
@@ -704,7 +704,7 @@ describe("generated", () => {
     it("issue.cycle", async () => {
       if (_issue) {
         const issue_cycle = await _issue.cycle;
-        expect(issue_cycle).toBeDefined();
+        expect(issue_cycle instanceof L.Cycle);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.cycle query");
       }
@@ -714,7 +714,7 @@ describe("generated", () => {
     it("issue.parent", async () => {
       if (_issue) {
         const issue_parent = await _issue.parent;
-        expect(issue_parent).toBeDefined();
+        expect(issue_parent instanceof L.Issue);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.parent query");
       }
@@ -724,7 +724,7 @@ describe("generated", () => {
     it("issue.project", async () => {
       if (_issue) {
         const issue_project = await _issue.project;
-        expect(issue_project).toBeDefined();
+        expect(issue_project instanceof L.Project);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.project query");
       }
@@ -734,7 +734,7 @@ describe("generated", () => {
     it("issue.state", async () => {
       if (_issue) {
         const issue_state = await _issue.state;
-        expect(issue_state).toBeDefined();
+        expect(issue_state instanceof L.WorkflowState);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.state query");
       }
@@ -744,7 +744,7 @@ describe("generated", () => {
     it("issue.team", async () => {
       if (_issue) {
         const issue_team = await _issue.team;
-        expect(issue_team).toBeDefined();
+        expect(issue_team instanceof L.Team);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.team query");
       }
@@ -754,7 +754,7 @@ describe("generated", () => {
     it("issue.children", async () => {
       if (_issue) {
         const issue_children = await _issue.children();
-        expect(issue_children).toBeDefined();
+        expect(issue_children instanceof L.IssueConnection);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.children connection query");
       }
@@ -764,7 +764,7 @@ describe("generated", () => {
     it("issue.comments", async () => {
       if (_issue) {
         const issue_comments = await _issue.comments();
-        expect(issue_comments).toBeDefined();
+        expect(issue_comments instanceof L.CommentConnection);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.comments connection query");
       }
@@ -774,7 +774,7 @@ describe("generated", () => {
     it("issue.history", async () => {
       if (_issue) {
         const issue_history = await _issue.history();
-        expect(issue_history).toBeDefined();
+        expect(issue_history instanceof L.IssueHistoryConnection);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.history connection query");
       }
@@ -784,7 +784,7 @@ describe("generated", () => {
     it("issue.integrationResources", async () => {
       if (_issue) {
         const issue_integrationResources = await _issue.integrationResources();
-        expect(issue_integrationResources).toBeDefined();
+        expect(issue_integrationResources instanceof L.IntegrationResourceConnection);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.integrationResources connection query");
       }
@@ -794,7 +794,7 @@ describe("generated", () => {
     it("issue.inverseRelations", async () => {
       if (_issue) {
         const issue_inverseRelations = await _issue.inverseRelations();
-        expect(issue_inverseRelations).toBeDefined();
+        expect(issue_inverseRelations instanceof L.IssueRelationConnection);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.inverseRelations connection query");
       }
@@ -804,7 +804,7 @@ describe("generated", () => {
     it("issue.labels", async () => {
       if (_issue) {
         const issue_labels = await _issue.labels();
-        expect(issue_labels).toBeDefined();
+        expect(issue_labels instanceof L.IssueLabelConnection);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.labels connection query");
       }
@@ -814,7 +814,7 @@ describe("generated", () => {
     it("issue.relations", async () => {
       if (_issue) {
         const issue_relations = await _issue.relations();
-        expect(issue_relations).toBeDefined();
+        expect(issue_relations instanceof L.IssueRelationConnection);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.relations connection query");
       }
@@ -824,7 +824,7 @@ describe("generated", () => {
     it("issue.subscribers", async () => {
       if (_issue) {
         const issue_subscribers = await _issue.subscribers();
-        expect(issue_subscribers).toBeDefined();
+        expect(issue_subscribers instanceof L.UserConnection);
       } else {
         throw new Error("No Issue found from issue query - cannot test issue.subscribers connection query");
       }
@@ -841,7 +841,7 @@ describe("generated", () => {
       const milestones = await client.milestones();
       const milestone = milestones?.nodes?.[0];
       _milestone_id = milestone?.id;
-      expect(milestones).toBeDefined();
+      expect(milestones instanceof L.MilestoneConnection);
     });
 
     /** Test the root query for a single Milestone */
@@ -849,7 +849,7 @@ describe("generated", () => {
       if (_milestone_id) {
         const milestone = await client.milestone(_milestone_id);
         _milestone = milestone;
-        expect(milestone).toBeDefined();
+        expect(milestone instanceof L.Milestone);
       } else {
         throw new Error("No first Milestone found from milestones connection query - cannot test milestone query");
       }
@@ -859,7 +859,7 @@ describe("generated", () => {
     it("milestone.organization", async () => {
       if (_milestone) {
         const milestone_organization = await _milestone.organization;
-        expect(milestone_organization).toBeDefined();
+        expect(milestone_organization instanceof L.Organization);
       } else {
         throw new Error("No Milestone found from milestone query - cannot test milestone.organization query");
       }
@@ -869,7 +869,7 @@ describe("generated", () => {
     it("milestone.projects", async () => {
       if (_milestone) {
         const milestone_projects = await _milestone.projects();
-        expect(milestone_projects).toBeDefined();
+        expect(milestone_projects instanceof L.ProjectConnection);
       } else {
         throw new Error("No Milestone found from milestone query - cannot test milestone.projects connection query");
       }
@@ -886,7 +886,7 @@ describe("generated", () => {
       const notificationSubscriptions = await client.notificationSubscriptions();
       const notificationSubscription = notificationSubscriptions?.nodes?.[0];
       _notificationSubscription_id = notificationSubscription?.id;
-      expect(notificationSubscriptions).toBeDefined();
+      expect(notificationSubscriptions instanceof L.NotificationSubscriptionConnection);
     });
 
     /** Test the root query for a single NotificationSubscription */
@@ -894,7 +894,7 @@ describe("generated", () => {
       if (_notificationSubscription_id) {
         const notificationSubscription = await client.notificationSubscription(_notificationSubscription_id);
         _notificationSubscription = notificationSubscription;
-        expect(notificationSubscription).toBeDefined();
+        expect(notificationSubscription instanceof L.NotificationSubscription);
       } else {
         throw new Error(
           "No first NotificationSubscription found from notificationSubscriptions connection query - cannot test notificationSubscription query"
@@ -906,7 +906,7 @@ describe("generated", () => {
     it("notificationSubscription.project", async () => {
       if (_notificationSubscription) {
         const notificationSubscription_project = await _notificationSubscription.project;
-        expect(notificationSubscription_project).toBeDefined();
+        expect(notificationSubscription_project instanceof L.Project);
       } else {
         throw new Error(
           "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.project query"
@@ -918,7 +918,7 @@ describe("generated", () => {
     it("notificationSubscription.team", async () => {
       if (_notificationSubscription) {
         const notificationSubscription_team = await _notificationSubscription.team;
-        expect(notificationSubscription_team).toBeDefined();
+        expect(notificationSubscription_team instanceof L.Team);
       } else {
         throw new Error(
           "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.team query"
@@ -930,7 +930,7 @@ describe("generated", () => {
     it("notificationSubscription.user", async () => {
       if (_notificationSubscription) {
         const notificationSubscription_user = await _notificationSubscription.user;
-        expect(notificationSubscription_user).toBeDefined();
+        expect(notificationSubscription_user instanceof L.User);
       } else {
         throw new Error(
           "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.user query"
@@ -949,7 +949,7 @@ describe("generated", () => {
       const notifications = await client.notifications();
       const notification = notifications?.nodes?.[0];
       _notification_id = notification?.id;
-      expect(notifications).toBeDefined();
+      expect(notifications instanceof L.NotificationConnection);
     });
 
     /** Test the root query for a single Notification */
@@ -957,7 +957,7 @@ describe("generated", () => {
       if (_notification_id) {
         const notification = await client.notification(_notification_id);
         _notification = notification;
-        expect(notification).toBeDefined();
+        expect(notification instanceof L.Notification);
       } else {
         throw new Error(
           "No first Notification found from notifications connection query - cannot test notification query"
@@ -969,7 +969,7 @@ describe("generated", () => {
     it("notification.comment", async () => {
       if (_notification) {
         const notification_comment = await _notification.comment;
-        expect(notification_comment).toBeDefined();
+        expect(notification_comment instanceof L.Comment);
       } else {
         throw new Error("No Notification found from notification query - cannot test notification.comment query");
       }
@@ -979,7 +979,7 @@ describe("generated", () => {
     it("notification.issue", async () => {
       if (_notification) {
         const notification_issue = await _notification.issue;
-        expect(notification_issue).toBeDefined();
+        expect(notification_issue instanceof L.Issue);
       } else {
         throw new Error("No Notification found from notification query - cannot test notification.issue query");
       }
@@ -989,7 +989,7 @@ describe("generated", () => {
     it("notification.team", async () => {
       if (_notification) {
         const notification_team = await _notification.team;
-        expect(notification_team).toBeDefined();
+        expect(notification_team instanceof L.Team);
       } else {
         throw new Error("No Notification found from notification query - cannot test notification.team query");
       }
@@ -999,7 +999,7 @@ describe("generated", () => {
     it("notification.user", async () => {
       if (_notification) {
         const notification_user = await _notification.user;
-        expect(notification_user).toBeDefined();
+        expect(notification_user instanceof L.User);
       } else {
         throw new Error("No Notification found from notification query - cannot test notification.user query");
       }
@@ -1011,7 +1011,7 @@ describe("generated", () => {
     /** Test the root query for Organization */
     it("organization", async () => {
       const organization = await client.organization;
-      expect(organization).toBeDefined();
+      expect(organization instanceof L.Organization);
     });
   });
 
@@ -1020,7 +1020,7 @@ describe("generated", () => {
     /** Test the root query for the OrganizationExists using mock data */
     it("organizationExists", async () => {
       const organizationExists = await client.organizationExists("mock-urlKey");
-      expect(organizationExists).toBeDefined();
+      expect(organizationExists instanceof L.OrganizationExistsPayload);
     });
   });
 
@@ -1029,7 +1029,7 @@ describe("generated", () => {
     /** Test the root query for the OrganizationInvite connection */
     it("organizationInvites", async () => {
       const organizationInvites = await client.organizationInvites();
-      expect(organizationInvites).toBeDefined();
+      expect(organizationInvites instanceof L.OrganizationInviteConnection);
     });
   });
 
@@ -1043,7 +1043,7 @@ describe("generated", () => {
       const projectLinks = await client.projectLinks();
       const projectLink = projectLinks?.nodes?.[0];
       _projectLink_id = projectLink?.id;
-      expect(projectLinks).toBeDefined();
+      expect(projectLinks instanceof L.ProjectLinkConnection);
     });
 
     /** Test the root query for a single ProjectLink */
@@ -1051,7 +1051,7 @@ describe("generated", () => {
       if (_projectLink_id) {
         const projectLink = await client.projectLink(_projectLink_id);
         _projectLink = projectLink;
-        expect(projectLink).toBeDefined();
+        expect(projectLink instanceof L.ProjectLink);
       } else {
         throw new Error(
           "No first ProjectLink found from projectLinks connection query - cannot test projectLink query"
@@ -1063,7 +1063,7 @@ describe("generated", () => {
     it("projectLink.creator", async () => {
       if (_projectLink) {
         const projectLink_creator = await _projectLink.creator;
-        expect(projectLink_creator).toBeDefined();
+        expect(projectLink_creator instanceof L.User);
       } else {
         throw new Error("No ProjectLink found from projectLink query - cannot test projectLink.creator query");
       }
@@ -1073,7 +1073,7 @@ describe("generated", () => {
     it("projectLink.project", async () => {
       if (_projectLink) {
         const projectLink_project = await _projectLink.project;
-        expect(projectLink_project).toBeDefined();
+        expect(projectLink_project instanceof L.Project);
       } else {
         throw new Error("No ProjectLink found from projectLink query - cannot test projectLink.project query");
       }
@@ -1090,7 +1090,7 @@ describe("generated", () => {
       const projects = await client.projects();
       const project = projects?.nodes?.[0];
       _project_id = project?.id;
-      expect(projects).toBeDefined();
+      expect(projects instanceof L.ProjectConnection);
     });
 
     /** Test the root query for a single Project */
@@ -1098,7 +1098,7 @@ describe("generated", () => {
       if (_project_id) {
         const project = await client.project(_project_id);
         _project = project;
-        expect(project).toBeDefined();
+        expect(project instanceof L.Project);
       } else {
         throw new Error("No first Project found from projects connection query - cannot test project query");
       }
@@ -1108,7 +1108,7 @@ describe("generated", () => {
     it("project.creator", async () => {
       if (_project) {
         const project_creator = await _project.creator;
-        expect(project_creator).toBeDefined();
+        expect(project_creator instanceof L.User);
       } else {
         throw new Error("No Project found from project query - cannot test project.creator query");
       }
@@ -1118,7 +1118,7 @@ describe("generated", () => {
     it("project.lead", async () => {
       if (_project) {
         const project_lead = await _project.lead;
-        expect(project_lead).toBeDefined();
+        expect(project_lead instanceof L.User);
       } else {
         throw new Error("No Project found from project query - cannot test project.lead query");
       }
@@ -1128,7 +1128,7 @@ describe("generated", () => {
     it("project.milestone", async () => {
       if (_project) {
         const project_milestone = await _project.milestone;
-        expect(project_milestone).toBeDefined();
+        expect(project_milestone instanceof L.Milestone);
       } else {
         throw new Error("No Project found from project query - cannot test project.milestone query");
       }
@@ -1138,7 +1138,7 @@ describe("generated", () => {
     it("project.issues", async () => {
       if (_project) {
         const project_issues = await _project.issues();
-        expect(project_issues).toBeDefined();
+        expect(project_issues instanceof L.IssueConnection);
       } else {
         throw new Error("No Project found from project query - cannot test project.issues connection query");
       }
@@ -1148,7 +1148,7 @@ describe("generated", () => {
     it("project.links", async () => {
       if (_project) {
         const project_links = await _project.links();
-        expect(project_links).toBeDefined();
+        expect(project_links instanceof L.ProjectLinkConnection);
       } else {
         throw new Error("No Project found from project query - cannot test project.links connection query");
       }
@@ -1158,7 +1158,7 @@ describe("generated", () => {
     it("project.members", async () => {
       if (_project) {
         const project_members = await _project.members();
-        expect(project_members).toBeDefined();
+        expect(project_members instanceof L.UserConnection);
       } else {
         throw new Error("No Project found from project query - cannot test project.members connection query");
       }
@@ -1168,7 +1168,7 @@ describe("generated", () => {
     it("project.teams", async () => {
       if (_project) {
         const project_teams = await _project.teams();
-        expect(project_teams).toBeDefined();
+        expect(project_teams instanceof L.TeamConnection);
       } else {
         throw new Error("No Project found from project query - cannot test project.teams connection query");
       }
@@ -1180,7 +1180,7 @@ describe("generated", () => {
     /** Test the root query for PushSubscriptionTest */
     it("pushSubscriptionTest", async () => {
       const pushSubscriptionTest = await client.pushSubscriptionTest;
-      expect(pushSubscriptionTest).toBeDefined();
+      expect(pushSubscriptionTest instanceof L.PushSubscriptionPayload);
     });
   });
 
@@ -1194,7 +1194,7 @@ describe("generated", () => {
       const reactions = await client.reactions();
       const reaction = reactions?.nodes?.[0];
       _reaction_id = reaction?.id;
-      expect(reactions).toBeDefined();
+      expect(reactions instanceof L.ReactionConnection);
     });
 
     /** Test the root query for a single Reaction */
@@ -1202,7 +1202,7 @@ describe("generated", () => {
       if (_reaction_id) {
         const reaction = await client.reaction(_reaction_id);
         _reaction = reaction;
-        expect(reaction).toBeDefined();
+        expect(reaction instanceof L.Reaction);
       } else {
         throw new Error("No first Reaction found from reactions connection query - cannot test reaction query");
       }
@@ -1212,7 +1212,7 @@ describe("generated", () => {
     it("reaction.comment", async () => {
       if (_reaction) {
         const reaction_comment = await _reaction.comment;
-        expect(reaction_comment).toBeDefined();
+        expect(reaction_comment instanceof L.Comment);
       } else {
         throw new Error("No Reaction found from reaction query - cannot test reaction.comment query");
       }
@@ -1222,7 +1222,7 @@ describe("generated", () => {
     it("reaction.user", async () => {
       if (_reaction) {
         const reaction_user = await _reaction.user;
-        expect(reaction_user).toBeDefined();
+        expect(reaction_user instanceof L.User);
       } else {
         throw new Error("No Reaction found from reaction query - cannot test reaction.user query");
       }
@@ -1234,7 +1234,7 @@ describe("generated", () => {
     /** Test the root query for the SsoUrlFromEmail using mock data */
     it("ssoUrlFromEmail", async () => {
       const ssoUrlFromEmail = await client.ssoUrlFromEmail("mock-email");
-      expect(ssoUrlFromEmail).toBeDefined();
+      expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
     });
   });
 
@@ -1243,7 +1243,7 @@ describe("generated", () => {
     /** Test the root query for the SyncBootstrap using mock data */
     it("syncBootstrap", async () => {
       const syncBootstrap = await client.syncBootstrap(123, 123);
-      expect(syncBootstrap).toBeDefined();
+      expect(syncBootstrap instanceof L.SyncResponse);
     });
   });
 
@@ -1252,7 +1252,7 @@ describe("generated", () => {
     /** Test the root query for the SyncUpdates using mock data */
     it("syncUpdates", async () => {
       const syncUpdates = await client.syncUpdates(123);
-      expect(syncUpdates).toBeDefined();
+      expect(syncUpdates instanceof L.SyncResponse);
     });
   });
 
@@ -1266,7 +1266,7 @@ describe("generated", () => {
       const teamMemberships = await client.teamMemberships();
       const teamMembership = teamMemberships?.nodes?.[0];
       _teamMembership_id = teamMembership?.id;
-      expect(teamMemberships).toBeDefined();
+      expect(teamMemberships instanceof L.TeamMembershipConnection);
     });
 
     /** Test the root query for a single TeamMembership */
@@ -1274,7 +1274,7 @@ describe("generated", () => {
       if (_teamMembership_id) {
         const teamMembership = await client.teamMembership(_teamMembership_id);
         _teamMembership = teamMembership;
-        expect(teamMembership).toBeDefined();
+        expect(teamMembership instanceof L.TeamMembership);
       } else {
         throw new Error(
           "No first TeamMembership found from teamMemberships connection query - cannot test teamMembership query"
@@ -1286,7 +1286,7 @@ describe("generated", () => {
     it("teamMembership.team", async () => {
       if (_teamMembership) {
         const teamMembership_team = await _teamMembership.team;
-        expect(teamMembership_team).toBeDefined();
+        expect(teamMembership_team instanceof L.Team);
       } else {
         throw new Error("No TeamMembership found from teamMembership query - cannot test teamMembership.team query");
       }
@@ -1296,7 +1296,7 @@ describe("generated", () => {
     it("teamMembership.user", async () => {
       if (_teamMembership) {
         const teamMembership_user = await _teamMembership.user;
-        expect(teamMembership_user).toBeDefined();
+        expect(teamMembership_user instanceof L.User);
       } else {
         throw new Error("No TeamMembership found from teamMembership query - cannot test teamMembership.user query");
       }
@@ -1313,7 +1313,7 @@ describe("generated", () => {
       const teams = await client.teams();
       const team = teams?.nodes?.[0];
       _team_id = team?.id;
-      expect(teams).toBeDefined();
+      expect(teams instanceof L.TeamConnection);
     });
 
     /** Test the root query for a single Team */
@@ -1321,7 +1321,7 @@ describe("generated", () => {
       if (_team_id) {
         const team = await client.team(_team_id);
         _team = team;
-        expect(team).toBeDefined();
+        expect(team instanceof L.Team);
       } else {
         throw new Error("No first Team found from teams connection query - cannot test team query");
       }
@@ -1331,7 +1331,7 @@ describe("generated", () => {
     it("team.activeCycle", async () => {
       if (_team) {
         const team_activeCycle = await _team.activeCycle;
-        expect(team_activeCycle).toBeDefined();
+        expect(team_activeCycle instanceof L.Cycle);
       } else {
         throw new Error("No Team found from team query - cannot test team.activeCycle query");
       }
@@ -1341,7 +1341,7 @@ describe("generated", () => {
     it("team.draftWorkflowState", async () => {
       if (_team) {
         const team_draftWorkflowState = await _team.draftWorkflowState;
-        expect(team_draftWorkflowState).toBeDefined();
+        expect(team_draftWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("No Team found from team query - cannot test team.draftWorkflowState query");
       }
@@ -1351,7 +1351,7 @@ describe("generated", () => {
     it("team.markedAsDuplicateWorkflowState", async () => {
       if (_team) {
         const team_markedAsDuplicateWorkflowState = await _team.markedAsDuplicateWorkflowState;
-        expect(team_markedAsDuplicateWorkflowState).toBeDefined();
+        expect(team_markedAsDuplicateWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("No Team found from team query - cannot test team.markedAsDuplicateWorkflowState query");
       }
@@ -1361,7 +1361,7 @@ describe("generated", () => {
     it("team.mergeWorkflowState", async () => {
       if (_team) {
         const team_mergeWorkflowState = await _team.mergeWorkflowState;
-        expect(team_mergeWorkflowState).toBeDefined();
+        expect(team_mergeWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("No Team found from team query - cannot test team.mergeWorkflowState query");
       }
@@ -1371,7 +1371,7 @@ describe("generated", () => {
     it("team.organization", async () => {
       if (_team) {
         const team_organization = await _team.organization;
-        expect(team_organization).toBeDefined();
+        expect(team_organization instanceof L.Organization);
       } else {
         throw new Error("No Team found from team query - cannot test team.organization query");
       }
@@ -1381,7 +1381,7 @@ describe("generated", () => {
     it("team.reviewWorkflowState", async () => {
       if (_team) {
         const team_reviewWorkflowState = await _team.reviewWorkflowState;
-        expect(team_reviewWorkflowState).toBeDefined();
+        expect(team_reviewWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("No Team found from team query - cannot test team.reviewWorkflowState query");
       }
@@ -1391,7 +1391,7 @@ describe("generated", () => {
     it("team.startWorkflowState", async () => {
       if (_team) {
         const team_startWorkflowState = await _team.startWorkflowState;
-        expect(team_startWorkflowState).toBeDefined();
+        expect(team_startWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("No Team found from team query - cannot test team.startWorkflowState query");
       }
@@ -1401,7 +1401,7 @@ describe("generated", () => {
     it("team.cycles", async () => {
       if (_team) {
         const team_cycles = await _team.cycles();
-        expect(team_cycles).toBeDefined();
+        expect(team_cycles instanceof L.CycleConnection);
       } else {
         throw new Error("No Team found from team query - cannot test team.cycles connection query");
       }
@@ -1411,7 +1411,7 @@ describe("generated", () => {
     it("team.issues", async () => {
       if (_team) {
         const team_issues = await _team.issues();
-        expect(team_issues).toBeDefined();
+        expect(team_issues instanceof L.IssueConnection);
       } else {
         throw new Error("No Team found from team query - cannot test team.issues connection query");
       }
@@ -1421,7 +1421,7 @@ describe("generated", () => {
     it("team.labels", async () => {
       if (_team) {
         const team_labels = await _team.labels();
-        expect(team_labels).toBeDefined();
+        expect(team_labels instanceof L.IssueLabelConnection);
       } else {
         throw new Error("No Team found from team query - cannot test team.labels connection query");
       }
@@ -1431,7 +1431,7 @@ describe("generated", () => {
     it("team.memberships", async () => {
       if (_team) {
         const team_memberships = await _team.memberships();
-        expect(team_memberships).toBeDefined();
+        expect(team_memberships instanceof L.TeamMembershipConnection);
       } else {
         throw new Error("No Team found from team query - cannot test team.memberships connection query");
       }
@@ -1441,7 +1441,7 @@ describe("generated", () => {
     it("team.projects", async () => {
       if (_team) {
         const team_projects = await _team.projects();
-        expect(team_projects).toBeDefined();
+        expect(team_projects instanceof L.ProjectConnection);
       } else {
         throw new Error("No Team found from team query - cannot test team.projects connection query");
       }
@@ -1451,7 +1451,7 @@ describe("generated", () => {
     it("team.states", async () => {
       if (_team) {
         const team_states = await _team.states();
-        expect(team_states).toBeDefined();
+        expect(team_states instanceof L.WorkflowStateConnection);
       } else {
         throw new Error("No Team found from team query - cannot test team.states connection query");
       }
@@ -1461,7 +1461,7 @@ describe("generated", () => {
     it("team.templates", async () => {
       if (_team) {
         const team_templates = await _team.templates();
-        expect(team_templates).toBeDefined();
+        expect(team_templates instanceof L.TemplateConnection);
       } else {
         throw new Error("No Team found from team query - cannot test team.templates connection query");
       }
@@ -1471,7 +1471,7 @@ describe("generated", () => {
     it("team.webhooks", async () => {
       if (_team) {
         const team_webhooks = await _team.webhooks();
-        expect(team_webhooks).toBeDefined();
+        expect(team_webhooks instanceof L.WebhookConnection);
       } else {
         throw new Error("No Team found from team query - cannot test team.webhooks connection query");
       }
@@ -1483,7 +1483,7 @@ describe("generated", () => {
     /** Test the root query for the Template using mock data */
     it("template", async () => {
       const template = await client.template("mock-id");
-      expect(template).toBeDefined();
+      expect(template instanceof L.Template);
     });
   });
 
@@ -1494,7 +1494,7 @@ describe("generated", () => {
     /** Test the root query for UserSettings */
     it("userSettings", async () => {
       const userSettings = await client.userSettings;
-      expect(userSettings).toBeDefined();
+      expect(userSettings instanceof L.UserSettings);
     });
   });
 
@@ -1508,7 +1508,7 @@ describe("generated", () => {
       const users = await client.users();
       const user = users?.nodes?.[0];
       _user_id = user?.id;
-      expect(users).toBeDefined();
+      expect(users instanceof L.UserConnection);
     });
 
     /** Test the root query for a single User */
@@ -1516,7 +1516,7 @@ describe("generated", () => {
       if (_user_id) {
         const user = await client.user(_user_id);
         _user = user;
-        expect(user).toBeDefined();
+        expect(user instanceof L.User);
       } else {
         throw new Error("No first User found from users connection query - cannot test user query");
       }
@@ -1526,7 +1526,7 @@ describe("generated", () => {
     it("user.organization", async () => {
       if (_user) {
         const user_organization = await _user.organization;
-        expect(user_organization).toBeDefined();
+        expect(user_organization instanceof L.Organization);
       } else {
         throw new Error("No User found from user query - cannot test user.organization query");
       }
@@ -1536,7 +1536,7 @@ describe("generated", () => {
     it("user.assignedIssues", async () => {
       if (_user) {
         const user_assignedIssues = await _user.assignedIssues();
-        expect(user_assignedIssues).toBeDefined();
+        expect(user_assignedIssues instanceof L.IssueConnection);
       } else {
         throw new Error("No User found from user query - cannot test user.assignedIssues connection query");
       }
@@ -1546,7 +1546,7 @@ describe("generated", () => {
     it("user.createdIssues", async () => {
       if (_user) {
         const user_createdIssues = await _user.createdIssues();
-        expect(user_createdIssues).toBeDefined();
+        expect(user_createdIssues instanceof L.IssueConnection);
       } else {
         throw new Error("No User found from user query - cannot test user.createdIssues connection query");
       }
@@ -1556,7 +1556,7 @@ describe("generated", () => {
     it("user.teamMemberships", async () => {
       if (_user) {
         const user_teamMemberships = await _user.teamMemberships();
-        expect(user_teamMemberships).toBeDefined();
+        expect(user_teamMemberships instanceof L.TeamMembershipConnection);
       } else {
         throw new Error("No User found from user query - cannot test user.teamMemberships connection query");
       }
@@ -1568,7 +1568,7 @@ describe("generated", () => {
     /** Test the root query for Viewer */
     it("viewer", async () => {
       const viewer = await client.viewer;
-      expect(viewer).toBeDefined();
+      expect(viewer instanceof L.User);
     });
   });
 
@@ -1582,7 +1582,7 @@ describe("generated", () => {
       const webhooks = await client.webhooks();
       const webhook = webhooks?.nodes?.[0];
       _webhook_id = webhook?.id;
-      expect(webhooks).toBeDefined();
+      expect(webhooks instanceof L.WebhookConnection);
     });
 
     /** Test the root query for a single Webhook */
@@ -1590,7 +1590,7 @@ describe("generated", () => {
       if (_webhook_id) {
         const webhook = await client.webhook(_webhook_id);
         _webhook = webhook;
-        expect(webhook).toBeDefined();
+        expect(webhook instanceof L.Webhook);
       } else {
         throw new Error("No first Webhook found from webhooks connection query - cannot test webhook query");
       }
@@ -1600,7 +1600,7 @@ describe("generated", () => {
     it("webhook.creator", async () => {
       if (_webhook) {
         const webhook_creator = await _webhook.creator;
-        expect(webhook_creator).toBeDefined();
+        expect(webhook_creator instanceof L.User);
       } else {
         throw new Error("No Webhook found from webhook query - cannot test webhook.creator query");
       }
@@ -1610,7 +1610,7 @@ describe("generated", () => {
     it("webhook.team", async () => {
       if (_webhook) {
         const webhook_team = await _webhook.team;
-        expect(webhook_team).toBeDefined();
+        expect(webhook_team instanceof L.Team);
       } else {
         throw new Error("No Webhook found from webhook query - cannot test webhook.team query");
       }
@@ -1627,7 +1627,7 @@ describe("generated", () => {
       const workflowStates = await client.workflowStates();
       const workflowState = workflowStates?.nodes?.[0];
       _workflowState_id = workflowState?.id;
-      expect(workflowStates).toBeDefined();
+      expect(workflowStates instanceof L.WorkflowStateConnection);
     });
 
     /** Test the root query for a single WorkflowState */
@@ -1635,7 +1635,7 @@ describe("generated", () => {
       if (_workflowState_id) {
         const workflowState = await client.workflowState(_workflowState_id);
         _workflowState = workflowState;
-        expect(workflowState).toBeDefined();
+        expect(workflowState instanceof L.WorkflowState);
       } else {
         throw new Error(
           "No first WorkflowState found from workflowStates connection query - cannot test workflowState query"
@@ -1647,7 +1647,7 @@ describe("generated", () => {
     it("workflowState.team", async () => {
       if (_workflowState) {
         const workflowState_team = await _workflowState.team;
-        expect(workflowState_team).toBeDefined();
+        expect(workflowState_team instanceof L.Team);
       } else {
         throw new Error("No WorkflowState found from workflowState query - cannot test workflowState.team query");
       }
@@ -1657,7 +1657,7 @@ describe("generated", () => {
     it("workflowState.issues", async () => {
       if (_workflowState) {
         const workflowState_issues = await _workflowState.issues();
-        expect(workflowState_issues).toBeDefined();
+        expect(workflowState_issues instanceof L.IssueConnection);
       } else {
         throw new Error(
           "No WorkflowState found from workflowState query - cannot test workflowState.issues connection query"
