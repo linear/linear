@@ -23,25 +23,39 @@ export function printBeforeAll(): string {
   return printLines([
     `beforeAll(async () => {
       ${printLines([
-        printComment([`Create sleep function`]),
-        "const sleep = promisify(setTimeout)",
-        "\n",
-        printComment([`Get a port for the mock server`]),
-        `const port = await getPort()`,
-        "\n",
-        printComment(["Initialize Linear client with environment api key and url"]),
-        `client = new ${SdkConstants.NAMESPACE}.LinearClient({
-          apiKey: process.env.E2E_API_KEY ?? 'test',
-          apiUrl: process.env.E2E_API_KEY ? undefined : \`http://localhost:\$\{port\}/graphql\`,
-        })`,
-        "\n",
-        printComment(["Start the mock server"]),
-        `try {
-          mockServer = execa("npx", ["graphql-faker", "packages/client/src/schema.graphql", \`-p \$\{port\}\`])
-          await sleep(1000)
-        } catch (error) {
-          logger.fatal(error)
-          throw new Error('Failed to start the mock server')
+        printComment(["Determine whether to use production or a mock server"]),
+        `if (Boolean(process.env.E2E)) {
+          ${printLines([
+            printComment(["Create Linear client with production server endpoint"]),
+            `client = new ${SdkConstants.NAMESPACE}.LinearClient({
+              apiKey: process.env.E2E_API_KEY,
+            })`,
+          ])}
+        } else {
+          ${printLines([
+            printComment([`Create sleep function`]),
+            "const sleep = promisify(setTimeout)",
+            "\n",
+            printComment([`Get a port for the mock server`]),
+            `const port = await getPort()`,
+            "\n",
+            printComment(["Start the mock server"]),
+            `try {
+              mockServer = execa("npx", ["graphql-faker", "packages/client/src/schema.graphql", \`-p \$\{port\}\`])
+            } catch (error) {
+              logger.fatal(error)
+              throw new Error('Failed to start the mock server')
+            }`,
+            "\n",
+            printComment(["Wait for mock server to start"]),
+            `await sleep(1000)`,
+            "\n",
+            printComment(["Create Linear client with mock server endpoint"]),
+            `client = new ${SdkConstants.NAMESPACE}.LinearClient({
+              apiKey: 'test',
+              apiUrl: \`http://localhost:\$\{port\}/graphql\`,
+            })`,
+          ])}
         }`,
       ])}
     })`,
@@ -59,9 +73,11 @@ export function printAfterAll(): string {
       ${printLines([
         printComment(["Kill the mock server"]),
         `try {
-          mockServer.kill("SIGTERM", {
-            forceKillAfterTimeout: 2000,
-          })
+          if (mockServer) {
+            mockServer.kill("SIGTERM", {
+              forceKillAfterTimeout: 2000,
+            })
+          }
         } catch (error) {
           logger.fatal(error)
           throw new Error('Failed to kill the mock server')

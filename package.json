@@ -32,8 +32,7 @@
     "test:watch": "yarn test --watch",
     "test:update": "yarn test -u",
     "mock": "npx graphql-faker packages/client/src/schema.graphql",
-    "test:mock": "E2E_API_URL=http://localhost:9002/graphql npx jest gen.test",
-    "test:e2e": "npx jest gen.test",
+    "test:e2e": "E2E=true yarn test _gen.test",
     "test:ci": "npx jest -w 1",
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
     "prettier": "npx prettier --write **/*.{json,ts,js}"

@@ -101,7 +101,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                         []),
                     ])
                   : undefined,
-                `logger.trace(${fieldName})`,
+                `expect(${fieldName}).toBeDefined()`,
               ])
             ),
             "\n",
@@ -119,7 +119,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                           itemArgs.map(arg => `_${itemField}_${arg.name}`)
                         )})`,
                         printSet(`_${itemField}`, itemField),
-                        `logger.trace(${itemField})`,
+                        `expect(${itemField}).toBeDefined()`,
                       ])}
                     } else {
                       throw new Error('No first ${listType} found from ${fieldName} connection query - cannot test ${itemField} query')
@@ -138,7 +138,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                         `if (_${itemField}) {
                           ${printLines([
                             `const ${itemField}_${field.name} = await _${itemField}.${field.name}`,
-                            `logger.trace(${itemField}_${field.name})`,
+                            `expect(${itemField}_${field.name}).toBeDefined()`,
                           ])}
                         } else {
                           throw new Error('No ${listType} found from ${itemField} query - cannot test ${itemField}.${
@@ -161,7 +161,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                         `if (_${itemField}) {
                         ${printLines([
                           `const ${itemField}_${field.name} = await _${itemField}.${field.name}()`,
-                          `logger.trace(${itemField}_${field.name})`,
+                          `expect(${itemField}_${field.name}).toBeDefined()`,
                         ])}
                       } else {
                         throw new Error('No ${listType} found from ${itemField} query - cannot test ${itemField}.${
@@ -189,7 +189,7 @@ function printQueryTest(context: SdkPluginContext, operation: SdkOperation): str
                 `const ${fieldName} = await client.${fieldName}${
                   Boolean(operation.optionalArgs.args.length) ? "()" : ""
                 }`,
-                `logger.trace(${fieldName})`,
+                `expect(${fieldName}).toBeDefined()`,
               ])
             ),
           ])
