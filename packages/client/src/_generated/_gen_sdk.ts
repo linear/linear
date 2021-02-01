@@ -250,6 +250,38 @@ export class ArchiveResponse extends LinearRequest {
   public totalCount?: number;
 }
 /**
+ * AuthResolverResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthResolverResponseFragment response data
+ */
+export class AuthResolverResponse extends LinearRequest {
+  public constructor(request: Request, data: L.AuthResolverResponseFragment) {
+    super(request);
+    this.allowDomainAccess = data.allowDomainAccess ?? undefined;
+    this.email = data.email ?? undefined;
+    this.id = data.id ?? undefined;
+    this.token = data.token ?? undefined;
+    this.availableOrganizations = data.availableOrganizations
+      ? data.availableOrganizations.map(node => new Organization(request, node))
+      : undefined;
+    this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
+  }
+
+  /** Should the signup flow allow access for the domain. */
+  public allowDomainAccess?: boolean;
+  /** Email for the authenticated account. */
+  public email?: string;
+  /** User account ID. */
+  public id?: string;
+  /** JWT token for authentication of the account. */
+  public token?: string;
+  /** Organizations this account has access to, but is not yet a member. */
+  public availableOrganizations?: Organization[];
+  /** Users belonging to this account. */
+  public users?: User[];
+}
+/**
  * Public information of the OAuth application, plus the authorized scopes for a given user.
  *
  * @param request - function to call the graphql client
@@ -284,38 +316,6 @@ export class AuthorizedApplication extends LinearRequest {
   public name?: string;
   /** Scopes that are authorized for this application for a given user. */
   public scope?: string[];
-}
-/**
- * AuthResolverResponse model
- *
- * @param request - function to call the graphql client
- * @param data - L.AuthResolverResponseFragment response data
- */
-export class AuthResolverResponse extends LinearRequest {
-  public constructor(request: Request, data: L.AuthResolverResponseFragment) {
-    super(request);
-    this.allowDomainAccess = data.allowDomainAccess ?? undefined;
-    this.email = data.email ?? undefined;
-    this.id = data.id ?? undefined;
-    this.token = data.token ?? undefined;
-    this.availableOrganizations = data.availableOrganizations
-      ? data.availableOrganizations.map(node => new Organization(request, node))
-      : undefined;
-    this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
-  }
-
-  /** Should the signup flow allow access for the domain. */
-  public allowDomainAccess?: boolean;
-  /** Email for the authenticated account. */
-  public email?: string;
-  /** User account ID. */
-  public id?: string;
-  /** JWT token for authentication of the account. */
-  public token?: string;
-  /** Organizations this account has access to, but is not yet a member. */
-  public availableOrganizations?: Organization[];
-  /** Users belonging to this account. */
-  public users?: User[];
 }
 /**
  * BillingDetailsPayload model
@@ -3583,21 +3583,6 @@ export class SubscriptionSessionPayload extends LinearRequest {
   public session?: string;
 }
 /**
- * SynchronizedPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.SynchronizedPayloadFragment response data
- */
-export class SynchronizedPayload extends LinearRequest {
-  public constructor(request: Request, data: L.SynchronizedPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-}
-/**
  * Contains either the full serialized state of the application or delta packets that the requester can
  *   apply to the local data set in order to be up-to-date.
  *
@@ -3632,6 +3617,21 @@ export class SyncResponse extends LinearRequest {
   public state?: string;
 }
 /**
+ * SynchronizedPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SynchronizedPayloadFragment response data
+ */
+export class SynchronizedPayload extends LinearRequest {
+  public constructor(request: Request, data: L.SynchronizedPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+}
+/**
  * An organizational unit that contains issues.
  *
  * @param request - function to call the graphql client
@@ -3658,8 +3658,8 @@ export class Team extends LinearRequest {
     this.cycleIssueAutoAssignCompleted = data.cycleIssueAutoAssignCompleted ?? undefined;
     this.cycleIssueAutoAssignStarted = data.cycleIssueAutoAssignStarted ?? undefined;
     this.cycleLockToActive = data.cycleLockToActive ?? undefined;
-    this.cyclesEnabled = data.cyclesEnabled ?? undefined;
     this.cycleStartDay = data.cycleStartDay ?? undefined;
+    this.cyclesEnabled = data.cyclesEnabled ?? undefined;
     this.defaultIssueEstimate = data.defaultIssueEstimate ?? undefined;
     this.description = data.description ?? undefined;
     this.groupIssueHistory = data.groupIssueHistory ?? undefined;
@@ -3706,10 +3706,10 @@ export class Team extends LinearRequest {
   public cycleIssueAutoAssignStarted?: boolean;
   /** Only allow issues issues with cycles in Active Issues. */
   public cycleLockToActive?: boolean;
-  /** Whether the team uses cycles. */
-  public cyclesEnabled?: boolean;
   /** The day of the week that a new cycle starts. */
   public cycleStartDay?: number;
+  /** Whether the team uses cycles. */
+  public cyclesEnabled?: boolean;
   /** What to use as an default estimate for unestimated issues. */
   public defaultIssueEstimate?: number;
   /** The team's description. */
@@ -4745,6 +4745,34 @@ export class ApplicationWithAuthorizationQuery extends LinearRequest {
 }
 
 /**
+ * A fetchable ArchivedModelSync Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ArchivedModelSyncQuery extends LinearRequest {
+  public constructor(request: Request) {
+    super(request);
+  }
+
+  /**
+   * Call the ArchivedModelSync query and return a ArchiveResponse
+   *
+   * @param identifier - required identifier to pass to archivedModelSync
+   * @param modelClass - required modelClass to pass to archivedModelSync
+   * @returns parsed response from ArchivedModelSyncQuery
+   */
+  public async fetch(identifier: string, modelClass: string): Fetch<ArchiveResponse> {
+    return this._request<L.ArchivedModelSyncQuery, L.ArchivedModelSyncQueryVariables>(L.ArchivedModelSyncDocument, {
+      identifier,
+      modelClass,
+    }).then(response => {
+      const data = response?.archivedModelSync;
+      return data ? new ArchiveResponse(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable ArchivedModelsSync Query
  *
  * @param request - function to call the graphql client
@@ -4773,34 +4801,6 @@ export class ArchivedModelsSyncQuery extends LinearRequest {
       ...variables,
     }).then(response => {
       const data = response?.archivedModelsSync;
-      return data ? new ArchiveResponse(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable ArchivedModelSync Query
- *
- * @param request - function to call the graphql client
- */
-export class ArchivedModelSyncQuery extends LinearRequest {
-  public constructor(request: Request) {
-    super(request);
-  }
-
-  /**
-   * Call the ArchivedModelSync query and return a ArchiveResponse
-   *
-   * @param identifier - required identifier to pass to archivedModelSync
-   * @param modelClass - required modelClass to pass to archivedModelSync
-   * @returns parsed response from ArchivedModelSyncQuery
-   */
-  public async fetch(identifier: string, modelClass: string): Fetch<ArchiveResponse> {
-    return this._request<L.ArchivedModelSyncQuery, L.ArchivedModelSyncQueryVariables>(L.ArchivedModelSyncDocument, {
-      identifier,
-      modelClass,
-    }).then(response => {
-      const data = response?.archivedModelSync;
       return data ? new ArchiveResponse(this._request, data) : undefined;
     });
   }
@@ -5491,32 +5491,6 @@ export class IssueRelationsQuery extends LinearRequest {
 }
 
 /**
- * A fetchable Issues Query
- *
- * @param request - function to call the graphql client
- */
-export class IssuesQuery extends LinearRequest {
-  public constructor(request: Request) {
-    super(request);
-  }
-
-  /**
-   * Call the Issues query and return a IssueConnection
-   *
-   * @param variables - variables to pass into the IssuesQuery
-   * @returns parsed response from IssuesQuery
-   */
-  public async fetch(variables?: L.IssuesQueryVariables): Fetch<IssueConnection> {
-    return this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables).then(response => {
-      const data = response?.issues;
-      return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-        : undefined;
-    });
-  }
-}
-
-/**
  * A fetchable IssueSearch Query
  *
  * @param request - function to call the graphql client
@@ -5541,6 +5515,32 @@ export class IssueSearchQuery extends LinearRequest {
       const data = response?.issueSearch;
       return data
         ? new IssueConnection(this._request, pagination => this.fetch(query, { ...variables, ...pagination }), data)
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable Issues Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssuesQuery extends LinearRequest {
+  public constructor(request: Request) {
+    super(request);
+  }
+
+  /**
+   * Call the Issues query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the IssuesQuery
+   * @returns parsed response from IssuesQuery
+   */
+  public async fetch(variables?: L.IssuesQueryVariables): Fetch<IssueConnection> {
+    return this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables).then(response => {
+      const data = response?.issues;
+      return data
+        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
         : undefined;
     });
   }
@@ -5627,34 +5627,6 @@ export class NotificationQuery extends LinearRequest {
 }
 
 /**
- * A fetchable Notifications Query
- *
- * @param request - function to call the graphql client
- */
-export class NotificationsQuery extends LinearRequest {
-  public constructor(request: Request) {
-    super(request);
-  }
-
-  /**
-   * Call the Notifications query and return a NotificationConnection
-   *
-   * @param variables - variables to pass into the NotificationsQuery
-   * @returns parsed response from NotificationsQuery
-   */
-  public async fetch(variables?: L.NotificationsQueryVariables): Fetch<NotificationConnection> {
-    return this._request<L.NotificationsQuery, L.NotificationsQueryVariables>(L.NotificationsDocument, variables).then(
-      response => {
-        const data = response?.notifications;
-        return data
-          ? new NotificationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-          : undefined;
-      }
-    );
-  }
-}
-
-/**
  * A fetchable NotificationSubscription Query
  *
  * @param request - function to call the graphql client
@@ -5713,6 +5685,34 @@ export class NotificationSubscriptionsQuery extends LinearRequest {
           )
         : undefined;
     });
+  }
+}
+
+/**
+ * A fetchable Notifications Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationsQuery extends LinearRequest {
+  public constructor(request: Request) {
+    super(request);
+  }
+
+  /**
+   * Call the Notifications query and return a NotificationConnection
+   *
+   * @param variables - variables to pass into the NotificationsQuery
+   * @returns parsed response from NotificationsQuery
+   */
+  public async fetch(variables?: L.NotificationsQueryVariables): Fetch<NotificationConnection> {
+    return this._request<L.NotificationsQuery, L.NotificationsQueryVariables>(L.NotificationsDocument, variables).then(
+      response => {
+        const data = response?.notifications;
+        return data
+          ? new NotificationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
+      }
+    );
   }
 }
 
@@ -6278,6 +6278,31 @@ export class UserQuery extends LinearRequest {
 }
 
 /**
+ * A fetchable UserSettings Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettingsQuery extends LinearRequest {
+  public constructor(request: Request) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings query and return a UserSettings
+   *
+   * @returns parsed response from UserSettingsQuery
+   */
+  public async fetch(): Fetch<UserSettings> {
+    return this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {}).then(
+      response => {
+        const data = response?.userSettings;
+        return data ? new UserSettings(this._request, data) : undefined;
+      }
+    );
+  }
+}
+
+/**
  * A fetchable Users Query
  *
  * @param request - function to call the graphql client
@@ -6300,31 +6325,6 @@ export class UsersQuery extends LinearRequest {
         ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
         : undefined;
     });
-  }
-}
-
-/**
- * A fetchable UserSettings Query
- *
- * @param request - function to call the graphql client
- */
-export class UserSettingsQuery extends LinearRequest {
-  public constructor(request: Request) {
-    super(request);
-  }
-
-  /**
-   * Call the UserSettings query and return a UserSettings
-   *
-   * @returns parsed response from UserSettingsQuery
-   */
-  public async fetch(): Fetch<UserSettings> {
-    return this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {}).then(
-      response => {
-        const data = response?.userSettings;
-        return data ? new UserSettings(this._request, data) : undefined;
-      }
-    );
   }
 }
 
@@ -11558,6 +11558,17 @@ export class LinearSdk extends LinearRequest {
     return new ApplicationWithAuthorizationQuery(this._request).fetch(clientId, scope, variables);
   }
   /**
+   * Query archivedModelSync for ArchiveResponse
+   * Fetches an archived model.
+   *
+   * @param identifier - required identifier to pass to archivedModelSync
+   * @param modelClass - required modelClass to pass to archivedModelSync
+   * @returns ArchiveResponse
+   */
+  public archivedModelSync(identifier: string, modelClass: string): Fetch<ArchiveResponse> {
+    return new ArchivedModelSyncQuery(this._request).fetch(identifier, modelClass);
+  }
+  /**
    * Query archivedModelsSync for ArchiveResponse
    * Fetches archived models.
    *
@@ -11572,17 +11583,6 @@ export class LinearSdk extends LinearRequest {
     variables?: Omit<L.ArchivedModelsSyncQueryVariables, "modelClass" | "teamId">
   ): Fetch<ArchiveResponse> {
     return new ArchivedModelsSyncQuery(this._request).fetch(modelClass, teamId, variables);
-  }
-  /**
-   * Query archivedModelSync for ArchiveResponse
-   * Fetches an archived model.
-   *
-   * @param identifier - required identifier to pass to archivedModelSync
-   * @param modelClass - required modelClass to pass to archivedModelSync
-   * @returns ArchiveResponse
-   */
-  public archivedModelSync(identifier: string, modelClass: string): Fetch<ArchiveResponse> {
-    return new ArchivedModelSyncQuery(this._request).fetch(identifier, modelClass);
   }
   /**
    * Query authorizedApplications for AuthorizedApplications
@@ -11846,16 +11846,6 @@ export class LinearSdk extends LinearRequest {
     return new IssueRelationsQuery(this._request).fetch(variables);
   }
   /**
-   * Query issues for IssueConnection
-   * All issues.
-   *
-   * @param variables - variables to pass into the IssuesQuery
-   * @returns IssueConnection
-   */
-  public issues(variables?: L.IssuesQueryVariables): Fetch<IssueConnection> {
-    return new IssuesQuery(this._request).fetch(variables);
-  }
-  /**
    * Query issueSearch for IssueConnection
    * [ALPHA] Search issues. This query is experimental and is subject to change without notice.
    *
@@ -11865,6 +11855,16 @@ export class LinearSdk extends LinearRequest {
    */
   public issueSearch(query: string, variables?: Omit<L.IssueSearchQueryVariables, "query">): Fetch<IssueConnection> {
     return new IssueSearchQuery(this._request).fetch(query, variables);
+  }
+  /**
+   * Query issues for IssueConnection
+   * All issues.
+   *
+   * @param variables - variables to pass into the IssuesQuery
+   * @returns IssueConnection
+   */
+  public issues(variables?: L.IssuesQueryVariables): Fetch<IssueConnection> {
+    return new IssuesQuery(this._request).fetch(variables);
   }
   /**
    * Query milestone for Milestone
@@ -11897,16 +11897,6 @@ export class LinearSdk extends LinearRequest {
     return new NotificationQuery(this._request).fetch(id);
   }
   /**
-   * Query notifications for NotificationConnection
-   * All notifications.
-   *
-   * @param variables - variables to pass into the NotificationsQuery
-   * @returns NotificationConnection
-   */
-  public notifications(variables?: L.NotificationsQueryVariables): Fetch<NotificationConnection> {
-    return new NotificationsQuery(this._request).fetch(variables);
-  }
-  /**
    * Query notificationSubscription for NotificationSubscription
    * One specific notification subscription.
    *
@@ -11927,6 +11917,16 @@ export class LinearSdk extends LinearRequest {
     variables?: L.NotificationSubscriptionsQueryVariables
   ): Fetch<NotificationSubscriptionConnection> {
     return new NotificationSubscriptionsQuery(this._request).fetch(variables);
+  }
+  /**
+   * Query notifications for NotificationConnection
+   * All notifications.
+   *
+   * @param variables - variables to pass into the NotificationsQuery
+   * @returns NotificationConnection
+   */
+  public notifications(variables?: L.NotificationsQueryVariables): Fetch<NotificationConnection> {
+    return new NotificationsQuery(this._request).fetch(variables);
   }
   /**
    * Query organization for Organization
@@ -12141,6 +12141,15 @@ export class LinearSdk extends LinearRequest {
     return new UserQuery(this._request).fetch(id);
   }
   /**
+   * Query userSettings for UserSettings
+   * The user's settings.
+   *
+   * @returns UserSettings
+   */
+  public get userSettings(): Fetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
+  }
+  /**
    * Query users for UserConnection
    * All users for the organization.
    *
@@ -12149,15 +12158,6 @@ export class LinearSdk extends LinearRequest {
    */
   public users(variables?: L.UsersQueryVariables): Fetch<UserConnection> {
     return new UsersQuery(this._request).fetch(variables);
-  }
-  /**
-   * Query userSettings for UserSettings
-   * The user's settings.
-   *
-   * @returns UserSettings
-   */
-  public get userSettings(): Fetch<UserSettings> {
-    return new UserSettingsQuery(this._request).fetch();
   }
   /**
    * Query viewer for User

@@ -20,15 +20,15 @@ describe("LinearClient", () => {
     });
   });
 
-  it("makes query to baseUrl", async () => {
-    const client = new LinearClient({ apiKey: MOCK_API_KEY, baseUrl: ctx.url });
+  it("makes query to apiUrl", async () => {
+    const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url });
     const response = await client.viewer;
 
     expect(response).toEqual(expect.objectContaining({ id: "viewerId" }));
   });
 
   it("has chained api", async () => {
-    const client = new LinearClient({ apiKey: MOCK_API_KEY, baseUrl: ctx.url });
+    const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url });
     const team = await client.team("someTeamId");
     const labels = await team?.labels();
     const states = await team?.states();
@@ -39,7 +39,7 @@ describe("LinearClient", () => {
   });
 
   it("fails auth with incorrect api key", async () => {
-    const client = new LinearClient({ apiKey: "asd", baseUrl: ctx.url });
+    const client = new LinearClient({ apiKey: "asd", apiUrl: ctx.url });
 
     try {
       await client.viewer;

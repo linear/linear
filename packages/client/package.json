@@ -27,23 +27,25 @@
   },
   "dependencies": {
     "@linear/common": "^1.0.0",
-    "graphql": "15.4.0",
-    "graphql-request": "3.3.0",
-    "uuid": "8.3.1"
+    "uuid": "^8.3.1"
+  },
+  "peerDependencies": {
+    "graphql": "^15.4.0",
+    "graphql-request": "^3.3.0"
   },
   "devDependencies": {
-    "@graphql-codegen/introspection": "1.18.0",
-    "@graphql-codegen/schema-ast": "1.18.1",
-    "@graphql-codegen/typed-document-node": "1.17.10",
-    "@graphql-codegen/typescript": "1.17.11",
-    "@graphql-codegen/typescript-operations": "1.17.9",
-    "@graphql-typed-document-node/core": "3.1.0",
+    "@graphql-codegen/introspection": "^1.18.0",
+    "@graphql-codegen/schema-ast": "^1.18.1",
+    "@graphql-codegen/typed-document-node": "^1.17.10",
+    "@graphql-codegen/typescript": "^1.17.11",
+    "@graphql-codegen/typescript-operations": "^1.17.9",
+    "@graphql-typed-document-node/core": "^3.1.0",
     "@linear/plugin-doc": "^1.0.0",
     "@linear/plugin-sdk": "^1.0.0",
     "@linear/plugin-test": "^1.0.0",
-    "dotenv": "8.2.0",
+    "dotenv": "^8.2.0",
     "execa": "^5.0.0",
     "get-port": "^5.1.1",
-    "ts-node": "9.1.1"
+    "ts-node": "^9.1.1"
   }
 }

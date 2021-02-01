@@ -20,14 +20,16 @@
     "build:sdk": "yarn build:clean && npx tsc",
     "build:clean": "npx rimraf dist"
   },
-  "dependencies": {
-    "@graphql-codegen/plugin-helpers": "1.18.1",
-    "@graphql-codegen/visitor-plugin-common": "1.17.17",
-    "@graphql-tools/graphql-file-loader": "6.2.5",
-    "@graphql-tools/load": "6.2.5",
+  "peerDependencies": {
+    "graphql": "^15.4.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/plugin-helpers": "^1.18.1",
+    "@graphql-codegen/visitor-plugin-common": "^1.17.17",
+    "@graphql-tools/graphql-file-loader": "^6.2.5",
+    "@graphql-tools/load": "^6.2.5",
     "@linear/common": "^1.0.0",
-    "auto-bind": "4.0.0",
-    "graphql": "15.4.0",
-    "typescript": "4.0.5"
+    "auto-bind": "^4.0.0",
+    "typescript": "^4.0.5"
   }
 }

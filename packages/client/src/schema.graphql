@@ -125,6 +125,32 @@ type ArchiveResponse {
   """
   totalCount: Float!
 }
+type AuthResolverResponse {
+  """
+  Should the signup flow allow access for the domain.
+  """
+  allowDomainAccess: Boolean
+  """
+  Organizations this account has access to, but is not yet a member.
+  """
+  availableOrganizations: [Organization!]
+  """
+  Email for the authenticated account.
+  """
+  email: String
+  """
+  User account ID.
+  """
+  id: String!
+  """
+  JWT token for authentication of the account.
+  """
+  token: String
+  """
+  Users belonging to this account.
+  """
+  users: [User!]!
+}
 """
 Public information of the OAuth application, plus the authorized scopes for a given user.
 """
@@ -161,32 +187,6 @@ type AuthorizedApplication {
   Scopes that are authorized for this application for a given user.
   """
   scope: [String!]!
-}
-type AuthResolverResponse {
-  """
-  Should the signup flow allow access for the domain.
-  """
-  allowDomainAccess: Boolean
-  """
-  Organizations this account has access to, but is not yet a member.
-  """
-  availableOrganizations: [Organization!]
-  """
-  Email for the authenticated account.
-  """
-  email: String
-  """
-  User account ID.
-  """
-  id: String!
-  """
-  JWT token for authentication of the account.
-  """
-  token: String
-  """
-  Users belonging to this account.
-  """
-  users: [User!]!
 }
 type BillingDetailsPayload {
   """
@@ -402,6 +402,10 @@ type CreateCsvExportReportPayload {
   """
   success: Boolean!
 }
+type CreateOrJoinOrganizationResponse {
+  organization: Organization!
+  user: User!
+}
 input CreateOrganizationInput {
   """
   Whether the organization should allow email domain access.
@@ -419,10 +423,6 @@ input CreateOrganizationInput {
   The URL key of the organization.
   """
   urlKey: String!
-}
-type CreateOrJoinOrganizationResponse {
-  organization: Organization!
-  user: User!
 }
 """
 A custom view that has been saved by a user.
@@ -2386,12 +2386,6 @@ input IssueUpdateInput {
   """
   title: String
 }
-input JoinOrganizationInput {
-  """
-  The identifier of the organization.
-  """
-  organizationId: String!
-}
 """
 The `JSON` scalar type represents JSON values
 """
@@ -2400,6 +2394,12 @@ scalar JSON
 The `JSONObject` scalar type represents JSON values as a string
 """
 scalar JSONObject
+input JoinOrganizationInput {
+  """
+  The identifier of the organization.
+  """
+  organizationId: String!
+}
 """
 A milestone that contains projects.
 """
@@ -5065,6 +5065,19 @@ type Query {
     scope: [String!]!
   ): UserAuthorizedApplication!
   """
+  Fetches an archived model.
+  """
+  archivedModelSync(
+    """
+    The identifier of the model to load. What an identifier is specific to the model class.
+    """
+    identifier: String!
+    """
+    The class name of the model to load.
+    """
+    modelClass: String!
+  ): ArchiveResponse!
+  """
   Fetches archived models.
   """
   archivedModelsSync(
@@ -5084,19 +5097,6 @@ type Query {
     The teamId for which to load archived models.
     """
     teamId: String!
-  ): ArchiveResponse!
-  """
-  Fetches an archived model.
-  """
-  archivedModelSync(
-    """
-    The identifier of the model to load. What an identifier is specific to the model class.
-    """
-    identifier: String!
-    """
-    The class name of the model to load.
-    """
-    modelClass: String!
   ): ArchiveResponse!
   """
   Get all authorized applications for a user
@@ -5465,35 +5465,6 @@ type Query {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
-  All issues.
-  """
-  issues(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): IssueConnection!
-  """
   [ALPHA] Search issues. This query is experimental and is subject to change without notice.
   """
   issueSearch(
@@ -5525,6 +5496,35 @@ type Query {
     Search string to look for.
     """
     query: String!
+  ): IssueConnection!
+  """
+  All issues.
+  """
+  issues(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
   ): IssueConnection!
   """
   One specific milestone.
@@ -5564,35 +5564,6 @@ type Query {
   """
   notification(id: String!): Notification!
   """
-  All notifications.
-  """
-  notifications(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): NotificationConnection!
-  """
   One specific notification subscription.
   """
   notificationSubscription(id: String!): NotificationSubscription!
@@ -5625,6 +5596,35 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): NotificationSubscriptionConnection!
+  """
+  All notifications.
+  """
+  notifications(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): NotificationConnection!
   """
   The user's organization.
   """
@@ -5902,6 +5902,10 @@ type Query {
     id: String!
   ): User!
   """
+  The user's settings.
+  """
+  userSettings: UserSettings!
+  """
   All users for the organization.
   """
   users(
@@ -5930,10 +5934,6 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): UserConnection!
-  """
-  The user's settings.
-  """
-  userSettings: UserSettings!
   """
   The currently authenticated user.
   """
@@ -6305,12 +6305,6 @@ input SubscriptionUpdateInput {
   """
   pendingChangeType: String
 }
-type SynchronizedPayload {
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-}
 """
 Contains either the full serialized state of the application or delta packets that the requester can
   apply to the local data set in order to be up-to-date.
@@ -6338,6 +6332,12 @@ type SyncResponse {
       Mutually exclusive with the delta property
   """
   state: String
+}
+type SynchronizedPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
 }
 """
 An organizational unit that contains issues.
@@ -6392,6 +6392,10 @@ type Team implements Node {
   """
   cycleLockToActive: Boolean!
   """
+  The day of the week that a new cycle starts.
+  """
+  cycleStartDay: Float!
+  """
   Cycles associated with the team.
   """
   cycles(
@@ -6424,10 +6428,6 @@ type Team implements Node {
   Whether the team uses cycles.
   """
   cyclesEnabled: Boolean!
-  """
-  The day of the week that a new cycle starts.
-  """
-  cycleStartDay: Float!
   """
   What to use as an default estimate for unestimated issues.
   """
@@ -6768,13 +6768,13 @@ input TeamCreateInput {
   """
   cycleLockToActive: Boolean
   """
-  Whether the team uses cycles.
-  """
-  cyclesEnabled: Boolean
-  """
   The day of the week that a new cycle starts.
   """
   cycleStartDay: Float
+  """
+  Whether the team uses cycles.
+  """
+  cyclesEnabled: Boolean
   """
   What to use as an default estimate for unestimated issues.
   """
@@ -6961,13 +6961,13 @@ input TeamUpdateInput {
   """
   cycleLockToActive: Boolean
   """
-  Whether the team uses cycles.
-  """
-  cyclesEnabled: Boolean
-  """
   The day of the week that a new cycle starts.
   """
   cycleStartDay: Float
+  """
+  Whether the team uses cycles.
+  """
+  cyclesEnabled: Boolean
   """
   What to use as an default estimate for unestimated issues.
   """
@@ -7841,7 +7841,7 @@ input WebhookCreateInput {
   """
   Whether this webhook is enabled.
   """
-  enabled: Boolean = true
+  enabled: Boolean
   """
   The identifier. If none is provided, the backend will generate one.
   """

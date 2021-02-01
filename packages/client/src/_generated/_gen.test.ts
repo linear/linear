@@ -73,9 +73,9 @@ describe("generated", () => {
 
   // ApplicationWithAuthorization clientId: string, scope: string[] - has required args
 
-  // ArchivedModelsSync modelClass: string, teamId: string - has required args
-
   // ArchivedModelSync identifier: string, modelClass: string - has required args
+
+  // ArchivedModelsSync modelClass: string, teamId: string - has required args
 
   // AuthorizedApplications - no model for query
 
@@ -602,6 +602,8 @@ describe("generated", () => {
     });
   });
 
+  // IssueSearch query: string - has required args
+
   /** Test all Issue queries */
   describe("Issues", () => {
     let _issue: L.Issue | undefined;
@@ -777,8 +779,6 @@ describe("generated", () => {
     });
   });
 
-  // IssueSearch query: string - has required args
-
   /** Test all Milestone queries */
   describe("Milestones", () => {
     let _milestone: L.Milestone | undefined;
@@ -820,6 +820,69 @@ describe("generated", () => {
         expect(milestone_projects).toBeDefined();
       } else {
         throw new Error("No Milestone found from milestone query - cannot test milestone.projects connection query");
+      }
+    });
+  });
+
+  /** Test all NotificationSubscription queries */
+  describe("NotificationSubscriptions", () => {
+    let _notificationSubscription: L.NotificationSubscription | undefined;
+    let _notificationSubscription_id: string | undefined;
+
+    /** Test the root query for the NotificationSubscription connection */
+    it("notificationSubscriptions", async () => {
+      const notificationSubscriptions = await client.notificationSubscriptions();
+      const notificationSubscription = notificationSubscriptions?.nodes?.[0];
+      _notificationSubscription_id = notificationSubscription?.id;
+      expect(notificationSubscriptions).toBeDefined();
+    });
+
+    /** Test the root query for a single NotificationSubscription */
+    it("notificationSubscription", async () => {
+      if (_notificationSubscription_id) {
+        const notificationSubscription = await client.notificationSubscription(_notificationSubscription_id);
+        _notificationSubscription = notificationSubscription;
+        expect(notificationSubscription).toBeDefined();
+      } else {
+        throw new Error(
+          "No first NotificationSubscription found from notificationSubscriptions connection query - cannot test notificationSubscription query"
+        );
+      }
+    });
+
+    /** Test the notificationSubscription.project query for L.Project */
+    it("notificationSubscription.project", async () => {
+      if (_notificationSubscription) {
+        const notificationSubscription_project = await _notificationSubscription.project;
+        expect(notificationSubscription_project).toBeDefined();
+      } else {
+        throw new Error(
+          "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.project query"
+        );
+      }
+    });
+
+    /** Test the notificationSubscription.team query for L.Team */
+    it("notificationSubscription.team", async () => {
+      if (_notificationSubscription) {
+        const notificationSubscription_team = await _notificationSubscription.team;
+        expect(notificationSubscription_team).toBeDefined();
+      } else {
+        throw new Error(
+          "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.team query"
+        );
+      }
+    });
+
+    /** Test the notificationSubscription.user query for L.User */
+    it("notificationSubscription.user", async () => {
+      if (_notificationSubscription) {
+        const notificationSubscription_user = await _notificationSubscription.user;
+        expect(notificationSubscription_user).toBeDefined();
+      } else {
+        throw new Error(
+          "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.user query"
+        );
       }
     });
   });
@@ -887,69 +950,6 @@ describe("generated", () => {
         expect(notification_user).toBeDefined();
       } else {
         throw new Error("No Notification found from notification query - cannot test notification.user query");
-      }
-    });
-  });
-
-  /** Test all NotificationSubscription queries */
-  describe("NotificationSubscriptions", () => {
-    let _notificationSubscription: L.NotificationSubscription | undefined;
-    let _notificationSubscription_id: string | undefined;
-
-    /** Test the root query for the NotificationSubscription connection */
-    it("notificationSubscriptions", async () => {
-      const notificationSubscriptions = await client.notificationSubscriptions();
-      const notificationSubscription = notificationSubscriptions?.nodes?.[0];
-      _notificationSubscription_id = notificationSubscription?.id;
-      expect(notificationSubscriptions).toBeDefined();
-    });
-
-    /** Test the root query for a single NotificationSubscription */
-    it("notificationSubscription", async () => {
-      if (_notificationSubscription_id) {
-        const notificationSubscription = await client.notificationSubscription(_notificationSubscription_id);
-        _notificationSubscription = notificationSubscription;
-        expect(notificationSubscription).toBeDefined();
-      } else {
-        throw new Error(
-          "No first NotificationSubscription found from notificationSubscriptions connection query - cannot test notificationSubscription query"
-        );
-      }
-    });
-
-    /** Test the notificationSubscription.project query for L.Project */
-    it("notificationSubscription.project", async () => {
-      if (_notificationSubscription) {
-        const notificationSubscription_project = await _notificationSubscription.project;
-        expect(notificationSubscription_project).toBeDefined();
-      } else {
-        throw new Error(
-          "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.project query"
-        );
-      }
-    });
-
-    /** Test the notificationSubscription.team query for L.Team */
-    it("notificationSubscription.team", async () => {
-      if (_notificationSubscription) {
-        const notificationSubscription_team = await _notificationSubscription.team;
-        expect(notificationSubscription_team).toBeDefined();
-      } else {
-        throw new Error(
-          "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.team query"
-        );
-      }
-    });
-
-    /** Test the notificationSubscription.user query for L.User */
-    it("notificationSubscription.user", async () => {
-      if (_notificationSubscription) {
-        const notificationSubscription_user = await _notificationSubscription.user;
-        expect(notificationSubscription_user).toBeDefined();
-      } else {
-        throw new Error(
-          "No NotificationSubscription found from notificationSubscription query - cannot test notificationSubscription.user query"
-        );
       }
     });
   });
@@ -1402,6 +1402,15 @@ describe("generated", () => {
 
   // Templates - no model for query
 
+  /** Test UserSettings query */
+  describe("UserSettings", () => {
+    /** Test the root query for UserSettings */
+    it("userSettings", async () => {
+      const userSettings = await client.userSettings;
+      expect(userSettings).toBeDefined();
+    });
+  });
+
   /** Test all User queries */
   describe("Users", () => {
     let _user: L.User | undefined;
@@ -1464,15 +1473,6 @@ describe("generated", () => {
       } else {
         throw new Error("No User found from user query - cannot test user.teamMemberships connection query");
       }
-    });
-  });
-
-  /** Test UserSettings query */
-  describe("UserSettings", () => {
-    /** Test the root query for UserSettings */
-    it("userSettings", async () => {
-      const userSettings = await client.userSettings;
-      expect(userSettings).toBeDefined();
     });
   });
 

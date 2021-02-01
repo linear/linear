@@ -1,6 +1,8 @@
 import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -105,6 +107,22 @@ export type ArchiveResponse = {
   totalCount: Scalars["Float"];
 };
 
+export type AuthResolverResponse = {
+  __typename?: "AuthResolverResponse";
+  /** Should the signup flow allow access for the domain. */
+  allowDomainAccess?: Maybe<Scalars["Boolean"]>;
+  /** Organizations this account has access to, but is not yet a member. */
+  availableOrganizations?: Maybe<Array<Organization>>;
+  /** Email for the authenticated account. */
+  email?: Maybe<Scalars["String"]>;
+  /** User account ID. */
+  id: Scalars["String"];
+  /** JWT token for authentication of the account. */
+  token?: Maybe<Scalars["String"]>;
+  /** Users belonging to this account. */
+  users: Array<User>;
+};
+
 /** Public information of the OAuth application, plus the authorized scopes for a given user. */
 export type AuthorizedApplication = {
   __typename?: "AuthorizedApplication";
@@ -124,22 +142,6 @@ export type AuthorizedApplication = {
   name: Scalars["String"];
   /** Scopes that are authorized for this application for a given user. */
   scope: Array<Scalars["String"]>;
-};
-
-export type AuthResolverResponse = {
-  __typename?: "AuthResolverResponse";
-  /** Should the signup flow allow access for the domain. */
-  allowDomainAccess?: Maybe<Scalars["Boolean"]>;
-  /** Organizations this account has access to, but is not yet a member. */
-  availableOrganizations?: Maybe<Array<Organization>>;
-  /** Email for the authenticated account. */
-  email?: Maybe<Scalars["String"]>;
-  /** User account ID. */
-  id: Scalars["String"];
-  /** JWT token for authentication of the account. */
-  token?: Maybe<Scalars["String"]>;
-  /** Users belonging to this account. */
-  users: Array<User>;
 };
 
 export type BillingDetailsPayload = {
@@ -299,6 +301,12 @@ export type CreateCsvExportReportPayload = {
   success: Scalars["Boolean"];
 };
 
+export type CreateOrJoinOrganizationResponse = {
+  __typename?: "CreateOrJoinOrganizationResponse";
+  organization: Organization;
+  user: User;
+};
+
 export type CreateOrganizationInput = {
   /** Whether the organization should allow email domain access. */
   domainAccess?: Maybe<Scalars["Boolean"]>;
@@ -308,12 +316,6 @@ export type CreateOrganizationInput = {
   timezone?: Maybe<Scalars["String"]>;
   /** The URL key of the organization. */
   urlKey: Scalars["String"];
-};
-
-export type CreateOrJoinOrganizationResponse = {
-  __typename?: "CreateOrJoinOrganizationResponse";
-  organization: Organization;
-  user: User;
 };
 
 /** A custom view that has been saved by a user. */
@@ -3154,10 +3156,10 @@ export type Query = {
   apiKeys: ApiKeyConnection;
   /** Get information for an application and whether a user has approved it for the given scopes. */
   applicationWithAuthorization: UserAuthorizedApplication;
-  /** Fetches archived models. */
-  archivedModelsSync: ArchiveResponse;
   /** Fetches an archived model. */
   archivedModelSync: ArchiveResponse;
+  /** Fetches archived models. */
+  archivedModelsSync: ArchiveResponse;
   /** Get all authorized applications for a user */
   authorizedApplications: Array<AuthorizedApplication>;
   /** Fetch users belonging to this user account. */
@@ -3208,22 +3210,22 @@ export type Query = {
   issueRelation: IssueRelation;
   /** All issue relationships. */
   issueRelations: IssueRelationConnection;
-  /** All issues. */
-  issues: IssueConnection;
   /** [ALPHA] Search issues. This query is experimental and is subject to change without notice. */
   issueSearch: IssueConnection;
+  /** All issues. */
+  issues: IssueConnection;
   /** One specific milestone. */
   milestone: Milestone;
   /** All milestones. */
   milestones: MilestoneConnection;
   /** One specific notification. */
   notification: Notification;
-  /** All notifications. */
-  notifications: NotificationConnection;
   /** One specific notification subscription. */
   notificationSubscription: NotificationSubscription;
   /** The user's notification subscriptions. */
   notificationSubscriptions: NotificationSubscriptionConnection;
+  /** All notifications. */
+  notifications: NotificationConnection;
   /** The user's organization. */
   organization: Organization;
   /** Does the organization exist. */
@@ -3268,10 +3270,10 @@ export type Query = {
   templates: Array<Template>;
   /** One specific user. */
   user: User;
-  /** All users for the organization. */
-  users: UserConnection;
   /** The user's settings. */
   userSettings: UserSettings;
+  /** All users for the organization. */
+  users: UserConnection;
   /** The currently authenticated user. */
   viewer: User;
   /** A specific webhook. */
@@ -3299,16 +3301,16 @@ export type QueryApplicationWithAuthorizationArgs = {
   scope: Array<Scalars["String"]>;
 };
 
+export type QueryArchivedModelSyncArgs = {
+  identifier: Scalars["String"];
+  modelClass: Scalars["String"];
+};
+
 export type QueryArchivedModelsSyncArgs = {
   before?: Maybe<Scalars["DateTime"]>;
   last?: Maybe<Scalars["Int"]>;
   modelClass: Scalars["String"];
   teamId: Scalars["String"];
-};
-
-export type QueryArchivedModelSyncArgs = {
-  identifier: Scalars["String"];
-  modelClass: Scalars["String"];
 };
 
 export type QueryCollaborativeDocumentJoinArgs = {
@@ -3448,15 +3450,6 @@ export type QueryIssueRelationsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryIssuesArgs = {
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
 export type QueryIssueSearchArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -3465,6 +3458,15 @@ export type QueryIssueSearchArgs = {
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
   query: Scalars["String"];
+};
+
+export type QueryIssuesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type QueryMilestoneArgs = {
@@ -3484,7 +3486,11 @@ export type QueryNotificationArgs = {
   id: Scalars["String"];
 };
 
-export type QueryNotificationsArgs = {
+export type QueryNotificationSubscriptionArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryNotificationSubscriptionsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -3493,11 +3499,7 @@ export type QueryNotificationsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryNotificationSubscriptionArgs = {
-  id: Scalars["String"];
-};
-
-export type QueryNotificationSubscriptionsArgs = {
+export type QueryNotificationsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -3847,12 +3849,6 @@ export type SubscriptionUpdateInput = {
   pendingChangeType?: Maybe<Scalars["String"]>;
 };
 
-export type SynchronizedPayload = {
-  __typename?: "SynchronizedPayload";
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
-};
-
 /**
  * Contains either the full serialized state of the application or delta packets that the requester can
  *   apply to the local data set in order to be up-to-date.
@@ -3875,6 +3871,12 @@ export type SyncResponse = {
    *     Mutually exclusive with the delta property
    */
   state?: Maybe<Scalars["String"]>;
+};
+
+export type SynchronizedPayload = {
+  __typename?: "SynchronizedPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
 };
 
 /** An organizational unit that contains issues. */
@@ -3904,12 +3906,12 @@ export type Team = Node & {
   cycleIssueAutoAssignStarted: Scalars["Boolean"];
   /** Only allow issues issues with cycles in Active Issues. */
   cycleLockToActive: Scalars["Boolean"];
+  /** The day of the week that a new cycle starts. */
+  cycleStartDay: Scalars["Float"];
   /** Cycles associated with the team. */
   cycles: CycleConnection;
   /** Whether the team uses cycles. */
   cyclesEnabled: Scalars["Boolean"];
-  /** The day of the week that a new cycle starts. */
-  cycleStartDay: Scalars["Float"];
   /** What to use as an default estimate for unestimated issues. */
   defaultIssueEstimate: Scalars["Float"];
   /** The default template to use for new issues created by members of the team. */
@@ -4081,10 +4083,10 @@ export type TeamCreateInput = {
   cycleIssueAutoAssignStarted?: Maybe<Scalars["Boolean"]>;
   /** Only allow issues issues with cycles in Active Issues. */
   cycleLockToActive?: Maybe<Scalars["Boolean"]>;
-  /** Whether the team uses cycles. */
-  cyclesEnabled?: Maybe<Scalars["Boolean"]>;
   /** The day of the week that a new cycle starts. */
   cycleStartDay?: Maybe<Scalars["Float"]>;
+  /** Whether the team uses cycles. */
+  cyclesEnabled?: Maybe<Scalars["Boolean"]>;
   /** What to use as an default estimate for unestimated issues. */
   defaultIssueEstimate?: Maybe<Scalars["Float"]>;
   /** The identifier of the default template for members of this team. */
@@ -4204,10 +4206,10 @@ export type TeamUpdateInput = {
   cycleIssueAutoAssignStarted?: Maybe<Scalars["Boolean"]>;
   /** Only allow issues with cycles in Active Issues. */
   cycleLockToActive?: Maybe<Scalars["Boolean"]>;
-  /** Whether the team uses cycles. */
-  cyclesEnabled?: Maybe<Scalars["Boolean"]>;
   /** The day of the week that a new cycle starts. */
   cycleStartDay?: Maybe<Scalars["Float"]>;
+  /** Whether the team uses cycles. */
+  cyclesEnabled?: Maybe<Scalars["Boolean"]>;
   /** What to use as an default estimate for unestimated issues. */
   defaultIssueEstimate?: Maybe<Scalars["Float"]>;
   /** The identifier of the default template for members of this team. */
@@ -5823,11 +5825,20 @@ export type ApiKeysQuery = { __typename?: "Query" } & {
 export type ApplicationWithAuthorizationQueryVariables = Exact<{
   clientId: Scalars["String"];
   redirectUri?: Maybe<Scalars["String"]>;
-  scope: Array<Scalars["String"]>;
+  scope: Array<Scalars["String"]> | Scalars["String"];
 }>;
 
 export type ApplicationWithAuthorizationQuery = { __typename?: "Query" } & {
   applicationWithAuthorization: { __typename?: "UserAuthorizedApplication" } & UserAuthorizedApplicationFragment;
+};
+
+export type ArchivedModelSyncQueryVariables = Exact<{
+  identifier: Scalars["String"];
+  modelClass: Scalars["String"];
+}>;
+
+export type ArchivedModelSyncQuery = { __typename?: "Query" } & {
+  archivedModelSync: { __typename?: "ArchiveResponse" } & ArchiveResponseFragment;
 };
 
 export type ArchivedModelsSyncQueryVariables = Exact<{
@@ -5839,15 +5850,6 @@ export type ArchivedModelsSyncQueryVariables = Exact<{
 
 export type ArchivedModelsSyncQuery = { __typename?: "Query" } & {
   archivedModelsSync: { __typename?: "ArchiveResponse" } & ArchiveResponseFragment;
-};
-
-export type ArchivedModelSyncQueryVariables = Exact<{
-  identifier: Scalars["String"];
-  modelClass: Scalars["String"];
-}>;
-
-export type ArchivedModelSyncQuery = { __typename?: "Query" } & {
-  archivedModelSync: { __typename?: "ArchiveResponse" } & ArchiveResponseFragment;
 };
 
 export type AuthorizedApplicationsQueryVariables = Exact<{ [key: string]: never }>;
@@ -6364,19 +6366,6 @@ export type IssueRelationsQuery = { __typename?: "Query" } & {
   issueRelations: { __typename?: "IssueRelationConnection" } & IssueRelationConnectionFragment;
 };
 
-export type IssuesQueryVariables = Exact<{
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type IssuesQuery = { __typename?: "Query" } & {
-  issues: { __typename?: "IssueConnection" } & IssueConnectionFragment;
-};
-
 export type IssueSearchQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -6389,6 +6378,19 @@ export type IssueSearchQueryVariables = Exact<{
 
 export type IssueSearchQuery = { __typename?: "Query" } & {
   issueSearch: { __typename?: "IssueConnection" } & IssueConnectionFragment;
+};
+
+export type IssuesQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type IssuesQuery = { __typename?: "Query" } & {
+  issues: { __typename?: "IssueConnection" } & IssueConnectionFragment;
 };
 
 export type MilestoneQueryVariables = Exact<{
@@ -6434,19 +6436,6 @@ export type NotificationQuery = { __typename?: "Query" } & {
   notification: { __typename?: "Notification" } & NotificationFragment;
 };
 
-export type NotificationsQueryVariables = Exact<{
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type NotificationsQuery = { __typename?: "Query" } & {
-  notifications: { __typename?: "NotificationConnection" } & NotificationConnectionFragment;
-};
-
 export type NotificationSubscriptionQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -6468,6 +6457,19 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
   notificationSubscriptions: {
     __typename?: "NotificationSubscriptionConnection";
   } & NotificationSubscriptionConnectionFragment;
+};
+
+export type NotificationsQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type NotificationsQuery = { __typename?: "Query" } & {
+  notifications: { __typename?: "NotificationConnection" } & NotificationConnectionFragment;
 };
 
 export type OrganizationQueryVariables = Exact<{ [key: string]: never }>;
@@ -6949,6 +6951,12 @@ export type User_TeamMembershipsQuery = { __typename?: "Query" } & {
   };
 };
 
+export type UserSettingsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type UserSettingsQuery = { __typename?: "Query" } & {
+  userSettings: { __typename?: "UserSettings" } & UserSettingsFragment;
+};
+
 export type UsersQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -6960,12 +6968,6 @@ export type UsersQueryVariables = Exact<{
 
 export type UsersQuery = { __typename?: "Query" } & {
   users: { __typename?: "UserConnection" } & UserConnectionFragment;
-};
-
-export type UserSettingsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type UserSettingsQuery = { __typename?: "Query" } & {
-  userSettings: { __typename?: "UserSettings" } & UserSettingsFragment;
 };
 
 export type ViewerQueryVariables = Exact<{ [key: string]: never }>;
@@ -7672,7 +7674,7 @@ export type OauthClientUpdateMutation = { __typename?: "Mutation" } & {
 
 export type OauthTokenRevokeMutationVariables = Exact<{
   appId: Scalars["String"];
-  scope: Array<Scalars["String"]>;
+  scope: Array<Scalars["String"]> | Scalars["String"];
 }>;
 
 export type OauthTokenRevokeMutation = { __typename?: "Mutation" } & {
@@ -8116,24 +8118,21 @@ export const FileUploadFragmentDoc: DocumentNode<FileUploadFragment, unknown> = 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "FileUpload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FileUpload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "metaData" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "size" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "contentType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "assetUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "filename" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "metaData" } },
+          { kind: "Field", name: { kind: "Name", value: "size" } },
+          { kind: "Field", name: { kind: "Name", value: "contentType" } },
+          { kind: "Field", name: { kind: "Name", value: "assetUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "filename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -8148,36 +8147,31 @@ export const TemplateFragmentDoc: DocumentNode<TemplateFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Template" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Template" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "templateData" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "templateData" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -8192,23 +8186,22 @@ export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "User" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "avatarUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "lastSeen" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "displayName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "active" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "admin" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSeen" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "displayName" } },
+          { kind: "Field", name: { kind: "Name", value: "email" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
+          { kind: "Field", name: { kind: "Name", value: "admin" } },
         ],
       },
     },
@@ -8221,25 +8214,22 @@ export const UserAccountFragmentDoc: DocumentNode<UserAccountFragment, unknown> 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserAccount" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAccount" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "service" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "email" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "users" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" } }],
             },
           },
         ],
@@ -8255,17 +8245,16 @@ export const DocumentStepFragmentDoc: DocumentNode<DocumentStepFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "DocumentStep" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DocumentStep" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "step" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "version" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "clientId" } },
+          { kind: "Field", name: { kind: "Name", value: "step" } },
+          { kind: "Field", name: { kind: "Name", value: "version" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -8278,15 +8267,14 @@ export const SyncResponseFragmentDoc: DocumentNode<SyncResponseFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SyncResponse" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SyncResponse" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "archive" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "delta" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "state" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "databaseVersion" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archive" } },
+          { kind: "Field", name: { kind: "Name", value: "delta" } },
+          { kind: "Field", name: { kind: "Name", value: "state" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "databaseVersion" } },
         ],
       },
     },
@@ -8299,13 +8287,12 @@ export const ArchiveResponseFragmentDoc: DocumentNode<ArchiveResponseFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ArchiveResponse" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ArchiveResponse" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "archive" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "totalCount" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "databaseVersion" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archive" } },
+          { kind: "Field", name: { kind: "Name", value: "totalCount" } },
+          { kind: "Field", name: { kind: "Name", value: "databaseVersion" } },
         ],
       },
     },
@@ -8318,18 +8305,17 @@ export const AuthorizedApplicationFragmentDoc: DocumentNode<AuthorizedApplicatio
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "AuthorizedApplication" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuthorizedApplication" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "appId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "scope" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "developer" } },
+          { kind: "Field", name: { kind: "Name", value: "appId" } },
+          { kind: "Field", name: { kind: "Name", value: "clientId" } },
+          { kind: "Field", name: { kind: "Name", value: "scope" } },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
         ],
       },
     },
@@ -8342,17 +8328,16 @@ export const UserAuthorizedApplicationFragmentDoc: DocumentNode<UserAuthorizedAp
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserAuthorizedApplication" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAuthorizedApplication" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "isAuthorized" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "developer" } },
+          { kind: "Field", name: { kind: "Name", value: "clientId" } },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "isAuthorized" } },
         ],
       },
     },
@@ -8365,16 +8350,15 @@ export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Application" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Application" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "developer" } },
+          { kind: "Field", name: { kind: "Name", value: "clientId" } },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
         ],
       },
     },
@@ -8387,14 +8371,13 @@ export const GoogleSheetsSettingsFragmentDoc: DocumentNode<GoogleSheetsSettingsF
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "GoogleSheetsSettings" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "GoogleSheetsSettings" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "sheetId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "spreadsheetId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "spreadsheetUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedIssuesAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "sheetId" } },
+          { kind: "Field", name: { kind: "Name", value: "spreadsheetId" } },
+          { kind: "Field", name: { kind: "Name", value: "spreadsheetUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedIssuesAt" } },
         ],
       },
     },
@@ -8407,12 +8390,9 @@ export const SentrySettingsFragmentDoc: DocumentNode<SentrySettingsFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SentrySettings" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SentrySettings" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "organizationSlug" }, arguments: [], directives: [] },
-        ],
+        selections: [{ kind: "Field", name: { kind: "Name", value: "organizationSlug" } }],
       },
     },
   ],
@@ -8424,13 +8404,12 @@ export const SlackPostSettingsFragmentDoc: DocumentNode<SlackPostSettingsFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SlackPostSettings" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SlackPostSettings" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "channel" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "channelId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "configurationUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "channel" } },
+          { kind: "Field", name: { kind: "Name", value: "channelId" } },
+          { kind: "Field", name: { kind: "Name", value: "configurationUrl" } },
         ],
       },
     },
@@ -8443,54 +8422,39 @@ export const IntegrationSettingsFragmentDoc: DocumentNode<IntegrationSettingsFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IntegrationSettings" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationSettings" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "googleSheets" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "GoogleSheetsSettings" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "GoogleSheetsSettings" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "sentry" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentrySettings" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentrySettings" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "slackPost" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "slackProjectPost" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" } }],
             },
           },
         ],
@@ -8508,15 +8472,14 @@ export const SamlConfigurationFragmentDoc: DocumentNode<SamlConfigurationFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SamlConfiguration" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SamlConfiguration" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "ssoBinding" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "allowedDomains" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "ssoSignAlgo" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "ssoBinding" } },
+          { kind: "Field", name: { kind: "Name", value: "allowedDomains" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoSignAlgo" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" } },
         ],
       },
     },
@@ -8529,24 +8492,21 @@ export const UserSettingsFragmentDoc: DocumentNode<UserSettingsFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserSettings" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettings" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "unsubscribedFrom" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "notificationPreferences" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "unsubscribedFrom" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "notificationPreferences" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -8561,28 +8521,25 @@ export const SubscriptionFragmentDoc: DocumentNode<SubscriptionFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Subscription" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Subscription" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "seats" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "pendingChangeType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "canceledAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "seats" } },
+          { kind: "Field", name: { kind: "Name", value: "pendingChangeType" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -8595,15 +8552,14 @@ export const ApiKeyFragmentDoc: DocumentNode<ApiKeyFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ApiKey" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ApiKey" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "label" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "label" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -8616,14 +8572,13 @@ export const PageInfoFragmentDoc: DocumentNode<PageInfoFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "PageInfo" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PageInfo" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "startCursor" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "endCursor" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "hasPreviousPage" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "hasNextPage" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "startCursor" } },
+          { kind: "Field", name: { kind: "Name", value: "endCursor" } },
+          { kind: "Field", name: { kind: "Name", value: "hasPreviousPage" } },
+          { kind: "Field", name: { kind: "Name", value: "hasNextPage" } },
         ],
       },
     },
@@ -8636,28 +8591,23 @@ export const ApiKeyConnectionFragmentDoc: DocumentNode<ApiKeyConnectionFragment,
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ApiKeyConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKey" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKey" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -8674,22 +8624,19 @@ export const ApiKeyPayloadFragmentDoc: DocumentNode<ApiKeyPayloadFragment, unkno
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ApiKeyPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "apiKey" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKey" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKey" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -8703,12 +8650,11 @@ export const ArchivePayloadFragmentDoc: DocumentNode<ArchivePayloadFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ArchivePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ArchivePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -8721,30 +8667,24 @@ export const OrganizationFragmentDoc: DocumentNode<OrganizationFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Organization" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Organization" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "userCount" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "periodUploadVolume" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "logoUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "urlKey" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "samlEnabled" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "gitLinkbackMessagesEnabled" }, arguments: [], directives: [] },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "gitPublicLinkbackMessagesEnabled" },
-            arguments: [],
-            directives: [],
-          },
-          { kind: "Field", name: { kind: "Name", value: "roadmapEnabled" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" } },
+          { kind: "Field", name: { kind: "Name", value: "userCount" } },
+          { kind: "Field", name: { kind: "Name", value: "createdIssueCount" } },
+          { kind: "Field", name: { kind: "Name", value: "periodUploadVolume" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "logoUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "urlKey" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "gitLinkbackMessagesEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "gitPublicLinkbackMessagesEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "roadmapEnabled" } },
         ],
       },
     },
@@ -8757,32 +8697,27 @@ export const AuthResolverResponseFragmentDoc: DocumentNode<AuthResolverResponseF
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "AuthResolverResponse" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuthResolverResponse" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "token" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "email" } },
+          { kind: "Field", name: { kind: "Name", value: "token" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "availableOrganizations" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Organization" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Organization" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "allowDomainAccess" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "allowDomainAccess" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "users" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" } }],
             },
           },
         ],
@@ -8799,15 +8734,14 @@ export const InvoiceFragmentDoc: DocumentNode<InvoiceFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Invoice" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Invoice" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "created" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "dueDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "total" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "created" } },
+          { kind: "Field", name: { kind: "Name", value: "dueDate" } },
+          { kind: "Field", name: { kind: "Name", value: "total" } },
+          { kind: "Field", name: { kind: "Name", value: "status" } },
         ],
       },
     },
@@ -8820,12 +8754,11 @@ export const CardFragmentDoc: DocumentNode<CardFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Card" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Card" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "brand" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "last4" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "brand" } },
+          { kind: "Field", name: { kind: "Name", value: "last4" } },
         ],
       },
     },
@@ -8838,32 +8771,27 @@ export const BillingDetailsPayloadFragmentDoc: DocumentNode<BillingDetailsPayloa
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "BillingDetailsPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "BillingDetailsPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "invoices" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Invoice" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Invoice" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "email" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "paymentMethod" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Card" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Card" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -8878,12 +8806,11 @@ export const BillingEmailPayloadFragmentDoc: DocumentNode<BillingEmailPayloadFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "BillingEmailPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "BillingEmailPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "email" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -8896,13 +8823,12 @@ export const StepsResponseFragmentDoc: DocumentNode<StepsResponseFragment, unkno
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "StepsResponse" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "StepsResponse" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "version" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientIds" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "steps" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "version" } },
+          { kind: "Field", name: { kind: "Name", value: "clientIds" } },
+          { kind: "Field", name: { kind: "Name", value: "steps" } },
         ],
       },
     },
@@ -8918,21 +8844,18 @@ export const CollaborationDocumentUpdatePayloadFragmentDoc: DocumentNode<
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "steps" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "StepsResponse" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "StepsResponse" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -8946,34 +8869,29 @@ export const CommentFragmentDoc: DocumentNode<CommentFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Comment" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Comment" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "body" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "editedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "editedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -8988,28 +8906,23 @@ export const CommentConnectionFragmentDoc: DocumentNode<CommentConnectionFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CommentConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommentConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Comment" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Comment" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -9026,22 +8939,19 @@ export const CommentPayloadFragmentDoc: DocumentNode<CommentPayloadFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CommentPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommentPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9054,11 +8964,7 @@ export const ContactPayloadFragmentDoc: DocumentNode<ContactPayloadFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ContactPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ContactPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -9069,11 +8975,7 @@ export const CreateCsvExportReportPayloadFragmentDoc: DocumentNode<CreateCsvExpo
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CreateCsvExportReportPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CreateCsvExportReportPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -9087,18 +8989,15 @@ export const CreateOrJoinOrganizationResponseFragmentDoc: DocumentNode<
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -9113,40 +9012,35 @@ export const CustomViewFragmentDoc: DocumentNode<CustomViewFragment, unknown> = 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CustomView" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomView" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "filters" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "icon" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "filters" } },
+          { kind: "Field", name: { kind: "Name", value: "icon" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "shared" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "shared" } },
         ],
       },
     },
@@ -9159,28 +9053,23 @@ export const CustomViewConnectionFragmentDoc: DocumentNode<CustomViewConnectionF
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CustomViewConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomViewConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomView" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomView" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -9197,22 +9086,19 @@ export const CustomViewPayloadFragmentDoc: DocumentNode<CustomViewPayloadFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CustomViewPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomViewPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "customView" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9225,33 +9111,30 @@ export const CycleFragmentDoc: DocumentNode<CycleFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Cycle" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Cycle" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "endsAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "startsAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "completedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "endsAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "number" } },
+          { kind: "Field", name: { kind: "Name", value: "startsAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "scopeHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueCountHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "scopeHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "issueCountHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -9264,28 +9147,23 @@ export const CycleConnectionFragmentDoc: DocumentNode<CycleConnectionFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CycleConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CycleConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Cycle" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Cycle" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -9302,22 +9180,19 @@ export const CyclePayloadFragmentDoc: DocumentNode<CyclePayloadFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CyclePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CyclePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "cycle" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9330,11 +9205,7 @@ export const DebugPayloadFragmentDoc: DocumentNode<DebugPayloadFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "DebugPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DebugPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -9345,11 +9216,7 @@ export const EmailUnsubscribePayloadFragmentDoc: DocumentNode<EmailUnsubscribePa
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "EmailUnsubscribePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailUnsubscribePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -9363,12 +9230,11 @@ export const EmailUserAccountAuthChallengeResponseFragmentDoc: DocumentNode<
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "authType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "authType" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9381,25 +9247,22 @@ export const EmojiFragmentDoc: DocumentNode<EmojiFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Emoji" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Emoji" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "source" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "source" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -9414,28 +9277,23 @@ export const EmojiConnectionFragmentDoc: DocumentNode<EmojiConnectionFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "EmojiConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmojiConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Emoji" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Emoji" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -9452,22 +9310,19 @@ export const EmojiPayloadFragmentDoc: DocumentNode<EmojiPayloadFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "EmojiPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmojiPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "emoji" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9480,11 +9335,7 @@ export const EventPayloadFragmentDoc: DocumentNode<EventPayloadFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "EventPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EventPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -9495,76 +9346,63 @@ export const FavoriteFragmentDoc: DocumentNode<FavoriteFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Favorite" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Favorite" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "cycle" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "label" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "projectTeam" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "project" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -9577,28 +9415,23 @@ export const FavoriteConnectionFragmentDoc: DocumentNode<FavoriteConnectionFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "FavoriteConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FavoriteConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Favorite" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Favorite" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -9615,22 +9448,19 @@ export const FavoritePayloadFragmentDoc: DocumentNode<FavoritePayloadFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "FavoritePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FavoritePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "favorite" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9643,11 +9473,7 @@ export const FeedbackPayloadFragmentDoc: DocumentNode<FeedbackPayloadFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "FeedbackPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FeedbackPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -9658,14 +9484,13 @@ export const FigmaEmbedFragmentDoc: DocumentNode<FigmaEmbedFragment, unknown> = 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "FigmaEmbed" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FigmaEmbed" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastModified" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "nodeName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastModified" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "nodeName" } },
         ],
       },
     },
@@ -9678,22 +9503,19 @@ export const FigmaEmbedPayloadFragmentDoc: DocumentNode<FigmaEmbedPayloadFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "FigmaEmbedPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FigmaEmbedPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "figmaEmbed" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FigmaEmbed" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FigmaEmbed" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9707,13 +9529,12 @@ export const ImageUploadFromUrlPayloadFragmentDoc: DocumentNode<ImageUploadFromU
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ImageUploadFromUrlPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ImageUploadFromUrlPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9726,33 +9547,28 @@ export const IntegrationFragmentDoc: DocumentNode<IntegrationFragment, unknown> 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Integration" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Integration" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "service" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -9767,28 +9583,23 @@ export const IntegrationConnectionFragmentDoc: DocumentNode<IntegrationConnectio
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IntegrationConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Integration" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Integration" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -9805,22 +9616,19 @@ export const IntegrationPayloadFragmentDoc: DocumentNode<IntegrationPayloadFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IntegrationPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "integration" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -9833,17 +9641,16 @@ export const CommitPayloadFragmentDoc: DocumentNode<CommitPayloadFragment, unkno
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CommitPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommitPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "added" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "message" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "modified" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "removed" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "timestamp" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "added" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "message" } },
+          { kind: "Field", name: { kind: "Name", value: "modified" } },
+          { kind: "Field", name: { kind: "Name", value: "removed" } },
+          { kind: "Field", name: { kind: "Name", value: "timestamp" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
         ],
       },
     },
@@ -9856,25 +9663,24 @@ export const PullRequestPayloadFragmentDoc: DocumentNode<PullRequestPayloadFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "PullRequestPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PullRequestPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "branch" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "closedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "draft" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "mergedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "repoLogin" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "repoName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "title" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "userId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "userLogin" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "branch" } },
+          { kind: "Field", name: { kind: "Name", value: "closedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "draft" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "mergedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "number" } },
+          { kind: "Field", name: { kind: "Name", value: "repoLogin" } },
+          { kind: "Field", name: { kind: "Name", value: "repoName" } },
+          { kind: "Field", name: { kind: "Name", value: "status" } },
+          { kind: "Field", name: { kind: "Name", value: "title" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "userId" } },
+          { kind: "Field", name: { kind: "Name", value: "userLogin" } },
         ],
       },
     },
@@ -9887,21 +9693,20 @@ export const SentryIssuePayloadFragmentDoc: DocumentNode<SentryIssuePayloadFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SentryIssuePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SentryIssuePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "issueId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "actorId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "projectId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "firstSeen" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "webUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "actorName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "firstVersion" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "shortId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "projectSlug" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueTitle" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "actorType" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "issueId" } },
+          { kind: "Field", name: { kind: "Name", value: "actorId" } },
+          { kind: "Field", name: { kind: "Name", value: "projectId" } },
+          { kind: "Field", name: { kind: "Name", value: "firstSeen" } },
+          { kind: "Field", name: { kind: "Name", value: "webUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "actorName" } },
+          { kind: "Field", name: { kind: "Name", value: "firstVersion" } },
+          { kind: "Field", name: { kind: "Name", value: "shortId" } },
+          { kind: "Field", name: { kind: "Name", value: "projectSlug" } },
+          { kind: "Field", name: { kind: "Name", value: "issueTitle" } },
+          { kind: "Field", name: { kind: "Name", value: "actorType" } },
         ],
       },
     },
@@ -9914,54 +9719,39 @@ export const IntegrationResourceDataFragmentDoc: DocumentNode<IntegrationResourc
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IntegrationResourceData" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResourceData" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "githubCommit" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommitPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommitPayload" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "githubPullRequest" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "gitlabMergeRequest" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "sentryIssue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SentryIssuePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentryIssuePayload" } }],
             },
           },
         ],
@@ -9979,60 +9769,47 @@ export const IntegrationResourceFragmentDoc: DocumentNode<IntegrationResourceFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IntegrationResource" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResource" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "data" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceData" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceData" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pullRequest" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "resourceId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "resourceId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "integration" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "resourceType" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "resourceType" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -10047,30 +9824,23 @@ export const IntegrationResourceConnectionFragmentDoc: DocumentNode<IntegrationR
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IntegrationResourceConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResourceConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResource" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResource" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -10087,18 +9857,17 @@ export const InviteDataFragmentDoc: DocumentNode<InviteDataFragment, unknown> = 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "InviteData" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "InviteData" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "avatarURLs" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "teamIds" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "teamNames" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "organizationDomain" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "organizationLogoUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "inviterName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "organizationName" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "userCount" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "avatarURLs" } },
+          { kind: "Field", name: { kind: "Name", value: "teamIds" } },
+          { kind: "Field", name: { kind: "Name", value: "teamNames" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationDomain" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationLogoUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "inviterName" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationName" } },
+          { kind: "Field", name: { kind: "Name", value: "userCount" } },
         ],
       },
     },
@@ -10111,21 +9880,18 @@ export const InvitePagePayloadFragmentDoc: DocumentNode<InvitePagePayloadFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "InvitePagePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "InvitePagePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "inviteData" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "InviteData" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "InviteData" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -10139,100 +9905,85 @@ export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Issue" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Issue" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "identifier" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "priorityLabel" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "previousIdentifiers" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "branchName" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "identifier" } },
+          { kind: "Field", name: { kind: "Name", value: "priorityLabel" } },
+          { kind: "Field", name: { kind: "Name", value: "previousIdentifiers" } },
+          { kind: "Field", name: { kind: "Name", value: "branchName" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "cycle" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "dueDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "estimate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "title" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "number" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "boardOrder" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "subIssueSortOrder" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "dueDate" } },
+          { kind: "Field", name: { kind: "Name", value: "estimate" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "title" } },
+          { kind: "Field", name: { kind: "Name", value: "number" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "boardOrder" } },
+          { kind: "Field", name: { kind: "Name", value: "subIssueSortOrder" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "parent" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "priority" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "priority" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "project" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoArchivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoClosedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "startedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "autoArchivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "autoClosedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "canceledAt" } },
+          { kind: "Field", name: { kind: "Name", value: "completedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "startedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "assignee" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "state" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -10247,28 +9998,23 @@ export const IssueConnectionFragmentDoc: DocumentNode<IssueConnectionFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Issue" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Issue" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -10285,170 +10031,141 @@ export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueHistory" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueHistory" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "relationChanges" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "addedLabelIds" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "removedLabelIds" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "source" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "relationChanges" } },
+          { kind: "Field", name: { kind: "Name", value: "addedLabelIds" } },
+          { kind: "Field", name: { kind: "Name", value: "removedLabelIds" } },
+          { kind: "Field", name: { kind: "Name", value: "source" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "toCycle" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "toParent" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "toProject" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "toState" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "fromCycle" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "fromParent" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "fromProject" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "fromState" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "fromTeam" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "toTeam" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "fromAssignee" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "toAssignee" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "actor" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "fromDueDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "toDueDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "fromEstimate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "toEstimate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "fromPriority" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "toPriority" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "fromTitle" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "toTitle" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archived" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedDescription" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoArchived" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoClosed" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "fromDueDate" } },
+          { kind: "Field", name: { kind: "Name", value: "toDueDate" } },
+          { kind: "Field", name: { kind: "Name", value: "fromEstimate" } },
+          { kind: "Field", name: { kind: "Name", value: "toEstimate" } },
+          { kind: "Field", name: { kind: "Name", value: "fromPriority" } },
+          { kind: "Field", name: { kind: "Name", value: "toPriority" } },
+          { kind: "Field", name: { kind: "Name", value: "fromTitle" } },
+          { kind: "Field", name: { kind: "Name", value: "toTitle" } },
+          { kind: "Field", name: { kind: "Name", value: "archived" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedDescription" } },
+          { kind: "Field", name: { kind: "Name", value: "autoArchived" } },
+          { kind: "Field", name: { kind: "Name", value: "autoClosed" } },
         ],
       },
     },
@@ -10461,28 +10178,23 @@ export const IssueHistoryConnectionFragmentDoc: DocumentNode<IssueHistoryConnect
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueHistoryConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueHistoryConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueHistory" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueHistory" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -10499,17 +10211,16 @@ export const IssueImportFragmentDoc: DocumentNode<IssueImportFragment, unknown> 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueImport" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueImport" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "creatorId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "service" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "status" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "creatorId" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "service" } },
+          { kind: "Field", name: { kind: "Name", value: "status" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -10522,22 +10233,19 @@ export const IssueImportPayloadFragmentDoc: DocumentNode<IssueImportPayloadFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueImportPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueImportPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issueImport" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImport" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImport" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -10551,35 +10259,30 @@ export const IssueLabelFragmentDoc: DocumentNode<IssueLabelFragment, unknown> = 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueLabel" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabel" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -10594,28 +10297,23 @@ export const IssueLabelConnectionFragmentDoc: DocumentNode<IssueLabelConnectionF
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueLabelConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabel" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabel" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -10632,22 +10330,19 @@ export const IssueLabelPayloadFragmentDoc: DocumentNode<IssueLabelPayloadFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueLabelPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issueLabel" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -10660,22 +10355,19 @@ export const IssuePayloadFragmentDoc: DocumentNode<IssuePayloadFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssuePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssuePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -10688,35 +10380,30 @@ export const IssueRelationFragmentDoc: DocumentNode<IssueRelationFragment, unkno
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueRelation" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelation" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "relatedIssue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -10729,28 +10416,23 @@ export const IssueRelationConnectionFragmentDoc: DocumentNode<IssueRelationConne
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueRelationConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelation" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelation" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -10767,22 +10449,19 @@ export const IssueRelationPayloadFragmentDoc: DocumentNode<IssueRelationPayloadF
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "IssueRelationPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issueRelation" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -10795,16 +10474,15 @@ export const MilestoneFragmentDoc: DocumentNode<MilestoneFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Milestone" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Milestone" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -10817,28 +10495,23 @@ export const MilestoneConnectionFragmentDoc: DocumentNode<MilestoneConnectionFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "MilestoneConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestoneConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Milestone" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Milestone" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -10855,22 +10528,19 @@ export const MilestonePayloadFragmentDoc: DocumentNode<MilestonePayloadFragment,
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "MilestonePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestonePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "milestone" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -10883,58 +10553,49 @@ export const NotificationFragmentDoc: DocumentNode<NotificationFragment, unknown
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Notification" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Notification" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "reactionEmoji" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "reactionEmoji" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "emailedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "readAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "emailedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "readAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -10947,28 +10608,23 @@ export const NotificationConnectionFragmentDoc: DocumentNode<NotificationConnect
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "NotificationConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Notification" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Notification" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -10985,22 +10641,19 @@ export const NotificationPayloadFragmentDoc: DocumentNode<NotificationPayloadFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "NotificationPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "notification" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11013,43 +10666,36 @@ export const NotificationSubscriptionFragmentDoc: DocumentNode<NotificationSubsc
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "NotificationSubscription" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscription" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "project" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -11067,30 +10713,23 @@ export const NotificationSubscriptionConnectionFragmentDoc: DocumentNode<
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "NotificationSubscriptionConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscription" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscription" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -11110,22 +10749,19 @@ export const NotificationSubscriptionPayloadFragmentDoc: DocumentNode<
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "NotificationSubscriptionPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "notificationSubscription" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11138,22 +10774,21 @@ export const OauthClientFragmentDoc: DocumentNode<OauthClientFragment, unknown> 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OauthClient" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClient" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "redirectUris" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "clientSecret" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "redirectUris" } },
+          { kind: "Field", name: { kind: "Name", value: "developer" } },
+          { kind: "Field", name: { kind: "Name", value: "clientId" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "clientSecret" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
         ],
       },
     },
@@ -11166,22 +10801,19 @@ export const OauthClientPayloadFragmentDoc: DocumentNode<OauthClientPayloadFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OauthClientPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClientPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "oauthClient" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthClient" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthClient" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11195,11 +10827,7 @@ export const OauthTokenRevokePayloadFragmentDoc: DocumentNode<OauthTokenRevokePa
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OauthTokenRevokePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthTokenRevokePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -11210,11 +10838,7 @@ export const OrganizationDeletePayloadFragmentDoc: DocumentNode<OrganizationDele
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationDeletePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDeletePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -11225,25 +10849,22 @@ export const OrganizationDomainFragmentDoc: DocumentNode<OrganizationDomainFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationDomain" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomain" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "verificationEmail" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "verified" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "verificationEmail" } },
+          { kind: "Field", name: { kind: "Name", value: "verified" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -11258,24 +10879,19 @@ export const OrganizationDomainPayloadFragmentDoc: DocumentNode<OrganizationDoma
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationDomainPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "organizationDomain" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomain" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomain" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11292,11 +10908,7 @@ export const OrganizationDomainSimplePayloadFragmentDoc: DocumentNode<
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationDomainSimplePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainSimplePayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -11307,12 +10919,11 @@ export const OrganizationExistsPayloadFragmentDoc: DocumentNode<OrganizationExis
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationExistsPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationExistsPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "exists" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+          { kind: "Field", name: { kind: "Name", value: "exists" } },
         ],
       },
     },
@@ -11325,36 +10936,31 @@ export const OrganizationInviteFragmentDoc: DocumentNode<OrganizationInviteFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationInvite" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInvite" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "external" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "email" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "acceptedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "expiresAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "external" } },
+          { kind: "Field", name: { kind: "Name", value: "email" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "acceptedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "expiresAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "inviter" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "invitee" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -11369,30 +10975,23 @@ export const OrganizationInviteConnectionFragmentDoc: DocumentNode<OrganizationI
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationInviteConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvite" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvite" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -11409,24 +11008,19 @@ export const OrganizationInvitePayloadFragmentDoc: DocumentNode<OrganizationInvi
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationInvitePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInvitePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "organizationInvite" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvite" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvite" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11440,12 +11034,11 @@ export const OrganizationPayloadFragmentDoc: DocumentNode<OrganizationPayloadFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11458,62 +11051,55 @@ export const ProjectFragmentDoc: DocumentNode<ProjectFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Project" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Project" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "targetDate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "icon" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "targetDate" } },
+          { kind: "Field", name: { kind: "Name", value: "icon" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "milestone" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "lead" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slugId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "completedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "startedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "scopeHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueCountHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "state" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "slugId" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "canceledAt" } },
+          { kind: "Field", name: { kind: "Name", value: "completedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "startedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "scopeHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "issueCountHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "state" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "slackIssueComments" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackNewIssue" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueComments" } },
+          { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
         ],
       },
     },
@@ -11526,28 +11112,23 @@ export const ProjectConnectionFragmentDoc: DocumentNode<ProjectConnectionFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ProjectConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Project" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Project" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -11564,34 +11145,29 @@ export const ProjectLinkFragmentDoc: DocumentNode<ProjectLinkFragment, unknown> 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ProjectLink" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLink" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "label" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "label" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "project" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -11606,28 +11182,23 @@ export const ProjectLinkConnectionFragmentDoc: DocumentNode<ProjectLinkConnectio
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ProjectLinkConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLink" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLink" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -11644,22 +11215,19 @@ export const ProjectLinkPayloadFragmentDoc: DocumentNode<ProjectLinkPayloadFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ProjectLinkPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "projectLink" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11672,22 +11240,19 @@ export const ProjectPayloadFragmentDoc: DocumentNode<ProjectPayloadFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ProjectPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "project" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11700,14 +11265,13 @@ export const PushSubscriptionFragmentDoc: DocumentNode<PushSubscriptionFragment,
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "PushSubscription" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscription" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -11720,30 +11284,23 @@ export const PushSubscriptionConnectionFragmentDoc: DocumentNode<PushSubscriptio
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "PushSubscriptionConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscription" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscription" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -11760,12 +11317,11 @@ export const PushSubscriptionPayloadFragmentDoc: DocumentNode<PushSubscriptionPa
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "PushSubscriptionPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11778,33 +11334,28 @@ export const ReactionFragmentDoc: DocumentNode<ReactionFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Reaction" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Reaction" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "emoji" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "emoji" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -11819,28 +11370,23 @@ export const ReactionConnectionFragmentDoc: DocumentNode<ReactionConnectionFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ReactionConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ReactionConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Reaction" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Reaction" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -11857,22 +11403,19 @@ export const ReactionPayloadFragmentDoc: DocumentNode<ReactionPayloadFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ReactionPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ReactionPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "reaction" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11885,12 +11428,11 @@ export const RotateSecretPayloadFragmentDoc: DocumentNode<RotateSecretPayloadFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "RotateSecretPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "RotateSecretPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11903,12 +11445,11 @@ export const SsoUrlFromEmailResponseFragmentDoc: DocumentNode<SsoUrlFromEmailRes
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SsoUrlFromEmailResponse" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SsoUrlFromEmailResponse" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "samlSsoUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "samlSsoUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11921,13 +11462,12 @@ export const SubscriptionPayloadFragmentDoc: DocumentNode<SubscriptionPayloadFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SubscriptionPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SubscriptionPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "canceledAt" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -11940,11 +11480,7 @@ export const SubscriptionSessionPayloadFragmentDoc: DocumentNode<SubscriptionSes
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SubscriptionSessionPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SubscriptionSessionPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "session" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "session" } }] },
     },
   ],
 };
@@ -11955,10 +11491,9 @@ export const SynchronizedPayloadFragmentDoc: DocumentNode<SynchronizedPayloadFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SynchronizedPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SynchronizedPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] }],
+        selections: [{ kind: "Field", name: { kind: "Name", value: "lastSyncId" } }],
       },
     },
   ],
@@ -11970,109 +11505,86 @@ export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Team" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Team" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycleIssueAutoAssignCompleted" },
-            arguments: [],
-            directives: [],
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycleIssueAutoAssignStarted" },
-            arguments: [],
-            directives: [],
-          },
-          { kind: "Field", name: { kind: "Name", value: "cycleCalenderUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "upcomingCycleCount" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cycleLockToActive" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoArchivePeriod" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "autoClosePeriod" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "cycleIssueAutoAssignCompleted" } },
+          { kind: "Field", name: { kind: "Name", value: "cycleIssueAutoAssignStarted" } },
+          { kind: "Field", name: { kind: "Name", value: "cycleCalenderUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "upcomingCycleCount" } },
+          { kind: "Field", name: { kind: "Name", value: "cycleLockToActive" } },
+          { kind: "Field", name: { kind: "Name", value: "autoArchivePeriod" } },
+          { kind: "Field", name: { kind: "Name", value: "autoClosePeriod" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "activeCycle" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "autoCloseStateId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cycleCooldownTime" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cycleStartDay" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cycleDuration" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueEstimationType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "key" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "timezone" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "autoCloseStateId" } },
+          { kind: "Field", name: { kind: "Name", value: "cycleCooldownTime" } },
+          { kind: "Field", name: { kind: "Name", value: "cycleStartDay" } },
+          { kind: "Field", name: { kind: "Name", value: "cycleDuration" } },
+          { kind: "Field", name: { kind: "Name", value: "issueEstimationType" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "key" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "timezone" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "mergeWorkflowState" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "draftWorkflowState" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "startWorkflowState" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "reviewWorkflowState" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "markedAsDuplicateWorkflowState" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "inviteHash" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "cyclesEnabled" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueEstimationExtended" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "issueEstimationAllowZero" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "groupIssueHistory" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackIssueComments" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackNewIssue" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
+          { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" } },
+          { kind: "Field", name: { kind: "Name", value: "cyclesEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "issueEstimationExtended" } },
+          { kind: "Field", name: { kind: "Name", value: "issueEstimationAllowZero" } },
+          { kind: "Field", name: { kind: "Name", value: "groupIssueHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueComments" } },
+          { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
         ],
       },
     },
@@ -12085,28 +11597,23 @@ export const TeamConnectionFragmentDoc: DocumentNode<TeamConnectionFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "TeamConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -12123,32 +11630,27 @@ export const TeamMembershipFragmentDoc: DocumentNode<TeamMembershipFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "TeamMembership" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamMembership" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
         ],
@@ -12163,28 +11665,23 @@ export const TeamMembershipConnectionFragmentDoc: DocumentNode<TeamMembershipCon
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "TeamMembershipConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembership" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembership" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -12201,22 +11698,19 @@ export const TeamMembershipPayloadFragmentDoc: DocumentNode<TeamMembershipPayloa
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "TeamMembershipPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "teamMembership" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12229,22 +11723,19 @@ export const TeamPayloadFragmentDoc: DocumentNode<TeamPayloadFragment, unknown> 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "TeamPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12257,18 +11748,15 @@ export const TemplateConnectionFragmentDoc: DocumentNode<TemplateConnectionFragm
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "TemplateConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TemplateConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -12284,22 +11772,19 @@ export const TemplatePayloadFragmentDoc: DocumentNode<TemplatePayloadFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "TemplatePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TemplatePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "template" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12312,12 +11797,11 @@ export const UploadFileHeaderFragmentDoc: DocumentNode<UploadFileHeaderFragment,
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UploadFileHeader" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadFileHeader" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "key" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "value" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "key" } },
+          { kind: "Field", name: { kind: "Name", value: "value" } },
         ],
       },
     },
@@ -12330,28 +11814,23 @@ export const UploadFileFragmentDoc: DocumentNode<UploadFileFragment, unknown> = 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UploadFile" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadFile" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "assetUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "contentType" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "filename" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "uploadUrl" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "size" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "assetUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "contentType" } },
+          { kind: "Field", name: { kind: "Name", value: "filename" } },
+          { kind: "Field", name: { kind: "Name", value: "uploadUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "size" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "headers" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UploadFileHeader" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadFileHeader" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "metaData" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "metaData" } },
         ],
       },
     },
@@ -12365,22 +11844,19 @@ export const UploadPayloadFragmentDoc: DocumentNode<UploadPayloadFragment, unkno
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UploadPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UploadPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "uploadFile" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadFile" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadFile" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12394,11 +11870,7 @@ export const UserAdminPayloadFragmentDoc: DocumentNode<UserAdminPayloadFragment,
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserAdminPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAdminPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -12409,28 +11881,23 @@ export const UserConnectionFragmentDoc: DocumentNode<UserConnectionFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -12447,22 +11914,19 @@ export const UserPayloadFragmentDoc: DocumentNode<UserPayloadFragment, unknown> 
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12475,14 +11939,13 @@ export const UserSettingsFlagPayloadFragmentDoc: DocumentNode<UserSettingsFlagPa
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserSettingsFlagPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsFlagPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "flag" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "value" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "flag" } },
+          { kind: "Field", name: { kind: "Name", value: "value" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12495,12 +11958,11 @@ export const UserSettingsFlagsResetPayloadFragmentDoc: DocumentNode<UserSettings
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserSettingsFlagsResetPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsFlagsResetPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12513,12 +11975,11 @@ export const UserSettingsPayloadFragmentDoc: DocumentNode<UserSettingsPayloadFra
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserSettingsPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12534,11 +11995,7 @@ export const UserSubscribeToNewsletterPayloadFragmentDoc: DocumentNode<
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" } },
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] }],
-      },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
 };
@@ -12549,16 +12006,15 @@ export const ViewPreferencesFragmentDoc: DocumentNode<ViewPreferencesFragment, u
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ViewPreferences" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferences" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "viewType" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "viewType" } },
         ],
       },
     },
@@ -12571,24 +12027,19 @@ export const ViewPreferencesPayloadFragmentDoc: DocumentNode<ViewPreferencesPayl
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ViewPreferencesPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferencesPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "viewPreferences" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferences" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferences" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12602,37 +12053,32 @@ export const WebhookFragmentDoc: DocumentNode<WebhookFragment, unknown> = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Webhook" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Webhook" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "secret" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "secret" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "url" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "enabled" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "enabled" } },
         ],
       },
     },
@@ -12645,28 +12091,23 @@ export const WebhookConnectionFragmentDoc: DocumentNode<WebhookConnectionFragmen
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "WebhookConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WebhookConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Webhook" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Webhook" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -12683,22 +12124,19 @@ export const WebhookPayloadFragmentDoc: DocumentNode<WebhookPayloadFragment, unk
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "WebhookPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WebhookPayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "webhook" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12711,29 +12149,26 @@ export const WorkflowStateFragmentDoc: DocumentNode<WorkflowStateFragment, unkno
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "WorkflowState" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowState" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "position" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "color" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "position" } },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-          { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
     },
@@ -12746,28 +12181,23 @@ export const WorkflowStateConnectionFragmentDoc: DocumentNode<WorkflowStateConne
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "WorkflowStateConnection" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateConnection" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowState" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowState" } }],
             },
           },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
             },
           },
         ],
@@ -12784,22 +12214,19 @@ export const WorkflowStatePayloadFragmentDoc: DocumentNode<WorkflowStatePayloadF
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "WorkflowStatePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStatePayload" } },
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "workflowState" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "success" }, arguments: [], directives: [] },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
@@ -12817,40 +12244,33 @@ export const ApiKeysDocument: DocumentNode<ApiKeysQuery, ApiKeysQueryVariables> 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -12889,12 +12309,9 @@ export const ApiKeysDocument: DocumentNode<ApiKeysQuery, ApiKeysQueryVariables> 
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ApiKeyConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKeyConnection" } }],
             },
           },
         ],
@@ -12918,13 +12335,11 @@ export const ApplicationWithAuthorizationDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "clientId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -12936,10 +12351,8 @@ export const ApplicationWithAuthorizationDocument: DocumentNode<
               type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
             },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -12963,18 +12376,63 @@ export const ApplicationWithAuthorizationDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "scope" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserAuthorizedApplication" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAuthorizedApplication" } }],
             },
           },
         ],
       },
     },
     ...UserAuthorizedApplicationFragmentDoc.definitions,
+  ],
+};
+export const ArchivedModelSyncDocument: DocumentNode<ArchivedModelSyncQuery, ArchivedModelSyncQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "archivedModelSync" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "identifier" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "modelClass" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "archivedModelSync" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "identifier" },
+                value: { kind: "Variable", name: { kind: "Name", value: "identifier" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "modelClass" },
+                value: { kind: "Variable", name: { kind: "Name", value: "modelClass" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchiveResponse" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchiveResponseFragmentDoc.definitions,
   ],
 };
 export const ArchivedModelsSyncDocument: DocumentNode<ArchivedModelsSyncQuery, ArchivedModelsSyncQueryVariables> = {
@@ -12989,28 +12447,23 @@ export const ArchivedModelsSyncDocument: DocumentNode<ArchivedModelsSyncQuery, A
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "DateTime" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "modelClass" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13039,66 +12492,9 @@ export const ArchivedModelsSyncDocument: DocumentNode<ArchivedModelsSyncQuery, A
                 value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ArchiveResponse" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchiveResponseFragmentDoc.definitions,
-  ],
-};
-export const ArchivedModelSyncDocument: DocumentNode<ArchivedModelSyncQuery, ArchivedModelSyncQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "archivedModelSync" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "identifier" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "modelClass" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "archivedModelSync" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "identifier" },
-                value: { kind: "Variable", name: { kind: "Name", value: "identifier" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "modelClass" },
-                value: { kind: "Variable", name: { kind: "Name", value: "modelClass" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ArchiveResponse" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchiveResponse" } }],
             },
           },
         ],
@@ -13117,27 +12513,23 @@ export const AuthorizedApplicationsDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "authorizedApplications" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "authorizedApplications" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "Field", name: { kind: "Name", value: "appId" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "clientId" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "developer" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "developerUrl" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "imageUrl" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "scope" }, arguments: [], directives: [] },
+                { kind: "Field", name: { kind: "Name", value: "appId" } },
+                { kind: "Field", name: { kind: "Name", value: "clientId" } },
+                { kind: "Field", name: { kind: "Name", value: "description" } },
+                { kind: "Field", name: { kind: "Name", value: "developer" } },
+                { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
+                { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "scope" } },
               ],
             },
           },
@@ -13153,21 +12545,15 @@ export const AvailableUsersDocument: DocumentNode<AvailableUsersQuery, Available
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "availableUsers" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "availableUsers" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
             },
           },
         ],
@@ -13183,21 +12569,15 @@ export const BillingDetailsDocument: DocumentNode<BillingDetailsQuery, BillingDe
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "billingDetails" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "billingDetails" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "BillingDetailsPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "BillingDetailsPayload" } }],
             },
           },
         ],
@@ -13216,27 +12596,21 @@ export const BillingDetails_PaymentMethodDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "billingDetails_paymentMethod" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "billingDetails" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "paymentMethod" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Card" }, directives: [] }],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Card" } }],
                   },
                 },
               ],
@@ -13263,22 +12637,18 @@ export const CollaborativeDocumentJoinDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "clientId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "version" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13302,15 +12672,10 @@ export const CollaborativeDocumentJoinDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "version" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" } },
               ],
             },
           },
@@ -13335,22 +12700,18 @@ export const CollaborativeDocumentJoin_StepsDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "clientId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "version" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13374,20 +12735,15 @@ export const CollaborativeDocumentJoin_StepsDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "version" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "steps" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "StepsResponse" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "StepsResponse" } }],
                   },
                 },
               ],
@@ -13411,10 +12767,8 @@ export const CommentDocument: DocumentNode<CommentQuery, CommentQueryVariables> 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13428,10 +12782,9 @@ export const CommentDocument: DocumentNode<CommentQuery, CommentQueryVariables> 
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Comment" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Comment" } }],
             },
           },
         ],
@@ -13452,40 +12805,33 @@ export const CommentsDocument: DocumentNode<CommentsQuery, CommentsQueryVariable
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13524,12 +12870,9 @@ export const CommentsDocument: DocumentNode<CommentsQuery, CommentsQueryVariable
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CommentConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentConnection" } }],
             },
           },
         ],
@@ -13550,10 +12893,8 @@ export const CustomViewDocument: DocumentNode<CustomViewQuery, CustomViewQueryVa
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13567,10 +12908,9 @@ export const CustomViewDocument: DocumentNode<CustomViewQuery, CustomViewQueryVa
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomView" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomView" } }],
             },
           },
         ],
@@ -13591,40 +12931,33 @@ export const CustomViewsDocument: DocumentNode<CustomViewsQuery, CustomViewsQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13663,12 +12996,9 @@ export const CustomViewsDocument: DocumentNode<CustomViewsQuery, CustomViewsQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewConnection" } }],
             },
           },
         ],
@@ -13689,10 +13019,8 @@ export const CycleDocument: DocumentNode<CycleQuery, CycleQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13706,10 +13034,9 @@ export const CycleDocument: DocumentNode<CycleQuery, CycleQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Cycle" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Cycle" } }],
             },
           },
         ],
@@ -13730,46 +13057,38 @@ export const Cycle_IssuesDocument: DocumentNode<Cycle_IssuesQuery, Cycle_IssuesQ
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13783,7 +13102,6 @@ export const Cycle_IssuesDocument: DocumentNode<Cycle_IssuesQuery, Cycle_IssuesQ
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -13822,12 +13140,9 @@ export const Cycle_IssuesDocument: DocumentNode<Cycle_IssuesQuery, Cycle_IssuesQ
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -13854,46 +13169,38 @@ export const Cycle_UncompletedIssuesUponCloseDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -13907,7 +13214,6 @@ export const Cycle_UncompletedIssuesUponCloseDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -13946,12 +13252,9 @@ export const Cycle_UncompletedIssuesUponCloseDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -13975,40 +13278,33 @@ export const CyclesDocument: DocumentNode<CyclesQuery, CyclesQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14047,12 +13343,9 @@ export const CyclesDocument: DocumentNode<CyclesQuery, CyclesQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CycleConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CycleConnection" } }],
             },
           },
         ],
@@ -14073,10 +13366,8 @@ export const EmojiDocument: DocumentNode<EmojiQuery, EmojiQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14090,10 +13381,9 @@ export const EmojiDocument: DocumentNode<EmojiQuery, EmojiQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Emoji" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Emoji" } }],
             },
           },
         ],
@@ -14114,40 +13404,33 @@ export const EmojisDocument: DocumentNode<EmojisQuery, EmojisQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14186,12 +13469,9 @@ export const EmojisDocument: DocumentNode<EmojisQuery, EmojisQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "EmojiConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmojiConnection" } }],
             },
           },
         ],
@@ -14212,10 +13492,8 @@ export const FavoriteDocument: DocumentNode<FavoriteQuery, FavoriteQueryVariable
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14229,10 +13507,9 @@ export const FavoriteDocument: DocumentNode<FavoriteQuery, FavoriteQueryVariable
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Favorite" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Favorite" } }],
             },
           },
         ],
@@ -14253,40 +13530,33 @@ export const FavoritesDocument: DocumentNode<FavoritesQuery, FavoritesQueryVaria
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14325,12 +13595,9 @@ export const FavoritesDocument: DocumentNode<FavoritesQuery, FavoritesQueryVaria
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "FavoriteConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FavoriteConnection" } }],
             },
           },
         ],
@@ -14351,16 +13618,13 @@ export const FigmaEmbedInfoDocument: DocumentNode<FigmaEmbedInfoQuery, FigmaEmbe
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "fileId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "nodeId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14379,12 +13643,9 @@ export const FigmaEmbedInfoDocument: DocumentNode<FigmaEmbedInfoQuery, FigmaEmbe
                 value: { kind: "Variable", name: { kind: "Name", value: "nodeId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "FigmaEmbedPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FigmaEmbedPayload" } }],
             },
           },
         ],
@@ -14408,16 +13669,13 @@ export const FigmaEmbedInfo_FigmaEmbedDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "fileId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "nodeId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14436,20 +13694,15 @@ export const FigmaEmbedInfo_FigmaEmbedDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "nodeId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "figmaEmbed" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "FigmaEmbed" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FigmaEmbed" } }],
                   },
                 },
               ],
@@ -14473,10 +13726,8 @@ export const IntegrationDocument: DocumentNode<IntegrationQuery, IntegrationQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14490,10 +13741,9 @@ export const IntegrationDocument: DocumentNode<IntegrationQuery, IntegrationQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Integration" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Integration" } }],
             },
           },
         ],
@@ -14514,10 +13764,8 @@ export const IntegrationResourceDocument: DocumentNode<IntegrationResourceQuery,
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14531,12 +13779,9 @@ export const IntegrationResourceDocument: DocumentNode<IntegrationResourceQuery,
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResource" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResource" } }],
             },
           },
         ],
@@ -14560,10 +13805,8 @@ export const IntegrationResource_DataDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14577,24 +13820,15 @@ export const IntegrationResource_DataDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "data" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "IntegrationResourceData" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceData" } }],
                   },
                 },
               ],
@@ -14621,10 +13855,8 @@ export const IntegrationResource_Data_GithubCommitDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14638,28 +13870,21 @@ export const IntegrationResource_Data_GithubCommitDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "data" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
                       {
                         kind: "Field",
                         name: { kind: "Name", value: "githubCommit" },
-                        arguments: [],
-                        directives: [],
                         selectionSet: {
                           kind: "SelectionSet",
-                          selections: [
-                            { kind: "FragmentSpread", name: { kind: "Name", value: "CommitPayload" }, directives: [] },
-                          ],
+                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommitPayload" } }],
                         },
                       },
                     ],
@@ -14689,10 +13914,8 @@ export const IntegrationResource_Data_GithubPullRequestDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14706,32 +13929,21 @@ export const IntegrationResource_Data_GithubPullRequestDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "data" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
                       {
                         kind: "Field",
                         name: { kind: "Name", value: "githubPullRequest" },
-                        arguments: [],
-                        directives: [],
                         selectionSet: {
                           kind: "SelectionSet",
-                          selections: [
-                            {
-                              kind: "FragmentSpread",
-                              name: { kind: "Name", value: "PullRequestPayload" },
-                              directives: [],
-                            },
-                          ],
+                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
                         },
                       },
                     ],
@@ -14761,10 +13973,8 @@ export const IntegrationResource_Data_GitlabMergeRequestDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14778,32 +13988,21 @@ export const IntegrationResource_Data_GitlabMergeRequestDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "data" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
                       {
                         kind: "Field",
                         name: { kind: "Name", value: "gitlabMergeRequest" },
-                        arguments: [],
-                        directives: [],
                         selectionSet: {
                           kind: "SelectionSet",
-                          selections: [
-                            {
-                              kind: "FragmentSpread",
-                              name: { kind: "Name", value: "PullRequestPayload" },
-                              directives: [],
-                            },
-                          ],
+                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
                         },
                       },
                     ],
@@ -14833,10 +14032,8 @@ export const IntegrationResource_Data_SentryIssueDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14850,32 +14047,21 @@ export const IntegrationResource_Data_SentryIssueDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "data" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
                       {
                         kind: "Field",
                         name: { kind: "Name", value: "sentryIssue" },
-                        arguments: [],
-                        directives: [],
                         selectionSet: {
                           kind: "SelectionSet",
-                          selections: [
-                            {
-                              kind: "FragmentSpread",
-                              name: { kind: "Name", value: "SentryIssuePayload" },
-                              directives: [],
-                            },
-                          ],
+                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentryIssuePayload" } }],
                         },
                       },
                     ],
@@ -14905,10 +14091,8 @@ export const IntegrationResource_PullRequestDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -14922,20 +14106,15 @@ export const IntegrationResource_PullRequestDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "pullRequest" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
                   },
                 },
               ],
@@ -14962,40 +14141,33 @@ export const IntegrationResourcesDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15034,16 +14206,9 @@ export const IntegrationResourcesDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "IntegrationResourceConnection" },
-                  directives: [],
-                },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceConnection" } }],
             },
           },
         ],
@@ -15064,40 +14229,33 @@ export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQ
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15136,12 +14294,9 @@ export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQ
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationConnection" } }],
             },
           },
         ],
@@ -15162,16 +14317,13 @@ export const InviteInfoDocument: DocumentNode<InviteInfoQuery, InviteInfoQueryVa
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamHash" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "userHash" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15190,12 +14342,9 @@ export const InviteInfoDocument: DocumentNode<InviteInfoQuery, InviteInfoQueryVa
                 value: { kind: "Variable", name: { kind: "Name", value: "userHash" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "InvitePagePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "InvitePagePayload" } }],
             },
           },
         ],
@@ -15219,16 +14368,13 @@ export const InviteInfo_InviteDataDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamHash" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "userHash" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15247,20 +14393,15 @@ export const InviteInfo_InviteDataDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "userHash" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "inviteData" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "InviteData" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "InviteData" } }],
                   },
                 },
               ],
@@ -15284,10 +14425,8 @@ export const IssueDocument: DocumentNode<IssueQuery, IssueQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15301,10 +14440,9 @@ export const IssueDocument: DocumentNode<IssueQuery, IssueQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Issue" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Issue" } }],
             },
           },
         ],
@@ -15325,46 +14463,38 @@ export const Issue_ChildrenDocument: DocumentNode<Issue_ChildrenQuery, Issue_Chi
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15378,7 +14508,6 @@ export const Issue_ChildrenDocument: DocumentNode<Issue_ChildrenQuery, Issue_Chi
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -15417,12 +14546,9 @@ export const Issue_ChildrenDocument: DocumentNode<Issue_ChildrenQuery, Issue_Chi
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -15446,46 +14572,38 @@ export const Issue_CommentsDocument: DocumentNode<Issue_CommentsQuery, Issue_Com
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15499,7 +14617,6 @@ export const Issue_CommentsDocument: DocumentNode<Issue_CommentsQuery, Issue_Com
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -15538,12 +14655,9 @@ export const Issue_CommentsDocument: DocumentNode<Issue_CommentsQuery, Issue_Com
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "CommentConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentConnection" } }],
                   },
                 },
               ],
@@ -15567,46 +14681,38 @@ export const Issue_HistoryDocument: DocumentNode<Issue_HistoryQuery, Issue_Histo
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15620,7 +14726,6 @@ export const Issue_HistoryDocument: DocumentNode<Issue_HistoryQuery, Issue_Histo
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -15659,16 +14764,9 @@ export const Issue_HistoryDocument: DocumentNode<Issue_HistoryQuery, Issue_Histo
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "IssueHistoryConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueHistoryConnection" } }],
                   },
                 },
               ],
@@ -15695,46 +14793,38 @@ export const Issue_IntegrationResourcesDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15748,7 +14838,6 @@ export const Issue_IntegrationResourcesDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -15787,15 +14876,10 @@ export const Issue_IntegrationResourcesDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "IntegrationResourceConnection" },
-                        directives: [],
-                      },
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceConnection" } },
                     ],
                   },
                 },
@@ -15823,46 +14907,38 @@ export const Issue_InverseRelationsDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -15876,7 +14952,6 @@ export const Issue_InverseRelationsDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -15915,16 +14990,9 @@ export const Issue_InverseRelationsDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "IssueRelationConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationConnection" } }],
                   },
                 },
               ],
@@ -15948,46 +15016,38 @@ export const Issue_LabelsDocument: DocumentNode<Issue_LabelsQuery, Issue_LabelsQ
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16001,7 +15061,6 @@ export const Issue_LabelsDocument: DocumentNode<Issue_LabelsQuery, Issue_LabelsQ
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -16040,12 +15099,9 @@ export const Issue_LabelsDocument: DocumentNode<Issue_LabelsQuery, Issue_LabelsQ
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" } }],
                   },
                 },
               ],
@@ -16069,46 +15125,38 @@ export const Issue_RelationsDocument: DocumentNode<Issue_RelationsQuery, Issue_R
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16122,7 +15170,6 @@ export const Issue_RelationsDocument: DocumentNode<Issue_RelationsQuery, Issue_R
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -16161,16 +15208,9 @@ export const Issue_RelationsDocument: DocumentNode<Issue_RelationsQuery, Issue_R
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "IssueRelationConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationConnection" } }],
                   },
                 },
               ],
@@ -16194,46 +15234,38 @@ export const Issue_SubscribersDocument: DocumentNode<Issue_SubscribersQuery, Iss
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16247,7 +15279,6 @@ export const Issue_SubscribersDocument: DocumentNode<Issue_SubscribersQuery, Iss
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -16286,12 +15317,9 @@ export const Issue_SubscribersDocument: DocumentNode<Issue_SubscribersQuery, Iss
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" } }],
                   },
                 },
               ],
@@ -16315,10 +15343,8 @@ export const IssueLabelDocument: DocumentNode<IssueLabelQuery, IssueLabelQueryVa
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16332,10 +15358,9 @@ export const IssueLabelDocument: DocumentNode<IssueLabelQuery, IssueLabelQueryVa
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabel" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabel" } }],
             },
           },
         ],
@@ -16356,46 +15381,38 @@ export const IssueLabel_IssuesDocument: DocumentNode<IssueLabel_IssuesQuery, Iss
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16409,7 +15426,6 @@ export const IssueLabel_IssuesDocument: DocumentNode<IssueLabel_IssuesQuery, Iss
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -16448,12 +15464,9 @@ export const IssueLabel_IssuesDocument: DocumentNode<IssueLabel_IssuesQuery, Iss
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -16477,40 +15490,33 @@ export const IssueLabelsDocument: DocumentNode<IssueLabelsQuery, IssueLabelsQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16549,12 +15555,9 @@ export const IssueLabelsDocument: DocumentNode<IssueLabelsQuery, IssueLabelsQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" } }],
             },
           },
         ],
@@ -16575,10 +15578,8 @@ export const IssueRelationDocument: DocumentNode<IssueRelationQuery, IssueRelati
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16592,10 +15593,9 @@ export const IssueRelationDocument: DocumentNode<IssueRelationQuery, IssueRelati
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelation" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelation" } }],
             },
           },
         ],
@@ -16616,40 +15616,33 @@ export const IssueRelationsDocument: DocumentNode<IssueRelationsQuery, IssueRela
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16688,116 +15681,15 @@ export const IssueRelationsDocument: DocumentNode<IssueRelationsQuery, IssueRela
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationConnection" } }],
             },
           },
         ],
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
-  ],
-};
-export const IssuesDocument: DocumentNode<IssuesQuery, IssuesQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "issues" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issues" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueConnectionFragmentDoc.definitions,
   ],
 };
 export const IssueSearchDocument: DocumentNode<IssueSearchQuery, IssueSearchQueryVariables> = {
@@ -16812,46 +15704,38 @@ export const IssueSearchDocument: DocumentNode<IssueSearchQuery, IssueSearchQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "query" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16895,12 +15779,97 @@ export const IssueSearchDocument: DocumentNode<IssueSearchQuery, IssueSearchQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "query" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueConnectionFragmentDoc.definitions,
+  ],
+};
+export const IssuesDocument: DocumentNode<IssuesQuery, IssuesQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issues" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issues" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
             },
           },
         ],
@@ -16921,10 +15890,8 @@ export const MilestoneDocument: DocumentNode<MilestoneQuery, MilestoneQueryVaria
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -16938,10 +15905,9 @@ export const MilestoneDocument: DocumentNode<MilestoneQuery, MilestoneQueryVaria
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Milestone" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Milestone" } }],
             },
           },
         ],
@@ -16962,46 +15928,38 @@ export const Milestone_ProjectsDocument: DocumentNode<Milestone_ProjectsQuery, M
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -17015,7 +15973,6 @@ export const Milestone_ProjectsDocument: DocumentNode<Milestone_ProjectsQuery, M
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -17054,12 +16011,9 @@ export const Milestone_ProjectsDocument: DocumentNode<Milestone_ProjectsQuery, M
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" } }],
                   },
                 },
               ],
@@ -17083,40 +16037,33 @@ export const MilestonesDocument: DocumentNode<MilestonesQuery, MilestonesQueryVa
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -17155,12 +16102,9 @@ export const MilestonesDocument: DocumentNode<MilestonesQuery, MilestonesQueryVa
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "MilestoneConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "MilestoneConnection" } }],
             },
           },
         ],
@@ -17181,10 +16125,8 @@ export const NotificationDocument: DocumentNode<NotificationQuery, NotificationQ
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -17198,114 +16140,15 @@ export const NotificationDocument: DocumentNode<NotificationQuery, NotificationQ
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Notification" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Notification" } }],
             },
           },
         ],
       },
     },
     ...NotificationFragmentDoc.definitions,
-  ],
-};
-export const NotificationsDocument: DocumentNode<NotificationsQuery, NotificationsQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "notifications" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
-        },
-      ],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notifications" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationConnection" }, directives: [] },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...NotificationConnectionFragmentDoc.definitions,
   ],
 };
 export const NotificationSubscriptionDocument: DocumentNode<
@@ -17323,10 +16166,8 @@ export const NotificationSubscriptionDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -17340,12 +16181,9 @@ export const NotificationSubscriptionDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscription" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscription" } }],
             },
           },
         ],
@@ -17369,40 +16207,33 @@ export const NotificationSubscriptionsDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -17441,15 +16272,10 @@ export const NotificationSubscriptionsDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "NotificationSubscriptionConnection" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscriptionConnection" } },
               ],
             },
           },
@@ -17459,6 +16285,94 @@ export const NotificationSubscriptionsDocument: DocumentNode<
     ...NotificationSubscriptionConnectionFragmentDoc.definitions,
   ],
 };
+export const NotificationsDocument: DocumentNode<NotificationsQuery, NotificationsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "notifications" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notifications" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationConnectionFragmentDoc.definitions,
+  ],
+};
 export const OrganizationDocument: DocumentNode<OrganizationQuery, OrganizationQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -17466,19 +16380,15 @@ export const OrganizationDocument: DocumentNode<OrganizationQuery, OrganizationQ
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "organization" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "organization" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Organization" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Organization" } }],
             },
           },
         ],
@@ -17502,48 +16412,39 @@ export const Organization_IntegrationsDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "organization" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -17582,16 +16483,9 @@ export const Organization_IntegrationsDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "IntegrationConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationConnection" } }],
                   },
                 },
               ],
@@ -17618,48 +16512,39 @@ export const Organization_MilestonesDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "organization" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -17698,12 +16583,9 @@ export const Organization_MilestonesDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "MilestoneConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "MilestoneConnection" } }],
                   },
                 },
               ],
@@ -17727,48 +16609,39 @@ export const Organization_TeamsDocument: DocumentNode<Organization_TeamsQuery, O
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "organization" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -17807,12 +16680,9 @@ export const Organization_TeamsDocument: DocumentNode<Organization_TeamsQuery, O
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" } }],
                   },
                 },
               ],
@@ -17836,48 +16706,39 @@ export const Organization_UsersDocument: DocumentNode<Organization_UsersQuery, O
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "organization" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -17916,12 +16777,9 @@ export const Organization_UsersDocument: DocumentNode<Organization_UsersQuery, O
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" } }],
                   },
                 },
               ],
@@ -17945,10 +16803,8 @@ export const OrganizationExistsDocument: DocumentNode<OrganizationExistsQuery, O
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "urlKey" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -17962,12 +16818,9 @@ export const OrganizationExistsDocument: DocumentNode<OrganizationExistsQuery, O
                 value: { kind: "Variable", name: { kind: "Name", value: "urlKey" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationExistsPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationExistsPayload" } }],
             },
           },
         ],
@@ -17988,10 +16841,8 @@ export const OrganizationInviteDocument: DocumentNode<OrganizationInviteQuery, O
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18005,10 +16856,9 @@ export const OrganizationInviteDocument: DocumentNode<OrganizationInviteQuery, O
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabel" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabel" } }],
             },
           },
         ],
@@ -18032,46 +16882,38 @@ export const OrganizationInvite_IssuesDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18085,7 +16927,6 @@ export const OrganizationInvite_IssuesDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -18124,12 +16965,9 @@ export const OrganizationInvite_IssuesDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -18153,40 +16991,33 @@ export const OrganizationInvitesDocument: DocumentNode<OrganizationInvitesQuery,
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18225,16 +17056,9 @@ export const OrganizationInvitesDocument: DocumentNode<OrganizationInvitesQuery,
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "OrganizationInviteConnection" },
-                  directives: [],
-                },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInviteConnection" } }],
             },
           },
         ],
@@ -18255,10 +17079,8 @@ export const ProjectDocument: DocumentNode<ProjectQuery, ProjectQueryVariables> 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18272,10 +17094,9 @@ export const ProjectDocument: DocumentNode<ProjectQuery, ProjectQueryVariables> 
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Project" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Project" } }],
             },
           },
         ],
@@ -18296,46 +17117,38 @@ export const Project_IssuesDocument: DocumentNode<Project_IssuesQuery, Project_I
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18349,7 +17162,6 @@ export const Project_IssuesDocument: DocumentNode<Project_IssuesQuery, Project_I
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -18388,12 +17200,9 @@ export const Project_IssuesDocument: DocumentNode<Project_IssuesQuery, Project_I
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -18417,46 +17226,38 @@ export const Project_LinksDocument: DocumentNode<Project_LinksQuery, Project_Lin
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18470,7 +17271,6 @@ export const Project_LinksDocument: DocumentNode<Project_LinksQuery, Project_Lin
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -18509,16 +17309,9 @@ export const Project_LinksDocument: DocumentNode<Project_LinksQuery, Project_Lin
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "ProjectLinkConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkConnection" } }],
                   },
                 },
               ],
@@ -18542,46 +17335,38 @@ export const Project_MembersDocument: DocumentNode<Project_MembersQuery, Project
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18595,7 +17380,6 @@ export const Project_MembersDocument: DocumentNode<Project_MembersQuery, Project
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -18634,12 +17418,9 @@ export const Project_MembersDocument: DocumentNode<Project_MembersQuery, Project
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" } }],
                   },
                 },
               ],
@@ -18663,46 +17444,38 @@ export const Project_TeamsDocument: DocumentNode<Project_TeamsQuery, Project_Tea
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18716,7 +17489,6 @@ export const Project_TeamsDocument: DocumentNode<Project_TeamsQuery, Project_Tea
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -18755,12 +17527,9 @@ export const Project_TeamsDocument: DocumentNode<Project_TeamsQuery, Project_Tea
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" } }],
                   },
                 },
               ],
@@ -18784,10 +17553,8 @@ export const ProjectLinkDocument: DocumentNode<ProjectLinkQuery, ProjectLinkQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18801,10 +17568,9 @@ export const ProjectLinkDocument: DocumentNode<ProjectLinkQuery, ProjectLinkQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLink" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLink" } }],
             },
           },
         ],
@@ -18825,40 +17591,33 @@ export const ProjectLinksDocument: DocumentNode<ProjectLinksQuery, ProjectLinksQ
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18897,12 +17656,9 @@ export const ProjectLinksDocument: DocumentNode<ProjectLinksQuery, ProjectLinksQ
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkConnection" } }],
             },
           },
         ],
@@ -18923,40 +17679,33 @@ export const ProjectsDocument: DocumentNode<ProjectsQuery, ProjectsQueryVariable
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18995,12 +17744,9 @@ export const ProjectsDocument: DocumentNode<ProjectsQuery, ProjectsQueryVariable
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" } }],
             },
           },
         ],
@@ -19019,21 +17765,15 @@ export const PushSubscriptionTestDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "pushSubscriptionTest" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "pushSubscriptionTest" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" } }],
             },
           },
         ],
@@ -19054,10 +17794,8 @@ export const ReactionDocument: DocumentNode<ReactionQuery, ReactionQueryVariable
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19071,10 +17809,9 @@ export const ReactionDocument: DocumentNode<ReactionQuery, ReactionQueryVariable
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Reaction" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Reaction" } }],
             },
           },
         ],
@@ -19095,40 +17832,33 @@ export const ReactionsDocument: DocumentNode<ReactionsQuery, ReactionsQueryVaria
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19167,12 +17897,9 @@ export const ReactionsDocument: DocumentNode<ReactionsQuery, ReactionsQueryVaria
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ReactionConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ReactionConnection" } }],
             },
           },
         ],
@@ -19193,16 +17920,13 @@ export const SsoUrlFromEmailDocument: DocumentNode<SsoUrlFromEmailQuery, SsoUrlF
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "email" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "isDesktop" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19221,12 +17945,9 @@ export const SsoUrlFromEmailDocument: DocumentNode<SsoUrlFromEmailQuery, SsoUrlF
                 value: { kind: "Variable", name: { kind: "Name", value: "isDesktop" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SsoUrlFromEmailResponse" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SsoUrlFromEmailResponse" } }],
             },
           },
         ],
@@ -19247,16 +17968,13 @@ export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstr
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "databaseVersion" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "sinceSyncId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19275,10 +17993,9 @@ export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstr
                 value: { kind: "Variable", name: { kind: "Name", value: "sinceSyncId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SyncResponse" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SyncResponse" } }],
             },
           },
         ],
@@ -19299,10 +18016,8 @@ export const SyncUpdatesDocument: DocumentNode<SyncUpdatesQuery, SyncUpdatesQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "sinceSyncId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Float" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19316,10 +18031,9 @@ export const SyncUpdatesDocument: DocumentNode<SyncUpdatesQuery, SyncUpdatesQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "sinceSyncId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SyncResponse" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SyncResponse" } }],
             },
           },
         ],
@@ -19340,10 +18054,8 @@ export const TeamDocument: DocumentNode<TeamQuery, TeamQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19357,10 +18069,9 @@ export const TeamDocument: DocumentNode<TeamQuery, TeamQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" } }],
             },
           },
         ],
@@ -19381,46 +18092,38 @@ export const Team_CyclesDocument: DocumentNode<Team_CyclesQuery, Team_CyclesQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19434,7 +18137,6 @@ export const Team_CyclesDocument: DocumentNode<Team_CyclesQuery, Team_CyclesQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -19473,12 +18175,9 @@ export const Team_CyclesDocument: DocumentNode<Team_CyclesQuery, Team_CyclesQuer
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "CycleConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CycleConnection" } }],
                   },
                 },
               ],
@@ -19502,46 +18201,38 @@ export const Team_IssuesDocument: DocumentNode<Team_IssuesQuery, Team_IssuesQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19555,7 +18246,6 @@ export const Team_IssuesDocument: DocumentNode<Team_IssuesQuery, Team_IssuesQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -19594,12 +18284,9 @@ export const Team_IssuesDocument: DocumentNode<Team_IssuesQuery, Team_IssuesQuer
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -19623,46 +18310,38 @@ export const Team_LabelsDocument: DocumentNode<Team_LabelsQuery, Team_LabelsQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19676,7 +18355,6 @@ export const Team_LabelsDocument: DocumentNode<Team_LabelsQuery, Team_LabelsQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -19715,12 +18393,9 @@ export const Team_LabelsDocument: DocumentNode<Team_LabelsQuery, Team_LabelsQuer
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" } }],
                   },
                 },
               ],
@@ -19744,46 +18419,38 @@ export const Team_MembershipsDocument: DocumentNode<Team_MembershipsQuery, Team_
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19797,7 +18464,6 @@ export const Team_MembershipsDocument: DocumentNode<Team_MembershipsQuery, Team_
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -19836,16 +18502,9 @@ export const Team_MembershipsDocument: DocumentNode<Team_MembershipsQuery, Team_
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "TeamMembershipConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipConnection" } }],
                   },
                 },
               ],
@@ -19869,46 +18528,38 @@ export const Team_ProjectsDocument: DocumentNode<Team_ProjectsQuery, Team_Projec
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -19922,7 +18573,6 @@ export const Team_ProjectsDocument: DocumentNode<Team_ProjectsQuery, Team_Projec
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -19961,12 +18611,9 @@ export const Team_ProjectsDocument: DocumentNode<Team_ProjectsQuery, Team_Projec
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" } }],
                   },
                 },
               ],
@@ -19990,46 +18637,38 @@ export const Team_StatesDocument: DocumentNode<Team_StatesQuery, Team_StatesQuer
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20043,7 +18682,6 @@ export const Team_StatesDocument: DocumentNode<Team_StatesQuery, Team_StatesQuer
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -20082,16 +18720,9 @@ export const Team_StatesDocument: DocumentNode<Team_StatesQuery, Team_StatesQuer
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "WorkflowStateConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStateConnection" } }],
                   },
                 },
               ],
@@ -20115,46 +18746,38 @@ export const Team_TemplatesDocument: DocumentNode<Team_TemplatesQuery, Team_Temp
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20168,7 +18791,6 @@ export const Team_TemplatesDocument: DocumentNode<Team_TemplatesQuery, Team_Temp
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -20207,12 +18829,9 @@ export const Team_TemplatesDocument: DocumentNode<Team_TemplatesQuery, Team_Temp
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "TemplateConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TemplateConnection" } }],
                   },
                 },
               ],
@@ -20236,46 +18855,38 @@ export const Team_WebhooksDocument: DocumentNode<Team_WebhooksQuery, Team_Webhoo
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20289,7 +18900,6 @@ export const Team_WebhooksDocument: DocumentNode<Team_WebhooksQuery, Team_Webhoo
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -20328,12 +18938,9 @@ export const Team_WebhooksDocument: DocumentNode<Team_WebhooksQuery, Team_Webhoo
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "WebhookConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookConnection" } }],
                   },
                 },
               ],
@@ -20357,10 +18964,8 @@ export const TeamMembershipDocument: DocumentNode<TeamMembershipQuery, TeamMembe
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20374,10 +18979,9 @@ export const TeamMembershipDocument: DocumentNode<TeamMembershipQuery, TeamMembe
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembership" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembership" } }],
             },
           },
         ],
@@ -20398,40 +19002,33 @@ export const TeamMembershipsDocument: DocumentNode<TeamMembershipsQuery, TeamMem
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20470,12 +19067,9 @@ export const TeamMembershipsDocument: DocumentNode<TeamMembershipsQuery, TeamMem
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipConnection" } }],
             },
           },
         ],
@@ -20496,40 +19090,33 @@ export const TeamsDocument: DocumentNode<TeamsQuery, TeamsQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20568,10 +19155,9 @@ export const TeamsDocument: DocumentNode<TeamsQuery, TeamsQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" } }],
             },
           },
         ],
@@ -20592,10 +19178,8 @@ export const TemplateDocument: DocumentNode<TemplateQuery, TemplateQueryVariable
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20609,10 +19193,9 @@ export const TemplateDocument: DocumentNode<TemplateQuery, TemplateQueryVariable
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Template" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Template" } }],
             },
           },
         ],
@@ -20628,47 +19211,39 @@ export const TemplatesDocument: DocumentNode<TemplatesQuery, TemplatesQueryVaria
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "templates" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "templates" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "Field", name: { kind: "Name", value: "archivedAt" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "createdAt" }, arguments: [], directives: [] },
+                { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+                { kind: "Field", name: { kind: "Name", value: "createdAt" } },
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "creator" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" } }],
                   },
                 },
-                { kind: "Field", name: { kind: "Name", value: "description" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "id" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "name" }, arguments: [], directives: [] },
+                { kind: "Field", name: { kind: "Name", value: "description" } },
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "team" },
-                  arguments: [],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" }, directives: [] }],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" } }],
                   },
                 },
-                { kind: "Field", name: { kind: "Name", value: "templateData" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "type" }, arguments: [], directives: [] },
-                { kind: "Field", name: { kind: "Name", value: "updatedAt" }, arguments: [], directives: [] },
+                { kind: "Field", name: { kind: "Name", value: "templateData" } },
+                { kind: "Field", name: { kind: "Name", value: "type" } },
+                { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
               ],
             },
           },
@@ -20691,10 +19266,8 @@ export const UserDocument: DocumentNode<UserQuery, UserQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20708,10 +19281,9 @@ export const UserDocument: DocumentNode<UserQuery, UserQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" } }],
             },
           },
         ],
@@ -20732,46 +19304,38 @@ export const User_AssignedIssuesDocument: DocumentNode<User_AssignedIssuesQuery,
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20785,7 +19349,6 @@ export const User_AssignedIssuesDocument: DocumentNode<User_AssignedIssuesQuery,
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -20824,12 +19387,9 @@ export const User_AssignedIssuesDocument: DocumentNode<User_AssignedIssuesQuery,
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -20853,46 +19413,38 @@ export const User_CreatedIssuesDocument: DocumentNode<User_CreatedIssuesQuery, U
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -20906,7 +19458,6 @@ export const User_CreatedIssuesDocument: DocumentNode<User_CreatedIssuesQuery, U
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -20945,12 +19496,9 @@ export const User_CreatedIssuesDocument: DocumentNode<User_CreatedIssuesQuery, U
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -20977,46 +19525,38 @@ export const User_TeamMembershipsDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -21030,7 +19570,6 @@ export const User_TeamMembershipsDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -21069,16 +19608,9 @@ export const User_TeamMembershipsDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "TeamMembershipConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipConnection" } }],
                   },
                 },
               ],
@@ -21088,6 +19620,30 @@ export const User_TeamMembershipsDocument: DocumentNode<
       },
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
+  ],
+};
+export const UserSettingsDocument: DocumentNode<UserSettingsQuery, UserSettingsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "userSettings" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userSettings" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettings" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserSettingsFragmentDoc.definitions,
   ],
 };
 export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
@@ -21102,40 +19658,33 @@ export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -21174,44 +19723,15 @@ export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" } }],
             },
           },
         ],
       },
     },
     ...UserConnectionFragmentDoc.definitions,
-  ],
-};
-export const UserSettingsDocument: DocumentNode<UserSettingsQuery, UserSettingsQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "userSettings" },
-      variableDefinitions: [],
-      directives: [],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userSettings" },
-            arguments: [],
-            directives: [],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettings" }, directives: [] }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserSettingsFragmentDoc.definitions,
   ],
 };
 export const ViewerDocument: DocumentNode<ViewerQuery, ViewerQueryVariables> = {
@@ -21221,19 +19741,15 @@ export const ViewerDocument: DocumentNode<ViewerQuery, ViewerQueryVariables> = {
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "viewer" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "viewer" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" } }],
             },
           },
         ],
@@ -21257,48 +19773,39 @@ export const Viewer_AssignedIssuesDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "viewer" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -21337,12 +19844,9 @@ export const Viewer_AssignedIssuesDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -21369,48 +19873,39 @@ export const Viewer_CreatedIssuesDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "viewer" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -21449,12 +19944,9 @@ export const Viewer_CreatedIssuesDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -21481,48 +19973,39 @@ export const Viewer_TeamMembershipsDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "viewer" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -21561,16 +20044,9 @@ export const Viewer_TeamMembershipsDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "FragmentSpread",
-                        name: { kind: "Name", value: "TeamMembershipConnection" },
-                        directives: [],
-                      },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipConnection" } }],
                   },
                 },
               ],
@@ -21594,10 +20070,8 @@ export const WebhookDocument: DocumentNode<WebhookQuery, WebhookQueryVariables> 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -21611,10 +20085,9 @@ export const WebhookDocument: DocumentNode<WebhookQuery, WebhookQueryVariables> 
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Webhook" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Webhook" } }],
             },
           },
         ],
@@ -21635,40 +20108,33 @@ export const WebhooksDocument: DocumentNode<WebhooksQuery, WebhooksQueryVariable
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -21707,12 +20173,9 @@ export const WebhooksDocument: DocumentNode<WebhooksQuery, WebhooksQueryVariable
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "WebhookConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookConnection" } }],
             },
           },
         ],
@@ -21733,10 +20196,8 @@ export const WorkflowStateDocument: DocumentNode<WorkflowStateQuery, WorkflowSta
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -21750,10 +20211,9 @@ export const WorkflowStateDocument: DocumentNode<WorkflowStateQuery, WorkflowSta
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowState" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowState" } }],
             },
           },
         ],
@@ -21777,46 +20237,38 @@ export const WorkflowState_IssuesDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -21830,7 +20282,6 @@ export const WorkflowState_IssuesDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -21869,12 +20320,9 @@ export const WorkflowState_IssuesDocument: DocumentNode<
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
                     },
                   ],
-                  directives: [],
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" }, directives: [] },
-                    ],
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
                   },
                 },
               ],
@@ -21898,40 +20346,33 @@ export const WorkflowStatesDocument: DocumentNode<WorkflowStatesQuery, WorkflowS
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -21970,12 +20411,9 @@ export const WorkflowStatesDocument: DocumentNode<WorkflowStatesQuery, WorkflowS
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStateConnection" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStateConnection" } }],
             },
           },
         ],
@@ -21999,10 +20437,8 @@ export const ApiKeyCreateDocument: DocumentNode<ApiKeyCreateMutation, ApiKeyCrea
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22016,10 +20452,9 @@ export const ApiKeyCreateDocument: DocumentNode<ApiKeyCreateMutation, ApiKeyCrea
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKeyPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKeyPayload" } }],
             },
           },
         ],
@@ -22040,10 +20475,8 @@ export const ApiKeyDeleteDocument: DocumentNode<ApiKeyDeleteMutation, ApiKeyDele
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22057,10 +20490,9 @@ export const ApiKeyDeleteDocument: DocumentNode<ApiKeyDeleteMutation, ApiKeyDele
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -22087,10 +20519,8 @@ export const BillingEmailUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "BillingEmailUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22104,12 +20534,9 @@ export const BillingEmailUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "BillingEmailPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "BillingEmailPayload" } }],
             },
           },
         ],
@@ -22136,10 +20563,8 @@ export const CollaborativeDocumentUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "CollaborationDocumentUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22153,15 +20578,10 @@ export const CollaborativeDocumentUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CollaborationDocumentUpdatePayload" } },
               ],
             },
           },
@@ -22186,10 +20606,8 @@ export const CommentCreateDocument: DocumentNode<CommentCreateMutation, CommentC
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "CommentCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22203,10 +20621,9 @@ export const CommentCreateDocument: DocumentNode<CommentCreateMutation, CommentC
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" } }],
             },
           },
         ],
@@ -22227,10 +20644,8 @@ export const CommentDeleteDocument: DocumentNode<CommentDeleteMutation, CommentD
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22244,10 +20659,9 @@ export const CommentDeleteDocument: DocumentNode<CommentDeleteMutation, CommentD
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -22268,7 +20682,6 @@ export const CommentUpdateDocument: DocumentNode<CommentUpdateMutation, CommentU
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -22277,10 +20690,8 @@ export const CommentUpdateDocument: DocumentNode<CommentUpdateMutation, CommentU
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "CommentUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22299,10 +20710,9 @@ export const CommentUpdateDocument: DocumentNode<CommentUpdateMutation, CommentU
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" } }],
             },
           },
         ],
@@ -22326,10 +20736,8 @@ export const ContactCreateDocument: DocumentNode<ContactCreateMutation, ContactC
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ContactCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22343,10 +20751,9 @@ export const ContactCreateDocument: DocumentNode<ContactCreateMutation, ContactC
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ContactPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ContactPayload" } }],
             },
           },
         ],
@@ -22365,25 +20772,15 @@ export const CreateCsvExportReportDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "createCsvExportReport" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "createCsvExportReport" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "CreateCsvExportReportPayload" },
-                  directives: [],
-                },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CreateCsvExportReportPayload" } }],
             },
           },
         ],
@@ -22410,16 +20807,13 @@ export const CreateOrganizationFromOnboardingDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "CreateOrganizationInput" } },
           },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "survey" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "OnboardingCustomerSurvey" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22438,15 +20832,10 @@ export const CreateOrganizationFromOnboardingDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "survey" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
               ],
             },
           },
@@ -22471,10 +20860,8 @@ export const CustomViewCreateDocument: DocumentNode<CustomViewCreateMutation, Cu
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "CustomViewCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22488,12 +20875,9 @@ export const CustomViewCreateDocument: DocumentNode<CustomViewCreateMutation, Cu
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewPayload" } }],
             },
           },
         ],
@@ -22514,10 +20898,8 @@ export const CustomViewDeleteDocument: DocumentNode<CustomViewDeleteMutation, Cu
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22531,10 +20913,9 @@ export const CustomViewDeleteDocument: DocumentNode<CustomViewDeleteMutation, Cu
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -22555,7 +20936,6 @@ export const CustomViewUpdateDocument: DocumentNode<CustomViewUpdateMutation, Cu
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -22564,10 +20944,8 @@ export const CustomViewUpdateDocument: DocumentNode<CustomViewUpdateMutation, Cu
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "CustomViewUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22586,12 +20964,9 @@ export const CustomViewUpdateDocument: DocumentNode<CustomViewUpdateMutation, Cu
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewPayload" } }],
             },
           },
         ],
@@ -22612,10 +20987,8 @@ export const CycleArchiveDocument: DocumentNode<CycleArchiveMutation, CycleArchi
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22629,10 +21002,9 @@ export const CycleArchiveDocument: DocumentNode<CycleArchiveMutation, CycleArchi
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -22653,10 +21025,8 @@ export const CycleCreateDocument: DocumentNode<CycleCreateMutation, CycleCreateM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "CycleCreateInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22670,10 +21040,9 @@ export const CycleCreateDocument: DocumentNode<CycleCreateMutation, CycleCreateM
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CyclePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CyclePayload" } }],
             },
           },
         ],
@@ -22694,16 +21063,13 @@ export const CycleUpdateDocument: DocumentNode<CycleUpdateMutation, CycleUpdateM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "CycleUpdateInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22722,10 +21088,9 @@ export const CycleUpdateDocument: DocumentNode<CycleUpdateMutation, CycleUpdateM
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CyclePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CyclePayload" } }],
             },
           },
         ],
@@ -22744,19 +21109,15 @@ export const DebugCreateSamlOrgDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "debugCreateSAMLOrg" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "debugCreateSAMLOrg" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DebugPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DebugPayload" } }],
             },
           },
         ],
@@ -22775,19 +21136,15 @@ export const DebugFailWithInternalErrorDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "debugFailWithInternalError" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "debugFailWithInternalError" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DebugPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DebugPayload" } }],
             },
           },
         ],
@@ -22806,19 +21163,15 @@ export const DebugFailWithWarningDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "debugFailWithWarning" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "debugFailWithWarning" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DebugPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DebugPayload" } }],
             },
           },
         ],
@@ -22845,10 +21198,8 @@ export const EmailTokenUserAccountAuthDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "TokenUserAccountAuthInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22862,12 +21213,9 @@ export const EmailTokenUserAccountAuthDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
             },
           },
         ],
@@ -22891,10 +21239,8 @@ export const EmailUnsubscribeDocument: DocumentNode<EmailUnsubscribeMutation, Em
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "EmailUnsubscribeInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22908,12 +21254,9 @@ export const EmailUnsubscribeDocument: DocumentNode<EmailUnsubscribeMutation, Em
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "EmailUnsubscribePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmailUnsubscribePayload" } }],
             },
           },
         ],
@@ -22940,10 +21283,8 @@ export const EmailUserAccountAuthChallengeDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "EmailUserAccountAuthChallengeInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -22957,15 +21298,10 @@ export const EmailUserAccountAuthChallengeDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" } },
               ],
             },
           },
@@ -22987,10 +21323,8 @@ export const EmojiCreateDocument: DocumentNode<EmojiCreateMutation, EmojiCreateM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "EmojiCreateInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23004,10 +21338,9 @@ export const EmojiCreateDocument: DocumentNode<EmojiCreateMutation, EmojiCreateM
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmojiPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmojiPayload" } }],
             },
           },
         ],
@@ -23028,10 +21361,8 @@ export const EmojiDeleteDocument: DocumentNode<EmojiDeleteMutation, EmojiDeleteM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23045,10 +21376,9 @@ export const EmojiDeleteDocument: DocumentNode<EmojiDeleteMutation, EmojiDeleteM
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -23069,10 +21399,8 @@ export const EventCreateDocument: DocumentNode<EventCreateMutation, EventCreateM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "EventCreateInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23086,10 +21414,9 @@ export const EventCreateDocument: DocumentNode<EventCreateMutation, EventCreateM
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EventPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EventPayload" } }],
             },
           },
         ],
@@ -23113,10 +21440,8 @@ export const FavoriteCreateDocument: DocumentNode<FavoriteCreateMutation, Favori
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "FavoriteCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23130,12 +21455,9 @@ export const FavoriteCreateDocument: DocumentNode<FavoriteCreateMutation, Favori
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "FavoritePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FavoritePayload" } }],
             },
           },
         ],
@@ -23156,10 +21478,8 @@ export const FavoriteDeleteDocument: DocumentNode<FavoriteDeleteMutation, Favori
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23173,10 +21493,9 @@ export const FavoriteDeleteDocument: DocumentNode<FavoriteDeleteMutation, Favori
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -23197,7 +21516,6 @@ export const FavoriteUpdateDocument: DocumentNode<FavoriteUpdateMutation, Favori
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -23206,10 +21524,8 @@ export const FavoriteUpdateDocument: DocumentNode<FavoriteUpdateMutation, Favori
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "FavoriteUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23228,12 +21544,9 @@ export const FavoriteUpdateDocument: DocumentNode<FavoriteUpdateMutation, Favori
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "FavoritePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FavoritePayload" } }],
             },
           },
         ],
@@ -23257,10 +21570,8 @@ export const FeedbackCreateDocument: DocumentNode<FeedbackCreateMutation, Feedba
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "FeedbackCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23274,12 +21585,9 @@ export const FeedbackCreateDocument: DocumentNode<FeedbackCreateMutation, Feedba
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "FeedbackPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FeedbackPayload" } }],
             },
           },
         ],
@@ -23300,28 +21608,23 @@ export const FileUploadDocument: DocumentNode<FileUploadMutation, FileUploadMuta
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "contentType" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "filename" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "metaData" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "JSON" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "size" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23350,10 +21653,9 @@ export const FileUploadDocument: DocumentNode<FileUploadMutation, FileUploadMuta
                 value: { kind: "Variable", name: { kind: "Name", value: "size" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadPayload" } }],
             },
           },
         ],
@@ -23380,10 +21682,8 @@ export const GoogleUserAccountAuthDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "GoogleUserAccountAuthInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23397,12 +21697,9 @@ export const GoogleUserAccountAuthDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
             },
           },
         ],
@@ -23426,10 +21723,8 @@ export const ImageUploadFromUrlDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23443,12 +21738,9 @@ export const ImageUploadFromUrlDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "url" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ImageUploadFromUrlPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ImageUploadFromUrlPayload" } }],
             },
           },
         ],
@@ -23469,10 +21761,8 @@ export const IntegrationDeleteDocument: DocumentNode<IntegrationDeleteMutation, 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23486,10 +21776,9 @@ export const IntegrationDeleteDocument: DocumentNode<IntegrationDeleteMutation, 
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -23510,16 +21799,13 @@ export const IntegrationFigmaDocument: DocumentNode<IntegrationFigmaMutation, In
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23538,12 +21824,9 @@ export const IntegrationFigmaDocument: DocumentNode<IntegrationFigmaMutation, In
                 value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -23567,10 +21850,8 @@ export const IntegrationGithubConnectDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23584,12 +21865,9 @@ export const IntegrationGithubConnectDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -23613,16 +21891,13 @@ export const IntegrationGitlabConnectDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "accessToken" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "gitlabUrl" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23641,12 +21916,9 @@ export const IntegrationGitlabConnectDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "gitlabUrl" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -23670,10 +21942,8 @@ export const IntegrationGoogleSheetsDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23687,12 +21957,9 @@ export const IntegrationGoogleSheetsDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "code" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -23716,10 +21983,8 @@ export const IntegrationResourceArchiveDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23733,10 +21998,9 @@ export const IntegrationResourceArchiveDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -23760,22 +22024,18 @@ export const IntegrationSentryConnectDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "organizationSlug" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23799,12 +22059,9 @@ export const IntegrationSentryConnectDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "organizationSlug" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -23825,22 +22082,18 @@ export const IntegrationSlackDocument: DocumentNode<IntegrationSlackMutation, In
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23864,12 +22117,9 @@ export const IntegrationSlackDocument: DocumentNode<IntegrationSlackMutation, In
                 value: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -23893,16 +22143,13 @@ export const IntegrationSlackImportEmojisDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23921,12 +22168,9 @@ export const IntegrationSlackImportEmojisDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -23950,16 +22194,13 @@ export const IntegrationSlackPersonalDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -23978,12 +22219,9 @@ export const IntegrationSlackPersonalDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -24007,28 +22245,23 @@ export const IntegrationSlackPostDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24057,12 +22290,9 @@ export const IntegrationSlackPostDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -24086,22 +22316,18 @@ export const IntegrationSlackProjectPostDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24125,12 +22351,9 @@ export const IntegrationSlackProjectPostDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -24151,10 +22374,8 @@ export const IssueArchiveDocument: DocumentNode<IssueArchiveMutation, IssueArchi
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24168,10 +22389,9 @@ export const IssueArchiveDocument: DocumentNode<IssueArchiveMutation, IssueArchi
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -24192,10 +22412,8 @@ export const IssueCreateDocument: DocumentNode<IssueCreateMutation, IssueCreateM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueCreateInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24209,10 +22427,9 @@ export const IssueCreateDocument: DocumentNode<IssueCreateMutation, IssueCreateM
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
             },
           },
         ],
@@ -24236,28 +22453,23 @@ export const IssueImportCreateGithubDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24286,12 +22498,9 @@ export const IssueImportCreateGithubDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
             },
           },
         ],
@@ -24312,10 +22521,8 @@ export const IssueLabelArchiveDocument: DocumentNode<IssueLabelArchiveMutation, 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24329,10 +22536,9 @@ export const IssueLabelArchiveDocument: DocumentNode<IssueLabelArchiveMutation, 
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -24356,10 +22562,8 @@ export const IssueLabelCreateDocument: DocumentNode<IssueLabelCreateMutation, Is
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24373,12 +22577,9 @@ export const IssueLabelCreateDocument: DocumentNode<IssueLabelCreateMutation, Is
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" } }],
             },
           },
         ],
@@ -24399,7 +22600,6 @@ export const IssueLabelUpdateDocument: DocumentNode<IssueLabelUpdateMutation, Is
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -24408,10 +22608,8 @@ export const IssueLabelUpdateDocument: DocumentNode<IssueLabelUpdateMutation, Is
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24430,12 +22628,9 @@ export const IssueLabelUpdateDocument: DocumentNode<IssueLabelUpdateMutation, Is
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" } }],
             },
           },
         ],
@@ -24462,10 +22657,8 @@ export const IssueRelationCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24479,12 +22672,9 @@ export const IssueRelationCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationPayload" } }],
             },
           },
         ],
@@ -24508,10 +22698,8 @@ export const IssueRelationDeleteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24525,10 +22713,9 @@ export const IssueRelationDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -24552,7 +22739,6 @@ export const IssueRelationUpdateDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -24561,10 +22747,8 @@ export const IssueRelationUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24583,12 +22767,9 @@ export const IssueRelationUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationPayload" } }],
             },
           },
         ],
@@ -24609,10 +22790,8 @@ export const IssueUnarchiveDocument: DocumentNode<IssueUnarchiveMutation, IssueU
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24626,10 +22805,9 @@ export const IssueUnarchiveDocument: DocumentNode<IssueUnarchiveMutation, IssueU
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -24650,16 +22828,13 @@ export const IssueUpdateDocument: DocumentNode<IssueUpdateMutation, IssueUpdateM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueUpdateInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24678,10 +22853,9 @@ export const IssueUpdateDocument: DocumentNode<IssueUpdateMutation, IssueUpdateM
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
             },
           },
         ],
@@ -24708,10 +22882,8 @@ export const JoinOrganizationFromOnboardingDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "JoinOrganizationInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24725,15 +22897,10 @@ export const JoinOrganizationFromOnboardingDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
               ],
             },
           },
@@ -24755,10 +22922,8 @@ export const LeaveOrganizationDocument: DocumentNode<LeaveOrganizationMutation, 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24772,15 +22937,10 @@ export const LeaveOrganizationDocument: DocumentNode<LeaveOrganizationMutation, 
                 value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
               ],
             },
           },
@@ -24805,10 +22965,8 @@ export const MilestoneCreateDocument: DocumentNode<MilestoneCreateMutation, Mile
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "MilestoneCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24822,12 +22980,9 @@ export const MilestoneCreateDocument: DocumentNode<MilestoneCreateMutation, Mile
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "MilestonePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "MilestonePayload" } }],
             },
           },
         ],
@@ -24848,10 +23003,8 @@ export const MilestoneDeleteDocument: DocumentNode<MilestoneDeleteMutation, Mile
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24865,10 +23018,9 @@ export const MilestoneDeleteDocument: DocumentNode<MilestoneDeleteMutation, Mile
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -24889,7 +23041,6 @@ export const MilestoneUpdateDocument: DocumentNode<MilestoneUpdateMutation, Mile
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -24898,10 +23049,8 @@ export const MilestoneUpdateDocument: DocumentNode<MilestoneUpdateMutation, Mile
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "MilestoneUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24920,12 +23069,9 @@ export const MilestoneUpdateDocument: DocumentNode<MilestoneUpdateMutation, Mile
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "MilestonePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "MilestonePayload" } }],
             },
           },
         ],
@@ -24949,10 +23095,8 @@ export const NotificationArchiveDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -24966,10 +23110,9 @@ export const NotificationArchiveDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -24993,7 +23136,6 @@ export const NotificationCreateDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -25002,10 +23144,8 @@ export const NotificationCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "NotificationUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25024,12 +23164,9 @@ export const NotificationCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationPayload" } }],
             },
           },
         ],
@@ -25053,10 +23190,8 @@ export const NotificationDeleteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25070,10 +23205,9 @@ export const NotificationDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -25100,10 +23234,8 @@ export const NotificationSubscriptionCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25117,15 +23249,10 @@ export const NotificationSubscriptionCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "NotificationSubscriptionPayload" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscriptionPayload" } },
               ],
             },
           },
@@ -25150,10 +23277,8 @@ export const NotificationSubscriptionDeleteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25167,10 +23292,9 @@ export const NotificationSubscriptionDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -25194,10 +23318,8 @@ export const NotificationUnarchiveDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25211,10 +23333,9 @@ export const NotificationUnarchiveDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -25238,7 +23359,6 @@ export const NotificationUpdateDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -25247,10 +23367,8 @@ export const NotificationUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "NotificationUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25269,12 +23387,9 @@ export const NotificationUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationPayload" } }],
             },
           },
         ],
@@ -25298,10 +23413,8 @@ export const OauthClientArchiveDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25315,10 +23428,9 @@ export const OauthClientArchiveDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -25342,10 +23454,8 @@ export const OauthClientCreateDocument: DocumentNode<OauthClientCreateMutation, 
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "OauthClientCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25359,12 +23469,9 @@ export const OauthClientCreateDocument: DocumentNode<OauthClientCreateMutation, 
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OauthClientPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthClientPayload" } }],
             },
           },
         ],
@@ -25388,10 +23495,8 @@ export const OauthClientRotateSecretDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25405,12 +23510,9 @@ export const OauthClientRotateSecretDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "RotateSecretPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RotateSecretPayload" } }],
             },
           },
         ],
@@ -25431,7 +23533,6 @@ export const OauthClientUpdateDocument: DocumentNode<OauthClientUpdateMutation, 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -25440,10 +23541,8 @@ export const OauthClientUpdateDocument: DocumentNode<OauthClientUpdateMutation, 
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "OauthClientUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25462,12 +23561,9 @@ export const OauthClientUpdateDocument: DocumentNode<OauthClientUpdateMutation, 
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OauthClientPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthClientPayload" } }],
             },
           },
         ],
@@ -25488,7 +23584,6 @@ export const OauthTokenRevokeDocument: DocumentNode<OauthTokenRevokeMutation, Oa
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "appId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -25500,10 +23595,8 @@ export const OauthTokenRevokeDocument: DocumentNode<OauthTokenRevokeMutation, Oa
               type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
             },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25522,12 +23615,9 @@ export const OauthTokenRevokeDocument: DocumentNode<OauthTokenRevokeMutation, Oa
                 value: { kind: "Variable", name: { kind: "Name", value: "scope" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OauthTokenRevokePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthTokenRevokePayload" } }],
             },
           },
         ],
@@ -25554,10 +23644,8 @@ export const OrganizationDeleteDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "DeleteOrganizationInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25571,12 +23659,9 @@ export const OrganizationDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDeletePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDeletePayload" } }],
             },
           },
         ],
@@ -25595,21 +23680,15 @@ export const OrganizationDeleteChallengeDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "organizationDeleteChallenge" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "organizationDeleteChallenge" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDeletePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDeletePayload" } }],
             },
           },
         ],
@@ -25636,10 +23715,8 @@ export const OrganizationDomainCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25653,12 +23730,9 @@ export const OrganizationDomainCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomainPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomainPayload" } }],
             },
           },
         ],
@@ -25682,10 +23756,8 @@ export const OrganizationDomainDeleteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25699,10 +23771,9 @@ export const OrganizationDomainDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -25729,10 +23800,8 @@ export const OrganizationDomainVerifyDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainVerificationInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25746,12 +23815,9 @@ export const OrganizationDomainVerifyDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomainPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomainPayload" } }],
             },
           },
         ],
@@ -25778,10 +23844,8 @@ export const OrganizationInviteCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25795,12 +23859,9 @@ export const OrganizationInviteCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvitePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvitePayload" } }],
             },
           },
         ],
@@ -25824,10 +23885,8 @@ export const OrganizationInviteDeleteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25841,10 +23900,9 @@ export const OrganizationInviteDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -25871,10 +23929,8 @@ export const OrganizationUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "UpdateOrganizationInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25888,12 +23944,9 @@ export const OrganizationUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationPayload" } }],
             },
           },
         ],
@@ -25914,10 +23967,8 @@ export const ProjectArchiveDocument: DocumentNode<ProjectArchiveMutation, Projec
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25931,10 +23982,9 @@ export const ProjectArchiveDocument: DocumentNode<ProjectArchiveMutation, Projec
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -25958,10 +24008,8 @@ export const ProjectCreateDocument: DocumentNode<ProjectCreateMutation, ProjectC
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ProjectCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -25975,10 +24023,9 @@ export const ProjectCreateDocument: DocumentNode<ProjectCreateMutation, ProjectC
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" } }],
             },
           },
         ],
@@ -26002,10 +24049,8 @@ export const ProjectLinkCreateDocument: DocumentNode<ProjectLinkCreateMutation, 
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26019,12 +24064,9 @@ export const ProjectLinkCreateDocument: DocumentNode<ProjectLinkCreateMutation, 
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkPayload" } }],
             },
           },
         ],
@@ -26045,10 +24087,8 @@ export const ProjectLinkDeleteDocument: DocumentNode<ProjectLinkDeleteMutation, 
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26062,10 +24102,9 @@ export const ProjectLinkDeleteDocument: DocumentNode<ProjectLinkDeleteMutation, 
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -26086,7 +24125,6 @@ export const ProjectUpdateDocument: DocumentNode<ProjectUpdateMutation, ProjectU
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -26095,10 +24133,8 @@ export const ProjectUpdateDocument: DocumentNode<ProjectUpdateMutation, ProjectU
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26117,10 +24153,9 @@ export const ProjectUpdateDocument: DocumentNode<ProjectUpdateMutation, ProjectU
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" } }],
             },
           },
         ],
@@ -26147,10 +24182,8 @@ export const PushSubscriptionCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26164,12 +24197,9 @@ export const PushSubscriptionCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" } }],
             },
           },
         ],
@@ -26193,10 +24223,8 @@ export const PushSubscriptionDeleteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26210,12 +24238,9 @@ export const PushSubscriptionDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" } }],
             },
           },
         ],
@@ -26239,10 +24264,8 @@ export const ReactionCreateDocument: DocumentNode<ReactionCreateMutation, Reacti
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ReactionCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26256,12 +24279,9 @@ export const ReactionCreateDocument: DocumentNode<ReactionCreateMutation, Reacti
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ReactionPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ReactionPayload" } }],
             },
           },
         ],
@@ -26282,10 +24302,8 @@ export const ReactionDeleteDocument: DocumentNode<ReactionDeleteMutation, Reacti
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26299,10 +24317,9 @@ export const ReactionDeleteDocument: DocumentNode<ReactionDeleteMutation, Reacti
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -26326,10 +24343,8 @@ export const RefreshGoogleSheetsDataDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26343,12 +24358,9 @@ export const RefreshGoogleSheetsDataDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
             },
           },
         ],
@@ -26372,10 +24384,8 @@ export const ResentOrganizationInviteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26389,10 +24399,9 @@ export const ResentOrganizationInviteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -26419,10 +24428,8 @@ export const SamlTokenUserAccountAuthDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "TokenUserAccountAuthInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26436,12 +24443,9 @@ export const SamlTokenUserAccountAuthDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
             },
           },
         ],
@@ -26465,10 +24469,8 @@ export const SubscriptionArchiveDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26482,10 +24484,9 @@ export const SubscriptionArchiveDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -26509,10 +24510,8 @@ export const SubscriptionSessionCreateDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "plan" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26526,12 +24525,9 @@ export const SubscriptionSessionCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "plan" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SubscriptionSessionPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SubscriptionSessionPayload" } }],
             },
           },
         ],
@@ -26555,7 +24551,6 @@ export const SubscriptionUpdateDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -26564,10 +24559,8 @@ export const SubscriptionUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "SubscriptionUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26586,12 +24579,9 @@ export const SubscriptionUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SubscriptionPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SubscriptionPayload" } }],
             },
           },
         ],
@@ -26610,21 +24600,15 @@ export const SubscriptionUpdateSessionCreateDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "subscriptionUpdateSessionCreate" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "subscriptionUpdateSessionCreate" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SubscriptionSessionPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SubscriptionSessionPayload" } }],
             },
           },
         ],
@@ -26648,16 +24632,13 @@ export const SubscriptionUpgradeDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "type" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26676,12 +24657,9 @@ export const SubscriptionUpgradeDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "type" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "SubscriptionPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SubscriptionPayload" } }],
             },
           },
         ],
@@ -26702,10 +24680,8 @@ export const TeamArchiveDocument: DocumentNode<TeamArchiveMutation, TeamArchiveM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26719,10 +24695,9 @@ export const TeamArchiveDocument: DocumentNode<TeamArchiveMutation, TeamArchiveM
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -26743,16 +24718,13 @@ export const TeamCreateDocument: DocumentNode<TeamCreateMutation, TeamCreateMuta
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "copySettingsFromTeamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "TeamCreateInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26771,10 +24743,9 @@ export const TeamCreateDocument: DocumentNode<TeamCreateMutation, TeamCreateMuta
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" } }],
             },
           },
         ],
@@ -26795,10 +24766,8 @@ export const TeamDeleteDocument: DocumentNode<TeamDeleteMutation, TeamDeleteMuta
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26812,10 +24781,9 @@ export const TeamDeleteDocument: DocumentNode<TeamDeleteMutation, TeamDeleteMuta
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -26842,10 +24810,8 @@ export const TeamMembershipCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26859,12 +24825,9 @@ export const TeamMembershipCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipPayload" } }],
             },
           },
         ],
@@ -26888,10 +24851,8 @@ export const TeamMembershipDeleteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26905,10 +24866,9 @@ export const TeamMembershipDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -26929,16 +24889,13 @@ export const TeamUpdateDocument: DocumentNode<TeamUpdateMutation, TeamUpdateMuta
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "TeamUpdateInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -26957,10 +24914,9 @@ export const TeamUpdateDocument: DocumentNode<TeamUpdateMutation, TeamUpdateMuta
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" } }],
             },
           },
         ],
@@ -26984,10 +24940,8 @@ export const TemplateCreateDocument: DocumentNode<TemplateCreateMutation, Templa
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "TemplateCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27001,12 +24955,9 @@ export const TemplateCreateDocument: DocumentNode<TemplateCreateMutation, Templa
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "TemplatePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TemplatePayload" } }],
             },
           },
         ],
@@ -27027,10 +24978,8 @@ export const TemplateDeleteDocument: DocumentNode<TemplateDeleteMutation, Templa
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27044,10 +24993,9 @@ export const TemplateDeleteDocument: DocumentNode<TemplateDeleteMutation, Templa
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -27068,7 +25016,6 @@ export const TemplateUpdateDocument: DocumentNode<TemplateUpdateMutation, Templa
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -27077,10 +25024,8 @@ export const TemplateUpdateDocument: DocumentNode<TemplateUpdateMutation, Templa
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "TemplateUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27099,12 +25044,9 @@ export const TemplateUpdateDocument: DocumentNode<TemplateUpdateMutation, Templa
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "TemplatePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TemplatePayload" } }],
             },
           },
         ],
@@ -27125,10 +25067,8 @@ export const UserDemoteAdminDocument: DocumentNode<UserDemoteAdminMutation, User
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27142,12 +25082,9 @@ export const UserDemoteAdminDocument: DocumentNode<UserDemoteAdminMutation, User
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
             },
           },
         ],
@@ -27168,7 +25105,6 @@ export const UserFlagUpdateDocument: DocumentNode<UserFlagUpdateMutation, UserFl
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "flag" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UserFlagType" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -27177,10 +25113,8 @@ export const UserFlagUpdateDocument: DocumentNode<UserFlagUpdateMutation, UserFl
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "UserFlagUpdateOperation" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27199,12 +25133,9 @@ export const UserFlagUpdateDocument: DocumentNode<UserFlagUpdateMutation, UserFl
                 value: { kind: "Variable", name: { kind: "Name", value: "operation" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagPayload" } }],
             },
           },
         ],
@@ -27225,10 +25156,8 @@ export const UserPromoteAdminDocument: DocumentNode<UserPromoteAdminMutation, Us
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27242,12 +25171,9 @@ export const UserPromoteAdminDocument: DocumentNode<UserPromoteAdminMutation, Us
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
             },
           },
         ],
@@ -27271,10 +25197,8 @@ export const UserSettingsFlagIncrementDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "flag" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27288,12 +25212,9 @@ export const UserSettingsFlagIncrementDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "flag" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagPayload" } }],
             },
           },
         ],
@@ -27312,25 +25233,15 @@ export const UserSettingsFlagsResetDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "userSettingsFlagsReset" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "userSettingsFlagsReset" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "UserSettingsFlagsResetPayload" },
-                  directives: [],
-                },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagsResetPayload" } }],
             },
           },
         ],
@@ -27354,7 +25265,6 @@ export const UserSettingsUpdateDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -27363,10 +25273,8 @@ export const UserSettingsUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27385,12 +25293,9 @@ export const UserSettingsUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsPayload" } }],
             },
           },
         ],
@@ -27409,24 +25314,16 @@ export const UserSubscribeToNewsletterDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "userSubscribeToNewsletter" },
-      variableDefinitions: [],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "userSubscribeToNewsletter" },
-            arguments: [],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "FragmentSpread",
-                  name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" },
-                  directives: [],
-                },
+                { kind: "FragmentSpread", name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" } },
               ],
             },
           },
@@ -27448,10 +25345,8 @@ export const UserSuspendDocument: DocumentNode<UserSuspendMutation, UserSuspendM
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27465,12 +25360,9 @@ export const UserSuspendDocument: DocumentNode<UserSuspendMutation, UserSuspendM
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
             },
           },
         ],
@@ -27491,10 +25383,8 @@ export const UserUnsuspendDocument: DocumentNode<UserUnsuspendMutation, UserUnsu
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27508,12 +25398,9 @@ export const UserUnsuspendDocument: DocumentNode<UserUnsuspendMutation, UserUnsu
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
             },
           },
         ],
@@ -27534,16 +25421,13 @@ export const UserUpdateDocument: DocumentNode<UserUpdateMutation, UserUpdateMuta
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UpdateUserInput" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27562,10 +25446,9 @@ export const UserUpdateDocument: DocumentNode<UserUpdateMutation, UserUpdateMuta
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
             },
           },
         ],
@@ -27592,10 +25475,8 @@ export const ViewPreferencesCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferencesCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27609,12 +25490,9 @@ export const ViewPreferencesCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesPayload" } }],
             },
           },
         ],
@@ -27638,10 +25516,8 @@ export const ViewPreferencesDeleteDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27655,10 +25531,9 @@ export const ViewPreferencesDeleteDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -27682,7 +25557,6 @@ export const ViewPreferencesUpdateDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -27691,10 +25565,8 @@ export const ViewPreferencesUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferencesUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27713,12 +25585,9 @@ export const ViewPreferencesUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesPayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesPayload" } }],
             },
           },
         ],
@@ -27742,10 +25611,8 @@ export const WebhookCreateDocument: DocumentNode<WebhookCreateMutation, WebhookC
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "WebhookCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27759,10 +25626,9 @@ export const WebhookCreateDocument: DocumentNode<WebhookCreateMutation, WebhookC
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookPayload" } }],
             },
           },
         ],
@@ -27783,10 +25649,8 @@ export const WebhookDeleteDocument: DocumentNode<WebhookDeleteMutation, WebhookD
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27800,10 +25664,9 @@ export const WebhookDeleteDocument: DocumentNode<WebhookDeleteMutation, WebhookD
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -27824,7 +25687,6 @@ export const WebhookUpdateDocument: DocumentNode<WebhookUpdateMutation, WebhookU
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -27833,10 +25695,8 @@ export const WebhookUpdateDocument: DocumentNode<WebhookUpdateMutation, WebhookU
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "WebhookUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27855,10 +25715,9 @@ export const WebhookUpdateDocument: DocumentNode<WebhookUpdateMutation, WebhookU
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookPayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookPayload" } }],
             },
           },
         ],
@@ -27882,10 +25741,8 @@ export const WorkflowStateArchiveDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27899,10 +25756,9 @@ export const WorkflowStateArchiveDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" }, directives: [] }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
             },
           },
         ],
@@ -27929,10 +25785,8 @@ export const WorkflowStateCreateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateCreateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -27946,12 +25800,9 @@ export const WorkflowStateCreateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStatePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStatePayload" } }],
             },
           },
         ],
@@ -27975,7 +25826,6 @@ export const WorkflowStateUpdateDocument: DocumentNode<
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          directives: [],
         },
         {
           kind: "VariableDefinition",
@@ -27984,10 +25834,8 @@ export const WorkflowStateUpdateDocument: DocumentNode<
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateUpdateInput" } },
           },
-          directives: [],
         },
       ],
-      directives: [],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -28006,12 +25854,9 @@ export const WorkflowStateUpdateDocument: DocumentNode<
                 value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
-            directives: [],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStatePayload" }, directives: [] },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStatePayload" } }],
             },
           },
         ],

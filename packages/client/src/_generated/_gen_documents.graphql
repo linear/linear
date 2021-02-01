@@ -2251,6 +2251,17 @@ query applicationWithAuthorization(
     ...UserAuthorizedApplication
   }
 }
+# Fetches an archived model.
+query archivedModelSync(
+  # The identifier of the model to load. What an identifier is specific to the model class.
+  $identifier: String!
+  # The class name of the model to load.
+  $modelClass: String!
+) {
+  archivedModelSync(identifier: $identifier, modelClass: $modelClass) {
+    ...ArchiveResponse
+  }
+}
 # Fetches archived models.
 query archivedModelsSync(
   # Retrieve issues that have been archived before this date.
@@ -2263,17 +2274,6 @@ query archivedModelsSync(
   $teamId: String!
 ) {
   archivedModelsSync(before: $before, last: $last, modelClass: $modelClass, teamId: $teamId) {
-    ...ArchiveResponse
-  }
-}
-# Fetches an archived model.
-query archivedModelSync(
-  # The identifier of the model to load. What an identifier is specific to the model class.
-  $identifier: String!
-  # The class name of the model to load.
-  $modelClass: String!
-) {
-  archivedModelSync(identifier: $identifier, modelClass: $modelClass) {
     ...ArchiveResponse
   }
 }
@@ -3061,32 +3061,6 @@ query issueRelations(
     ...IssueRelationConnection
   }
 }
-# All issues.
-query issues(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issues(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...IssueConnection
-  }
-}
 # [ALPHA] Search issues. This query is experimental and is subject to change without notice.
 query issueSearch(
   # A cursor to be used with first for forward pagination
@@ -3112,6 +3086,32 @@ query issueSearch(
     last: $last
     orderBy: $orderBy
     query: $query
+  ) {
+    ...IssueConnection
+  }
+}
+# All issues.
+query issues(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issues(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
   ) {
     ...IssueConnection
   }
@@ -3183,32 +3183,6 @@ query notification($id: String!) {
     ...Notification
   }
 }
-# All notifications.
-query notifications(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  notifications(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...NotificationConnection
-  }
-}
 # One specific notification subscription.
 query notificationSubscription($id: String!) {
   notificationSubscription(id: $id) {
@@ -3239,6 +3213,32 @@ query notificationSubscriptions(
     orderBy: $orderBy
   ) {
     ...NotificationSubscriptionConnection
+  }
+}
+# All notifications.
+query notifications(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  notifications(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...NotificationConnection
   }
 }
 # The user's organization.
@@ -4103,6 +4103,12 @@ query user_teamMemberships(
     }
   }
 }
+# The user's settings.
+query userSettings {
+  userSettings {
+    ...UserSettings
+  }
+}
 # All users for the organization.
 query users(
   # A cursor to be used with first for forward pagination
@@ -4127,12 +4133,6 @@ query users(
     orderBy: $orderBy
   ) {
     ...UserConnection
-  }
-}
-# The user's settings.
-query userSettings {
-  userSettings {
-    ...UserSettings
   }
 }
 # The currently authenticated user.
