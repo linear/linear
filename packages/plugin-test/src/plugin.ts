@@ -1,5 +1,5 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, logger, PluginContext, printComment, printLines } from "@linear/common";
+import { ContextVisitor, logger, PluginContext, printLines } from "@linear/common";
 import {
   ModelVisitor,
   parseOperations,
@@ -49,21 +49,11 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
     const tests = printTests(sdkContext);
 
     return printLines([
-      /** Import logger and client */
       "import { logger } from '@linear/common'",
       `import * as ${SdkConstants.NAMESPACE} from '../index'`,
-      'import dotenv from "dotenv"',
-      "\n",
-      /** Import env variables from .env file */
-      printComment(["Load environment variables"]),
-      "dotenv.config()",
-      "\n",
-      /** Create the client configured with api key */
-      printComment(["Initialize Linear client with environment api key and url"]),
-      `const client = new ${SdkConstants.NAMESPACE}.LinearClient({
-        apiKey: process.env.E2E_API_KEY,
-        apiUrl: process.env.E2E_API_URL,
-      })`,
+      'import execa, { ExecaChildProcess } from "execa"',
+      'import getPort from "get-port"',
+      'import { promisify } from "util"',
       "\n",
       /** Print all tests */
       tests,

@@ -1,16 +1,22 @@
 import { OperationType, printComment, printLines, printList, printSet } from "@linear/common";
 import { SdkConstants, SdkListField, SdkOperation, SdkPluginContext } from "@linear/plugin-sdk";
+import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
 
 /**
  * Print all tests
  */
 export function printTests(context: SdkPluginContext): string {
-  return printLines([
-    ...context.sdkDefinitions[""].operations?.map(operation =>
-      operation.node.operation === OperationType.query ? printQueryTest(context, operation) : undefined
-    ),
-    "\n",
-  ]);
+  return printDescribe(
+    "generated",
+    printLines([
+      printBeforeSuite(),
+      printBeforeAll(),
+      printAfterAll(),
+      ...context.sdkDefinitions[""].operations?.map(operation =>
+        operation.node.operation === OperationType.query ? printQueryTest(context, operation) : undefined
+      ),
+    ])
+  );
 }
 
 /**

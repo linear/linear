@@ -42,6 +42,8 @@
     "@linear/plugin-sdk": "^1.0.0",
     "@linear/plugin-test": "^1.0.0",
     "dotenv": "8.2.0",
+    "execa": "^5.0.0",
+    "get-port": "^5.1.1",
     "ts-node": "9.1.1"
   }
 }
