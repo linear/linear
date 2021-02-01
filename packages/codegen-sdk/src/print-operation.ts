@@ -6,7 +6,7 @@ import {
   printList,
   printSet,
   printTernary,
-} from "@linear/plugin-doc";
+} from "@linear/codegen-doc";
 import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import { isConnectionModel } from "./print-connection";

@@ -1,4 +1,4 @@
-import { getArgList, printComment, printDebug, printLines } from "@linear/plugin-doc";
+import { getArgList, printComment, printDebug, printLines } from "@linear/codegen-doc";
 import { Sdk } from "./constants";
 import { getRequestArg } from "./print-request";
 import { SdkOperation, SdkPluginContext } from "./types";

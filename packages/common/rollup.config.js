@@ -1,3 +1,4 @@
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import gzip from "rollup-plugin-gzip";
 import { sizeSnapshot } from "rollup-plugin-size-snapshot";
@@ -7,6 +8,7 @@ import { brotliCompressSync } from "zlib";
 export default [
   {
     input: "src/index.ts",
+    external: ["tracer"],
     output: [
       {
         dir: "./",
@@ -22,6 +24,7 @@ export default [
       },
     ],
     plugins: [
+      nodeResolve(),
       typescript(),
       sizeSnapshot(),
       terser(),
@@ -34,6 +37,7 @@ export default [
   },
   {
     input: "src/index.ts",
+    external: ["tracer"],
     output: [
       {
         dir: "./",
@@ -48,6 +52,6 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [typescript()],
+    plugins: [nodeResolve(), typescript()],
   },
 ];

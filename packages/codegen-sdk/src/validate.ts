@@ -1,6 +1,6 @@
 import { PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
+import { validateExtension } from "@linear/codegen-doc";
 import { logger } from "@linear/common";
-import { validateExtension } from "@linear/plugin-doc";
 import { GraphQLSchema } from "graphql";
 import { SdkPluginConfig } from "./types";
 
@@ -13,7 +13,7 @@ export const validate: PluginValidateFn = async (
   config: SdkPluginConfig,
   outputFile: string
 ) => {
-  const packageName = "@linear/plugin-sdk";
+  const packageName = "@linear/codegen-sdk";
   logger.info(`Validating ${packageName}`);
   logger.info(config);
 

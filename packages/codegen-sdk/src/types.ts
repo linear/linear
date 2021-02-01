@@ -1,4 +1,4 @@
-import { ArgDefinition, ArgList, PluginConfig, PluginContext } from "@linear/plugin-doc";
+import { ArgDefinition, ArgList, PluginConfig, PluginContext } from "@linear/codegen-doc";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode, OperationDefinitionNode } from "graphql";
 
 /**

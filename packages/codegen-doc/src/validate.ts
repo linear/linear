@@ -1,8 +1,8 @@
 import { PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
 import { logger } from "@linear/common";
-import { validateExtension } from "@linear/plugin-doc";
-import { SdkPluginConfig } from "@linear/plugin-sdk";
 import { GraphQLSchema } from "graphql";
+import { PluginConfig } from "./types";
+import { validateExtension } from "./utils";
 
 /**
  * Validate use of the plugin
@@ -10,15 +10,13 @@ import { GraphQLSchema } from "graphql";
 export const validate: PluginValidateFn = async (
   _schema: GraphQLSchema,
   _documents: Types.DocumentFile[],
-  config: SdkPluginConfig,
+  config: PluginConfig,
   outputFile: string
 ) => {
-  const packageName = "@linear/plugin-test";
+  const packageName = "@linear/codegen-doc";
   logger.info(`Validating ${packageName}`);
   logger.info(config);
 
-  const prefix = `Plugin "${packageName}" config requires`;
-
   /** Check the output file extension */
-  validateExtension(prefix, ".test.ts", outputFile);
+  validateExtension(packageName, ".graphql", outputFile);
 };

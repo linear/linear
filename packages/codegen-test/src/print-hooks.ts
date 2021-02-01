@@ -1,5 +1,5 @@
-import { printComment, printLines } from "@linear/plugin-doc";
-import { Sdk } from "@linear/plugin-sdk";
+import { printComment, printLines } from "@linear/codegen-doc";
+import { Sdk } from "@linear/codegen-sdk";
 
 /**
  * Prints code required before tests

@@ -1,4 +1,4 @@
-import { PluginContext, printList } from "@linear/plugin-doc";
+import { PluginContext, printList } from "@linear/codegen-doc";
 import { Sdk } from "./constants";
 import { SdkPluginConfig } from "./types";
 

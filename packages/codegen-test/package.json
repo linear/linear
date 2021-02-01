@@ -1,5 +1,5 @@
 {
-  "name": "@linear/plugin-sdk",
+  "name": "@linear/codegen-test",
   "version": "1.0.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build:clean": "npx rimraf dist",
-    "build:plugin-sdk": "run-s build:clean build:rollup",
+    "build:codegen-test": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c"
   },
   "peerDependencies": {
@@ -27,7 +27,8 @@
     "@graphql-tools/graphql-file-loader": "^6.2.5",
     "@graphql-tools/load": "^6.2.5",
     "@linear/common": "^1.0.0",
-    "@linear/plugin-doc": "^1.0.0",
+    "@linear/codegen-doc": "^1.0.0",
+    "@linear/codegen-sdk": "^1.0.0",
     "@rollup/plugin-typescript": "^8.1.1",
     "auto-bind": "^4.0.0",
     "rollup": "^2.38.3",

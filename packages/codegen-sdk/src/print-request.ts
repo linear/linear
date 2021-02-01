@@ -6,7 +6,7 @@ import {
   printComment,
   printLines,
   printList,
-} from "@linear/plugin-doc";
+} from "@linear/codegen-doc";
 import { Sdk } from "./constants";
 import { SdkOperation } from "./types";
 

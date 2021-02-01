@@ -13,4 +13,4 @@ config:
 generates:
   src/_generated_documents.graphql:
     plugins:
-      - "@linear/plugin-doc"
+      - "@linear/codegen-doc"

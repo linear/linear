@@ -20,4 +20,4 @@ generates:
       - typed-document-node
   src/_generated_sdk.ts:
     plugins:
-      - "@linear/plugin-sdk"
+      - "@linear/codegen-sdk"

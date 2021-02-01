@@ -72,10 +72,6 @@ webpack-stats.json
 
 *.provisionprofile
 
-# yalc
-.yalc
-yalc.*
-
 # Local test script
 scratch.ts
 

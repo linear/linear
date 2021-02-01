@@ -1,5 +1,4 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
-import { nonNullable, upperFirst } from "@linear/common";
 import {
   ArgDefinition,
   getArgList,
@@ -11,7 +10,8 @@ import {
   printTypescriptType,
   reduceListType,
   reduceTypeName,
-} from "@linear/plugin-doc";
+} from "@linear/codegen-doc";
+import { nonNullable, upperFirst } from "@linear/common";
 import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode } from "graphql";
 import { Sdk } from "./constants";
 import { printNamespaced } from "./print";

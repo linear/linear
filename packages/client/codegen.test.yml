@@ -7,4 +7,4 @@ hooks:
 generates:
   src/_tests/_generated.test.ts:
     plugins:
-      - "@linear/plugin-test"
+      - "@linear/codegen-test"

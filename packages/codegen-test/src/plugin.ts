@@ -1,7 +1,7 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
+import { ContextVisitor, PluginContext, printComment, printLines } from "@linear/codegen-doc";
+import { ModelVisitor, parseOperations, Sdk, SdkModel, SdkPluginConfig, SdkPluginContext } from "@linear/codegen-sdk";
 import { logger } from "@linear/common";
-import { ContextVisitor, PluginContext, printComment, printLines } from "@linear/plugin-doc";
-import { ModelVisitor, parseOperations, Sdk, SdkModel, SdkPluginConfig, SdkPluginContext } from "@linear/plugin-sdk";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { printTests } from "./print-test";
 

@@ -1,6 +1,6 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
+import { ContextVisitor, PluginContext, printLines } from "@linear/codegen-doc";
 import { logger, nonNullable } from "@linear/common";
-import { ContextVisitor, PluginContext, printLines } from "@linear/plugin-doc";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { Sdk } from "./constants";
 import { ModelVisitor } from "./model-visitor";

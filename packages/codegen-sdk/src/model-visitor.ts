@@ -1,4 +1,3 @@
-import { lowerFirst } from "@linear/common";
 import {
   findObject,
   findQuery,
@@ -9,7 +8,8 @@ import {
   PluginContext,
   printTypescriptType,
   reduceListType,
-} from "@linear/plugin-doc";
+} from "@linear/codegen-doc";
+import { lowerFirst } from "@linear/common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { Sdk } from "./constants";

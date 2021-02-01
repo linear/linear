@@ -7,7 +7,7 @@ import {
   printList,
   printSet,
   printTernary,
-} from "@linear/plugin-doc";
+} from "@linear/codegen-doc";
 import { Sdk } from "./constants";
 import { getRequestArg } from "./print-request";
 import { SdkModel, SdkPluginContext } from "./types";

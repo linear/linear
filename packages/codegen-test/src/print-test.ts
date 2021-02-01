@@ -1,5 +1,5 @@
-import { OperationType, printComment, printLines, printList, printSet } from "@linear/plugin-doc";
-import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/plugin-sdk";
+import { OperationType, printComment, printLines, printList, printSet } from "@linear/codegen-doc";
+import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
 import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
 
 /**

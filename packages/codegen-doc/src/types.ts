@@ -39,7 +39,7 @@ export interface PluginConfig {
    * generates:
    *   src/_gen_documents.graphql:
    *     plugins:
-   *       - "@linear/plugin-doc"
+   *       - "@linear/codegen-doc"
    *     config:
    *       skipFields:
    *         - "adminCommand"
@@ -56,7 +56,7 @@ export interface PluginConfig {
    * generates:
    *   src/_gen_documents.graphql:
    *     plugins:
-   *       - "@linear/plugin-doc"
+   *       - "@linear/codegen-doc"
    *     config:
    *       skipDirectives:
    *         - "deprecated"

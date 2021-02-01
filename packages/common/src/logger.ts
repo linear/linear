@@ -1,3 +1,3 @@
-import tracer from "tracer";
+import { colorConsole } from "tracer";
 
-export const logger = tracer.colorConsole();
+export const logger = colorConsole();
