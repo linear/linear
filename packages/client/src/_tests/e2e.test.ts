@@ -1,8 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dotenv from "dotenv";
-import { v4 as uuid } from "uuid";
 import { LinearClient } from "../index";
 import { LinearErrorType } from "./../types";
+
+// https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid/2117523#2117523
+function uuid() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0,
+      // eslint-disable-next-line eqeqeq
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 dotenv.config();
 

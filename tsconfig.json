@@ -17,7 +17,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": false,
     "noUnusedLocals": false,
-    "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,

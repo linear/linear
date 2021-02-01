@@ -45,7 +45,6 @@
     "@types/inquirer": "^7.3.1",
     "@types/lodash": "^4.14.165",
     "@types/node-fetch": "^2.5.7",
-    "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.8.0",
     "@typescript-eslint/parser": "^4.8.0",
     "auto-bind": "^4.0.0",

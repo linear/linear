@@ -31,6 +31,7 @@
     "@linear/plugin-sdk": "^1.0.0",
     "auto-bind": "^4.0.0",
     "rollup": "^2.38.3",
+    "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-size-snapshot": "^0.12.0",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.0.5"
