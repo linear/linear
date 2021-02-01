@@ -11,7 +11,9 @@
     "../**/.eslintrc.json",
     "../.eslintrc.json",
     "./*.json",
-    "../**/src/**/*.ts",
-    "../**/src/**/*.tsx"
+    "../**/packages/**/*.json",
+    "../**/packages/**/*.js",
+    "../**/packages/**/*.ts",
+    "../**/packages/**/*.tsx"
   ]
 }

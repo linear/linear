@@ -1,7 +1,6 @@
 import typescript from "@rollup/plugin-typescript";
 import { sizeSnapshot } from "rollup-plugin-size-snapshot";
 import { terser } from "rollup-plugin-terser";
-import pkg from "./package.json";
 
 export default [
   {
@@ -9,13 +8,13 @@ export default [
     output: [
       {
         dir: "./",
-        entryFileNames: pkg.main,
+        entryFileNames: "dist/index-cjs.min.js",
         format: "cjs",
         sourcemap: true,
       },
       {
         dir: "./",
-        entryFileNames: pkg.module,
+        entryFileNames: "dist/index-es.min.js",
         format: "es",
         sourcemap: true,
       },
@@ -27,13 +26,13 @@ export default [
     output: [
       {
         dir: "./",
-        entryFileNames: pkg.main.replace(".min", ""),
+        entryFileNames: "dist/index-cjs.js",
         format: "cjs",
         sourcemap: true,
       },
       {
         dir: "./",
-        entryFileNames: pkg.module.replace(".min", ""),
+        entryFileNames: "dist/index-es.js",
         format: "es",
         sourcemap: true,
       },

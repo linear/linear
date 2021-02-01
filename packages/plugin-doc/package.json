@@ -14,9 +14,6 @@
     "dist"
   ],
   "scripts": {
-    "dev:doc": "NODE_ENV=development run-s dev:update build:doc dev:push",
-    "dev:push": "yalc push",
-    "dev:update": "yalc update",
     "build:doc": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",
     "build:clean": "npx rimraf dist"
