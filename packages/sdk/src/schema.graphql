@@ -423,6 +423,10 @@ input CreateOrganizationInput {
   The URL key of the organization.
   """
   urlKey: String!
+  """
+  JSON serialized UTM parameters associated with the creation of the workspace.
+  """
+  utm: String
 }
 """
 A custom view that has been saved by a user.
@@ -2038,6 +2042,10 @@ type IssueImport implements Node {
   """
   creatorId: String!
   """
+  User readable error message, if one has occurred during the import.
+  """
+  error: String
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -3003,6 +3011,31 @@ type Mutation {
     Github token to fetch information from the Github API.
     """
     githubToken: String!
+    """
+    ID of the team into which to import data.
+    """
+    teamId: String!
+  ): IssueImportPayload!
+  """
+  Kicks off a Jira import job.
+  """
+  issueImportCreateJira(
+    """
+    Jira user account email.
+    """
+    jiraEmail: String!
+    """
+    Jira installation or cloud hostname.
+    """
+    jiraHostname: String!
+    """
+    Jira project key from which we will import data.
+    """
+    jiraProject: String!
+    """
+    Jira personal access token to access Jira REST API.
+    """
+    jiraToken: String!
     """
     ID of the team into which to import data.
     """
@@ -6539,7 +6572,36 @@ type Team implements Node {
   """
   markedAsDuplicateWorkflowState: WorkflowState
   """
-  Memberships associated with the team.
+  Users who are members of this team.
+  """
+  members(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): UserConnection!
+  """
+  Memberships associated with the team. For easier access of the same data, use `members` query.
   """
   memberships(
     """
@@ -7417,7 +7479,7 @@ type User implements Node {
   """
   organization: Organization!
   """
-  Memberships associated with the user.
+  Memberships associated with the user. For easier access of the same data, use `teams` query.
   """
   teamMemberships(
     """
@@ -7445,6 +7507,35 @@ type User implements Node {
     """
     orderBy: PaginationOrderBy
   ): TeamMembershipConnection!
+  """
+  Teams the user is part of.
+  """
+  teams(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): TeamConnection!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
       entity hasn't been update after creation.
@@ -7611,7 +7702,7 @@ type UserSettings implements Node {
   """
   updatedAt: DateTime!
   """
-  The user to whom this notification was targeted for.
+  The user associated with these settings.
   """
   user: User!
 }
@@ -7815,6 +7906,14 @@ type Webhook implements Node {
   """
   id: ID!
   """
+  Webhook label
+  """
+  label: String!
+  """
+  The resource types this webhook is subscribed to.
+  """
+  resourceTypes: [String!]!
+  """
   Secret token for verifying the origin on the recipient side.
   """
   secret: String
@@ -7846,6 +7945,14 @@ input WebhookCreateInput {
   The identifier. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  Label for the webhook.
+  """
+  label: String
+  """
+  List of resources the webhook should subscribe to.
+  """
+  resourceTypes: [String!]!
   """
   An optional secret token used to sign the webhook payload.
   """
@@ -7885,6 +7992,14 @@ input WebhookUpdateInput {
   Whether this webhook is enabled.
   """
   enabled: Boolean
+  """
+  Label for the webhook.
+  """
+  label: String
+  """
+  List of resources the webhook should subscribe to.
+  """
+  resourceTypes: [String!]
   """
   An optional secret token used to sign the Webhook payload.
   """

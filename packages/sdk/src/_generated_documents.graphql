@@ -524,6 +524,8 @@ fragment Webhook on Webhook {
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
+  # The resource types this webhook is subscribed to.
+  resourceTypes
   # The team that the webhook is associated with.
   team {
     id
@@ -540,6 +542,8 @@ fragment Webhook on Webhook {
   }
   # Webhook URL
   url
+  # Webhook label
+  label
   # Whether the Webhook is enabled.
   enabled
 }
@@ -601,6 +605,8 @@ fragment IssueImport on IssueImport {
   createdAt
   # The unique identifier of the entity.
   id
+  # User readable error message, if one has occurred during the import.
+  error
 }
 
 # An integration resource created by an external service.
@@ -1287,7 +1293,7 @@ fragment UserSettings on UserSettings {
   createdAt
   # The unique identifier of the entity.
   id
-  # The user to whom this notification was targeted for.
+  # The user associated with these settings.
   user {
     id
   }
@@ -3771,7 +3777,36 @@ query team_labels(
     }
   }
 }
-# Memberships associated with the team.
+# Users who are members of this team.
+query team_members(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  team(id: $id) {
+    members(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...UserConnection
+    }
+  }
+}
+# Memberships associated with the team. For easier access of the same data, use `members` query.
 query team_memberships(
   $id: String!
   # A cursor to be used with first for forward pagination
@@ -4073,7 +4108,7 @@ query user_createdIssues(
     }
   }
 }
-# Memberships associated with the user.
+# Memberships associated with the user. For easier access of the same data, use `teams` query.
 query user_teamMemberships(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
   $id: String!
@@ -4100,6 +4135,36 @@ query user_teamMemberships(
       orderBy: $orderBy
     ) {
       ...TeamMembershipConnection
+    }
+  }
+}
+# Teams the user is part of.
+query user_teams(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    teams(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...TeamConnection
     }
   }
 }
@@ -4197,7 +4262,7 @@ query viewer_createdIssues(
     }
   }
 }
-# Memberships associated with the user.
+# Memberships associated with the user. For easier access of the same data, use `teams` query.
 query viewer_teamMemberships(
   # A cursor to be used with first for forward pagination
   $after: String
@@ -4222,6 +4287,34 @@ query viewer_teamMemberships(
       orderBy: $orderBy
     ) {
       ...TeamMembershipConnection
+    }
+  }
+}
+# Teams the user is part of.
+query viewer_teams(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    teams(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...TeamConnection
     }
   }
 }
@@ -4778,6 +4871,29 @@ mutation issueImportCreateGithub(
     githubRepoName: $githubRepoName
     githubRepoOwner: $githubRepoOwner
     githubToken: $githubToken
+    teamId: $teamId
+  ) {
+    ...IssueImportPayload
+  }
+}
+# Kicks off a Jira import job.
+mutation issueImportCreateJira(
+  # Jira user account email.
+  $jiraEmail: String!
+  # Jira installation or cloud hostname.
+  $jiraHostname: String!
+  # Jira project key from which we will import data.
+  $jiraProject: String!
+  # Jira personal access token to access Jira REST API.
+  $jiraToken: String!
+  # ID of the team into which to import data.
+  $teamId: String!
+) {
+  issueImportCreateJira(
+    jiraEmail: $jiraEmail
+    jiraHostname: $jiraHostname
+    jiraProject: $jiraProject
+    jiraToken: $jiraToken
     teamId: $teamId
   ) {
     ...IssueImportPayload

@@ -1902,6 +1902,7 @@ export class IssueImport extends LinearRequest {
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
     this.creatorId = data.creatorId ?? undefined;
+    this.error = data.error ?? undefined;
     this.id = data.id ?? undefined;
     this.service = data.service ?? undefined;
     this.status = data.status ?? undefined;
@@ -1914,6 +1915,8 @@ export class IssueImport extends LinearRequest {
   public createdAt?: L.Scalars["DateTime"];
   /** The id for the user that started the job. */
   public creatorId?: string;
+  /** User readable error message, if one has occurred during the import. */
+  public error?: string;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The service from which data will be imported. */
@@ -3795,7 +3798,11 @@ export class Team extends LinearRequest {
   public labels(variables?: Omit<L.Team_LabelsQueryVariables, "id">) {
     return this.id ? new Team_LabelsQuery(this._request, this.id).fetch(variables) : undefined;
   }
-  /** Memberships associated with the team. */
+  /** Users who are members of this team. */
+  public members(variables?: Omit<L.Team_MembersQueryVariables, "id">) {
+    return this.id ? new Team_MembersQuery(this._request, this.id).fetch(variables) : undefined;
+  }
+  /** Memberships associated with the team. For easier access of the same data, use `members` query. */
   public memberships(variables?: Omit<L.Team_MembershipsQueryVariables, "id">) {
     return this.id ? new Team_MembershipsQuery(this._request, this.id).fetch(variables) : undefined;
   }
@@ -4179,9 +4186,13 @@ export class User extends LinearRequest {
   public createdIssues(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">) {
     return this.id ? new User_CreatedIssuesQuery(this._request, this.id).fetch(variables) : undefined;
   }
-  /** Memberships associated with the user. */
+  /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   public teamMemberships(variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
     return this.id ? new User_TeamMembershipsQuery(this._request, this.id).fetch(variables) : undefined;
+  }
+  /** Teams the user is part of. */
+  public teams(variables?: Omit<L.User_TeamsQueryVariables, "id">) {
+    return this.id ? new User_TeamsQuery(this._request, this.id).fetch(variables) : undefined;
   }
 }
 /**
@@ -4349,7 +4360,7 @@ export class UserSettings extends LinearRequest {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: L.Scalars["DateTime"];
-  /** The user to whom this notification was targeted for. */
+  /** The user associated with these settings. */
   public get user(): Fetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
@@ -4503,6 +4514,8 @@ export class Webhook extends LinearRequest {
     this.createdAt = data.createdAt ?? undefined;
     this.enabled = data.enabled ?? undefined;
     this.id = data.id ?? undefined;
+    this.label = data.label ?? undefined;
+    this.resourceTypes = data.resourceTypes ?? undefined;
     this.secret = data.secret ?? undefined;
     this.updatedAt = data.updatedAt ?? undefined;
     this.url = data.url ?? undefined;
@@ -4518,6 +4531,10 @@ export class Webhook extends LinearRequest {
   public enabled?: boolean;
   /** The unique identifier of the entity. */
   public id?: string;
+  /** Webhook label */
+  public label?: string;
+  /** The resource types this webhook is subscribed to. */
+  public resourceTypes?: string[];
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
   /**
@@ -7799,6 +7816,49 @@ export class IssueImportCreateGithubMutation extends LinearRequest {
       }
     ).then(response => {
       const data = response?.issueImportCreateGithub;
+      return data ? new IssueImportPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IssueImportCreateJira Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportCreateJiraMutation extends LinearRequest {
+  public constructor(request: Request) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportCreateJira mutation and return a IssueImportPayload
+   *
+   * @param jiraEmail - required jiraEmail to pass to issueImportCreateJira
+   * @param jiraHostname - required jiraHostname to pass to issueImportCreateJira
+   * @param jiraProject - required jiraProject to pass to issueImportCreateJira
+   * @param jiraToken - required jiraToken to pass to issueImportCreateJira
+   * @param teamId - required teamId to pass to issueImportCreateJira
+   * @returns parsed response from IssueImportCreateJiraMutation
+   */
+  public async fetch(
+    jiraEmail: string,
+    jiraHostname: string,
+    jiraProject: string,
+    jiraToken: string,
+    teamId: string
+  ): Fetch<IssueImportPayload> {
+    return this._request<L.IssueImportCreateJiraMutation, L.IssueImportCreateJiraMutationVariables>(
+      L.IssueImportCreateJiraDocument,
+      {
+        jiraEmail,
+        jiraHostname,
+        jiraProject,
+        jiraToken,
+        teamId,
+      }
+    ).then(response => {
+      const data = response?.issueImportCreateJira;
       return data ? new IssueImportPayload(this._request, data) : undefined;
     });
   }
@@ -11131,6 +11191,39 @@ export class Team_LabelsQuery extends LinearRequest {
 }
 
 /**
+ * A fetchable Team_Members Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to team
+ */
+export class Team_MembersQuery extends LinearRequest {
+  private _id: string;
+
+  public constructor(request: Request, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Team_Members query and return a UserConnection
+   *
+   * @param variables - variables without 'id' to pass into the Team_MembersQuery
+   * @returns parsed response from Team_MembersQuery
+   */
+  public async fetch(variables?: Omit<L.Team_MembersQueryVariables, "id">): Fetch<UserConnection> {
+    return this._request<L.Team_MembersQuery, L.Team_MembersQueryVariables>(L.Team_MembersDocument, {
+      id: this._id,
+      ...variables,
+    }).then(response => {
+      const data = response?.team?.members;
+      return data
+        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable Team_Memberships Query
  *
  * @param request - function to call the graphql client
@@ -11399,6 +11492,39 @@ export class User_TeamMembershipsQuery extends LinearRequest {
 }
 
 /**
+ * A fetchable User_Teams Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to user
+ */
+export class User_TeamsQuery extends LinearRequest {
+  private _id: string;
+
+  public constructor(request: Request, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the User_Teams query and return a TeamConnection
+   *
+   * @param variables - variables without 'id' to pass into the User_TeamsQuery
+   * @returns parsed response from User_TeamsQuery
+   */
+  public async fetch(variables?: Omit<L.User_TeamsQueryVariables, "id">): Fetch<TeamConnection> {
+    return this._request<L.User_TeamsQuery, L.User_TeamsQueryVariables>(L.User_TeamsDocument, {
+      id: this._id,
+      ...variables,
+    }).then(response => {
+      const data = response?.user?.teams;
+      return data
+        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable Viewer_AssignedIssues Query
  *
  * @param request - function to call the graphql client
@@ -11482,6 +11608,34 @@ export class Viewer_TeamMembershipsQuery extends LinearRequest {
         ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
         : undefined;
     });
+  }
+}
+
+/**
+ * A fetchable Viewer_Teams Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class Viewer_TeamsQuery extends LinearRequest {
+  public constructor(request: Request) {
+    super(request);
+  }
+
+  /**
+   * Call the Viewer_Teams query and return a TeamConnection
+   *
+   * @param variables - variables to pass into the Viewer_TeamsQuery
+   * @returns parsed response from Viewer_TeamsQuery
+   */
+  public async fetch(variables?: L.Viewer_TeamsQueryVariables): Fetch<TeamConnection> {
+    return this._request<L.Viewer_TeamsQuery, L.Viewer_TeamsQueryVariables>(L.Viewer_TeamsDocument, variables).then(
+      response => {
+        const data = response?.viewer?.teams;
+        return data
+          ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          : undefined;
+      }
+    );
   }
 }
 
@@ -12683,6 +12837,31 @@ export class LinearSdk extends LinearRequest {
       githubRepoName,
       githubRepoOwner,
       githubToken,
+      teamId
+    );
+  }
+  /**
+   * Mutation issueImportCreateJira for IssueImportPayload
+   *
+   * @param jiraEmail - required jiraEmail to pass to issueImportCreateJira
+   * @param jiraHostname - required jiraHostname to pass to issueImportCreateJira
+   * @param jiraProject - required jiraProject to pass to issueImportCreateJira
+   * @param jiraToken - required jiraToken to pass to issueImportCreateJira
+   * @param teamId - required teamId to pass to issueImportCreateJira
+   * @returns IssueImportPayload
+   */
+  public issueImportCreateJira(
+    jiraEmail: string,
+    jiraHostname: string,
+    jiraProject: string,
+    jiraToken: string,
+    teamId: string
+  ): Fetch<IssueImportPayload> {
+    return new IssueImportCreateJiraMutation(this._request).fetch(
+      jiraEmail,
+      jiraHostname,
+      jiraProject,
+      jiraToken,
       teamId
     );
   }

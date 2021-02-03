@@ -316,6 +316,8 @@ export type CreateOrganizationInput = {
   timezone?: Maybe<Scalars["String"]>;
   /** The URL key of the organization. */
   urlKey: Scalars["String"];
+  /** JSON serialized UTM parameters associated with the creation of the workspace. */
+  utm?: Maybe<Scalars["String"]>;
 };
 
 /** A custom view that has been saved by a user. */
@@ -1298,6 +1300,8 @@ export type IssueImport = Node & {
   createdAt: Scalars["DateTime"];
   /** The id for the user that started the job. */
   creatorId: Scalars["String"];
+  /** User readable error message, if one has occurred during the import. */
+  error?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The service from which data will be imported. */
@@ -1700,6 +1704,8 @@ export type Mutation = {
   issueCreate: IssuePayload;
   /** Kicks off a GitHub import job. */
   issueImportCreateGithub: IssueImportPayload;
+  /** Kicks off a Jira import job. */
+  issueImportCreateJira: IssueImportPayload;
   /** Archives an issue label. */
   issueLabelArchive: ArchivePayload;
   /** Creates a new label. */
@@ -2051,6 +2057,14 @@ export type MutationIssueImportCreateGithubArgs = {
   githubRepoName: Scalars["String"];
   githubRepoOwner: Scalars["String"];
   githubToken: Scalars["String"];
+  teamId: Scalars["String"];
+};
+
+export type MutationIssueImportCreateJiraArgs = {
+  jiraEmail: Scalars["String"];
+  jiraHostname: Scalars["String"];
+  jiraProject: Scalars["String"];
+  jiraToken: Scalars["String"];
   teamId: Scalars["String"];
 };
 
@@ -3942,7 +3956,9 @@ export type Team = Node & {
   labels: IssueLabelConnection;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
   markedAsDuplicateWorkflowState?: Maybe<WorkflowState>;
-  /** Memberships associated with the team. */
+  /** Users who are members of this team. */
+  members: UserConnection;
+  /** Memberships associated with the team. For easier access of the same data, use `members` query. */
   memberships: TeamMembershipConnection;
   /** The workflow state into which issues are moved when a PR has been merged. */
   mergeWorkflowState?: Maybe<WorkflowState>;
@@ -4001,6 +4017,16 @@ export type TeamIssuesArgs = {
 
 /** An organizational unit that contains issues. */
 export type TeamLabelsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** An organizational unit that contains issues. */
+export type TeamMembersArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -4445,8 +4471,10 @@ export type User = Node & {
   name: Scalars["String"];
   /** Organization in which the user belongs to. */
   organization: Organization;
-  /** Memberships associated with the user. */
+  /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   teamMemberships: TeamMembershipConnection;
+  /** Teams the user is part of. */
+  teams: TeamConnection;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -4476,6 +4504,16 @@ export type UserCreatedIssuesArgs = {
 
 /** A user that has access to the the resources of an organization. */
 export type UserTeamMembershipsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** A user that has access to the the resources of an organization. */
+export type UserTeamsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -4598,7 +4636,7 @@ export type UserSettings = Node & {
    *     entity hasn't been update after creation.
    */
   updatedAt: Scalars["DateTime"];
-  /** The user to whom this notification was targeted for. */
+  /** The user associated with these settings. */
   user: User;
 };
 
@@ -4739,6 +4777,10 @@ export type Webhook = Node & {
   enabled: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** Webhook label */
+  label: Scalars["String"];
+  /** The resource types this webhook is subscribed to. */
+  resourceTypes: Array<Scalars["String"]>;
   /** Secret token for verifying the origin on the recipient side. */
   secret?: Maybe<Scalars["String"]>;
   /** The team that the webhook is associated with. */
@@ -4764,6 +4806,10 @@ export type WebhookCreateInput = {
   enabled?: Maybe<Scalars["Boolean"]>;
   /** The identifier. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** Label for the webhook. */
+  label?: Maybe<Scalars["String"]>;
+  /** List of resources the webhook should subscribe to. */
+  resourceTypes: Array<Scalars["String"]>;
   /** An optional secret token used to sign the webhook payload. */
   secret?: Maybe<Scalars["String"]>;
   /** The identifier or key of the team associated with the Webhook. */
@@ -4792,6 +4838,10 @@ export type WebhookPayload = {
 export type WebhookUpdateInput = {
   /** Whether this webhook is enabled. */
   enabled?: Maybe<Scalars["Boolean"]>;
+  /** Label for the webhook. */
+  label?: Maybe<Scalars["String"]>;
+  /** List of resources the webhook should subscribe to. */
+  resourceTypes?: Maybe<Array<Scalars["String"]>>;
   /** An optional secret token used to sign the Webhook payload. */
   secret?: Maybe<Scalars["String"]>;
   /** The URL that will be called on data changes. */
@@ -5060,7 +5110,7 @@ export type PushSubscriptionFragment = { __typename?: "PushSubscription" } & Pic
 
 export type WebhookFragment = { __typename?: "Webhook" } & Pick<
   Webhook,
-  "secret" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "url" | "enabled"
+  "secret" | "updatedAt" | "resourceTypes" | "archivedAt" | "createdAt" | "id" | "url" | "label" | "enabled"
 > & { team: { __typename?: "Team" } & Pick<Team, "id">; creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type ApiKeyFragment = { __typename?: "ApiKey" } & Pick<
@@ -5075,7 +5125,7 @@ export type ProjectLinkFragment = { __typename?: "ProjectLink" } & Pick<
 
 export type IssueImportFragment = { __typename?: "IssueImport" } & Pick<
   IssueImport,
-  "creatorId" | "updatedAt" | "service" | "status" | "archivedAt" | "createdAt" | "id"
+  "creatorId" | "updatedAt" | "service" | "status" | "archivedAt" | "createdAt" | "id" | "error"
 >;
 
 export type IntegrationResourceFragment = { __typename?: "IntegrationResource" } & Pick<
@@ -6776,6 +6826,20 @@ export type Team_LabelsQuery = { __typename?: "Query" } & {
   team: { __typename?: "Team" } & { labels: { __typename?: "IssueLabelConnection" } & IssueLabelConnectionFragment };
 };
 
+export type Team_MembersQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Team_MembersQuery = { __typename?: "Query" } & {
+  team: { __typename?: "Team" } & { members: { __typename?: "UserConnection" } & UserConnectionFragment };
+};
+
 export type Team_MembershipsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
@@ -6951,6 +7015,20 @@ export type User_TeamMembershipsQuery = { __typename?: "Query" } & {
   };
 };
 
+export type User_TeamsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type User_TeamsQuery = { __typename?: "Query" } & {
+  user: { __typename?: "User" } & { teams: { __typename?: "TeamConnection" } & TeamConnectionFragment };
+};
+
 export type UserSettingsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type UserSettingsQuery = { __typename?: "Query" } & {
@@ -7013,6 +7091,19 @@ export type Viewer_TeamMembershipsQuery = { __typename?: "Query" } & {
   viewer: { __typename?: "User" } & {
     teamMemberships: { __typename?: "TeamMembershipConnection" } & TeamMembershipConnectionFragment;
   };
+};
+
+export type Viewer_TeamsQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Viewer_TeamsQuery = { __typename?: "Query" } & {
+  viewer: { __typename?: "User" } & { teams: { __typename?: "TeamConnection" } & TeamConnectionFragment };
 };
 
 export type WebhookQueryVariables = Exact<{
@@ -7467,6 +7558,18 @@ export type IssueImportCreateGithubMutationVariables = Exact<{
 
 export type IssueImportCreateGithubMutation = { __typename?: "Mutation" } & {
   issueImportCreateGithub: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type IssueImportCreateJiraMutationVariables = Exact<{
+  jiraEmail: Scalars["String"];
+  jiraHostname: Scalars["String"];
+  jiraProject: Scalars["String"];
+  jiraToken: Scalars["String"];
+  teamId: Scalars["String"];
+}>;
+
+export type IssueImportCreateJiraMutation = { __typename?: "Mutation" } & {
+  issueImportCreateJira: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
 };
 
 export type IssueLabelArchiveMutationVariables = Exact<{
@@ -10221,6 +10324,7 @@ export const IssueImportFragmentDoc: DocumentNode<IssueImportFragment, unknown> 
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "error" } },
         ],
       },
     },
@@ -12058,6 +12162,7 @@ export const WebhookFragmentDoc: DocumentNode<WebhookFragment, unknown> = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "secret" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "resourceTypes" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
@@ -12078,6 +12183,7 @@ export const WebhookFragmentDoc: DocumentNode<WebhookFragment, unknown> = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "label" } },
           { kind: "Field", name: { kind: "Name", value: "enabled" } },
         ],
       },
@@ -18407,6 +18513,115 @@ export const Team_LabelsDocument: DocumentNode<Team_LabelsQuery, Team_LabelsQuer
     ...IssueLabelConnectionFragmentDoc.definitions,
   ],
 };
+export const Team_MembersDocument: DocumentNode<Team_MembersQuery, Team_MembersQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "team_members" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "members" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...UserConnectionFragmentDoc.definitions,
+  ],
+};
 export const Team_MembershipsDocument: DocumentNode<Team_MembershipsQuery, Team_MembershipsQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -19622,6 +19837,115 @@ export const User_TeamMembershipsDocument: DocumentNode<
     ...TeamMembershipConnectionFragmentDoc.definitions,
   ],
 };
+export const User_TeamsDocument: DocumentNode<User_TeamsQuery, User_TeamsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "user_teams" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "teams" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamConnectionFragmentDoc.definitions,
+  ],
+};
 export const UserSettingsDocument: DocumentNode<UserSettingsQuery, UserSettingsQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -20056,6 +20380,103 @@ export const Viewer_TeamMembershipsDocument: DocumentNode<
       },
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
+  ],
+};
+export const Viewer_TeamsDocument: DocumentNode<Viewer_TeamsQuery, Viewer_TeamsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "viewer_teams" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "viewer" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "teams" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamConnectionFragmentDoc.definitions,
   ],
 };
 export const WebhookDocument: DocumentNode<WebhookQuery, WebhookQueryVariables> = {
@@ -22491,6 +22912,87 @@ export const IssueImportCreateGithubDocument: DocumentNode<
                 kind: "Argument",
                 name: { kind: "Name", value: "githubToken" },
                 value: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+};
+export const IssueImportCreateJiraDocument: DocumentNode<
+  IssueImportCreateJiraMutation,
+  IssueImportCreateJiraMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportCreateJira" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraHostname" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraProject" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraToken" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportCreateJira" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraEmail" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraHostname" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraHostname" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraProject" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraProject" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraToken" } },
               },
               {
                 kind: "Argument",

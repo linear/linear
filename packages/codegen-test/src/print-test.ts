@@ -170,7 +170,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
           `No ${getLast(
             operation.sdkPath
           )} found from ${fieldName} query - cannot test ${clientName}.${fieldName} query`,
-          operation.sdkPath.length > 0
+          operation.sdkPath.length > 1
         )
       ),
 
@@ -188,7 +188,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                 ),
                 printLines([
                   `const ${itemField} = await ${clientName}.${itemField}${itemOperationArgs}`,
-                  itemOperations.length ? printSet(`_${itemField}`, itemField) : undefined,
+                  itemOperations.length || itemQueries.length ? printSet(`_${itemField}`, itemField) : undefined,
                   `expect(${itemField} instanceof ${itemType})`,
                 ]),
                 `No first ${connectionType} found from ${fieldName} connection query - cannot test ${itemField} query`
