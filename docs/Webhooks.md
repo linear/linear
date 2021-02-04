@@ -5,7 +5,7 @@ Linear provides **webhooks** which allow you to receive HTTP push notifications 
 Webhooks are specific to a `Team`, so you can configure webhooks to satisfy the needs of each team in your organization. Webhook updates are currently supported for following models:
 
 - `**Issue**`
-- `**Commens**`
+- `**Comments**`
 - `**Reaction**` (comment emoji reactions)
 
 ## How does a Webhook work?
@@ -80,7 +80,7 @@ Once you've created an API token and found out the `teamId` that will own the We
 
 #### Creating a new Webhook
 
-To create a new Webhook via the API, you can create a new Webhook with by calling a `webhookCreate` mutation with the `teamId` and `url` of your webhook:
+To create a new Webhook via the API, you can create a new Webhook with by calling a `webhookCreate` mutation with the `teamId` and `url` of your webhook, and the preferred `resourceTypes` (`[Comment, Issue, IssueLabel, Project, Cycle, Reaction]`):
 
 ```
 mutation {
@@ -88,6 +88,7 @@ mutation {
     input: {
       url: "http://example.com/webhooks/linear-consumer"
       teamId: "72b2a2dc-6f4f-4423-9d34-24b5bd10634a"
+      resourceTypes: ["Issue"]
     }
   ) {
     success
