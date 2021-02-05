@@ -75,6 +75,7 @@ function printOperationArgs(operation: SdkOperation): string {
         : "UNMAPPED_MOCK_TYPE"
     )
     .filter(nonNullable);
+
   return fieldMockArgs.length || operation.optionalArgs.args.length ? `(${printList(fieldMockArgs)})` : "";
 }
 
@@ -89,32 +90,36 @@ function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation,
   const fieldName = getLast(operation.path) ?? "UNKNOWN_FIELD_NAME";
   const fieldType = printList([Sdk.NAMESPACE, operation.print.model], ".");
 
+  const isModelObject = operation.parent?.model?.fields.object.find(field => field.name === getLast(operation.path));
+
   /** Mock data for any queries with required variables that cannot be sourced via a connection */
   return printDescribe(
     operation.name,
     [`Test ${operation.name} query`],
     printLines([
-      sdkOperations.length ? `let _${fieldName}: ${fieldType}` : undefined,
+      sdkOperations.length ? `let _${fieldName}: ${fieldType} | undefined` : undefined,
       "\n",
-      printComment([`Test the ${sdkKey || "root"} query for ${operation.name}`]),
+      printComment([`Test the ${sdkKey || "root"} model query for ${operation.name}`]),
       printIt(
-        fieldName,
+        printList([sdkKey ? sdkKey : undefined, fieldName], "."),
         printElseThrow(
           clientName,
           printLines([
-            `const ${fieldName} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
+            `const ${fieldName} = ${
+              isModelObject
+                ? `${clientName}.${fieldName}`
+                : `await ${clientName}.${fieldName}${printOperationArgs(operation)}`
+            }`,
             sdkOperations.length ? printSet(`_${fieldName}`, fieldName) : undefined,
             `expect(${fieldName} instanceof ${fieldType})`,
           ]),
-          `No ${getLast(
-            operation.sdkPath
-          )} found from ${fieldName} query - cannot test ${clientName}.${fieldName} query`,
-          operation.sdkPath.length > 0
+          `No ${getLast(operation.sdkPath)} found - cannot test ${clientName}.${fieldName} query`,
+          clientName === "client"
         )
       ),
       printLines(sdkOperations.map(sdkOperation => printQueryTest(context, sdkOperation, index))),
     ]),
-    operation.path.length > 1
+    operation.sdkPath.length > 0
   );
 }
 
@@ -152,7 +157,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
             "\n",
           ])
         : undefined,
-      printComment([`Test the ${sdkKey || "root"} query for the ${connectionType} connection`]),
+      printComment([`Test the ${sdkKey || "root"} connection query for the ${connectionType}`]),
       printIt(
         printList([sdkKey ? sdkKey : undefined, fieldName], "."),
         printElseThrow(
@@ -167,10 +172,8 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
               : undefined,
             `expect(${fieldName} instanceof ${fieldType})`,
           ]),
-          `No ${getLast(
-            operation.sdkPath
-          )} found from ${fieldName} query - cannot test ${clientName}.${fieldName} query`,
-          operation.sdkPath.length > 1
+          `No ${getLast(operation.sdkPath)} found - cannot test ${clientName}.${fieldName} query`,
+          clientName === "client"
         )
       ),
 
@@ -191,7 +194,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                   itemOperations.length || itemQueries.length ? printSet(`_${itemField}`, itemField) : undefined,
                   `expect(${itemField} instanceof ${itemType})`,
                 ]),
-                `No first ${connectionType} found from ${fieldName} connection query - cannot test ${itemField} query`
+                `No first ${connectionType} found in connection - cannot test ${itemField} query`
               )
             ),
           ]
@@ -206,47 +209,22 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
               return printLines([
                 printComment([`Test the ${itemField}.${field.name} query for ${field.type}`]),
                 printIt(
-                  `${itemField}.${field.name}`,
+                  printList([sdkKey ? sdkKey : undefined, itemField, field.name], "."),
                   printElseThrow(
                     `_${itemField}`,
                     printLines([
                       `const ${itemField}_${field.name} = await _${itemField}.${field.name}`,
                       `expect(${itemField}_${field.name} instanceof ${field.type})`,
                     ]),
-                    `No ${connectionType} found from ${itemField} query - cannot test ${itemField}.${field.name} query`
+                    `No ${connectionType} found - cannot test ${itemField}.${field.name} query`
                   )
                 ),
               ]);
             })
           )
         : undefined,
-
-      //   itemConnections.length
-      //     ? printLines(
-      //         itemConnections.map(field => {
-      //           return printLines([
-      //             printComment([`Test the ${itemField}.${field.name} connection query for ${field.type}`]),
-      //             printIt(
-      //               `${itemField}.${field.name}`,
-      //               `if (_${itemField}) {
-      //                   ${printLines([
-      //                     `const ${itemField}_${field.name} = await _${itemField}.${field.name}${printOperationArgs(
-      //                       operation
-      //                     )}`,
-      //                     `expect(${itemField}_${field.name} instanceof ${field.type})`,
-      //                   ])}
-      //                 } else {
-      //                   throw new Error('No ${connectionType} found from ${itemField} query - cannot test ${itemField}.${
-      //                 field.name
-      //               } connection query')
-      //                 }`
-      //             ),
-      //           ]);
-      //         })
-      //       )
-      //     : undefined,
     ]),
-    operation.path.length > 1
+    operation.sdkPath.length > 0
   );
 }
 

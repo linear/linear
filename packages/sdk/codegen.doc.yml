@@ -8,7 +8,8 @@ config:
     - "disableReason"
     - "defaultTemplateForMembersId"
     - "defaultTemplateForNonMembersId"
-    - "gitBranchFormat"
+    - "integrationResource"
+    - "integrationResources"
     - "subscription"
 generates:
   src/_generated_documents.graphql:

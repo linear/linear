@@ -1348,6 +1348,8 @@ export class IntegrationResource extends LinearRequest {
     this.resourceId = data.resourceId ?? undefined;
     this.resourceType = data.resourceType ?? undefined;
     this.updatedAt = data.updatedAt ?? undefined;
+    this.data = data.data ? new IntegrationResourceData(request, data.data) : undefined;
+    this.pullRequest = data.pullRequest ? new PullRequestPayload(request, data.pullRequest) : undefined;
     this._integration = data.integration ?? undefined;
     this._issue = data.issue ?? undefined;
   }
@@ -1367,6 +1369,10 @@ export class IntegrationResource extends LinearRequest {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: L.Scalars["DateTime"];
+  /** Detailed information about the external resource. */
+  public data?: IntegrationResourceData;
+  /** Pull request information for GitHub pull requests and GitLab merge requests. */
+  public pullRequest?: PullRequestPayload;
   /** The integration that the resource is associated with. */
   public get integration(): Fetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -1374,14 +1380,6 @@ export class IntegrationResource extends LinearRequest {
   /** The issue that the resource is associated with. */
   public get issue(): Fetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
-  }
-  /** Detailed information about the external resource. */
-  public get data() {
-    return this.id ? new IntegrationResource_DataQuery(this._request, this.id).fetch() : undefined;
-  }
-  /** Pull request information for GitHub pull requests and GitLab merge requests. */
-  public get pullRequest() {
-    return this.id ? new IntegrationResource_PullRequestQuery(this._request, this.id).fetch() : undefined;
   }
 }
 /**
@@ -1668,10 +1666,6 @@ export class Issue extends LinearRequest {
   /** History entries associated with the issue. */
   public history(variables?: Omit<L.Issue_HistoryQueryVariables, "id">) {
     return this.id ? new Issue_HistoryQuery(this._request, this.id).fetch(variables) : undefined;
-  }
-  /** Integration resources for this issue. */
-  public integrationResources(variables?: Omit<L.Issue_IntegrationResourcesQueryVariables, "id">) {
-    return this.id ? new Issue_IntegrationResourcesQuery(this._request, this.id).fetch(variables) : undefined;
   }
   /** Inverse relations associated with this issue. */
   public inverseRelations(variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">) {
@@ -2560,6 +2554,7 @@ export class Organization extends LinearRequest {
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
     this.createdIssueCount = data.createdIssueCount ?? undefined;
+    this.gitBranchFormat = data.gitBranchFormat ?? undefined;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled ?? undefined;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled ?? undefined;
     this.id = data.id ?? undefined;
@@ -2581,6 +2576,8 @@ export class Organization extends LinearRequest {
   public createdAt?: L.Scalars["DateTime"];
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
+  /** How git branches are formatted. If null, default formatting will be used. */
+  public gitBranchFormat?: string;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
   public gitLinkbackMessagesEnabled?: boolean;
   /** Whether the Git integration linkback messages should be sent to public repositories. */
@@ -5252,68 +5249,6 @@ export class IntegrationQuery extends LinearRequest {
 }
 
 /**
- * A fetchable IntegrationResource Query
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationResourceQuery extends LinearRequest {
-  public constructor(request: Request) {
-    super(request);
-  }
-
-  /**
-   * Call the IntegrationResource query and return a IntegrationResource
-   *
-   * @param id - required id to pass to integrationResource
-   * @returns parsed response from IntegrationResourceQuery
-   */
-  public async fetch(id: string): Fetch<IntegrationResource> {
-    return this._request<L.IntegrationResourceQuery, L.IntegrationResourceQueryVariables>(
-      L.IntegrationResourceDocument,
-      {
-        id,
-      }
-    ).then(response => {
-      const data = response?.integrationResource;
-      return data ? new IntegrationResource(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable IntegrationResources Query
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationResourcesQuery extends LinearRequest {
-  public constructor(request: Request) {
-    super(request);
-  }
-
-  /**
-   * Call the IntegrationResources query and return a IntegrationResourceConnection
-   *
-   * @param variables - variables to pass into the IntegrationResourcesQuery
-   * @returns parsed response from IntegrationResourcesQuery
-   */
-  public async fetch(variables?: L.IntegrationResourcesQueryVariables): Fetch<IntegrationResourceConnection> {
-    return this._request<L.IntegrationResourcesQuery, L.IntegrationResourcesQueryVariables>(
-      L.IntegrationResourcesDocument,
-      variables
-    ).then(response => {
-      const data = response?.integrationResources;
-      return data
-        ? new IntegrationResourceConnection(
-            this._request,
-            pagination => this.fetch({ ...variables, ...pagination }),
-            data
-          )
-        : undefined;
-    });
-  }
-}
-
-/**
  * A fetchable Integrations Query
  *
  * @param request - function to call the graphql client
@@ -6071,44 +6006,16 @@ export class SyncBootstrapQuery extends LinearRequest {
   /**
    * Call the SyncBootstrap query and return a SyncResponse
    *
-   * @param databaseVersion - required databaseVersion to pass to syncBootstrap
-   * @param sinceSyncId - required sinceSyncId to pass to syncBootstrap
+   * @param variables - variables to pass into the SyncBootstrapQuery
    * @returns parsed response from SyncBootstrapQuery
    */
-  public async fetch(databaseVersion: number, sinceSyncId: number): Fetch<SyncResponse> {
-    return this._request<L.SyncBootstrapQuery, L.SyncBootstrapQueryVariables>(L.SyncBootstrapDocument, {
-      databaseVersion,
-      sinceSyncId,
-    }).then(response => {
-      const data = response?.syncBootstrap;
-      return data ? new SyncResponse(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable SyncUpdates Query
- *
- * @param request - function to call the graphql client
- */
-export class SyncUpdatesQuery extends LinearRequest {
-  public constructor(request: Request) {
-    super(request);
-  }
-
-  /**
-   * Call the SyncUpdates query and return a SyncResponse
-   *
-   * @param sinceSyncId - required sinceSyncId to pass to syncUpdates
-   * @returns parsed response from SyncUpdatesQuery
-   */
-  public async fetch(sinceSyncId: number): Fetch<SyncResponse> {
-    return this._request<L.SyncUpdatesQuery, L.SyncUpdatesQueryVariables>(L.SyncUpdatesDocument, {
-      sinceSyncId,
-    }).then(response => {
-      const data = response?.syncUpdates;
-      return data ? new SyncResponse(this._request, data) : undefined;
-    });
+  public async fetch(variables?: L.SyncBootstrapQueryVariables): Fetch<SyncResponse> {
+    return this._request<L.SyncBootstrapQuery, L.SyncBootstrapQueryVariables>(L.SyncBootstrapDocument, variables).then(
+      response => {
+        const data = response?.syncBootstrap;
+        return data ? new SyncResponse(this._request, data) : undefined;
+      }
+    );
   }
 }
 
@@ -7777,6 +7684,37 @@ export class IssueCreateMutation extends LinearRequest {
     }).then(response => {
       const data = response?.issueCreate;
       return data ? new IssuePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IssueImportCreateClubhouse Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportCreateClubhouseMutation extends LinearRequest {
+  public constructor(request: Request) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportCreateClubhouse mutation and return a IssueImportPayload
+   *
+   * @param clubhouseToken - required clubhouseToken to pass to issueImportCreateClubhouse
+   * @param teamId - required teamId to pass to issueImportCreateClubhouse
+   * @returns parsed response from IssueImportCreateClubhouseMutation
+   */
+  public async fetch(clubhouseToken: string, teamId: string): Fetch<IssueImportPayload> {
+    return this._request<L.IssueImportCreateClubhouseMutation, L.IssueImportCreateClubhouseMutationVariables>(
+      L.IssueImportCreateClubhouseDocument,
+      {
+        clubhouseToken,
+        teamId,
+      }
+    ).then(response => {
+      const data = response?.issueImportCreateClubhouse;
+      return data ? new IssueImportPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10240,198 +10178,6 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
 }
 
 /**
- * A fetchable IntegrationResource_Data Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to integrationResource
- */
-export class IntegrationResource_DataQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
-    super(request);
-    this._id = id;
-  }
-
-  /**
-   * Call the IntegrationResource_Data query and return a IntegrationResourceData
-   *
-   * @returns parsed response from IntegrationResource_DataQuery
-   */
-  public async fetch(): Fetch<IntegrationResourceData> {
-    return this._request<L.IntegrationResource_DataQuery, L.IntegrationResource_DataQueryVariables>(
-      L.IntegrationResource_DataDocument,
-      {
-        id: this._id,
-      }
-    ).then(response => {
-      const data = response?.integrationResource?.data;
-      return data ? new IntegrationResourceData(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable IntegrationResource_PullRequest Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to integrationResource
- */
-export class IntegrationResource_PullRequestQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
-    super(request);
-    this._id = id;
-  }
-
-  /**
-   * Call the IntegrationResource_PullRequest query and return a PullRequestPayload
-   *
-   * @returns parsed response from IntegrationResource_PullRequestQuery
-   */
-  public async fetch(): Fetch<PullRequestPayload> {
-    return this._request<L.IntegrationResource_PullRequestQuery, L.IntegrationResource_PullRequestQueryVariables>(
-      L.IntegrationResource_PullRequestDocument,
-      {
-        id: this._id,
-      }
-    ).then(response => {
-      const data = response?.integrationResource?.pullRequest;
-      return data ? new PullRequestPayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable IntegrationResource_Data_GithubCommit Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to integrationResource_data
- */
-export class IntegrationResource_Data_GithubCommitQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
-    super(request);
-    this._id = id;
-  }
-
-  /**
-   * Call the IntegrationResource_Data_GithubCommit query and return a CommitPayload
-   *
-   * @returns parsed response from IntegrationResource_Data_GithubCommitQuery
-   */
-  public async fetch(): Fetch<CommitPayload> {
-    return this._request<
-      L.IntegrationResource_Data_GithubCommitQuery,
-      L.IntegrationResource_Data_GithubCommitQueryVariables
-    >(L.IntegrationResource_Data_GithubCommitDocument, {
-      id: this._id,
-    }).then(response => {
-      const data = response?.integrationResource?.data?.githubCommit;
-      return data ? new CommitPayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable IntegrationResource_Data_GithubPullRequest Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to integrationResource_data
- */
-export class IntegrationResource_Data_GithubPullRequestQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
-    super(request);
-    this._id = id;
-  }
-
-  /**
-   * Call the IntegrationResource_Data_GithubPullRequest query and return a PullRequestPayload
-   *
-   * @returns parsed response from IntegrationResource_Data_GithubPullRequestQuery
-   */
-  public async fetch(): Fetch<PullRequestPayload> {
-    return this._request<
-      L.IntegrationResource_Data_GithubPullRequestQuery,
-      L.IntegrationResource_Data_GithubPullRequestQueryVariables
-    >(L.IntegrationResource_Data_GithubPullRequestDocument, {
-      id: this._id,
-    }).then(response => {
-      const data = response?.integrationResource?.data?.githubPullRequest;
-      return data ? new PullRequestPayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable IntegrationResource_Data_GitlabMergeRequest Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to integrationResource_data
- */
-export class IntegrationResource_Data_GitlabMergeRequestQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
-    super(request);
-    this._id = id;
-  }
-
-  /**
-   * Call the IntegrationResource_Data_GitlabMergeRequest query and return a PullRequestPayload
-   *
-   * @returns parsed response from IntegrationResource_Data_GitlabMergeRequestQuery
-   */
-  public async fetch(): Fetch<PullRequestPayload> {
-    return this._request<
-      L.IntegrationResource_Data_GitlabMergeRequestQuery,
-      L.IntegrationResource_Data_GitlabMergeRequestQueryVariables
-    >(L.IntegrationResource_Data_GitlabMergeRequestDocument, {
-      id: this._id,
-    }).then(response => {
-      const data = response?.integrationResource?.data?.gitlabMergeRequest;
-      return data ? new PullRequestPayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable IntegrationResource_Data_SentryIssue Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to integrationResource_data
- */
-export class IntegrationResource_Data_SentryIssueQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
-    super(request);
-    this._id = id;
-  }
-
-  /**
-   * Call the IntegrationResource_Data_SentryIssue query and return a SentryIssuePayload
-   *
-   * @returns parsed response from IntegrationResource_Data_SentryIssueQuery
-   */
-  public async fetch(): Fetch<SentryIssuePayload> {
-    return this._request<
-      L.IntegrationResource_Data_SentryIssueQuery,
-      L.IntegrationResource_Data_SentryIssueQueryVariables
-    >(L.IntegrationResource_Data_SentryIssueDocument, {
-      id: this._id,
-    }).then(response => {
-      const data = response?.integrationResource?.data?.sentryIssue;
-      return data ? new SentryIssuePayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
  * A fetchable InviteInfo_InviteData Query
  *
  * @param request - function to call the graphql client
@@ -10559,48 +10305,6 @@ export class Issue_HistoryQuery extends LinearRequest {
       const data = response?.issue?.history;
       return data
         ? new IssueHistoryConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
-        : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable Issue_IntegrationResources Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to issue
- */
-export class Issue_IntegrationResourcesQuery extends LinearRequest {
-  private _id: string;
-
-  public constructor(request: Request, id: string) {
-    super(request);
-    this._id = id;
-  }
-
-  /**
-   * Call the Issue_IntegrationResources query and return a IntegrationResourceConnection
-   *
-   * @param variables - variables without 'id' to pass into the Issue_IntegrationResourcesQuery
-   * @returns parsed response from Issue_IntegrationResourcesQuery
-   */
-  public async fetch(
-    variables?: Omit<L.Issue_IntegrationResourcesQueryVariables, "id">
-  ): Fetch<IntegrationResourceConnection> {
-    return this._request<L.Issue_IntegrationResourcesQuery, L.Issue_IntegrationResourcesQueryVariables>(
-      L.Issue_IntegrationResourcesDocument,
-      {
-        id: this._id,
-        ...variables,
-      }
-    ).then(response => {
-      const data = response?.issue?.integrationResources;
-      return data
-        ? new IntegrationResourceConnection(
-            this._request,
-            pagination => this.fetch({ ...variables, ...pagination }),
-            data
-          )
         : undefined;
     });
   }
@@ -11906,26 +11610,6 @@ export class LinearSdk extends LinearRequest {
     return new IntegrationQuery(this._request).fetch(id);
   }
   /**
-   * Query integrationResource for IntegrationResource
-   * One specific integration resource. (e.g. linked GitHub pull requests for an issue)
-   *
-   * @param id - required id to pass to integrationResource
-   * @returns IntegrationResource
-   */
-  public integrationResource(id: string): Fetch<IntegrationResource> {
-    return new IntegrationResourceQuery(this._request).fetch(id);
-  }
-  /**
-   * Query integrationResources for IntegrationResourceConnection
-   * All integrations resources (e.g. linked GitHub pull requests for issues).
-   *
-   * @param variables - variables to pass into the IntegrationResourcesQuery
-   * @returns IntegrationResourceConnection
-   */
-  public integrationResources(variables?: L.IntegrationResourcesQueryVariables): Fetch<IntegrationResourceConnection> {
-    return new IntegrationResourcesQuery(this._request).fetch(variables);
-  }
-  /**
    * Query integrations for IntegrationConnection
    * All integrations.
    *
@@ -12208,22 +11892,11 @@ export class LinearSdk extends LinearRequest {
    * Query syncBootstrap for SyncResponse
    * Fetch data to catch up the client to the state of the world.
    *
-   * @param databaseVersion - required databaseVersion to pass to syncBootstrap
-   * @param sinceSyncId - required sinceSyncId to pass to syncBootstrap
+   * @param variables - variables to pass into the SyncBootstrapQuery
    * @returns SyncResponse
    */
-  public syncBootstrap(databaseVersion: number, sinceSyncId: number): Fetch<SyncResponse> {
-    return new SyncBootstrapQuery(this._request).fetch(databaseVersion, sinceSyncId);
-  }
-  /**
-   * Query syncUpdates for SyncResponse
-   * Fetches delta packets to catch up the user to the current state of the world.
-   *
-   * @param sinceSyncId - required sinceSyncId to pass to syncUpdates
-   * @returns SyncResponse
-   */
-  public syncUpdates(sinceSyncId: number): Fetch<SyncResponse> {
-    return new SyncUpdatesQuery(this._request).fetch(sinceSyncId);
+  public syncBootstrap(variables?: L.SyncBootstrapQueryVariables): Fetch<SyncResponse> {
+    return new SyncBootstrapQuery(this._request).fetch(variables);
   }
   /**
    * Query team for Team
@@ -12817,6 +12490,16 @@ export class LinearSdk extends LinearRequest {
    */
   public issueCreate(input: L.IssueCreateInput): Fetch<IssuePayload> {
     return new IssueCreateMutation(this._request).fetch(input);
+  }
+  /**
+   * Mutation issueImportCreateClubhouse for IssueImportPayload
+   *
+   * @param clubhouseToken - required clubhouseToken to pass to issueImportCreateClubhouse
+   * @param teamId - required teamId to pass to issueImportCreateClubhouse
+   * @returns IssueImportPayload
+   */
+  public issueImportCreateClubhouse(clubhouseToken: string, teamId: string): Fetch<IssueImportPayload> {
+    return new IssueImportCreateClubhouseMutation(this._request).fetch(clubhouseToken, teamId);
   }
   /**
    * Mutation issueImportCreateGithub for IssueImportPayload

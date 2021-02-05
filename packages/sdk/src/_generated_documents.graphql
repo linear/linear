@@ -775,6 +775,8 @@ fragment Issue on Issue {
 fragment Organization on Organization {
   # Allowed authentication providers, empty array means all are allowed
   allowedAuthServices
+  # How git branches are formatted. If null, default formatting will be used.
+  gitBranchFormat
   # Number of active users in the organization.
   userCount
   # Number of issues in the organization.
@@ -2598,94 +2600,6 @@ query integration($id: String!) {
     ...Integration
   }
 }
-# One specific integration resource. (e.g. linked GitHub pull requests for an issue)
-query integrationResource($id: String!) {
-  integrationResource(id: $id) {
-    ...IntegrationResource
-  }
-}
-# Detailed information about the external resource.
-query integrationResource_data($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      ...IntegrationResourceData
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'githubCommit'
-query integrationResource_data_githubCommit($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      githubCommit {
-        ...CommitPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'githubPullRequest'
-query integrationResource_data_githubPullRequest($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      githubPullRequest {
-        ...PullRequestPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'gitlabMergeRequest'
-query integrationResource_data_gitlabMergeRequest($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      gitlabMergeRequest {
-        ...PullRequestPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'sentryIssue'
-query integrationResource_data_sentryIssue($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      sentryIssue {
-        ...SentryIssuePayload
-      }
-    }
-  }
-}
-# Pull request information for GitHub pull requests and GitLab merge requests.
-query integrationResource_pullRequest($id: String!) {
-  integrationResource(id: $id) {
-    pullRequest {
-      ...PullRequestPayload
-    }
-  }
-}
-# All integrations resources (e.g. linked GitHub pull requests for issues).
-query integrationResources(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  integrationResources(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...IntegrationResourceConnection
-  }
-}
 # All integrations.
 query integrations(
   # A cursor to be used with first for forward pagination
@@ -2826,35 +2740,6 @@ query issue_history(
       orderBy: $orderBy
     ) {
       ...IssueHistoryConnection
-    }
-  }
-}
-# Integration resources for this issue.
-query issue_integrationResources(
-  $id: String!
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    integrationResources(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...IntegrationResourceConnection
     }
   }
 }
@@ -3666,21 +3551,12 @@ query ssoUrlFromEmail(
 }
 # Fetch data to catch up the client to the state of the world.
 query syncBootstrap(
-  # The version of the backend database the client has locally stored.
-  $databaseVersion: Int!
-  # The last sync id the client has seen.
-  $sinceSyncId: Int!
+  # Deprecated.
+  $databaseVersion: Int
+  # Deprecated.
+  $sinceSyncId: Int
 ) {
   syncBootstrap(databaseVersion: $databaseVersion, sinceSyncId: $sinceSyncId) {
-    ...SyncResponse
-  }
-}
-# Fetches delta packets to catch up the user to the current state of the world.
-query syncUpdates(
-  # The last sync id the client has seen.
-  $sinceSyncId: Float!
-) {
-  syncUpdates(sinceSyncId: $sinceSyncId) {
     ...SyncResponse
   }
 }
@@ -4854,6 +4730,17 @@ mutation issueCreate(
 ) {
   issueCreate(input: $input) {
     ...IssuePayload
+  }
+}
+# Kicks off a Clubhouse import job.
+mutation issueImportCreateClubhouse(
+  # Clubhouse token to fetch information from the Clubhouse API.
+  $clubhouseToken: String!
+  # ID of the team into which to import data.
+  $teamId: String!
+) {
+  issueImportCreateClubhouse(clubhouseToken: $clubhouseToken, teamId: $teamId) {
+    ...IssueImportPayload
   }
 }
 # Kicks off a GitHub import job.

@@ -2996,6 +2996,19 @@ type Mutation {
     input: IssueCreateInput!
   ): IssuePayload!
   """
+  Kicks off a Clubhouse import job.
+  """
+  issueImportCreateClubhouse(
+    """
+    Clubhouse token to fetch information from the Clubhouse API.
+    """
+    clubhouseToken: String!
+    """
+    ID of the team into which to import data.
+    """
+    teamId: String!
+  ): IssueImportPayload!
+  """
   Kicks off a GitHub import job.
   """
   issueImportCreateGithub(
@@ -4132,7 +4145,7 @@ type Organization implements Node {
   """
   How git branches are formatted. If null, default formatting will be used.
   """
-  gitBranchFormat: String!
+  gitBranchFormat: String
   """
   Whether the Git integration linkback messages should be sent to private repositories.
   """
@@ -5823,28 +5836,19 @@ type Query {
   """
   The organization's subscription.
   """
-  subscription: Subscription!
+  subscription: Subscription
   """
   Fetch data to catch up the client to the state of the world.
   """
   syncBootstrap(
     """
-    The version of the backend database the client has locally stored.
+    Deprecated.
     """
-    databaseVersion: Int!
+    databaseVersion: Int
     """
-    The last sync id the client has seen.
+    Deprecated.
     """
-    sinceSyncId: Int!
-  ): SyncResponse!
-  """
-  Fetches delta packets to catch up the user to the current state of the world.
-  """
-  syncUpdates(
-    """
-    The last sync id the client has seen.
-    """
-    sinceSyncId: Float!
+    sinceSyncId: Int
   ): SyncResponse!
   """
   One specific team.
@@ -6468,11 +6472,11 @@ type Team implements Node {
   """
   The default template to use for new issues created by members of the team.
   """
-  defaultTemplateForMembersId: String!
+  defaultTemplateForMembersId: String
   """
   The default template to use for new issues created by non-members of the team.
   """
-  defaultTemplateForNonMembersId: String!
+  defaultTemplateForNonMembersId: String
   """
   The team's description.
   """
@@ -7449,7 +7453,7 @@ type User implements Node {
   """
   Reason why is the account disabled.
   """
-  disableReason: String!
+  disableReason: String
   """
   The user's display (nick) name. Unique within each organization.
   """
