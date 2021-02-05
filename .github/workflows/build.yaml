@@ -28,15 +28,12 @@ jobs:
 
       # Runs the bootstrap action
       - name: Run bootstrap
-        uses: actions/setup-node@v2
         run: yarn bootstrap
 
       # Runs the build action
       - name: Run build
-        uses: actions/setup-node@v2
         run: yarn build
 
       # Runs the test action
       - name: Run test
-        uses: actions/setup-node@v2
         run: yarn test
