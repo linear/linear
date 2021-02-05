@@ -28,18 +28,15 @@ jobs:
 
       # Runs the bootstrap action
       - name: Run bootstrap
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: bootstrap # will run `yarn bootstrap` command
+        uses: actions/setup-node@v2
+        run: yarn bootstrap
 
       # Runs the build action
       - name: Run build
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: build # will run `yarn build` command
+        uses: actions/setup-node@v2
+        run: yarn build
 
       # Runs the test action
       - name: Run test
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: test # will run `yarn test` command
+        uses: actions/setup-node@v2
+        run: yarn test
