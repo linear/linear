@@ -20,6 +20,12 @@ jobs:
       - name: Add yarn cache
         uses: c-hive/gha-yarn-cache@v1
 
+      # Set node version
+      - name: Use node 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
       # Runs the bootstrap action
       - name: Run bootstrap
         uses: borales/actions-yarn@v2.0.0
