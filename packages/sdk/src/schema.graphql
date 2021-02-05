@@ -3000,6 +3000,10 @@ type Mutation {
   """
   issueImportCreateClubhouse(
     """
+    Clubhouse team name to choose which issues we should import.
+    """
+    clubhouseTeamName: String!
+    """
     Clubhouse token to fetch information from the Clubhouse API.
     """
     clubhouseToken: String!

@@ -19666,6 +19666,22 @@
             "description": "Kicks off a Clubhouse import job.",
             "args": [
               {
+                "name": "clubhouseTeamName",
+                "description": "Clubhouse team name to choose which issues we should import.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "clubhouseToken",
                 "description": "Clubhouse token to fetch information from the Clubhouse API.",
                 "type": {

@@ -18,22 +18,22 @@ jobs:
 
       # Sets up yarn caching
       - name: Add yarn cache
-      - uses: c-hive/gha-yarn-cache@v1
+        uses: c-hive/gha-yarn-cache@v1
 
       # Runs the bootstrap action
       - name: Run bootstrap
-      - uses: borales/actions-yarn@v2.0.0
+        uses: borales/actions-yarn@v2.0.0
         with:
           cmd: bootstrap # will run `yarn bootstrap` command
 
       # Runs the build action
       - name: Run build
-      - uses: borales/actions-yarn@v2.0.0
+        uses: borales/actions-yarn@v2.0.0
         with:
           cmd: build # will run `yarn build` command
 
       # Runs the test action
       - name: Run test
-      - uses: borales/actions-yarn@v2.0.0
+        uses: borales/actions-yarn@v2.0.0
         with:
           cmd: test # will run `yarn test` command

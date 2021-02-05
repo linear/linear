@@ -7701,14 +7701,16 @@ export class IssueImportCreateClubhouseMutation extends LinearRequest {
   /**
    * Call the IssueImportCreateClubhouse mutation and return a IssueImportPayload
    *
+   * @param clubhouseTeamName - required clubhouseTeamName to pass to issueImportCreateClubhouse
    * @param clubhouseToken - required clubhouseToken to pass to issueImportCreateClubhouse
    * @param teamId - required teamId to pass to issueImportCreateClubhouse
    * @returns parsed response from IssueImportCreateClubhouseMutation
    */
-  public async fetch(clubhouseToken: string, teamId: string): Fetch<IssueImportPayload> {
+  public async fetch(clubhouseTeamName: string, clubhouseToken: string, teamId: string): Fetch<IssueImportPayload> {
     return this._request<L.IssueImportCreateClubhouseMutation, L.IssueImportCreateClubhouseMutationVariables>(
       L.IssueImportCreateClubhouseDocument,
       {
+        clubhouseTeamName,
         clubhouseToken,
         teamId,
       }
@@ -12494,12 +12496,17 @@ export class LinearSdk extends LinearRequest {
   /**
    * Mutation issueImportCreateClubhouse for IssueImportPayload
    *
+   * @param clubhouseTeamName - required clubhouseTeamName to pass to issueImportCreateClubhouse
    * @param clubhouseToken - required clubhouseToken to pass to issueImportCreateClubhouse
    * @param teamId - required teamId to pass to issueImportCreateClubhouse
    * @returns IssueImportPayload
    */
-  public issueImportCreateClubhouse(clubhouseToken: string, teamId: string): Fetch<IssueImportPayload> {
-    return new IssueImportCreateClubhouseMutation(this._request).fetch(clubhouseToken, teamId);
+  public issueImportCreateClubhouse(
+    clubhouseTeamName: string,
+    clubhouseToken: string,
+    teamId: string
+  ): Fetch<IssueImportPayload> {
+    return new IssueImportCreateClubhouseMutation(this._request).fetch(clubhouseTeamName, clubhouseToken, teamId);
   }
   /**
    * Mutation issueImportCreateGithub for IssueImportPayload

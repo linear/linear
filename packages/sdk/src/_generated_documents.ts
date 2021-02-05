@@ -2056,6 +2056,7 @@ export type MutationIssueCreateArgs = {
 };
 
 export type MutationIssueImportCreateClubhouseArgs = {
+  clubhouseTeamName: Scalars["String"];
   clubhouseToken: Scalars["String"];
   teamId: Scalars["String"];
 };
@@ -7439,6 +7440,7 @@ export type IssueCreateMutation = { __typename?: "Mutation" } & {
 };
 
 export type IssueImportCreateClubhouseMutationVariables = Exact<{
+  clubhouseTeamName: Scalars["String"];
   clubhouseToken: Scalars["String"];
   teamId: Scalars["String"];
 }>;
@@ -22154,6 +22156,11 @@ export const IssueImportCreateClubhouseDocument: DocumentNode<
       variableDefinitions: [
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "clubhouseTeamName" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "clubhouseToken" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -22170,6 +22177,11 @@ export const IssueImportCreateClubhouseDocument: DocumentNode<
             kind: "Field",
             name: { kind: "Name", value: "issueImportCreateClubhouse" },
             arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "clubhouseTeamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "clubhouseTeamName" } },
+              },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "clubhouseToken" },

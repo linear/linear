@@ -4734,12 +4734,14 @@ mutation issueCreate(
 }
 # Kicks off a Clubhouse import job.
 mutation issueImportCreateClubhouse(
+  # Clubhouse team name to choose which issues we should import.
+  $clubhouseTeamName: String!
   # Clubhouse token to fetch information from the Clubhouse API.
   $clubhouseToken: String!
   # ID of the team into which to import data.
   $teamId: String!
 ) {
-  issueImportCreateClubhouse(clubhouseToken: $clubhouseToken, teamId: $teamId) {
+  issueImportCreateClubhouse(clubhouseTeamName: $clubhouseTeamName, clubhouseToken: $clubhouseToken, teamId: $teamId) {
     ...IssueImportPayload
   }
 }
