@@ -23,7 +23,6 @@
 </p>
 
 - [🦋 Make your first query](#-make-your-first-query)
-- [🌈 Find help](#-find-help)
 - [🦄 Use the Client](#-use-the-client)
   - [Typescript](#typescript)
   - [Query](#query)
@@ -39,6 +38,7 @@
   - [Customise the GraphQL Client](#customise-the-graphql-client)
   - [Limitations](#limitations)
 - [⚡️ Authenticate with OAuth](#️-authenticate-with-oauth)
+- [🌈 Find help](#-find-help)
 - [🔥 Contribute](#-contribute)
   - [Get Started](#get-started)
   - [Project Structure](#project-structure)
@@ -100,10 +100,6 @@ You can connect to the Linear API and start interacting with your data in a few 
     });
     ```
 
-## 🌈 Find help
-- faq
-- link to customer slack
-- 
 ## 🦄 Use the Client
 
 The Linear Client exposes the Linear GraphQL API through strongly typed models and operations.
@@ -236,7 +232,7 @@ async function createComment(input: CommentCreateInput): Fetch<Comment | UserErr
     const commentPayload = await client.commentCreate(input);
     /** Return it if available */
     return commentPayload.comment;
-  } catch (error: unknown) {
+  } catch (error) {
     /** The error has been parsed by Linear Client */
     throw error as LinearError;
   }
@@ -265,6 +261,9 @@ archiveFirstIssue().catch(error => {
 
 The parsed error type can be compared against the LinearErrorType enum:
 ```typescript
+import { LinearError, LinearErrorType } from '@linear/client'
+import { UserError } from './custom-errors'
+
 createTeam(input).catch(error => {
   /** The error has been parsed and provided with a type */
   if ((error as LinearError)?.type === LinearErrorType.InvalidInput) {
@@ -480,6 +479,10 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     - `200` - token was revoked
     - `400` - unable to revoke token (e.g. token was already revoked)
     - `401` - unable to authenticate with the token
+
+## 🌈 Find help
+- faq
+- link to customer slack
 
 ## 🔥 Contribute
 
