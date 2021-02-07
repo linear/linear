@@ -22,6 +22,28 @@
   </a>
 </p>
 
+- [🦋 Make your first query](#-make-your-first-query)
+- [🦄 Use the Client](#-use-the-client)
+  - [Typescript](#typescript)
+  - [Query](#query)
+  - [Mutate](#mutate)
+  - [Paginate](#paginate)
+  - [Search](#search)
+  - [Filter](#filter)
+  - [File Upload](#file-upload)
+- [🌊 Dig deeper](#-dig-deeper)
+  - [Handling Errors](#handling-errors)
+  - [Configuring the Request](#configuring-the-request)
+  - [Accessing the GraphQL Client](#accessing-the-graphql-client)
+  - [Customising the GraphQL Client](#customising-the-graphql-client)
+  - [Limitations](#limitations)
+- [⚡️ Authenticate with OAuth](#️-authenticate-with-oauth)
+- [🌈 Find help](#-find-help)
+- [🔥 Contribute](#-contribute)
+  - [Getting Started](#getting-started)
+  - [Project Structure](#project-structure)
+- [License](#license)
+
 ## 🦋 Make your first query
 
 You can connect to the Linear API and start interacting with your data in a few steps:
@@ -454,7 +476,7 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     - `400` - unable to revoke token (e.g. token was already revoked)
     - `401` - unable to authenticate with the token
 
-## 🌈 Find Help
+## 🌈 Find help
 - faq
 - link to customer slack
 
