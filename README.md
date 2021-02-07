@@ -32,10 +32,10 @@
   - [Filter](#filter)
   - [File Upload](#file-upload)
 - [🌊 Dig deeper](#-dig-deeper)
-  - [Handling Errors](#handling-errors)
-  - [Configuring the Request](#configuring-the-request)
-  - [Accessing the GraphQL Client](#accessing-the-graphql-client)
-  - [Customising the GraphQL Client](#customising-the-graphql-client)
+  - [Handle Errors](#handle-errors)
+  - [Configure the Request](#configure-the-request)
+  - [Access the GraphQL Client](#access-the-graphql-client)
+  - [Customise the GraphQL Client](#customise-the-graphql-client)
   - [Limitations](#limitations)
 - [⚡️ Authenticate with OAuth](#️-authenticate-with-oauth)
 - [🌈 Find help](#-find-help)
@@ -221,7 +221,7 @@ const issuesEndCursor = issues?.pageInfo.endCursor;
 
 The Linear Client wraps the Linear SDK, provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and parses errors.
 
-### Handling Errors
+### Handle Errors
 
 Errors can be caught and interrogated by wrapping the operation in a try catch block:
 ```typescript
@@ -314,14 +314,14 @@ run().catch((_error) => {
   throw error;
 });
 ```
-### Configuring the Request
+### Configure the Request
 
 The graphql-request client can be configured by passing the `RequestInit` object to the Linear Client constructor:
 ```typescript
 const client = new LinearClient({ apiKey, headers: { "my-header": "value" } });
 ```
 
-### Accessing the GraphQL Client
+### Access the GraphQL Client
 
 The graphql-request client is accessible through the Linear Client:
 ```typescript
@@ -330,7 +330,7 @@ const graphqlRequestClient = linearClient.client;
 graphqlRequestClient.setHeader("my-header", "value");
 ```
 
-### Customising the GraphQL Client
+### Customise the GraphQL Client
 
 In order to use a custom the GraphQL Client, the Linear SDK must be used directly and provided with a request function:
 ```typescript
