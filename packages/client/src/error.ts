@@ -66,9 +66,9 @@ export class LinearGraphQLError {
  */
 export class LinearError extends Error {
   /** The type of the first error returned by the Linear API */
-  public type: LinearErrorType;
+  public type?: LinearErrorType;
   /** A list of graphql errors returned by the Linear API */
-  public errors: LinearGraphQLError[];
+  public errors?: LinearGraphQLError[];
   /** The graphql query that caused this error */
   public query?: string;
   /** The graphql variables that caused this error */

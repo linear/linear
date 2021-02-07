@@ -60,8 +60,12 @@ You can connect to the Linear API and start interacting with your data in a few 
 
     Using async await syntax:
     ```javascript
-    const me = await client.viewer;
-    console.log('My email address is:', me?.email);
+    async function getEmail() {
+      const me = await client.viewer;
+      console.log('My email address is:', me?.email);
+    }
+
+    getEmail();
     ```
 
     Or promises:
@@ -159,6 +163,16 @@ if (project) {
 }
 ```
 
+Mutations will often return a success boolean and the mutated entity:
+```typescript
+const commentPayload = await client.commentCreate({ issueId: "some-issue-id" });
+if (commentPayload.success) {
+  return commentPayload.comment;
+} else {
+  throw new Error('Failed to create comment', input);
+}
+```
+
 ### Paginate
 
 Connection models have helpers to fetch the next and previous pages of results:
@@ -187,6 +201,98 @@ The Linear Client wraps the Linear SDK, provides a [graphql-request](https://git
 
 ### Handling Errors
 
+Errors can be caught and interrogated by wrapping the operation in a try catch block:
+```typescript
+async function createComment(input: CommentCreateInput): Fetch<Comment | UserError> {
+  try {
+    /** Try to create a comment */
+    const commentPayload = await client.commentCreate(input);
+    /** Return it if available */
+    return commentPayload.comment;
+  } catch (error: unknown) {
+    /** The error has been parsed by Linear Client */
+    throw error as LinearError;
+  }
+}
+```
+
+Or by catching the error thrown from a calling function:
+```typescript
+async function archiveFirstIssue(): Promise<ArchivePayload | undefined> {
+  const me = await client.viewer;
+  const issues = await me?.assignedIssues();
+  const firstIssue = issues?.nodes?.[0];
+
+  if (firstIssue?.id) {
+    const payload = await client.issueArchive(firstIssue.id);
+    return payload;
+  } else {
+    return undefined;
+  }
+}
+
+archiveFirstIssue().catch(error => {
+  throw error as LinearError;
+});
+```
+
+The parsed error type can be compared against the LinearErrorType enum:
+```typescript
+createTeam(input).catch(error => {
+  /** The error has been parsed and provided with a type */
+  if ((error as LinearError)?.type === LinearErrorType.InvalidInput) {
+    /** If the mutation has failed due to an invalid user input return a custom user error */
+    return new UserError(input, error);
+  } else {
+    /** Otherwise throw the error and handle in the calling function */
+    throw error;
+  }
+});
+```
+
+Information about the request resulting in the error is attached if available:
+```typescript
+run().catch((_error) => {
+  const error = _error as LinearError;
+  console.error('Failed query:', error.query)
+  console.error('With variables:', error.variables)
+  throw error
+});
+```
+
+Information about the response is attached if available:
+```typescript
+run().catch((_error) => {
+  const error = _error as LinearError;
+  console.error('Failed HTTP status:', error.status)
+  console.error('Failed response data:', error.data)
+  throw error
+});
+```
+
+Any GraphQL errors are parsed and added to an array:
+```typescript
+run().catch((_error) => {
+  const error = _error as LinearError;
+  error.errors.map(graphqlError => {
+    console.log("Error message", graphqlError.message);
+    console.log("LinearErrorType of this GraphQL error", graphqlError.type);
+    console.log("Error due to user input", graphqlError.userError);
+    console.log("Path through the GraphQL schema", graphqlError.path);
+  });
+  throw error;
+});
+```
+
+The raw error returned by the graphql-request client is still available:
+```typescript
+run().catch((_error) => {
+  const error = _error as LinearError;
+  console.log("The original error", error.raw);
+  throw error;
+});
+```
+
 ### Authenticating with OAuth
 
 ### Configuring the Request
@@ -207,30 +313,39 @@ graphqlRequestClient.setHeader("my-header", "value");
 
 ### Customising the GraphQL Client
 
-In order to provide your own request function, the Linear SDK must be used directly. Beware, this circumvents any features added by the Linear Client wrapper, such as error parsing:
+In order to use a custom the GraphQL Client, the Linear SDK must be used directly and provided with a request function:
 ```typescript
-import { Fetch, LinearSdk, UserConnection } from "@linear/client";
-import { DocumentNode, print } from "graphql";
-import { GraphQLClient } from "./graphql-client";
+import { Fetch, LinearError, LinearSdk, Request, UserConnection } from "@linear/client";
+import { DocumentNode, GraphQLClient, print } from "graphql";
+import { CustomGraphqlClient } from "./graphql-client";
 
+/** Create a custom client configured with the Linear API base url and API key */
+const customGraphqlClient = new CustomGraphqlClient("https://api.linear.app/graphql", {
+  headers: { Authorization: apiKey },
+});
+
+/** Create the custom request function */
+const customLinearRequest: Request = <Response, Variables>(document: DocumentNode, variables?: Variables) => {
+  /** The request must take a GraphQL document and variables, then return a promise for the result */
+  return customGraphqlClient.request<Response, Variables>(print(document), variables).catch(error => {
+    /** Optionally catch and parse errors from the Linear API */
+    throw new LinearError(error);
+  })
+}
+
+/** Extend the Linear SDK to provide a request function using the custom client */
 class CustomLinearClient extends LinearSdk {
-  public constructor(client: GraphQLClient) {
-    super(<Response, Variables>(document: DocumentNode, variables?: Variables) =>
-      /**
-       * The request must take a GraphQL document and variables
-       * Then return a promise for the result
-       */
-      client.request<Response, Variables>(print(document), variables)
-    );
+  public constructor() {
+    super(customLinearRequest);
   }
 }
 
+/** Create an instance of the custom client */
+const customLinearClient = new CustomLinearClient();
+
+/** Use the custom client as if it were the Linear Client */
 async function getUsers(): Fetch<UserConnection> {
-  const graphQlClient = new GraphQLClient("https://api.linear.app/graphql", {
-    headers: { Authorization: apiKey },
-  });
-  const customClient = new CustomLinearClient(graphQlClient);
-  const users = await customClient.users();
+  const users = await customLinearClient.users();
   return users;
 }
 ```
