@@ -23,6 +23,7 @@
 </p>
 
 - [🦋 Make your first query](#-make-your-first-query)
+- [🌈 Find help](#-find-help)
 - [🦄 Use the Client](#-use-the-client)
   - [Typescript](#typescript)
   - [Query](#query)
@@ -38,9 +39,8 @@
   - [Customise the GraphQL Client](#customise-the-graphql-client)
   - [Limitations](#limitations)
 - [⚡️ Authenticate with OAuth](#️-authenticate-with-oauth)
-- [🌈 Find help](#-find-help)
 - [🔥 Contribute](#-contribute)
-  - [Getting Started](#getting-started)
+  - [Get Started](#get-started)
   - [Project Structure](#project-structure)
 - [License](#license)
 
@@ -100,6 +100,10 @@ You can connect to the Linear API and start interacting with your data in a few 
     });
     ```
 
+## 🌈 Find help
+- faq
+- link to customer slack
+- 
 ## 🦄 Use the Client
 
 The Linear Client exposes the Linear GraphQL API through strongly typed models and operations.
@@ -204,11 +208,12 @@ const nextIssues = await issues.fetchNext;
 const prevIssues = await issues.fetchPrevious;
 ```
 
-Pagination info is exposed and can be used as variables to the query operations. This uses the [Relay Connection spec](https://relay.dev/graphql/connections.htm):
+Pagination info is exposed and can be passed to the query operations. This uses the [Relay Connection spec](https://relay.dev/graphql/connections.htm):
 ```typescript
 const issues = await client.issues();
 const hasMoreIssues = issues?.pageInfo.hasNextPage;
 const issuesEndCursor = issues?.pageInfo.endCursor;
+const moreIssues = await client.issues({ after: issuesEndCursor });
 ```
 
 ### Search
@@ -332,7 +337,7 @@ graphqlRequestClient.setHeader("my-header", "value");
 
 ### Customise the GraphQL Client
 
-In order to use a custom the GraphQL Client, the Linear SDK must be used directly and provided with a request function:
+In order to use a custom GraphQL Client, the Linear SDK must be extended and provided with a request function:
 ```typescript
 import { Fetch, LinearError, LinearSdk, Request, UserConnection } from "@linear/client";
 import { DocumentNode, GraphQLClient, print } from "graphql";
@@ -476,13 +481,9 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     - `400` - unable to revoke token (e.g. token was already revoked)
     - `401` - unable to authenticate with the token
 
-## 🌈 Find help
-- faq
-- link to customer slack
-
 ## 🔥 Contribute
 
-### Getting Started
+### Get Started
 
 ### Project Structure
 
