@@ -10,7 +10,7 @@
   The issue tracking tool you'll enjoy using
 </h3>
 <p align="center">
-  Linear helps streamline software projects, sprints, tasks, and\n
+  Linear helps streamline software projects, sprints, tasks, and<br />
   bug tracking. It's built for high-performance teams.
 </p>
 <p align="center">
