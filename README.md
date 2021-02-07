@@ -78,7 +78,7 @@ You can connect to the Linear API and start interacting with your data in a few 
     });
     ```
 
-## 🦄 Using the Client
+## 🦄 Use the Client
 
 The Linear Client exposes the Linear GraphQL API through strongly typed models and operations.
 
@@ -195,7 +195,7 @@ const issuesEndCursor = issues?.pageInfo.endCursor;
 
 ### File Upload
 
-## 🌊 Getting deeper
+## 🌊 Dig deeper
 
 The Linear Client wraps the Linear SDK, provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and parses errors.
 
@@ -349,7 +349,7 @@ async function getUsers(): Fetch<UserConnection> {
 
 ### Limitations
 
-## ⚡️ Authenticating with OAuth
+## ⚡️ Authenticate with OAuth
 
 Linear supports OAuth2 authentication, which is recommended if you're building applications to integrate with Linear.
 
@@ -454,11 +454,11 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     - `400` - unable to revoke token (e.g. token was already revoked)
     - `401` - unable to authenticate with the token
 
-## 🌈 Help
+## 🌈 Find Help
 - faq
 - link to customer slack
 
-## 🔥 How to Contribute
+## 🔥 Contribute
 
 ### Getting Started
 
