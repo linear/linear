@@ -440,7 +440,7 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     const me = await client.viewer
     ```
 
--. **Revoke an access token**
+6. **Revoke an access token**
 
     To revoke a user's access to your application, you can use the `/token/revoke` endpoint:
 
