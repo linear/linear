@@ -22,6 +22,8 @@
   </a>
 </p>
 
+<br/>
+
 - [🦋 Your First Query](#-your-first-query)
 - [🦄 Features](#-features)
   - [Typescript](#typescript)
@@ -33,16 +35,18 @@
   - [Limitations](#limitations)
 - [☀️ API Reference](#️-api-reference)
 - [🌵 OAuth Authentication](#-oauth-authentication)
+- [� Find Help](#-find-help)
 - [🌊 Advanced](#-advanced)
   - [Request Configuration](#request-configuration)
   - [Raw GraphQL Client](#raw-graphql-client)
   - [Raw GraphQL Queries](#raw-graphql-queries)
   - [Custom GraphQL Client](#custom-graphql-client)
-- [🌈 Find Help](#-find-help)
 - [🔥 Contribute](#-contribute)
   - [Get Started](#get-started)
   - [Project Structure](#project-structure)
 - [License](#license)
+
+<br/>
 
 ## 🦋 Your First Query
 
@@ -109,6 +113,7 @@ Connect to the Linear API and interact with your data in a few steps:
       });
     });
     ```
+<br/>
 
 ## 🦄 Features
 
@@ -369,6 +374,8 @@ run().catch((_error) => {
 This functionality is currently under development and must be performed by the consumer:
 - Search and filtering of collections
 
+<br/>
+
 ## ☀️ API Reference
 
 The Linear Client is generated from the [Linear GraphQL schema]('./../packages/sdk/src/schema.graphql).
@@ -379,6 +386,8 @@ Point the GraphQL client to the Linear production API endpoint:
 ```
 https://api.linear.app/graphql
 ```
+
+<br/>
 
 ## 🌵 OAuth Authentication
 
@@ -488,6 +497,18 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     - `400` - unable to revoke token (e.g. token was already revoked)
     - `401` - unable to authenticate with the token
 
+<br/>
+
+## 🌈 Find Help
+
+If you run into problems, have questions or suggestions:
+- Join our customer Slack
+- Send an email to hello@linear.app 
+
+Both options are available through the user menu in [Linear](https://linear.app).
+
+<br/>
+
 ## 🌊 Advanced
 
 The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./packages/client/src/error.ts).
@@ -567,13 +588,7 @@ async function getUsers(): Fetch<UserConnection> {
 }
 ```
 
-## 🌈 Find Help
-
-If you run into problems, have questions or suggestions:
-- Join our customer Slack
-- Send an email to hello@linear.app 
-
-Both options are available through the user menu in [Linear](https://linear.app).
+<br/>
 
 ## 🔥 Contribute
 
@@ -611,6 +626,8 @@ packages
   codegen-sdk   - GraphQL codegen plugin to generate Typescript SDK from fragments and documents
   codegen-test  - GraphQL codegen plugin to generate a jest test for the Typescript SDK
 ```
+
+<br/>
 
 ## License
 
