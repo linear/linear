@@ -414,7 +414,7 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     - `issues:create` - Special scope to only gain access in order to create new issues. If this is the main reason for your application, you should ask for this scope instead of `write`
     - `admin` - Full access to admin level endpoints. You should never ask for this permission unless it's absolutely needed
 
-    Examples of authorization URLs:
+    **Example**
     ```
     GET https://linear.app/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URL&state=SECURE_RANDOM&scope=read
 
@@ -427,7 +427,7 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
 
     Any `state` parameter you specified in step 2 will also be returned in the URL params and must match the value specified in step 2. If the values do not match, the request should not be trusted.
 
-    Example of a redirect URL with params:
+    **Example**
     ```
     GET https://example.com/oauth/callback?code=9a5190f637d8b1ad0ca92ab3ec4c0d033ad6c862&state=b1ad0ca92
     ```
