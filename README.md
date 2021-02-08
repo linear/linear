@@ -35,7 +35,7 @@
   - [Limitations](#limitations)
 - [☀️ API Reference](#️-api-reference)
 - [🌵 OAuth Authentication](#-oauth-authentication)
-- [� Find Help](#-find-help)
+- [🌈 Find Help](#-find-help)
 - [🌊 Advanced](#-advanced)
   - [Request Configuration](#request-configuration)
   - [Raw GraphQL Client](#raw-graphql-client)
