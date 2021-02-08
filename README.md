@@ -35,6 +35,7 @@
   - [Handle Errors](#handle-errors)
   - [Configure the Request](#configure-the-request)
   - [Access the GraphQL Client](#access-the-graphql-client)
+  - [Raw queries](#raw-queries)
   - [Customise the GraphQL Client](#customise-the-graphql-client)
   - [Limitations](#limitations)
 - [⚡️ Authenticate with OAuth](#️-authenticate-with-oauth)
@@ -333,6 +334,8 @@ const linearClient = new LinearClient({ apiKey });
 const graphqlRequestClient = linearClient.client;
 graphqlRequestClient.setHeader("my-header", "value");
 ```
+
+### Raw queries
 
 ### Customise the GraphQL Client
 
