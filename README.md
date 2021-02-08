@@ -22,22 +22,20 @@
   </a>
 </p>
 
-- [🦋 Make your first query](#-make-your-first-query)
-- [🦄 Use the Client](#-use-the-client)
+- [🦋 Your First Query](#-your-first-query)
+- [🦄 Features](#-features)
   - [Typescript](#typescript)
   - [Query](#query)
   - [Mutate](#mutate)
   - [Paginate](#paginate)
-  - [Search](#search)
-  - [Filter](#filter)
   - [File Upload](#file-upload)
-- [🌊 Dig deeper](#-dig-deeper)
-  - [Handle Errors](#handle-errors)
+  - [Errors](#errors)
+  - [Limitations](#limitations)
+- [🌊 Advanced](#-advanced)
   - [Configure the Request](#configure-the-request)
   - [Access the GraphQL Client](#access-the-graphql-client)
-  - [Raw queries](#raw-queries)
+  - [Raw GraphQL queries](#raw-graphql-queries)
   - [Customise the GraphQL Client](#customise-the-graphql-client)
-  - [Limitations](#limitations)
 - [⚡️ Authenticate with OAuth](#️-authenticate-with-oauth)
 - [🌈 Find help](#-find-help)
 - [🔥 Contribute](#-contribute)
@@ -45,7 +43,7 @@
   - [Project Structure](#project-structure)
 - [License](#license)
 
-## 🦋 Make your first query
+## 🦋 Your First Query
 
 You can connect to the Linear API and start interacting with your data in a few steps:
 
@@ -80,30 +78,40 @@ You can connect to the Linear API and start interacting with your data in a few 
     })
     ```
 
-4. **Query for your email address**
+4. **Query for your issues**
 
     Using async await syntax:
     ```javascript
-    async function getEmail() {
+    async function getMyIssues() {
       const me = await client.viewer;
-      console.log('My email address is:', me?.email);
+      const myIssues = await me?.assignedIssues();
+
+      myIssues?.nodes?.map(issue => {
+        console.log(`${me?.displayName} has issue: ${issue?.title}`);
+      });
+
+      return myIssues;
     }
 
-    getEmail();
+    getMyIssues();
     ```
 
     Or promises:
     ```javascript
     client.viewer.then(me => {
-      if (me) {
-        console.log('My email address is:', me.email);
-      }
+      return me?.assignedIssues().then(myIssues => {
+        myIssues?.nodes?.map(issue => {
+          console.log(`${me?.displayName} has issue: ${issue?.title}`);
+        });
+
+        return myIssues;
+      });
     });
     ```
 
-## 🦄 Use the Client
+## 🦄 Features
 
-The Linear Client exposes the Linear GraphQL API through strongly typed models and operations.
+The Linear Client exposes the [Linear GraphQL schema](./packages/sdk/src/schema.graphql) through strongly typed [models and operations](packages/sdk/src/_generated_sdk.ts).
 
 All operations return models, which can be used to perform operations for other models.
 
@@ -156,7 +164,7 @@ const myFirstIssueFirstComment = myFirstIssueComments?.nodes?.[0];
 const myFirstIssueFirstCommentUser = await myFirstIssueFirstComment?.user;
 ```
 
-NOTE: Parenthesis is required only if the operation takes an optional variables object.
+*NOTE:* Parenthesis is required only if the operation takes an optional variables object.
 
 ### Mutate
 
@@ -213,17 +221,52 @@ const issuesEndCursor = issues?.pageInfo.endCursor;
 const moreIssues = await client.issues({ after: issuesEndCursor });
 ```
 
-### Search
+Results can be ordered using the `orderBy` optional variable:
+```typescript
+import { Linear } from "@linear/client";
 
-### Filter
+const issues = await client.issues({ orderBy: Linear.PaginationOrderBy.UpdatedAt });
+```
 
 ### File Upload
 
-## 🌊 Dig deeper
+Create a file upload URL, upload the file to external storage, and attach the file by asset URL:
+```typescript
+  import { Fetch, Issue } from "@linear/client";
+  
+  async function createIssueWithFile(file: File): Fetch<Issue> {
+    /** Fetch a storage URL to upload the file to */
+    const uploadPayload = await client.fileUpload(file.type, file.name, file.size);
 
-The Linear Client wraps the Linear SDK, provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and parses errors.
+    /** Upload the file to the storage URL using the authentication header */
+    const authHeader = uploadPayload?.uploadFile?.headers?.[0];
+    const uploadUrl = uploadPayload?.uploadFile?.uploadUrl;
+    const fileData = await file.arrayBuffer();
+    await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        [authHeader.key]: authHeader.value,
+        "cache-control": "max-age=31536000",
+      },
+      contentLength: file.size,
+      contentType: file.type,
+      payload: fileData,
+    });
 
-### Handle Errors
+    /** Use the asset URL to attach the stored file */
+    const assetUrl = uploadPayload?.uploadFile?.assetUrl;
+    const issuePayload = await client.issueCreate({
+      title: "My new issue",
+      /** Use the asset URL in a markdown link */
+      description: `Attached file: ![${assetUrl}](${encodeURI(assetUrl)})`,
+      teamId: "team-id",
+    });
+
+    return issuePayload.issue;
+  }
+```
+
+### Errors
 
 Errors can be caught and interrogated by wrapping the operation in a try catch block:
 ```typescript
@@ -242,7 +285,7 @@ async function createComment(input: CommentCreateInput): Fetch<Comment | UserErr
 
 Or by catching the error thrown from a calling function:
 ```typescript
-async function archiveFirstIssue(): Promise<ArchivePayload | undefined> {
+async function archiveFirstIssue(): Fetch<ArchivePayload> {
   const me = await client.viewer;
   const issues = await me?.assignedIssues();
   const firstIssue = issues?.nodes?.[0];
@@ -260,7 +303,7 @@ archiveFirstIssue().catch(error => {
 });
 ```
 
-The parsed error type can be compared against the LinearErrorType enum:
+The parsed error type can be compared against the `LinearErrorType` enum:
 ```typescript
 import { LinearError, LinearErrorType } from '@linear/client'
 import { UserError } from './custom-errors'
@@ -277,7 +320,7 @@ createTeam(input).catch(error => {
 });
 ```
 
-Information about the request resulting in the error is attached if available:
+Information about the `request` resulting in the error is attached if available:
 ```typescript
 run().catch((_error) => {
   const error = _error as LinearError;
@@ -287,7 +330,7 @@ run().catch((_error) => {
 });
 ```
 
-Information about the response is attached if available:
+Information about the `response` is attached if available:
 ```typescript
 run().catch((_error) => {
   const error = _error as LinearError;
@@ -297,7 +340,7 @@ run().catch((_error) => {
 });
 ```
 
-Any GraphQL errors are parsed and added to an array:
+Any GraphQL `errors` are parsed and added to an array:
 ```typescript
 run().catch((_error) => {
   const error = _error as LinearError;
@@ -311,7 +354,7 @@ run().catch((_error) => {
 });
 ```
 
-The raw error returned by the graphql-request client is still available:
+The `raw` error returned by the graphql-request client is still available:
 ```typescript
 run().catch((_error) => {
   const error = _error as LinearError;
@@ -319,6 +362,15 @@ run().catch((_error) => {
   throw error;
 });
 ```
+
+### Limitations
+
+- Search and filtering is currently under development. For now, this functionality must be performed by the consumer.
+
+## 🌊 Advanced
+
+The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./packages/client/src/error.ts).
+
 ### Configure the Request
 
 The graphql-request client can be configured by passing the `RequestInit` object to the Linear Client constructor:
@@ -335,7 +387,25 @@ const graphqlRequestClient = linearClient.client;
 graphqlRequestClient.setHeader("my-header", "value");
 ```
 
-### Raw queries
+### Raw GraphQL queries
+
+The Linear GraphQL API can be queried directly by passing a raw GraphQL query to the graphql-request client:
+```typescript
+const linearClient = new LinearClient({ apiKey });
+const graphqlRequestClient = linearClient.client;
+const cycle =  await graphqlRequestClient.rawRequest(
+  gql`
+    query cycle($id: String!) {
+      cycle(id: $id) {
+        id
+        name
+        completedAt
+      }
+    }
+  `,
+  { id: "cycle-id" }
+);
+```
 
 ### Customise the GraphQL Client
 
@@ -376,15 +446,13 @@ async function getUsers(): Fetch<UserConnection> {
 }
 ```
 
-### Limitations
-
 ## ⚡️ Authenticate with OAuth
 
 Linear supports OAuth2 authentication, which is recommended if you're building applications to integrate with Linear.
 
-1. **Create an OAuth2 application in Linear**
+*NOTE:* It is `highly recommended` you create a workspace for the purpose of managing the OAuth2 Application. As each admin user will have access.
 
-    NOTE: It's recommended you create a workspace for the purpose of managing the OAuth2 Application, as each admin user will have access to it.
+1. **Create an OAuth2 application in Linear**
 
     Create a new [OAuth2 Application](https://linear.app/settings/api/applications/new)
 
@@ -392,9 +460,11 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
 
 2. **Redirect user access requests to Linear**
 
-    When redirecting a user to authorize access to your application, construct the authorization URL with correct parameters and scopes and send a GET request.
-
-    You should always specify:
+    When authorizing a user to the Linear API, redirect to an authorization URL with correct parameters and scopes:
+    
+    ```
+    GET https://linear.app/oauth/authorize
+    ```
 
     **Parameters**
 
@@ -411,43 +481,44 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     - `issues:create` - Special scope to only gain access in order to create new issues. If this is the main reason for your application, you should ask for this scope instead of `write`
     - `admin` - Full access to admin level endpoints. You should never ask for this permission unless it's absolutely needed
 
-    Example of authorization URLs:
+    Examples of authorization URLs:
     ```
     GET https://linear.app/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URL&state=SECURE_RANDOM&scope=read
 
     GET https://linear.app/oauth/authorize?client_id=client1&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth%2Fcallback&response_type=code&scope=read,write
     ```
 
-3. **Handle the redirect URLs specified in the OAuth2 Application**
+3. **Handle the redirect URLs you specified in the OAuth2 Application**
 
-    Once the user approves your application they will be redirected to your application with the OAuth authorization `code` in the URL params.
+    Once the user approves your application they will be redirected back to your application, with the OAuth authorization `code` in the URL params.
 
-    If you specified a state parameter in step 1, it will be returned as well. 
+    Any `state` parameter you specified in step 2 will also be returned in the URL params and must match the value specified in step 2. If the values do not match, the request should not be trusted.
 
-    The parameter will always match the value specified in step 1. If the values don’t match, the request should not be trusted.
-
-    Example of the redirect:
-
-    `GET https://example.com/oauth/callback?code=9a5190f637d8b1ad0ca92ab3ec4c0d033ad6c862&state=b1ad0ca92`
+    Example of a redirect URL with params:
+    ```
+    GET https://example.com/oauth/callback?code=9a5190f637d8b1ad0ca92ab3ec4c0d033ad6c862&state=b1ad0ca92
+    ```
 
 4. **Exchange `code` for an access token**
 
-    After receiving the `code`, you can exchange it for an access token for API authentication.
+    After receiving the `code`, you can exchange it for a Linear API access token:
+    
+    ```
+    POST https://api.linear.app/oauth/token
+    ```
 
-    Make a POST request:
-    `POST https://api.linear.app/oauth/token`
+    **Parameters**
 
-    You'll need to supply the following parameters in the POST request:
+    - `code` - (required) Authorization code from the previous step
+    - `redirect_uri` - (required) Same redirect URI which you used in the previous step
+    - `client_id` - (required) Application's client ID
+    - `client_secret` - (required) Application's client secret
+    - `grant_type=authorization_code` (required)
 
-    - `code` - Authorization code from the previous step
-    - `redirect_uri` - Same redirect URI which you used in the previous step
-    - `client_id` - Application's client ID
-    - `client_secret` - Application's client secret
-    - `grant_type=authorization_code`
+    **Response**
 
     After a successful request, a valid access token will be returned in the response:
-
-    ```
+    ```json
     {
       "access_token": "00a21d8b0c4e2375114e49c067dfb81eb0d2076f48354714cd5df984d87b67cc",
       "token_type": "Bearer",
@@ -461,8 +532,6 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
 
 5. **Make an API request**
 
-    Once you have obtained a valid access token, you can make a request to the Linear API.
-
     Initialize the Linear Client with the access token:
     ```
     const client = new LinearClient({ accessToken: oauthToken })
@@ -471,13 +540,15 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
 
 6. **Revoke an access token**
 
-    To revoke a user's access to your application, you can use the `/token/revoke` endpoint:
+    To revoke a user's access to your application pass the access token as Bearer token in the authorization header (`Authorization: Bearer <ACCESS_TOKEN>`) or as the `access_token` form field:
+    
+    ```
+    POST https://api.linear.app/oauth/revoke
+    ```
 
-    `POST https://api.linear.app/oauth/revoke`
+    **Response**
 
-    You'll also need to pass the access token as Bearer token in the authorization header (`Authorization: Bearer <ACCESS_TOKEN>`) or as the `access_token` form field.
-
-    Expected responses:
+    Expected HTTP status:
 
     - `200` - token was revoked
     - `400` - unable to revoke token (e.g. token was already revoked)
