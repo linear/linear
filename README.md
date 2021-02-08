@@ -32,13 +32,12 @@
   - [Errors](#errors)
   - [Limitations](#limitations)
 - [☀️ API Reference](#️-api-reference)
+- [⚡️ OAuth Authentication](#️-oauth-authentication)
 - [🌊 Advanced](#-advanced)
   - [Configure the Request](#configure-the-request)
   - [Access the GraphQL Client](#access-the-graphql-client)
   - [Raw GraphQL queries](#raw-graphql-queries)
   - [Customise the GraphQL Client](#customise-the-graphql-client)
-- [⚡️ OAuth Authentication](#️-oauth-authentication)
-- [🌈 Find help](#-find-help)
 - [🔥 Contribute](#-contribute)
   - [Get Started](#get-started)
   - [Project Structure](#project-structure)
@@ -380,85 +379,6 @@ Point the GraphQL client to the Linear production API endpoint:
 https://api.linear.app/graphql
 ```
 
-## 🌊 Advanced
-
-The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./packages/client/src/error.ts).
-
-### Configure the Request
-
-The graphql-request client can be configured by passing the `RequestInit` object to the Linear Client constructor:
-```typescript
-const client = new LinearClient({ apiKey, headers: { "my-header": "value" } });
-```
-
-### Access the GraphQL Client
-
-The graphql-request client is accessible through the Linear Client:
-```typescript
-const linearClient = new LinearClient({ apiKey });
-const graphqlRequestClient = linearClient.client;
-graphqlRequestClient.setHeader("my-header", "value");
-```
-
-### Raw GraphQL queries
-
-The Linear GraphQL API can be queried directly by passing a raw GraphQL query to the graphql-request client:
-```typescript
-const linearClient = new LinearClient({ apiKey });
-const graphqlRequestClient = linearClient.client;
-const cycle =  await graphqlRequestClient.rawRequest(
-  gql`
-    query cycle($id: String!) {
-      cycle(id: $id) {
-        id
-        name
-        completedAt
-      }
-    }
-  `,
-  { id: "cycle-id" }
-);
-```
-
-### Customise the GraphQL Client
-
-In order to use a custom GraphQL Client, the Linear SDK must be extended and provided with a request function:
-```typescript
-import { Fetch, LinearError, LinearSdk, Request, UserConnection } from "@linear/client";
-import { DocumentNode, GraphQLClient, print } from "graphql";
-import { CustomGraphqlClient } from "./graphql-client";
-
-/** Create a custom client configured with the Linear API base url and API key */
-const customGraphqlClient = new CustomGraphqlClient("https://api.linear.app/graphql", {
-  headers: { Authorization: apiKey },
-});
-
-/** Create the custom request function */
-const customLinearRequest: Request = <Response, Variables>(document: DocumentNode, variables?: Variables) => {
-  /** The request must take a GraphQL document and variables, then return a promise for the result */
-  return customGraphqlClient.request<Response, Variables>(print(document), variables).catch(error => {
-    /** Optionally catch and parse errors from the Linear API */
-    throw new LinearError(error);
-  })
-}
-
-/** Extend the Linear SDK to provide a request function using the custom client */
-class CustomLinearClient extends LinearSdk {
-  public constructor() {
-    super(customLinearRequest);
-  }
-}
-
-/** Create an instance of the custom client */
-const customLinearClient = new CustomLinearClient();
-
-/** Use the custom client as if it were the Linear Client */
-async function getUsers(): Fetch<UserConnection> {
-  const users = await customLinearClient.users();
-  return users;
-}
-```
-
 ## ⚡️ OAuth Authentication
 
 Linear supports OAuth2 authentication, which is recommended if you're building applications to integrate with Linear.
@@ -567,9 +487,84 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
     - `400` - unable to revoke token (e.g. token was already revoked)
     - `401` - unable to authenticate with the token
 
-## 🌈 Find help
-- faq
-- link to customer slack
+## 🌊 Advanced
+
+The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./packages/client/src/error.ts).
+
+### Configure the Request
+
+The graphql-request client can be configured by passing the `RequestInit` object to the Linear Client constructor:
+```typescript
+const client = new LinearClient({ apiKey, headers: { "my-header": "value" } });
+```
+
+### Access the GraphQL Client
+
+The graphql-request client is accessible through the Linear Client:
+```typescript
+const linearClient = new LinearClient({ apiKey });
+const graphqlRequestClient = linearClient.client;
+graphqlRequestClient.setHeader("my-header", "value");
+```
+
+### Raw GraphQL queries
+
+The Linear GraphQL API can be queried directly by passing a raw GraphQL query to the graphql-request client:
+```typescript
+const linearClient = new LinearClient({ apiKey });
+const graphqlRequestClient = linearClient.client;
+const cycle =  await graphqlRequestClient.rawRequest(
+  gql`
+    query cycle($id: String!) {
+      cycle(id: $id) {
+        id
+        name
+        completedAt
+      }
+    }
+  `,
+  { id: "cycle-id" }
+);
+```
+
+### Customise the GraphQL Client
+
+In order to use a custom GraphQL Client, the Linear SDK must be extended and provided with a request function:
+```typescript
+import { Fetch, LinearError, LinearSdk, Request, UserConnection } from "@linear/client";
+import { DocumentNode, GraphQLClient, print } from "graphql";
+import { CustomGraphqlClient } from "./graphql-client";
+
+/** Create a custom client configured with the Linear API base url and API key */
+const customGraphqlClient = new CustomGraphqlClient("https://api.linear.app/graphql", {
+  headers: { Authorization: apiKey },
+});
+
+/** Create the custom request function */
+const customLinearRequest: Request = <Response, Variables>(document: DocumentNode, variables?: Variables) => {
+  /** The request must take a GraphQL document and variables, then return a promise for the result */
+  return customGraphqlClient.request<Response, Variables>(print(document), variables).catch(error => {
+    /** Optionally catch and parse errors from the Linear API */
+    throw new LinearError(error);
+  })
+}
+
+/** Extend the Linear SDK to provide a request function using the custom client */
+class CustomLinearClient extends LinearSdk {
+  public constructor() {
+    super(customLinearRequest);
+  }
+}
+
+/** Create an instance of the custom client */
+const customLinearClient = new CustomLinearClient();
+
+/** Use the custom client as if it were the Linear Client */
+async function getUsers(): Fetch<UserConnection> {
+  const users = await customLinearClient.users();
+  return users;
+}
+```
 
 ## 🔥 Contribute
 
