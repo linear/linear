@@ -164,7 +164,7 @@ const myFirstIssueFirstComment = myFirstIssueComments?.nodes?.[0];
 const myFirstIssueFirstCommentUser = await myFirstIssueFirstComment?.user;
 ```
 
-*NOTE:* Parenthesis is required only if the operation takes an optional variables object.
+**NOTE:** Parenthesis is required only if the operation takes an optional variables object.
 
 ### Mutate
 
@@ -383,7 +383,7 @@ https://api.linear.app/graphql
 
 Linear supports OAuth2 authentication, which is recommended if you're building applications to integrate with Linear.
 
-*NOTE:* It is `highly recommended` you create a workspace for the purpose of managing the OAuth2 Application. As each admin user will have access.
+**NOTE:** It is *highly recommended* you create a workspace for the purpose of managing the OAuth2 Application. As each admin user will have access.
 
 1. **Create an OAuth2 application in Linear**
 
