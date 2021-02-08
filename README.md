@@ -38,6 +38,7 @@
   - [Raw GraphQL Client](#raw-graphql-client)
   - [Raw GraphQL Queries](#raw-graphql-queries)
   - [Custom GraphQL Client](#custom-graphql-client)
+- [🌈 Find Help](#-find-help)
 - [🔥 Contribute](#-contribute)
   - [Get Started](#get-started)
   - [Project Structure](#project-structure)
@@ -45,7 +46,7 @@
 
 ## 🦋 Your First Query
 
-You can connect to the Linear API and start interacting with your data in a few steps:
+Connect to the Linear API and interact with your data in a few steps:
 
 1. **Install the Linear Client**
 
@@ -566,11 +567,50 @@ async function getUsers(): Fetch<UserConnection> {
 }
 ```
 
+## 🌈 Find Help
+
+If you run into problems, have questions or suggestions:
+- Join our customer Slack
+- Send an email to hello@linear.app 
+
+Both options are available through the user menu in [Linear](https://linear.app).
+
 ## 🔥 Contribute
+
+The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins to produce a typed SDK for all operations and models exposed by the Linear production API.
 
 ### Get Started
 
+```shell
+# install dependencies
+yarn
+
+# build all packages
+yarn build
+
+# test all packages
+yarn test
+
+# update the schema from the production API
+yarn schema
+```
+
 ### Project Structure
+
+This monorepo uses yarn workspaces and lerna to publish packages independently.
+
+Generated code uses file prefix `_generated` and should never be manually updated.
+
+```
+packages
+  client        - Linear Client wrapper, graphql-request and error parsing 
+  common        - Common functions and logging
+  import        - Import tooling for uploading from other systems
+  sdk           - The Linear SDK generated from the Linear GraphQL schema
+  codegen-doc   - GraphQL codegen plugin to generate GraphQL fragments and documents
+  codegen-sdk   - GraphQL codegen plugin to generate Typescript SDK from fragments and documents
+  codegen-test  - GraphQL codegen plugin to generate a jest test for the Typescript SDK
+```
 
 ## License
 
