@@ -1,13 +1,14 @@
 name: build
 
-# Run this workflow every time a new commit pushed to your repository
-on: push
+on:
+  push:
+    branches:
+      - "*"
+      - "!master"
 
 jobs:
-  # Set the job key. The key is displayed as the job name when a job name is not provided
   build:
     name: Build
-    # Set the type of machine to run on
     runs-on: ubuntu-latest
 
     steps:
@@ -22,11 +23,11 @@ jobs:
         with:
           node-version: "14"
 
-      - name: Run yarn
+      - name: Install dependencies
         run: yarn
 
-      - name: Run build
+      - name: Build packages
         run: yarn build
 
-      - name: Run test
+      - name: Run tests
         run: yarn test:ci
