@@ -597,7 +597,7 @@ yarn schema
 
 ### Project Structure
 
-This monorepo uses yarn workspaces and lerna to publish packages independently.
+This monorepo uses `yarn workspaces` and `lerna` to publish packages independently.
 
 Generated code uses file prefix `_generated` and should never be manually updated.
 
