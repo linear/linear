@@ -29,15 +29,15 @@
   - [Mutate](#mutate)
   - [Paginate](#paginate)
   - [File Upload](#file-upload)
-  - [Errors](#errors)
+  - [Error](#error)
   - [Limitations](#limitations)
 - [☀️ API Reference](#️-api-reference)
 - [⚡️ OAuth Authentication](#️-oauth-authentication)
 - [🌊 Advanced](#-advanced)
-  - [Configure the Request](#configure-the-request)
-  - [Access the GraphQL Client](#access-the-graphql-client)
-  - [Raw GraphQL queries](#raw-graphql-queries)
-  - [Customise the GraphQL Client](#customise-the-graphql-client)
+  - [Request Configuration](#request-configuration)
+  - [Raw GraphQL Client](#raw-graphql-client)
+  - [Raw GraphQL Queries](#raw-graphql-queries)
+  - [Custom GraphQL Client](#custom-graphql-client)
 - [🔥 Contribute](#-contribute)
   - [Get Started](#get-started)
   - [Project Structure](#project-structure)
@@ -266,7 +266,7 @@ Create a file upload URL, upload the file to external storage, and attach the fi
   }
 ```
 
-### Errors
+### Error
 
 Errors can be caught and interrogated by wrapping the operation in a try catch block:
 ```typescript
@@ -491,14 +491,14 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
 
 The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./packages/client/src/error.ts).
 
-### Configure the Request
+### Request Configuration
 
 The graphql-request client can be configured by passing the `RequestInit` object to the Linear Client constructor:
 ```typescript
 const client = new LinearClient({ apiKey, headers: { "my-header": "value" } });
 ```
 
-### Access the GraphQL Client
+### Raw GraphQL Client
 
 The graphql-request client is accessible through the Linear Client:
 ```typescript
@@ -507,7 +507,7 @@ const graphqlRequestClient = linearClient.client;
 graphqlRequestClient.setHeader("my-header", "value");
 ```
 
-### Raw GraphQL queries
+### Raw GraphQL Queries
 
 The Linear GraphQL API can be queried directly by passing a raw GraphQL query to the graphql-request client:
 ```typescript
@@ -527,7 +527,7 @@ const cycle =  await graphqlRequestClient.rawRequest(
 );
 ```
 
-### Customise the GraphQL Client
+### Custom GraphQL Client
 
 In order to use a custom GraphQL Client, the Linear SDK must be extended and provided with a request function:
 ```typescript
