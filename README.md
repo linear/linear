@@ -32,7 +32,7 @@
   - [Error](#error)
   - [Limitations](#limitations)
 - [☀️ API Reference](#️-api-reference)
-- [⚡️ OAuth Authentication](#️-oauth-authentication)
+- [🌵 OAuth Authentication](#-oauth-authentication)
 - [🌊 Advanced](#-advanced)
   - [Request Configuration](#request-configuration)
   - [Raw GraphQL Client](#raw-graphql-client)
@@ -379,7 +379,7 @@ Point the GraphQL client to the Linear production API endpoint:
 https://api.linear.app/graphql
 ```
 
-## ⚡️ OAuth Authentication
+## 🌵 OAuth Authentication
 
 Linear supports OAuth2 authentication, which is recommended if you're building applications to integrate with Linear.
 
