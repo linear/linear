@@ -175,7 +175,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             const operationArgs = printList([
               `this._${Sdk.REQUEST_NAME}`,
               ...operation.requiredArgs.args.map(variable => `this.${variable.name}`),
-              ,
+              operation.optionalArgs.printOutput,
             ]);
             const variableCheck = printList(
               operation.requiredArgs.args.map(variable => `this.${variable.name}`),

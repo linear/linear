@@ -1,6 +1,7 @@
 export const Sdk = {
   CONNECTION_CLASS: "LinearConnection",
   CONNECTION_TYPE: "Connection",
+  CONNECTION_NAME: "connection",
   DATA_NAME: "data",
   DATA_TYPE: "Data",
   NAMESPACE: "L",

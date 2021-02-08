@@ -28,7 +28,8 @@ export function printOperations(context: SdkPluginContext): string {
  * Print the exported return type for an sdk operation
  */
 function printOperation(context: SdkPluginContext, operation: SdkOperation): string {
-  const constructorArgs = getArgList([getRequestArg(), ...(operation.parentArgs.args ?? [])]);
+  const optionalArgs = operation.sdkPath.length > 0 ? operation.optionalArgs.args : [];
+  const constructorArgs = getArgList([getRequestArg(), ...(operation.parentArgs.args ?? []), ...optionalArgs]);
   const parentArgNames = operation.parentArgs.args.map(arg => arg.name);
 
   return printLines([
@@ -36,10 +37,12 @@ function printOperation(context: SdkPluginContext, operation: SdkOperation): str
     printDebug(operation),
     `export class ${operation.print.response} extends ${Sdk.REQUEST_CLASS} {
         ${printLines(operation.parentArgs.args.map(arg => `private _${arg.name}: ${arg.type}`))}
+        ${printLines(optionalArgs.map(arg => `private _${arg.name}?: ${arg.type}`))}
 
         public constructor(${constructorArgs.printInput}) {
           super(${Sdk.REQUEST_NAME})
           ${printLines(operation.parentArgs.args.map(arg => printSet(`this._${arg.name}`, `${arg.name}`)))}
+          ${printLines(optionalArgs.map(arg => printSet(`this._${arg.name}`, `${arg.name}`)))}
         }
 
         ${printComment([
@@ -64,11 +67,15 @@ function printOperation(context: SdkPluginContext, operation: SdkOperation): str
                 : isConnectionModel(operation.model)
                 ? `new ${operation.print.model}(${printList([
                     `this._${Sdk.REQUEST_NAME}`,
-                    `pagination => this.${Sdk.FETCH_NAME}(${printList([
+                    `${Sdk.CONNECTION_NAME} => this.${Sdk.FETCH_NAME}(${printList([
                       ...operation.requiredArgs.args
                         .filter(arg => !parentArgNames.includes(arg.name))
                         .map(arg => arg.name),
-                      `{ ${printList([`...${Sdk.VARIABLE_NAME}`, `...pagination`])} }`,
+                      `{ ${printList([
+                        ...optionalArgs.map(arg => `...this._${arg.name}`),
+                        `...${Sdk.VARIABLE_NAME}`,
+                        `...${Sdk.CONNECTION_NAME}`,
+                      ])} }`,
                     ])})`,
                     Sdk.DATA_NAME,
                   ])})`
@@ -96,8 +103,10 @@ export function printOperationArgs(operation: SdkOperation): string {
         ...operation.requiredArgs.args.map(variable =>
           parentVariableNames.includes(variable.name) ? undefined : variable.name
         ),
+        /** Spread parent optional variables */
+        ...(operation.sdkPath.length > 0 ? operation.optionalArgs.args.map(arg => `...this._${arg.name}`) : []),
         /** Spread optional variables */
-        operation.optionalArgs.args.length ? `...${Sdk.VARIABLE_NAME}` : undefined,
+        ...operation.optionalArgs.args.map(arg => `...${arg.name}`),
       ])}
     }`;
   }

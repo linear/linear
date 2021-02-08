@@ -201,7 +201,7 @@ export function printConnectionModel(context: SdkPluginContext, model: SdkModel)
     {
       name: Sdk.FETCH_NAME,
       optional: false,
-      type: `(${Sdk.VARIABLE_NAME}?: ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE}) => ${Sdk.FETCH_TYPE}<${Sdk.CONNECTION_TYPE}<${modelType}>>`,
+      type: `(${Sdk.CONNECTION_NAME}?: ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE}) => ${Sdk.FETCH_TYPE}<${Sdk.CONNECTION_TYPE}<${modelType}>>`,
       description: `function to trigger a refetch of this ${model.name} model`,
     },
     {

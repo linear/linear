@@ -148,7 +148,7 @@ export class ApiKey extends LinearRequest {
 export class ApiKeyConnection extends LinearConnection<ApiKey> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<ApiKey>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<ApiKey>>,
     data: L.ApiKeyConnectionFragment
   ) {
     super(
@@ -451,7 +451,7 @@ export class Comment extends LinearRequest {
 export class CommentConnection extends LinearConnection<Comment> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Comment>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Comment>>,
     data: L.CommentConnectionFragment
   ) {
     super(
@@ -636,7 +636,7 @@ export class CustomView extends LinearRequest {
 export class CustomViewConnection extends LinearConnection<CustomView> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<CustomView>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<CustomView>>,
     data: L.CustomViewConnectionFragment
   ) {
     super(
@@ -734,11 +734,13 @@ export class Cycle extends LinearRequest {
   }
   /** Issues associated with the cycle. */
   public issues(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">) {
-    return this.id ? new Cycle_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Cycle_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Issues that weren't completed when the cycle was closed. */
   public uncompletedIssuesUponClose(variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
-    return this.id ? new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id
+      ? new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id, variables).fetch(variables)
+      : undefined;
   }
 }
 /**
@@ -751,7 +753,7 @@ export class Cycle extends LinearRequest {
 export class CycleConnection extends LinearConnection<Cycle> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Cycle>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Cycle>>,
     data: L.CycleConnectionFragment
   ) {
     super(
@@ -928,7 +930,7 @@ export class Emoji extends LinearRequest {
 export class EmojiConnection extends LinearConnection<Emoji> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Emoji>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Emoji>>,
     data: L.EmojiConnectionFragment
   ) {
     super(
@@ -1059,7 +1061,7 @@ export class Favorite extends LinearRequest {
 export class FavoriteConnection extends LinearConnection<Favorite> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Favorite>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Favorite>>,
     data: L.FavoriteConnectionFragment
   ) {
     super(
@@ -1294,7 +1296,7 @@ export class Integration extends LinearRequest {
 export class IntegrationConnection extends LinearConnection<Integration> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Integration>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Integration>>,
     data: L.IntegrationConnectionFragment
   ) {
     super(
@@ -1392,7 +1394,7 @@ export class IntegrationResource extends LinearRequest {
 export class IntegrationResourceConnection extends LinearConnection<IntegrationResource> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<IntegrationResource>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<IntegrationResource>>,
     data: L.IntegrationResourceConnectionFragment
   ) {
     super(
@@ -1657,31 +1659,31 @@ export class Issue extends LinearRequest {
   }
   /** Children of the issue. */
   public children(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">) {
-    return this.id ? new Issue_ChildrenQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Issue_ChildrenQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Comments associated with the issue. */
   public comments(variables?: Omit<L.Issue_CommentsQueryVariables, "id">) {
-    return this.id ? new Issue_CommentsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Issue_CommentsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** History entries associated with the issue. */
   public history(variables?: Omit<L.Issue_HistoryQueryVariables, "id">) {
-    return this.id ? new Issue_HistoryQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Issue_HistoryQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Inverse relations associated with this issue. */
   public inverseRelations(variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">) {
-    return this.id ? new Issue_InverseRelationsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Issue_InverseRelationsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Labels associated with this issue. */
   public labels(variables?: Omit<L.Issue_LabelsQueryVariables, "id">) {
-    return this.id ? new Issue_LabelsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Issue_LabelsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Relations associated with this issue. */
   public relations(variables?: Omit<L.Issue_RelationsQueryVariables, "id">) {
-    return this.id ? new Issue_RelationsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Issue_RelationsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Users who are subscribed to the issue. */
   public subscribers(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">) {
-    return this.id ? new Issue_SubscribersQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Issue_SubscribersQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
 }
 /**
@@ -1694,7 +1696,7 @@ export class Issue extends LinearRequest {
 export class IssueConnection extends LinearConnection<Issue> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Issue>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Issue>>,
     data: L.IssueConnectionFragment
   ) {
     super(
@@ -1873,7 +1875,7 @@ export class IssueHistory extends LinearRequest {
 export class IssueHistoryConnection extends LinearConnection<IssueHistory> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<IssueHistory>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<IssueHistory>>,
     data: L.IssueHistoryConnectionFragment
   ) {
     super(
@@ -1994,7 +1996,7 @@ export class IssueLabel extends LinearRequest {
   }
   /** Issues associated with the label. */
   public issues(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">) {
-    return this.id ? new IssueLabel_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new IssueLabel_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
 }
 /**
@@ -2007,7 +2009,7 @@ export class IssueLabel extends LinearRequest {
 export class IssueLabelConnection extends LinearConnection<IssueLabel> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<IssueLabel>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<IssueLabel>>,
     data: L.IssueLabelConnectionFragment
   ) {
     super(
@@ -2121,7 +2123,7 @@ export class IssueRelation extends LinearRequest {
 export class IssueRelationConnection extends LinearConnection<IssueRelation> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<IssueRelation>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<IssueRelation>>,
     data: L.IssueRelationConnectionFragment
   ) {
     super(
@@ -2195,7 +2197,7 @@ export class Milestone extends LinearRequest {
   }
   /** Projects associated with the milestone. */
   public projects(variables?: Omit<L.Milestone_ProjectsQueryVariables, "id">) {
-    return this.id ? new Milestone_ProjectsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Milestone_ProjectsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
 }
 /**
@@ -2208,7 +2210,7 @@ export class Milestone extends LinearRequest {
 export class MilestoneConnection extends LinearConnection<Milestone> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Milestone>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Milestone>>,
     data: L.MilestoneConnectionFragment
   ) {
     super(
@@ -2321,7 +2323,7 @@ export class Notification extends LinearRequest {
 export class NotificationConnection extends LinearConnection<Notification> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Notification>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Notification>>,
     data: L.NotificationConnectionFragment
   ) {
     super(
@@ -2416,7 +2418,7 @@ export class NotificationSubscription extends LinearRequest {
 export class NotificationSubscriptionConnection extends LinearConnection<NotificationSubscription> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<NotificationSubscription>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<NotificationSubscription>>,
     data: L.NotificationSubscriptionConnectionFragment
   ) {
     super(
@@ -2606,19 +2608,19 @@ export class Organization extends LinearRequest {
 
   /** Integrations associated with the organization. */
   public integrations(variables?: L.Organization_IntegrationsQueryVariables) {
-    return new Organization_IntegrationsQuery(this._request).fetch(variables);
+    return new Organization_IntegrationsQuery(this._request, variables).fetch(variables);
   }
   /** Milestones associated with the organization. */
   public milestones(variables?: L.Organization_MilestonesQueryVariables) {
-    return new Organization_MilestonesQuery(this._request).fetch(variables);
+    return new Organization_MilestonesQuery(this._request, variables).fetch(variables);
   }
   /** Teams associated with the organization. */
   public teams(variables?: L.Organization_TeamsQueryVariables) {
-    return new Organization_TeamsQuery(this._request).fetch(variables);
+    return new Organization_TeamsQuery(this._request, variables).fetch(variables);
   }
   /** Users associated with the organization. */
   public users(variables?: L.Organization_UsersQueryVariables) {
-    return new Organization_UsersQuery(this._request).fetch(variables);
+    return new Organization_UsersQuery(this._request, variables).fetch(variables);
   }
 }
 /**
@@ -2792,7 +2794,7 @@ export class OrganizationInvite extends LinearRequest {
   }
   /** undefined */
   public issues(variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">) {
-    return this.id ? new OrganizationInvite_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new OrganizationInvite_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
 }
 /**
@@ -2805,7 +2807,7 @@ export class OrganizationInvite extends LinearRequest {
 export class OrganizationInviteConnection extends LinearConnection<OrganizationInvite> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<OrganizationInvite>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<OrganizationInvite>>,
     data: L.OrganizationInviteConnectionFragment
   ) {
     super(
@@ -2986,19 +2988,19 @@ export class Project extends LinearRequest {
   }
   /** Issues associated with the project. */
   public issues(variables?: Omit<L.Project_IssuesQueryVariables, "id">) {
-    return this.id ? new Project_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Project_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Links associated with the project. */
   public links(variables?: Omit<L.Project_LinksQueryVariables, "id">) {
-    return this.id ? new Project_LinksQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Project_LinksQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Users that are members of the project. */
   public members(variables?: Omit<L.Project_MembersQueryVariables, "id">) {
-    return this.id ? new Project_MembersQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Project_MembersQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Teams associated with this project. */
   public teams(variables?: Omit<L.Project_TeamsQueryVariables, "id">) {
-    return this.id ? new Project_TeamsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Project_TeamsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
 }
 /**
@@ -3011,7 +3013,7 @@ export class Project extends LinearRequest {
 export class ProjectConnection extends LinearConnection<Project> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Project>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Project>>,
     data: L.ProjectConnectionFragment
   ) {
     super(
@@ -3078,7 +3080,7 @@ export class ProjectLink extends LinearRequest {
 export class ProjectLinkConnection extends LinearConnection<ProjectLink> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<ProjectLink>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<ProjectLink>>,
     data: L.ProjectLinkConnectionFragment
   ) {
     super(
@@ -3218,7 +3220,7 @@ export class PushSubscription extends LinearRequest {
 export class PushSubscriptionConnection extends LinearConnection<PushSubscription> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<PushSubscription>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<PushSubscription>>,
     data: L.PushSubscriptionConnectionFragment
   ) {
     super(
@@ -3300,7 +3302,7 @@ export class Reaction extends LinearRequest {
 export class ReactionConnection extends LinearConnection<Reaction> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Reaction>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Reaction>>,
     data: L.ReactionConnectionFragment
   ) {
     super(
@@ -3785,39 +3787,39 @@ export class Team extends LinearRequest {
   }
   /** Cycles associated with the team. */
   public cycles(variables?: Omit<L.Team_CyclesQueryVariables, "id">) {
-    return this.id ? new Team_CyclesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_CyclesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Issues associated with the team. */
   public issues(variables?: Omit<L.Team_IssuesQueryVariables, "id">) {
-    return this.id ? new Team_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Labels associated with the team. */
   public labels(variables?: Omit<L.Team_LabelsQueryVariables, "id">) {
-    return this.id ? new Team_LabelsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_LabelsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Users who are members of this team. */
   public members(variables?: Omit<L.Team_MembersQueryVariables, "id">) {
-    return this.id ? new Team_MembersQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_MembersQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Memberships associated with the team. For easier access of the same data, use `members` query. */
   public memberships(variables?: Omit<L.Team_MembershipsQueryVariables, "id">) {
-    return this.id ? new Team_MembershipsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_MembershipsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Projects associated with the team. */
   public projects(variables?: Omit<L.Team_ProjectsQueryVariables, "id">) {
-    return this.id ? new Team_ProjectsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_ProjectsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** The states that define the workflow associated with the team. */
   public states(variables?: Omit<L.Team_StatesQueryVariables, "id">) {
-    return this.id ? new Team_StatesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_StatesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Templates associated with the team. */
   public templates(variables?: Omit<L.Team_TemplatesQueryVariables, "id">) {
-    return this.id ? new Team_TemplatesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_TemplatesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Webhooks associated with the team. */
   public webhooks(variables?: Omit<L.Team_WebhooksQueryVariables, "id">) {
-    return this.id ? new Team_WebhooksQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new Team_WebhooksQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
 }
 /**
@@ -3830,7 +3832,7 @@ export class Team extends LinearRequest {
 export class TeamConnection extends LinearConnection<Team> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Team>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Team>>,
     data: L.TeamConnectionFragment
   ) {
     super(
@@ -3891,7 +3893,7 @@ export class TeamMembership extends LinearRequest {
 export class TeamMembershipConnection extends LinearConnection<TeamMembership> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<TeamMembership>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<TeamMembership>>,
     data: L.TeamMembershipConnectionFragment
   ) {
     super(
@@ -4177,19 +4179,19 @@ export class User extends LinearRequest {
   }
   /** Issues assigned to the user. */
   public assignedIssues(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">) {
-    return this.id ? new User_AssignedIssuesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new User_AssignedIssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Issues created by the user. */
   public createdIssues(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">) {
-    return this.id ? new User_CreatedIssuesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new User_CreatedIssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   public teamMemberships(variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
-    return this.id ? new User_TeamMembershipsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new User_TeamMembershipsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Teams the user is part of. */
   public teams(variables?: Omit<L.User_TeamsQueryVariables, "id">) {
-    return this.id ? new User_TeamsQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new User_TeamsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
 }
 /**
@@ -4286,7 +4288,7 @@ export class UserAuthorizedApplication extends LinearRequest {
 export class UserConnection extends LinearConnection<User> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<User>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<User>>,
     data: L.UserConnectionFragment
   ) {
     super(
@@ -4560,7 +4562,7 @@ export class Webhook extends LinearRequest {
 export class WebhookConnection extends LinearConnection<Webhook> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<Webhook>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<Webhook>>,
     data: L.WebhookConnectionFragment
   ) {
     super(
@@ -4646,7 +4648,7 @@ export class WorkflowState extends LinearRequest {
   }
   /** Issues belonging in this state. */
   public issues(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">) {
-    return this.id ? new WorkflowState_IssuesQuery(this._request, this.id).fetch(variables) : undefined;
+    return this.id ? new WorkflowState_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
 }
 /**
@@ -4659,7 +4661,7 @@ export class WorkflowState extends LinearRequest {
 export class WorkflowStateConnection extends LinearConnection<WorkflowState> {
   public constructor(
     request: Request,
-    fetch: (variables?: ConnectionVariables) => Fetch<Connection<WorkflowState>>,
+    fetch: (connection?: ConnectionVariables) => Fetch<Connection<WorkflowState>>,
     data: L.WorkflowStateConnectionFragment
   ) {
     super(
@@ -4715,7 +4717,7 @@ export class ApiKeysQuery extends LinearRequest {
     return this._request<L.ApiKeysQuery, L.ApiKeysQueryVariables>(L.ApiKeysDocument, variables).then(response => {
       const data = response?.apiKeys;
       return data
-        ? new ApiKeyConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new ApiKeyConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -4975,7 +4977,7 @@ export class CommentsQuery extends LinearRequest {
     return this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables).then(response => {
       const data = response?.comments;
       return data
-        ? new CommentConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new CommentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -5028,7 +5030,7 @@ export class CustomViewsQuery extends LinearRequest {
       response => {
         const data = response?.customViews;
         return data
-          ? new CustomViewConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          ? new CustomViewConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
           : undefined;
       }
     );
@@ -5081,7 +5083,7 @@ export class CyclesQuery extends LinearRequest {
     return this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables).then(response => {
       const data = response?.cycles;
       return data
-        ? new CycleConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new CycleConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -5133,7 +5135,7 @@ export class EmojisQuery extends LinearRequest {
     return this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables).then(response => {
       const data = response?.emojis;
       return data
-        ? new EmojiConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new EmojiConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -5185,7 +5187,7 @@ export class FavoritesQuery extends LinearRequest {
     return this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables).then(response => {
       const data = response?.favorites;
       return data
-        ? new FavoriteConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new FavoriteConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -5269,7 +5271,7 @@ export class IntegrationsQuery extends LinearRequest {
       response => {
         const data = response?.integrations;
         return data
-          ? new IntegrationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          ? new IntegrationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
           : undefined;
       }
     );
@@ -5380,7 +5382,7 @@ export class IssueLabelsQuery extends LinearRequest {
       response => {
         const data = response?.issueLabels;
         return data
-          ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          ? new IssueLabelConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
           : undefined;
       }
     );
@@ -5436,7 +5438,7 @@ export class IssueRelationsQuery extends LinearRequest {
     ).then(response => {
       const data = response?.issueRelations;
       return data
-        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueRelationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -5466,7 +5468,7 @@ export class IssueSearchQuery extends LinearRequest {
     }).then(response => {
       const data = response?.issueSearch;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch(query, { ...variables, ...pagination }), data)
+        ? new IssueConnection(this._request, connection => this.fetch(query, { ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -5492,7 +5494,7 @@ export class IssuesQuery extends LinearRequest {
     return this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables).then(response => {
       const data = response?.issues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -5545,7 +5547,7 @@ export class MilestonesQuery extends LinearRequest {
       response => {
         const data = response?.milestones;
         return data
-          ? new MilestoneConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          ? new MilestoneConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
           : undefined;
       }
     );
@@ -5632,7 +5634,7 @@ export class NotificationSubscriptionsQuery extends LinearRequest {
       return data
         ? new NotificationSubscriptionConnection(
             this._request,
-            pagination => this.fetch({ ...variables, ...pagination }),
+            connection => this.fetch({ ...variables, ...connection }),
             data
           )
         : undefined;
@@ -5661,7 +5663,7 @@ export class NotificationsQuery extends LinearRequest {
       response => {
         const data = response?.notifications;
         return data
-          ? new NotificationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          ? new NotificationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
           : undefined;
       }
     );
@@ -5770,7 +5772,7 @@ export class OrganizationInvitesQuery extends LinearRequest {
       return data
         ? new OrganizationInviteConnection(
             this._request,
-            pagination => this.fetch({ ...variables, ...pagination }),
+            connection => this.fetch({ ...variables, ...connection }),
             data
           )
         : undefined;
@@ -5851,7 +5853,7 @@ export class ProjectLinksQuery extends LinearRequest {
       response => {
         const data = response?.projectLinks;
         return data
-          ? new ProjectLinkConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          ? new ProjectLinkConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
           : undefined;
       }
     );
@@ -5878,7 +5880,7 @@ export class ProjectsQuery extends LinearRequest {
     return this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables).then(response => {
       const data = response?.projects;
       return data
-        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new ProjectConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -5956,7 +5958,7 @@ export class ReactionsQuery extends LinearRequest {
     return this._request<L.ReactionsQuery, L.ReactionsQueryVariables>(L.ReactionsDocument, variables).then(response => {
       const data = response?.reactions;
       return data
-        ? new ReactionConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new ReactionConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -6094,7 +6096,7 @@ export class TeamMembershipsQuery extends LinearRequest {
     ).then(response => {
       const data = response?.teamMemberships;
       return data
-        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new TeamMembershipConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -6120,7 +6122,7 @@ export class TeamsQuery extends LinearRequest {
     return this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables).then(response => {
       const data = response?.teams;
       return data
-        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new TeamConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -6246,7 +6248,7 @@ export class UsersQuery extends LinearRequest {
     return this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables).then(response => {
       const data = response?.users;
       return data
-        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new UserConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -6321,7 +6323,7 @@ export class WebhooksQuery extends LinearRequest {
     return this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables).then(response => {
       const data = response?.webhooks;
       return data
-        ? new WebhookConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new WebhookConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -6376,7 +6378,7 @@ export class WorkflowStatesQuery extends LinearRequest {
     ).then(response => {
       const data = response?.workflowStates;
       return data
-        ? new WorkflowStateConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new WorkflowStateConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
     });
   }
@@ -10081,13 +10083,16 @@ export class CollaborativeDocumentJoin_StepsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to cycle
+ * @param variables - variables without 'id' to pass into the Cycle_IssuesQuery
  */
 export class Cycle_IssuesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Cycle_IssuesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Cycle_IssuesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10099,11 +10104,16 @@ export class Cycle_IssuesQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
     return this._request<L.Cycle_IssuesQuery, L.Cycle_IssuesQueryVariables>(L.Cycle_IssuesDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.cycle?.issues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10114,13 +10124,20 @@ export class Cycle_IssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to cycle
+ * @param variables - variables without 'id' to pass into the Cycle_UncompletedIssuesUponCloseQuery
  */
 export class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(
+    request: Request,
+    id: string,
+    variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
+  ) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10134,12 +10151,17 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
       L.Cycle_UncompletedIssuesUponCloseDocument,
       {
         id: this._id,
+        ...this._variables,
         ...variables,
       }
     ).then(response => {
       const data = response?.cycle?.uncompletedIssuesUponClose;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10150,13 +10172,20 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param fileId - required fileId to pass to figmaEmbedInfo
+ * @param variables - variables without 'fileId' to pass into the FigmaEmbedInfo_FigmaEmbedQuery
  */
 export class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
   private _fileId: string;
+  private _variables?: Omit<L.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">;
 
-  public constructor(request: Request, fileId: string) {
+  public constructor(
+    request: Request,
+    fileId: string,
+    variables?: Omit<L.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
+  ) {
     super(request);
     this._fileId = fileId;
+    this._variables = variables;
   }
 
   /**
@@ -10170,6 +10199,7 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
       L.FigmaEmbedInfo_FigmaEmbedDocument,
       {
         fileId: this._fileId,
+        ...this._variables,
         ...variables,
       }
     ).then(response => {
@@ -10184,13 +10214,20 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param userHash - required userHash to pass to inviteInfo
+ * @param variables - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
  */
 export class InviteInfo_InviteDataQuery extends LinearRequest {
   private _userHash: string;
+  private _variables?: Omit<L.InviteInfo_InviteDataQueryVariables, "userHash">;
 
-  public constructor(request: Request, userHash: string) {
+  public constructor(
+    request: Request,
+    userHash: string,
+    variables?: Omit<L.InviteInfo_InviteDataQueryVariables, "userHash">
+  ) {
     super(request);
     this._userHash = userHash;
+    this._variables = variables;
   }
 
   /**
@@ -10204,6 +10241,7 @@ export class InviteInfo_InviteDataQuery extends LinearRequest {
       L.InviteInfo_InviteDataDocument,
       {
         userHash: this._userHash,
+        ...this._variables,
         ...variables,
       }
     ).then(response => {
@@ -10218,13 +10256,16 @@ export class InviteInfo_InviteDataQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_ChildrenQuery
  */
 export class Issue_ChildrenQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Issue_ChildrenQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Issue_ChildrenQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10236,11 +10277,16 @@ export class Issue_ChildrenQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">): Fetch<IssueConnection> {
     return this._request<L.Issue_ChildrenQuery, L.Issue_ChildrenQueryVariables>(L.Issue_ChildrenDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.issue?.children;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10251,13 +10297,16 @@ export class Issue_ChildrenQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_CommentsQuery
  */
 export class Issue_CommentsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Issue_CommentsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Issue_CommentsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10269,11 +10318,16 @@ export class Issue_CommentsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Issue_CommentsQueryVariables, "id">): Fetch<CommentConnection> {
     return this._request<L.Issue_CommentsQuery, L.Issue_CommentsQueryVariables>(L.Issue_CommentsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.issue?.comments;
       return data
-        ? new CommentConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new CommentConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10284,13 +10338,16 @@ export class Issue_CommentsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_HistoryQuery
  */
 export class Issue_HistoryQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Issue_HistoryQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Issue_HistoryQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10302,11 +10359,16 @@ export class Issue_HistoryQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Issue_HistoryQueryVariables, "id">): Fetch<IssueHistoryConnection> {
     return this._request<L.Issue_HistoryQuery, L.Issue_HistoryQueryVariables>(L.Issue_HistoryDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.issue?.history;
       return data
-        ? new IssueHistoryConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueHistoryConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10317,13 +10379,16 @@ export class Issue_HistoryQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_InverseRelationsQuery
  */
 export class Issue_InverseRelationsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10337,12 +10402,17 @@ export class Issue_InverseRelationsQuery extends LinearRequest {
       L.Issue_InverseRelationsDocument,
       {
         id: this._id,
+        ...this._variables,
         ...variables,
       }
     ).then(response => {
       const data = response?.issue?.inverseRelations;
       return data
-        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueRelationConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10353,13 +10423,16 @@ export class Issue_InverseRelationsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_LabelsQuery
  */
 export class Issue_LabelsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Issue_LabelsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Issue_LabelsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10371,11 +10444,16 @@ export class Issue_LabelsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Issue_LabelsQueryVariables, "id">): Fetch<IssueLabelConnection> {
     return this._request<L.Issue_LabelsQuery, L.Issue_LabelsQueryVariables>(L.Issue_LabelsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.issue?.labels;
       return data
-        ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueLabelConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10386,13 +10464,16 @@ export class Issue_LabelsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_RelationsQuery
  */
 export class Issue_RelationsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Issue_RelationsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Issue_RelationsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10404,11 +10485,16 @@ export class Issue_RelationsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Issue_RelationsQueryVariables, "id">): Fetch<IssueRelationConnection> {
     return this._request<L.Issue_RelationsQuery, L.Issue_RelationsQueryVariables>(L.Issue_RelationsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.issue?.relations;
       return data
-        ? new IssueRelationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueRelationConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10419,13 +10505,16 @@ export class Issue_RelationsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_SubscribersQuery
  */
 export class Issue_SubscribersQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Issue_SubscribersQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Issue_SubscribersQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10437,11 +10526,16 @@ export class Issue_SubscribersQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">): Fetch<UserConnection> {
     return this._request<L.Issue_SubscribersQuery, L.Issue_SubscribersQueryVariables>(L.Issue_SubscribersDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.issue?.subscribers;
       return data
-        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new UserConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10452,13 +10546,16 @@ export class Issue_SubscribersQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to issueLabel
+ * @param variables - variables without 'id' to pass into the IssueLabel_IssuesQuery
  */
 export class IssueLabel_IssuesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10470,11 +10567,16 @@ export class IssueLabel_IssuesQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
     return this._request<L.IssueLabel_IssuesQuery, L.IssueLabel_IssuesQueryVariables>(L.IssueLabel_IssuesDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.issueLabel?.issues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10485,13 +10587,16 @@ export class IssueLabel_IssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to milestone
+ * @param variables - variables without 'id' to pass into the Milestone_ProjectsQuery
  */
 export class Milestone_ProjectsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Milestone_ProjectsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Milestone_ProjectsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10503,11 +10608,16 @@ export class Milestone_ProjectsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Milestone_ProjectsQueryVariables, "id">): Fetch<ProjectConnection> {
     return this._request<L.Milestone_ProjectsQuery, L.Milestone_ProjectsQueryVariables>(L.Milestone_ProjectsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.milestone?.projects;
       return data
-        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new ProjectConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10517,10 +10627,15 @@ export class Milestone_ProjectsQuery extends LinearRequest {
  * A fetchable Organization_Integrations Query
  *
  * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Organization_IntegrationsQuery
  */
 export class Organization_IntegrationsQuery extends LinearRequest {
-  public constructor(request: Request) {
+  private _variables?: L.Organization_IntegrationsQueryVariables;
+
+  public constructor(request: Request, variables?: L.Organization_IntegrationsQueryVariables) {
     super(request);
+
+    this._variables = variables;
   }
 
   /**
@@ -10536,7 +10651,11 @@ export class Organization_IntegrationsQuery extends LinearRequest {
     ).then(response => {
       const data = response?.organization?.integrations;
       return data
-        ? new IntegrationConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IntegrationConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10546,10 +10665,15 @@ export class Organization_IntegrationsQuery extends LinearRequest {
  * A fetchable Organization_Milestones Query
  *
  * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Organization_MilestonesQuery
  */
 export class Organization_MilestonesQuery extends LinearRequest {
-  public constructor(request: Request) {
+  private _variables?: L.Organization_MilestonesQueryVariables;
+
+  public constructor(request: Request, variables?: L.Organization_MilestonesQueryVariables) {
     super(request);
+
+    this._variables = variables;
   }
 
   /**
@@ -10565,7 +10689,11 @@ export class Organization_MilestonesQuery extends LinearRequest {
     ).then(response => {
       const data = response?.organization?.milestones;
       return data
-        ? new MilestoneConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new MilestoneConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10575,10 +10703,15 @@ export class Organization_MilestonesQuery extends LinearRequest {
  * A fetchable Organization_Teams Query
  *
  * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Organization_TeamsQuery
  */
 export class Organization_TeamsQuery extends LinearRequest {
-  public constructor(request: Request) {
+  private _variables?: L.Organization_TeamsQueryVariables;
+
+  public constructor(request: Request, variables?: L.Organization_TeamsQueryVariables) {
     super(request);
+
+    this._variables = variables;
   }
 
   /**
@@ -10594,7 +10727,11 @@ export class Organization_TeamsQuery extends LinearRequest {
     ).then(response => {
       const data = response?.organization?.teams;
       return data
-        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new TeamConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10604,10 +10741,15 @@ export class Organization_TeamsQuery extends LinearRequest {
  * A fetchable Organization_Users Query
  *
  * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Organization_UsersQuery
  */
 export class Organization_UsersQuery extends LinearRequest {
-  public constructor(request: Request) {
+  private _variables?: L.Organization_UsersQueryVariables;
+
+  public constructor(request: Request, variables?: L.Organization_UsersQueryVariables) {
     super(request);
+
+    this._variables = variables;
   }
 
   /**
@@ -10623,7 +10765,11 @@ export class Organization_UsersQuery extends LinearRequest {
     ).then(response => {
       const data = response?.organization?.users;
       return data
-        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new UserConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10634,13 +10780,16 @@ export class Organization_UsersQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to organizationInvite
+ * @param variables - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
  */
 export class OrganizationInvite_IssuesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10654,12 +10803,17 @@ export class OrganizationInvite_IssuesQuery extends LinearRequest {
       L.OrganizationInvite_IssuesDocument,
       {
         id: this._id,
+        ...this._variables,
         ...variables,
       }
     ).then(response => {
       const data = response?.organizationInvite?.issues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10670,13 +10824,16 @@ export class OrganizationInvite_IssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_IssuesQuery
  */
 export class Project_IssuesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Project_IssuesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Project_IssuesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10688,11 +10845,16 @@ export class Project_IssuesQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Project_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
     return this._request<L.Project_IssuesQuery, L.Project_IssuesQueryVariables>(L.Project_IssuesDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.project?.issues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10703,13 +10865,16 @@ export class Project_IssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_LinksQuery
  */
 export class Project_LinksQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Project_LinksQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Project_LinksQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10721,11 +10886,16 @@ export class Project_LinksQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Project_LinksQueryVariables, "id">): Fetch<ProjectLinkConnection> {
     return this._request<L.Project_LinksQuery, L.Project_LinksQueryVariables>(L.Project_LinksDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.project?.links;
       return data
-        ? new ProjectLinkConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new ProjectLinkConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10736,13 +10906,16 @@ export class Project_LinksQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_MembersQuery
  */
 export class Project_MembersQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Project_MembersQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Project_MembersQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10754,11 +10927,16 @@ export class Project_MembersQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Project_MembersQueryVariables, "id">): Fetch<UserConnection> {
     return this._request<L.Project_MembersQuery, L.Project_MembersQueryVariables>(L.Project_MembersDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.project?.members;
       return data
-        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new UserConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10769,13 +10947,16 @@ export class Project_MembersQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_TeamsQuery
  */
 export class Project_TeamsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Project_TeamsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Project_TeamsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10787,11 +10968,16 @@ export class Project_TeamsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Project_TeamsQueryVariables, "id">): Fetch<TeamConnection> {
     return this._request<L.Project_TeamsQuery, L.Project_TeamsQueryVariables>(L.Project_TeamsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.project?.teams;
       return data
-        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new TeamConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10802,13 +10988,16 @@ export class Project_TeamsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_CyclesQuery
  */
 export class Team_CyclesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_CyclesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_CyclesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10820,11 +11009,16 @@ export class Team_CyclesQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_CyclesQueryVariables, "id">): Fetch<CycleConnection> {
     return this._request<L.Team_CyclesQuery, L.Team_CyclesQueryVariables>(L.Team_CyclesDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.cycles;
       return data
-        ? new CycleConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new CycleConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10835,13 +11029,16 @@ export class Team_CyclesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_IssuesQuery
  */
 export class Team_IssuesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_IssuesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_IssuesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10853,11 +11050,16 @@ export class Team_IssuesQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_IssuesQueryVariables, "id">): Fetch<IssueConnection> {
     return this._request<L.Team_IssuesQuery, L.Team_IssuesQueryVariables>(L.Team_IssuesDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.issues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10868,13 +11070,16 @@ export class Team_IssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_LabelsQuery
  */
 export class Team_LabelsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_LabelsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_LabelsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10886,11 +11091,16 @@ export class Team_LabelsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_LabelsQueryVariables, "id">): Fetch<IssueLabelConnection> {
     return this._request<L.Team_LabelsQuery, L.Team_LabelsQueryVariables>(L.Team_LabelsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.labels;
       return data
-        ? new IssueLabelConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueLabelConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10901,13 +11111,16 @@ export class Team_LabelsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_MembersQuery
  */
 export class Team_MembersQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_MembersQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_MembersQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10919,11 +11132,16 @@ export class Team_MembersQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_MembersQueryVariables, "id">): Fetch<UserConnection> {
     return this._request<L.Team_MembersQuery, L.Team_MembersQueryVariables>(L.Team_MembersDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.members;
       return data
-        ? new UserConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new UserConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10934,13 +11152,16 @@ export class Team_MembersQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_MembershipsQuery
  */
 export class Team_MembershipsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_MembershipsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_MembershipsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10952,11 +11173,16 @@ export class Team_MembershipsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_MembershipsQueryVariables, "id">): Fetch<TeamMembershipConnection> {
     return this._request<L.Team_MembershipsQuery, L.Team_MembershipsQueryVariables>(L.Team_MembershipsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.memberships;
       return data
-        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new TeamMembershipConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -10967,13 +11193,16 @@ export class Team_MembershipsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_ProjectsQuery
  */
 export class Team_ProjectsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_ProjectsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_ProjectsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -10985,11 +11214,16 @@ export class Team_ProjectsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_ProjectsQueryVariables, "id">): Fetch<ProjectConnection> {
     return this._request<L.Team_ProjectsQuery, L.Team_ProjectsQueryVariables>(L.Team_ProjectsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.projects;
       return data
-        ? new ProjectConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new ProjectConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11000,13 +11234,16 @@ export class Team_ProjectsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_StatesQuery
  */
 export class Team_StatesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_StatesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_StatesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -11018,11 +11255,16 @@ export class Team_StatesQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_StatesQueryVariables, "id">): Fetch<WorkflowStateConnection> {
     return this._request<L.Team_StatesQuery, L.Team_StatesQueryVariables>(L.Team_StatesDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.states;
       return data
-        ? new WorkflowStateConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new WorkflowStateConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11033,13 +11275,16 @@ export class Team_StatesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_TemplatesQuery
  */
 export class Team_TemplatesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_TemplatesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_TemplatesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -11051,6 +11296,7 @@ export class Team_TemplatesQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_TemplatesQueryVariables, "id">): Fetch<TemplateConnection> {
     return this._request<L.Team_TemplatesQuery, L.Team_TemplatesQueryVariables>(L.Team_TemplatesDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.templates;
@@ -11064,13 +11310,16 @@ export class Team_TemplatesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_WebhooksQuery
  */
 export class Team_WebhooksQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.Team_WebhooksQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.Team_WebhooksQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -11082,11 +11331,16 @@ export class Team_WebhooksQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.Team_WebhooksQueryVariables, "id">): Fetch<WebhookConnection> {
     return this._request<L.Team_WebhooksQuery, L.Team_WebhooksQueryVariables>(L.Team_WebhooksDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.team?.webhooks;
       return data
-        ? new WebhookConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new WebhookConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11097,13 +11351,16 @@ export class Team_WebhooksQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to user
+ * @param variables - variables without 'id' to pass into the User_AssignedIssuesQuery
  */
 export class User_AssignedIssuesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -11117,12 +11374,17 @@ export class User_AssignedIssuesQuery extends LinearRequest {
       L.User_AssignedIssuesDocument,
       {
         id: this._id,
+        ...this._variables,
         ...variables,
       }
     ).then(response => {
       const data = response?.user?.assignedIssues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11133,13 +11395,16 @@ export class User_AssignedIssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to user
+ * @param variables - variables without 'id' to pass into the User_CreatedIssuesQuery
  */
 export class User_CreatedIssuesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -11151,11 +11416,16 @@ export class User_CreatedIssuesQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">): Fetch<IssueConnection> {
     return this._request<L.User_CreatedIssuesQuery, L.User_CreatedIssuesQueryVariables>(L.User_CreatedIssuesDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.user?.createdIssues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11166,13 +11436,16 @@ export class User_CreatedIssuesQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to user
+ * @param variables - variables without 'id' to pass into the User_TeamMembershipsQuery
  */
 export class User_TeamMembershipsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -11186,12 +11459,17 @@ export class User_TeamMembershipsQuery extends LinearRequest {
       L.User_TeamMembershipsDocument,
       {
         id: this._id,
+        ...this._variables,
         ...variables,
       }
     ).then(response => {
       const data = response?.user?.teamMemberships;
       return data
-        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new TeamMembershipConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11202,13 +11480,16 @@ export class User_TeamMembershipsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to user
+ * @param variables - variables without 'id' to pass into the User_TeamsQuery
  */
 export class User_TeamsQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.User_TeamsQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.User_TeamsQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -11220,11 +11501,16 @@ export class User_TeamsQuery extends LinearRequest {
   public async fetch(variables?: Omit<L.User_TeamsQueryVariables, "id">): Fetch<TeamConnection> {
     return this._request<L.User_TeamsQuery, L.User_TeamsQueryVariables>(L.User_TeamsDocument, {
       id: this._id,
+      ...this._variables,
       ...variables,
     }).then(response => {
       const data = response?.user?.teams;
       return data
-        ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new TeamConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11234,10 +11520,15 @@ export class User_TeamsQuery extends LinearRequest {
  * A fetchable Viewer_AssignedIssues Query
  *
  * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Viewer_AssignedIssuesQuery
  */
 export class Viewer_AssignedIssuesQuery extends LinearRequest {
-  public constructor(request: Request) {
+  private _variables?: L.Viewer_AssignedIssuesQueryVariables;
+
+  public constructor(request: Request, variables?: L.Viewer_AssignedIssuesQueryVariables) {
     super(request);
+
+    this._variables = variables;
   }
 
   /**
@@ -11253,7 +11544,11 @@ export class Viewer_AssignedIssuesQuery extends LinearRequest {
     ).then(response => {
       const data = response?.viewer?.assignedIssues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11263,10 +11558,15 @@ export class Viewer_AssignedIssuesQuery extends LinearRequest {
  * A fetchable Viewer_CreatedIssues Query
  *
  * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Viewer_CreatedIssuesQuery
  */
 export class Viewer_CreatedIssuesQuery extends LinearRequest {
-  public constructor(request: Request) {
+  private _variables?: L.Viewer_CreatedIssuesQueryVariables;
+
+  public constructor(request: Request, variables?: L.Viewer_CreatedIssuesQueryVariables) {
     super(request);
+
+    this._variables = variables;
   }
 
   /**
@@ -11282,7 +11582,11 @@ export class Viewer_CreatedIssuesQuery extends LinearRequest {
     ).then(response => {
       const data = response?.viewer?.createdIssues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11292,10 +11596,15 @@ export class Viewer_CreatedIssuesQuery extends LinearRequest {
  * A fetchable Viewer_TeamMemberships Query
  *
  * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Viewer_TeamMembershipsQuery
  */
 export class Viewer_TeamMembershipsQuery extends LinearRequest {
-  public constructor(request: Request) {
+  private _variables?: L.Viewer_TeamMembershipsQueryVariables;
+
+  public constructor(request: Request, variables?: L.Viewer_TeamMembershipsQueryVariables) {
     super(request);
+
+    this._variables = variables;
   }
 
   /**
@@ -11311,7 +11620,11 @@ export class Viewer_TeamMembershipsQuery extends LinearRequest {
     ).then(response => {
       const data = response?.viewer?.teamMemberships;
       return data
-        ? new TeamMembershipConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new TeamMembershipConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
@@ -11321,10 +11634,15 @@ export class Viewer_TeamMembershipsQuery extends LinearRequest {
  * A fetchable Viewer_Teams Query
  *
  * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Viewer_TeamsQuery
  */
 export class Viewer_TeamsQuery extends LinearRequest {
-  public constructor(request: Request) {
+  private _variables?: L.Viewer_TeamsQueryVariables;
+
+  public constructor(request: Request, variables?: L.Viewer_TeamsQueryVariables) {
     super(request);
+
+    this._variables = variables;
   }
 
   /**
@@ -11338,7 +11656,11 @@ export class Viewer_TeamsQuery extends LinearRequest {
       response => {
         const data = response?.viewer?.teams;
         return data
-          ? new TeamConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+          ? new TeamConnection(
+              this._request,
+              connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+              data
+            )
           : undefined;
       }
     );
@@ -11350,13 +11672,16 @@ export class Viewer_TeamsQuery extends LinearRequest {
  *
  * @param request - function to call the graphql client
  * @param id - required id to pass to workflowState
+ * @param variables - variables without 'id' to pass into the WorkflowState_IssuesQuery
  */
 export class WorkflowState_IssuesQuery extends LinearRequest {
   private _id: string;
+  private _variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">;
 
-  public constructor(request: Request, id: string) {
+  public constructor(request: Request, id: string, variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">) {
     super(request);
     this._id = id;
+    this._variables = variables;
   }
 
   /**
@@ -11370,12 +11695,17 @@ export class WorkflowState_IssuesQuery extends LinearRequest {
       L.WorkflowState_IssuesDocument,
       {
         id: this._id,
+        ...this._variables,
         ...variables,
       }
     ).then(response => {
       const data = response?.workflowState?.issues;
       return data
-        ? new IssueConnection(this._request, pagination => this.fetch({ ...variables, ...pagination }), data)
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
         : undefined;
     });
   }
