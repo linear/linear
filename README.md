@@ -486,7 +486,7 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
 
     Initialize the Linear Client with the access token:
     ```
-    const client = new LinearClient({ accessToken: oauthToken })
+    const client = new LinearClient({ accessToken: response.access_token })
     const me = await client.viewer
     ```
 
