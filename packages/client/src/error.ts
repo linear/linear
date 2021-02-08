@@ -1,4 +1,4 @@
-import { getKeyByValue, logger, nonNullable } from "@linear/common";
+import { getKeyByValue, nonNullable } from "@linear/common";
 import { LinearErrorRaw, LinearErrorType, LinearGraphQLErrorRaw } from "./types";
 import { capitalize } from "./utils";
 
@@ -121,9 +121,5 @@ export class LinearError extends Error {
         : `${this.status}`.startsWith("5")
         ? LinearErrorType.NetworkError
         : LinearErrorType.Unknown);
-
-    if (process.env.NODE_ENV === "test") {
-      logger.error(this);
-    }
   }
 }
