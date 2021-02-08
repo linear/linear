@@ -31,12 +31,13 @@
   - [File Upload](#file-upload)
   - [Errors](#errors)
   - [Limitations](#limitations)
+- [☀️ API Reference](#️-api-reference)
 - [🌊 Advanced](#-advanced)
   - [Configure the Request](#configure-the-request)
   - [Access the GraphQL Client](#access-the-graphql-client)
   - [Raw GraphQL queries](#raw-graphql-queries)
   - [Customise the GraphQL Client](#customise-the-graphql-client)
-- [⚡️ Authenticate with OAuth](#️-authenticate-with-oauth)
+- [⚡️ OAuth Authentication](#️-oauth-authentication)
 - [🌈 Find help](#-find-help)
 - [🔥 Contribute](#-contribute)
   - [Get Started](#get-started)
@@ -365,7 +366,19 @@ run().catch((_error) => {
 
 ### Limitations
 
-- Search and filtering is currently under development. For now, this functionality must be performed by the consumer.
+This functionality is currently under development and must be performed by the consumer:
+- Search and filtering of collections
+
+## ☀️ API Reference
+
+The Linear Client is generated from the [Linear GraphQL schema]('./../packages/sdk/src/schema.graphql).
+
+You can use any GraphQL client to introspect and explore the schema. Such as [Insomnia](https://insomnia.rest/) or [GraphQL Playground](https://github.com/prisma/graphql-playground).
+
+Point the GraphQL client to the Linear production API endpoint:
+```
+https://api.linear.app/graphql
+```
 
 ## 🌊 Advanced
 
@@ -446,7 +459,7 @@ async function getUsers(): Fetch<UserConnection> {
 }
 ```
 
-## ⚡️ Authenticate with OAuth
+## ⚡️ OAuth Authentication
 
 Linear supports OAuth2 authentication, which is recommended if you're building applications to integrate with Linear.
 
