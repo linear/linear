@@ -50,6 +50,8 @@
 
 ## 🦋 Your First Query
 
+<br/>
+
 Connect to the Linear API and interact with your data in a few steps:
 
 1. **Install the Linear Client**
@@ -113,9 +115,12 @@ Connect to the Linear API and interact with your data in a few steps:
       });
     });
     ```
+
 <br/>
 
 ## 🦄 Features
+
+<br/>
 
 The Linear Client exposes the [Linear GraphQL schema](./packages/sdk/src/schema.graphql) through strongly typed [models and operations](packages/sdk/src/_generated_sdk.ts).
 
@@ -378,6 +383,8 @@ This functionality is currently under development and must be performed by the c
 
 ## ☀️ API Reference
 
+<br/>
+
 The Linear Client is generated from the [Linear GraphQL schema]('./../packages/sdk/src/schema.graphql).
 
 You can use any GraphQL client to introspect and explore the schema. Such as [Insomnia](https://insomnia.rest/) or [GraphQL Playground](https://github.com/prisma/graphql-playground).
@@ -390,6 +397,8 @@ https://api.linear.app/graphql
 <br/>
 
 ## 🌵 OAuth Authentication
+
+<br/>
 
 Linear supports OAuth2 authentication, which is recommended if you're building applications to integrate with Linear.
 
@@ -501,6 +510,8 @@ Linear supports OAuth2 authentication, which is recommended if you're building a
 
 ## 🌈 Find Help
 
+<br/>
+
 If you run into problems, have questions or suggestions:
 - Join our customer Slack
 - Send an email to hello@linear.app 
@@ -510,6 +521,8 @@ Both options are available through the user menu in [Linear](https://linear.app)
 <br/>
 
 ## 🌊 Advanced
+
+<br/>
 
 The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./packages/client/src/error.ts).
 
@@ -592,6 +605,8 @@ async function getUsers(): Fetch<UserConnection> {
 
 ## 🔥 Contribute
 
+<br/>
+
 The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins to produce a typed SDK for all operations and models exposed by the Linear production API.
 
 ### Get Started
@@ -630,5 +645,7 @@ packages
 <br/>
 
 ## License
+
+<br/>
 
 Licensed under the [MIT License](./LICENSE).
