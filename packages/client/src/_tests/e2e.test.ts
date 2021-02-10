@@ -30,7 +30,7 @@ function getClient() {
 async function getSomeTeam() {
   const client = getClient();
   const teams = await client.teams();
-  const moreTeams = await teams?.fetchNext;
+  const moreTeams = await teams?.fetchNext();
 
   const first = moreTeams?.nodes?.[0];
   expect(first).toBeDefined();

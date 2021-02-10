@@ -87,7 +87,7 @@ export class LinearConnection<Node> extends Connection<Node> {
   }
 
   /** Fetch the next page of results and append to nodes */
-  public get fetchNext(): Promise<this> {
+  public fetchNext(): Promise<this> {
     return this.pageInfo?.hasNextPage
       ? this._fetch({ after: this.pageInfo?.endCursor }).then(response => {
           this._appendNodes(response?.nodes);
@@ -98,7 +98,7 @@ export class LinearConnection<Node> extends Connection<Node> {
   }
 
   /** Fetch the previous page of results and prepend to nodes */
-  public get fetchPrevious(): Promise<this> {
+  public fetchPrevious(): Promise<this> {
     return this.pageInfo?.hasPreviousPage
       ? this._fetch({ before: this.pageInfo?.startCursor }).then(response => {
           this._prependNodes(response?.nodes);

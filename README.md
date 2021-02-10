@@ -220,8 +220,8 @@ if (commentPayload.success) {
 Connection models have helpers to fetch the next and previous pages of results:
 ```typescript
 const issues = await client.issues({ after: "some-issue-cursor" });
-const nextIssues = await issues.fetchNext;
-const prevIssues = await issues.fetchPrevious;
+const nextIssues = await issues.fetchNext();
+const prevIssues = await issues.fetchPrevious();
 ```
 
 Pagination info is exposed and can be passed to the query operations. This uses the [Relay Connection spec](https://relay.dev/graphql/connections.htm):
