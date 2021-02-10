@@ -161,7 +161,7 @@ export function printConnection(): string {
       }
     
       ${printComment(["Fetch the next page of results and append to nodes"])}
-      public get ${Sdk.FETCH_NAME}Next(): Promise<this> {
+      public ${Sdk.FETCH_NAME}Next(): Promise<this> {
         return ${printTernary(
           `this.${Sdk.PAGEINFO_NAME}?.hasNextPage`,
           `this._${Sdk.FETCH_NAME}({ after: this.${Sdk.PAGEINFO_NAME}?.endCursor }).then(${Sdk.RESPONSE_NAME} => {
@@ -174,7 +174,7 @@ export function printConnection(): string {
       }
     
       ${printComment(["Fetch the previous page of results and prepend to nodes"])}
-      public get ${Sdk.FETCH_NAME}Previous(): Promise<this> {
+      public ${Sdk.FETCH_NAME}Previous(): Promise<this> {
         return ${printTernary(
           `this.${Sdk.PAGEINFO_NAME}?.hasPreviousPage`,
           `this._${Sdk.FETCH_NAME}({ before: this.${Sdk.PAGEINFO_NAME}?.startCursor }).then(${Sdk.RESPONSE_NAME} => {
