@@ -21,12 +21,13 @@ export function printBeforeSuite(): string {
  */
 export function printBeforeAll(): string {
   return printLines([
+    'const log = "codegen-test:print-hooks:"',
     `beforeAll(async () => {
       ${printLines([
         printComment(["Determine whether to use production or a mock server"]),
         `if (Boolean(process.env.E2E)) {
           ${printLines([
-            'logger.info("Using Linear API production endpoint for end-to-end test")',
+            'logger.info(log, "Using Linear API production endpoint for end-to-end test")',
             "\n",
             printComment(["Create Linear client with production server endpoint"]),
             `client = new ${Sdk.NAMESPACE}.LinearClient({
@@ -44,11 +45,11 @@ export function printBeforeAll(): string {
             "\n",
             printComment(["Start the mock server"]),
             `try {
-              logger.info(\`Using mock server on http://localhost:\$\{port\}/graphql\`)
+              logger.info(log, \`Using mock server on http://localhost:\$\{port\}/graphql\`)
               mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", \`-p \$\{port\}\`])
             } catch (error) {
-              logger.fatal(error)
-              throw new Error('Failed to start the mock server')
+              logger.fatal(log, error)
+              throw new Error(\`\$\{log\} Failed to start the mock server\`)
             }`,
             "\n",
             printComment(["Wait for mock server to start"]),
@@ -83,8 +84,8 @@ export function printAfterAll(): string {
             })
           }
         } catch (error) {
-          logger.fatal(error)
-          throw new Error('Failed to kill the mock server')
+          logger.fatal(log, error)
+          throw new Error(\`\$\{log\} Failed to kill the mock server\`)
         }`,
       ])}
     })`,

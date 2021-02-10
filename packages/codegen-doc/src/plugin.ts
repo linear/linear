@@ -7,6 +7,8 @@ import { OperationVisitor } from "./operation-visitor";
 import { printLines } from "./print";
 import { PluginConfig } from "./types";
 
+const log = "codegen-doc:plugin:";
+
 /**
  * Graphql-codegen plugin for outputting the typed Linear documents
  */
@@ -16,18 +18,18 @@ export const plugin: PluginFunction = async (
   config: PluginConfig
 ) => {
   try {
-    logger.info("Parsing schema");
+    logger.info(log, "Parsing schema");
     const ast = parse(printSchema(schema));
 
-    logger.info("Collecting context");
+    logger.info(log, "Collecting context");
     const contextVisitor = new ContextVisitor(schema, config);
     visit(ast, contextVisitor);
 
-    logger.info("Generating fragments");
+    logger.info(log, "Generating fragments");
     const fragmentVisitor = new FragmentVisitor(contextVisitor.context);
     const fragments = visit(ast, fragmentVisitor);
 
-    logger.info("Generating operations");
+    logger.info(log, "Generating operations");
     const operations = visit(ast, new OperationVisitor(fragmentVisitor.context));
 
     return printLines([
@@ -37,7 +39,7 @@ export const plugin: PluginFunction = async (
       operations,
     ]);
   } catch (e) {
-    logger.fatal(e);
+    logger.fatal(log, e);
     throw e;
   }
 };

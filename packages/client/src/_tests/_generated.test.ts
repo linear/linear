@@ -16,10 +16,11 @@ describe("generated", () => {
   /** Initialize Linear client variable */
   let client: L.LinearClient;
 
+  const log = "codegen-test:print-hooks:";
   beforeAll(async () => {
     /** Determine whether to use production or a mock server */
     if (Boolean(process.env.E2E)) {
-      logger.info("Using Linear API production endpoint for end-to-end test");
+      logger.info(log, "Using Linear API production endpoint for end-to-end test");
 
       /** Create Linear client with production server endpoint */
       client = new L.LinearClient({
@@ -34,11 +35,11 @@ describe("generated", () => {
 
       /** Start the mock server */
       try {
-        logger.info(`Using mock server on http://localhost:${port}/graphql`);
+        logger.info(log, `Using mock server on http://localhost:${port}/graphql`);
         mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", `-p ${port}`]);
       } catch (error) {
-        logger.fatal(error);
-        throw new Error("Failed to start the mock server");
+        logger.fatal(log, error);
+        throw new Error(`${log} Failed to start the mock server`);
       }
 
       /** Wait for mock server to start */
@@ -61,8 +62,8 @@ describe("generated", () => {
         });
       }
     } catch (error) {
-      logger.fatal(error);
-      throw new Error("Failed to kill the mock server");
+      logger.fatal(log, error);
+      throw new Error(`${log} Failed to kill the mock server`);
     }
   });
 
@@ -130,7 +131,7 @@ describe("generated", () => {
         const paymentMethod = _billingDetails.paymentMethod;
         expect(paymentMethod instanceof L.Card);
       } else {
-        throw new Error("No billingDetails found - cannot test _billingDetails.paymentMethod query");
+        throw new Error("codegen-doc:print: No billingDetails found - cannot test _billingDetails.paymentMethod query");
       }
     });
   });
@@ -152,7 +153,9 @@ describe("generated", () => {
         const steps = _collaborativeDocumentJoin.steps;
         expect(steps instanceof L.StepsResponse);
       } else {
-        throw new Error("No collaborativeDocumentJoin found - cannot test _collaborativeDocumentJoin.steps query");
+        throw new Error(
+          "codegen-doc:print: No collaborativeDocumentJoin found - cannot test _collaborativeDocumentJoin.steps query"
+        );
       }
     });
   });
@@ -177,7 +180,7 @@ describe("generated", () => {
         _comment = comment;
         expect(comment instanceof L.Comment);
       } else {
-        throw new Error("No first Comment found in connection - cannot test comment query");
+        throw new Error("codegen-doc:print: No first Comment found in connection - cannot test comment query");
       }
     });
 
@@ -187,7 +190,7 @@ describe("generated", () => {
         const comment_issue = await _comment.issue;
         expect(comment_issue instanceof L.Issue);
       } else {
-        throw new Error("No Comment found - cannot test comment.issue query");
+        throw new Error("codegen-doc:print: No Comment found - cannot test comment.issue query");
       }
     });
 
@@ -197,7 +200,7 @@ describe("generated", () => {
         const comment_user = await _comment.user;
         expect(comment_user instanceof L.User);
       } else {
-        throw new Error("No Comment found - cannot test comment.user query");
+        throw new Error("codegen-doc:print: No Comment found - cannot test comment.user query");
       }
     });
   });
@@ -222,7 +225,7 @@ describe("generated", () => {
         _customView = customView;
         expect(customView instanceof L.CustomView);
       } else {
-        throw new Error("No first CustomView found in connection - cannot test customView query");
+        throw new Error("codegen-doc:print: No first CustomView found in connection - cannot test customView query");
       }
     });
 
@@ -232,7 +235,7 @@ describe("generated", () => {
         const customView_creator = await _customView.creator;
         expect(customView_creator instanceof L.User);
       } else {
-        throw new Error("No CustomView found - cannot test customView.creator query");
+        throw new Error("codegen-doc:print: No CustomView found - cannot test customView.creator query");
       }
     });
 
@@ -242,7 +245,7 @@ describe("generated", () => {
         const customView_organization = await _customView.organization;
         expect(customView_organization instanceof L.Organization);
       } else {
-        throw new Error("No CustomView found - cannot test customView.organization query");
+        throw new Error("codegen-doc:print: No CustomView found - cannot test customView.organization query");
       }
     });
 
@@ -252,7 +255,7 @@ describe("generated", () => {
         const customView_team = await _customView.team;
         expect(customView_team instanceof L.Team);
       } else {
-        throw new Error("No CustomView found - cannot test customView.team query");
+        throw new Error("codegen-doc:print: No CustomView found - cannot test customView.team query");
       }
     });
   });
@@ -277,7 +280,7 @@ describe("generated", () => {
         _cycle = cycle;
         expect(cycle instanceof L.Cycle);
       } else {
-        throw new Error("No first Cycle found in connection - cannot test cycle query");
+        throw new Error("codegen-doc:print: No first Cycle found in connection - cannot test cycle query");
       }
     });
 
@@ -287,7 +290,7 @@ describe("generated", () => {
         const issues = await _cycle.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
-        throw new Error("No cycle found - cannot test _cycle.issues query");
+        throw new Error("codegen-doc:print: No cycle found - cannot test _cycle.issues query");
       }
     });
 
@@ -297,7 +300,7 @@ describe("generated", () => {
         const uncompletedIssuesUponClose = await _cycle.uncompletedIssuesUponClose();
         expect(uncompletedIssuesUponClose instanceof L.IssueConnection);
       } else {
-        throw new Error("No cycle found - cannot test _cycle.uncompletedIssuesUponClose query");
+        throw new Error("codegen-doc:print: No cycle found - cannot test _cycle.uncompletedIssuesUponClose query");
       }
     });
 
@@ -307,7 +310,7 @@ describe("generated", () => {
         const cycle_team = await _cycle.team;
         expect(cycle_team instanceof L.Team);
       } else {
-        throw new Error("No Cycle found - cannot test cycle.team query");
+        throw new Error("codegen-doc:print: No Cycle found - cannot test cycle.team query");
       }
     });
   });
@@ -332,7 +335,7 @@ describe("generated", () => {
         _emoji = emoji;
         expect(emoji instanceof L.Emoji);
       } else {
-        throw new Error("No first Emoji found in connection - cannot test emoji query");
+        throw new Error("codegen-doc:print: No first Emoji found in connection - cannot test emoji query");
       }
     });
 
@@ -342,7 +345,7 @@ describe("generated", () => {
         const emoji_creator = await _emoji.creator;
         expect(emoji_creator instanceof L.User);
       } else {
-        throw new Error("No Emoji found - cannot test emoji.creator query");
+        throw new Error("codegen-doc:print: No Emoji found - cannot test emoji.creator query");
       }
     });
 
@@ -352,7 +355,7 @@ describe("generated", () => {
         const emoji_organization = await _emoji.organization;
         expect(emoji_organization instanceof L.Organization);
       } else {
-        throw new Error("No Emoji found - cannot test emoji.organization query");
+        throw new Error("codegen-doc:print: No Emoji found - cannot test emoji.organization query");
       }
     });
   });
@@ -377,7 +380,7 @@ describe("generated", () => {
         _favorite = favorite;
         expect(favorite instanceof L.Favorite);
       } else {
-        throw new Error("No first Favorite found in connection - cannot test favorite query");
+        throw new Error("codegen-doc:print: No first Favorite found in connection - cannot test favorite query");
       }
     });
 
@@ -387,7 +390,7 @@ describe("generated", () => {
         const favorite_cycle = await _favorite.cycle;
         expect(favorite_cycle instanceof L.Cycle);
       } else {
-        throw new Error("No Favorite found - cannot test favorite.cycle query");
+        throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.cycle query");
       }
     });
 
@@ -397,7 +400,7 @@ describe("generated", () => {
         const favorite_issue = await _favorite.issue;
         expect(favorite_issue instanceof L.Issue);
       } else {
-        throw new Error("No Favorite found - cannot test favorite.issue query");
+        throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.issue query");
       }
     });
 
@@ -407,7 +410,7 @@ describe("generated", () => {
         const favorite_label = await _favorite.label;
         expect(favorite_label instanceof L.IssueLabel);
       } else {
-        throw new Error("No Favorite found - cannot test favorite.label query");
+        throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.label query");
       }
     });
 
@@ -417,7 +420,7 @@ describe("generated", () => {
         const favorite_project = await _favorite.project;
         expect(favorite_project instanceof L.Project);
       } else {
-        throw new Error("No Favorite found - cannot test favorite.project query");
+        throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.project query");
       }
     });
 
@@ -427,7 +430,7 @@ describe("generated", () => {
         const favorite_projectTeam = await _favorite.projectTeam;
         expect(favorite_projectTeam instanceof L.Project);
       } else {
-        throw new Error("No Favorite found - cannot test favorite.projectTeam query");
+        throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.projectTeam query");
       }
     });
 
@@ -437,7 +440,7 @@ describe("generated", () => {
         const favorite_user = await _favorite.user;
         expect(favorite_user instanceof L.User);
       } else {
-        throw new Error("No Favorite found - cannot test favorite.user query");
+        throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.user query");
       }
     });
   });
@@ -459,7 +462,7 @@ describe("generated", () => {
         const figmaEmbed = _figmaEmbedInfo.figmaEmbed;
         expect(figmaEmbed instanceof L.FigmaEmbed);
       } else {
-        throw new Error("No figmaEmbedInfo found - cannot test _figmaEmbedInfo.figmaEmbed query");
+        throw new Error("codegen-doc:print: No figmaEmbedInfo found - cannot test _figmaEmbedInfo.figmaEmbed query");
       }
     });
   });
@@ -484,7 +487,7 @@ describe("generated", () => {
         _integration = integration;
         expect(integration instanceof L.Integration);
       } else {
-        throw new Error("No first Integration found in connection - cannot test integration query");
+        throw new Error("codegen-doc:print: No first Integration found in connection - cannot test integration query");
       }
     });
 
@@ -494,7 +497,7 @@ describe("generated", () => {
         const integration_creator = await _integration.creator;
         expect(integration_creator instanceof L.User);
       } else {
-        throw new Error("No Integration found - cannot test integration.creator query");
+        throw new Error("codegen-doc:print: No Integration found - cannot test integration.creator query");
       }
     });
 
@@ -504,7 +507,7 @@ describe("generated", () => {
         const integration_organization = await _integration.organization;
         expect(integration_organization instanceof L.Organization);
       } else {
-        throw new Error("No Integration found - cannot test integration.organization query");
+        throw new Error("codegen-doc:print: No Integration found - cannot test integration.organization query");
       }
     });
 
@@ -514,7 +517,7 @@ describe("generated", () => {
         const integration_team = await _integration.team;
         expect(integration_team instanceof L.Team);
       } else {
-        throw new Error("No Integration found - cannot test integration.team query");
+        throw new Error("codegen-doc:print: No Integration found - cannot test integration.team query");
       }
     });
   });
@@ -536,7 +539,7 @@ describe("generated", () => {
         const inviteData = _inviteInfo.inviteData;
         expect(inviteData instanceof L.InviteData);
       } else {
-        throw new Error("No inviteInfo found - cannot test _inviteInfo.inviteData query");
+        throw new Error("codegen-doc:print: No inviteInfo found - cannot test _inviteInfo.inviteData query");
       }
     });
   });
@@ -561,7 +564,7 @@ describe("generated", () => {
         _issueLabel = issueLabel;
         expect(issueLabel instanceof L.IssueLabel);
       } else {
-        throw new Error("No first IssueLabel found in connection - cannot test issueLabel query");
+        throw new Error("codegen-doc:print: No first IssueLabel found in connection - cannot test issueLabel query");
       }
     });
 
@@ -571,7 +574,7 @@ describe("generated", () => {
         const issues = await _issueLabel.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
-        throw new Error("No issueLabel found - cannot test _issueLabel.issues query");
+        throw new Error("codegen-doc:print: No issueLabel found - cannot test _issueLabel.issues query");
       }
     });
 
@@ -581,7 +584,7 @@ describe("generated", () => {
         const issueLabel_creator = await _issueLabel.creator;
         expect(issueLabel_creator instanceof L.User);
       } else {
-        throw new Error("No IssueLabel found - cannot test issueLabel.creator query");
+        throw new Error("codegen-doc:print: No IssueLabel found - cannot test issueLabel.creator query");
       }
     });
 
@@ -591,7 +594,7 @@ describe("generated", () => {
         const issueLabel_team = await _issueLabel.team;
         expect(issueLabel_team instanceof L.Team);
       } else {
-        throw new Error("No IssueLabel found - cannot test issueLabel.team query");
+        throw new Error("codegen-doc:print: No IssueLabel found - cannot test issueLabel.team query");
       }
     });
   });
@@ -616,7 +619,9 @@ describe("generated", () => {
         _issueRelation = issueRelation;
         expect(issueRelation instanceof L.IssueRelation);
       } else {
-        throw new Error("No first IssueRelation found in connection - cannot test issueRelation query");
+        throw new Error(
+          "codegen-doc:print: No first IssueRelation found in connection - cannot test issueRelation query"
+        );
       }
     });
 
@@ -626,7 +631,7 @@ describe("generated", () => {
         const issueRelation_issue = await _issueRelation.issue;
         expect(issueRelation_issue instanceof L.Issue);
       } else {
-        throw new Error("No IssueRelation found - cannot test issueRelation.issue query");
+        throw new Error("codegen-doc:print: No IssueRelation found - cannot test issueRelation.issue query");
       }
     });
 
@@ -636,7 +641,7 @@ describe("generated", () => {
         const issueRelation_relatedIssue = await _issueRelation.relatedIssue;
         expect(issueRelation_relatedIssue instanceof L.Issue);
       } else {
-        throw new Error("No IssueRelation found - cannot test issueRelation.relatedIssue query");
+        throw new Error("codegen-doc:print: No IssueRelation found - cannot test issueRelation.relatedIssue query");
       }
     });
   });
@@ -661,7 +666,7 @@ describe("generated", () => {
         _issue = issue;
         expect(issue instanceof L.Issue);
       } else {
-        throw new Error("No first Issue found in connection - cannot test issue query");
+        throw new Error("codegen-doc:print: No first Issue found in connection - cannot test issue query");
       }
     });
 
@@ -671,7 +676,7 @@ describe("generated", () => {
         const children = await _issue.children();
         expect(children instanceof L.IssueConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.children query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.children query");
       }
     });
 
@@ -681,7 +686,7 @@ describe("generated", () => {
         const comments = await _issue.comments();
         expect(comments instanceof L.CommentConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.comments query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.comments query");
       }
     });
 
@@ -691,7 +696,7 @@ describe("generated", () => {
         const history = await _issue.history();
         expect(history instanceof L.IssueHistoryConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.history query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.history query");
       }
     });
 
@@ -701,7 +706,7 @@ describe("generated", () => {
         const inverseRelations = await _issue.inverseRelations();
         expect(inverseRelations instanceof L.IssueRelationConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.inverseRelations query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.inverseRelations query");
       }
     });
 
@@ -711,7 +716,7 @@ describe("generated", () => {
         const labels = await _issue.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.labels query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.labels query");
       }
     });
 
@@ -721,7 +726,7 @@ describe("generated", () => {
         const relations = await _issue.relations();
         expect(relations instanceof L.IssueRelationConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.relations query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.relations query");
       }
     });
 
@@ -731,7 +736,7 @@ describe("generated", () => {
         const subscribers = await _issue.subscribers();
         expect(subscribers instanceof L.UserConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.subscribers query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.subscribers query");
       }
     });
 
@@ -741,7 +746,7 @@ describe("generated", () => {
         const issue_assignee = await _issue.assignee;
         expect(issue_assignee instanceof L.User);
       } else {
-        throw new Error("No Issue found - cannot test issue.assignee query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.assignee query");
       }
     });
 
@@ -751,7 +756,7 @@ describe("generated", () => {
         const issue_creator = await _issue.creator;
         expect(issue_creator instanceof L.User);
       } else {
-        throw new Error("No Issue found - cannot test issue.creator query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.creator query");
       }
     });
 
@@ -761,7 +766,7 @@ describe("generated", () => {
         const issue_cycle = await _issue.cycle;
         expect(issue_cycle instanceof L.Cycle);
       } else {
-        throw new Error("No Issue found - cannot test issue.cycle query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.cycle query");
       }
     });
 
@@ -771,7 +776,7 @@ describe("generated", () => {
         const issue_parent = await _issue.parent;
         expect(issue_parent instanceof L.Issue);
       } else {
-        throw new Error("No Issue found - cannot test issue.parent query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.parent query");
       }
     });
 
@@ -781,7 +786,7 @@ describe("generated", () => {
         const issue_project = await _issue.project;
         expect(issue_project instanceof L.Project);
       } else {
-        throw new Error("No Issue found - cannot test issue.project query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.project query");
       }
     });
 
@@ -791,7 +796,7 @@ describe("generated", () => {
         const issue_state = await _issue.state;
         expect(issue_state instanceof L.WorkflowState);
       } else {
-        throw new Error("No Issue found - cannot test issue.state query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.state query");
       }
     });
 
@@ -801,7 +806,7 @@ describe("generated", () => {
         const issue_team = await _issue.team;
         expect(issue_team instanceof L.Team);
       } else {
-        throw new Error("No Issue found - cannot test issue.team query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.team query");
       }
     });
   });
@@ -826,7 +831,7 @@ describe("generated", () => {
         _issue = issue;
         expect(issue instanceof L.Issue);
       } else {
-        throw new Error("No first Issue found in connection - cannot test issue query");
+        throw new Error("codegen-doc:print: No first Issue found in connection - cannot test issue query");
       }
     });
 
@@ -836,7 +841,7 @@ describe("generated", () => {
         const children = await _issue.children();
         expect(children instanceof L.IssueConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.children query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.children query");
       }
     });
 
@@ -846,7 +851,7 @@ describe("generated", () => {
         const comments = await _issue.comments();
         expect(comments instanceof L.CommentConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.comments query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.comments query");
       }
     });
 
@@ -856,7 +861,7 @@ describe("generated", () => {
         const history = await _issue.history();
         expect(history instanceof L.IssueHistoryConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.history query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.history query");
       }
     });
 
@@ -866,7 +871,7 @@ describe("generated", () => {
         const inverseRelations = await _issue.inverseRelations();
         expect(inverseRelations instanceof L.IssueRelationConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.inverseRelations query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.inverseRelations query");
       }
     });
 
@@ -876,7 +881,7 @@ describe("generated", () => {
         const labels = await _issue.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.labels query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.labels query");
       }
     });
 
@@ -886,7 +891,7 @@ describe("generated", () => {
         const relations = await _issue.relations();
         expect(relations instanceof L.IssueRelationConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.relations query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.relations query");
       }
     });
 
@@ -896,7 +901,7 @@ describe("generated", () => {
         const subscribers = await _issue.subscribers();
         expect(subscribers instanceof L.UserConnection);
       } else {
-        throw new Error("No issue found - cannot test _issue.subscribers query");
+        throw new Error("codegen-doc:print: No issue found - cannot test _issue.subscribers query");
       }
     });
 
@@ -906,7 +911,7 @@ describe("generated", () => {
         const issue_assignee = await _issue.assignee;
         expect(issue_assignee instanceof L.User);
       } else {
-        throw new Error("No Issue found - cannot test issue.assignee query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.assignee query");
       }
     });
 
@@ -916,7 +921,7 @@ describe("generated", () => {
         const issue_creator = await _issue.creator;
         expect(issue_creator instanceof L.User);
       } else {
-        throw new Error("No Issue found - cannot test issue.creator query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.creator query");
       }
     });
 
@@ -926,7 +931,7 @@ describe("generated", () => {
         const issue_cycle = await _issue.cycle;
         expect(issue_cycle instanceof L.Cycle);
       } else {
-        throw new Error("No Issue found - cannot test issue.cycle query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.cycle query");
       }
     });
 
@@ -936,7 +941,7 @@ describe("generated", () => {
         const issue_parent = await _issue.parent;
         expect(issue_parent instanceof L.Issue);
       } else {
-        throw new Error("No Issue found - cannot test issue.parent query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.parent query");
       }
     });
 
@@ -946,7 +951,7 @@ describe("generated", () => {
         const issue_project = await _issue.project;
         expect(issue_project instanceof L.Project);
       } else {
-        throw new Error("No Issue found - cannot test issue.project query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.project query");
       }
     });
 
@@ -956,7 +961,7 @@ describe("generated", () => {
         const issue_state = await _issue.state;
         expect(issue_state instanceof L.WorkflowState);
       } else {
-        throw new Error("No Issue found - cannot test issue.state query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.state query");
       }
     });
 
@@ -966,7 +971,7 @@ describe("generated", () => {
         const issue_team = await _issue.team;
         expect(issue_team instanceof L.Team);
       } else {
-        throw new Error("No Issue found - cannot test issue.team query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test issue.team query");
       }
     });
   });
@@ -991,7 +996,7 @@ describe("generated", () => {
         _milestone = milestone;
         expect(milestone instanceof L.Milestone);
       } else {
-        throw new Error("No first Milestone found in connection - cannot test milestone query");
+        throw new Error("codegen-doc:print: No first Milestone found in connection - cannot test milestone query");
       }
     });
 
@@ -1001,7 +1006,7 @@ describe("generated", () => {
         const projects = await _milestone.projects();
         expect(projects instanceof L.ProjectConnection);
       } else {
-        throw new Error("No milestone found - cannot test _milestone.projects query");
+        throw new Error("codegen-doc:print: No milestone found - cannot test _milestone.projects query");
       }
     });
 
@@ -1011,7 +1016,7 @@ describe("generated", () => {
         const milestone_organization = await _milestone.organization;
         expect(milestone_organization instanceof L.Organization);
       } else {
-        throw new Error("No Milestone found - cannot test milestone.organization query");
+        throw new Error("codegen-doc:print: No Milestone found - cannot test milestone.organization query");
       }
     });
   });
@@ -1037,7 +1042,7 @@ describe("generated", () => {
         expect(notificationSubscription instanceof L.NotificationSubscription);
       } else {
         throw new Error(
-          "No first NotificationSubscription found in connection - cannot test notificationSubscription query"
+          "codegen-doc:print: No first NotificationSubscription found in connection - cannot test notificationSubscription query"
         );
       }
     });
@@ -1048,7 +1053,9 @@ describe("generated", () => {
         const notificationSubscription_project = await _notificationSubscription.project;
         expect(notificationSubscription_project instanceof L.Project);
       } else {
-        throw new Error("No NotificationSubscription found - cannot test notificationSubscription.project query");
+        throw new Error(
+          "codegen-doc:print: No NotificationSubscription found - cannot test notificationSubscription.project query"
+        );
       }
     });
 
@@ -1058,7 +1065,9 @@ describe("generated", () => {
         const notificationSubscription_team = await _notificationSubscription.team;
         expect(notificationSubscription_team instanceof L.Team);
       } else {
-        throw new Error("No NotificationSubscription found - cannot test notificationSubscription.team query");
+        throw new Error(
+          "codegen-doc:print: No NotificationSubscription found - cannot test notificationSubscription.team query"
+        );
       }
     });
 
@@ -1068,7 +1077,9 @@ describe("generated", () => {
         const notificationSubscription_user = await _notificationSubscription.user;
         expect(notificationSubscription_user instanceof L.User);
       } else {
-        throw new Error("No NotificationSubscription found - cannot test notificationSubscription.user query");
+        throw new Error(
+          "codegen-doc:print: No NotificationSubscription found - cannot test notificationSubscription.user query"
+        );
       }
     });
   });
@@ -1093,7 +1104,9 @@ describe("generated", () => {
         _notification = notification;
         expect(notification instanceof L.Notification);
       } else {
-        throw new Error("No first Notification found in connection - cannot test notification query");
+        throw new Error(
+          "codegen-doc:print: No first Notification found in connection - cannot test notification query"
+        );
       }
     });
 
@@ -1103,7 +1116,7 @@ describe("generated", () => {
         const notification_comment = await _notification.comment;
         expect(notification_comment instanceof L.Comment);
       } else {
-        throw new Error("No Notification found - cannot test notification.comment query");
+        throw new Error("codegen-doc:print: No Notification found - cannot test notification.comment query");
       }
     });
 
@@ -1113,7 +1126,7 @@ describe("generated", () => {
         const notification_issue = await _notification.issue;
         expect(notification_issue instanceof L.Issue);
       } else {
-        throw new Error("No Notification found - cannot test notification.issue query");
+        throw new Error("codegen-doc:print: No Notification found - cannot test notification.issue query");
       }
     });
 
@@ -1123,7 +1136,7 @@ describe("generated", () => {
         const notification_team = await _notification.team;
         expect(notification_team instanceof L.Team);
       } else {
-        throw new Error("No Notification found - cannot test notification.team query");
+        throw new Error("codegen-doc:print: No Notification found - cannot test notification.team query");
       }
     });
 
@@ -1133,7 +1146,7 @@ describe("generated", () => {
         const notification_user = await _notification.user;
         expect(notification_user instanceof L.User);
       } else {
-        throw new Error("No Notification found - cannot test notification.user query");
+        throw new Error("codegen-doc:print: No Notification found - cannot test notification.user query");
       }
     });
   });
@@ -1155,7 +1168,7 @@ describe("generated", () => {
         const integrations = await _organization.integrations();
         expect(integrations instanceof L.IntegrationConnection);
       } else {
-        throw new Error("No organization found - cannot test _organization.integrations query");
+        throw new Error("codegen-doc:print: No organization found - cannot test _organization.integrations query");
       }
     });
 
@@ -1165,7 +1178,7 @@ describe("generated", () => {
         const milestones = await _organization.milestones();
         expect(milestones instanceof L.MilestoneConnection);
       } else {
-        throw new Error("No organization found - cannot test _organization.milestones query");
+        throw new Error("codegen-doc:print: No organization found - cannot test _organization.milestones query");
       }
     });
 
@@ -1175,7 +1188,7 @@ describe("generated", () => {
         const teams = await _organization.teams();
         expect(teams instanceof L.TeamConnection);
       } else {
-        throw new Error("No organization found - cannot test _organization.teams query");
+        throw new Error("codegen-doc:print: No organization found - cannot test _organization.teams query");
       }
     });
 
@@ -1185,7 +1198,7 @@ describe("generated", () => {
         const users = await _organization.users();
         expect(users instanceof L.UserConnection);
       } else {
-        throw new Error("No organization found - cannot test _organization.users query");
+        throw new Error("codegen-doc:print: No organization found - cannot test _organization.users query");
       }
     });
   });
@@ -1228,7 +1241,7 @@ describe("generated", () => {
         _projectLink = projectLink;
         expect(projectLink instanceof L.ProjectLink);
       } else {
-        throw new Error("No first ProjectLink found in connection - cannot test projectLink query");
+        throw new Error("codegen-doc:print: No first ProjectLink found in connection - cannot test projectLink query");
       }
     });
 
@@ -1238,7 +1251,7 @@ describe("generated", () => {
         const projectLink_creator = await _projectLink.creator;
         expect(projectLink_creator instanceof L.User);
       } else {
-        throw new Error("No ProjectLink found - cannot test projectLink.creator query");
+        throw new Error("codegen-doc:print: No ProjectLink found - cannot test projectLink.creator query");
       }
     });
 
@@ -1248,7 +1261,7 @@ describe("generated", () => {
         const projectLink_project = await _projectLink.project;
         expect(projectLink_project instanceof L.Project);
       } else {
-        throw new Error("No ProjectLink found - cannot test projectLink.project query");
+        throw new Error("codegen-doc:print: No ProjectLink found - cannot test projectLink.project query");
       }
     });
   });
@@ -1273,7 +1286,7 @@ describe("generated", () => {
         _project = project;
         expect(project instanceof L.Project);
       } else {
-        throw new Error("No first Project found in connection - cannot test project query");
+        throw new Error("codegen-doc:print: No first Project found in connection - cannot test project query");
       }
     });
 
@@ -1283,7 +1296,7 @@ describe("generated", () => {
         const issues = await _project.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
-        throw new Error("No project found - cannot test _project.issues query");
+        throw new Error("codegen-doc:print: No project found - cannot test _project.issues query");
       }
     });
 
@@ -1293,7 +1306,7 @@ describe("generated", () => {
         const links = await _project.links();
         expect(links instanceof L.ProjectLinkConnection);
       } else {
-        throw new Error("No project found - cannot test _project.links query");
+        throw new Error("codegen-doc:print: No project found - cannot test _project.links query");
       }
     });
 
@@ -1303,7 +1316,7 @@ describe("generated", () => {
         const members = await _project.members();
         expect(members instanceof L.UserConnection);
       } else {
-        throw new Error("No project found - cannot test _project.members query");
+        throw new Error("codegen-doc:print: No project found - cannot test _project.members query");
       }
     });
 
@@ -1313,7 +1326,7 @@ describe("generated", () => {
         const teams = await _project.teams();
         expect(teams instanceof L.TeamConnection);
       } else {
-        throw new Error("No project found - cannot test _project.teams query");
+        throw new Error("codegen-doc:print: No project found - cannot test _project.teams query");
       }
     });
 
@@ -1323,7 +1336,7 @@ describe("generated", () => {
         const project_creator = await _project.creator;
         expect(project_creator instanceof L.User);
       } else {
-        throw new Error("No Project found - cannot test project.creator query");
+        throw new Error("codegen-doc:print: No Project found - cannot test project.creator query");
       }
     });
 
@@ -1333,7 +1346,7 @@ describe("generated", () => {
         const project_lead = await _project.lead;
         expect(project_lead instanceof L.User);
       } else {
-        throw new Error("No Project found - cannot test project.lead query");
+        throw new Error("codegen-doc:print: No Project found - cannot test project.lead query");
       }
     });
 
@@ -1343,7 +1356,7 @@ describe("generated", () => {
         const project_milestone = await _project.milestone;
         expect(project_milestone instanceof L.Milestone);
       } else {
-        throw new Error("No Project found - cannot test project.milestone query");
+        throw new Error("codegen-doc:print: No Project found - cannot test project.milestone query");
       }
     });
   });
@@ -1377,7 +1390,7 @@ describe("generated", () => {
         _reaction = reaction;
         expect(reaction instanceof L.Reaction);
       } else {
-        throw new Error("No first Reaction found in connection - cannot test reaction query");
+        throw new Error("codegen-doc:print: No first Reaction found in connection - cannot test reaction query");
       }
     });
 
@@ -1387,7 +1400,7 @@ describe("generated", () => {
         const reaction_comment = await _reaction.comment;
         expect(reaction_comment instanceof L.Comment);
       } else {
-        throw new Error("No Reaction found - cannot test reaction.comment query");
+        throw new Error("codegen-doc:print: No Reaction found - cannot test reaction.comment query");
       }
     });
 
@@ -1397,7 +1410,7 @@ describe("generated", () => {
         const reaction_user = await _reaction.user;
         expect(reaction_user instanceof L.User);
       } else {
-        throw new Error("No Reaction found - cannot test reaction.user query");
+        throw new Error("codegen-doc:print: No Reaction found - cannot test reaction.user query");
       }
     });
   });
@@ -1440,7 +1453,9 @@ describe("generated", () => {
         _teamMembership = teamMembership;
         expect(teamMembership instanceof L.TeamMembership);
       } else {
-        throw new Error("No first TeamMembership found in connection - cannot test teamMembership query");
+        throw new Error(
+          "codegen-doc:print: No first TeamMembership found in connection - cannot test teamMembership query"
+        );
       }
     });
 
@@ -1450,7 +1465,7 @@ describe("generated", () => {
         const teamMembership_team = await _teamMembership.team;
         expect(teamMembership_team instanceof L.Team);
       } else {
-        throw new Error("No TeamMembership found - cannot test teamMembership.team query");
+        throw new Error("codegen-doc:print: No TeamMembership found - cannot test teamMembership.team query");
       }
     });
 
@@ -1460,7 +1475,7 @@ describe("generated", () => {
         const teamMembership_user = await _teamMembership.user;
         expect(teamMembership_user instanceof L.User);
       } else {
-        throw new Error("No TeamMembership found - cannot test teamMembership.user query");
+        throw new Error("codegen-doc:print: No TeamMembership found - cannot test teamMembership.user query");
       }
     });
   });
@@ -1485,7 +1500,7 @@ describe("generated", () => {
         _team = team;
         expect(team instanceof L.Team);
       } else {
-        throw new Error("No first Team found in connection - cannot test team query");
+        throw new Error("codegen-doc:print: No first Team found in connection - cannot test team query");
       }
     });
 
@@ -1495,7 +1510,7 @@ describe("generated", () => {
         const cycles = await _team.cycles();
         expect(cycles instanceof L.CycleConnection);
       } else {
-        throw new Error("No team found - cannot test _team.cycles query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.cycles query");
       }
     });
 
@@ -1505,7 +1520,7 @@ describe("generated", () => {
         const issues = await _team.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
-        throw new Error("No team found - cannot test _team.issues query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.issues query");
       }
     });
 
@@ -1515,7 +1530,7 @@ describe("generated", () => {
         const labels = await _team.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
-        throw new Error("No team found - cannot test _team.labels query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.labels query");
       }
     });
 
@@ -1525,7 +1540,7 @@ describe("generated", () => {
         const members = await _team.members();
         expect(members instanceof L.UserConnection);
       } else {
-        throw new Error("No team found - cannot test _team.members query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.members query");
       }
     });
 
@@ -1535,7 +1550,7 @@ describe("generated", () => {
         const memberships = await _team.memberships();
         expect(memberships instanceof L.TeamMembershipConnection);
       } else {
-        throw new Error("No team found - cannot test _team.memberships query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.memberships query");
       }
     });
 
@@ -1545,7 +1560,7 @@ describe("generated", () => {
         const projects = await _team.projects();
         expect(projects instanceof L.ProjectConnection);
       } else {
-        throw new Error("No team found - cannot test _team.projects query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.projects query");
       }
     });
 
@@ -1555,7 +1570,7 @@ describe("generated", () => {
         const states = await _team.states();
         expect(states instanceof L.WorkflowStateConnection);
       } else {
-        throw new Error("No team found - cannot test _team.states query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.states query");
       }
     });
 
@@ -1565,7 +1580,7 @@ describe("generated", () => {
         const templates = await _team.templates();
         expect(templates instanceof L.TemplateConnection);
       } else {
-        throw new Error("No team found - cannot test _team.templates query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.templates query");
       }
     });
 
@@ -1575,7 +1590,7 @@ describe("generated", () => {
         const webhooks = await _team.webhooks();
         expect(webhooks instanceof L.WebhookConnection);
       } else {
-        throw new Error("No team found - cannot test _team.webhooks query");
+        throw new Error("codegen-doc:print: No team found - cannot test _team.webhooks query");
       }
     });
 
@@ -1585,7 +1600,7 @@ describe("generated", () => {
         const team_activeCycle = await _team.activeCycle;
         expect(team_activeCycle instanceof L.Cycle);
       } else {
-        throw new Error("No Team found - cannot test team.activeCycle query");
+        throw new Error("codegen-doc:print: No Team found - cannot test team.activeCycle query");
       }
     });
 
@@ -1595,7 +1610,7 @@ describe("generated", () => {
         const team_draftWorkflowState = await _team.draftWorkflowState;
         expect(team_draftWorkflowState instanceof L.WorkflowState);
       } else {
-        throw new Error("No Team found - cannot test team.draftWorkflowState query");
+        throw new Error("codegen-doc:print: No Team found - cannot test team.draftWorkflowState query");
       }
     });
 
@@ -1605,7 +1620,7 @@ describe("generated", () => {
         const team_markedAsDuplicateWorkflowState = await _team.markedAsDuplicateWorkflowState;
         expect(team_markedAsDuplicateWorkflowState instanceof L.WorkflowState);
       } else {
-        throw new Error("No Team found - cannot test team.markedAsDuplicateWorkflowState query");
+        throw new Error("codegen-doc:print: No Team found - cannot test team.markedAsDuplicateWorkflowState query");
       }
     });
 
@@ -1615,7 +1630,7 @@ describe("generated", () => {
         const team_mergeWorkflowState = await _team.mergeWorkflowState;
         expect(team_mergeWorkflowState instanceof L.WorkflowState);
       } else {
-        throw new Error("No Team found - cannot test team.mergeWorkflowState query");
+        throw new Error("codegen-doc:print: No Team found - cannot test team.mergeWorkflowState query");
       }
     });
 
@@ -1625,7 +1640,7 @@ describe("generated", () => {
         const team_organization = await _team.organization;
         expect(team_organization instanceof L.Organization);
       } else {
-        throw new Error("No Team found - cannot test team.organization query");
+        throw new Error("codegen-doc:print: No Team found - cannot test team.organization query");
       }
     });
 
@@ -1635,7 +1650,7 @@ describe("generated", () => {
         const team_reviewWorkflowState = await _team.reviewWorkflowState;
         expect(team_reviewWorkflowState instanceof L.WorkflowState);
       } else {
-        throw new Error("No Team found - cannot test team.reviewWorkflowState query");
+        throw new Error("codegen-doc:print: No Team found - cannot test team.reviewWorkflowState query");
       }
     });
 
@@ -1645,7 +1660,7 @@ describe("generated", () => {
         const team_startWorkflowState = await _team.startWorkflowState;
         expect(team_startWorkflowState instanceof L.WorkflowState);
       } else {
-        throw new Error("No Team found - cannot test team.startWorkflowState query");
+        throw new Error("codegen-doc:print: No Team found - cannot test team.startWorkflowState query");
       }
     });
   });
@@ -1690,7 +1705,7 @@ describe("generated", () => {
         _user = user;
         expect(user instanceof L.User);
       } else {
-        throw new Error("No first User found in connection - cannot test user query");
+        throw new Error("codegen-doc:print: No first User found in connection - cannot test user query");
       }
     });
 
@@ -1700,7 +1715,7 @@ describe("generated", () => {
         const assignedIssues = await _user.assignedIssues();
         expect(assignedIssues instanceof L.IssueConnection);
       } else {
-        throw new Error("No user found - cannot test _user.assignedIssues query");
+        throw new Error("codegen-doc:print: No user found - cannot test _user.assignedIssues query");
       }
     });
 
@@ -1710,7 +1725,7 @@ describe("generated", () => {
         const createdIssues = await _user.createdIssues();
         expect(createdIssues instanceof L.IssueConnection);
       } else {
-        throw new Error("No user found - cannot test _user.createdIssues query");
+        throw new Error("codegen-doc:print: No user found - cannot test _user.createdIssues query");
       }
     });
 
@@ -1720,7 +1735,7 @@ describe("generated", () => {
         const teamMemberships = await _user.teamMemberships();
         expect(teamMemberships instanceof L.TeamMembershipConnection);
       } else {
-        throw new Error("No user found - cannot test _user.teamMemberships query");
+        throw new Error("codegen-doc:print: No user found - cannot test _user.teamMemberships query");
       }
     });
 
@@ -1730,7 +1745,7 @@ describe("generated", () => {
         const teams = await _user.teams();
         expect(teams instanceof L.TeamConnection);
       } else {
-        throw new Error("No user found - cannot test _user.teams query");
+        throw new Error("codegen-doc:print: No user found - cannot test _user.teams query");
       }
     });
 
@@ -1740,7 +1755,7 @@ describe("generated", () => {
         const user_organization = await _user.organization;
         expect(user_organization instanceof L.Organization);
       } else {
-        throw new Error("No User found - cannot test user.organization query");
+        throw new Error("codegen-doc:print: No User found - cannot test user.organization query");
       }
     });
   });
@@ -1762,7 +1777,7 @@ describe("generated", () => {
         const assignedIssues = await _viewer.assignedIssues();
         expect(assignedIssues instanceof L.IssueConnection);
       } else {
-        throw new Error("No viewer found - cannot test _viewer.assignedIssues query");
+        throw new Error("codegen-doc:print: No viewer found - cannot test _viewer.assignedIssues query");
       }
     });
 
@@ -1772,7 +1787,7 @@ describe("generated", () => {
         const createdIssues = await _viewer.createdIssues();
         expect(createdIssues instanceof L.IssueConnection);
       } else {
-        throw new Error("No viewer found - cannot test _viewer.createdIssues query");
+        throw new Error("codegen-doc:print: No viewer found - cannot test _viewer.createdIssues query");
       }
     });
 
@@ -1782,7 +1797,7 @@ describe("generated", () => {
         const teamMemberships = await _viewer.teamMemberships();
         expect(teamMemberships instanceof L.TeamMembershipConnection);
       } else {
-        throw new Error("No viewer found - cannot test _viewer.teamMemberships query");
+        throw new Error("codegen-doc:print: No viewer found - cannot test _viewer.teamMemberships query");
       }
     });
 
@@ -1792,7 +1807,7 @@ describe("generated", () => {
         const teams = await _viewer.teams();
         expect(teams instanceof L.TeamConnection);
       } else {
-        throw new Error("No viewer found - cannot test _viewer.teams query");
+        throw new Error("codegen-doc:print: No viewer found - cannot test _viewer.teams query");
       }
     });
   });
@@ -1817,7 +1832,7 @@ describe("generated", () => {
         _webhook = webhook;
         expect(webhook instanceof L.Webhook);
       } else {
-        throw new Error("No first Webhook found in connection - cannot test webhook query");
+        throw new Error("codegen-doc:print: No first Webhook found in connection - cannot test webhook query");
       }
     });
 
@@ -1827,7 +1842,7 @@ describe("generated", () => {
         const webhook_creator = await _webhook.creator;
         expect(webhook_creator instanceof L.User);
       } else {
-        throw new Error("No Webhook found - cannot test webhook.creator query");
+        throw new Error("codegen-doc:print: No Webhook found - cannot test webhook.creator query");
       }
     });
 
@@ -1837,7 +1852,7 @@ describe("generated", () => {
         const webhook_team = await _webhook.team;
         expect(webhook_team instanceof L.Team);
       } else {
-        throw new Error("No Webhook found - cannot test webhook.team query");
+        throw new Error("codegen-doc:print: No Webhook found - cannot test webhook.team query");
       }
     });
   });
@@ -1862,7 +1877,9 @@ describe("generated", () => {
         _workflowState = workflowState;
         expect(workflowState instanceof L.WorkflowState);
       } else {
-        throw new Error("No first WorkflowState found in connection - cannot test workflowState query");
+        throw new Error(
+          "codegen-doc:print: No first WorkflowState found in connection - cannot test workflowState query"
+        );
       }
     });
 
@@ -1872,7 +1889,7 @@ describe("generated", () => {
         const issues = await _workflowState.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
-        throw new Error("No workflowState found - cannot test _workflowState.issues query");
+        throw new Error("codegen-doc:print: No workflowState found - cannot test _workflowState.issues query");
       }
     });
 
@@ -1882,7 +1899,7 @@ describe("generated", () => {
         const workflowState_team = await _workflowState.team;
         expect(workflowState_team instanceof L.Team);
       } else {
-        throw new Error("No WorkflowState found - cannot test workflowState.team query");
+        throw new Error("codegen-doc:print: No WorkflowState found - cannot test workflowState.team query");
       }
     });
   });

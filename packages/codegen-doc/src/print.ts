@@ -156,6 +156,6 @@ export function printElseThrow(_if: string, content: string, error: string, omit
     : `if (${_if}) {
         ${content}
       } else {
-        throw new Error('${error}')
+        throw new Error('codegen-doc:print: ${error}')
       }`;
 }

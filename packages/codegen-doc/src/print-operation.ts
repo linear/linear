@@ -9,6 +9,8 @@ import { findQuery } from "./query";
 import { OperationType, PluginContext } from "./types";
 import { reduceListType } from "./utils";
 
+const log = "codegen-doc:print-operation:";
+
 /**
  * Print the operation wrapper
  */
@@ -63,8 +65,8 @@ function printOperationFields(
         object.fields?.map(field => {
           if (isValidField(context, field)) {
             if (i > 9) {
-              logger.fatal([...fields, field, object]);
-              throw new Error("printOperationFields called over 10 times recursively");
+              logger.fatal(log, [...fields, field, object]);
+              throw new Error(`${log} printOperationFields called over 10 times recursively`);
             }
 
             const operation = printOperationBody(context, [field], i + 1);

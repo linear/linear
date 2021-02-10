@@ -5,6 +5,8 @@ import { logger } from "@linear/common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { printTests } from "./print-test";
 
+const log = "codegen-test:plugin:";
+
 /**
  * Graphql-codegen plugin for outputting the typed Linear documents
  */
@@ -14,10 +16,10 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
   config: SdkPluginConfig
 ) => {
   try {
-    logger.info("Parsing schema");
+    logger.info(log, "Parsing schema");
     const ast = parse(printSchema(schema));
 
-    logger.info("Collecting context");
+    logger.info(log, "Collecting context");
     const contextVisitor = new ContextVisitor<SdkPluginConfig>(schema, config);
     visit(ast, contextVisitor);
     const context: PluginContext<SdkPluginConfig> = {
@@ -25,11 +27,11 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       fragments: [],
     };
 
-    logger.info("Generating models");
+    logger.info(log, "Generating models");
     const modelVisitor = new ModelVisitor(context);
     const models = visit(ast, modelVisitor) as SdkModel[];
 
-    logger.info("Parsing operations");
+    logger.info(log, "Parsing operations");
     const sdkDefinitions = parseOperations(context, documents, models);
     const sdkContext: SdkPluginContext = {
       ...context,
@@ -37,7 +39,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       sdkDefinitions,
     };
 
-    logger.info("Printing tests");
+    logger.info(log, "Printing tests");
     const tests = printTests(sdkContext);
 
     return printLines([
@@ -55,7 +57,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       tests,
     ]);
   } catch (e) {
-    logger.fatal(e);
+    logger.fatal(log, e);
     throw e;
   }
 };

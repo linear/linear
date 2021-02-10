@@ -4,6 +4,7 @@ import { GraphQLSchema } from "graphql";
 import { PluginConfig } from "./types";
 import { validateExtension } from "./utils";
 
+const log = "codegen-doc:validate:";
 /**
  * Validate use of the plugin
  */
@@ -14,8 +15,8 @@ export const validate: PluginValidateFn = async (
   outputFile: string
 ) => {
   const packageName = "@linear/codegen-doc";
-  logger.info(`Validating ${packageName}`);
-  logger.info(config);
+  logger.info(log, `Validating ${packageName}`);
+  logger.info(log, config);
 
   /** Check the output file extension */
   validateExtension(packageName, ".graphql", outputFile);

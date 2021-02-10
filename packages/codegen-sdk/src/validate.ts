@@ -4,6 +4,8 @@ import { logger } from "@linear/common";
 import { GraphQLSchema } from "graphql";
 import { SdkPluginConfig } from "./types";
 
+const log = "codegen-sdk:validate:";
+
 /**
  * Validate use of the plugin
  */
@@ -14,10 +16,10 @@ export const validate: PluginValidateFn = async (
   outputFile: string
 ) => {
   const packageName = "@linear/codegen-sdk";
-  logger.info(`Validating ${packageName}`);
-  logger.info(config);
+  logger.info(log, `Validating ${packageName}`);
+  logger.info(log, config);
 
-  const prefix = `Plugin "${packageName}" config requires`;
+  const prefix = `${log} Plugin "${packageName}" config requires`;
 
   validateExtension(packageName, ".ts", outputFile);
 

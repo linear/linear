@@ -1,5 +1,7 @@
 import { Kind, ListTypeNode, NamedTypeNode, NameNode, NonNullTypeNode } from "graphql";
 
+const log = "codegen-doc:utils:";
+
 /**
  * Get the deepest type name from any type node
  */
@@ -47,7 +49,7 @@ export function validateExtension(packageName: string, ext: string, outputFile: 
   /** Check the output file extension */
   if (!outputFile.endsWith(ext)) {
     throw new Error(
-      `Plugin "${packageName}" config requires output file extension to be "${ext}" but is "${outputFile}"`
+      `${log} Plugin "${packageName}" config requires output file extension to be "${ext}" but is "${outputFile}"`
     );
   }
 }

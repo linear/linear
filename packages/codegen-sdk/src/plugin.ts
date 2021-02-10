@@ -12,6 +12,8 @@ import { printRequest } from "./print-request";
 import { printSdk } from "./print-sdk";
 import { SdkModel, SdkPluginConfig, SdkPluginContext } from "./types";
 
+const log = "codegen-sdk:plugin:";
+
 /**
  * Graphql-codegen plugin for outputting the typed Linear sdk
  */
@@ -21,10 +23,10 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
   config: SdkPluginConfig
 ) => {
   try {
-    logger.info("Parsing schema");
+    logger.info(log, "Parsing schema");
     const ast = parse(printSchema(schema));
 
-    logger.info("Collecting context");
+    logger.info(log, "Collecting context");
     const contextVisitor = new ContextVisitor<SdkPluginConfig>(schema, config);
     visit(ast, contextVisitor);
     const context: PluginContext<SdkPluginConfig> = {
@@ -32,11 +34,11 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       fragments: [],
     };
 
-    logger.info("Generating models");
+    logger.info(log, "Generating models");
     const modelVisitor = new ModelVisitor(context);
     const models = visit(ast, modelVisitor) as SdkModel[];
 
-    logger.info("Parsing operations");
+    logger.info(log, "Parsing operations");
     const sdkDefinitions = parseOperations(context, documents, models);
     const sdkContext: SdkPluginContext = {
       ...context,
@@ -44,13 +46,13 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       sdkDefinitions,
     };
 
-    logger.info("Printing models");
+    logger.info(log, "Printing models");
     const printedModels = printModels(sdkContext);
 
-    logger.info("Printing operations");
+    logger.info(log, "Printing operations");
     const printedOperations = printOperations(sdkContext);
 
-    logger.info("Printing sdk");
+    logger.info(log, "Printing sdk");
     const printedSdk = printSdk(sdkContext);
 
     return {
@@ -76,7 +78,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
       ]),
     };
   } catch (e) {
-    logger.fatal(e);
+    logger.fatal(log, e);
     throw e;
   }
 };
