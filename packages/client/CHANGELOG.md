@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.7](https://github.com/linear/linear/compare/@linear/client@1.0.6...@linear/client@1.0.7) (2021-02-12)
+
+
+### Bug Fixes
+
+* **error:** improve error names ([9079204](https://github.com/linear/linear/commit/9079204f6831f7779f1d9f154d87828f44d980bc))
+
+
+
+
+
 ## [1.0.6](https://github.com/linear/linear/compare/@linear/client@1.0.5...@linear/client@1.0.6) (2021-02-12)
 
 **Note:** Version bump only for package @linear/client
