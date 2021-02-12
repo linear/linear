@@ -6,7 +6,7 @@
   "main": "dist/index-cjs.min.js",
   "module": "dist/index-es.min.js",
   "types": "dist/index.d.ts",
-  "repository": "https://github.com/linearapp/linear",
+  "repository": "https://github.com/linear/linear",
   "engines": {
     "node": ">=12.x",
     "yarn": "1.x"

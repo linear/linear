@@ -27,7 +27,6 @@ const errorMap: Record<LinearErrorType, string> = {
 function getErrorType(type?: string): LinearErrorType {
   return getKeyByValue(errorMap, type) ?? LinearErrorType.Unknown;
 }
-
 /**
  * The error shown if no other message is available
  */
@@ -80,17 +79,12 @@ export class LinearError extends Error {
   /** The raw graphql-request error */
   public raw?: LinearErrorRaw;
 
-  public constructor(error?: LinearErrorRaw) {
-    /** Parse graphql errors */
-    const errors = (error?.response?.errors ?? []).map(graphqlError => {
-      return new LinearGraphQLError(graphqlError);
-    });
-
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[], type?: LinearErrorType) {
     /** Find messages, duplicate and join, or default */
     super(
       Array.from(
         new Set(
-          [capitalize(error?.message?.split(": {")?.[0]), error?.response?.error, errors[0]?.message].filter(
+          [capitalize(error?.message?.split(": {")?.[0]), error?.response?.error, errors?.[0]?.message].filter(
             nonNullable
           )
         )
@@ -99,6 +93,8 @@ export class LinearError extends Error {
         .join(" - ") ?? defaultError
     );
 
+    this.type = type;
+
     /** Set error properties */
     this.errors = errors;
     this.query = error?.request?.query;
@@ -106,20 +102,129 @@ export class LinearError extends Error {
     this.status = error?.response?.status;
     this.data = error?.response?.data;
     this.raw = error;
-
-    /** Set type based first graphql error or http status */
-    this.type =
-      errors[0]?.type ??
-      (this.status === 403
-        ? LinearErrorType.Forbidden
-        : this.status === 429
-        ? LinearErrorType.Ratelimited
-        : `${this.status}`.startsWith("4")
-        ? LinearErrorType.AuthenticationError
-        : this.status === 500
-        ? LinearErrorType.InternalError
-        : `${this.status}`.startsWith("5")
-        ? LinearErrorType.NetworkError
-        : LinearErrorType.Unknown);
   }
+}
+
+export class FeatureNotAccessibleLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.FeatureNotAccessible);
+  }
+}
+
+export class InvalidInputLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.InvalidInput);
+  }
+}
+
+export class RatelimitedLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.Ratelimited);
+  }
+}
+
+export class NetworkErrorLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.NetworkError);
+  }
+}
+
+export class AuthenticationErrorLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.AuthenticationError);
+  }
+}
+
+export class ForbiddenLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.Forbidden);
+  }
+}
+
+export class BootstrapErrorLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.BootstrapError);
+  }
+}
+
+export class UnknownLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.Unknown);
+  }
+}
+
+export class InternalErrorLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.InternalError);
+  }
+}
+
+export class OtherLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.Other);
+  }
+}
+
+export class UserErrorLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.UserError);
+  }
+}
+
+export class GraphqlErrorLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.GraphqlError);
+  }
+}
+
+export class LockTimeoutLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.LockTimeout);
+  }
+}
+
+/**
+ * A map between the Linear error type and the LinearError class
+ */
+const errorConstructorMap: Record<LinearErrorType, typeof LinearError> = {
+  [LinearErrorType.FeatureNotAccessible]: FeatureNotAccessibleLinearError,
+  [LinearErrorType.InvalidInput]: InvalidInputLinearError,
+  [LinearErrorType.Ratelimited]: RatelimitedLinearError,
+  [LinearErrorType.NetworkError]: NetworkErrorLinearError,
+  [LinearErrorType.AuthenticationError]: AuthenticationErrorLinearError,
+  [LinearErrorType.Forbidden]: ForbiddenLinearError,
+  [LinearErrorType.BootstrapError]: BootstrapErrorLinearError,
+  [LinearErrorType.Unknown]: UnknownLinearError,
+  [LinearErrorType.InternalError]: InternalErrorLinearError,
+  [LinearErrorType.Other]: OtherLinearError,
+  [LinearErrorType.UserError]: UserErrorLinearError,
+  [LinearErrorType.GraphqlError]: GraphqlErrorLinearError,
+  [LinearErrorType.LockTimeout]: LockTimeoutLinearError,
+};
+
+export function parseLinearError(error?: LinearErrorRaw): LinearError {
+  /** Parse graphQL errors */
+  const errors = (error?.response?.errors ?? []).map(graphqlError => {
+    return new LinearGraphQLError(graphqlError);
+  });
+
+  /** Set type based first graphql error or http status */
+  const status = error?.response?.status;
+  const type =
+    errors[0]?.type ??
+    (status === 403
+      ? LinearErrorType.Forbidden
+      : status === 429
+      ? LinearErrorType.Ratelimited
+      : `${status}`.startsWith("4")
+      ? LinearErrorType.AuthenticationError
+      : status === 500
+      ? LinearErrorType.InternalError
+      : `${status}`.startsWith("5")
+      ? LinearErrorType.NetworkError
+      : LinearErrorType.Unknown);
+
+  const LinearErrorConstructor = errorConstructorMap[type] ?? LinearError;
+
+  return new LinearErrorConstructor(error, errors);
 }

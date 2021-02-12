@@ -14,11 +14,11 @@
   bug tracking. It's built for high-performance teams.
 </p>
 <p align="center">
-  <a href="https://github.com/linearapp/linear/blob/master/LICENSE">
+  <a href="https://github.com/linear/linear/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Linear is released under the MIT license." />
   </a>
-  <a href="https://github.com/linearapp/linear/workflows/build">
-    <img src="https://github.com/linearapp/linear/workflows/build/badge.svg" alt="Current Github Action build status." />
+  <a href="https://github.com/linear/linear/workflows/build">
+    <img src="https://github.com/linear/linear/workflows/build/badge.svg" alt="Current Github Action build status." />
   </a>
 </p>
 
@@ -88,9 +88,9 @@ Connect to the Linear API and interact with your data in a few steps:
 4. **Query for your issues**
 
     Using async await syntax:
-    ```javascript
+    ```typescript
     async function getMyIssues() {
-      const me = await client.viewer;
+      const me = await linearClient.viewer;
       const myIssues = await me?.assignedIssues();
 
       myIssues?.nodes?.map(issue => {
@@ -104,9 +104,9 @@ Connect to the Linear API and interact with your data in a few steps:
     ```
 
     Or promises:
-    ```javascript
-    client.viewer.then(me => {
-      return me?.assignedIssues().then(myIssues => {
+    ```typescript
+    linearClient.viewer.then(me => {
+      return me?.assignedIssues()?.then(myIssues => {
         myIssues?.nodes?.map(issue => {
           console.log(`${me?.displayName} has issue: ${issue?.title}`);
         });
@@ -132,10 +132,10 @@ All types are accessible through the Linear Client package. It is written in Typ
 ```typescript
 import { Fetch, LinearClient, User } from "@linear/client";
 
-const client = new LinearClient({ apiKey });
+const linearClient = new LinearClient({ apiKey });
 
-async function getCurrentUser(): Fetch<User> {
-  return client.viewer;
+async function getCurrentUser(): LinearFetch<User> {
+  return linearClient.viewer;
 }
 ```
 
@@ -143,34 +143,34 @@ async function getCurrentUser(): Fetch<User> {
 
 Some models can be fetched from the Linear Client without any arguments:
 ```typescript
-const me = await client.viewer;
-const org = await client.organization;
+const me = await linearClient.viewer;
+const org = await linearClient.organization;
 ```
 
 Other models are exposed as connections, and return a list of nodes:
 ```typescript
-const issues = await client.issues();
+const issues = await linearClient.issues();
 const firstIssue = issues?.nodes?.[0];
 ```
 
 All required variables are passed as the first arguments:
 ```typescript
-const user = await client.user('user-id');
-const team = await client.team('team-id');
+const user = await linearClient.user("user-id");
+const team = await linearClient.team("team-id");
 ```
 
 Any optional variables are passed into the last argument as an object:
 ```typescript
-const fiftyProjects = await client.projects({ first: 50 });
-const allComments = await client.comments({ includeArchived: true });
+const fiftyProjects = await linearClient.projects({ first: 50 });
+const allComments = await linearClient.comments({ includeArchived: true });
 ```
 
 Most models expose operations to fetch other models:
 ```typescript
-const me = await client.viewer;
+const me = await linearClient.viewer;
 const myIssues = await me?.assignedIssues();
 const myFirstIssue = myIssues?.nodes?.[0];
-const myFirstIssueComments = await myFirstIssue.comments();
+const myFirstIssueComments = await myFirstIssue?.comments();
 const myFirstIssueFirstComment = myFirstIssueComments?.nodes?.[0];
 const myFirstIssueFirstCommentUser = await myFirstIssueFirstComment?.user;
 ```
@@ -181,37 +181,37 @@ const myFirstIssueFirstCommentUser = await myFirstIssueFirstComment?.user;
 
 To create a model, call the Linear Client mutation and pass in the input object:
 ```typescript
-const teams = await client.teams();
-const team = teams.nodes?.[0];
-if (team) {
-  await client.issueCreate({ teamId: team.id, title: "My Created Issue" });
+const teams = await linearClient.teams();
+const team = teams?.nodes?.[0];
+if (team?.id) {
+  await linearClient.issueCreate({ teamId: team.id, title: "My Created Issue" });
 }
 ```
 
 To update a model, call the Linear Client mutation and pass in the required variables and input object:
 ```typescript
-const me = await client.viewer;
-if (me) {
-  await client.userUpdate(me.id, { ...me, displayName: "My Updated Name" });
+const me = await linearClient.viewer;
+if (me?.id) {
+  await linearClient.userUpdate(me.id, { displayName: "My Updated Name" });
 }
 ```
 
 All mutations are exposed in the same way:
 ```typescript
-const projects = await client.projects();
-const project = projects.nodes?.[0];
-if (project) {
-  await client.projectArchive(project.id);
+const projects = await linearClient.projects();
+const project = projects?.nodes?.[0];
+if (project?.id) {
+  await linearClient.projectArchive(project.id);
 }
 ```
 
 Mutations will often return a success boolean and the mutated entity:
 ```typescript
-const commentPayload = await client.commentCreate({ issueId: "some-issue-id" });
-if (commentPayload.success) {
+const commentPayload = await linearClient.commentCreate({ issueId: "some-issue-id" });
+if (commentPayload?.success) {
   return commentPayload.comment;
 } else {
-  throw new Error('Failed to create comment', input);
+  return new Error("Failed to create comment");
 }
 ```
 
@@ -219,90 +219,91 @@ if (commentPayload.success) {
 
 Connection models have helpers to fetch the next and previous pages of results:
 ```typescript
-const issues = await client.issues({ after: "some-issue-cursor" });
-const nextIssues = await issues.fetchNext();
-const prevIssues = await issues.fetchPrevious();
+const issues = await linearClient.issues({ after: "some-issue-cursor", first: 10 });
+const nextIssues = await issues?.fetchNext();
+const prevIssues = await issues?.fetchPrevious();
 ```
 
 Pagination info is exposed and can be passed to the query operations. This uses the [Relay Connection spec](https://relay.dev/graphql/connections.htm):
 ```typescript
-const issues = await client.issues();
-const hasMoreIssues = issues?.pageInfo.hasNextPage;
-const issuesEndCursor = issues?.pageInfo.endCursor;
-const moreIssues = await client.issues({ after: issuesEndCursor });
+const issues = await linearClient.issues();
+const hasMoreIssues = issues?.pageInfo?.hasNextPage;
+const issuesEndCursor = issues?.pageInfo?.endCursor;
+const moreIssues = await linearClient.issues({ after: issuesEndCursor, first: 10 });
 ```
 
 Results can be ordered using the `orderBy` optional variable:
 ```typescript
 import { Linear } from "@linear/client";
 
-const issues = await client.issues({ orderBy: Linear.PaginationOrderBy.UpdatedAt });
+const issues = await linearClient.issues({ orderBy: LinearDocument.PaginationOrderBy.UpdatedAt });
 ```
 
 ### File Upload
 
 Create a file upload URL, upload the file to external storage, and attach the file by asset URL:
 ```typescript
-  import { Fetch, Issue } from "@linear/client";
-  
-  async function createIssueWithFile(file: File): Fetch<Issue> {
-    /** Fetch a storage URL to upload the file to */
-    const uploadPayload = await client.fileUpload(file.type, file.name, file.size);
+import { Fetch, Issue } from "@linear/client";
+async function createIssueWithFile(title: string, file: File, uploadData: RequestInit): LinearFetch<Issue> {
+  /** Fetch a storage URL to upload the file to */
+  const uploadPayload = await linearClient.fileUpload(file.type, file.name, file.size);
 
-    /** Upload the file to the storage URL using the authentication header */
-    const authHeader = uploadPayload?.uploadFile?.headers?.[0];
-    const uploadUrl = uploadPayload?.uploadFile?.uploadUrl;
-    const fileData = await file.arrayBuffer();
+  /** Upload the file to the storage URL using the authentication header */
+  const authHeader = uploadPayload?.uploadFile?.headers?.[0];
+  const uploadUrl = uploadPayload?.uploadFile?.uploadUrl;
+  if (uploadUrl && authHeader?.key && authHeader?.value) {
     await fetch(uploadUrl, {
       method: "PUT",
       headers: {
         [authHeader.key]: authHeader.value,
         "cache-control": "max-age=31536000",
       },
-      contentLength: file.size,
-      contentType: file.type,
-      payload: fileData,
+      ...uploadData,
     });
 
     /** Use the asset URL to attach the stored file */
     const assetUrl = uploadPayload?.uploadFile?.assetUrl;
-    const issuePayload = await client.issueCreate({
-      title: "My new issue",
-      /** Use the asset URL in a markdown link */
-      description: `Attached file: ![${assetUrl}](${encodeURI(assetUrl)})`,
-      teamId: "team-id",
-    });
+    if (assetUrl) {
+      const issuePayload = await linearClient.issueCreate({
+        title,
+        /** Use the asset URL in a markdown link */
+        description: `Attached file: ![${assetUrl}](${encodeURI(assetUrl)})`,
+        teamId: "team-id",
+      });
 
-    return issuePayload.issue;
+      return issuePayload?.issue;
+    }
   }
+  return undefined;
+}
 ```
 
 ### Error
 
 Errors can be caught and interrogated by wrapping the operation in a try catch block:
 ```typescript
-async function createComment(input: CommentCreateInput): Fetch<Comment | UserError> {
+async function createComment(input: LinearDocument.CommentCreateInput): LinearFetch<Comment | UserError> {
   try {
     /** Try to create a comment */
-    const commentPayload = await client.commentCreate(input);
+    const commentPayload = await linearClient.commentCreate(input);
     /** Return it if available */
-    return commentPayload.comment;
+    return commentPayload?.comment;
   } catch (error) {
     /** The error has been parsed by Linear Client */
-    throw error as LinearError;
+    throw error;
   }
 }
 ```
 
 Or by catching the error thrown from a calling function:
 ```typescript
-async function archiveFirstIssue(): Fetch<ArchivePayload> {
-  const me = await client.viewer;
+async function archiveFirstIssue(): LinearFetch<ArchivePayload> {
+  const me = await linearClient.viewer;
   const issues = await me?.assignedIssues();
   const firstIssue = issues?.nodes?.[0];
 
   if (firstIssue?.id) {
-    const payload = await client.issueArchive(firstIssue.id);
+    const payload = await linearClient.issueArchive(firstIssue.id);
     return payload;
   } else {
     return undefined;
@@ -310,18 +311,18 @@ async function archiveFirstIssue(): Fetch<ArchivePayload> {
 }
 
 archiveFirstIssue().catch(error => {
-  throw error as LinearError;
+  throw error;
 });
 ```
 
-The parsed error type can be compared against the `LinearErrorType` enum:
+The parsed error type can be compared to determine the course of action:
 ```typescript
-import { LinearError, LinearErrorType } from '@linear/client'
+import { LinearError, LinearErrorType, InvalidInputLinearError } from '@linear/client'
 import { UserError } from './custom-errors'
 
+const input = { name: "Happy Team" };
 createTeam(input).catch(error => {
-  /** The error has been parsed and provided with a type */
-  if ((error as LinearError)?.type === LinearErrorType.InvalidInput) {
+  if (error instanceof InvalidInputLinearError) {
     /** If the mutation has failed due to an invalid user input return a custom user error */
     return new UserError(input, error);
   } else {
@@ -333,43 +334,47 @@ createTeam(input).catch(error => {
 
 Information about the `request` resulting in the error is attached if available:
 ```typescript
-run().catch((_error) => {
-  const error = _error as LinearError;
-  console.error('Failed query:', error.query)
-  console.error('With variables:', error.variables)
-  throw error
+run().catch(error => {
+  if (error instanceof LinearError) {
+    console.error("Failed query:", error.query);
+    console.error("With variables:", error.variables);
+  }
+  throw error;
 });
 ```
 
 Information about the `response` is attached if available:
 ```typescript
-run().catch((_error) => {
-  const error = _error as LinearError;
-  console.error('Failed HTTP status:', error.status)
-  console.error('Failed response data:', error.data)
-  throw error
+run().catch(error => {
+  if (error instanceof LinearError) {
+    console.error("Failed HTTP status:", error.status);
+    console.error("Failed response data:", error.data);
+  }
+  throw error;
 });
 ```
 
 Any GraphQL `errors` are parsed and added to an array:
 ```typescript
-run().catch((_error) => {
-  const error = _error as LinearError;
-  error.errors.map(graphqlError => {
-    console.log("Error message", graphqlError.message);
-    console.log("LinearErrorType of this GraphQL error", graphqlError.type);
-    console.log("Error due to user input", graphqlError.userError);
-    console.log("Path through the GraphQL schema", graphqlError.path);
-  });
+run().catch(error => {
+  if (error instanceof LinearError) {
+    error.errors?.map(graphqlError => {
+      console.log("Error message", graphqlError.message);
+      console.log("LinearErrorType of this GraphQL error", graphqlError.type);
+      console.log("Error due to user input", graphqlError.userError);
+      console.log("Path through the GraphQL schema", graphqlError.path);
+    });
+  }
   throw error;
 });
 ```
 
 The `raw` error returned by the graphql-request client is still available:
 ```typescript
-run().catch((_error) => {
-  const error = _error as LinearError;
-  console.log("The original error", error.raw);
+run().catch(error => {
+  if (error instanceof LinearError) {
+    console.log("The original error", error.raw);
+  }
   throw error;
 });
 ```
@@ -530,25 +535,23 @@ The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), 
 
 The graphql-request client can be configured by passing the `RequestInit` object to the Linear Client constructor:
 ```typescript
-const client = new LinearClient({ apiKey, headers: { "my-header": "value" } });
+const linearClient = new LinearClient({ apiKey, headers: { "my-header": "value" } });
 ```
 
 ### Raw GraphQL Client
 
 The graphql-request client is accessible through the Linear Client:
 ```typescript
-const linearClient = new LinearClient({ apiKey });
-const graphqlRequestClient = linearClient.client;
-graphqlRequestClient.setHeader("my-header", "value");
+const graphQLClient = linearClient.client;
+graphQLClient.setHeader("my-header", "value");
 ```
 
 ### Raw GraphQL Queries
 
 The Linear GraphQL API can be queried directly by passing a raw GraphQL query to the graphql-request client:
 ```typescript
-const linearClient = new LinearClient({ apiKey });
-const graphqlRequestClient = linearClient.client;
-const cycle =  await graphqlRequestClient.rawRequest(
+const graphQLClient = linearClient.client;
+const cycle = await graphQLClient.rawRequest(
   gql`
     query cycle($id: String!) {
       cycle(id: $id) {
@@ -576,13 +579,16 @@ const customGraphqlClient = new CustomGraphqlClient("https://api.linear.app/grap
 });
 
 /** Create the custom request function */
-const customLinearRequest: Request = <Response, Variables>(document: DocumentNode, variables?: Variables) => {
+const customLinearRequest: LinearRequest = <Response, Variables>(
+  document: DocumentNode,
+  variables?: Variables
+) => {
   /** The request must take a GraphQL document and variables, then return a promise for the result */
-  return customGraphqlClient.request<Response, Variables>(print(document), variables).catch(error => {
+  return customGraphqlClient.request<Response>(print(document), variables).catch(error => {
     /** Optionally catch and parse errors from the Linear API */
     throw new LinearError(error);
-  })
-}
+  });
+};
 
 /** Extend the Linear SDK to provide a request function using the custom client */
 class CustomLinearClient extends LinearSdk {
@@ -595,7 +601,7 @@ class CustomLinearClient extends LinearSdk {
 const customLinearClient = new CustomLinearClient();
 
 /** Use the custom client as if it were the Linear Client */
-async function getUsers(): Fetch<UserConnection> {
+async function getUsers(): LinearFetch<UserConnection> {
   const users = await customLinearClient.users();
   return users;
 }

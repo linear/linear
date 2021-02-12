@@ -58,7 +58,7 @@ function printConnectionVariables(): string {
 function printFetchType(): string {
   return printLines([
     printComment(["Fetch return type wrapped in a promise"]),
-    `export type ${Sdk.FETCH_TYPE}<Response> = Promise<Response | undefined>`,
+    `export type ${Sdk.FETCH_TYPE}<${Sdk.RESPONSE_TYPE}> = Promise<${Sdk.RESPONSE_TYPE} | undefined>`,
   ]);
 }
 

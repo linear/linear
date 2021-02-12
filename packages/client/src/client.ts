@@ -1,7 +1,7 @@
 import { LinearSdk } from "@linear/sdk";
 import { DocumentNode, print } from "graphql";
 import { GraphQLClient } from "graphql-request";
-import { LinearError } from "./error";
+import { parseLinearError } from "./error";
 import { LinearClientOptions, LinearClientParsedOptions } from "./types";
 import { serializeUserAgent } from "./utils";
 
@@ -50,11 +50,11 @@ export class LinearClient extends LinearSdk {
     const parsedOptions = parseClientOptions(options);
     const graphQLClient = new GraphQLClient(parsedOptions.apiUrl, parsedOptions);
 
-    super(<R, V>(doc: DocumentNode, vars?: V) =>
+    super(<Response, Variables>(doc: DocumentNode, vars?: Variables) =>
       /** Call the graphql-request client */
-      this.client.request<R, V>(print(doc), vars).catch(error => {
+      this.client.request<Response, Variables>(print(doc), vars).catch(error => {
         /** Catch and wrap errors from the graphql-request client */
-        throw new LinearError(error);
+        throw parseLinearError(error);
       })
     );
 
