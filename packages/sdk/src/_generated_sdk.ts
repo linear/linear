@@ -3675,6 +3675,7 @@ export class Team extends Request {
     this.issueEstimationType = data.issueEstimationType ?? undefined;
     this.key = data.key ?? undefined;
     this.name = data.name ?? undefined;
+    this.private = data.private ?? undefined;
     this.slackIssueComments = data.slackIssueComments ?? undefined;
     this.slackIssueStatuses = data.slackIssueStatuses ?? undefined;
     this.slackNewIssue = data.slackNewIssue ?? undefined;
@@ -3735,6 +3736,8 @@ export class Team extends Request {
   public key?: string;
   /** The team's name. */
   public name?: string;
+  /** Internal. Whether the team is private or not. */
+  public private?: boolean;
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments?: boolean;
   /** Whether to send new issue status updates to Slack. */

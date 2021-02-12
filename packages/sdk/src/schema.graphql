@@ -6650,6 +6650,10 @@ type Team implements Node {
   """
   organization: Organization!
   """
+  Internal. Whether the team is private or not.
+  """
+  private: Boolean!
+  """
   Projects associated with the team.
   """
   projects(
@@ -6898,6 +6902,10 @@ input TeamCreateInput {
   """
   organizationId: String
   """
+  Internal. Whether the team is private or not.
+  """
+  private: Boolean
+  """
   The timezone of the team.
   """
   timezone: String
@@ -7090,6 +7098,10 @@ input TeamUpdateInput {
   The name of the team.
   """
   name: String
+  """
+  Internal. Whether the team is private or not.
+  """
+  private: Boolean
   """
   The workflow state into which issues are moved when a review has been requested for the PR.
   """

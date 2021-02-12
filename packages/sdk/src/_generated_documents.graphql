@@ -818,6 +818,8 @@ fragment Team on Team {
   cycleCalenderUrl
   # How many upcoming cycles to create.
   upcomingCycleCount
+  # Internal. Whether the team is private or not.
+  private
   # Only allow issues issues with cycles in Active Issues.
   cycleLockToActive
   # Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.

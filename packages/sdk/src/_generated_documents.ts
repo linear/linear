@@ -3968,6 +3968,8 @@ export type Team = Node & {
   name: Scalars["String"];
   /** The organization that the team is associated with. */
   organization: Organization;
+  /** Internal. Whether the team is private or not. */
+  private: Scalars["Boolean"];
   /** Projects associated with the team. */
   projects: ProjectConnection;
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
@@ -4141,6 +4143,8 @@ export type TeamCreateInput = {
   name: Scalars["String"];
   /** The organization associated with the team. */
   organizationId?: Maybe<Scalars["String"]>;
+  /** Internal. Whether the team is private or not. */
+  private?: Maybe<Scalars["Boolean"]>;
   /** The timezone of the team. */
   timezone?: Maybe<Scalars["String"]>;
   /** How many upcoming cycles to create. */
@@ -4264,6 +4268,8 @@ export type TeamUpdateInput = {
   mergeWorkflowStateId?: Maybe<Scalars["String"]>;
   /** The name of the team. */
   name?: Maybe<Scalars["String"]>;
+  /** Internal. Whether the team is private or not. */
+  private?: Maybe<Scalars["Boolean"]>;
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   reviewWorkflowStateId?: Maybe<Scalars["String"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -5213,6 +5219,7 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
   | "cycleIssueAutoAssignStarted"
   | "cycleCalenderUrl"
   | "upcomingCycleCount"
+  | "private"
   | "cycleLockToActive"
   | "autoArchivePeriod"
   | "autoClosePeriod"
@@ -11517,6 +11524,7 @@ export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "cycleIssueAutoAssignStarted" } },
           { kind: "Field", name: { kind: "Name", value: "cycleCalenderUrl" } },
           { kind: "Field", name: { kind: "Name", value: "upcomingCycleCount" } },
+          { kind: "Field", name: { kind: "Name", value: "private" } },
           { kind: "Field", name: { kind: "Name", value: "cycleLockToActive" } },
           { kind: "Field", name: { kind: "Name", value: "autoArchivePeriod" } },
           { kind: "Field", name: { kind: "Name", value: "autoClosePeriod" } },

@@ -6835,6 +6835,22 @@
             "deprecationReason": null
           },
           {
+            "name": "private",
+            "description": "Internal. Whether the team is private or not.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "draftWorkflowState",
             "description": "The workflow state into which issues are moved when a PR has been opened as draft.",
             "args": [],
@@ -28852,6 +28868,18 @@
             "deprecationReason": null
           },
           {
+            "name": "private",
+            "description": "Internal. Whether the team is private or not.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "autoClosePeriod",
             "description": "Period after which issues are automatically closed, in months.",
             "type": {
@@ -29271,6 +29299,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "private",
+            "description": "Internal. Whether the team is private or not.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
