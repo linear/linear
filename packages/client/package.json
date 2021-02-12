@@ -1,6 +1,6 @@
 {
   "name": "@linear/client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -24,15 +24,15 @@
     "scratch": "ts-node src/scratch.ts"
   },
   "dependencies": {
-    "@linear/common": "^1.0.1",
-    "@linear/sdk": "^1.1.0"
+    "@linear/common": "^1.0.2",
+    "@linear/sdk": "^1.1.1"
   },
   "peerDependencies": {
     "graphql": "^15.4.0",
     "graphql-request": "^3.3.0"
   },
   "devDependencies": {
-    "@linear/codegen-test": "^1.0.1",
+    "@linear/codegen-test": "^1.0.2",
     "@rollup/plugin-typescript": "^8.1.1",
     "dotenv": "^8.2.0",
     "execa": "^5.0.0",
