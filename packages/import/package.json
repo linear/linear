@@ -28,5 +28,6 @@
     "jira2md": "2.0.4",
     "lodash": "4.17.20",
     "node-fetch": "2.6.1"
-  }
+  },
+  "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
 }

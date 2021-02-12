@@ -29,5 +29,6 @@
     "rollup-plugin-size-snapshot": "^0.12.0",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.0.5"
-  }
+  },
+  "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
 }
