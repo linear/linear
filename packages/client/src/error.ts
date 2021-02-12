@@ -123,13 +123,13 @@ export class RatelimitedLinearError extends LinearError {
   }
 }
 
-export class NetworkErrorLinearError extends LinearError {
+export class NetworkLinearError extends LinearError {
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
     super(error, errors, LinearErrorType.NetworkError);
   }
 }
 
-export class AuthenticationErrorLinearError extends LinearError {
+export class AuthenticationLinearError extends LinearError {
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
     super(error, errors, LinearErrorType.AuthenticationError);
   }
@@ -141,7 +141,7 @@ export class ForbiddenLinearError extends LinearError {
   }
 }
 
-export class BootstrapErrorLinearError extends LinearError {
+export class BootstrapLinearError extends LinearError {
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
     super(error, errors, LinearErrorType.BootstrapError);
   }
@@ -153,7 +153,7 @@ export class UnknownLinearError extends LinearError {
   }
 }
 
-export class InternalErrorLinearError extends LinearError {
+export class InternalLinearError extends LinearError {
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
     super(error, errors, LinearErrorType.InternalError);
   }
@@ -165,13 +165,13 @@ export class OtherLinearError extends LinearError {
   }
 }
 
-export class UserErrorLinearError extends LinearError {
+export class UserLinearError extends LinearError {
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
     super(error, errors, LinearErrorType.UserError);
   }
 }
 
-export class GraphqlErrorLinearError extends LinearError {
+export class GraphqlLinearError extends LinearError {
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
     super(error, errors, LinearErrorType.GraphqlError);
   }
@@ -190,15 +190,15 @@ const errorConstructorMap: Record<LinearErrorType, typeof LinearError> = {
   [LinearErrorType.FeatureNotAccessible]: FeatureNotAccessibleLinearError,
   [LinearErrorType.InvalidInput]: InvalidInputLinearError,
   [LinearErrorType.Ratelimited]: RatelimitedLinearError,
-  [LinearErrorType.NetworkError]: NetworkErrorLinearError,
-  [LinearErrorType.AuthenticationError]: AuthenticationErrorLinearError,
+  [LinearErrorType.NetworkError]: NetworkLinearError,
+  [LinearErrorType.AuthenticationError]: AuthenticationLinearError,
   [LinearErrorType.Forbidden]: ForbiddenLinearError,
-  [LinearErrorType.BootstrapError]: BootstrapErrorLinearError,
+  [LinearErrorType.BootstrapError]: BootstrapLinearError,
   [LinearErrorType.Unknown]: UnknownLinearError,
-  [LinearErrorType.InternalError]: InternalErrorLinearError,
+  [LinearErrorType.InternalError]: InternalLinearError,
   [LinearErrorType.Other]: OtherLinearError,
-  [LinearErrorType.UserError]: UserErrorLinearError,
-  [LinearErrorType.GraphqlError]: GraphqlErrorLinearError,
+  [LinearErrorType.UserError]: UserLinearError,
+  [LinearErrorType.GraphqlError]: GraphqlLinearError,
   [LinearErrorType.LockTimeout]: LockTimeoutLinearError,
 };
 
