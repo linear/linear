@@ -1,6 +1,6 @@
 {
   "name": "@linear/common",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.4](https://github.com/linear/linear/compare/@linear/codegen-sdk@1.0.3...@linear/codegen-sdk@1.0.4) (2021-02-12)
+
+**Note:** Version bump only for package @linear/codegen-sdk
+
+
+
+
+
 ## [1.0.3](https://github.com/linear/linear/compare/@linear/codegen-sdk@1.0.1...@linear/codegen-sdk@1.0.3) (2021-02-12)
 
 **Note:** Version bump only for package @linear/codegen-sdk
