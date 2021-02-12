@@ -43,5 +43,8 @@
     "rollup-plugin-terser": "^7.0.2",
     "ts-node": "^9.1.1"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
 }
