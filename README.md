@@ -234,7 +234,7 @@ const moreIssues = await linearClient.issues({ after: issuesEndCursor, first: 10
 
 Results can be ordered using the `orderBy` optional variable:
 ```typescript
-import { Linear } from "@linear/client";
+import { LinearDocument } from "@linear/client";
 
 const issues = await linearClient.issues({ orderBy: LinearDocument.PaginationOrderBy.UpdatedAt });
 ```
