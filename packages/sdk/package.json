@@ -1,5 +1,6 @@
 {
   "name": "@linear/sdk",
+  "description": "The Linear SDK containing GraphQL models and operations",
   "version": "1.1.5",
   "author": "Linear Orbit, Inc",
   "license": "MIT",

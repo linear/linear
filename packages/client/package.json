@@ -1,5 +1,6 @@
 {
   "name": "@linear/client",
+  "description": "The Linear Client for interacting with the Linear GraphQL API",
   "version": "1.0.7",
   "author": "Linear Orbit, Inc",
   "license": "MIT",

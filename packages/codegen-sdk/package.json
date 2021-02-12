@@ -1,5 +1,6 @@
 {
   "name": "@linear/codegen-sdk",
+  "description": "Plugin for generating the Linear SDK from fragments and documents",
   "version": "1.0.6",
   "author": "Linear Orbit, Inc",
   "license": "MIT",

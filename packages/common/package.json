@@ -1,5 +1,6 @@
 {
   "name": "@linear/common",
+  "description": "Linear common code",
   "version": "1.0.6",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
