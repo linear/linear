@@ -130,7 +130,7 @@ All operations return models, which can be used to perform operations for other 
 
 All types are accessible through the Linear Client package. It is written in Typescript:
 ```typescript
-import { Fetch, LinearClient, User } from "@linear/client";
+import { LinearClient, LinearFetch, User } from "@linear/client";
 
 const linearClient = new LinearClient({ apiKey });
 
@@ -243,7 +243,8 @@ const issues = await linearClient.issues({ orderBy: LinearDocument.PaginationOrd
 
 Create a file upload URL, upload the file to external storage, and attach the file by asset URL:
 ```typescript
-import { Fetch, Issue } from "@linear/client";
+import { Issue, LinearFetch } from "@linear/client";
+
 async function createIssueWithFile(title: string, file: File, uploadData: RequestInit): LinearFetch<Issue> {
   /** Fetch a storage URL to upload the file to */
   const uploadPayload = await linearClient.fileUpload(file.type, file.name, file.size);
@@ -317,14 +318,14 @@ archiveFirstIssue().catch(error => {
 
 The parsed error type can be compared to determine the course of action:
 ```typescript
-import { LinearError, LinearErrorType, InvalidInputLinearError } from '@linear/client'
-import { UserError } from './custom-errors'
+import { InvalidInputLinearError, LinearError, LinearErrorType } from '@linear/client'
+import { CustomUserError } from './custom-errors'
 
 const input = { name: "Happy Team" };
 createTeam(input).catch(error => {
   if (error instanceof InvalidInputLinearError) {
     /** If the mutation has failed due to an invalid user input return a custom user error */
-    return new UserError(input, error);
+    return new CustomUserError(input, error);
   } else {
     /** Otherwise throw the error and handle in the calling function */
     throw error;
@@ -569,7 +570,7 @@ const cycle = await graphQLClient.rawRequest(
 
 In order to use a custom GraphQL Client, the Linear SDK must be extended and provided with a request function:
 ```typescript
-import { Fetch, LinearError, LinearSdk, Request, UserConnection } from "@linear/client";
+import { LinearError, LinearFetch, LinearRequest, LinearSdk, parseLinearError, UserConnection } from "@linear/client";
 import { DocumentNode, GraphQLClient, print } from "graphql";
 import { CustomGraphqlClient } from "./graphql-client";
 
@@ -586,7 +587,7 @@ const customLinearRequest: LinearRequest = <Response, Variables>(
   /** The request must take a GraphQL document and variables, then return a promise for the result */
   return customGraphqlClient.request<Response>(print(document), variables).catch(error => {
     /** Optionally catch and parse errors from the Linear API */
-    throw new LinearError(error);
+    throw parseLinearError(error);
   });
 };
 

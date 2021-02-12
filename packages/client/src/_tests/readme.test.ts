@@ -4,6 +4,7 @@
 /* eslint-disable no-console */
 import { DocumentNode, print } from "graphql";
 import { gql, GraphQLClient } from "graphql-request";
+import { parseLinearError } from "../error";
 import {
   ArchivePayload,
   InvalidInputLinearError,
@@ -339,7 +340,7 @@ describe("readme.md", () => {
         /** The request must take a GraphQL document and variables, then return a promise for the result */
         return customGraphqlClient.request<Response>(print(document), variables).catch(error => {
           /** Optionally catch and parse errors from the Linear API */
-          throw new LinearError(error);
+          throw parseLinearError(error);
         });
       };
 
