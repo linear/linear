@@ -73,7 +73,7 @@ export function getKeyByValue<Key extends string, Value>(obj: Record<Key, Value>
 }
 
 /**
- * Return the key matching the value of an object
+ * Return the key matching the value in an object
  */
 export function getKeyByValue<Key extends string, Value>(obj: Record<Key, Value>, value: Value): Key | undefined {
   const keys = Object.keys(obj) as Key[];
