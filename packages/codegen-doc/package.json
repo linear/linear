@@ -1,6 +1,6 @@
 {
   "name": "@linear/codegen-doc",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -28,7 +28,7 @@
   "devDependencies": {
     "@graphql-codegen/plugin-helpers": "^1.18.1",
     "@graphql-codegen/visitor-plugin-common": "^1.17.17",
-    "@linear/common": "^1.0.1",
+    "@linear/common": "^1.0.2",
     "@rollup/plugin-typescript": "^8.1.1",
     "auto-bind": "^4.0.0",
     "rollup": "^2.38.3",
