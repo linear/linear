@@ -16,7 +16,15 @@ It supports introspection so you can query the whole schema.
 
 ## Authentication
 
-Right now we support personal API keys, which can be created in the [API settings](https://linear.app/settings/api). To authenticate your requests, you need to pass the newly created key as an `Authorization` header:
+Right now we support personal API keys and OAuth2 authentication.
+
+### OAuth2
+
+If you're building an application for others to use, we recommend you use [OAuth2 authentication](OAuth2.md).
+
+### Personal API keys
+
+For personal scripts API keys are the easiest way to access the API. They can be created in the [API settings](https://linear.app/settings/api). To authenticate your requests, you need to pass the newly created key as an `Authorization` header:
 
 ```bash
 curl \
@@ -140,6 +148,8 @@ query {
   }
 }
 ```
+
+To query the next 10, simply pass the value of `pageInfo.endCursor` as `after` parameter for the next request. You can do this as long as `pageInfo.hasNextPage` return true and you'll paginate through all the values in the collection.
 
 The first 50 results are returned by default without query arguments. Pagination also supports simpler syntax where instead of edges you can directly get all the nodes similar to GitHub's GraphQL API:
 
