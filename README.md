@@ -58,13 +58,15 @@ Connect to the Linear API and interact with your data in a few steps:
 
     Using npm:
     ```shell
-    npm install @linear/client
+    npm install @linear/client graphql graphql-request
     ```
 
     Or yarn:
     ```shell
-    yarn add @linear/client
+    yarn add @linear/client graphql graphql-request
     ```
+
+    The `graphql` and `graphql-request` packages are required as peer dependencies.
 
 2. **Create a Linear API authentication token**
 
