@@ -1,6 +1,6 @@
 {
   "name": "@linear/import",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "engines": {
@@ -20,7 +20,7 @@
     "build:clean": "npx rimraf dist"
   },
   "dependencies": {
-    "@linear/client": "^1.0.2",
+    "@linear/client": "^1.0.3",
     "chalk": "4.1.0",
     "csvtojson": "2.0.10",
     "inquirer": "7.3.3",
