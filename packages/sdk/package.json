@@ -1,6 +1,6 @@
 {
   "name": "@linear/sdk",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -33,8 +33,8 @@
     "@graphql-codegen/typescript": "^1.17.11",
     "@graphql-codegen/typescript-operations": "^1.17.9",
     "@graphql-typed-document-node/core": "^3.1.0",
-    "@linear/codegen-doc": "1.0.0-alpha.1",
-    "@linear/codegen-sdk": "1.0.0-alpha.1",
+    "@linear/codegen-doc": "1.0.0",
+    "@linear/codegen-sdk": "1.0.0",
     "@rollup/plugin-typescript": "^8.1.1",
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",
