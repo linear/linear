@@ -58,12 +58,12 @@ Connect to the Linear API and interact with your data in a few steps:
 
     Using npm:
     ```shell
-    npm install @linear/client graphql graphql-request
+    npm install @linear/sdk graphql graphql-request
     ```
 
     Or yarn:
     ```shell
-    yarn add @linear/client graphql graphql-request
+    yarn add @linear/sdk graphql graphql-request
     ```
 
     The `graphql` and `graphql-request` packages are required as peer dependencies.
@@ -80,7 +80,7 @@ Connect to the Linear API and interact with your data in a few steps:
 
     Using the API key created in step 2:
     ```javascript
-    import { LinearClient } from '@linear/client'
+    import { LinearClient } from '@linear/sdk'
 
     const client = new LinearClient({
       apiKey: YOUR_PERSONAL_API_KEY
@@ -132,7 +132,7 @@ All operations return models, which can be used to perform operations for other 
 
 All types are accessible through the Linear Client package. It is written in Typescript:
 ```typescript
-import { LinearClient, LinearFetch, User } from "@linear/client";
+import { LinearClient, LinearFetch, User } from "@linear/sdk";
 
 const linearClient = new LinearClient({ apiKey });
 
@@ -236,7 +236,7 @@ const moreIssues = await linearClient.issues({ after: issuesEndCursor, first: 10
 
 Results can be ordered using the `orderBy` optional variable:
 ```typescript
-import { LinearDocument } from "@linear/client";
+import { LinearDocument } from "@linear/sdk";
 
 const issues = await linearClient.issues({ orderBy: LinearDocument.PaginationOrderBy.UpdatedAt });
 ```
@@ -245,7 +245,7 @@ const issues = await linearClient.issues({ orderBy: LinearDocument.PaginationOrd
 
 Create a file upload URL, upload the file to external storage, and attach the file by asset URL:
 ```typescript
-import { Issue, LinearFetch } from "@linear/client";
+import { Issue, LinearFetch } from "@linear/sdk";
 
 async function createIssueWithFile(title: string, file: File, uploadData: RequestInit): LinearFetch<Issue> {
   /** Fetch a storage URL to upload the file to */
@@ -320,7 +320,7 @@ archiveFirstIssue().catch(error => {
 
 The parsed error type can be compared to determine the course of action:
 ```typescript
-import { InvalidInputLinearError, LinearError, LinearErrorType } from '@linear/client'
+import { InvalidInputLinearError, LinearError, LinearErrorType } from '@linear/sdk'
 import { CustomUserError } from './custom-errors'
 
 const input = { name: "Happy Team" };
@@ -572,7 +572,7 @@ const cycle = await graphQLClient.rawRequest(
 
 In order to use a custom GraphQL Client, the Linear SDK must be extended and provided with a request function:
 ```typescript
-import { LinearError, LinearFetch, LinearRequest, LinearSdk, parseLinearError, UserConnection } from "@linear/client";
+import { LinearError, LinearFetch, LinearRequest, LinearSdk, parseLinearError, UserConnection } from "@linear/sdk";
 import { DocumentNode, GraphQLClient, print } from "graphql";
 import { CustomGraphqlClient } from "./graphql-client";
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { LinearClient } from "@linear/client";
+import { LinearClient } from "@linear/sdk";
 import chalk from "chalk";
 import * as inquirer from "inquirer";
 import _ from "lodash";

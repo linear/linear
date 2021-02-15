@@ -1,9 +1,9 @@
-import { LinearSdk } from "@linear/sdk";
 import { DocumentNode, print } from "graphql";
 import { GraphQLClient } from "graphql-request";
 import { parseLinearError } from "./error";
 import { LinearClientOptions, LinearClientParsedOptions } from "./types";
 import { serializeUserAgent } from "./utils";
+import { LinearSdk } from "./_generated_sdk";
 
 /**
  * Validate and return default graphql-request client options
@@ -28,7 +28,7 @@ function parseClientOptions({ apiKey, accessToken, apiUrl, ...opts }: LinearClie
       ...opts.headers,
       /** Override any user agent with the sdk name and version */
       "User-Agent": serializeUserAgent({
-        [process.env.npm_package_name ?? "@linear/client"]: process.env.npm_package_version ?? "unknown",
+        [process.env.npm_package_name ?? "@linear/sdk"]: process.env.npm_package_version ?? "unknown",
       }),
     },
     /** Default to production linear api */

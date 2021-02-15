@@ -21,7 +21,7 @@
     "build:clean": "npx rimraf dist"
   },
   "dependencies": {
-    "@linear/client": "^1.0.7",
+    "@linear/sdk": "^1.0.7",
     "chalk": "4.1.0",
     "csvtojson": "2.0.10",
     "inquirer": "7.3.3",

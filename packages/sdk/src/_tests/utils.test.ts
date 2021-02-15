@@ -7,16 +7,16 @@ describe("serializeUserAgent", () => {
   });
 
   it("handles one property", async () => {
-    const result = serializeUserAgent({ "@linear/client": "0.1.2" });
-    expect(result).toEqual("@linear/client@0.1.2");
+    const result = serializeUserAgent({ "@linear/sdk": "0.1.2" });
+    expect(result).toEqual("@linear/sdk@0.1.2");
   });
 
   it("handles multiple properties", async () => {
     const result = serializeUserAgent({
-      "@linear/client": "0.1.2",
+      "@linear/sdk": "0.1.2",
       "@linear/dfl": "1.2.3",
     });
-    expect(result).toEqual("@linear/client@0.1.2 @linear/dfl@1.2.3");
+    expect(result).toEqual("@linear/sdk@0.1.2 @linear/dfl@1.2.3");
   });
 
   it("handles uri encoding of value", async () => {

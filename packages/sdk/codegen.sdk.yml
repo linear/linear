@@ -1,18 +1,18 @@
 overwrite: true
 schema: ./src/schema.graphql
-documents: ./src/**
+documents: ./src/_generated_documents.graphql
 hooks:
   afterOneFileWrite:
     - prettier --write
 config:
   documentFile: ./_generated_documents
   skipFields:
-    - "disableReason"
-    - "defaultTemplateForMembersId"
-    - "defaultTemplateForNonMembersId"
-    - "integrationResource"
-    - "integrationResources"
-    - "subscription"
+    - disableReason
+    - defaultTemplateForMembersId
+    - defaultTemplateForNonMembersId
+    - integrationResource
+    - integrationResources
+    - subscription
 generates:
   src/_generated_documents.ts:
     plugins:

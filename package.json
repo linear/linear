@@ -12,11 +12,10 @@
   ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "build:client": "lerna run build:client",
     "build:common": "lerna run build:common",
     "build:import": "lerna run build:import",
     "build:sdk": "lerna run build:sdk",
-    "build": "run-s build:common generate build:sdk generate:test build:client build:import",
+    "build": "run-s build:common generate build:sdk generate:test build:import",
     "dev": "NODE_ENV=development yarn build",
     "generate": "run-s generate:clean generate:doc generate:sdk",
     "generate:clean": "lerna run generate:clean",

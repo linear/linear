@@ -1,6 +1,6 @@
 {
   "name": "@linear/sdk",
-  "description": "The Linear SDK containing GraphQL models and operations",
+  "description": "The Linear Client SDK for interacting with the Linear GraphQL API",
   "version": "1.1.5",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
@@ -19,13 +19,20 @@
     "build:clean": "npx rimraf dist",
     "build:sdk": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",
-    "generate:clean": "npx rimraf src/_generated_*",
+    "generate:clean": "npx rimraf src/**/_generated*",
     "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
     "generate:schema": "npx graphql-codegen --config codegen.schema.yml",
-    "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml"
+    "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml",
+    "generate:test": "npx graphql-codegen --config codegen.test.yml",
+    "schema": "npx graphql-codegen --config codegen.schema.yml",
+    "scratch": "ts-node src/scratch.ts"
+  },
+  "dependencies": {
+    "@linear/common": "^1.0.6"
   },
   "peerDependencies": {
-    "graphql": "^15.4.0"
+    "graphql": "^15.4.0",
+    "graphql-request": "^3.3.0"
   },
   "devDependencies": {
     "@graphql-codegen/introspection": "^1.18.0",
@@ -36,11 +43,16 @@
     "@graphql-typed-document-node/core": "^3.1.0",
     "@linear/codegen-doc": "^1.0.6",
     "@linear/codegen-sdk": "^1.0.6",
+    "@linear/codegen-test": "^1.0.6",
     "@rollup/plugin-typescript": "^8.1.1",
-    "rollup": "^2.38.3",
+    "dotenv": "^8.2.0",
+    "execa": "^5.0.0",
+    "get-port": "^5.1.1",
     "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-size-snapshot": "^0.12.0",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup": "^2.38.3",
+    "ts-node": "^9.1.1"
   },
   "publishConfig": {
     "access": "public"
