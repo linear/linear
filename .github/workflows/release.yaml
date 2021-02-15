@@ -39,8 +39,8 @@ jobs:
       # - name: Check for changeset
       #   run: yarn changeset status
 
-      - name: Set auth token
-        run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
+      # - name: Set auth token
+      #   run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
 
       - name: Create release pull request
         uses: changesets/action@master
