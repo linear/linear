@@ -31,7 +31,7 @@
     "test:watch": "yarn test --watch",
     "test": "npx jest -w 4"
   },
-  "devDependencies": {
+  "dependencies": {
     "@changesets/cli": "^2.14.1",
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
