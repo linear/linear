@@ -33,8 +33,8 @@ jobs:
       - name: Run tests
         run: yarn test:ci
 
-      - name: Check for changeset
-        run: yarn changeset status
+      # - name: Check for changeset
+      #   run: yarn changeset status
 
       - name: Set auth token
         run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
