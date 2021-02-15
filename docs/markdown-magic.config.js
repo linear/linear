@@ -1,6 +1,6 @@
-import codeSectionTransform from "./transforms/code-section";
+const codeSectionTransform = require("./transforms/code-section");
 
-export default {
+module.exports = {
   transforms: {
     CODE_SECTION: codeSectionTransform,
   },

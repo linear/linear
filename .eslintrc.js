@@ -97,6 +97,7 @@ module.exports = {
       rules: {
         "no-console": "off",
         "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-var-requires": "off",
       },
     },
     {

@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
+const fs = require("fs");
+const path = require("path");
 
-export default function CODE_SECTION(content, options, config) {
+module.exports = function CODE_SECTION(content, options, config) {
   let code;
   let syntax = options.syntax;
   if (!options.id || !options.src) {
@@ -49,4 +49,4 @@ export default function CODE_SECTION(content, options, config) {
 \`\`\`${syntax}${header}
 ${selectedLines.map(line => line.substring(trimBy).replace(/^\/\/ CODE_SECTION:INCLUDE /g, "")).join("\n")}
 \`\`\``;
-}
+};
