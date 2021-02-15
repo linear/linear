@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.2.2
+
+### Patch Changes
+
+- Add check for git changes and test bump
+- Updated dependencies [undefined]
+  - @linear/common@1.0.8
+
 ## 1.2.1
 
 ### Patch Changes

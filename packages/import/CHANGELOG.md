@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.1.2
+
+### Patch Changes
+
+- Add check for git changes and test bump
+- Updated dependencies [undefined]
+  - @linear/sdk@1.2.2
+
 ## 1.1.1
 
 ### Patch Changes

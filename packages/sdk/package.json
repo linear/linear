@@ -1,7 +1,7 @@
 {
   "name": "@linear/sdk",
   "description": "The Linear Client SDK for interacting with the Linear GraphQL API",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -28,7 +28,7 @@
     "scratch": "ts-node src/scratch.ts"
   },
   "dependencies": {
-    "@linear/common": "^1.0.7"
+    "@linear/common": "^1.0.8"
   },
   "peerDependencies": {
     "graphql": "^15.4.0",
@@ -41,9 +41,9 @@
     "@graphql-codegen/typescript": "^1.17.11",
     "@graphql-codegen/typescript-operations": "^1.17.9",
     "@graphql-typed-document-node/core": "^3.1.0",
-    "@linear/codegen-doc": "^1.0.7",
-    "@linear/codegen-sdk": "^1.0.7",
-    "@linear/codegen-test": "^1.0.7",
+    "@linear/codegen-doc": "^1.0.8",
+    "@linear/codegen-sdk": "^1.0.8",
+    "@linear/codegen-test": "^1.0.8",
     "@rollup/plugin-typescript": "^8.1.1",
     "dotenv": "^8.2.0",
     "execa": "^5.0.0",
