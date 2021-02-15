@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.7
+
+### Patch Changes
+
+- c11060c: Make internal packages private
+
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
@@ -7,33 +13,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @linear/codegen-test
 
-
-
-
-
 ## [1.0.5](https://github.com/linear/linear/compare/@linear/codegen-test@1.0.4...@linear/codegen-test@1.0.5) (2021-02-12)
 
 **Note:** Version bump only for package @linear/codegen-test
-
-
-
-
 
 ## [1.0.4](https://github.com/linear/linear/compare/@linear/codegen-test@1.0.3...@linear/codegen-test@1.0.4) (2021-02-12)
 
 **Note:** Version bump only for package @linear/codegen-test
 
-
-
-
-
 ## [1.0.3](https://github.com/linear/linear/compare/@linear/codegen-test@1.0.1...@linear/codegen-test@1.0.3) (2021-02-12)
 
 **Note:** Version bump only for package @linear/codegen-test
-
-
-
-
 
 ## 1.0.1 (2021-02-12)
 

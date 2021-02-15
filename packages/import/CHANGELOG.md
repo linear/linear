@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.1.1
+
+### Patch Changes
+
+- c11060c: Make internal packages private
+- Updated dependencies [c11060c]
+  - @linear/sdk@1.2.1
+
 ## 1.1.0
 
 ### Minor Changes
