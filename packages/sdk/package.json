@@ -17,7 +17,8 @@
   ],
   "scripts": {
     "build:clean": "npx rimraf dist",
-    "build:sdk": "run-s build:clean build:rollup",
+    "build:copy": "cp package.json dist/ && cp ../../README.md dist/",
+    "build:sdk": "run-s build:clean build:rollup build:copy",
     "build:rollup": "npx rollup -c",
     "generate:clean": "npx rimraf src/**/_generated*",
     "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
