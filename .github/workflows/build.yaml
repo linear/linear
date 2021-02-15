@@ -31,3 +31,6 @@ jobs:
 
       - name: Run tests
         run: yarn test:ci
+
+      - name: Check for no generated changes
+        run: git update-index --refresh && git diff-index HEAD
