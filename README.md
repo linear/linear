@@ -724,10 +724,9 @@ Generated code uses file prefix `_generated` and should never be manually update
 
 ```
 packages
-  client        - Linear Client wrapper, graphql-request and error parsing 
   common        - Common functions and logging
   import        - Import tooling for uploading from other systems
-  sdk           - The Linear SDK generated from the Linear GraphQL schema
+  sdk           - The Linear Client SDK for interacting with the Linear GraphQL API
   codegen-doc   - GraphQL codegen plugin to generate GraphQL fragments and documents
   codegen-sdk   - GraphQL codegen plugin to generate Typescript SDK from fragments and documents
   codegen-test  - GraphQL codegen plugin to generate a jest test for the Typescript SDK
