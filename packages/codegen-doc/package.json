@@ -1,5 +1,6 @@
 {
   "name": "@linear/codegen-doc",
+  "private": true,
   "description": "Plugin for generating GraphQL fragments and documents from a schema",
   "version": "1.0.6",
   "author": "Linear Orbit, Inc",
@@ -37,9 +38,6 @@
     "rollup-plugin-size-snapshot": "^0.12.0",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.0.5"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
 }
