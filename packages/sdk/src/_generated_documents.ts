@@ -777,8 +777,6 @@ export type FigmaEmbedPayload = {
   __typename?: "FigmaEmbedPayload";
   /** Figma embed information. */
   figmaEmbed?: Maybe<FigmaEmbed>;
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
@@ -1818,6 +1816,8 @@ export type Mutation = {
   teamMembershipCreate: TeamMembershipPayload;
   /** Deletes a team membership. */
   teamMembershipDelete: ArchivePayload;
+  /** Updates a team membership. */
+  teamMembershipUpdate: TeamMembershipPayload;
   /** Updates a team. */
   teamUpdate: TeamPayload;
   /** Creates a new template. */
@@ -2298,6 +2298,11 @@ export type MutationTeamMembershipCreateArgs = {
 
 export type MutationTeamMembershipDeleteArgs = {
   id: Scalars["String"];
+};
+
+export type MutationTeamMembershipUpdateArgs = {
+  id: Scalars["String"];
+  input: TeamMembershipUpdateInput;
 };
 
 export type MutationTeamUpdateArgs = {
@@ -4167,6 +4172,8 @@ export type TeamMembership = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** Whether the user is the owner of the team */
+  owner?: Maybe<Scalars["Boolean"]>;
   /** The team that the membership is associated with. */
   team: Team;
   /**
@@ -4188,6 +4195,8 @@ export type TeamMembershipConnection = {
 export type TeamMembershipCreateInput = {
   /** The identifier. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** Internal. Whether the user is the owner of the team. */
+  owner?: Maybe<Scalars["Boolean"]>;
   /** The identifier of the team associated with the membership. */
   teamId: Scalars["String"];
   /** The identifier of the user associated with the membership. */
@@ -4209,6 +4218,11 @@ export type TeamMembershipPayload = {
   success: Scalars["Boolean"];
   /** The team membership that was created or updated. */
   teamMembership?: Maybe<TeamMembership>;
+};
+
+export type TeamMembershipUpdateInput = {
+  /** Internal. Whether the user is the owner of the team. */
+  owner: Scalars["Boolean"];
 };
 
 export type TeamPayload = {
@@ -5271,7 +5285,7 @@ export type ArchiveResponseFragment = { __typename?: "ArchiveResponse" } & Pick<
 
 export type TeamMembershipFragment = { __typename?: "TeamMembership" } & Pick<
   TeamMembership,
-  "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "updatedAt" | "archivedAt" | "createdAt" | "id" | "owner"
 > & { team: { __typename?: "Team" } & Pick<Team, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type OrganizationDomainFragment = { __typename?: "OrganizationDomain" } & Pick<
@@ -5544,10 +5558,9 @@ export type FavoritePayloadFragment = { __typename?: "FavoritePayload" } & Pick<
 
 export type FeedbackPayloadFragment = { __typename?: "FeedbackPayload" } & Pick<FeedbackPayload, "success">;
 
-export type FigmaEmbedPayloadFragment = { __typename?: "FigmaEmbedPayload" } & Pick<
-  FigmaEmbedPayload,
-  "lastSyncId" | "success"
-> & { figmaEmbed?: Maybe<{ __typename?: "FigmaEmbed" } & FigmaEmbedFragment> };
+export type FigmaEmbedPayloadFragment = { __typename?: "FigmaEmbedPayload" } & Pick<FigmaEmbedPayload, "success"> & {
+    figmaEmbed?: Maybe<{ __typename?: "FigmaEmbed" } & FigmaEmbedFragment>;
+  };
 
 export type ImageUploadFromUrlPayloadFragment = { __typename?: "ImageUploadFromUrlPayload" } & Pick<
   ImageUploadFromUrlPayload,
@@ -7931,6 +7944,15 @@ export type TeamMembershipDeleteMutation = { __typename?: "Mutation" } & {
   teamMembershipDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
+export type TeamMembershipUpdateMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: TeamMembershipUpdateInput;
+}>;
+
+export type TeamMembershipUpdateMutation = { __typename?: "Mutation" } & {
+  teamMembershipUpdate: { __typename?: "TeamMembershipPayload" } & TeamMembershipPayloadFragment;
+};
+
 export type TeamUpdateMutationVariables = Exact<{
   id: Scalars["String"];
   input: TeamUpdateInput;
@@ -9525,7 +9547,6 @@ export const FigmaEmbedPayloadFragmentDoc: DocumentNode<FigmaEmbedPayloadFragmen
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FigmaEmbed" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
@@ -11666,6 +11687,7 @@ export const TeamMembershipFragmentDoc: DocumentNode<TeamMembershipFragment, unk
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "owner" } },
         ],
       },
     },
@@ -24730,6 +24752,60 @@ export const TeamMembershipDeleteDocument: DocumentNode<
       },
     },
     ...ArchivePayloadFragmentDoc.definitions,
+  ],
+};
+export const TeamMembershipUpdateDocument: DocumentNode<
+  TeamMembershipUpdateMutation,
+  TeamMembershipUpdateMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "teamMembershipUpdate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamMembershipUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamMembershipPayloadFragmentDoc.definitions,
   ],
 };
 export const TeamUpdateDocument: DocumentNode<TeamUpdateMutation, TeamUpdateMutationVariables> = {

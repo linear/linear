@@ -1148,13 +1148,10 @@ export class FigmaEmbed extends Request {
 export class FigmaEmbedPayload extends Request {
   public constructor(request: LinearRequest, data: L.FigmaEmbedPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
     this.figmaEmbed = data.figmaEmbed ? new FigmaEmbed(request, data.figmaEmbed) : undefined;
   }
 
-  /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
   /** Whether the operation was successful. */
   public success?: boolean;
   /** Figma embed information. */
@@ -3864,6 +3861,7 @@ export class TeamMembership extends Request {
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt ?? undefined;
     this.id = data.id ?? undefined;
+    this.owner = data.owner ?? undefined;
     this.updatedAt = data.updatedAt ?? undefined;
     this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
@@ -3875,6 +3873,8 @@ export class TeamMembership extends Request {
   public createdAt?: L.Scalars["DateTime"];
   /** The unique identifier of the entity. */
   public id?: string;
+  /** Whether the user is the owner of the team */
+  public owner?: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -9394,6 +9394,37 @@ export class TeamMembershipDeleteMutation extends Request {
 }
 
 /**
+ * A fetchable TeamMembershipUpdate Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class TeamMembershipUpdateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TeamMembershipUpdate mutation and return a TeamMembershipPayload
+   *
+   * @param id - required id to pass to teamMembershipUpdate
+   * @param input - required input to pass to teamMembershipUpdate
+   * @returns parsed response from TeamMembershipUpdateMutation
+   */
+  public async fetch(id: string, input: L.TeamMembershipUpdateInput): LinearFetch<TeamMembershipPayload> {
+    return this._request<L.TeamMembershipUpdateMutation, L.TeamMembershipUpdateMutationVariables>(
+      L.TeamMembershipUpdateDocument,
+      {
+        id,
+        input,
+      }
+    ).then(response => {
+      const data = response?.teamMembershipUpdate;
+      return data ? new TeamMembershipPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable TeamUpdate Mutation
  *
  * @param request - function to call the graphql client
@@ -13438,6 +13469,16 @@ export class LinearSdk extends Request {
    */
   public teamMembershipDelete(id: string): LinearFetch<ArchivePayload> {
     return new TeamMembershipDeleteMutation(this._request).fetch(id);
+  }
+  /**
+   * Mutation teamMembershipUpdate for TeamMembershipPayload
+   *
+   * @param id - required id to pass to teamMembershipUpdate
+   * @param input - required input to pass to teamMembershipUpdate
+   * @returns TeamMembershipPayload
+   */
+  public teamMembershipUpdate(id: string, input: L.TeamMembershipUpdateInput): LinearFetch<TeamMembershipPayload> {
+    return new TeamMembershipUpdateMutation(this._request).fetch(id, input);
   }
   /**
    * Mutation teamUpdate for TeamPayload

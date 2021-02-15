@@ -962,6 +962,8 @@ fragment TeamMembership on TeamMembership {
   user {
     id
   }
+  # Whether the user is the owner of the team
+  owner
 }
 
 # Defines the use of a domain by an organization.
@@ -1618,8 +1620,6 @@ fragment FigmaEmbedPayload on FigmaEmbedPayload {
   figmaEmbed {
     ...FigmaEmbed
   }
-  # The identifier of the last sync operation.
-  lastSyncId
   # Whether the operation was successful.
   success
 }
@@ -5302,6 +5302,17 @@ mutation teamMembershipDelete(
 ) {
   teamMembershipDelete(id: $id) {
     ...ArchivePayload
+  }
+}
+# Updates a team membership.
+mutation teamMembershipUpdate(
+  # The identifier of the team membership to update.
+  $id: String!
+  # A partial team membership object to update the team membership with.
+  $input: TeamMembershipUpdateInput!
+) {
+  teamMembershipUpdate(id: $id, input: $input) {
+    ...TeamMembershipPayload
   }
 }
 # Updates a team.

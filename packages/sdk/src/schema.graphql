@@ -1133,10 +1133,6 @@ type FigmaEmbedPayload {
   """
   figmaEmbed: FigmaEmbed
   """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
   Whether the operation was successful.
   """
   success: Boolean!
@@ -3591,6 +3587,19 @@ type Mutation {
     """
     id: String!
   ): ArchivePayload!
+  """
+  Updates a team membership.
+  """
+  teamMembershipUpdate(
+    """
+    The identifier of the team membership to update.
+    """
+    id: String!
+    """
+    A partial team membership object to update the team membership with.
+    """
+    input: TeamMembershipUpdateInput!
+  ): TeamMembershipPayload!
   """
   Updates a team.
   """
@@ -6938,6 +6947,10 @@ type TeamMembership implements Node {
   """
   id: ID!
   """
+  Whether the user is the owner of the team
+  """
+  owner: Boolean
+  """
   The team that the membership is associated with.
   """
   team: Team!
@@ -6961,6 +6974,10 @@ input TeamMembershipCreateInput {
   The identifier. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  Internal. Whether the user is the owner of the team.
+  """
+  owner: Boolean
   """
   The identifier of the team associated with the membership.
   """
@@ -6990,6 +7007,12 @@ type TeamMembershipPayload {
   The team membership that was created or updated.
   """
   teamMembership: TeamMembership
+}
+input TeamMembershipUpdateInput {
+  """
+  Internal. Whether the user is the owner of the team.
+  """
+  owner: Boolean!
 }
 type TeamPayload {
   """
