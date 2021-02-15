@@ -15,9 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Add yarn cache
-        uses: c-hive/gha-yarn-cache@v1
-
       - name: Use node 14
         uses: actions/setup-node@v2
         with:
