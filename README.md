@@ -532,7 +532,7 @@ Both options are available through the user menu in [Linear](https://linear.app)
 
 <br/>
 
-The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./packages/client/src/error.ts).
+The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./packages/sdk/src/error.ts).
 
 ### Request Configuration
 
