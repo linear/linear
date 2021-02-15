@@ -90,33 +90,39 @@ Connect to the Linear API and interact with your data in a few steps:
 4. **Query for your issues**
 
     Using async await syntax:
-    ```typescript
+    <!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=1_1&src=./packages/sdk/src/_tests/readme.test.ts) -->
+    <!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+    ```ts
     async function getMyIssues() {
       const me = await linearClient.viewer;
       const myIssues = await me?.assignedIssues();
-
+    
       myIssues?.nodes?.map(issue => {
         console.log(`${me?.displayName} has issue: ${issue?.title}`);
       });
-
+    
       return myIssues;
     }
-
+    
     getMyIssues();
     ```
+    <!-- AUTO-GENERATED-CONTENT:END -->
 
     Or promises:
-    ```typescript
+    <!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=1_2&src=./packages/sdk/src/_tests/readme.test.ts) -->
+    <!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+    ```ts
     linearClient.viewer.then(me => {
       return me?.assignedIssues()?.then(myIssues => {
         myIssues?.nodes?.map(issue => {
           console.log(`${me?.displayName} has issue: ${issue?.title}`);
         });
-
+    
         return myIssues;
       });
     });
     ```
+    <!-- AUTO-GENERATED-CONTENT:END -->
 
 <br/>
 
@@ -131,7 +137,9 @@ All operations return models, which can be used to perform operations for other 
 ### Typescript
 
 All types are accessible through the Linear Client package. It is written in Typescript:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=2_1&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 import { LinearClient, LinearFetch, User } from "@linear/sdk";
 
 const linearClient = new LinearClient({ apiKey });
@@ -140,35 +148,51 @@ async function getCurrentUser(): LinearFetch<User> {
   return linearClient.viewer;
 }
 ```
+<!-- The below code snippet is automatically added from ./packages/sdk/src/readme/2.1.ts -->
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### Query
 
 Some models can be fetched from the Linear Client without any arguments:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=3_1&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const me = await linearClient.viewer;
 const org = await linearClient.organization;
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Other models are exposed as connections, and return a list of nodes:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=3_2&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const issues = await linearClient.issues();
 const firstIssue = issues?.nodes?.[0];
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 All required variables are passed as the first arguments:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=3_3&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const user = await linearClient.user("user-id");
 const team = await linearClient.team("team-id");
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Any optional variables are passed into the last argument as an object:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=3_4&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const fiftyProjects = await linearClient.projects({ first: 50 });
 const allComments = await linearClient.comments({ includeArchived: true });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Most models expose operations to fetch other models:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=3_5&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const me = await linearClient.viewer;
 const myIssues = await me?.assignedIssues();
 const myFirstIssue = myIssues?.nodes?.[0];
@@ -176,39 +200,51 @@ const myFirstIssueComments = await myFirstIssue?.comments();
 const myFirstIssueFirstComment = myFirstIssueComments?.nodes?.[0];
 const myFirstIssueFirstCommentUser = await myFirstIssueFirstComment?.user;
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 **NOTE:** Parenthesis is required only if the operation takes an optional variables object.
 
 ### Mutate
 
 To create a model, call the Linear Client mutation and pass in the input object:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=4_1&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const teams = await linearClient.teams();
 const team = teams?.nodes?.[0];
 if (team?.id) {
   await linearClient.issueCreate({ teamId: team.id, title: "My Created Issue" });
 }
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 To update a model, call the Linear Client mutation and pass in the required variables and input object:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=4_2&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const me = await linearClient.viewer;
 if (me?.id) {
   await linearClient.userUpdate(me.id, { displayName: "My Updated Name" });
 }
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 All mutations are exposed in the same way:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=4_3&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const projects = await linearClient.projects();
 const project = projects?.nodes?.[0];
 if (project?.id) {
   await linearClient.projectArchive(project.id);
 }
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Mutations will often return a success boolean and the mutated entity:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=4_4&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const commentPayload = await linearClient.commentCreate({ issueId: "some-issue-id" });
 if (commentPayload?.success) {
   return commentPayload.comment;
@@ -216,35 +252,47 @@ if (commentPayload?.success) {
   return new Error("Failed to create comment");
 }
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### Paginate
 
 Connection models have helpers to fetch the next and previous pages of results:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=5_1&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const issues = await linearClient.issues({ after: "some-issue-cursor", first: 10 });
 const nextIssues = await issues?.fetchNext();
 const prevIssues = await issues?.fetchPrevious();
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Pagination info is exposed and can be passed to the query operations. This uses the [Relay Connection spec](https://relay.dev/graphql/connections.htm):
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=5_2&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const issues = await linearClient.issues();
 const hasMoreIssues = issues?.pageInfo?.hasNextPage;
 const issuesEndCursor = issues?.pageInfo?.endCursor;
 const moreIssues = await linearClient.issues({ after: issuesEndCursor, first: 10 });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Results can be ordered using the `orderBy` optional variable:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=5_3&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 import { LinearDocument } from "@linear/sdk";
 
 const issues = await linearClient.issues({ orderBy: LinearDocument.PaginationOrderBy.UpdatedAt });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### File Upload
 
 Create a file upload URL, upload the file to external storage, and attach the file by asset URL:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=6_1&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 import { Issue, LinearFetch } from "@linear/sdk";
 
 async function createIssueWithFile(title: string, file: File, uploadData: RequestInit): LinearFetch<Issue> {
@@ -280,11 +328,14 @@ async function createIssueWithFile(title: string, file: File, uploadData: Reques
   return undefined;
 }
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### Error
 
 Errors can be caught and interrogated by wrapping the operation in a try catch block:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=7_1&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 async function createComment(input: LinearDocument.CommentCreateInput): LinearFetch<Comment | UserError> {
   try {
     /** Try to create a comment */
@@ -297,9 +348,12 @@ async function createComment(input: LinearDocument.CommentCreateInput): LinearFe
   }
 }
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Or by catching the error thrown from a calling function:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=7_2&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 async function archiveFirstIssue(): LinearFetch<ArchivePayload> {
   const me = await linearClient.viewer;
   const issues = await me?.assignedIssues();
@@ -317,26 +371,32 @@ archiveFirstIssue().catch(error => {
   throw error;
 });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 The parsed error type can be compared to determine the course of action:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=7_3&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 import { InvalidInputLinearError, LinearError, LinearErrorType } from '@linear/sdk'
-import { CustomUserError } from './custom-errors'
+import { UserError } from './custom-errors'
 
 const input = { name: "Happy Team" };
 createTeam(input).catch(error => {
   if (error instanceof InvalidInputLinearError) {
     /** If the mutation has failed due to an invalid user input return a custom user error */
-    return new CustomUserError(input, error);
+    return new UserError(input, error);
   } else {
     /** Otherwise throw the error and handle in the calling function */
     throw error;
   }
 });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Information about the `request` resulting in the error is attached if available:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=7_4&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 run().catch(error => {
   if (error instanceof LinearError) {
     console.error("Failed query:", error.query);
@@ -345,9 +405,12 @@ run().catch(error => {
   throw error;
 });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Information about the `response` is attached if available:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=7_5&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 run().catch(error => {
   if (error instanceof LinearError) {
     console.error("Failed HTTP status:", error.status);
@@ -356,9 +419,12 @@ run().catch(error => {
   throw error;
 });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 Any GraphQL `errors` are parsed and added to an array:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=7_6&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 run().catch(error => {
   if (error instanceof LinearError) {
     error.errors?.map(graphqlError => {
@@ -371,9 +437,12 @@ run().catch(error => {
   throw error;
 });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 The `raw` error returned by the graphql-request client is still available:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=7_7&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 run().catch(error => {
   if (error instanceof LinearError) {
     console.log("The original error", error.raw);
@@ -381,6 +450,7 @@ run().catch(error => {
   throw error;
 });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### Limitations
 
@@ -537,22 +607,30 @@ The Linear Client wraps the [Linear SDK](./packages/sdk/src/_generated_sdk.ts), 
 ### Request Configuration
 
 The graphql-request client can be configured by passing the `RequestInit` object to the Linear Client constructor:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=8_1&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const linearClient = new LinearClient({ apiKey, headers: { "my-header": "value" } });
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### Raw GraphQL Client
 
 The graphql-request client is accessible through the Linear Client:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=8_2&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const graphQLClient = linearClient.client;
 graphQLClient.setHeader("my-header", "value");
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### Raw GraphQL Queries
 
 The Linear GraphQL API can be queried directly by passing a raw GraphQL query to the graphql-request client:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=8_3&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 const graphQLClient = linearClient.client;
 const cycle = await graphQLClient.rawRequest(
   gql`
@@ -567,11 +645,14 @@ const cycle = await graphQLClient.rawRequest(
   { id: "cycle-id" }
 );
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ### Custom GraphQL Client
 
 In order to use a custom GraphQL Client, the Linear SDK must be extended and provided with a request function:
-```typescript
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=8_4&src=./packages/sdk/src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./packages/sdk/src/_tests/readme.test.ts -->
+```ts
 import { LinearError, LinearFetch, LinearRequest, LinearSdk, parseLinearError, UserConnection } from "@linear/sdk";
 import { DocumentNode, GraphQLClient, print } from "graphql";
 import { CustomGraphqlClient } from "./graphql-client";
@@ -609,6 +690,7 @@ async function getUsers(): LinearFetch<UserConnection> {
   return users;
 }
 ```
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 <br/>
 
