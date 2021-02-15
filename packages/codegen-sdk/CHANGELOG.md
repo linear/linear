@@ -1,19 +1,20 @@
 # Change Log
 
-## 1.0.8
-
-### Patch Changes
-
-- Add check for git changes and test bump
-
-## 1.0.7
-
-### Patch Changes
-
-- c11060c: Make internal packages private
-
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# 1.3.0 (2021-02-15)
+
+
+### Bug Fixes
+
+* **error:** split error into many constructors ([9a68e93](https://github.com/linear/linear/commit/9a68e93aeb8d2a41e91a054ca2648d788fc1583e))
+* **sdk:** apply parent variables to nested sdk queries ([3458ebf](https://github.com/linear/linear/commit/3458ebf5cee10066bbe93f0af1d0fe718d971ac9))
+* **sdk:** remove get from connection helpers ([543492d](https://github.com/linear/linear/commit/543492d0a08ed116003b8acdbdcc0884763474ca))
+
+
+
+
 
 ## [1.0.6](https://github.com/linear/linear/compare/@linear/codegen-sdk@1.0.5...@linear/codegen-sdk@1.0.6) (2021-02-12)
 

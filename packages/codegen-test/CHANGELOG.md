@@ -1,19 +1,18 @@
 # Change Log
 
-## 1.0.8
-
-### Patch Changes
-
-- Add check for git changes and test bump
-
-## 1.0.7
-
-### Patch Changes
-
-- c11060c: Make internal packages private
-
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# 1.3.0 (2021-02-15)
+
+
+### Bug Fixes
+
+* **error:** split error into many constructors ([9a68e93](https://github.com/linear/linear/commit/9a68e93aeb8d2a41e91a054ca2648d788fc1583e))
+
+
+
+
 
 ## [1.0.6](https://github.com/linear/linear/compare/@linear/codegen-test@1.0.5...@linear/codegen-test@1.0.6) (2021-02-12)
 
