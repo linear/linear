@@ -1,29 +1,110 @@
 {
   "name": "linear",
   "private": true,
-  "license": "MIT",
   "author": "Linear Orbit, Inc",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "lint": "lerna run lint",
-    "build": "lerna run build",
-    "test": "lerna run test",
-    "generate": "lerna run generate",
-    "cli": "yarn workspace @linear/cli start"
-  },
-  "devDependencies": {
-    "lerna": "3.13.2",
-    "prettier": "1.16.4",
-    "tslint": "5.15.0",
-    "typescript": "^3.6.3"
-  },
+  "license": "MIT",
   "engines": {
-    "node": "10.x.x",
+    "node": ">=12.x",
     "yarn": "1.x"
   },
-  "dependencies": {
-    "concurrently": "^4.1.2"
+  "workspaces": [
+    "./packages/*"
+  ],
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "build:common": "lerna run build:common",
+    "build:import": "lerna run build:import",
+    "build:sdk": "lerna run build:sdk",
+    "build": "run-s build:common generate build:sdk generate:test build:import",
+    "dev": "NODE_ENV=development yarn build",
+    "generate": "run-s generate:clean generate:doc generate:sdk",
+    "generate:clean": "lerna run generate:clean",
+    "generate:doc": "lerna run build:codegen-doc && lerna run generate:doc",
+    "generate:sdk": "lerna run build:codegen-sdk && lerna run generate:sdk",
+    "generate:test": "lerna run build:codegen-test && lerna run generate:test",
+    "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
+    "mock": "npx graphql-faker packages/sdk/src/schema.graphql",
+    "schema": "lerna run generate:schema",
+    "test:ci": "npx jest -w 1",
+    "test:e2e": "E2E=true yarn test _generated.test",
+    "test:update": "yarn test -u",
+    "test:watch": "yarn test --watch",
+    "test": "npx jest -w 4"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.14.1",
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@graphql-codegen/cli": "^1.19.1",
+    "@octokit/core": "^3.2.1",
+    "@rollup/plugin-typescript": "^8.1.1",
+    "@types/express": "^4.17.8",
+    "@types/inquirer": "^7.3.1",
+    "@types/lodash": "^4.14.165",
+    "@types/node-fetch": "^2.5.7",
+    "@typescript-eslint/eslint-plugin": "^4.8.0",
+    "@typescript-eslint/parser": "^4.8.0",
+    "auto-bind": "^4.0.0",
+    "body-parser": "^1.19.0",
+    "eslint": "^7.13.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsdoc": "^30.7.8",
+    "eslint-plugin-no-null": "^1.0.2",
+    "express": "^4.17.1",
+    "get-port": "^5.1.1",
+    "graphql": "^15.4.0",
+    "graphql-faker": "^2.0.0-rc.23",
+    "husky": "^4.3.8",
+    "jest": "^26.6.3",
+    "lerna": "^3.22.1",
+    "lint-staged": "^10.5.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.1.2",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^26.4.4",
+    "tslib": "^2.1.0",
+    "typescript": "^4.0.5"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,json,css,yaml}": [
+      "npx prettier --write **/*.{js,ts,tsx,json,css,yaml}"
+    ],
+    "*.{js,ts,tsx}": [
+      "npx eslint --max-warnings 0 --fix -c .eslintrc.precommit.json"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "npx commitlint -E  HUSKY_GIT_PARAMS",
+      "pre-commit": "npx lint-staged"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "testMatch": [
+      "**/*.test.ts?(x)"
+    ],
+    "transform": {
+      "^.*\\.tsx?$": "ts-jest"
+    },
+    "testTimeout": 20000,
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    }
   }
 }

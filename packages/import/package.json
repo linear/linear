@@ -1,0 +1,37 @@
+{
+  "name": "@linear/import",
+  "description": "Import helpers for uploading issues to Linear",
+  "version": "1.0.7",
+  "author": "Linear Orbit, Inc",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.x",
+    "yarn": "1.x"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "linear-import": "bin/linear-import.js"
+  },
+  "scripts": {
+    "dev:import": "NODE_ENV=development run-s dev:update build:import",
+    "dev:update": "yalc update",
+    "build:import": "yarn build:clean && npx tsc",
+    "build:clean": "npx rimraf dist"
+  },
+  "dependencies": {
+    "@linear/sdk": "^1.0.7",
+    "chalk": "4.1.0",
+    "csvtojson": "2.0.10",
+    "inquirer": "7.3.3",
+    "inquirer-file-path": "1.0.1",
+    "jira2md": "2.0.4",
+    "lodash": "4.17.20",
+    "node-fetch": "2.6.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
+}

@@ -1,38 +1,61 @@
 {
   "name": "@linear/sdk",
-  "version": "0.1.0",
-  "description": "Linear API SDK",
-  "author": "Linear.app",
-  "main": "dist/index.js",
-  "typings": "dist/index",
-  "umd:main": "dist/index.umd.js",
-  "module": "dist/index.mjs",
-  "source": "src/index.ts",
+  "description": "The Linear Client SDK for interacting with the Linear GraphQL API",
+  "version": "1.1.5",
+  "author": "Linear Orbit, Inc",
   "license": "MIT",
-  "scripts": {
-    "build": "tsc -b",
-    "lint": "tslint -p .",
-    "generate": "graphql-codegen",
-    "bundle": "microbundle",
-    "watch": "microbundle watch",
-    "dev": "concurrently -k -n 'sdk|microbundle,sdk|gql-codegen' 'yarn watch' 'yarn generate -w'"
+  "main": "dist/index-cjs.min.js",
+  "module": "dist/index-es.min.js",
+  "types": "dist/index.d.ts",
+  "repository": "https://github.com/linear/linear",
+  "engines": {
+    "node": ">=12.x",
+    "yarn": "1.x"
   },
-  "resolutions": {
-    "graphql": "14.1.1",
-    "module": "1.2.5"
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:clean": "npx rimraf dist",
+    "build:sdk": "run-s build:clean build:rollup",
+    "build:rollup": "npx rollup -c",
+    "generate:clean": "npx rimraf src/**/_generated*",
+    "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
+    "generate:schema": "npx graphql-codegen --config codegen.schema.yml",
+    "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml",
+    "generate:test": "npx graphql-codegen --config codegen.test.yml",
+    "schema": "npx graphql-codegen --config codegen.schema.yml",
+    "scratch": "ts-node src/scratch.ts"
   },
   "dependencies": {
-    "graphql": "14.1.1",
-    "graphql-request": "^1.8.2",
-    "tagged-template-noop": "^2.1.0"
+    "@linear/common": "^1.0.6"
+  },
+  "peerDependencies": {
+    "graphql": "^15.4.0",
+    "graphql-request": "^3.3.0"
   },
   "devDependencies": {
-    "@graphql-codegen/add": "^1.7.0",
-    "@graphql-codegen/cli": "^1.7.0",
-    "@graphql-codegen/near-operation-file-preset": "^1.7.0",
-    "@graphql-codegen/typescript": "^1.7.0",
-    "@graphql-codegen/typescript-operations": "^1.7.0",
-    "@types/graphql": "14.0.4",
-    "microbundle": "0.9.0"
-  }
+    "@graphql-codegen/introspection": "^1.18.0",
+    "@graphql-codegen/schema-ast": "^1.18.1",
+    "@graphql-codegen/typed-document-node": "^1.17.10",
+    "@graphql-codegen/typescript": "^1.17.11",
+    "@graphql-codegen/typescript-operations": "^1.17.9",
+    "@graphql-typed-document-node/core": "^3.1.0",
+    "@linear/codegen-doc": "^1.0.6",
+    "@linear/codegen-sdk": "^1.0.6",
+    "@linear/codegen-test": "^1.0.6",
+    "@rollup/plugin-typescript": "^8.1.1",
+    "dotenv": "^8.2.0",
+    "execa": "^5.0.0",
+    "get-port": "^5.1.1",
+    "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-size-snapshot": "^0.12.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup": "^2.38.3",
+    "ts-node": "^9.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
 }

@@ -1,0 +1,23 @@
+{
+  "extends": ["./.eslintrc.js"],
+  "parserOptions": {
+    "project": null,
+    "sourceType": "module",
+    "extraFileExtensions": [".json"]
+  },
+  "rules": {
+    "@typescript-eslint/await-thenable": "off",
+    "@typescript-eslint/dot-notation": "off",
+    "@typescript-eslint/no-floating-promises": "off",
+    "@typescript-eslint/tslint/config": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "argsIgnorePattern": "(^_|type|returns|of)",
+        "ignoreRestSiblings": true
+      }
+    ]
+  }
+}

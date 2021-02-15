@@ -1,11 +1,9 @@
 {
-  "extends": "../../config/tsconfig",
+  "extends": "../../tsconfig",
   "compilerOptions": {
-    "composite": true,
-    "outDir": "./dist",
-    "resolveJsonModule": true,
-    "rootDir": "./src",
-    "baseUrl": "./src"
+    "rootDir": "src",
+    "outDir": "dist",
+    "declarationDir": "dist"
   },
-  "include": ["./src"]
+  "exclude": ["./src/_tests", "dist", "rollup.config.js", "./src/scratch.ts"]
 }
