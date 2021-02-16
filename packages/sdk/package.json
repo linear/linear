@@ -28,9 +28,6 @@
     "schema": "npx graphql-codegen --config codegen.schema.yml",
     "scratch": "ts-node src/scratch.ts"
   },
-  "dependencies": {
-    "@linear/common": "^1.3.0"
-  },
   "peerDependencies": {
     "graphql": "^15.4.0",
     "graphql-request": "^3.3.0"

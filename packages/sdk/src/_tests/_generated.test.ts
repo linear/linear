@@ -55,9 +55,7 @@ describe("generated", () => {
     /** Test the root model query for AuthorizedApplications */
     it("authorizedApplications", async () => {
       const authorizedApplications = await client.authorizedApplications;
-      authorizedApplications.map(node => {
-        expect(node instanceof L.AuthorizedApplication);
-      });
+      authorizedApplications?.map(node => expect(node instanceof L.AuthorizedApplication));
     });
   });
 
@@ -1635,9 +1633,7 @@ describe("generated", () => {
     /** Test the root model query for Templates */
     it("templates", async () => {
       const templates = await client.templates;
-      templates.map(node => {
-        expect(node instanceof L.Template);
-      });
+      templates?.map(node => expect(node instanceof L.Template));
     });
   });
 

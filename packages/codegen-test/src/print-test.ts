@@ -112,9 +112,7 @@ function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation,
             }`,
             sdkOperations.length ? printSet(`_${fieldName}`, fieldName) : undefined,
             operation.print.list
-              ? `${fieldName}.map(node => {
-                  expect(node instanceof ${fieldType})
-                })`
+              ? `${fieldName}?.map(node => expect(node instanceof ${fieldType}))`
               : `expect(${fieldName} instanceof ${fieldType})`,
           ]),
           `No ${getLast(operation.sdkPath)} found - cannot test ${clientName}.${fieldName} query`,
@@ -175,9 +173,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                 ])
               : undefined,
             operation.print.list
-              ? `${fieldName}.map(node => {
-                    expect(node instanceof ${fieldType})
-                  })`
+              ? `${fieldName}?.map(node => expect(node instanceof ${fieldType}))`
               : `expect(${fieldName} instanceof ${fieldType})`,
           ]),
           `No ${getLast(operation.sdkPath)} found - cannot test ${clientName}.${fieldName} query`,
@@ -201,9 +197,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                   `const ${itemField} = await ${clientName}.${itemField}${itemOperationArgs}`,
                   itemOperations.length || itemQueries.length ? printSet(`_${itemField}`, itemField) : undefined,
                   operation.print.list
-                    ? `${itemField}.map(node => {
-                        expect(node instanceof ${itemType})
-                      })`
+                    ? `${itemField}?.map(node => expect(node instanceof ${itemType}))`
                     : `expect(${itemField} instanceof ${itemType})`,
                 ]),
                 `No first ${connectionType} found in connection - cannot test ${itemField} query`
@@ -227,9 +221,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                     printLines([
                       `const ${itemField}_${field.name} = await _${itemField}.${field.name}`,
                       operation.print.list
-                        ? `${itemField}_${field.name}.map(node => {
-                            expect(node instanceof ${field.type})
-                          })`
+                        ? `${itemField}_${field.name}?.map(node => expect(node instanceof ${field.type}))`
                         : `expect(${itemField}_${field.name} instanceof ${field.type})`,
                     ]),
                     `No ${connectionType} found - cannot test ${itemField}.${field.name} query`
