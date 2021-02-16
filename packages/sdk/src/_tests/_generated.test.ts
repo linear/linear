@@ -50,7 +50,16 @@ describe("generated", () => {
     });
   });
 
-  // AuthorizedApplications - no model for query
+  /** Test AuthorizedApplications query */
+  describe("AuthorizedApplications", () => {
+    /** Test the root model query for AuthorizedApplications */
+    it("authorizedApplications", async () => {
+      const authorizedApplications = await client.authorizedApplications;
+      authorizedApplications.map(node => {
+        expect(node instanceof L.AuthorizedApplication);
+      });
+    });
+  });
 
   /** Test AvailableUsers query */
   describe("AvailableUsers", () => {
@@ -1621,7 +1630,16 @@ describe("generated", () => {
     });
   });
 
-  // Templates - no model for query
+  /** Test Templates query */
+  describe("Templates", () => {
+    /** Test the root model query for Templates */
+    it("templates", async () => {
+      const templates = await client.templates;
+      templates.map(node => {
+        expect(node instanceof L.Template);
+      });
+    });
+  });
 
   /** Test UserSettings query */
   describe("UserSettings", () => {

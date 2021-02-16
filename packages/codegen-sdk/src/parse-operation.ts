@@ -8,8 +8,6 @@ import {
   printList,
   printPascal,
   printTypescriptType,
-  reduceListType,
-  reduceTypeName,
 } from "@linear/codegen-doc";
 import { nonNullable, upperFirst } from "@linear/common";
 import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode } from "graphql";
@@ -50,15 +48,14 @@ export function parseOperations(
   documents: Types.DocumentFile[],
   models: SdkModel[]
 ): SdkDefinitions {
-  return getOperations(documents).reduce<SdkDefinitions>((acc, node) => {
+  const operations = getOperations(documents);
+
+  return operations.reduce<SdkDefinitions>((acc, node) => {
     const path = (node.name?.value ?? "").split("_");
     const sdkPath = path.slice(0, path.length - 1);
     const sdkKey = sdkPath.join("_");
     const operationName = printPascal(node.name?.value);
     const operationType = printPascal(node.operation);
-
-    /** Find a matching query if it exists */
-    const query = context.queries.find(_query => _query.name.value === node.name?.value);
 
     /** Identify returned field node */
     const returnedField = path.reduce<OperationDefinitionNode | FieldNode | undefined>((acc2, name) => {
@@ -73,9 +70,12 @@ export function parseOperations(
     }) as FragmentSpreadNode | undefined;
     const fragment = context.objects.find(object => object.name.value === fragmentNode?.name.value);
 
+    const query = context.queries.find(q => q.name.value === node.name?.value);
+    const queryType = printTypescriptType(context, query?.type);
+    const listType = queryType?.endsWith("[]") ? queryType : undefined;
+
     /** Store printable type names */
-    const modelName = query ? reduceTypeName(query.type) : fragment?.name.value ?? "UNKNOWN_MODEL";
-    const listName = query ? reduceListType(query.type) : undefined;
+    const modelName = fragment?.name.value ?? "UNKNOWN_MODEL";
     const print: SdkOperationPrint = {
       /** The name of the operation */
       name: operationName,
@@ -94,16 +94,14 @@ export function parseOperations(
       /** The name of the returned model */
       model: modelName,
       /** The name of the model in a list, if a list */
-      list: listName,
+      list: listType?.replace("[]", ""),
       /** The returned promise result from fetch  */
-      promise: `${Sdk.FETCH_TYPE}<${modelName}${listName ? "[]" : ""}>`,
+      promise: `${Sdk.FETCH_TYPE}<${listType ?? modelName}>`,
     };
 
     /** Find a matching model */
     const model = models.find(
       b =>
-        /** Find model that matches query type */
-        b.name === printTypescriptType(context, query?.type) ||
         /** Or the returned fragment type */
         b.name === fragment?.name.value
     );
@@ -156,7 +154,6 @@ export function parseOperations(
       sdkKey,
       sdkPath,
       node,
-      query,
       model,
       fragment,
       args: getArgList(args),
