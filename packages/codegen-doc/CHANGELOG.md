@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.2
+
+### Patch Changes
+
+- Bump packages
+
 ## 1.4.1
 
 ### Patch Changes
