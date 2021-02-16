@@ -2290,14 +2290,7 @@ query archivedModelsSync(
 # Get all authorized applications for a user
 query authorizedApplications {
   authorizedApplications {
-    appId
-    clientId
-    description
-    developer
-    developerUrl
-    imageUrl
-    name
-    scope
+    ...AuthorizedApplication
   }
 }
 # Fetch users belonging to this user account.
@@ -3899,22 +3892,7 @@ query template(
 # All templates from all users.
 query templates {
   templates {
-    archivedAt
-    createdAt
-    # The user who created the template.
-    creator {
-      ...User
-    }
-    description
-    id
-    name
-    # The team that the template is associated with.
-    team {
-      ...Team
-    }
-    templateData
-    type
-    updatedAt
+    ...Template
   }
 }
 # One specific user.

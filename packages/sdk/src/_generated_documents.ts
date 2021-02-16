@@ -5928,12 +5928,7 @@ export type ArchivedModelsSyncQuery = { __typename?: "Query" } & {
 export type AuthorizedApplicationsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AuthorizedApplicationsQuery = { __typename?: "Query" } & {
-  authorizedApplications: Array<
-    { __typename?: "AuthorizedApplication" } & Pick<
-      AuthorizedApplication,
-      "appId" | "clientId" | "description" | "developer" | "developerUrl" | "imageUrl" | "name" | "scope"
-    >
-  >;
+  authorizedApplications: Array<{ __typename?: "AuthorizedApplication" } & AuthorizedApplicationFragment>;
 };
 
 export type AvailableUsersQueryVariables = Exact<{ [key: string]: never }>;
@@ -6867,12 +6862,7 @@ export type TemplateQuery = { __typename?: "Query" } & { template: { __typename?
 export type TemplatesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type TemplatesQuery = { __typename?: "Query" } & {
-  templates: Array<
-    { __typename?: "Template" } & Pick<
-      Template,
-      "archivedAt" | "createdAt" | "description" | "id" | "name" | "templateData" | "type" | "updatedAt"
-    > & { creator?: Maybe<{ __typename?: "User" } & UserFragment>; team: { __typename?: "Team" } & TeamFragment }
-  >;
+  templates: Array<{ __typename?: "Template" } & TemplateFragment>;
 };
 
 export type UserQueryVariables = Exact<{
@@ -12558,21 +12548,13 @@ export const AuthorizedApplicationsDocument: DocumentNode<
             name: { kind: "Name", value: "authorizedApplications" },
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "appId" } },
-                { kind: "Field", name: { kind: "Name", value: "clientId" } },
-                { kind: "Field", name: { kind: "Name", value: "description" } },
-                { kind: "Field", name: { kind: "Name", value: "developer" } },
-                { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
-                { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
-                { kind: "Field", name: { kind: "Name", value: "name" } },
-                { kind: "Field", name: { kind: "Name", value: "scope" } },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthorizedApplication" } }],
             },
           },
         ],
       },
     },
+    ...AuthorizedApplicationFragmentDoc.definitions,
   ],
 };
 export const AvailableUsersDocument: DocumentNode<AvailableUsersQuery, AvailableUsersQueryVariables> = {
@@ -18748,39 +18730,13 @@ export const TemplatesDocument: DocumentNode<TemplatesQuery, TemplatesQueryVaria
             name: { kind: "Name", value: "templates" },
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-                { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "creator" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "User" } }],
-                  },
-                },
-                { kind: "Field", name: { kind: "Name", value: "description" } },
-                { kind: "Field", name: { kind: "Name", value: "id" } },
-                { kind: "Field", name: { kind: "Name", value: "name" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "team" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Team" } }],
-                  },
-                },
-                { kind: "Field", name: { kind: "Name", value: "templateData" } },
-                { kind: "Field", name: { kind: "Name", value: "type" } },
-                { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-              ],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Template" } }],
             },
           },
         ],
       },
     },
-    ...UserFragmentDoc.definitions,
-    ...TeamFragmentDoc.definitions,
+    ...TemplateFragmentDoc.definitions,
   ],
 };
 export const UserDocument: DocumentNode<UserQuery, UserQueryVariables> = {

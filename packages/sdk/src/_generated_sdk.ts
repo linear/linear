@@ -11787,7 +11787,6 @@ export class LinearSdk extends Request {
 
   /**
    * Query apiKeys for ApiKeyConnection
-   * All API keys for the user.
    *
    * @param variables - variables to pass into the ApiKeysQuery
    * @returns ApiKeyConnection
@@ -11797,7 +11796,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query applicationWithAuthorization for UserAuthorizedApplication
-   * Get information for an application and whether a user has approved it for the given scopes.
    *
    * @param clientId - required clientId to pass to applicationWithAuthorization
    * @param scope - required scope to pass to applicationWithAuthorization
@@ -11813,7 +11811,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query archivedModelSync for ArchiveResponse
-   * Fetches an archived model.
    *
    * @param identifier - required identifier to pass to archivedModelSync
    * @param modelClass - required modelClass to pass to archivedModelSync
@@ -11824,7 +11821,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query archivedModelsSync for ArchiveResponse
-   * Fetches archived models.
    *
    * @param modelClass - required modelClass to pass to archivedModelsSync
    * @param teamId - required teamId to pass to archivedModelsSync
@@ -11840,7 +11836,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query authorizedApplications for AuthorizedApplications
-   * Get all authorized applications for a user
    *
    * @returns AuthorizedApplication[]
    */
@@ -11849,7 +11844,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query availableUsers for AuthResolverResponse
-   * Fetch users belonging to this user account.
    *
    * @returns AuthResolverResponse
    */
@@ -11858,7 +11852,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query billingDetails for BillingDetailsPayload
-   * Billing details for the customer.
    *
    * @returns BillingDetailsPayload
    */
@@ -11867,7 +11860,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query collaborativeDocumentJoin for CollaborationDocumentUpdatePayload
-   * Join collaborative document and get missing steps.
    *
    * @param clientId - required clientId to pass to collaborativeDocumentJoin
    * @param issueId - required issueId to pass to collaborativeDocumentJoin
@@ -11883,7 +11875,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query comment for Comment
-   * A specific comment.
    *
    * @param id - required id to pass to comment
    * @returns Comment
@@ -11893,7 +11884,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query comments for CommentConnection
-   * All comments.
    *
    * @param variables - variables to pass into the CommentsQuery
    * @returns CommentConnection
@@ -11903,7 +11893,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query customView for CustomView
-   * One specific custom view.
    *
    * @param id - required id to pass to customView
    * @returns CustomView
@@ -11913,7 +11902,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query customViews for CustomViewConnection
-   * Custom views for the user.
    *
    * @param variables - variables to pass into the CustomViewsQuery
    * @returns CustomViewConnection
@@ -11923,7 +11911,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query cycle for Cycle
-   * One specific cycle.
    *
    * @param id - required id to pass to cycle
    * @returns Cycle
@@ -11933,7 +11920,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query cycles for CycleConnection
-   * All cycles.
    *
    * @param variables - variables to pass into the CyclesQuery
    * @returns CycleConnection
@@ -11943,7 +11929,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query emoji for Emoji
-   * A specific emoji.
    *
    * @param id - required id to pass to emoji
    * @returns Emoji
@@ -11953,7 +11938,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query emojis for EmojiConnection
-   * All custom emojis.
    *
    * @param variables - variables to pass into the EmojisQuery
    * @returns EmojiConnection
@@ -11963,7 +11947,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query favorite for Favorite
-   * One specific favorite.
    *
    * @param id - required id to pass to favorite
    * @returns Favorite
@@ -11973,7 +11956,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query favorites for FavoriteConnection
-   * The user's favorites.
    *
    * @param variables - variables to pass into the FavoritesQuery
    * @returns FavoriteConnection
@@ -11983,7 +11965,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query figmaEmbedInfo for FigmaEmbedPayload
-   * Fetch Figma screenshot and other information with file and node identifiers.
    *
    * @param fileId - required fileId to pass to figmaEmbedInfo
    * @param variables - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
@@ -11997,7 +11978,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query integration for Integration
-   * One specific integration.
    *
    * @param id - required id to pass to integration
    * @returns Integration
@@ -12007,7 +11987,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query integrations for IntegrationConnection
-   * All integrations.
    *
    * @param variables - variables to pass into the IntegrationsQuery
    * @returns IntegrationConnection
@@ -12017,7 +11996,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query inviteInfo for InvitePagePayload
-   * Retrieves information for the public invite page.
    *
    * @param userHash - required userHash to pass to inviteInfo
    * @param variables - variables without 'userHash' to pass into the InviteInfoQuery
@@ -12031,7 +12009,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query issue for Issue
-   * One specific issue.
    *
    * @param id - required id to pass to issue
    * @returns Issue
@@ -12041,7 +12018,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query issueLabel for IssueLabel
-   * One specific label.
    *
    * @param id - required id to pass to issueLabel
    * @returns IssueLabel
@@ -12051,7 +12027,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query issueLabels for IssueLabelConnection
-   * All issue labels.
    *
    * @param variables - variables to pass into the IssueLabelsQuery
    * @returns IssueLabelConnection
@@ -12061,7 +12036,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query issueRelation for IssueRelation
-   * One specific issue relation.
    *
    * @param id - required id to pass to issueRelation
    * @returns IssueRelation
@@ -12071,7 +12045,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query issueRelations for IssueRelationConnection
-   * All issue relationships.
    *
    * @param variables - variables to pass into the IssueRelationsQuery
    * @returns IssueRelationConnection
@@ -12081,7 +12054,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query issueSearch for IssueConnection
-   * [ALPHA] Search issues. This query is experimental and is subject to change without notice.
    *
    * @param query - required query to pass to issueSearch
    * @param variables - variables without 'query' to pass into the IssueSearchQuery
@@ -12095,7 +12067,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query issues for IssueConnection
-   * All issues.
    *
    * @param variables - variables to pass into the IssuesQuery
    * @returns IssueConnection
@@ -12105,7 +12076,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query milestone for Milestone
-   * One specific milestone.
    *
    * @param id - required id to pass to milestone
    * @returns Milestone
@@ -12115,7 +12085,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query milestones for MilestoneConnection
-   * All milestones.
    *
    * @param variables - variables to pass into the MilestonesQuery
    * @returns MilestoneConnection
@@ -12125,7 +12094,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query notification for Notification
-   * One specific notification.
    *
    * @param id - required id to pass to notification
    * @returns Notification
@@ -12135,7 +12103,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query notificationSubscription for NotificationSubscription
-   * One specific notification subscription.
    *
    * @param id - required id to pass to notificationSubscription
    * @returns NotificationSubscription
@@ -12145,7 +12112,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query notificationSubscriptions for NotificationSubscriptionConnection
-   * The user's notification subscriptions.
    *
    * @param variables - variables to pass into the NotificationSubscriptionsQuery
    * @returns NotificationSubscriptionConnection
@@ -12157,7 +12123,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query notifications for NotificationConnection
-   * All notifications.
    *
    * @param variables - variables to pass into the NotificationsQuery
    * @returns NotificationConnection
@@ -12167,7 +12132,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query organization for Organization
-   * The user's organization.
    *
    * @returns Organization
    */
@@ -12176,7 +12140,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query organizationExists for OrganizationExistsPayload
-   * Does the organization exist.
    *
    * @param urlKey - required urlKey to pass to organizationExists
    * @returns OrganizationExistsPayload
@@ -12186,7 +12149,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query organizationInvite for IssueLabel
-   * One specific organization invite.
    *
    * @param id - required id to pass to organizationInvite
    * @returns IssueLabel
@@ -12196,7 +12158,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query organizationInvites for OrganizationInviteConnection
-   * All invites for the organization.
    *
    * @param variables - variables to pass into the OrganizationInvitesQuery
    * @returns OrganizationInviteConnection
@@ -12208,7 +12169,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query project for Project
-   * One specific project.
    *
    * @param id - required id to pass to project
    * @returns Project
@@ -12218,7 +12178,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query projectLink for ProjectLink
-   * One specific project link.
    *
    * @param id - required id to pass to projectLink
    * @returns ProjectLink
@@ -12228,7 +12187,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query projectLinks for ProjectLinkConnection
-   * All links for the project.
    *
    * @param variables - variables to pass into the ProjectLinksQuery
    * @returns ProjectLinkConnection
@@ -12238,7 +12196,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query projects for ProjectConnection
-   * All projects.
    *
    * @param variables - variables to pass into the ProjectsQuery
    * @returns ProjectConnection
@@ -12248,7 +12205,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query pushSubscriptionTest for PushSubscriptionPayload
-   * Sends a test push message.
    *
    * @returns PushSubscriptionPayload
    */
@@ -12257,7 +12213,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query reaction for Reaction
-   * A specific reaction.
    *
    * @param id - required id to pass to reaction
    * @returns Reaction
@@ -12267,7 +12222,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query reactions for ReactionConnection
-   * All comment emoji reactions.
    *
    * @param variables - variables to pass into the ReactionsQuery
    * @returns ReactionConnection
@@ -12277,7 +12231,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query ssoUrlFromEmail for SsoUrlFromEmailResponse
-   * Fetch SSO login URL for the email provided.
    *
    * @param email - required email to pass to ssoUrlFromEmail
    * @param variables - variables without 'email' to pass into the SsoUrlFromEmailQuery
@@ -12291,7 +12244,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query syncBootstrap for SyncResponse
-   * Fetch data to catch up the client to the state of the world.
    *
    * @param variables - variables to pass into the SyncBootstrapQuery
    * @returns SyncResponse
@@ -12301,7 +12253,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query team for Team
-   * One specific team.
    *
    * @param id - required id to pass to team
    * @returns Team
@@ -12311,7 +12262,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query teamMembership for TeamMembership
-   * One specific team membership.
    *
    * @param id - required id to pass to teamMembership
    * @returns TeamMembership
@@ -12321,7 +12271,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query teamMemberships for TeamMembershipConnection
-   * All team memberships.
    *
    * @param variables - variables to pass into the TeamMembershipsQuery
    * @returns TeamMembershipConnection
@@ -12331,7 +12280,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query teams for TeamConnection
-   * All teams.
    *
    * @param variables - variables to pass into the TeamsQuery
    * @returns TeamConnection
@@ -12341,7 +12289,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query template for Template
-   * A specific template.
    *
    * @param id - required id to pass to template
    * @returns Template
@@ -12351,7 +12298,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query templates for Templates
-   * All templates from all users.
    *
    * @returns Template[]
    */
@@ -12360,7 +12306,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query user for User
-   * One specific user.
    *
    * @param id - required id to pass to user
    * @returns User
@@ -12370,7 +12315,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query userSettings for UserSettings
-   * The user's settings.
    *
    * @returns UserSettings
    */
@@ -12379,7 +12323,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query users for UserConnection
-   * All users for the organization.
    *
    * @param variables - variables to pass into the UsersQuery
    * @returns UserConnection
@@ -12389,7 +12332,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query viewer for User
-   * The currently authenticated user.
    *
    * @returns User
    */
@@ -12398,7 +12340,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query webhook for Webhook
-   * A specific webhook.
    *
    * @param id - required id to pass to webhook
    * @returns Webhook
@@ -12408,7 +12349,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query webhooks for WebhookConnection
-   * All webhooks.
    *
    * @param variables - variables to pass into the WebhooksQuery
    * @returns WebhookConnection
@@ -12418,7 +12358,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query workflowState for WorkflowState
-   * One specific state.
    *
    * @param id - required id to pass to workflowState
    * @returns WorkflowState
@@ -12428,7 +12367,6 @@ export class LinearSdk extends Request {
   }
   /**
    * Query workflowStates for WorkflowStateConnection
-   * All issue workflow states.
    *
    * @param variables - variables to pass into the WorkflowStatesQuery
    * @returns WorkflowStateConnection
