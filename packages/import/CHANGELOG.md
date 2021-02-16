@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.4.1
+
+### Patch Changes
+
+- Add changeset
+- Updated dependencies [undefined]
+  - @linear/sdk@1.4.1
+
 ## 1.4.0
 
 ### Minor Changes

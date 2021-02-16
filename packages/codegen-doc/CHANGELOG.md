@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.1
+
+### Patch Changes
+
+- Add changeset
+
 ## 1.4.0
 
 ### Minor Changes
