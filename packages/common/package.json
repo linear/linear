@@ -2,7 +2,7 @@
   "name": "@linear/common",
   "private": true,
   "description": "Linear common code",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
