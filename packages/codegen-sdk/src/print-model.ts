@@ -1,5 +1,7 @@
 import {
   getArgList,
+  getLast,
+  lowerFirst,
   printComment,
   printDebug,
   printLines,
@@ -9,7 +11,6 @@ import {
   printTernary,
   printTypescriptType,
 } from "@linear/codegen-doc";
-import { getLast, lowerFirst } from "@linear/common";
 import { Sdk } from "./constants";
 import { isConnectionModel, printConnectionModel } from "./print-connection";
 import { getRequestArg } from "./print-request";

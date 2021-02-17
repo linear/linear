@@ -4,12 +4,12 @@ import {
   isConnection,
   isScalarField,
   isValidField,
+  lowerFirst,
   OperationType,
   PluginContext,
   printTypescriptType,
   reduceListType,
 } from "@linear/codegen-doc";
-import { lowerFirst } from "@linear/common";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
 import { Sdk } from "./constants";

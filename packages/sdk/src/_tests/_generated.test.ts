@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as L from "../index";
 import { startTestClient, stopTestClient } from "./test-client";
 

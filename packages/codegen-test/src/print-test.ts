@@ -1,6 +1,14 @@
-import { OperationType, printComment, printElseThrow, printLines, printList, printSet } from "@linear/codegen-doc";
+import {
+  getLast,
+  nonNullable,
+  OperationType,
+  printComment,
+  printElseThrow,
+  printLines,
+  printList,
+  printSet,
+} from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
-import { getLast, nonNullable } from "@linear/common";
 import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
 
 /**

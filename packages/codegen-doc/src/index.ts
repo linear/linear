@@ -5,6 +5,7 @@ export * from "./context-visitor";
 export * from "./field";
 export * from "./fragment";
 export * from "./fragment-visitor";
+export * from "./logger";
 export * from "./object";
 export * from "./operation-visitor";
 export * from "./plugin";
