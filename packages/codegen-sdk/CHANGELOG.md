@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.3
+
+### Patch Changes
+
+- Package dependencies with build output
+
 ## 1.4.2
 
 ### Patch Changes
