@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LinearSdk } from "../index";
 
 function resolveWithData(data: unknown) {
@@ -9,31 +10,33 @@ function resolveWithData(data: unknown) {
 
 describe("LinearSdk", () => {
   it("returns data", async () => {
-    const sdk = new LinearSdk(resolveWithData({ project: { id: "qwe" } }));
-    const response = await sdk.project("asd");
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "test" } }));
+    const response = await sdk.project("test");
 
-    expect(response).toEqual(expect.objectContaining({ id: "qwe" }));
+    expect(response).toEqual(expect.objectContaining({ id: "test" }));
   });
 
   it("parses DateTime", async () => {
-    const sdk = new LinearSdk(resolveWithData({ project: { id: "qwe", createdAt: "2020-10-02T13:01:55.852Z" } }));
-    const response = await sdk.project("asd");
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "test", createdAt: "2020-10-02T13:01:55.852Z" } }));
+    const response = await sdk.project("test");
 
     expect(response?.createdAt?.getFullYear()).toEqual(2020);
   });
 
   it("parses TimelessDateScalar", async () => {
-    const sdk = new LinearSdk(resolveWithData({ project: { id: "qwe", targetDate: "2021-02-26T00:00:00.000Z" } }));
-    const response = await sdk.project("asd");
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "test", targetDate: "2021-02-26T00:00:00.000Z" } }));
+    const response = await sdk.project("test");
 
     expect(response?.targetDate?.getFullYear()).toEqual(2021);
   });
 
-  it("parses JSON", async () => {
-    const sdk = new LinearSdk(resolveWithData({ project: { id: "qwe", targetDate: "2021-02-26T00:00:00.000Z" } }));
-    const response = await sdk.project("asd");
+  it("parses JSONObject", async () => {
+    const sdk = new LinearSdk(
+      resolveWithData({ attachment: { id: "test", metadata: JSON.stringify({ some: { nested: { data: 123 } } }) } })
+    );
+    const response = await sdk.attachment("test");
 
-    expect(response?.targetDate?.getFullYear()).toEqual(2021);
+    expect((response?.metadata?.some as any)?.nested?.data).toEqual(123);
   });
 
   it("catches errors", async () => {
