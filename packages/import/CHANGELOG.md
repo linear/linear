@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.4.4
+
+### Patch Changes
+
+- Update dependencies for tsc resolution
+- Updated dependencies [undefined]
+  - @linear/sdk@1.4.4
+
 ## 1.4.3
 
 ### Patch Changes
