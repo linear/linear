@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.8
+
+### Patch Changes
+
+- Output cli entry to bin
+
 ## 1.4.7
 
 ### Patch Changes
