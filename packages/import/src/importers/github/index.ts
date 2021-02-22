@@ -1,6 +1,6 @@
-import { GithubImporter } from "./GithubImporter";
 import * as inquirer from "inquirer";
 import { Importer } from "../../types";
+import { GithubImporter } from "./GithubImporter";
 
 export const githubImport = async (): Promise<Importer> => {
   const answers = await inquirer.prompt<GithubImportAnswers>(questions);

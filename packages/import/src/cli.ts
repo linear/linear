@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from "chalk";
 import * as inquirer from "inquirer";
-import inquirerFilePath from "inquirer-file-path";
 import { asanaCsvImport } from "./importers/asanaCsv";
 import { clubhouseCsvImport } from "./importers/clubhouseCsv";
 import { githubImport } from "./importers/github";
@@ -11,7 +11,7 @@ import { trelloJsonImport } from "./importers/trelloJson";
 import { importIssues } from "./importIssues";
 import { ImportAnswers } from "./types";
 
-inquirer.registerPrompt("filePath", inquirerFilePath);
+inquirer.registerPrompt("filePath", require("inquirer-file-path"));
 
 (async () => {
   try {

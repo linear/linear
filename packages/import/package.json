@@ -8,7 +8,7 @@
   "module": "dist/index-es.min.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "linear-import": "dist/index-cjs.min.js"
+    "linear-import": "bin/linear-import.js"
   },
   "repository": "https://github.com/linear/linear",
   "engines": {
@@ -19,6 +19,7 @@
     "dist"
   ],
   "scripts": {
+    "cli": "npx ts-node src/cli",
     "dev:import": "NODE_ENV=development yarn build:import",
     "build:import": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",
