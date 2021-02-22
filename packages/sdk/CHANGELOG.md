@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.5.0
+
+### Minor Changes
+
+- Update schema to add attachments
+  Fix query discovery to use matching name if available
+  Add date and json parsing
+  Add tests for parsing
+
 ## 1.4.6
 
 ### Patch Changes
