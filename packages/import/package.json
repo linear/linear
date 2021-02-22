@@ -4,6 +4,13 @@
   "version": "1.4.5",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
+  "main": "dist/index-cjs.min.js",
+  "module": "dist/index-es.min.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "linear-import": "dist/index-cjs.min.js"
+  },
+  "repository": "https://github.com/linear/linear",
   "engines": {
     "node": ">=12.x",
     "yarn": "1.x"
@@ -11,26 +18,31 @@
   "files": [
     "dist"
   ],
-  "bin": {
-    "linear-import": "bin/linear-import.js"
-  },
   "scripts": {
-    "dev:import": "NODE_ENV=development run-s dev:update build:import",
-    "dev:update": "yalc update",
-    "build:import": "yarn build:clean && npx tsc",
+    "dev:import": "NODE_ENV=development yarn build:import",
+    "build:import": "run-s build:clean build:rollup",
+    "build:rollup": "npx rollup -c",
     "build:clean": "npx rimraf dist"
   },
   "dependencies": {
     "@linear/sdk": "^1.4.5",
     "chalk": "4.1.0",
     "csvtojson": "2.0.10",
-    "graphql": "^15.4.0",
-    "graphql-request": "^3.3.0",
     "inquirer": "7.3.3",
     "inquirer-file-path": "1.0.1",
     "jira2md": "2.0.4",
     "lodash": "4.17.20",
     "node-fetch": "2.6.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@rollup/plugin-typescript": "^8.1.1",
+    "rollup": "^2.38.3",
+    "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-size-snapshot": "^0.12.0",
+    "rollup-plugin-terser": "^7.0.2"
   },
   "publishConfig": {
     "access": "public"
