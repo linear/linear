@@ -9,6 +9,18 @@ import { brotliCompressSync } from "zlib";
 
 export default [
   {
+    input: "src/cli.ts",
+    output: [
+      {
+        dir: "./",
+        entryFileNames: "dist/cli.js",
+        format: "cjs",
+        sourcemap: true,
+      },
+    ],
+    plugins: [typescript(), commonjs(), json()],
+  },
+  {
     input: "src/index.ts",
     output: [
       {
