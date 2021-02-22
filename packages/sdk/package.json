@@ -23,8 +23,9 @@
     "generate:clean": "npx rimraf src/**/_generated*",
     "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
     "generate:schema": "npx graphql-codegen --config codegen.schema.yml",
-    "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml",
+    "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml && yarn update:scalars",
     "generate:test": "npx graphql-codegen --config codegen.test.yml",
+    "update:scalars": "ts-node scripts/update-scalars.ts",
     "schema": "npx graphql-codegen --config codegen.schema.yml",
     "scratch": "ts-node src/scratch.ts"
   },
@@ -47,6 +48,7 @@
     "dotenv": "^8.2.0",
     "execa": "^5.0.0",
     "get-port": "^5.1.1",
+    "replace-in-file": "^6.2.0",
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-size-snapshot": "^0.12.0",

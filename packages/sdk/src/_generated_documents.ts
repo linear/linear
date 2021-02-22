@@ -11,13 +11,13 @@ export type Scalars = {
   Int: number;
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
-  DateTime: any;
+  DateTime: Date;
   /** The `JSON` scalar type represents JSON values */
-  JSON: any;
+  JSON: Record<string, unknown>;
   /** The `JSONObject` scalar type represents JSON values as a string */
-  JSONObject: any;
+  JSONObject: Record<string, unknown>;
   /** The `TimelessDateScalar` scalar type represents Date values without a timestamp. It expects strings in the format YYYY-MM-DD */
-  TimelessDateScalar: any;
+  TimelessDateScalar: Date;
 };
 
 /** An API key. Grants access to the user's resources. */
