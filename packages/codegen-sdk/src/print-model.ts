@@ -14,6 +14,7 @@ import {
 import { Sdk } from "./constants";
 import { isConnectionModel, printConnectionModel } from "./print-connection";
 import { getRequestArg } from "./print-request";
+import { printModelScalar } from "./print-scalar";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
 
 /**
@@ -73,14 +74,12 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           `super(${Sdk.REQUEST_NAME})`,
           printDebug("fields.scalar"),
           printLines(
-            model.fields.scalar.map(field =>
-              printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name} ?? undefined`)
-            )
+            model.fields.scalar.map(field => printSet(`this.${field.name}`, `${printModelScalar(field)} ?? undefined`))
           ),
           printDebug("fields.scalarList"),
           printLines(
             model.fields.scalarList.map(field =>
-              printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name} ?? undefined`)
+              printSet(`this.${field.name}`, `${printModelScalar(field)} ?? undefined`)
             )
           ),
           printDebug("fields.object"),

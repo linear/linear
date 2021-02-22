@@ -20,7 +20,7 @@ export async function startTestClient(): Promise<LinearClient> {
 
     /** Create Linear client with production server endpoint */
     return new LinearClient({
-      apiKey: process.env.E2E_API_KEY,
+      apiKey: process.env.API_KEY,
     });
   } else {
     /** Create sleep function */
