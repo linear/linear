@@ -44,7 +44,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
     return printLines([
       "/* eslint-disable no-console */",
       `import * as ${Sdk.NAMESPACE} from '../index'`,
-      `import { startTestClient, stopTestClient } from './test-client'`,
+      `import { startClient, stopClient } from './test-client'`,
       "\n",
       /** Print all tests */
       tests,

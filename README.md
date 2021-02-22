@@ -44,6 +44,7 @@
 - [🔥 Contribute](#-contribute)
   - [Get Started](#get-started)
   - [Project Structure](#project-structure)
+  - [Generation Flow](#generation-flow)
 - [License](#license)
 
 <br/>
@@ -728,13 +729,18 @@ Generated code uses file prefix `_generated` and should never be manually update
 
 ```
 packages
-  common        - Common functions and logging
   import        - Import tooling for uploading from other systems
   sdk           - The Linear Client SDK for interacting with the Linear GraphQL API
   codegen-doc   - GraphQL codegen plugin to generate GraphQL fragments and documents
   codegen-sdk   - GraphQL codegen plugin to generate Typescript SDK from fragments and documents
   codegen-test  - GraphQL codegen plugin to generate a jest test for the Typescript SDK
 ```
+
+### Generation Flow
+
+1. The [@linear/codegen-doc](./packages/codegen-doc/README.md) plugin is used by [codegen.doc.yml](./packages/sdk/codegen.doc.yml) to generate [fragments and documents](./packages/sdk/src/_generated_documents.graphql)
+1. The [@linear/codegen-sdk](./packages/codegen-sdk/README.md) plugin is used by [codegen.sdk.yml](./packages/sdk/codegen.sdk.yml) to generate the typed [Linear SDK](./packages/sdk/src/_generated_sdk.ts)
+2. The [@linear/codegen-test](./packages/codegen-test/README.md) plugin is used by [codegen.test.yml](./packages/sdk/codegen.test.yml) to generate a typed [jest test](./packages/sdk/src/_tests/_generated.test.ts)
 
 <br/>
 

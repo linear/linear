@@ -19,7 +19,7 @@ export function printBeforeSuite(): string {
 export function printBeforeAll(): string {
   return printLines([
     `beforeAll(async () => {
-      client = await startTestClient()
+      client = await startClient()
     })`,
     "\n",
   ]);
@@ -32,7 +32,7 @@ export function printBeforeAll(): string {
 export function printAfterAll(): string {
   return printLines([
     `afterAll(() => {
-      stopTestClient()
+      stopClient()
     })`,
     "\n",
   ]);
