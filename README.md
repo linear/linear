@@ -58,15 +58,13 @@ Connect to the Linear API and interact with your data in a few steps:
 
     Using npm:
     ```shell
-    npm install @linear/sdk graphql graphql-request
+    npm install @linear/sdk
     ```
 
     Or yarn:
     ```shell
-    yarn add @linear/sdk graphql graphql-request
+    yarn add @linear/sdk
     ```
-
-    The `graphql` and `graphql-request` packages are required as peer dependencies.
 
 2. **Create a Linear API authentication token**
 
@@ -97,11 +95,11 @@ Connect to the Linear API and interact with your data in a few steps:
       const me = await linearClient.viewer;
       const myIssues = await me?.assignedIssues();
     
-      myIssues?.nodes?.map(issue => {
-        console.log(`${me?.displayName} has issue: ${issue?.title}`);
-      });
-    
-      return myIssues;
+      if (myIssues?.nodes?.length) {
+        myIssues?.nodes?.map(issue => console.log(`${me?.displayName} has issue: ${issue?.title}`));
+      } else {
+        console.log(`${me?.displayName} has no issues`);
+      }
     }
     
     getMyIssues();
@@ -114,11 +112,11 @@ Connect to the Linear API and interact with your data in a few steps:
     ```ts
     linearClient.viewer.then(me => {
       return me?.assignedIssues()?.then(myIssues => {
-        myIssues?.nodes?.map(issue => {
-          console.log(`${me?.displayName} has issue: ${issue?.title}`);
-        });
-    
-        return myIssues;
+        if (myIssues?.nodes?.length) {
+          myIssues?.nodes?.map(issue => console.log(`${me?.displayName} has issue: ${issue?.title}`));
+        } else {
+          console.log(`${me?.displayName} has no issues`);
+        }
       });
     });
     ```
@@ -706,6 +704,9 @@ The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-gene
 # install dependencies
 yarn
 
+# link package dependencies
+yarn bootstrap
+
 # build all packages
 yarn build
 
@@ -714,6 +715,9 @@ yarn test
 
 # update the schema from the production API
 yarn schema
+
+# create changeset for generating CHANGELOG.md
+yarn changeset
 ```
 
 ### Project Structure

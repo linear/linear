@@ -13,7 +13,9 @@ import { LinearSdk } from "./_generated_sdk";
  */
 function parseClientOptions({ apiKey, accessToken, apiUrl, ...opts }: LinearClientOptions): LinearClientParsedOptions {
   if (!accessToken && !apiKey) {
-    throw new Error("No accessToken or apiKey provided to the LinearClient");
+    throw new Error(
+      "No accessToken or apiKey provided to the LinearClient - create one here: https://linear.app/settings/api"
+    );
   }
 
   return {

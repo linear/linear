@@ -55,11 +55,11 @@ describe("readme.md", () => {
           const me = await linearClient.viewer;
           const myIssues = await me?.assignedIssues();
 
-          myIssues?.nodes?.map(issue => {
-            console.log(`${me?.displayName} has issue: ${issue?.title}`);
-          });
-
-          return myIssues;
+          if (myIssues?.nodes?.length) {
+            myIssues?.nodes?.map(issue => console.log(`${me?.displayName} has issue: ${issue?.title}`));
+          } else {
+            console.log(`${me?.displayName} has no issues`);
+          }
         }
 
         getMyIssues();
@@ -70,11 +70,11 @@ describe("readme.md", () => {
         /** CODE_SECTION:1_2:START */
         linearClient.viewer.then(me => {
           return me?.assignedIssues()?.then(myIssues => {
-            myIssues?.nodes?.map(issue => {
-              console.log(`${me?.displayName} has issue: ${issue?.title}`);
-            });
-
-            return myIssues;
+            if (myIssues?.nodes?.length) {
+              myIssues?.nodes?.map(issue => console.log(`${me?.displayName} has issue: ${issue?.title}`));
+            } else {
+              console.log(`${me?.displayName} has no issues`);
+            }
           });
         });
         /** CODE_SECTION:1_2:END */
