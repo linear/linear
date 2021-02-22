@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.5.1
+
+### Patch Changes
+
+- Update custom scalars to use non-any types
+
 ## 1.5.0
 
 ### Minor Changes
