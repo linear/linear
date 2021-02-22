@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as inquirer from "inquirer";
 import { Importer } from "../../types";
 import { AsanaCsvImporter } from "./AsanaCsvImporter";
@@ -9,8 +8,8 @@ const ASANA_URL_REGEX = /(^https?:\/\/app.asana.com\/0\/\d+\/)list/;
 
 export const asanaCsvImport = async (): Promise<Importer> => {
   const answers = await inquirer.prompt<AsanaImportAnswers>(questions);
-  const orgSlug = answers.asanaUrlName.match(ASANA_URL_REGEX)![1];
-  const asanaImporter = new AsanaCsvImporter(answers.asanaFilePath, orgSlug);
+  const orgSlug = answers.asanaUrlName.match(ASANA_URL_REGEX)?.[1];
+  const asanaImporter = new AsanaCsvImporter(answers.asanaFilePath, orgSlug ?? "");
   return asanaImporter;
 };
 

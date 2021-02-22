@@ -122,7 +122,7 @@ export class GithubImporter implements Importer {
         }
 
         cursor = data.repository.issues.pageInfo.endCursor;
-        const fetchedIssues = data.repository.issues.edges.map((edge: any) => edge.node) as GITHUB_ISSUE[];
+        const fetchedIssues = data.repository.issues.edges.map((d: any) => d.node) as GITHUB_ISSUE[];
         issueData = issueData.concat(fetchedIssues);
 
         if (!data.repository.issues.pageInfo.hasNextPage) {
