@@ -9,17 +9,31 @@ function resolveWithData(data: unknown) {
 
 describe("LinearSdk", () => {
   it("returns data", async () => {
-    const sdk = new LinearSdk(resolveWithData({ team: { id: "qwe" } }));
-    const response = await sdk.team("asd");
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "qwe" } }));
+    const response = await sdk.project("asd");
 
     expect(response).toEqual(expect.objectContaining({ id: "qwe" }));
   });
 
   it("parses DateTime", async () => {
-    const sdk = new LinearSdk(resolveWithData({ team: { id: "qwe" } }));
-    const response = await sdk.team("asd");
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "qwe", createdAt: "2020-10-02T13:01:55.852Z" } }));
+    const response = await sdk.project("asd");
 
-    expect(response).toEqual(expect.objectContaining({ id: "qwe" }));
+    expect(response?.createdAt?.getFullYear()).toEqual(2020);
+  });
+
+  it("parses TimelessDateScalar", async () => {
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "qwe", targetDate: "2021-02-26T00:00:00.000Z" } }));
+    const response = await sdk.project("asd");
+
+    expect(response?.targetDate?.getFullYear()).toEqual(2021);
+  });
+
+  it("parses JSON", async () => {
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "qwe", targetDate: "2021-02-26T00:00:00.000Z" } }));
+    const response = await sdk.project("asd");
+
+    expect(response?.targetDate?.getFullYear()).toEqual(2021);
   });
 
   it("catches errors", async () => {

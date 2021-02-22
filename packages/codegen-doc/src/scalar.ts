@@ -17,6 +17,9 @@ export function printTypescriptScalar(name: string, namespace?: string): string 
       case "DateTime":
       case "TimelessDateScalar":
         return "Date";
+      case "JSON":
+      case "JSONObject":
+        return "Record<string, unknown>";
       default:
         return `${printList([namespace, "Scalars"], ".")}['${name}']`;
     }
