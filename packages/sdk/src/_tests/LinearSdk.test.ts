@@ -15,6 +15,13 @@ describe("LinearSdk", () => {
     expect(response).toEqual(expect.objectContaining({ id: "qwe" }));
   });
 
+  it("parses DateTime", async () => {
+    const sdk = new LinearSdk(resolveWithData({ team: { id: "qwe" } }));
+    const response = await sdk.team("asd");
+
+    expect(response).toEqual(expect.objectContaining({ id: "qwe" }));
+  });
+
   it("catches errors", async () => {
     const sdk = new LinearSdk(() => {
       throw new Error("test error");

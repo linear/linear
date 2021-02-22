@@ -11,6 +11,7 @@ export * from "./plugin";
 export * from "./print";
 export * from "./print-operation";
 export * from "./query";
+export * from "./scalar";
 export * from "./types";
 export * from "./utils";
 export * from "./validate";

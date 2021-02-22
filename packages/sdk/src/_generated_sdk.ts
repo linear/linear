@@ -112,6 +112,18 @@ export class Connection<Node> extends LinearConnection<Node> {
   }
 }
 /**
+ * Function to parse custom DateTime scalars into Date types
+ *
+ * @param value - value to parse
+ */
+function parseDate(value?: any): Date | undefined {
+  try {
+    return value ? new Date(value) : undefined;
+  } catch (e) {
+    return undefined;
+  }
+}
+/**
  * An API key. Grants access to the user's resources.
  *
  * @param request - function to call the graphql client
@@ -120,17 +132,17 @@ export class Connection<Node> extends LinearConnection<Node> {
 export class ApiKey extends Request {
   public constructor(request: LinearRequest, data: L.ApiKeyFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.label = data.label ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The label of the API key. */
@@ -139,7 +151,7 @@ export class ApiKey extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
 }
 /**
  * ApiKeyConnection model
@@ -263,23 +275,23 @@ export class Attachment extends Request {
 
   public constructor(request: LinearRequest, data: L.AttachmentFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.groupBySource = data.groupBySource ?? undefined;
     this.id = data.id ?? undefined;
     this.metadata = data.metadata ?? undefined;
     this.source = data.source ?? undefined;
     this.subtitle = data.subtitle ?? undefined;
     this.title = data.title ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.url = data.url ?? undefined;
     this._issue = data.issue ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
   public groupBySource?: boolean;
   /** The unique identifier of the entity. */
@@ -296,7 +308,7 @@ export class Attachment extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL. */
   public url?: string;
   /** The issue this attachment belongs to. */
@@ -508,31 +520,31 @@ export class Comment extends Request {
 
   public constructor(request: LinearRequest, data: L.CommentFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.body = data.body ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.editedAt = data.editedAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.editedAt = parseDate(data.editedAt) ?? undefined;
     this.id = data.id ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._issue = data.issue ?? undefined;
     this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The comment content in markdown format. */
   public body?: string;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The time user edited the comment. */
-  public editedAt?: L.Scalars["DateTime"];
+  public editedAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
@@ -677,26 +689,26 @@ export class CustomView extends Request {
 
   public constructor(request: LinearRequest, data: L.CustomViewFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.color = data.color ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
     this.filters = data.filters ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.shared = data.shared ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._creator = data.creator ?? undefined;
     this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The color of the icon of the custom view. */
   public color?: string;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The description of the custom view. */
   public description?: string;
   /** The filters applied to issues in the custom view. */
@@ -713,7 +725,7 @@ export class CustomView extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The user who created the custom view. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -784,34 +796,34 @@ export class Cycle extends Request {
 
   public constructor(request: LinearRequest, data: L.CycleFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.completedAt = data.completedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.completedAt = parseDate(data.completedAt) ?? undefined;
     this.completedIssueCountHistory = data.completedIssueCountHistory ?? undefined;
     this.completedScopeHistory = data.completedScopeHistory ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.endsAt = data.endsAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.endsAt = parseDate(data.endsAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.issueCountHistory = data.issueCountHistory ?? undefined;
     this.name = data.name ?? undefined;
     this.number = data.number ?? undefined;
     this.scopeHistory = data.scopeHistory ?? undefined;
-    this.startsAt = data.startsAt ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.startsAt = parseDate(data.startsAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The completion time of the cycle. If null, the cycle hasn't been completed. */
-  public completedAt?: L.Scalars["DateTime"];
+  public completedAt?: Date;
   /** The number of completed issues in the cycle after each day. */
   public completedIssueCountHistory?: number[];
   /** The number of completed estimation points after each day. */
   public completedScopeHistory?: number[];
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The end time of the cycle. */
-  public endsAt?: L.Scalars["DateTime"];
+  public endsAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The total number of issues in the cycle after each day. */
@@ -823,12 +835,12 @@ export class Cycle extends Request {
   /** The total number of estimation points after each day. */
   public scopeHistory?: number[];
   /** The start time of the cycle. */
-  public startsAt?: L.Scalars["DateTime"];
+  public startsAt?: Date;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The team that the cycle is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
@@ -914,21 +926,21 @@ export class DebugPayload extends Request {
 export class DocumentStep extends Request {
   public constructor(request: LinearRequest, data: L.DocumentStepFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.clientId = data.clientId ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.step = data.step ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.version = data.version ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** Connected client ID. */
   public clientId?: string;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** Step data. */
@@ -937,7 +949,7 @@ export class DocumentStep extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Step version. */
   public version?: number;
 }
@@ -985,20 +997,20 @@ export class Emoji extends Request {
 
   public constructor(request: LinearRequest, data: L.EmojiFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.source = data.source ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.url = data.url ?? undefined;
     this._creator = data.creator ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The emoji's name. */
@@ -1009,7 +1021,7 @@ export class Emoji extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The emoji image URL. */
   public url?: string;
   /** The user who created the emoji. */
@@ -1098,12 +1110,12 @@ export class Favorite extends Request {
 
   public constructor(request: LinearRequest, data: L.FavoriteFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.sortOrder = data.sortOrder ?? undefined;
     this.type = data.type ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._issue = data.issue ?? undefined;
     this._label = data.label ?? undefined;
@@ -1113,9 +1125,9 @@ export class Favorite extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The order of the item in the favorites list. */
@@ -1126,7 +1138,7 @@ export class Favorite extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Favorited cycle. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
@@ -1222,14 +1234,14 @@ export class FeedbackPayload extends Request {
 export class FigmaEmbed extends Request {
   public constructor(request: LinearRequest, data: L.FigmaEmbedFragment) {
     super(request);
-    this.lastModified = data.lastModified ?? undefined;
+    this.lastModified = parseDate(data.lastModified) ?? undefined;
     this.name = data.name ?? undefined;
     this.nodeName = data.nodeName ?? undefined;
     this.url = data.url ?? undefined;
   }
 
   /** Date when the file was updated at the time of embedding. */
-  public lastModified?: L.Scalars["DateTime"];
+  public lastModified?: Date;
   /** Figma file name. */
   public name?: string;
   /** Node name. */
@@ -1350,13 +1362,13 @@ export class GoogleSheetsSettings extends Request {
     this.sheetId = data.sheetId ?? undefined;
     this.spreadsheetId = data.spreadsheetId ?? undefined;
     this.spreadsheetUrl = data.spreadsheetUrl ?? undefined;
-    this.updatedIssuesAt = data.updatedIssuesAt ?? undefined;
+    this.updatedIssuesAt = parseDate(data.updatedIssuesAt) ?? undefined;
   }
 
   public sheetId?: number;
   public spreadsheetId?: string;
   public spreadsheetUrl?: string;
-  public updatedIssuesAt?: L.Scalars["DateTime"];
+  public updatedIssuesAt?: Date;
 }
 /**
  * ImageUploadFromUrlPayload model
@@ -1391,19 +1403,19 @@ export class Integration extends Request {
 
   public constructor(request: LinearRequest, data: L.IntegrationFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.service = data.service ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._creator = data.creator ?? undefined;
     this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The integration's type. */
@@ -1412,7 +1424,7 @@ export class Integration extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The user that added the integration. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -1484,12 +1496,12 @@ export class IntegrationResource extends Request {
 
   public constructor(request: LinearRequest, data: L.IntegrationResourceFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.resourceId = data.resourceId ?? undefined;
     this.resourceType = data.resourceType ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.data = data.data ? new IntegrationResourceData(request, data.data) : undefined;
     this.pullRequest = data.pullRequest ? new PullRequestPayload(request, data.pullRequest) : undefined;
     this._integration = data.integration ?? undefined;
@@ -1497,9 +1509,9 @@ export class IntegrationResource extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The external service resource ID. */
@@ -1510,7 +1522,7 @@ export class IntegrationResource extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Detailed information about the external resource. */
   public data?: IntegrationResourceData;
   /** Pull request information for GitHub pull requests and GitLab merge requests. */
@@ -1656,17 +1668,17 @@ export class InvitePagePayload extends Request {
 export class Invoice extends Request {
   public constructor(request: LinearRequest, data: L.InvoiceFragment) {
     super(request);
-    this.created = data.created ?? undefined;
-    this.dueDate = data.dueDate ?? undefined;
+    this.created = parseDate(data.created) ?? undefined;
+    this.dueDate = parseDate(data.dueDate) ?? undefined;
     this.status = data.status ?? undefined;
     this.total = data.total ?? undefined;
     this.url = data.url ?? undefined;
   }
 
   /** The creation date of the invoice. */
-  public created?: L.Scalars["TimelessDateScalar"];
+  public created?: Date;
   /** The due date of the invoice. */
-  public dueDate?: L.Scalars["TimelessDateScalar"];
+  public dueDate?: Date;
   /** The status of the invoice. */
   public status?: string;
   /** The invoice total, in cents. */
@@ -1691,16 +1703,16 @@ export class Issue extends Request {
 
   public constructor(request: LinearRequest, data: L.IssueFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.autoArchivedAt = data.autoArchivedAt ?? undefined;
-    this.autoClosedAt = data.autoClosedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.autoArchivedAt = parseDate(data.autoArchivedAt) ?? undefined;
+    this.autoClosedAt = parseDate(data.autoClosedAt) ?? undefined;
     this.boardOrder = data.boardOrder ?? undefined;
     this.branchName = data.branchName ?? undefined;
-    this.canceledAt = data.canceledAt ?? undefined;
-    this.completedAt = data.completedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.canceledAt = parseDate(data.canceledAt) ?? undefined;
+    this.completedAt = parseDate(data.completedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
-    this.dueDate = data.dueDate ?? undefined;
+    this.dueDate = parseDate(data.dueDate) ?? undefined;
     this.estimate = data.estimate ?? undefined;
     this.id = data.id ?? undefined;
     this.identifier = data.identifier ?? undefined;
@@ -1708,10 +1720,10 @@ export class Issue extends Request {
     this.previousIdentifiers = data.previousIdentifiers ?? undefined;
     this.priority = data.priority ?? undefined;
     this.priorityLabel = data.priorityLabel ?? undefined;
-    this.startedAt = data.startedAt ?? undefined;
+    this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.subIssueSortOrder = data.subIssueSortOrder ?? undefined;
     this.title = data.title ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.url = data.url ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -1723,25 +1735,25 @@ export class Issue extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the issue was automatically archived by the auto pruning process. */
-  public autoArchivedAt?: L.Scalars["DateTime"];
+  public autoArchivedAt?: Date;
   /** The time at which the issue was automatically closed by the auto pruning process. */
-  public autoClosedAt?: L.Scalars["DateTime"];
+  public autoClosedAt?: Date;
   /** The order of the item in its column on the board. */
   public boardOrder?: number;
   /** Suggested branch name for the issue. */
   public branchName?: string;
   /** The time at which the issue was moved into canceled state. */
-  public canceledAt?: L.Scalars["DateTime"];
+  public canceledAt?: Date;
   /** The time at which the issue was moved into completed state. */
-  public completedAt?: L.Scalars["DateTime"];
+  public completedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The issue's description in markdown format. */
   public description?: string;
   /** The date at which the issue is due. */
-  public dueDate?: L.Scalars["TimelessDateScalar"];
+  public dueDate?: Date;
   /** The estimate of the complexity of the issue.. */
   public estimate?: number;
   /** The unique identifier of the entity. */
@@ -1757,7 +1769,7 @@ export class Issue extends Request {
   /** Label for the priority. */
   public priorityLabel?: string;
   /** The time at which the issue was moved into started state. */
-  public startedAt?: L.Scalars["DateTime"];
+  public startedAt?: Date;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   public subIssueSortOrder?: number;
   /** The issue's title. */
@@ -1766,7 +1778,7 @@ export class Issue extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Issue URL. */
   public url?: string;
   /** The user to whom the issue is assigned to. */
@@ -1877,11 +1889,11 @@ export class IssueHistory extends Request {
     super(request);
     this.addedLabelIds = data.addedLabelIds ?? undefined;
     this.archived = data.archived ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.autoArchived = data.autoArchived ?? undefined;
     this.autoClosed = data.autoClosed ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.fromDueDate = data.fromDueDate ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.fromDueDate = parseDate(data.fromDueDate) ?? undefined;
     this.fromEstimate = data.fromEstimate ?? undefined;
     this.fromPriority = data.fromPriority ?? undefined;
     this.fromTitle = data.fromTitle ?? undefined;
@@ -1889,11 +1901,11 @@ export class IssueHistory extends Request {
     this.relationChanges = data.relationChanges ?? undefined;
     this.removedLabelIds = data.removedLabelIds ?? undefined;
     this.source = data.source ?? undefined;
-    this.toDueDate = data.toDueDate ?? undefined;
+    this.toDueDate = parseDate(data.toDueDate) ?? undefined;
     this.toEstimate = data.toEstimate ?? undefined;
     this.toPriority = data.toPriority ?? undefined;
     this.toTitle = data.toTitle ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.updatedDescription = data.updatedDescription ?? undefined;
     this._actor = data.actor ?? undefined;
     this._fromAssignee = data.fromAssignee ?? undefined;
@@ -1916,13 +1928,13 @@ export class IssueHistory extends Request {
   /** Whether the issue was archived or un-archived. */
   public archived?: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   public autoArchived?: boolean;
   public autoClosed?: boolean;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** What the due date was changed from */
-  public fromDueDate?: L.Scalars["TimelessDateScalar"];
+  public fromDueDate?: Date;
   /** What the estimate was changed from. */
   public fromEstimate?: number;
   /** What the priority was changed from. */
@@ -1938,7 +1950,7 @@ export class IssueHistory extends Request {
   /** Information about the integration or application which created this history entry. */
   public source?: L.Scalars["JSONObject"];
   /** What the due date was changed to */
-  public toDueDate?: L.Scalars["TimelessDateScalar"];
+  public toDueDate?: Date;
   /** What the estimate was changed to. */
   public toEstimate?: number;
   /** What the priority was changed to. */
@@ -1949,7 +1961,7 @@ export class IssueHistory extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Whether the issue's description was updated. */
   public updatedDescription?: boolean;
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
@@ -2039,20 +2051,20 @@ export class IssueHistoryConnection extends Connection<IssueHistory> {
 export class IssueImport extends Request {
   public constructor(request: LinearRequest, data: L.IssueImportFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.creatorId = data.creatorId ?? undefined;
     this.error = data.error ?? undefined;
     this.id = data.id ?? undefined;
     this.service = data.service ?? undefined;
     this.status = data.status ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The id for the user that started the job. */
   public creatorId?: string;
   /** User readable error message, if one has occurred during the import. */
@@ -2067,7 +2079,7 @@ export class IssueImport extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
 }
 /**
  * IssueImportPayload model
@@ -2102,23 +2114,23 @@ export class IssueLabel extends Request {
 
   public constructor(request: LinearRequest, data: L.IssueLabelFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.color = data.color ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._creator = data.creator ?? undefined;
     this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The label's color as a HEX string. */
   public color?: string;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The label's description. */
   public description?: string;
   /** The unique identifier of the entity. */
@@ -2129,7 +2141,7 @@ export class IssueLabel extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The user who created the label. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -2226,19 +2238,19 @@ export class IssueRelation extends Request {
 
   public constructor(request: LinearRequest, data: L.IssueRelationFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._issue = data.issue ?? undefined;
     this._relatedIssue = data.relatedIssue ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The relationship of the issue with the related issue. */
@@ -2247,7 +2259,7 @@ export class IssueRelation extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The issue whose relationship is being described. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
@@ -2312,18 +2324,18 @@ export class IssueRelationPayload extends Request {
 export class Milestone extends Request {
   public constructor(request: LinearRequest, data: L.MilestoneFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.sortOrder = data.sortOrder ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The name of the milestone. */
@@ -2334,7 +2346,7 @@ export class Milestone extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The organization that the milestone belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -2404,14 +2416,14 @@ export class Notification extends Request {
 
   public constructor(request: LinearRequest, data: L.NotificationFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.emailedAt = data.emailedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.reactionEmoji = data.reactionEmoji ?? undefined;
-    this.readAt = data.readAt ?? undefined;
+    this.readAt = parseDate(data.readAt) ?? undefined;
     this.type = data.type ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._comment = data.comment ?? undefined;
     this._issue = data.issue ?? undefined;
     this._team = data.team ?? undefined;
@@ -2419,27 +2431,27 @@ export class Notification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: L.Scalars["DateTime"];
+  public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** Name of the reaction emoji associated with the notification. */
   public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: L.Scalars["DateTime"];
+  public readAt?: Date;
   /** Notification type */
   public type?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The comment which the notification is associated with. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
@@ -2516,20 +2528,20 @@ export class NotificationSubscription extends Request {
 
   public constructor(request: LinearRequest, data: L.NotificationSubscriptionFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._project = data.project ?? undefined;
     this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The type of the subscription. */
@@ -2538,7 +2550,7 @@ export class NotificationSubscription extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Subscribed project. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
@@ -2627,10 +2639,10 @@ export class OAuthTokenPayload extends Request {
 export class OauthClient extends Request {
   public constructor(request: LinearRequest, data: L.OauthClientFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.clientId = data.clientId ?? undefined;
     this.clientSecret = data.clientSecret ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
     this.developer = data.developer ?? undefined;
     this.developerUrl = data.developerUrl ?? undefined;
@@ -2638,17 +2650,17 @@ export class OauthClient extends Request {
     this.imageUrl = data.imageUrl ?? undefined;
     this.name = data.name ?? undefined;
     this.redirectUris = data.redirectUris ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** OAuth application's client ID. */
   public clientId?: string;
   /** OAuth application's client secret. */
   public clientSecret?: string;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Information about the application. */
   public description?: string;
   /** Name of the developer. */
@@ -2667,7 +2679,7 @@ export class OauthClient extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
 }
 /**
  * OauthClientPayload model
@@ -2715,8 +2727,8 @@ export class Organization extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationFragment) {
     super(request);
     this.allowedAuthServices = data.allowedAuthServices ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.createdIssueCount = data.createdIssueCount ?? undefined;
     this.gitBranchFormat = data.gitBranchFormat ?? undefined;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled ?? undefined;
@@ -2727,7 +2739,7 @@ export class Organization extends Request {
     this.periodUploadVolume = data.periodUploadVolume ?? undefined;
     this.roadmapEnabled = data.roadmapEnabled ?? undefined;
     this.samlEnabled = data.samlEnabled ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.urlKey = data.urlKey ?? undefined;
     this.userCount = data.userCount ?? undefined;
   }
@@ -2735,9 +2747,9 @@ export class Organization extends Request {
   /** Allowed authentication providers, empty array means all are allowed */
   public allowedAuthServices?: string[];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
   /** How git branches are formatted. If null, default formatting will be used. */
@@ -2762,7 +2774,7 @@ export class Organization extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The organization's unique URL key. */
   public urlKey?: string;
   /** Number of active users in the organization. */
@@ -2811,20 +2823,20 @@ export class OrganizationDomain extends Request {
 
   public constructor(request: LinearRequest, data: L.OrganizationDomainFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.verificationEmail = data.verificationEmail ?? undefined;
     this.verified = data.verified ?? undefined;
     this._creator = data.creator ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** Domain name */
@@ -2833,7 +2845,7 @@ export class OrganizationDomain extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** E-mail used to verify this domain */
   public verificationEmail?: string;
   /** Is this domain verified */
@@ -2911,28 +2923,28 @@ export class OrganizationInvite extends Request {
 
   public constructor(request: LinearRequest, data: L.OrganizationInviteFragment) {
     super(request);
-    this.acceptedAt = data.acceptedAt ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.acceptedAt = parseDate(data.acceptedAt) ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.email = data.email ?? undefined;
-    this.expiresAt = data.expiresAt ?? undefined;
+    this.expiresAt = parseDate(data.expiresAt) ?? undefined;
     this.external = data.external ?? undefined;
     this.id = data.id ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._invitee = data.invitee ?? undefined;
     this._inviter = data.inviter ?? undefined;
   }
 
   /** The time at which the invite was accepted. Null, if the invite hasn't been accepted */
-  public acceptedAt?: L.Scalars["DateTime"];
+  public acceptedAt?: Date;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The invitees email address. */
   public email?: string;
   /** The time at which the invite will be expiring. Null, if the invite shouldn't expire */
-  public expiresAt?: L.Scalars["DateTime"];
+  public expiresAt?: Date;
   /** The invite was sent to external address. */
   public external?: boolean;
   /** The unique identifier of the entity. */
@@ -2941,7 +2953,7 @@ export class OrganizationInvite extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
   public get invitee(): LinearFetch<User> | undefined {
     return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
@@ -3062,13 +3074,13 @@ export class Project extends Request {
 
   public constructor(request: LinearRequest, data: L.ProjectFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.canceledAt = data.canceledAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.canceledAt = parseDate(data.canceledAt) ?? undefined;
     this.color = data.color ?? undefined;
-    this.completedAt = data.completedAt ?? undefined;
+    this.completedAt = parseDate(data.completedAt) ?? undefined;
     this.completedIssueCountHistory = data.completedIssueCountHistory ?? undefined;
     this.completedScopeHistory = data.completedScopeHistory ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id ?? undefined;
@@ -3080,29 +3092,29 @@ export class Project extends Request {
     this.slackNewIssue = data.slackNewIssue ?? undefined;
     this.slugId = data.slugId ?? undefined;
     this.sortOrder = data.sortOrder ?? undefined;
-    this.startedAt = data.startedAt ?? undefined;
+    this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state ?? undefined;
-    this.targetDate = data.targetDate ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.targetDate = parseDate(data.targetDate) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._creator = data.creator ?? undefined;
     this._lead = data.lead ?? undefined;
     this._milestone = data.milestone ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the project was moved into canceled state. */
-  public canceledAt?: L.Scalars["DateTime"];
+  public canceledAt?: Date;
   /** The project's color. */
   public color?: string;
   /** The time at which the project was moved into completed state. */
-  public completedAt?: L.Scalars["DateTime"];
+  public completedAt?: Date;
   /** The number of completed issues in the project after each week. */
   public completedIssueCountHistory?: number[];
   /** The number of completed estimation points after each week. */
   public completedScopeHistory?: number[];
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The project's description. */
   public description?: string;
   /** The icon of the project. */
@@ -3126,16 +3138,16 @@ export class Project extends Request {
   /** The sort order for the project within its milestone. */
   public sortOrder?: number;
   /** The time at which the project was moved into started state. */
-  public startedAt?: L.Scalars["DateTime"];
+  public startedAt?: Date;
   /** The type of the state. */
   public state?: string;
   /** The estimated completion date of the project. */
-  public targetDate?: L.Scalars["TimelessDateScalar"];
+  public targetDate?: Date;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -3198,20 +3210,20 @@ export class ProjectLink extends Request {
 
   public constructor(request: LinearRequest, data: L.ProjectLinkFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.label = data.label ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.url = data.url ?? undefined;
     this._creator = data.creator ?? undefined;
     this._project = data.project ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The link's label. */
@@ -3220,7 +3232,7 @@ export class ProjectLink extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The link's URL. */
   public url?: string;
   /** The user who created the link. */
@@ -3354,23 +3366,23 @@ export class PullRequestPayload extends Request {
 export class PushSubscription extends Request {
   public constructor(request: LinearRequest, data: L.PushSubscriptionFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
 }
 /**
  * PushSubscriptionConnection model
@@ -3423,19 +3435,19 @@ export class Reaction extends Request {
 
   public constructor(request: LinearRequest, data: L.ReactionFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.emoji = data.emoji ?? undefined;
     this.id = data.id ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._comment = data.comment ?? undefined;
     this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Name of the reaction's emoji. */
   public emoji?: string;
   /** The unique identifier of the entity. */
@@ -3444,7 +3456,7 @@ export class Reaction extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The comment that the reaction is associated with. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
@@ -3671,23 +3683,23 @@ export class Subscription extends Request {
 
   public constructor(request: LinearRequest, data: L.SubscriptionFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.canceledAt = data.canceledAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.canceledAt = parseDate(data.canceledAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.pendingChangeType = data.pendingChangeType ?? undefined;
     this.seats = data.seats ?? undefined;
     this.type = data.type ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._creator = data.creator ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The date the subscription was canceled, if any. */
-  public canceledAt?: L.Scalars["DateTime"];
+  public canceledAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The subscription type of a pending change. Null if no change pending. */
@@ -3700,7 +3712,7 @@ export class Subscription extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The creator of the subscription. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -3719,13 +3731,13 @@ export class Subscription extends Request {
 export class SubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: L.SubscriptionPayloadFragment) {
     super(request);
-    this.canceledAt = data.canceledAt ?? undefined;
+    this.canceledAt = parseDate(data.canceledAt) ?? undefined;
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.success = data.success ?? undefined;
   }
 
   /** The date the subscription was set to cancel at the end of the billing period, if any. */
-  public canceledAt?: L.Scalars["DateTime"];
+  public canceledAt?: Date;
   /** The identifier of the last sync operation. */
   public lastSyncId?: number;
   /** Whether the operation was successful. */
@@ -3811,11 +3823,11 @@ export class Team extends Request {
 
   public constructor(request: LinearRequest, data: L.TeamFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.autoArchivePeriod = data.autoArchivePeriod ?? undefined;
     this.autoClosePeriod = data.autoClosePeriod ?? undefined;
     this.autoCloseStateId = data.autoCloseStateId ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.cycleCalenderUrl = data.cycleCalenderUrl ?? undefined;
     this.cycleCooldownTime = data.cycleCooldownTime ?? undefined;
     this.cycleDuration = data.cycleDuration ?? undefined;
@@ -3840,7 +3852,7 @@ export class Team extends Request {
     this.slackNewIssue = data.slackNewIssue ?? undefined;
     this.timezone = data.timezone ?? undefined;
     this.upcomingCycleCount = data.upcomingCycleCount ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._activeCycle = data.activeCycle ?? undefined;
     this._draftWorkflowState = data.draftWorkflowState ?? undefined;
     this._markedAsDuplicateWorkflowState = data.markedAsDuplicateWorkflowState ?? undefined;
@@ -3850,7 +3862,7 @@ export class Team extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled. */
   public autoArchivePeriod?: number;
   /** Period after which issues are automatically closed in months. Null/undefined means disabled. */
@@ -3858,7 +3870,7 @@ export class Team extends Request {
   /** The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state. */
   public autoCloseStateId?: string;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Calender feed (iCal) for cycles. */
   public cycleCalenderUrl?: string;
   /** The cooldown time after each cycle in weeks. */
@@ -3911,7 +3923,7 @@ export class Team extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Team's currently active cycle. */
   public get activeCycle(): LinearFetch<Cycle> | undefined {
     return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
@@ -4020,19 +4032,19 @@ export class TeamMembership extends Request {
 
   public constructor(request: LinearRequest, data: L.TeamMembershipFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.owner = data.owner ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** Whether the user is the owner of the team */
@@ -4041,7 +4053,7 @@ export class TeamMembership extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The team that the membership is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
@@ -4136,22 +4148,22 @@ export class Template extends Request {
 
   public constructor(request: LinearRequest, data: L.TemplateFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.templateData = data.templateData ?? undefined;
     this.type = data.type ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._creator = data.creator ?? undefined;
     this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Template description. */
   public description?: string;
   /** The unique identifier of the entity. */
@@ -4166,7 +4178,7 @@ export class Template extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The user who created the template. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -4299,17 +4311,17 @@ export class User extends Request {
     super(request);
     this.active = data.active ?? undefined;
     this.admin = data.admin ?? undefined;
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.avatarUrl = data.avatarUrl ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.createdIssueCount = data.createdIssueCount ?? undefined;
     this.displayName = data.displayName ?? undefined;
     this.email = data.email ?? undefined;
     this.id = data.id ?? undefined;
     this.inviteHash = data.inviteHash ?? undefined;
-    this.lastSeen = data.lastSeen ?? undefined;
+    this.lastSeen = parseDate(data.lastSeen) ?? undefined;
     this.name = data.name ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
   }
 
   /** Whether the user account is active or disabled. */
@@ -4317,11 +4329,11 @@ export class User extends Request {
   /** Whether the user is an organization administrator. */
   public admin?: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Number of issues created. */
   public createdIssueCount?: number;
   /** The user's display (nick) name. Unique within each organization. */
@@ -4333,14 +4345,14 @@ export class User extends Request {
   /** Unique hash for the user to be used in invite URLs. */
   public inviteHash?: string;
   /** The last time the user was seen online. If null, the user is currently online. */
-  public lastSeen?: L.Scalars["DateTime"];
+  public lastSeen?: Date;
   /** The user's full name. */
   public name?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Organization in which the user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -4371,20 +4383,20 @@ export class User extends Request {
 export class UserAccount extends Request {
   public constructor(request: LinearRequest, data: L.UserAccountFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.email = data.email ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.service = data.service ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
   }
 
   /** The time at which the model was archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the model was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The user's email address. */
   public email?: string;
   /** The models identifier. */
@@ -4394,7 +4406,7 @@ export class UserAccount extends Request {
   /** The authentication service used to create the account. */
   public service?: string;
   /** The time at which the model was updated. */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Users belonging to the account. */
   public users?: User[];
 }
@@ -4503,19 +4515,19 @@ export class UserSettings extends Request {
 
   public constructor(request: LinearRequest, data: L.UserSettingsFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.notificationPreferences = data.notificationPreferences ?? undefined;
     this.unsubscribedFrom = data.unsubscribedFrom ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The notification channel settings the user has selected. */
@@ -4526,7 +4538,7 @@ export class UserSettings extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The user associated with these settings. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
@@ -4620,18 +4632,18 @@ export class UserSubscribeToNewsletterPayload extends Request {
 export class ViewPreferences extends Request {
   public constructor(request: LinearRequest, data: L.ViewPreferencesFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.type = data.type ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.viewType = data.viewType ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
   /** The view preference type. */
@@ -4640,7 +4652,7 @@ export class ViewPreferences extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The view type. */
   public viewType?: string;
 }
@@ -4677,23 +4689,23 @@ export class Webhook extends Request {
 
   public constructor(request: LinearRequest, data: L.WebhookFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.enabled = data.enabled ?? undefined;
     this.id = data.id ?? undefined;
     this.label = data.label ?? undefined;
     this.resourceTypes = data.resourceTypes ?? undefined;
     this.secret = data.secret ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.url = data.url ?? undefined;
     this._creator = data.creator ?? undefined;
     this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Whether the Webhook is enabled. */
   public enabled?: boolean;
   /** The unique identifier of the entity. */
@@ -4708,7 +4720,7 @@ export class Webhook extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** Webhook URL */
   public url?: string;
   /** The user who created the webhook. */
@@ -4777,24 +4789,24 @@ export class WorkflowState extends Request {
 
   public constructor(request: LinearRequest, data: L.WorkflowStateFragment) {
     super(request);
-    this.archivedAt = data.archivedAt ?? undefined;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.color = data.color ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
     this.position = data.position ?? undefined;
     this.type = data.type ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: L.Scalars["DateTime"];
+  public archivedAt?: Date;
   /** The state's UI color as a HEX string. */
   public color?: string;
   /** The time at which the entity was created. */
-  public createdAt?: L.Scalars["DateTime"];
+  public createdAt?: Date;
   /** Description of the state. */
   public description?: string;
   /** The unique identifier of the entity. */
@@ -4809,7 +4821,7 @@ export class WorkflowState extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: L.Scalars["DateTime"];
+  public updatedAt?: Date;
   /** The team to which this state belongs to. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;

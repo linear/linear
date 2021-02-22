@@ -9,6 +9,7 @@ import { printConnection } from "./print-connection";
 import { printModels } from "./print-model";
 import { printOperations } from "./print-operation";
 import { printRequest } from "./print-request";
+import { printScalarParsers } from "./print-scalar";
 import { printSdk } from "./print-sdk";
 import { SdkModel, SdkPluginConfig, SdkPluginContext } from "./types";
 
@@ -69,6 +70,8 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
         printRequest(),
         /** Print the connection base class */
         printConnection(),
+        /** Print the custom scalar parsers */
+        printScalarParsers(),
         /** Print the api models */
         printedModels,
         /** Print the api operations */
