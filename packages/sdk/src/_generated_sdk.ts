@@ -111,8 +111,9 @@ export class Connection<Node> extends LinearConnection<Node> {
       : Promise.resolve(this);
   }
 }
+
 /**
- * Function to parse custom DateTime scalars into Date types
+ * Function to parse custom scalars into Date types
  *
  * @param value - value to parse
  */
@@ -123,6 +124,20 @@ function parseDate(value?: any): Date | undefined {
     return undefined;
   }
 }
+
+/**
+ * Function to parse custom scalars into JSON objects
+ *
+ * @param value - value to parse
+ */
+function parseJson(value?: any): Record<string, unknown> | undefined {
+  try {
+    return value ? JSON.parse(value) : undefined;
+  } catch (e) {
+    return undefined;
+  }
+}
+
 /**
  * An API key. Grants access to the user's resources.
  *
@@ -279,8 +294,8 @@ export class Attachment extends Request {
     this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.groupBySource = data.groupBySource ?? undefined;
     this.id = data.id ?? undefined;
-    this.metadata = data.metadata ?? undefined;
-    this.source = data.source ?? undefined;
+    this.metadata = parseJson(data.metadata) ?? undefined;
+    this.source = parseJson(data.source) ?? undefined;
     this.subtitle = data.subtitle ?? undefined;
     this.title = data.title ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
@@ -297,9 +312,9 @@ export class Attachment extends Request {
   /** The unique identifier of the entity. */
   public id?: string;
   /** Custom metadata related to the attachment. */
-  public metadata?: L.Scalars["JSONObject"];
+  public metadata?: Record<string, unknown>;
   /** Information about the source which created the attachment. */
-  public source?: L.Scalars["JSONObject"];
+  public source?: Record<string, unknown>;
   /** Content for the subtitle line in the Linear attachment widget. */
   public subtitle?: string;
   /** Content for the title line in the Linear attachment widget. */
@@ -313,7 +328,7 @@ export class Attachment extends Request {
   public url?: string;
   /** The issue this attachment belongs to. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
 /**
@@ -547,7 +562,7 @@ export class Comment extends Request {
   public updatedAt?: Date;
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The user who wrote the comment. */
   public get user(): LinearFetch<User> | undefined {
@@ -693,7 +708,7 @@ export class CustomView extends Request {
     this.color = data.color ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
-    this.filters = data.filters ?? undefined;
+    this.filters = parseJson(data.filters) ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
@@ -712,7 +727,7 @@ export class CustomView extends Request {
   /** The description of the custom view. */
   public description?: string;
   /** The filters applied to issues in the custom view. */
-  public filters?: L.Scalars["JSONObject"];
+  public filters?: Record<string, unknown>;
   /** The icon of the custom view. */
   public icon?: string;
   /** The unique identifier of the entity. */
@@ -930,7 +945,7 @@ export class DocumentStep extends Request {
     this.clientId = data.clientId ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
-    this.step = data.step ?? undefined;
+    this.step = parseJson(data.step) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.version = data.version ?? undefined;
   }
@@ -944,7 +959,7 @@ export class DocumentStep extends Request {
   /** The unique identifier of the entity. */
   public id?: string;
   /** Step data. */
-  public step?: L.Scalars["JSON"];
+  public step?: Record<string, unknown>;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -1145,7 +1160,7 @@ export class Favorite extends Request {
   }
   /** Favorited issue. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** Favorited issue label. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -1282,7 +1297,7 @@ export class FileUpload extends Request {
     this.contentType = data.contentType ?? undefined;
     this.filename = data.filename ?? undefined;
     this.id = data.id ?? undefined;
-    this.metaData = data.metaData ?? undefined;
+    this.metaData = parseJson(data.metaData) ?? undefined;
     this.size = data.size ?? undefined;
     this._creator = data.creator ?? undefined;
   }
@@ -1296,7 +1311,7 @@ export class FileUpload extends Request {
   /** The unique identifier of the entity. */
   public id?: string;
   /** Additional metadata of the file. */
-  public metaData?: L.Scalars["JSON"];
+  public metaData?: Record<string, unknown>;
   /** Size of the uploaded file in bytes. */
   public size?: number;
   /** The user who uploaded the file. */
@@ -1533,7 +1548,7 @@ export class IntegrationResource extends Request {
   }
   /** The issue that the resource is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
 /**
@@ -1900,7 +1915,7 @@ export class IssueHistory extends Request {
     this.id = data.id ?? undefined;
     this.relationChanges = data.relationChanges ?? undefined;
     this.removedLabelIds = data.removedLabelIds ?? undefined;
-    this.source = data.source ?? undefined;
+    this.source = parseJson(data.source) ?? undefined;
     this.toDueDate = parseDate(data.toDueDate) ?? undefined;
     this.toEstimate = data.toEstimate ?? undefined;
     this.toPriority = data.toPriority ?? undefined;
@@ -1948,7 +1963,7 @@ export class IssueHistory extends Request {
   /** ID's of labels that were removed. */
   public removedLabelIds?: string[];
   /** Information about the integration or application which created this history entry. */
-  public source?: L.Scalars["JSONObject"];
+  public source?: Record<string, unknown>;
   /** What the due date was changed to */
   public toDueDate?: Date;
   /** What the estimate was changed to. */
@@ -1994,7 +2009,7 @@ export class IssueHistory extends Request {
   }
   /** The issue that was changed. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The user to whom the issue was assigned to. */
   public get toAssignee(): LinearFetch<User> | undefined {
@@ -2223,7 +2238,7 @@ export class IssuePayload extends Request {
   public success?: boolean;
   /** The issue that was created or updated. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
 /**
@@ -2262,7 +2277,7 @@ export class IssueRelation extends Request {
   public updatedAt?: Date;
   /** The issue whose relationship is being described. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The related issue. */
   public get relatedIssue(): LinearFetch<Issue> | undefined {
@@ -2458,7 +2473,7 @@ export class Notification extends Request {
   }
   /** The issue that the notification is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The team which the notification is associated with. */
   public get team(): LinearFetch<Team> | undefined {
@@ -3668,7 +3683,7 @@ export class StepsResponse extends Request {
   /** List of client IDs for the document steps. */
   public clientIds?: string[];
   /** New document steps from the client. */
-  public steps?: L.Scalars["JSON"][];
+  public steps?: Record<string, unknown>[];
   /** Client's document version. */
   public version?: number;
 }
@@ -4153,7 +4168,7 @@ export class Template extends Request {
     this.description = data.description ?? undefined;
     this.id = data.id ?? undefined;
     this.name = data.name ?? undefined;
-    this.templateData = data.templateData ?? undefined;
+    this.templateData = parseJson(data.templateData) ?? undefined;
     this.type = data.type ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -4171,7 +4186,7 @@ export class Template extends Request {
   /** The name of the template. */
   public name?: string;
   /** Template data. */
-  public templateData?: L.Scalars["JSON"];
+  public templateData?: Record<string, unknown>;
   /** The entity type this template is for. */
   public type?: string;
   /**
@@ -4242,7 +4257,7 @@ export class UploadFile extends Request {
     this.assetUrl = data.assetUrl ?? undefined;
     this.contentType = data.contentType ?? undefined;
     this.filename = data.filename ?? undefined;
-    this.metaData = data.metaData ?? undefined;
+    this.metaData = parseJson(data.metaData) ?? undefined;
     this.size = data.size ?? undefined;
     this.uploadUrl = data.uploadUrl ?? undefined;
     this.headers = data.headers ? data.headers.map(node => new UploadFileHeader(request, node)) : undefined;
@@ -4254,7 +4269,7 @@ export class UploadFile extends Request {
   public contentType?: string;
   /** The filename. */
   public filename?: string;
-  public metaData?: L.Scalars["JSON"];
+  public metaData?: Record<string, unknown>;
   /** The size of the uploaded file. */
   public size?: number;
   /** The signed URL the for the uploaded file. (assigned automatically) */
@@ -4518,7 +4533,7 @@ export class UserSettings extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
-    this.notificationPreferences = data.notificationPreferences ?? undefined;
+    this.notificationPreferences = parseJson(data.notificationPreferences) ?? undefined;
     this.unsubscribedFrom = data.unsubscribedFrom ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._user = data.user ?? undefined;
@@ -4531,7 +4546,7 @@ export class UserSettings extends Request {
   /** The unique identifier of the entity. */
   public id?: string;
   /** The notification channel settings the user has selected. */
-  public notificationPreferences?: L.Scalars["JSONObject"];
+  public notificationPreferences?: Record<string, unknown>;
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom?: string[];
   /**

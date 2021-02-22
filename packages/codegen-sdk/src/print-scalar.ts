@@ -3,22 +3,34 @@ import { Sdk } from "./constants";
 import { SdkModelField } from "./types";
 
 const parseDateFunction = "parseDate";
-const parseDateValue = "value";
+const parseJsonFunction = "parseJson";
+const parseValue = "value";
 
 /**
  * Print functions to parse custom scalars
  */
 export function printScalarParsers(): string {
-  const args = getArgList([{ name: parseDateValue, type: "any", optional: true, description: "value to parse" }]);
+  const args = getArgList([{ name: parseValue, type: "any", optional: true, description: "value to parse" }]);
   return printLines([
-    printComment(["Function to parse custom DateTime scalars into Date types", ...args.jsdoc]),
+    "\n",
+    printComment(["Function to parse custom scalars into Date types", ...args.jsdoc]),
     `function ${parseDateFunction}(${args.printInput}): Date | undefined {
       try {
-        return ${printTernary(parseDateValue, `new Date(${args.printOutput})`)}
+        return ${printTernary(parseValue, `new Date(${args.printOutput})`)}
       } catch(e) {
         return undefined
       }
     }`,
+    "\n",
+    printComment(["Function to parse custom scalars into JSON objects", ...args.jsdoc]),
+    `function ${parseJsonFunction}(${args.printInput}): Record<string, unknown> | undefined {
+      try {
+        return ${printTernary(parseValue, `JSON.parse(${args.printOutput})`)}
+      } catch(e) {
+        return undefined
+      }
+    }`,
+    "\n",
   ]);
 }
 
@@ -31,6 +43,8 @@ export function printModelScalar(field: SdkModelField): string {
   switch (field.type) {
     case "Date":
       return `${parseDateFunction}(${fieldName})`;
+    case "Record<string, unknown>":
+      return `${parseJsonFunction}(${fieldName})`;
     default:
       return `${fieldName}`;
   }
