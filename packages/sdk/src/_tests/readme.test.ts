@@ -18,18 +18,18 @@ import {
   User,
   UserConnection,
 } from "../index";
-import { startTestClient, stopTestClient } from "./test-client";
+import { startClient, stopClient } from "./test-client";
 
 describe("readme.md", () => {
   /** Initialize Linear client variable */
   let linearClient: LinearClient;
 
   beforeAll(async () => {
-    linearClient = await startTestClient();
+    linearClient = await startClient();
   });
 
   afterAll(() => {
-    stopTestClient();
+    stopClient();
   });
 
   async function createTeam(input: LinearDocument.TeamCreateInput) {

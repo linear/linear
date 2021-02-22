@@ -13,7 +13,7 @@ dotenv.config();
 /** Initialize mock server variable */
 let mockServer: ExecaChildProcess;
 
-export async function startTestClient(): Promise<LinearClient> {
+export async function startClient(): Promise<LinearClient> {
   /** Determine whether to use production or a mock server */
   if (Boolean(process.env.E2E)) {
     logger.info(log, "Using Linear API production endpoint for end-to-end test");
@@ -49,7 +49,7 @@ export async function startTestClient(): Promise<LinearClient> {
   }
 }
 
-export function stopTestClient(): void {
+export function stopClient(): void {
   /** Kill the mock server */
   try {
     if (mockServer) {

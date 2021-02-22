@@ -1,5 +1,5 @@
 import * as L from "../index";
-import { startTestClient, stopTestClient } from "./test-client";
+import { startClient, stopClient } from "./test-client";
 
 /** Auto generated API tests */
 describe("generated", () => {
@@ -7,11 +7,11 @@ describe("generated", () => {
   let client: L.LinearClient;
 
   beforeAll(async () => {
-    client = await startTestClient();
+    client = await startClient();
   });
 
   afterAll(() => {
-    stopTestClient();
+    stopClient();
   });
 
   /** Test all ApiKey queries */
