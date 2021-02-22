@@ -35,7 +35,6 @@
     "graphql-request": "^3.3.0"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.14.1",
     "@graphql-codegen/introspection": "^1.18.0",
     "@graphql-codegen/schema-ast": "^1.18.1",
     "@graphql-codegen/typed-document-node": "^1.17.10",
