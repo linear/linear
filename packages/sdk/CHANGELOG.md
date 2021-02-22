@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.5
+
+### Patch Changes
+
+- Add link from auth error to api settings
+
 ## 1.4.4
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.4.5
+
+### Patch Changes
+
+- Add link from auth error to api settings
+- Updated dependencies [undefined]
+  - @linear/sdk@1.4.5
+
 ## 1.4.4
 
 ### Patch Changes
