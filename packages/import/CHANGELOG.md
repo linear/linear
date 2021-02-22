@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.6
+
+### Patch Changes
+
+- Bundle with rollup
+
 ## 1.4.5
 
 ### Patch Changes
