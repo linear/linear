@@ -107,6 +107,86 @@ export type ArchiveResponse = {
   totalCount: Scalars["Float"];
 };
 
+/** [Alpha] Issue attachment (e.g. support ticket, pull request). */
+export type Attachment = Node & {
+  __typename?: "Attachment";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
+  groupBySource: Scalars["Boolean"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The issue this attachment belongs to. */
+  issue: Issue;
+  /** Custom metadata related to the attachment. */
+  metadata: Scalars["JSONObject"];
+  /** Information about the source which created the attachment. */
+  source?: Maybe<Scalars["JSONObject"]>;
+  /** Content for the subtitle line in the Linear attachment widget. */
+  subtitle?: Maybe<Scalars["String"]>;
+  /** Content for the title line in the Linear attachment widget. */
+  title: Scalars["String"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL. */
+  url: Scalars["String"];
+};
+
+export type AttachmentConnection = {
+  __typename?: "AttachmentConnection";
+  edges: Array<AttachmentEdge>;
+  nodes: Array<Attachment>;
+  pageInfo: PageInfo;
+};
+
+export type AttachmentCreateInput = {
+  /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
+  groupBySource?: Maybe<Scalars["Boolean"]>;
+  /** The identifier. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The issue to associate the attachment with. */
+  issueId: Scalars["String"];
+  /** Attachment metadata object with string and number values. */
+  metadata?: Maybe<Scalars["JSONObject"]>;
+  /** The attachment subtitle. */
+  subtitle?: Maybe<Scalars["String"]>;
+  /** The attachment title. */
+  title: Scalars["String"];
+  /** Attachment location which is also used as an unique identifier for the attachment. If another attachment is created with the same `url` value, existing record is updated instead. */
+  url: Scalars["String"];
+};
+
+export type AttachmentEdge = {
+  __typename?: "AttachmentEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: Attachment;
+};
+
+export type AttachmentPayload = {
+  __typename?: "AttachmentPayload";
+  /** The issue attachment that was created. */
+  attachment: Attachment;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type AttachmentUpdateInput = {
+  /** Attachment metadata object with string and number values. */
+  metadata?: Maybe<Scalars["JSONObject"]>;
+  /** The attachment subtitle. */
+  subtitle?: Maybe<Scalars["String"]>;
+  /** The attachment title. */
+  title: Scalars["String"];
+};
+
 export type AuthResolverResponse = {
   __typename?: "AuthResolverResponse";
   /** Should the signup flow allow access for the domain. */
@@ -802,6 +882,28 @@ export type FileUpload = {
   size: Scalars["Float"];
 };
 
+/** Relevant information for the GitHub organization. */
+export type GithubOrg = {
+  __typename?: "GithubOrg";
+  /** GitHub org's id. */
+  id: Scalars["String"];
+  /** The login for the GitHub org. */
+  login: Scalars["String"];
+  /** The name of the GitHub org. */
+  name: Scalars["String"];
+  /** Repositories that the org owns. */
+  repositories: Array<GithubRepo>;
+};
+
+/** Relevant information for the GitHub repository. */
+export type GithubRepo = {
+  __typename?: "GithubRepo";
+  /** The id of the GitHub repository. */
+  id: Scalars["String"];
+  /** The name of the GitHub repository. */
+  name: Scalars["String"];
+};
+
 /** Google Sheets specific settings. */
 export type GoogleSheetsSettings = {
   __typename?: "GoogleSheetsSettings";
@@ -995,6 +1097,8 @@ export type Issue = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The user to whom the issue is assigned to. */
   assignee?: Maybe<User>;
+  /** Attachments associated with the issue. */
+  attachments: AttachmentConnection;
   /** The time at which the issue was automatically archived by the auto pruning process. */
   autoArchivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue was automatically closed by the auto pruning process. */
@@ -1068,6 +1172,16 @@ export type Issue = Node & {
   updatedAt: Scalars["DateTime"];
   /** Issue URL. */
   url: Scalars["String"];
+};
+
+/** An issue. */
+export type IssueAttachmentsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 /** An issue. */
@@ -1612,6 +1726,12 @@ export type Mutation = {
   apiKeyCreate: ApiKeyPayload;
   /** Deletes an API key. */
   apiKeyDelete: ArchivePayload;
+  /** [Alpha] Archives an issue attachment. */
+  attachmentArchive: ArchivePayload;
+  /** [Alpha] Creates a new attachment, or updates existing if the same `uri` is used. */
+  attachmentCreate: AttachmentPayload;
+  /** [Alpha] Updates an existing issue attachment. */
+  attachmentUpdate: AttachmentPayload;
   /** Updates the billing email address for the customer. */
   billingEmailUpdate: BillingEmailPayload;
   /** Update collaborative document with client steps. */
@@ -1872,6 +1992,19 @@ export type MutationApiKeyCreateArgs = {
 
 export type MutationApiKeyDeleteArgs = {
   id: Scalars["String"];
+};
+
+export type MutationAttachmentArchiveArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationAttachmentCreateArgs = {
+  input: AttachmentCreateInput;
+};
+
+export type MutationAttachmentUpdateArgs = {
+  id: Scalars["String"];
+  input: AttachmentUpdateInput;
 };
 
 export type MutationBillingEmailUpdateArgs = {
@@ -2521,6 +2654,15 @@ export type NotificationSubscriptionPayload = {
 export type NotificationUpdateInput = {
   /** The time when notification was marked as read. */
   readAt?: Maybe<Scalars["DateTime"]>;
+};
+
+/** GitHub OAuth token, plus information about the organizations the user is a member of. */
+export type OAuthTokenPayload = {
+  __typename?: "OAuthTokenPayload";
+  /** A list of the GitHub orgs the user is a member of with attached repositories. */
+  organizations?: Maybe<Array<GithubOrg>>;
+  /** The OAuth token if the operation to fetch it was successful. */
+  token?: Maybe<Scalars["String"]>;
 };
 
 /** OAuth2 client application */
@@ -3187,6 +3329,12 @@ export type Query = {
   archivedModelSync: ArchiveResponse;
   /** Fetches archived models. */
   archivedModelsSync: ArchiveResponse;
+  /** [Alpha] One specific issue attachment. `url` can be used as the `id` parameter. */
+  attachment: Attachment;
+  /** [Alpha] Query an issue by its associated attachment, and its id or URI. */
+  attachmentIssue: Issue;
+  /** [Alpha] All issue attachments. */
+  attachments: AttachmentConnection;
   /** Get all authorized applications for a user */
   authorizedApplications: Array<AuthorizedApplication>;
   /** Fetch users belonging to this user account. */
@@ -3229,6 +3377,8 @@ export type Query = {
   inviteInfo: InvitePagePayload;
   /** One specific issue. */
   issue: Issue;
+  /** Fetches the GitHub token, completing the OAuth flow. */
+  issueImportFinishGithubOAuth: OAuthTokenPayload;
   /** One specific label. */
   issueLabel: IssueLabel;
   /** All issue labels. */
@@ -3336,6 +3486,23 @@ export type QueryArchivedModelsSyncArgs = {
   last?: Maybe<Scalars["Int"]>;
   modelClass: Scalars["String"];
   teamId: Scalars["String"];
+};
+
+export type QueryAttachmentArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryAttachmentIssueArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryAttachmentsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type QueryCollaborativeDocumentJoinArgs = {
@@ -3447,6 +3614,10 @@ export type QueryInviteInfoArgs = {
 
 export type QueryIssueArgs = {
   id: Scalars["String"];
+};
+
+export type QueryIssueImportFinishGithubOAuthArgs = {
+  code: Scalars["String"];
 };
 
 export type QueryIssueLabelArgs = {
@@ -5293,6 +5464,10 @@ export type OrganizationDomainFragment = { __typename?: "OrganizationDomain" } &
   "name" | "verificationEmail" | "verified" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
+export type OAuthTokenPayloadFragment = { __typename?: "OAuthTokenPayload" } & Pick<OAuthTokenPayload, "token"> & {
+    organizations?: Maybe<Array<{ __typename?: "GithubOrg" } & GithubOrgFragment>>;
+  };
+
 export type CommitPayloadFragment = { __typename?: "CommitPayload" } & Pick<
   CommitPayload,
   "added" | "id" | "message" | "modified" | "removed" | "timestamp" | "url"
@@ -5384,6 +5559,12 @@ export type PullRequestPayloadFragment = { __typename?: "PullRequestPayload" } &
   | "userLogin"
 >;
 
+export type GithubOrgFragment = { __typename?: "GithubOrg" } & Pick<GithubOrg, "id" | "login" | "name"> & {
+    repositories: Array<{ __typename?: "GithubRepo" } & GithubRepoFragment>;
+  };
+
+export type GithubRepoFragment = { __typename?: "GithubRepo" } & Pick<GithubRepo, "id" | "name">;
+
 export type SentryIssuePayloadFragment = { __typename?: "SentryIssuePayload" } & Pick<
   SentryIssuePayload,
   | "issueId"
@@ -5445,6 +5626,20 @@ export type ViewPreferencesFragment = { __typename?: "ViewPreferences" } & Pick<
   "updatedAt" | "archivedAt" | "createdAt" | "id" | "type" | "viewType"
 >;
 
+export type AttachmentFragment = { __typename?: "Attachment" } & Pick<
+  Attachment,
+  | "subtitle"
+  | "title"
+  | "metadata"
+  | "groupBySource"
+  | "source"
+  | "url"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+> & { issue: { __typename?: "Issue" } & Pick<Issue, "id"> };
+
 export type ApiKeyConnectionFragment = { __typename?: "ApiKeyConnection" } & {
   nodes: Array<{ __typename?: "ApiKey" } & ApiKeyFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
@@ -5455,6 +5650,16 @@ export type ApiKeyPayloadFragment = { __typename?: "ApiKeyPayload" } & Pick<ApiK
   };
 
 export type ArchivePayloadFragment = { __typename?: "ArchivePayload" } & Pick<ArchivePayload, "lastSyncId" | "success">;
+
+export type AttachmentConnectionFragment = { __typename?: "AttachmentConnection" } & {
+  nodes: Array<{ __typename?: "Attachment" } & AttachmentFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type AttachmentPayloadFragment = { __typename?: "AttachmentPayload" } & Pick<
+  AttachmentPayload,
+  "lastSyncId" | "success"
+> & { attachment: { __typename?: "Attachment" } & Pick<Attachment, "id"> };
 
 export type AuthResolverResponseFragment = { __typename?: "AuthResolverResponse" } & Pick<
   AuthResolverResponse,
@@ -5925,6 +6130,163 @@ export type ArchivedModelsSyncQuery = { __typename?: "Query" } & {
   archivedModelsSync: { __typename?: "ArchiveResponse" } & ArchiveResponseFragment;
 };
 
+export type AttachmentQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type AttachmentQuery = { __typename?: "Query" } & {
+  attachment: { __typename?: "Attachment" } & AttachmentFragment;
+};
+
+export type AttachmentIssueQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type AttachmentIssueQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & IssueFragment;
+};
+
+export type AttachmentIssue_AttachmentsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentIssue_AttachmentsQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    attachments: { __typename?: "AttachmentConnection" } & AttachmentConnectionFragment;
+  };
+};
+
+export type AttachmentIssue_ChildrenQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentIssue_ChildrenQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    children: { __typename?: "IssueConnection" } & IssueConnectionFragment;
+  };
+};
+
+export type AttachmentIssue_CommentsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentIssue_CommentsQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    comments: { __typename?: "CommentConnection" } & CommentConnectionFragment;
+  };
+};
+
+export type AttachmentIssue_HistoryQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    history: { __typename?: "IssueHistoryConnection" } & IssueHistoryConnectionFragment;
+  };
+};
+
+export type AttachmentIssue_InverseRelationsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentIssue_InverseRelationsQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    inverseRelations: { __typename?: "IssueRelationConnection" } & IssueRelationConnectionFragment;
+  };
+};
+
+export type AttachmentIssue_LabelsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentIssue_LabelsQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    labels: { __typename?: "IssueLabelConnection" } & IssueLabelConnectionFragment;
+  };
+};
+
+export type AttachmentIssue_RelationsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentIssue_RelationsQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    relations: { __typename?: "IssueRelationConnection" } & IssueRelationConnectionFragment;
+  };
+};
+
+export type AttachmentIssue_SubscribersQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentIssue_SubscribersQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    subscribers: { __typename?: "UserConnection" } & UserConnectionFragment;
+  };
+};
+
+export type AttachmentsQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AttachmentsQuery = { __typename?: "Query" } & {
+  attachments: { __typename?: "AttachmentConnection" } & AttachmentConnectionFragment;
+};
+
 export type AuthorizedApplicationsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AuthorizedApplicationsQuery = { __typename?: "Query" } & {
@@ -6169,6 +6531,22 @@ export type IssueQueryVariables = Exact<{
 
 export type IssueQuery = { __typename?: "Query" } & { issue: { __typename?: "Issue" } & IssueFragment };
 
+export type Issue_AttachmentsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Issue_AttachmentsQuery = { __typename?: "Query" } & {
+  issue: { __typename?: "Issue" } & {
+    attachments: { __typename?: "AttachmentConnection" } & AttachmentConnectionFragment;
+  };
+};
+
 export type Issue_ChildrenQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
@@ -6271,6 +6649,14 @@ export type Issue_SubscribersQueryVariables = Exact<{
 
 export type Issue_SubscribersQuery = { __typename?: "Query" } & {
   issue: { __typename?: "Issue" } & { subscribers: { __typename?: "UserConnection" } & UserConnectionFragment };
+};
+
+export type IssueImportFinishGithubOAuthQueryVariables = Exact<{
+  code: Scalars["String"];
+}>;
+
+export type IssueImportFinishGithubOAuthQuery = { __typename?: "Query" } & {
+  issueImportFinishGithubOAuth: { __typename?: "OAuthTokenPayload" } & OAuthTokenPayloadFragment;
 };
 
 export type IssueLabelQueryVariables = Exact<{
@@ -7076,6 +7462,31 @@ export type ApiKeyDeleteMutationVariables = Exact<{
 
 export type ApiKeyDeleteMutation = { __typename?: "Mutation" } & {
   apiKeyDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type AttachmentArchiveMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type AttachmentArchiveMutation = { __typename?: "Mutation" } & {
+  attachmentArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type AttachmentCreateMutationVariables = Exact<{
+  input: AttachmentCreateInput;
+}>;
+
+export type AttachmentCreateMutation = { __typename?: "Mutation" } & {
+  attachmentCreate: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
+export type AttachmentUpdateMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: AttachmentUpdateInput;
+}>;
+
+export type AttachmentUpdateMutation = { __typename?: "Mutation" } & {
+  attachmentUpdate: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
 };
 
 export type BillingEmailUpdateMutationVariables = Exact<{
@@ -8320,6 +8731,75 @@ export const ArchiveResponseFragmentDoc: DocumentNode<ArchiveResponseFragment, u
     },
   ],
 };
+export const GithubRepoFragmentDoc: DocumentNode<GithubRepoFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "GithubRepo" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "GithubRepo" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+        ],
+      },
+    },
+  ],
+};
+export const GithubOrgFragmentDoc: DocumentNode<GithubOrgFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "GithubOrg" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "GithubOrg" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "repositories" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "GithubRepo" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "login" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+        ],
+      },
+    },
+    ...GithubRepoFragmentDoc.definitions,
+  ],
+};
+export const OAuthTokenPayloadFragmentDoc: DocumentNode<OAuthTokenPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OAuthTokenPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OAuthTokenPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizations" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "GithubOrg" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "token" } },
+        ],
+      },
+    },
+    ...GithubOrgFragmentDoc.definitions,
+  ],
+};
 export const AuthorizedApplicationFragmentDoc: DocumentNode<AuthorizedApplicationFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -8676,6 +9156,97 @@ export const ArchivePayloadFragmentDoc: DocumentNode<ArchivePayloadFragment, unk
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+};
+export const AttachmentFragmentDoc: DocumentNode<AttachmentFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Attachment" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Attachment" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "subtitle" } },
+          { kind: "Field", name: { kind: "Name", value: "title" } },
+          { kind: "Field", name: { kind: "Name", value: "metadata" } },
+          { kind: "Field", name: { kind: "Name", value: "groupBySource" } },
+          { kind: "Field", name: { kind: "Name", value: "source" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+};
+export const AttachmentConnectionFragmentDoc: DocumentNode<AttachmentConnectionFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AttachmentConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AttachmentConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Attachment" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+};
+export const AttachmentPayloadFragmentDoc: DocumentNode<AttachmentPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AttachmentPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AttachmentPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
@@ -12530,6 +13101,1066 @@ export const ArchivedModelsSyncDocument: DocumentNode<ArchivedModelsSyncQuery, A
     ...ArchiveResponseFragmentDoc.definitions,
   ],
 };
+export const AttachmentDocument: DocumentNode<AttachmentQuery, AttachmentQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachment" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Attachment" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssueDocument: DocumentNode<AttachmentIssueQuery, AttachmentIssueQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Issue" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssue_AttachmentsDocument: DocumentNode<
+  AttachmentIssue_AttachmentsQuery,
+  AttachmentIssue_AttachmentsQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue_attachments" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "attachments" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssue_ChildrenDocument: DocumentNode<
+  AttachmentIssue_ChildrenQuery,
+  AttachmentIssue_ChildrenQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue_children" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "children" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssue_CommentsDocument: DocumentNode<
+  AttachmentIssue_CommentsQuery,
+  AttachmentIssue_CommentsQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue_comments" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "comments" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CommentConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssue_HistoryDocument: DocumentNode<
+  AttachmentIssue_HistoryQuery,
+  AttachmentIssue_HistoryQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue_history" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "history" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueHistoryConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueHistoryConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssue_InverseRelationsDocument: DocumentNode<
+  AttachmentIssue_InverseRelationsQuery,
+  AttachmentIssue_InverseRelationsQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue_inverseRelations" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "inverseRelations" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueRelationConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssue_LabelsDocument: DocumentNode<
+  AttachmentIssue_LabelsQuery,
+  AttachmentIssue_LabelsQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue_labels" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "labels" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueLabelConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssue_RelationsDocument: DocumentNode<
+  AttachmentIssue_RelationsQuery,
+  AttachmentIssue_RelationsQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue_relations" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "relations" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueRelationConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentIssue_SubscribersDocument: DocumentNode<
+  AttachmentIssue_SubscribersQuery,
+  AttachmentIssue_SubscribersQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentIssue_subscribers" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "subscribers" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...UserConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentsDocument: DocumentNode<AttachmentsQuery, AttachmentsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachments" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachments" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentConnectionFragmentDoc.definitions,
+  ],
+};
 export const AuthorizedApplicationsDocument: DocumentNode<
   AuthorizedApplicationsQuery,
   AuthorizedApplicationsQueryVariables
@@ -14005,6 +15636,115 @@ export const IssueDocument: DocumentNode<IssueQuery, IssueQueryVariables> = {
     ...IssueFragmentDoc.definitions,
   ],
 };
+export const Issue_AttachmentsDocument: DocumentNode<Issue_AttachmentsQuery, Issue_AttachmentsQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issue_attachments" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "attachments" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentConnectionFragmentDoc.definitions,
+  ],
+};
 export const Issue_ChildrenDocument: DocumentNode<Issue_ChildrenQuery, Issue_ChildrenQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -14769,6 +16509,47 @@ export const Issue_SubscribersDocument: DocumentNode<Issue_SubscribersQuery, Iss
       },
     },
     ...UserConnectionFragmentDoc.definitions,
+  ],
+};
+export const IssueImportFinishGithubOAuthDocument: DocumentNode<
+  IssueImportFinishGithubOAuthQuery,
+  IssueImportFinishGithubOAuthQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issueImportFinishGithubOAuth" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportFinishGithubOAuth" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OAuthTokenPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...OAuthTokenPayloadFragmentDoc.definitions,
   ],
 };
 export const IssueLabelDocument: DocumentNode<IssueLabelQuery, IssueLabelQueryVariables> = {
@@ -20190,6 +21971,136 @@ export const ApiKeyDeleteDocument: DocumentNode<ApiKeyDeleteMutation, ApiKeyDele
       },
     },
     ...ArchivePayloadFragmentDoc.definitions,
+  ],
+};
+export const AttachmentArchiveDocument: DocumentNode<AttachmentArchiveMutation, AttachmentArchiveMutationVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentArchive" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+};
+export const AttachmentCreateDocument: DocumentNode<AttachmentCreateMutation, AttachmentCreateMutationVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentCreate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+};
+export const AttachmentUpdateDocument: DocumentNode<AttachmentUpdateMutation, AttachmentUpdateMutationVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentUpdate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
   ],
 };
 export const BillingEmailUpdateDocument: DocumentNode<

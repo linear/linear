@@ -253,6 +253,104 @@ export class ArchiveResponse extends Request {
   public totalCount?: number;
 }
 /**
+ * [Alpha] Issue attachment (e.g. support ticket, pull request).
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AttachmentFragment response data
+ */
+export class Attachment extends Request {
+  private _issue?: L.AttachmentFragment["issue"];
+
+  public constructor(request: LinearRequest, data: L.AttachmentFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt ?? undefined;
+    this.groupBySource = data.groupBySource ?? undefined;
+    this.id = data.id ?? undefined;
+    this.metadata = data.metadata ?? undefined;
+    this.source = data.source ?? undefined;
+    this.subtitle = data.subtitle ?? undefined;
+    this.title = data.title ?? undefined;
+    this.updatedAt = data.updatedAt ?? undefined;
+    this.url = data.url ?? undefined;
+    this._issue = data.issue ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: L.Scalars["DateTime"];
+  /** The time at which the entity was created. */
+  public createdAt?: L.Scalars["DateTime"];
+  /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
+  public groupBySource?: boolean;
+  /** The unique identifier of the entity. */
+  public id?: string;
+  /** Custom metadata related to the attachment. */
+  public metadata?: L.Scalars["JSONObject"];
+  /** Information about the source which created the attachment. */
+  public source?: L.Scalars["JSONObject"];
+  /** Content for the subtitle line in the Linear attachment widget. */
+  public subtitle?: string;
+  /** Content for the title line in the Linear attachment widget. */
+  public title?: string;
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been update after creation.
+   */
+  public updatedAt?: L.Scalars["DateTime"];
+  /** Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL. */
+  public url?: string;
+  /** The issue this attachment belongs to. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+}
+/**
+ * AttachmentConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this AttachmentConnection model
+ * @param data - AttachmentConnection response data
+ */
+export class AttachmentConnection extends Connection<Attachment> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Attachment>>,
+    data: L.AttachmentConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data?.nodes ? data.nodes.map(node => new Attachment(request, node)) : undefined,
+      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+    );
+  }
+}
+/**
+ * AttachmentPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AttachmentPayloadFragment response data
+ */
+export class AttachmentPayload extends Request {
+  private _attachment?: L.AttachmentPayloadFragment["attachment"];
+
+  public constructor(request: LinearRequest, data: L.AttachmentPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this._attachment = data.attachment ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The issue attachment that was created. */
+  public get attachment(): LinearFetch<Attachment> | undefined {
+    return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
+  }
+}
+/**
  * AuthResolverResponse model
  *
  * @param request - function to call the graphql client
@@ -437,7 +535,7 @@ export class Comment extends Request {
   public updatedAt?: L.Scalars["DateTime"];
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The user who wrote the comment. */
   public get user(): LinearFetch<User> | undefined {
@@ -1035,7 +1133,7 @@ export class Favorite extends Request {
   }
   /** Favorited issue. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** Favorited issue label. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -1197,6 +1295,48 @@ export class FileUpload extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+}
+/**
+ * Relevant information for the GitHub organization.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GithubOrgFragment response data
+ */
+export class GithubOrg extends Request {
+  public constructor(request: LinearRequest, data: L.GithubOrgFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.login = data.login ?? undefined;
+    this.name = data.name ?? undefined;
+    this.repositories = data.repositories ? data.repositories.map(node => new GithubRepo(request, node)) : undefined;
+  }
+
+  /** GitHub org's id. */
+  public id?: string;
+  /** The login for the GitHub org. */
+  public login?: string;
+  /** The name of the GitHub org. */
+  public name?: string;
+  /** Repositories that the org owns. */
+  public repositories?: GithubRepo[];
+}
+/**
+ * Relevant information for the GitHub repository.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GithubRepoFragment response data
+ */
+export class GithubRepo extends Request {
+  public constructor(request: LinearRequest, data: L.GithubRepoFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.name = data.name ?? undefined;
+  }
+
+  /** The id of the GitHub repository. */
+  public id?: string;
+  /** The name of the GitHub repository. */
+  public name?: string;
 }
 /**
  * Google Sheets specific settings.
@@ -1381,7 +1521,7 @@ export class IntegrationResource extends Request {
   }
   /** The issue that the resource is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
 /**
@@ -1643,7 +1783,7 @@ export class Issue extends Request {
   }
   /** The parent of the issue. */
   public get parent(): LinearFetch<Issue> | undefined {
-    return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
+    return this._parent?.id ? new AttachmentIssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
@@ -1656,6 +1796,10 @@ export class Issue extends Request {
   /** The team that the issue is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** Attachments associated with the issue. */
+  public attachments(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">) {
+    return this.id ? new Issue_AttachmentsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Children of the issue. */
   public children(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">) {
@@ -1822,7 +1966,7 @@ export class IssueHistory extends Request {
   }
   /** The previous parent of the issue. */
   public get fromParent(): LinearFetch<Issue> | undefined {
-    return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
+    return this._fromParent?.id ? new AttachmentIssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
   /** The previous project of the issue. */
   public get fromProject(): LinearFetch<Project> | undefined {
@@ -1838,7 +1982,7 @@ export class IssueHistory extends Request {
   }
   /** The issue that was changed. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The user to whom the issue was assigned to. */
   public get toAssignee(): LinearFetch<User> | undefined {
@@ -1850,7 +1994,7 @@ export class IssueHistory extends Request {
   }
   /** The new parent of the issue. */
   public get toParent(): LinearFetch<Issue> | undefined {
-    return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
+    return this._toParent?.id ? new AttachmentIssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
   /** The new project of the issue. */
   public get toProject(): LinearFetch<Project> | undefined {
@@ -2067,7 +2211,7 @@ export class IssuePayload extends Request {
   public success?: boolean;
   /** The issue that was created or updated. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
 /**
@@ -2106,11 +2250,11 @@ export class IssueRelation extends Request {
   public updatedAt?: L.Scalars["DateTime"];
   /** The issue whose relationship is being described. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The related issue. */
   public get relatedIssue(): LinearFetch<Issue> | undefined {
-    return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
+    return this._relatedIssue?.id ? new AttachmentIssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
   }
 }
 /**
@@ -2302,7 +2446,7 @@ export class Notification extends Request {
   }
   /** The issue that the notification is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return this._issue?.id ? new AttachmentIssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The team which the notification is associated with. */
   public get team(): LinearFetch<Team> | undefined {
@@ -2455,6 +2599,24 @@ export class NotificationSubscriptionPayload extends Request {
       ? new NotificationSubscriptionQuery(this._request).fetch(this._notificationSubscription?.id)
       : undefined;
   }
+}
+/**
+ * GitHub OAuth token, plus information about the organizations the user is a member of.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OAuthTokenPayloadFragment response data
+ */
+export class OAuthTokenPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OAuthTokenPayloadFragment) {
+    super(request);
+    this.token = data.token ?? undefined;
+    this.organizations = data.organizations ? data.organizations.map(node => new GithubOrg(request, node)) : undefined;
+  }
+
+  /** The OAuth token if the operation to fetch it was successful. */
+  public token?: string;
+  /** A list of the GitHub orgs the user is a member of with attached repositories. */
+  public organizations?: GithubOrg[];
 }
 /**
  * OAuth2 client application
@@ -4829,6 +4991,86 @@ export class ArchivedModelsSyncQuery extends Request {
 }
 
 /**
+ * A fetchable Attachment Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Attachment query and return a Attachment
+   *
+   * @param id - required id to pass to attachment
+   * @returns parsed response from AttachmentQuery
+   */
+  public async fetch(id: string): LinearFetch<Attachment> {
+    return this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(L.AttachmentDocument, {
+      id,
+    }).then(response => {
+      const data = response?.attachment;
+      return data ? new Attachment(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentIssueQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentIssue query and return a Issue
+   *
+   * @param id - required id to pass to attachmentIssue
+   * @returns parsed response from AttachmentIssueQuery
+   */
+  public async fetch(id: string): LinearFetch<Issue> {
+    return this._request<L.AttachmentIssueQuery, L.AttachmentIssueQueryVariables>(L.AttachmentIssueDocument, {
+      id,
+    }).then(response => {
+      const data = response?.attachmentIssue;
+      return data ? new Issue(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable Attachments Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Attachments query and return a AttachmentConnection
+   *
+   * @param variables - variables to pass into the AttachmentsQuery
+   * @returns parsed response from AttachmentsQuery
+   */
+  public async fetch(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
+    return this._request<L.AttachmentsQuery, L.AttachmentsQueryVariables>(L.AttachmentsDocument, variables).then(
+      response => {
+        const data = response?.attachments;
+        return data
+          ? new AttachmentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+          : undefined;
+      }
+    );
+  }
+}
+
+/**
  * A fetchable AuthorizedApplications Query
  *
  * @param request - function to call the graphql client
@@ -5341,6 +5583,35 @@ export class IssueQuery extends Request {
     }).then(response => {
       const data = response?.issue;
       return data ? new Issue(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IssueImportFinishGithubOAuth Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportFinishGithubOAuthQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportFinishGithubOAuth query and return a OAuthTokenPayload
+   *
+   * @param code - required code to pass to issueImportFinishGithubOAuth
+   * @returns parsed response from IssueImportFinishGithubOAuthQuery
+   */
+  public async fetch(code: string): LinearFetch<OAuthTokenPayload> {
+    return this._request<L.IssueImportFinishGithubOAuthQuery, L.IssueImportFinishGithubOAuthQueryVariables>(
+      L.IssueImportFinishGithubOAuthDocument,
+      {
+        code,
+      }
+    ).then(response => {
+      const data = response?.issueImportFinishGithubOAuth;
+      return data ? new OAuthTokenPayload(this._request, data) : undefined;
     });
   }
 }
@@ -6447,6 +6718,89 @@ export class ApiKeyDeleteMutation extends Request {
     }).then(response => {
       const data = response?.apiKeyDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentArchive Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentArchiveMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentArchive mutation and return a ArchivePayload
+   *
+   * @param id - required id to pass to attachmentArchive
+   * @returns parsed response from AttachmentArchiveMutation
+   */
+  public async fetch(id: string): LinearFetch<ArchivePayload> {
+    return this._request<L.AttachmentArchiveMutation, L.AttachmentArchiveMutationVariables>(
+      L.AttachmentArchiveDocument,
+      {
+        id,
+      }
+    ).then(response => {
+      const data = response?.attachmentArchive;
+      return data ? new ArchivePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentCreate Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentCreateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentCreate mutation and return a AttachmentPayload
+   *
+   * @param input - required input to pass to attachmentCreate
+   * @returns parsed response from AttachmentCreateMutation
+   */
+  public async fetch(input: L.AttachmentCreateInput): LinearFetch<AttachmentPayload> {
+    return this._request<L.AttachmentCreateMutation, L.AttachmentCreateMutationVariables>(L.AttachmentCreateDocument, {
+      input,
+    }).then(response => {
+      const data = response?.attachmentCreate;
+      return data ? new AttachmentPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentUpdate Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentUpdateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentUpdate mutation and return a AttachmentPayload
+   *
+   * @param id - required id to pass to attachmentUpdate
+   * @param input - required input to pass to attachmentUpdate
+   * @returns parsed response from AttachmentUpdateMutation
+   */
+  public async fetch(id: string, input: L.AttachmentUpdateInput): LinearFetch<AttachmentPayload> {
+    return this._request<L.AttachmentUpdateMutation, L.AttachmentUpdateMutationVariables>(L.AttachmentUpdateDocument, {
+      id,
+      input,
+    }).then(response => {
+      const data = response?.attachmentUpdate;
+      return data ? new AttachmentPayload(this._request, data) : undefined;
     });
   }
 }
@@ -10063,6 +10417,400 @@ export class WorkflowStateUpdateMutation extends Request {
 }
 
 /**
+ * A fetchable AttachmentIssue_Attachments Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_AttachmentsQuery
+ */
+export class AttachmentIssue_AttachmentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_AttachmentsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_AttachmentsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_Attachments query and return a AttachmentConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_AttachmentsQuery
+   * @returns parsed response from AttachmentIssue_AttachmentsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_AttachmentsQueryVariables, "id">
+  ): LinearFetch<AttachmentConnection> {
+    return this._request<L.AttachmentIssue_AttachmentsQuery, L.AttachmentIssue_AttachmentsQueryVariables>(
+      L.AttachmentIssue_AttachmentsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.attachmentIssue?.attachments;
+      return data
+        ? new AttachmentConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_Children Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_ChildrenQuery
+ */
+export class AttachmentIssue_ChildrenQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_ChildrenQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_ChildrenQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_Children query and return a IssueConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_ChildrenQuery
+   * @returns parsed response from AttachmentIssue_ChildrenQuery
+   */
+  public async fetch(variables?: Omit<L.AttachmentIssue_ChildrenQueryVariables, "id">): LinearFetch<IssueConnection> {
+    return this._request<L.AttachmentIssue_ChildrenQuery, L.AttachmentIssue_ChildrenQueryVariables>(
+      L.AttachmentIssue_ChildrenDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.attachmentIssue?.children;
+      return data
+        ? new IssueConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_Comments Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_CommentsQuery
+ */
+export class AttachmentIssue_CommentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_CommentsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_CommentsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_Comments query and return a CommentConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_CommentsQuery
+   * @returns parsed response from AttachmentIssue_CommentsQuery
+   */
+  public async fetch(variables?: Omit<L.AttachmentIssue_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
+    return this._request<L.AttachmentIssue_CommentsQuery, L.AttachmentIssue_CommentsQueryVariables>(
+      L.AttachmentIssue_CommentsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.attachmentIssue?.comments;
+      return data
+        ? new CommentConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_History Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_HistoryQuery
+ */
+export class AttachmentIssue_HistoryQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_HistoryQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_HistoryQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_History query and return a IssueHistoryConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_HistoryQuery
+   * @returns parsed response from AttachmentIssue_HistoryQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_HistoryQueryVariables, "id">
+  ): LinearFetch<IssueHistoryConnection> {
+    return this._request<L.AttachmentIssue_HistoryQuery, L.AttachmentIssue_HistoryQueryVariables>(
+      L.AttachmentIssue_HistoryDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.attachmentIssue?.history;
+      return data
+        ? new IssueHistoryConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_InverseRelations Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_InverseRelationsQuery
+ */
+export class AttachmentIssue_InverseRelationsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_InverseRelationsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_InverseRelationsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_InverseRelations query and return a IssueRelationConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_InverseRelationsQuery
+   * @returns parsed response from AttachmentIssue_InverseRelationsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_InverseRelationsQueryVariables, "id">
+  ): LinearFetch<IssueRelationConnection> {
+    return this._request<L.AttachmentIssue_InverseRelationsQuery, L.AttachmentIssue_InverseRelationsQueryVariables>(
+      L.AttachmentIssue_InverseRelationsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.attachmentIssue?.inverseRelations;
+      return data
+        ? new IssueRelationConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_Labels Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_LabelsQuery
+ */
+export class AttachmentIssue_LabelsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_LabelsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_LabelsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_Labels query and return a IssueLabelConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_LabelsQuery
+   * @returns parsed response from AttachmentIssue_LabelsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_LabelsQueryVariables, "id">
+  ): LinearFetch<IssueLabelConnection> {
+    return this._request<L.AttachmentIssue_LabelsQuery, L.AttachmentIssue_LabelsQueryVariables>(
+      L.AttachmentIssue_LabelsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.attachmentIssue?.labels;
+      return data
+        ? new IssueLabelConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_Relations Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_RelationsQuery
+ */
+export class AttachmentIssue_RelationsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_RelationsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_RelationsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_Relations query and return a IssueRelationConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_RelationsQuery
+   * @returns parsed response from AttachmentIssue_RelationsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_RelationsQueryVariables, "id">
+  ): LinearFetch<IssueRelationConnection> {
+    return this._request<L.AttachmentIssue_RelationsQuery, L.AttachmentIssue_RelationsQueryVariables>(
+      L.AttachmentIssue_RelationsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.attachmentIssue?.relations;
+      return data
+        ? new IssueRelationConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_Subscribers Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_SubscribersQuery
+ */
+export class AttachmentIssue_SubscribersQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_SubscribersQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_SubscribersQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_Subscribers query and return a UserConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_SubscribersQuery
+   * @returns parsed response from AttachmentIssue_SubscribersQuery
+   */
+  public async fetch(variables?: Omit<L.AttachmentIssue_SubscribersQueryVariables, "id">): LinearFetch<UserConnection> {
+    return this._request<L.AttachmentIssue_SubscribersQuery, L.AttachmentIssue_SubscribersQueryVariables>(
+      L.AttachmentIssue_SubscribersDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.attachmentIssue?.subscribers;
+      return data
+        ? new UserConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable BillingDetails_PaymentMethod Query
  *
  * @param request - function to call the graphql client
@@ -10299,6 +11047,47 @@ export class InviteInfo_InviteDataQuery extends Request {
     ).then(response => {
       const data = response?.inviteInfo?.inviteData;
       return data ? new InviteData(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable Issue_Attachments Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_AttachmentsQuery
+ */
+export class Issue_AttachmentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Issue_Attachments query and return a AttachmentConnection
+   *
+   * @param variables - variables without 'id' to pass into the Issue_AttachmentsQuery
+   * @returns parsed response from Issue_AttachmentsQuery
+   */
+  public async fetch(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">): LinearFetch<AttachmentConnection> {
+    return this._request<L.Issue_AttachmentsQuery, L.Issue_AttachmentsQueryVariables>(L.Issue_AttachmentsDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
+    }).then(response => {
+      const data = response?.issue?.attachments;
+      return data
+        ? new AttachmentConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
     });
   }
 }
@@ -11835,6 +12624,33 @@ export class LinearSdk extends Request {
     return new ArchivedModelsSyncQuery(this._request).fetch(modelClass, teamId, variables);
   }
   /**
+   * Query attachment for Attachment
+   *
+   * @param id - required id to pass to attachment
+   * @returns Attachment
+   */
+  public attachment(id: string): LinearFetch<Attachment> {
+    return new AttachmentQuery(this._request).fetch(id);
+  }
+  /**
+   * Query attachmentIssue for Issue
+   *
+   * @param id - required id to pass to attachmentIssue
+   * @returns Issue
+   */
+  public attachmentIssue(id: string): LinearFetch<Issue> {
+    return new AttachmentIssueQuery(this._request).fetch(id);
+  }
+  /**
+   * Query attachments for AttachmentConnection
+   *
+   * @param variables - variables to pass into the AttachmentsQuery
+   * @returns AttachmentConnection
+   */
+  public attachments(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
+    return new AttachmentsQuery(this._request).fetch(variables);
+  }
+  /**
    * Query authorizedApplications for AuthorizedApplications
    *
    * @returns AuthorizedApplication[]
@@ -12015,6 +12831,15 @@ export class LinearSdk extends Request {
    */
   public issue(id: string): LinearFetch<Issue> {
     return new IssueQuery(this._request).fetch(id);
+  }
+  /**
+   * Query issueImportFinishGithubOAuth for OAuthTokenPayload
+   *
+   * @param code - required code to pass to issueImportFinishGithubOAuth
+   * @returns OAuthTokenPayload
+   */
+  public issueImportFinishGithubOAuth(code: string): LinearFetch<OAuthTokenPayload> {
+    return new IssueImportFinishGithubOAuthQuery(this._request).fetch(code);
   }
   /**
    * Query issueLabel for IssueLabel
@@ -12391,6 +13216,34 @@ export class LinearSdk extends Request {
    */
   public apiKeyDelete(id: string): LinearFetch<ArchivePayload> {
     return new ApiKeyDeleteMutation(this._request).fetch(id);
+  }
+  /**
+   * Mutation attachmentArchive for ArchivePayload
+   *
+   * @param id - required id to pass to attachmentArchive
+   * @returns ArchivePayload
+   */
+  public attachmentArchive(id: string): LinearFetch<ArchivePayload> {
+    return new AttachmentArchiveMutation(this._request).fetch(id);
+  }
+  /**
+   * Mutation attachmentCreate for AttachmentPayload
+   *
+   * @param input - required input to pass to attachmentCreate
+   * @returns AttachmentPayload
+   */
+  public attachmentCreate(input: L.AttachmentCreateInput): LinearFetch<AttachmentPayload> {
+    return new AttachmentCreateMutation(this._request).fetch(input);
+  }
+  /**
+   * Mutation attachmentUpdate for AttachmentPayload
+   *
+   * @param id - required id to pass to attachmentUpdate
+   * @param input - required input to pass to attachmentUpdate
+   * @returns AttachmentPayload
+   */
+  public attachmentUpdate(id: string, input: L.AttachmentUpdateInput): LinearFetch<AttachmentPayload> {
+    return new AttachmentUpdateMutation(this._request).fetch(id, input);
   }
   /**
    * Mutation billingEmailUpdate for BillingEmailPayload
