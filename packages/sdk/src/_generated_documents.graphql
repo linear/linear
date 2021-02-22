@@ -989,6 +989,16 @@ fragment OrganizationDomain on OrganizationDomain {
   }
 }
 
+# GitHub OAuth token, plus information about the organizations the user is a member of.
+fragment OAuthTokenPayload on OAuthTokenPayload {
+  # A list of the GitHub orgs the user is a member of with attached repositories.
+  organizations {
+    ...GithubOrg
+  }
+  # The OAuth token if the operation to fetch it was successful.
+  token
+}
+
 # GitHub's commit data
 fragment CommitPayload on CommitPayload {
   added
@@ -1215,6 +1225,28 @@ fragment PullRequestPayload on PullRequestPayload {
   userLogin
 }
 
+# Relevant information for the GitHub organization.
+fragment GithubOrg on GithubOrg {
+  # GitHub org's id.
+  id
+  # Repositories that the org owns.
+  repositories {
+    ...GithubRepo
+  }
+  # The login for the GitHub org.
+  login
+  # The name of the GitHub org.
+  name
+}
+
+# Relevant information for the GitHub repository.
+fragment GithubRepo on GithubRepo {
+  # The id of the GitHub repository.
+  id
+  # The name of the GitHub repository.
+  name
+}
+
 # Sentry issue data
 fragment SentryIssuePayload on SentryIssuePayload {
   # The Sentry identifier for the issue.
@@ -1388,6 +1420,35 @@ fragment ViewPreferences on ViewPreferences {
   viewType
 }
 
+# [Alpha] Issue attachment (e.g. support ticket, pull request).
+fragment Attachment on Attachment {
+  # Content for the subtitle line in the Linear attachment widget.
+  subtitle
+  # Content for the title line in the Linear attachment widget.
+  title
+  # Custom metadata related to the attachment.
+  metadata
+  # Indicates if attachments for the same source application should be grouped in the Linear UI.
+  groupBySource
+  # Information about the source which created the attachment.
+  source
+  # Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL.
+  url
+  # The issue this attachment belongs to.
+  issue {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 fragment ApiKeyConnection on ApiKeyConnection {
   nodes {
     ...ApiKey
@@ -1411,6 +1472,26 @@ fragment ApiKeyPayload on ApiKeyPayload {
 fragment ArchivePayload on ArchivePayload {
   # The identifier of the last sync operation.
   lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment AttachmentConnection on AttachmentConnection {
+  nodes {
+    ...Attachment
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment AttachmentPayload on AttachmentPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The issue attachment that was created.
+  attachment {
+    id
+  }
   # Whether the operation was successful.
   success
 }
@@ -2287,6 +2368,287 @@ query archivedModelsSync(
     ...ArchiveResponse
   }
 }
+# [Alpha] One specific issue attachment. `url` can be used as the `id` parameter.
+query attachment($id: String!) {
+  attachment(id: $id) {
+    ...Attachment
+  }
+}
+# [Alpha] Query an issue by its associated attachment, and its id or URI.
+query attachmentIssue(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+) {
+  attachmentIssue(id: $id) {
+    ...Issue
+  }
+}
+# Attachments associated with the issue.
+query attachmentIssue_attachments(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    attachments(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Children of the issue.
+query attachmentIssue_children(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    children(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Comments associated with the issue.
+query attachmentIssue_comments(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    comments(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CommentConnection
+    }
+  }
+}
+# History entries associated with the issue.
+query attachmentIssue_history(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    history(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueHistoryConnection
+    }
+  }
+}
+# Inverse relations associated with this issue.
+query attachmentIssue_inverseRelations(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    inverseRelations(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueRelationConnection
+    }
+  }
+}
+# Labels associated with this issue.
+query attachmentIssue_labels(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    labels(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueLabelConnection
+    }
+  }
+}
+# Relations associated with this issue.
+query attachmentIssue_relations(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    relations(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueRelationConnection
+    }
+  }
+}
+# Users who are subscribed to the issue.
+query attachmentIssue_subscribers(
+  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    subscribers(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...UserConnection
+    }
+  }
+}
+# [Alpha] All issue attachments.
+query attachments(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachments(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AttachmentConnection
+  }
+}
 # Get all authorized applications for a user
 query authorizedApplications {
   authorizedApplications {
@@ -2651,6 +3013,35 @@ query issue($id: String!) {
     ...Issue
   }
 }
+# Attachments associated with the issue.
+query issue_attachments(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    attachments(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
 # Children of the issue.
 query issue_children(
   $id: String!
@@ -2852,6 +3243,15 @@ query issue_subscribers(
     ) {
       ...UserConnection
     }
+  }
+}
+# Fetches the GitHub token, completing the OAuth flow.
+query issueImportFinishGithubOAuth(
+  # OAuth code.
+  $code: String!
+) {
+  issueImportFinishGithubOAuth(code: $code) {
+    ...OAuthTokenPayload
   }
 }
 # One specific label.
@@ -4288,6 +4688,35 @@ mutation apiKeyDelete(
     ...ArchivePayload
   }
 }
+# [Alpha] Archives an issue attachment.
+mutation attachmentArchive(
+  # The identifier of the attachment to delete.
+  $id: String!
+) {
+  attachmentArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# [Alpha] Creates a new attachment, or updates existing if the same `uri` is used.
+mutation attachmentCreate(
+  # The attachment object to create.
+  $input: AttachmentCreateInput!
+) {
+  attachmentCreate(input: $input) {
+    ...AttachmentPayload
+  }
+}
+# [Alpha] Updates an existing issue attachment.
+mutation attachmentUpdate(
+  # The identifier of the comment to update.
+  $id: String!
+  # A partial attachment object to update the attachment with.
+  $input: AttachmentUpdateInput!
+) {
+  attachmentUpdate(id: $id, input: $input) {
+    ...AttachmentPayload
+  }
+}
 # Updates the billing email address for the customer.
 mutation billingEmailUpdate(
   # The properties of the billing details.
@@ -4325,7 +4754,7 @@ mutation commentDelete(
 mutation commentUpdate(
   # The identifier of the comment to update.
   $id: String!
-  # A partial comment object to update the issue with.
+  # A partial comment object to update the comment with.
   $input: CommentUpdateInput!
 ) {
   commentUpdate(id: $id, input: $input) {

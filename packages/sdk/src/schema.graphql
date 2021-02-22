@@ -125,6 +125,126 @@ type ArchiveResponse {
   """
   totalCount: Float!
 }
+"""
+[Alpha] Issue attachment (e.g. support ticket, pull request).
+"""
+type Attachment implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  Indicates if attachments for the same source application should be grouped in the Linear UI.
+  """
+  groupBySource: Boolean!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue this attachment belongs to.
+  """
+  issue: Issue!
+  """
+  Custom metadata related to the attachment.
+  """
+  metadata: JSONObject!
+  """
+  Information about the source which created the attachment.
+  """
+  source: JSONObject
+  """
+  Content for the subtitle line in the Linear attachment widget.
+  """
+  subtitle: String
+  """
+  Content for the title line in the Linear attachment widget.
+  """
+  title: String!
+  """
+  The last time at which the entity was updated. This is the same as the creation time if the
+      entity hasn't been update after creation.
+  """
+  updatedAt: DateTime!
+  """
+  Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL.
+  """
+  url: String!
+}
+type AttachmentConnection {
+  edges: [AttachmentEdge!]!
+  nodes: [Attachment!]!
+  pageInfo: PageInfo!
+}
+input AttachmentCreateInput {
+  """
+  Indicates if attachments for the same source application should be grouped in the Linear UI.
+  """
+  groupBySource: Boolean
+  """
+  The identifier. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The issue to associate the attachment with.
+  """
+  issueId: String!
+  """
+  Attachment metadata object with string and number values.
+  """
+  metadata: JSONObject
+  """
+  The attachment subtitle.
+  """
+  subtitle: String
+  """
+  The attachment title.
+  """
+  title: String!
+  """
+  Attachment location which is also used as an unique identifier for the attachment. If another attachment is created with the same `url` value, existing record is updated instead.
+  """
+  url: String!
+}
+type AttachmentEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Attachment!
+}
+type AttachmentPayload {
+  """
+  The issue attachment that was created.
+  """
+  attachment: Attachment!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+input AttachmentUpdateInput {
+  """
+  Attachment metadata object with string and number values.
+  """
+  metadata: JSONObject
+  """
+  The attachment subtitle.
+  """
+  subtitle: String
+  """
+  The attachment title.
+  """
+  title: String!
+}
 type AuthResolverResponse {
   """
   Should the signup flow allow access for the domain.
@@ -1175,6 +1295,40 @@ type FileUpload {
   size: Float!
 }
 """
+Relevant information for the GitHub organization.
+"""
+type GithubOrg {
+  """
+  GitHub org's id.
+  """
+  id: String!
+  """
+  The login for the GitHub org.
+  """
+  login: String!
+  """
+  The name of the GitHub org.
+  """
+  name: String!
+  """
+  Repositories that the org owns.
+  """
+  repositories: [GithubRepo!]!
+}
+"""
+Relevant information for the GitHub repository.
+"""
+type GithubRepo {
+  """
+  The id of the GitHub repository.
+  """
+  id: String!
+  """
+  The name of the GitHub repository.
+  """
+  name: String!
+}
+"""
 Google Sheets specific settings.
 """
 type GoogleSheetsSettings {
@@ -1449,6 +1603,35 @@ type Issue implements Node {
   The user to whom the issue is assigned to.
   """
   assignee: User
+  """
+  Attachments associated with the issue.
+  """
+  attachments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AttachmentConnection!
   """
   The time at which the issue was automatically archived by the auto pruning process.
   """
@@ -2537,6 +2720,37 @@ type Mutation {
     id: String!
   ): ArchivePayload!
   """
+  [Alpha] Archives an issue attachment.
+  """
+  attachmentArchive(
+    """
+    The identifier of the attachment to delete.
+    """
+    id: String!
+  ): ArchivePayload!
+  """
+  [Alpha] Creates a new attachment, or updates existing if the same `uri` is used.
+  """
+  attachmentCreate(
+    """
+    The attachment object to create.
+    """
+    input: AttachmentCreateInput!
+  ): AttachmentPayload!
+  """
+  [Alpha] Updates an existing issue attachment.
+  """
+  attachmentUpdate(
+    """
+    The identifier of the comment to update.
+    """
+    id: String!
+    """
+    A partial attachment object to update the attachment with.
+    """
+    input: AttachmentUpdateInput!
+  ): AttachmentPayload!
+  """
   Updates the billing email address for the customer.
   """
   billingEmailUpdate(
@@ -2576,7 +2790,7 @@ type Mutation {
     """
     id: String!
     """
-    A partial comment object to update the issue with.
+    A partial comment object to update the comment with.
     """
     input: CommentUpdateInput!
   ): CommentPayload!
@@ -4002,6 +4216,19 @@ input NotificationUpdateInput {
   readAt: DateTime
 }
 """
+GitHub OAuth token, plus information about the organizations the user is a member of.
+"""
+type OAuthTokenPayload {
+  """
+  A list of the GitHub orgs the user is a member of with attached repositories.
+  """
+  organizations: [GithubOrg!]
+  """
+  The OAuth token if the operation to fetch it was successful.
+  """
+  token: String
+}
+"""
 OAuth2 client application
 """
 type OauthClient implements Node {
@@ -5158,6 +5385,48 @@ type Query {
     teamId: String!
   ): ArchiveResponse!
   """
+  [Alpha] One specific issue attachment. `url` can be used as the `id` parameter.
+  """
+  attachment(id: String!): Attachment!
+  """
+  [Alpha] Query an issue by its associated attachment, and its id or URI.
+  """
+  attachmentIssue(
+    """
+    `id` or `url` of the attachment for which you'll want to get the issue for.
+    """
+    id: String!
+  ): Issue!
+  """
+  [Alpha] All issue attachments.
+  """
+  attachments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AttachmentConnection!
+  """
   Get all authorized applications for a user
   """
   authorizedApplications: [AuthorizedApplication!]!
@@ -5457,6 +5726,15 @@ type Query {
   One specific issue.
   """
   issue(id: String!): Issue!
+  """
+  Fetches the GitHub token, completing the OAuth flow.
+  """
+  issueImportFinishGithubOAuth(
+    """
+    OAuth code.
+    """
+    code: String!
+  ): OAuthTokenPayload!
   """
   One specific label.
   """
