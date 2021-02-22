@@ -1,14 +1,17 @@
+import { Doc } from "@linear/codegen-doc";
+
 export const Sdk = {
+  ...Doc,
   CONNECTION_CLASS: "Connection",
-  CONNECTION_TYPE: "LinearConnection",
   CONNECTION_NAME: "connection",
+  CONNECTION_TYPE: "LinearConnection",
   DATA_NAME: "data",
   DATA_TYPE: "Data",
+  FETCH_NAME: "fetch",
+  FETCH_TYPE: "LinearFetch",
   NAMESPACE: "L",
   NODE_NAME: "nodes",
   NODE_TYPE: "Node",
-  FETCH_NAME: "fetch",
-  FETCH_TYPE: "LinearFetch",
   PAGEINFO_NAME: "pageInfo",
   PAGEINFO_TYPE: "PageInfo",
   REQUEST_CLASS: "Request",

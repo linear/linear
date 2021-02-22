@@ -1,4 +1,5 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
+import { Doc } from "./constants";
 import { printList } from "./print";
 
 /**
@@ -13,15 +14,12 @@ export function printTypescriptScalar(name: string, namespace?: string): string 
   if (defaultName) {
     return defaultName;
   } else {
-    switch (name) {
-      case "DateTime":
-      case "TimelessDateScalar":
-        return "Date";
-      case "JSON":
-      case "JSONObject":
-        return "Record<string, unknown>";
-      default:
-        return `${printList([namespace, "Scalars"], ".")}['${name}']`;
+    if (Doc.SCALAR_DATE_NAMES.includes(name)) {
+      return Doc.SCALAR_DATE_TYPE;
+    } else if (Doc.SCALAR_JSON_NAMES.includes(name)) {
+      return Doc.SCALAR_JSON_TYPE;
+    } else {
+      return `${printList([namespace, "Scalars"], ".")}['${name}']`;
     }
   }
 }
