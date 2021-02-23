@@ -11,6 +11,7 @@
     "../**/.eslintrc.json",
     "../.eslintrc.json",
     "./*.json",
+    "../**/docs/**/*.js",
     "../**/packages/**/*.json",
     "../**/packages/**/*.js",
     "../**/packages/**/*.ts",

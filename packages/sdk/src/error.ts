@@ -1,6 +1,5 @@
-import { getKeyByValue, nonNullable } from "@linear/common";
 import { LinearErrorRaw, LinearErrorType, LinearGraphQLErrorRaw } from "./types";
-import { capitalize } from "./utils";
+import { capitalize, getKeyByValue, nonNullable } from "./utils";
 
 /**
  * A map between the Linear API string type and the LinearErrorType enum

@@ -1,7 +1,6 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, PluginContext, printLines } from "@linear/codegen-doc";
+import { ContextVisitor, logger, PluginContext, printLines } from "@linear/codegen-doc";
 import { ModelVisitor, parseOperations, Sdk, SdkModel, SdkPluginConfig, SdkPluginContext } from "@linear/codegen-sdk";
-import { logger } from "@linear/common";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { printTests } from "./print-test";
 
@@ -43,6 +42,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
     const tests = printTests(sdkContext);
 
     return printLines([
+      "/* eslint-disable no-console */",
       `import * as ${Sdk.NAMESPACE} from '../index'`,
       `import { startClient, stopClient } from './test-client'`,
       "\n",

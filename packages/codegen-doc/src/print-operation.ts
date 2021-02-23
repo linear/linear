@@ -1,13 +1,13 @@
-import { getLast, logger } from "@linear/common";
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { printGraphqlInputArgs, printGraphqlResponseArgs } from "./args";
 import { isScalarField, isValidField } from "./field";
 import { findFragment } from "./fragment";
+import { logger } from "./logger";
 import { findObject } from "./object";
 import { printGraphqlDebug, printGraphqlDescription, printLines, printList } from "./print";
 import { findQuery } from "./query";
 import { OperationType, PluginContext } from "./types";
-import { reduceListType } from "./utils";
+import { getLast, reduceListType } from "./utils";
 
 const log = "codegen-doc:print-operation:";
 

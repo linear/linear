@@ -93,6 +93,14 @@ module.exports = {
   },
   overrides: [
     {
+      files: ["**/docs/**/*.js"],
+      rules: {
+        "no-console": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-var-requires": "off",
+      },
+    },
+    {
       files: ["**/_generated*"],
       rules: {
         "@typescript-eslint/explicit-module-boundary-types": "off",

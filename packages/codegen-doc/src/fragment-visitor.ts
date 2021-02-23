@@ -1,4 +1,3 @@
-import { nonNullable } from "@linear/common";
 import autoBind from "auto-bind";
 import {
   DocumentNode,
@@ -16,7 +15,7 @@ import { findObject, isConnection } from "./object";
 import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printLines } from "./print";
 import { findQuery } from "./query";
 import { Fragment, Named, NamedFields, PluginContext } from "./types";
-import { reduceTypeName } from "./utils";
+import { nonNullable, reduceTypeName } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments

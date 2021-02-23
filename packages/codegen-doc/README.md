@@ -28,3 +28,11 @@ An operation for each nested query within a model containing:
 2. The context is visited using the [FragmentVisitor](./src/fragment-visitor.ts) to return a list of printed GraphQL fragments
 3. The fragments and context are visited using the [OperationVisitor](./src/operation-visitor.ts) to return a list of printed GraphQL operations
 4. The printed fragments and operations are returned to be printed 
+
+<!-- AUTO-GENERATED-CONTENT:START (TEXT_SECTION:id=license&src=../../README.md) -->
+## License
+
+<br/>
+
+Licensed under the [MIT License](./LICENSE).
+<!-- AUTO-GENERATED-CONTENT:END -->

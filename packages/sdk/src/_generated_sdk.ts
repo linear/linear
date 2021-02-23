@@ -167,6 +167,11 @@ export class ApiKey extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+
+  /** Deletes an API key. */
+  public delete() {
+    return this.id ? new ApiKeyDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
 }
 /**
  * ApiKeyConnection model
@@ -329,6 +334,15 @@ export class Attachment extends Request {
   /** The issue this attachment belongs to. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+
+  /** [Alpha] Archives an issue attachment. */
+  public archive() {
+    return this.id ? new AttachmentArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** [Alpha] Updates an existing issue attachment. */
+  public update(input: L.AttachmentUpdateInput) {
+    return this.id ? new AttachmentUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**
@@ -568,6 +582,15 @@ export class Comment extends Request {
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
+
+  /** Deletes a comment. */
+  public delete() {
+    return this.id ? new CommentDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a comment. */
+  public update(input: L.CommentUpdateInput) {
+    return this.id ? new CommentUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * CommentConnection model
@@ -753,6 +776,15 @@ export class CustomView extends Request {
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+
+  /** Deletes a custom view. */
+  public delete() {
+    return this.id ? new CustomViewDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a custom view. */
+  public update(input: L.CustomViewUpdateInput) {
+    return this.id ? new CustomViewUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * CustomViewConnection model
@@ -869,6 +901,14 @@ export class Cycle extends Request {
     return this.id
       ? new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id, variables).fetch(variables)
       : undefined;
+  }
+  /** Archives a cycle. */
+  public archive() {
+    return this.id ? new CycleArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a cycle. */
+  public update(input: L.CycleUpdateInput) {
+    return this.id ? new CycleUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**
@@ -1047,6 +1087,11 @@ export class Emoji extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+
+  /** Deletes an emoji. */
+  public delete() {
+    return this.id ? new EmojiDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
 }
 /**
  * EmojiConnection model
@@ -1177,6 +1222,15 @@ export class Favorite extends Request {
   /** The owner of the favorite. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+
+  /** Deletes a favorite reference. */
+  public delete() {
+    return this.id ? new FavoriteDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a favorite. */
+  public update(input: L.FavoriteUpdateInput) {
+    return this.id ? new FavoriteUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**
@@ -1452,6 +1506,15 @@ export class Integration extends Request {
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+
+  /** Deletes an integration. */
+  public delete() {
+    return this.id ? new IntegrationDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Archives an integration resource. */
+  public resourceArchive() {
+    return this.id ? new IntegrationResourceArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
 }
 /**
  * IntegrationConnection model
@@ -1549,6 +1612,11 @@ export class IntegrationResource extends Request {
   /** The issue that the resource is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+
+  /** Archives an integration resource. */
+  public archive() {
+    return this.id ? new IntegrationResourceArchiveMutation(this._request).fetch(this.id) : undefined;
   }
 }
 /**
@@ -1855,6 +1923,18 @@ export class Issue extends Request {
   /** Users who are subscribed to the issue. */
   public subscribers(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">) {
     return this.id ? new Issue_SubscribersQuery(this._request, this.id, variables).fetch(variables) : undefined;
+  }
+  /** Archives an issue. */
+  public archive() {
+    return this.id ? new IssueArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Unarchives an issue. */
+  public unarchive() {
+    return this.id ? new IssueUnarchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates an issue. */
+  public update(input: L.IssueUpdateInput) {
+    return this.id ? new IssueUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**
@@ -2169,6 +2249,14 @@ export class IssueLabel extends Request {
   public issues(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">) {
     return this.id ? new IssueLabel_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
+  /** Archives an issue label. */
+  public archive() {
+    return this.id ? new IssueLabelArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates an label. */
+  public update(input: L.IssueLabelUpdateInput) {
+    return this.id ? new IssueLabelUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * IssueLabelConnection model
@@ -2283,6 +2371,15 @@ export class IssueRelation extends Request {
   public get relatedIssue(): LinearFetch<Issue> | undefined {
     return this._relatedIssue?.id ? new AttachmentIssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
   }
+
+  /** Deletes an issue relation. */
+  public delete() {
+    return this.id ? new IssueRelationDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates an issue relation. */
+  public update(input: L.IssueRelationUpdateInput) {
+    return this.id ? new IssueRelationUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * IssueRelationConnection model
@@ -2369,6 +2466,14 @@ export class Milestone extends Request {
   /** Projects associated with the milestone. */
   public projects(variables?: Omit<L.Milestone_ProjectsQueryVariables, "id">) {
     return this.id ? new Milestone_ProjectsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+  }
+  /** Deletes a milestone. */
+  public delete() {
+    return this.id ? new MilestoneDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a milestone. */
+  public update(input: L.MilestoneUpdateInput) {
+    return this.id ? new MilestoneUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**
@@ -2483,6 +2588,23 @@ export class Notification extends Request {
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
+
+  /** Archives a notification. */
+  public archive() {
+    return this.id ? new NotificationArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** [Deprecated] Deletes a notification. */
+  public delete() {
+    return this.id ? new NotificationDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Unarchives a notification. */
+  public unarchive() {
+    return this.id ? new NotificationUnarchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a notification. */
+  public update(input: L.NotificationUpdateInput) {
+    return this.id ? new NotificationUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * NotificationConnection model
@@ -2577,6 +2699,11 @@ export class NotificationSubscription extends Request {
   /** The user associated with notification subscriptions. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+
+  /** Deletes a notification subscription reference. */
+  public delete() {
+    return this.id ? new NotificationSubscriptionDeleteMutation(this._request).fetch(this.id) : undefined;
   }
 }
 /**
@@ -2695,6 +2822,19 @@ export class OauthClient extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+
+  /** Archives an OAuth client. */
+  public archive() {
+    return this.id ? new OauthClientArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates an OAuth client. */
+  public rotateSecret() {
+    return this.id ? new OauthClientRotateSecretMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates an OAuth client. */
+  public update(input: L.OauthClientUpdateInput) {
+    return this.id ? new OauthClientUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * OauthClientPayload model
@@ -2811,6 +2951,14 @@ export class Organization extends Request {
   public users(variables?: L.Organization_UsersQueryVariables) {
     return new Organization_UsersQuery(this._request, variables).fetch(variables);
   }
+  /** Delete's an organization. Administrator privileges required. */
+  public delete(input: L.DeleteOrganizationInput) {
+    return new OrganizationDeleteMutation(this._request).fetch(input);
+  }
+  /** Updates the user's organization. */
+  public update(input: L.UpdateOrganizationInput) {
+    return new OrganizationUpdateMutation(this._request).fetch(input);
+  }
 }
 /**
  * OrganizationDeletePayload model
@@ -2868,6 +3016,11 @@ export class OrganizationDomain extends Request {
   /** The user who added the domain. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+
+  /** Deletes a domain. */
+  public delete() {
+    return this.id ? new OrganizationDomainDeleteMutation(this._request).fetch(this.id) : undefined;
   }
 }
 /**
@@ -2984,6 +3137,10 @@ export class OrganizationInvite extends Request {
   /** undefined */
   public issues(variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">) {
     return this.id ? new OrganizationInvite_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+  }
+  /** Deletes an organization invite. */
+  public delete() {
+    return this.id ? new OrganizationInviteDeleteMutation(this._request).fetch(this.id) : undefined;
   }
 }
 /**
@@ -3191,6 +3348,14 @@ export class Project extends Request {
   public teams(variables?: Omit<L.Project_TeamsQueryVariables, "id">) {
     return this.id ? new Project_TeamsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
+  /** Archives a project. */
+  public archive() {
+    return this.id ? new ProjectArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a project. */
+  public update(input: L.ProjectUpdateInput) {
+    return this.id ? new ProjectUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * ProjectConnection model
@@ -3257,6 +3422,11 @@ export class ProjectLink extends Request {
   /** The project that the link is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+
+  /** Deletes a project link. */
+  public delete() {
+    return this.id ? new ProjectLinkDeleteMutation(this._request).fetch(this.id) : undefined;
   }
 }
 /**
@@ -3398,6 +3568,11 @@ export class PushSubscription extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+
+  /** Deletes a push subscription. */
+  public delete() {
+    return this.id ? new PushSubscriptionDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
 }
 /**
  * PushSubscriptionConnection model
@@ -3479,6 +3654,11 @@ export class Reaction extends Request {
   /** The user who reacted. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+
+  /** Deletes a reaction. */
+  public delete() {
+    return this.id ? new ReactionDeleteMutation(this._request).fetch(this.id) : undefined;
   }
 }
 /**
@@ -3735,6 +3915,19 @@ export class Subscription extends Request {
   /** The organization that the subscription is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+
+  /** Archives a subscription. */
+  public archive() {
+    return this.id ? new SubscriptionArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a subscription. */
+  public update(input: L.SubscriptionUpdateInput) {
+    return this.id ? new SubscriptionUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
+  /** Upgrades a subscription plan. */
+  public upgrade() {
+    return this.id && this.type ? new SubscriptionUpgradeMutation(this._request).fetch(this.id, this.type) : undefined;
   }
 }
 /**
@@ -4013,6 +4206,18 @@ export class Team extends Request {
   public webhooks(variables?: Omit<L.Team_WebhooksQueryVariables, "id">) {
     return this.id ? new Team_WebhooksQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
+  /** Archives a team. */
+  public archive() {
+    return this.id ? new TeamArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Deletes a team. */
+  public delete() {
+    return this.id ? new TeamDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a team. */
+  public update(input: L.TeamUpdateInput) {
+    return this.id ? new TeamUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * TeamConnection model
@@ -4076,6 +4281,15 @@ export class TeamMembership extends Request {
   /** The user that the membership is associated with. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+
+  /** Deletes a team membership. */
+  public delete() {
+    return this.id ? new TeamMembershipDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a team membership. */
+  public update(input: L.TeamMembershipUpdateInput) {
+    return this.id ? new TeamMembershipUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**
@@ -4201,6 +4415,15 @@ export class Template extends Request {
   /** The team that the template is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+
+  /** Deletes a template. */
+  public delete() {
+    return this.id ? new TemplateDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates an existing template. */
+  public update(input: L.TemplateUpdateInput) {
+    return this.id ? new TemplateUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**
@@ -4388,6 +4611,22 @@ export class User extends Request {
   public teams(variables?: Omit<L.User_TeamsQueryVariables, "id">) {
     return this.id ? new User_TeamsQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
+  /** Updates the user's settings. */
+  public settingsUpdate(input: L.UserSettingsUpdateInput) {
+    return this.id ? new UserSettingsUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
+  /** Suspends a user. Can only be called by an admin. */
+  public suspend() {
+    return this.id ? new UserSuspendMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Un-suspends a user. Can only be called by an admin. */
+  public unsuspend() {
+    return this.id ? new UserUnsuspendMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a user. Only available to organization admins and the user themselves. */
+  public update(input: L.UpdateUserInput) {
+    return this.id ? new UserUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * A user account.
@@ -4558,6 +4797,11 @@ export class UserSettings extends Request {
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
+
+  /** Updates the user's settings. */
+  public update(input: L.UserSettingsUpdateInput) {
+    return this.id ? new UserSettingsUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * UserSettingsFlagPayload model
@@ -4670,6 +4914,15 @@ export class ViewPreferences extends Request {
   public updatedAt?: Date;
   /** The view type. */
   public viewType?: string;
+
+  /** Deletes a ViewPreferences. */
+  public delete() {
+    return this.id ? new ViewPreferencesDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates an existing ViewPreferences object. */
+  public update(input: L.ViewPreferencesUpdateInput) {
+    return this.id ? new ViewPreferencesUpdateMutation(this._request).fetch(this.id, input) : undefined;
+  }
 }
 /**
  * ViewPreferencesPayload model
@@ -4745,6 +4998,15 @@ export class Webhook extends Request {
   /** The team that the webhook is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+
+  /** Deletes a Webhook. */
+  public delete() {
+    return this.id ? new WebhookDeleteMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates an existing Webhook. */
+  public update(input: L.WebhookUpdateInput) {
+    return this.id ? new WebhookUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**
@@ -4844,6 +5106,14 @@ export class WorkflowState extends Request {
   /** Issues belonging in this state. */
   public issues(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">) {
     return this.id ? new WorkflowState_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+  }
+  /** Archives a state. Only states with issues that have all been archived can be archived. */
+  public archive() {
+    return this.id ? new WorkflowStateArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Updates a state. */
+  public update(input: L.WorkflowStateUpdateInput) {
+    return this.id ? new WorkflowStateUpdateMutation(this._request).fetch(this.id, input) : undefined;
   }
 }
 /**

@@ -46,3 +46,11 @@ An SDK class containing a public getter for each root query and mutation which:
 3. The models and context are [parsed](./src/parse-operation.ts) to return a map of all operations for each nested resource
 4. The parsed models, operations and context are used to print [models](./src/print-model.ts), [operations](./src/print-operation.ts) and the [sdk](./src/print-sdk.ts)
 5. The printed models, operations and sdk are returned to be printed
+   
+<!-- AUTO-GENERATED-CONTENT:START (TEXT_SECTION:id=license&src=../../README.md) -->
+## License
+
+<br/>
+
+Licensed under the [MIT License](./LICENSE).
+<!-- AUTO-GENERATED-CONTENT:END -->

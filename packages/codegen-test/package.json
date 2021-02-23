@@ -1,7 +1,8 @@
 {
   "name": "@linear/codegen-test",
+  "private": true,
   "description": "Plugin for generating jest tests for the Linear Client",
-  "version": "1.0.6",
+  "version": "1.5.3",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -20,27 +21,19 @@
     "build:codegen-test": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c"
   },
-  "peerDependencies": {
-    "graphql": "^15.4.0"
-  },
   "devDependencies": {
     "@graphql-codegen/plugin-helpers": "^1.18.1",
     "@graphql-codegen/visitor-plugin-common": "^1.17.17",
     "@graphql-tools/graphql-file-loader": "^6.2.5",
     "@graphql-tools/load": "^6.2.5",
-    "@linear/codegen-doc": "^1.0.6",
-    "@linear/codegen-sdk": "^1.0.6",
-    "@linear/common": "^1.0.6",
     "@rollup/plugin-typescript": "^8.1.1",
     "auto-bind": "^4.0.0",
+    "graphql": "^15.4.0",
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-size-snapshot": "^0.12.0",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.0.5"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
 }
