@@ -78,8 +78,10 @@ export interface PluginContext<C extends PluginConfig = PluginConfig> {
   fragments: Fragment[];
   /** All object definitions */
   objects: ObjectTypeDefinitionNode[];
-  /** All query definitions */
+  /** All query field definitions */
   queries: readonly FieldDefinitionNode[];
+  /** All mutation field definitions */
+  mutations: readonly FieldDefinitionNode[];
   /** A map for determining operation type names */
   operationMap: Record<OperationType, string>;
   /** The plugin config */

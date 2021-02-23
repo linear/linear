@@ -70,12 +70,20 @@ export function parseOperations(
     }) as FragmentSpreadNode | undefined;
     const fragment = context.objects.find(object => object.name.value === fragmentNode?.name.value);
 
-    const query = context.queries.find(q => q.name.value === node.name?.value);
+    /** Find a matching query or mutation for descriptions */
+    const query =
+      context.queries.find(q => q.name.value === node.name?.value) ??
+      context.mutations.find(q => q.name.value === node.name?.value);
+
+    /** Identify list types */
     const queryType = printTypescriptType(context, query?.type);
     const listType = queryType?.endsWith("[]") ? queryType : undefined;
 
+    /** Find a matching model */
+    const model = models.find(b => b.name === fragment?.name.value);
+    const modelName = model?.name ?? "UNKNOWN_MODEL";
+
     /** Store printable type names */
-    const modelName = fragment?.name.value ?? "UNKNOWN_MODEL";
     const print: SdkOperationPrint = {
       /** The name of the operation */
       name: operationName,
@@ -98,13 +106,6 @@ export function parseOperations(
       /** The returned promise result from fetch  */
       promise: `${Sdk.FETCH_TYPE}<${listType ?? modelName}>`,
     };
-
-    /** Find a matching model */
-    const model = models.find(
-      b =>
-        /** Or the returned fragment type */
-        b.name === fragment?.name.value
-    );
 
     /** Find a parent operation */
     const parentSdkKey = sdkPath.slice(0, -1).join("_");
@@ -154,6 +155,7 @@ export function parseOperations(
       sdkKey,
       sdkPath,
       node,
+      query,
       model,
       fragment,
       args: getArgList(args),

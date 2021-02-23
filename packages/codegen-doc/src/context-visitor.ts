@@ -12,6 +12,7 @@ export class ContextVisitor<Config extends PluginConfig> {
   private _scalars: typeof DEFAULT_SCALARS = DEFAULT_SCALARS;
   private _objects: ObjectTypeDefinitionNode[] = [];
   private _queries: FieldDefinitionNode[] = [];
+  private _mutations: FieldDefinitionNode[] = [];
 
   /** Initialize the visitor */
   public constructor(schema: GraphQLSchema, config: Config) {
@@ -31,6 +32,7 @@ export class ContextVisitor<Config extends PluginConfig> {
       scalars: this._scalars,
       objects: this._objects,
       queries: this._queries,
+      mutations: this._mutations,
       operationMap: {
         [OperationType.query]: this._schema.getQueryType()?.name ?? "Query",
         [OperationType.mutation]: this._schema.getMutationType()?.name ?? "Mutation",
@@ -56,6 +58,9 @@ export class ContextVisitor<Config extends PluginConfig> {
       if (node.name.value === this.context.operationMap[OperationType.query]) {
         /** Record all queries */
         this._queries = node.fields as FieldDefinitionNode[];
+      } else if (node.name.value === this.context.operationMap[OperationType.mutation]) {
+        /** Record all mutations */
+        this._mutations = node.fields as FieldDefinitionNode[];
       }
 
       return node;

@@ -12602,7 +12602,7 @@ export class LinearSdk extends Request {
   }
 
   /**
-   * Query apiKeys for ApiKeyConnection
+   * All API keys for the user.
    *
    * @param variables - variables to pass into the ApiKeysQuery
    * @returns ApiKeyConnection
@@ -12611,7 +12611,7 @@ export class LinearSdk extends Request {
     return new ApiKeysQuery(this._request).fetch(variables);
   }
   /**
-   * Query applicationWithAuthorization for UserAuthorizedApplication
+   * Get information for an application and whether a user has approved it for the given scopes.
    *
    * @param clientId - required clientId to pass to applicationWithAuthorization
    * @param scope - required scope to pass to applicationWithAuthorization
@@ -12626,7 +12626,7 @@ export class LinearSdk extends Request {
     return new ApplicationWithAuthorizationQuery(this._request).fetch(clientId, scope, variables);
   }
   /**
-   * Query archivedModelSync for ArchiveResponse
+   * Fetches an archived model.
    *
    * @param identifier - required identifier to pass to archivedModelSync
    * @param modelClass - required modelClass to pass to archivedModelSync
@@ -12636,7 +12636,7 @@ export class LinearSdk extends Request {
     return new ArchivedModelSyncQuery(this._request).fetch(identifier, modelClass);
   }
   /**
-   * Query archivedModelsSync for ArchiveResponse
+   * Fetches archived models.
    *
    * @param modelClass - required modelClass to pass to archivedModelsSync
    * @param teamId - required teamId to pass to archivedModelsSync
@@ -12651,7 +12651,7 @@ export class LinearSdk extends Request {
     return new ArchivedModelsSyncQuery(this._request).fetch(modelClass, teamId, variables);
   }
   /**
-   * Query attachment for Attachment
+   * [Alpha] One specific issue attachment. `url` can be used as the `id` parameter.
    *
    * @param id - required id to pass to attachment
    * @returns Attachment
@@ -12660,7 +12660,7 @@ export class LinearSdk extends Request {
     return new AttachmentQuery(this._request).fetch(id);
   }
   /**
-   * Query attachmentIssue for Issue
+   * [Alpha] Query an issue by its associated attachment, and its id or URI.
    *
    * @param id - required id to pass to attachmentIssue
    * @returns Issue
@@ -12669,7 +12669,7 @@ export class LinearSdk extends Request {
     return new AttachmentIssueQuery(this._request).fetch(id);
   }
   /**
-   * Query attachments for AttachmentConnection
+   * [Alpha] All issue attachments.
    *
    * @param variables - variables to pass into the AttachmentsQuery
    * @returns AttachmentConnection
@@ -12678,7 +12678,7 @@ export class LinearSdk extends Request {
     return new AttachmentsQuery(this._request).fetch(variables);
   }
   /**
-   * Query authorizedApplications for AuthorizedApplications
+   * Get all authorized applications for a user
    *
    * @returns AuthorizedApplication[]
    */
@@ -12686,7 +12686,7 @@ export class LinearSdk extends Request {
     return new AuthorizedApplicationsQuery(this._request).fetch();
   }
   /**
-   * Query availableUsers for AuthResolverResponse
+   * Fetch users belonging to this user account.
    *
    * @returns AuthResolverResponse
    */
@@ -12694,7 +12694,7 @@ export class LinearSdk extends Request {
     return new AvailableUsersQuery(this._request).fetch();
   }
   /**
-   * Query billingDetails for BillingDetailsPayload
+   * Billing details for the customer.
    *
    * @returns BillingDetailsPayload
    */
@@ -12702,7 +12702,7 @@ export class LinearSdk extends Request {
     return new BillingDetailsQuery(this._request).fetch();
   }
   /**
-   * Query collaborativeDocumentJoin for CollaborationDocumentUpdatePayload
+   * Join collaborative document and get missing steps.
    *
    * @param clientId - required clientId to pass to collaborativeDocumentJoin
    * @param issueId - required issueId to pass to collaborativeDocumentJoin
@@ -12717,7 +12717,7 @@ export class LinearSdk extends Request {
     return new CollaborativeDocumentJoinQuery(this._request).fetch(clientId, issueId, version);
   }
   /**
-   * Query comment for Comment
+   * A specific comment.
    *
    * @param id - required id to pass to comment
    * @returns Comment
@@ -12726,7 +12726,7 @@ export class LinearSdk extends Request {
     return new CommentQuery(this._request).fetch(id);
   }
   /**
-   * Query comments for CommentConnection
+   * All comments.
    *
    * @param variables - variables to pass into the CommentsQuery
    * @returns CommentConnection
@@ -12735,7 +12735,7 @@ export class LinearSdk extends Request {
     return new CommentsQuery(this._request).fetch(variables);
   }
   /**
-   * Query customView for CustomView
+   * One specific custom view.
    *
    * @param id - required id to pass to customView
    * @returns CustomView
@@ -12744,7 +12744,7 @@ export class LinearSdk extends Request {
     return new CustomViewQuery(this._request).fetch(id);
   }
   /**
-   * Query customViews for CustomViewConnection
+   * Custom views for the user.
    *
    * @param variables - variables to pass into the CustomViewsQuery
    * @returns CustomViewConnection
@@ -12753,7 +12753,7 @@ export class LinearSdk extends Request {
     return new CustomViewsQuery(this._request).fetch(variables);
   }
   /**
-   * Query cycle for Cycle
+   * One specific cycle.
    *
    * @param id - required id to pass to cycle
    * @returns Cycle
@@ -12762,7 +12762,7 @@ export class LinearSdk extends Request {
     return new CycleQuery(this._request).fetch(id);
   }
   /**
-   * Query cycles for CycleConnection
+   * All cycles.
    *
    * @param variables - variables to pass into the CyclesQuery
    * @returns CycleConnection
@@ -12771,7 +12771,7 @@ export class LinearSdk extends Request {
     return new CyclesQuery(this._request).fetch(variables);
   }
   /**
-   * Query emoji for Emoji
+   * A specific emoji.
    *
    * @param id - required id to pass to emoji
    * @returns Emoji
@@ -12780,7 +12780,7 @@ export class LinearSdk extends Request {
     return new EmojiQuery(this._request).fetch(id);
   }
   /**
-   * Query emojis for EmojiConnection
+   * All custom emojis.
    *
    * @param variables - variables to pass into the EmojisQuery
    * @returns EmojiConnection
@@ -12789,7 +12789,7 @@ export class LinearSdk extends Request {
     return new EmojisQuery(this._request).fetch(variables);
   }
   /**
-   * Query favorite for Favorite
+   * One specific favorite.
    *
    * @param id - required id to pass to favorite
    * @returns Favorite
@@ -12798,7 +12798,7 @@ export class LinearSdk extends Request {
     return new FavoriteQuery(this._request).fetch(id);
   }
   /**
-   * Query favorites for FavoriteConnection
+   * The user's favorites.
    *
    * @param variables - variables to pass into the FavoritesQuery
    * @returns FavoriteConnection
@@ -12807,7 +12807,7 @@ export class LinearSdk extends Request {
     return new FavoritesQuery(this._request).fetch(variables);
   }
   /**
-   * Query figmaEmbedInfo for FigmaEmbedPayload
+   * Fetch Figma screenshot and other information with file and node identifiers.
    *
    * @param fileId - required fileId to pass to figmaEmbedInfo
    * @param variables - variables without 'fileId' to pass into the FigmaEmbedInfoQuery
@@ -12820,7 +12820,7 @@ export class LinearSdk extends Request {
     return new FigmaEmbedInfoQuery(this._request).fetch(fileId, variables);
   }
   /**
-   * Query integration for Integration
+   * One specific integration.
    *
    * @param id - required id to pass to integration
    * @returns Integration
@@ -12829,7 +12829,7 @@ export class LinearSdk extends Request {
     return new IntegrationQuery(this._request).fetch(id);
   }
   /**
-   * Query integrations for IntegrationConnection
+   * All integrations.
    *
    * @param variables - variables to pass into the IntegrationsQuery
    * @returns IntegrationConnection
@@ -12838,7 +12838,7 @@ export class LinearSdk extends Request {
     return new IntegrationsQuery(this._request).fetch(variables);
   }
   /**
-   * Query inviteInfo for InvitePagePayload
+   * Retrieves information for the public invite page.
    *
    * @param userHash - required userHash to pass to inviteInfo
    * @param variables - variables without 'userHash' to pass into the InviteInfoQuery
@@ -12851,7 +12851,7 @@ export class LinearSdk extends Request {
     return new InviteInfoQuery(this._request).fetch(userHash, variables);
   }
   /**
-   * Query issue for Issue
+   * One specific issue.
    *
    * @param id - required id to pass to issue
    * @returns Issue
@@ -12860,7 +12860,7 @@ export class LinearSdk extends Request {
     return new IssueQuery(this._request).fetch(id);
   }
   /**
-   * Query issueImportFinishGithubOAuth for OAuthTokenPayload
+   * Fetches the GitHub token, completing the OAuth flow.
    *
    * @param code - required code to pass to issueImportFinishGithubOAuth
    * @returns OAuthTokenPayload
@@ -12869,7 +12869,7 @@ export class LinearSdk extends Request {
     return new IssueImportFinishGithubOAuthQuery(this._request).fetch(code);
   }
   /**
-   * Query issueLabel for IssueLabel
+   * One specific label.
    *
    * @param id - required id to pass to issueLabel
    * @returns IssueLabel
@@ -12878,7 +12878,7 @@ export class LinearSdk extends Request {
     return new IssueLabelQuery(this._request).fetch(id);
   }
   /**
-   * Query issueLabels for IssueLabelConnection
+   * All issue labels.
    *
    * @param variables - variables to pass into the IssueLabelsQuery
    * @returns IssueLabelConnection
@@ -12887,7 +12887,7 @@ export class LinearSdk extends Request {
     return new IssueLabelsQuery(this._request).fetch(variables);
   }
   /**
-   * Query issueRelation for IssueRelation
+   * One specific issue relation.
    *
    * @param id - required id to pass to issueRelation
    * @returns IssueRelation
@@ -12896,7 +12896,7 @@ export class LinearSdk extends Request {
     return new IssueRelationQuery(this._request).fetch(id);
   }
   /**
-   * Query issueRelations for IssueRelationConnection
+   * All issue relationships.
    *
    * @param variables - variables to pass into the IssueRelationsQuery
    * @returns IssueRelationConnection
@@ -12905,7 +12905,7 @@ export class LinearSdk extends Request {
     return new IssueRelationsQuery(this._request).fetch(variables);
   }
   /**
-   * Query issueSearch for IssueConnection
+   * [ALPHA] Search issues. This query is experimental and is subject to change without notice.
    *
    * @param query - required query to pass to issueSearch
    * @param variables - variables without 'query' to pass into the IssueSearchQuery
@@ -12918,7 +12918,7 @@ export class LinearSdk extends Request {
     return new IssueSearchQuery(this._request).fetch(query, variables);
   }
   /**
-   * Query issues for IssueConnection
+   * All issues.
    *
    * @param variables - variables to pass into the IssuesQuery
    * @returns IssueConnection
@@ -12927,7 +12927,7 @@ export class LinearSdk extends Request {
     return new IssuesQuery(this._request).fetch(variables);
   }
   /**
-   * Query milestone for Milestone
+   * One specific milestone.
    *
    * @param id - required id to pass to milestone
    * @returns Milestone
@@ -12936,7 +12936,7 @@ export class LinearSdk extends Request {
     return new MilestoneQuery(this._request).fetch(id);
   }
   /**
-   * Query milestones for MilestoneConnection
+   * All milestones.
    *
    * @param variables - variables to pass into the MilestonesQuery
    * @returns MilestoneConnection
@@ -12945,7 +12945,7 @@ export class LinearSdk extends Request {
     return new MilestonesQuery(this._request).fetch(variables);
   }
   /**
-   * Query notification for Notification
+   * One specific notification.
    *
    * @param id - required id to pass to notification
    * @returns Notification
@@ -12954,7 +12954,7 @@ export class LinearSdk extends Request {
     return new NotificationQuery(this._request).fetch(id);
   }
   /**
-   * Query notificationSubscription for NotificationSubscription
+   * One specific notification subscription.
    *
    * @param id - required id to pass to notificationSubscription
    * @returns NotificationSubscription
@@ -12963,7 +12963,7 @@ export class LinearSdk extends Request {
     return new NotificationSubscriptionQuery(this._request).fetch(id);
   }
   /**
-   * Query notificationSubscriptions for NotificationSubscriptionConnection
+   * The user's notification subscriptions.
    *
    * @param variables - variables to pass into the NotificationSubscriptionsQuery
    * @returns NotificationSubscriptionConnection
@@ -12974,7 +12974,7 @@ export class LinearSdk extends Request {
     return new NotificationSubscriptionsQuery(this._request).fetch(variables);
   }
   /**
-   * Query notifications for NotificationConnection
+   * All notifications.
    *
    * @param variables - variables to pass into the NotificationsQuery
    * @returns NotificationConnection
@@ -12983,7 +12983,7 @@ export class LinearSdk extends Request {
     return new NotificationsQuery(this._request).fetch(variables);
   }
   /**
-   * Query organization for Organization
+   * The user's organization.
    *
    * @returns Organization
    */
@@ -12991,7 +12991,7 @@ export class LinearSdk extends Request {
     return new OrganizationQuery(this._request).fetch();
   }
   /**
-   * Query organizationExists for OrganizationExistsPayload
+   * Does the organization exist.
    *
    * @param urlKey - required urlKey to pass to organizationExists
    * @returns OrganizationExistsPayload
@@ -13000,7 +13000,7 @@ export class LinearSdk extends Request {
     return new OrganizationExistsQuery(this._request).fetch(urlKey);
   }
   /**
-   * Query organizationInvite for IssueLabel
+   * One specific organization invite.
    *
    * @param id - required id to pass to organizationInvite
    * @returns IssueLabel
@@ -13009,7 +13009,7 @@ export class LinearSdk extends Request {
     return new OrganizationInviteQuery(this._request).fetch(id);
   }
   /**
-   * Query organizationInvites for OrganizationInviteConnection
+   * All invites for the organization.
    *
    * @param variables - variables to pass into the OrganizationInvitesQuery
    * @returns OrganizationInviteConnection
@@ -13020,7 +13020,7 @@ export class LinearSdk extends Request {
     return new OrganizationInvitesQuery(this._request).fetch(variables);
   }
   /**
-   * Query project for Project
+   * One specific project.
    *
    * @param id - required id to pass to project
    * @returns Project
@@ -13029,7 +13029,7 @@ export class LinearSdk extends Request {
     return new ProjectQuery(this._request).fetch(id);
   }
   /**
-   * Query projectLink for ProjectLink
+   * One specific project link.
    *
    * @param id - required id to pass to projectLink
    * @returns ProjectLink
@@ -13038,7 +13038,7 @@ export class LinearSdk extends Request {
     return new ProjectLinkQuery(this._request).fetch(id);
   }
   /**
-   * Query projectLinks for ProjectLinkConnection
+   * All links for the project.
    *
    * @param variables - variables to pass into the ProjectLinksQuery
    * @returns ProjectLinkConnection
@@ -13047,7 +13047,7 @@ export class LinearSdk extends Request {
     return new ProjectLinksQuery(this._request).fetch(variables);
   }
   /**
-   * Query projects for ProjectConnection
+   * All projects.
    *
    * @param variables - variables to pass into the ProjectsQuery
    * @returns ProjectConnection
@@ -13056,7 +13056,7 @@ export class LinearSdk extends Request {
     return new ProjectsQuery(this._request).fetch(variables);
   }
   /**
-   * Query pushSubscriptionTest for PushSubscriptionPayload
+   * Sends a test push message.
    *
    * @returns PushSubscriptionPayload
    */
@@ -13064,7 +13064,7 @@ export class LinearSdk extends Request {
     return new PushSubscriptionTestQuery(this._request).fetch();
   }
   /**
-   * Query reaction for Reaction
+   * A specific reaction.
    *
    * @param id - required id to pass to reaction
    * @returns Reaction
@@ -13073,7 +13073,7 @@ export class LinearSdk extends Request {
     return new ReactionQuery(this._request).fetch(id);
   }
   /**
-   * Query reactions for ReactionConnection
+   * All comment emoji reactions.
    *
    * @param variables - variables to pass into the ReactionsQuery
    * @returns ReactionConnection
@@ -13082,7 +13082,7 @@ export class LinearSdk extends Request {
     return new ReactionsQuery(this._request).fetch(variables);
   }
   /**
-   * Query ssoUrlFromEmail for SsoUrlFromEmailResponse
+   * Fetch SSO login URL for the email provided.
    *
    * @param email - required email to pass to ssoUrlFromEmail
    * @param variables - variables without 'email' to pass into the SsoUrlFromEmailQuery
@@ -13095,7 +13095,7 @@ export class LinearSdk extends Request {
     return new SsoUrlFromEmailQuery(this._request).fetch(email, variables);
   }
   /**
-   * Query syncBootstrap for SyncResponse
+   * Fetch data to catch up the client to the state of the world.
    *
    * @param variables - variables to pass into the SyncBootstrapQuery
    * @returns SyncResponse
@@ -13104,7 +13104,7 @@ export class LinearSdk extends Request {
     return new SyncBootstrapQuery(this._request).fetch(variables);
   }
   /**
-   * Query team for Team
+   * One specific team.
    *
    * @param id - required id to pass to team
    * @returns Team
@@ -13113,7 +13113,7 @@ export class LinearSdk extends Request {
     return new TeamQuery(this._request).fetch(id);
   }
   /**
-   * Query teamMembership for TeamMembership
+   * One specific team membership.
    *
    * @param id - required id to pass to teamMembership
    * @returns TeamMembership
@@ -13122,7 +13122,7 @@ export class LinearSdk extends Request {
     return new TeamMembershipQuery(this._request).fetch(id);
   }
   /**
-   * Query teamMemberships for TeamMembershipConnection
+   * All team memberships.
    *
    * @param variables - variables to pass into the TeamMembershipsQuery
    * @returns TeamMembershipConnection
@@ -13131,7 +13131,7 @@ export class LinearSdk extends Request {
     return new TeamMembershipsQuery(this._request).fetch(variables);
   }
   /**
-   * Query teams for TeamConnection
+   * All teams.
    *
    * @param variables - variables to pass into the TeamsQuery
    * @returns TeamConnection
@@ -13140,7 +13140,7 @@ export class LinearSdk extends Request {
     return new TeamsQuery(this._request).fetch(variables);
   }
   /**
-   * Query template for Template
+   * A specific template.
    *
    * @param id - required id to pass to template
    * @returns Template
@@ -13149,7 +13149,7 @@ export class LinearSdk extends Request {
     return new TemplateQuery(this._request).fetch(id);
   }
   /**
-   * Query templates for Templates
+   * All templates from all users.
    *
    * @returns Template[]
    */
@@ -13157,7 +13157,7 @@ export class LinearSdk extends Request {
     return new TemplatesQuery(this._request).fetch();
   }
   /**
-   * Query user for User
+   * One specific user.
    *
    * @param id - required id to pass to user
    * @returns User
@@ -13166,7 +13166,7 @@ export class LinearSdk extends Request {
     return new UserQuery(this._request).fetch(id);
   }
   /**
-   * Query userSettings for UserSettings
+   * The user's settings.
    *
    * @returns UserSettings
    */
@@ -13174,7 +13174,7 @@ export class LinearSdk extends Request {
     return new UserSettingsQuery(this._request).fetch();
   }
   /**
-   * Query users for UserConnection
+   * All users for the organization.
    *
    * @param variables - variables to pass into the UsersQuery
    * @returns UserConnection
@@ -13183,7 +13183,7 @@ export class LinearSdk extends Request {
     return new UsersQuery(this._request).fetch(variables);
   }
   /**
-   * Query viewer for User
+   * The currently authenticated user.
    *
    * @returns User
    */
@@ -13191,7 +13191,7 @@ export class LinearSdk extends Request {
     return new ViewerQuery(this._request).fetch();
   }
   /**
-   * Query webhook for Webhook
+   * A specific webhook.
    *
    * @param id - required id to pass to webhook
    * @returns Webhook
@@ -13200,7 +13200,7 @@ export class LinearSdk extends Request {
     return new WebhookQuery(this._request).fetch(id);
   }
   /**
-   * Query webhooks for WebhookConnection
+   * All webhooks.
    *
    * @param variables - variables to pass into the WebhooksQuery
    * @returns WebhookConnection
@@ -13209,7 +13209,7 @@ export class LinearSdk extends Request {
     return new WebhooksQuery(this._request).fetch(variables);
   }
   /**
-   * Query workflowState for WorkflowState
+   * One specific state.
    *
    * @param id - required id to pass to workflowState
    * @returns WorkflowState
@@ -13218,7 +13218,7 @@ export class LinearSdk extends Request {
     return new WorkflowStateQuery(this._request).fetch(id);
   }
   /**
-   * Query workflowStates for WorkflowStateConnection
+   * All issue workflow states.
    *
    * @param variables - variables to pass into the WorkflowStatesQuery
    * @returns WorkflowStateConnection
@@ -13227,7 +13227,7 @@ export class LinearSdk extends Request {
     return new WorkflowStatesQuery(this._request).fetch(variables);
   }
   /**
-   * Mutation apiKeyCreate for ApiKeyPayload
+   * Creates a new API key.
    *
    * @param input - required input to pass to apiKeyCreate
    * @returns ApiKeyPayload
@@ -13236,7 +13236,7 @@ export class LinearSdk extends Request {
     return new ApiKeyCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation apiKeyDelete for ArchivePayload
+   * Deletes an API key.
    *
    * @param id - required id to pass to apiKeyDelete
    * @returns ArchivePayload
@@ -13245,7 +13245,7 @@ export class LinearSdk extends Request {
     return new ApiKeyDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation attachmentArchive for ArchivePayload
+   * [Alpha] Archives an issue attachment.
    *
    * @param id - required id to pass to attachmentArchive
    * @returns ArchivePayload
@@ -13254,7 +13254,7 @@ export class LinearSdk extends Request {
     return new AttachmentArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation attachmentCreate for AttachmentPayload
+   * [Alpha] Creates a new attachment, or updates existing if the same `uri` is used.
    *
    * @param input - required input to pass to attachmentCreate
    * @returns AttachmentPayload
@@ -13263,7 +13263,7 @@ export class LinearSdk extends Request {
     return new AttachmentCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation attachmentUpdate for AttachmentPayload
+   * [Alpha] Updates an existing issue attachment.
    *
    * @param id - required id to pass to attachmentUpdate
    * @param input - required input to pass to attachmentUpdate
@@ -13273,7 +13273,7 @@ export class LinearSdk extends Request {
     return new AttachmentUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation billingEmailUpdate for BillingEmailPayload
+   * Updates the billing email address for the customer.
    *
    * @param input - required input to pass to billingEmailUpdate
    * @returns BillingEmailPayload
@@ -13282,7 +13282,7 @@ export class LinearSdk extends Request {
     return new BillingEmailUpdateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation collaborativeDocumentUpdate for CollaborationDocumentUpdatePayload
+   * Update collaborative document with client steps.
    *
    * @param input - required input to pass to collaborativeDocumentUpdate
    * @returns CollaborationDocumentUpdatePayload
@@ -13293,7 +13293,7 @@ export class LinearSdk extends Request {
     return new CollaborativeDocumentUpdateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation commentCreate for CommentPayload
+   * Creates a new comment.
    *
    * @param input - required input to pass to commentCreate
    * @returns CommentPayload
@@ -13302,7 +13302,7 @@ export class LinearSdk extends Request {
     return new CommentCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation commentDelete for ArchivePayload
+   * Deletes a comment.
    *
    * @param id - required id to pass to commentDelete
    * @returns ArchivePayload
@@ -13311,7 +13311,7 @@ export class LinearSdk extends Request {
     return new CommentDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation commentUpdate for CommentPayload
+   * Updates a comment.
    *
    * @param id - required id to pass to commentUpdate
    * @param input - required input to pass to commentUpdate
@@ -13321,7 +13321,7 @@ export class LinearSdk extends Request {
     return new CommentUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation contactCreate for ContactPayload
+   * Saves user message.
    *
    * @param input - required input to pass to contactCreate
    * @returns ContactPayload
@@ -13330,7 +13330,7 @@ export class LinearSdk extends Request {
     return new ContactCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation createCsvExportReport for CreateCsvExportReportPayload
+   * Create CSV export report for the organization.
    *
    * @returns CreateCsvExportReportPayload
    */
@@ -13338,7 +13338,7 @@ export class LinearSdk extends Request {
     return new CreateCsvExportReportMutation(this._request).fetch();
   }
   /**
-   * Mutation createOrganizationFromOnboarding for CreateOrJoinOrganizationResponse
+   * Creates an organization from onboarding.
    *
    * @param input - required input to pass to createOrganizationFromOnboarding
    * @param variables - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
@@ -13351,7 +13351,7 @@ export class LinearSdk extends Request {
     return new CreateOrganizationFromOnboardingMutation(this._request).fetch(input, variables);
   }
   /**
-   * Mutation customViewCreate for CustomViewPayload
+   * Creates a new custom view.
    *
    * @param input - required input to pass to customViewCreate
    * @returns CustomViewPayload
@@ -13360,7 +13360,7 @@ export class LinearSdk extends Request {
     return new CustomViewCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation customViewDelete for ArchivePayload
+   * Deletes a custom view.
    *
    * @param id - required id to pass to customViewDelete
    * @returns ArchivePayload
@@ -13369,7 +13369,7 @@ export class LinearSdk extends Request {
     return new CustomViewDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation customViewUpdate for CustomViewPayload
+   * Updates a custom view.
    *
    * @param id - required id to pass to customViewUpdate
    * @param input - required input to pass to customViewUpdate
@@ -13379,7 +13379,7 @@ export class LinearSdk extends Request {
     return new CustomViewUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation cycleArchive for ArchivePayload
+   * Archives a cycle.
    *
    * @param id - required id to pass to cycleArchive
    * @returns ArchivePayload
@@ -13388,7 +13388,7 @@ export class LinearSdk extends Request {
     return new CycleArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation cycleCreate for CyclePayload
+   * Creates a new cycle.
    *
    * @param input - required input to pass to cycleCreate
    * @returns CyclePayload
@@ -13397,7 +13397,7 @@ export class LinearSdk extends Request {
     return new CycleCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation cycleUpdate for CyclePayload
+   * Updates a cycle.
    *
    * @param id - required id to pass to cycleUpdate
    * @param input - required input to pass to cycleUpdate
@@ -13407,7 +13407,7 @@ export class LinearSdk extends Request {
     return new CycleUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation debugCreateSAMLOrg for DebugPayload
+   * Create the SAML test organization in development.
    *
    * @returns DebugPayload
    */
@@ -13415,7 +13415,7 @@ export class LinearSdk extends Request {
     return new DebugCreateSamlOrgMutation(this._request).fetch();
   }
   /**
-   * Mutation debugFailWithInternalError for DebugPayload
+   * Always fails with internal error. Used to debug logging.
    *
    * @returns DebugPayload
    */
@@ -13423,7 +13423,7 @@ export class LinearSdk extends Request {
     return new DebugFailWithInternalErrorMutation(this._request).fetch();
   }
   /**
-   * Mutation debugFailWithWarning for DebugPayload
+   * Always logs an error to Sentry as warning. Used to debug logging.
    *
    * @returns DebugPayload
    */
@@ -13431,7 +13431,7 @@ export class LinearSdk extends Request {
     return new DebugFailWithWarningMutation(this._request).fetch();
   }
   /**
-   * Mutation emailTokenUserAccountAuth for AuthResolverResponse
+   * Authenticates a user account via email and authentication token.
    *
    * @param input - required input to pass to emailTokenUserAccountAuth
    * @returns AuthResolverResponse
@@ -13440,7 +13440,7 @@ export class LinearSdk extends Request {
     return new EmailTokenUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
-   * Mutation emailUnsubscribe for EmailUnsubscribePayload
+   * Unsubscribes the user from one type of emails.
    *
    * @param input - required input to pass to emailUnsubscribe
    * @returns EmailUnsubscribePayload
@@ -13449,7 +13449,7 @@ export class LinearSdk extends Request {
     return new EmailUnsubscribeMutation(this._request).fetch(input);
   }
   /**
-   * Mutation emailUserAccountAuthChallenge for EmailUserAccountAuthChallengeResponse
+   * Finds or creates a new user account by email and sends an email with token.
    *
    * @param input - required input to pass to emailUserAccountAuthChallenge
    * @returns EmailUserAccountAuthChallengeResponse
@@ -13460,7 +13460,7 @@ export class LinearSdk extends Request {
     return new EmailUserAccountAuthChallengeMutation(this._request).fetch(input);
   }
   /**
-   * Mutation emojiCreate for EmojiPayload
+   * Creates a custom emoji.
    *
    * @param input - required input to pass to emojiCreate
    * @returns EmojiPayload
@@ -13469,7 +13469,7 @@ export class LinearSdk extends Request {
     return new EmojiCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation emojiDelete for ArchivePayload
+   * Deletes an emoji.
    *
    * @param id - required id to pass to emojiDelete
    * @returns ArchivePayload
@@ -13478,7 +13478,7 @@ export class LinearSdk extends Request {
     return new EmojiDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation eventCreate for EventPayload
+   * [Deprecated] Creates a new event.
    *
    * @param input - required input to pass to eventCreate
    * @returns EventPayload
@@ -13487,7 +13487,7 @@ export class LinearSdk extends Request {
     return new EventCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation favoriteCreate for FavoritePayload
+   * Creates a new favorite (project, cycle etc).
    *
    * @param input - required input to pass to favoriteCreate
    * @returns FavoritePayload
@@ -13496,7 +13496,7 @@ export class LinearSdk extends Request {
     return new FavoriteCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation favoriteDelete for ArchivePayload
+   * Deletes a favorite reference.
    *
    * @param id - required id to pass to favoriteDelete
    * @returns ArchivePayload
@@ -13505,7 +13505,7 @@ export class LinearSdk extends Request {
     return new FavoriteDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation favoriteUpdate for FavoritePayload
+   * Updates a favorite.
    *
    * @param id - required id to pass to favoriteUpdate
    * @param input - required input to pass to favoriteUpdate
@@ -13515,7 +13515,7 @@ export class LinearSdk extends Request {
     return new FavoriteUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation feedbackCreate for FeedbackPayload
+   * Saves user feedback.
    *
    * @param input - required input to pass to feedbackCreate
    * @returns FeedbackPayload
@@ -13524,7 +13524,7 @@ export class LinearSdk extends Request {
     return new FeedbackCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation fileUpload for UploadPayload
+   * XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage.
    *
    * @param contentType - required contentType to pass to fileUpload
    * @param filename - required filename to pass to fileUpload
@@ -13541,7 +13541,7 @@ export class LinearSdk extends Request {
     return new FileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
-   * Mutation googleUserAccountAuth for AuthResolverResponse
+   * Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
    *
    * @param input - required input to pass to googleUserAccountAuth
    * @returns AuthResolverResponse
@@ -13550,7 +13550,7 @@ export class LinearSdk extends Request {
     return new GoogleUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
-   * Mutation imageUploadFromUrl for ImageUploadFromUrlPayload
+   * Upload an image from an URL to Linear.
    *
    * @param url - required url to pass to imageUploadFromUrl
    * @returns ImageUploadFromUrlPayload
@@ -13559,7 +13559,7 @@ export class LinearSdk extends Request {
     return new ImageUploadFromUrlMutation(this._request).fetch(url);
   }
   /**
-   * Mutation integrationDelete for ArchivePayload
+   * Deletes an integration.
    *
    * @param id - required id to pass to integrationDelete
    * @returns ArchivePayload
@@ -13568,7 +13568,7 @@ export class LinearSdk extends Request {
     return new IntegrationDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation integrationFigma for IntegrationPayload
+   * Integrates the organization with Figma.
    *
    * @param code - required code to pass to integrationFigma
    * @param redirectUri - required redirectUri to pass to integrationFigma
@@ -13578,7 +13578,7 @@ export class LinearSdk extends Request {
     return new IntegrationFigmaMutation(this._request).fetch(code, redirectUri);
   }
   /**
-   * Mutation integrationGithubConnect for IntegrationPayload
+   * Connects the organization with the GitHub App.
    *
    * @param installationId - required installationId to pass to integrationGithubConnect
    * @returns IntegrationPayload
@@ -13587,7 +13587,7 @@ export class LinearSdk extends Request {
     return new IntegrationGithubConnectMutation(this._request).fetch(installationId);
   }
   /**
-   * Mutation integrationGitlabConnect for IntegrationPayload
+   * Connects the organization with a GitLab Access Token.
    *
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
    * @param gitlabUrl - required gitlabUrl to pass to integrationGitlabConnect
@@ -13597,7 +13597,7 @@ export class LinearSdk extends Request {
     return new IntegrationGitlabConnectMutation(this._request).fetch(accessToken, gitlabUrl);
   }
   /**
-   * Mutation integrationGoogleSheets for IntegrationPayload
+   * Integrates the organization with Google Sheets.
    *
    * @param code - required code to pass to integrationGoogleSheets
    * @returns IntegrationPayload
@@ -13606,7 +13606,7 @@ export class LinearSdk extends Request {
     return new IntegrationGoogleSheetsMutation(this._request).fetch(code);
   }
   /**
-   * Mutation integrationResourceArchive for ArchivePayload
+   * Archives an integration resource.
    *
    * @param id - required id to pass to integrationResourceArchive
    * @returns ArchivePayload
@@ -13615,7 +13615,7 @@ export class LinearSdk extends Request {
     return new IntegrationResourceArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation integrationSentryConnect for IntegrationPayload
+   * Integrates the organization with Sentry.
    *
    * @param code - required code to pass to integrationSentryConnect
    * @param installationId - required installationId to pass to integrationSentryConnect
@@ -13630,7 +13630,7 @@ export class LinearSdk extends Request {
     return new IntegrationSentryConnectMutation(this._request).fetch(code, installationId, organizationSlug);
   }
   /**
-   * Mutation integrationSlack for IntegrationPayload
+   * Integrates the organization with Slack.
    *
    * @param code - required code to pass to integrationSlack
    * @param redirectUri - required redirectUri to pass to integrationSlack
@@ -13645,7 +13645,7 @@ export class LinearSdk extends Request {
     return new IntegrationSlackMutation(this._request).fetch(code, redirectUri, variables);
   }
   /**
-   * Mutation integrationSlackImportEmojis for IntegrationPayload
+   * Imports custom emojis from your Slack workspace.
    *
    * @param code - required code to pass to integrationSlackImportEmojis
    * @param redirectUri - required redirectUri to pass to integrationSlackImportEmojis
@@ -13655,7 +13655,7 @@ export class LinearSdk extends Request {
     return new IntegrationSlackImportEmojisMutation(this._request).fetch(code, redirectUri);
   }
   /**
-   * Mutation integrationSlackPersonal for IntegrationPayload
+   * Integrates your personal notifications with Slack.
    *
    * @param code - required code to pass to integrationSlackPersonal
    * @param redirectUri - required redirectUri to pass to integrationSlackPersonal
@@ -13665,7 +13665,7 @@ export class LinearSdk extends Request {
     return new IntegrationSlackPersonalMutation(this._request).fetch(code, redirectUri);
   }
   /**
-   * Mutation integrationSlackPost for IntegrationPayload
+   * Slack webhook integration.
    *
    * @param code - required code to pass to integrationSlackPost
    * @param redirectUri - required redirectUri to pass to integrationSlackPost
@@ -13682,7 +13682,7 @@ export class LinearSdk extends Request {
     return new IntegrationSlackPostMutation(this._request).fetch(code, redirectUri, teamId, variables);
   }
   /**
-   * Mutation integrationSlackProjectPost for IntegrationPayload
+   * Slack integration for project notifications.
    *
    * @param code - required code to pass to integrationSlackProjectPost
    * @param projectId - required projectId to pass to integrationSlackProjectPost
@@ -13697,7 +13697,7 @@ export class LinearSdk extends Request {
     return new IntegrationSlackProjectPostMutation(this._request).fetch(code, projectId, redirectUri);
   }
   /**
-   * Mutation issueArchive for ArchivePayload
+   * Archives an issue.
    *
    * @param id - required id to pass to issueArchive
    * @returns ArchivePayload
@@ -13706,7 +13706,7 @@ export class LinearSdk extends Request {
     return new IssueArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation issueCreate for IssuePayload
+   * Creates a new issue.
    *
    * @param input - required input to pass to issueCreate
    * @returns IssuePayload
@@ -13715,7 +13715,7 @@ export class LinearSdk extends Request {
     return new IssueCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation issueImportCreateClubhouse for IssueImportPayload
+   * Kicks off a Clubhouse import job.
    *
    * @param clubhouseTeamName - required clubhouseTeamName to pass to issueImportCreateClubhouse
    * @param clubhouseToken - required clubhouseToken to pass to issueImportCreateClubhouse
@@ -13730,7 +13730,7 @@ export class LinearSdk extends Request {
     return new IssueImportCreateClubhouseMutation(this._request).fetch(clubhouseTeamName, clubhouseToken, teamId);
   }
   /**
-   * Mutation issueImportCreateGithub for IssueImportPayload
+   * Kicks off a GitHub import job.
    *
    * @param githubRepoName - required githubRepoName to pass to issueImportCreateGithub
    * @param githubRepoOwner - required githubRepoOwner to pass to issueImportCreateGithub
@@ -13752,7 +13752,7 @@ export class LinearSdk extends Request {
     );
   }
   /**
-   * Mutation issueImportCreateJira for IssueImportPayload
+   * Kicks off a Jira import job.
    *
    * @param jiraEmail - required jiraEmail to pass to issueImportCreateJira
    * @param jiraHostname - required jiraHostname to pass to issueImportCreateJira
@@ -13777,7 +13777,7 @@ export class LinearSdk extends Request {
     );
   }
   /**
-   * Mutation issueLabelArchive for ArchivePayload
+   * Archives an issue label.
    *
    * @param id - required id to pass to issueLabelArchive
    * @returns ArchivePayload
@@ -13786,7 +13786,7 @@ export class LinearSdk extends Request {
     return new IssueLabelArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation issueLabelCreate for IssueLabelPayload
+   * Creates a new label.
    *
    * @param input - required input to pass to issueLabelCreate
    * @returns IssueLabelPayload
@@ -13795,7 +13795,7 @@ export class LinearSdk extends Request {
     return new IssueLabelCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation issueLabelUpdate for IssueLabelPayload
+   * Updates an label.
    *
    * @param id - required id to pass to issueLabelUpdate
    * @param input - required input to pass to issueLabelUpdate
@@ -13805,7 +13805,7 @@ export class LinearSdk extends Request {
     return new IssueLabelUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation issueRelationCreate for IssueRelationPayload
+   * Creates a new issue relation.
    *
    * @param input - required input to pass to issueRelationCreate
    * @returns IssueRelationPayload
@@ -13814,7 +13814,7 @@ export class LinearSdk extends Request {
     return new IssueRelationCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation issueRelationDelete for ArchivePayload
+   * Deletes an issue relation.
    *
    * @param id - required id to pass to issueRelationDelete
    * @returns ArchivePayload
@@ -13823,7 +13823,7 @@ export class LinearSdk extends Request {
     return new IssueRelationDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation issueRelationUpdate for IssueRelationPayload
+   * Updates an issue relation.
    *
    * @param id - required id to pass to issueRelationUpdate
    * @param input - required input to pass to issueRelationUpdate
@@ -13833,7 +13833,7 @@ export class LinearSdk extends Request {
     return new IssueRelationUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation issueUnarchive for ArchivePayload
+   * Unarchives an issue.
    *
    * @param id - required id to pass to issueUnarchive
    * @returns ArchivePayload
@@ -13842,7 +13842,7 @@ export class LinearSdk extends Request {
     return new IssueUnarchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation issueUpdate for IssuePayload
+   * Updates an issue.
    *
    * @param id - required id to pass to issueUpdate
    * @param input - required input to pass to issueUpdate
@@ -13852,7 +13852,7 @@ export class LinearSdk extends Request {
     return new IssueUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation joinOrganizationFromOnboarding for CreateOrJoinOrganizationResponse
+   * Join an organization from onboarding.
    *
    * @param input - required input to pass to joinOrganizationFromOnboarding
    * @returns CreateOrJoinOrganizationResponse
@@ -13861,7 +13861,7 @@ export class LinearSdk extends Request {
     return new JoinOrganizationFromOnboardingMutation(this._request).fetch(input);
   }
   /**
-   * Mutation leaveOrganization for CreateOrJoinOrganizationResponse
+   * Leave an organization.
    *
    * @param organizationId - required organizationId to pass to leaveOrganization
    * @returns CreateOrJoinOrganizationResponse
@@ -13870,7 +13870,7 @@ export class LinearSdk extends Request {
     return new LeaveOrganizationMutation(this._request).fetch(organizationId);
   }
   /**
-   * Mutation milestoneCreate for MilestonePayload
+   * Creates a new milestone.
    *
    * @param input - required input to pass to milestoneCreate
    * @returns MilestonePayload
@@ -13879,7 +13879,7 @@ export class LinearSdk extends Request {
     return new MilestoneCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation milestoneDelete for ArchivePayload
+   * Deletes a milestone.
    *
    * @param id - required id to pass to milestoneDelete
    * @returns ArchivePayload
@@ -13888,7 +13888,7 @@ export class LinearSdk extends Request {
     return new MilestoneDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation milestoneUpdate for MilestonePayload
+   * Updates a milestone.
    *
    * @param id - required id to pass to milestoneUpdate
    * @param input - required input to pass to milestoneUpdate
@@ -13898,7 +13898,7 @@ export class LinearSdk extends Request {
     return new MilestoneUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation notificationArchive for ArchivePayload
+   * Archives a notification.
    *
    * @param id - required id to pass to notificationArchive
    * @returns ArchivePayload
@@ -13907,7 +13907,7 @@ export class LinearSdk extends Request {
     return new NotificationArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation notificationCreate for NotificationPayload
+   * Creates a notification.
    *
    * @param id - required id to pass to notificationCreate
    * @param input - required input to pass to notificationCreate
@@ -13917,7 +13917,7 @@ export class LinearSdk extends Request {
     return new NotificationCreateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation notificationDelete for ArchivePayload
+   * [Deprecated] Deletes a notification.
    *
    * @param id - required id to pass to notificationDelete
    * @returns ArchivePayload
@@ -13926,7 +13926,7 @@ export class LinearSdk extends Request {
     return new NotificationDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation notificationSubscriptionCreate for NotificationSubscriptionPayload
+   * Creates a new notification subscription for a team or a project.
    *
    * @param input - required input to pass to notificationSubscriptionCreate
    * @returns NotificationSubscriptionPayload
@@ -13937,7 +13937,7 @@ export class LinearSdk extends Request {
     return new NotificationSubscriptionCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation notificationSubscriptionDelete for ArchivePayload
+   * Deletes a notification subscription reference.
    *
    * @param id - required id to pass to notificationSubscriptionDelete
    * @returns ArchivePayload
@@ -13946,7 +13946,7 @@ export class LinearSdk extends Request {
     return new NotificationSubscriptionDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation notificationUnarchive for ArchivePayload
+   * Unarchives a notification.
    *
    * @param id - required id to pass to notificationUnarchive
    * @returns ArchivePayload
@@ -13955,7 +13955,7 @@ export class LinearSdk extends Request {
     return new NotificationUnarchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation notificationUpdate for NotificationPayload
+   * Updates a notification.
    *
    * @param id - required id to pass to notificationUpdate
    * @param input - required input to pass to notificationUpdate
@@ -13965,7 +13965,7 @@ export class LinearSdk extends Request {
     return new NotificationUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation oauthClientArchive for ArchivePayload
+   * Archives an OAuth client.
    *
    * @param id - required id to pass to oauthClientArchive
    * @returns ArchivePayload
@@ -13974,7 +13974,7 @@ export class LinearSdk extends Request {
     return new OauthClientArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation oauthClientCreate for OauthClientPayload
+   * Creates a new OAuth client.
    *
    * @param input - required input to pass to oauthClientCreate
    * @returns OauthClientPayload
@@ -13983,7 +13983,7 @@ export class LinearSdk extends Request {
     return new OauthClientCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation oauthClientRotateSecret for RotateSecretPayload
+   * Updates an OAuth client.
    *
    * @param id - required id to pass to oauthClientRotateSecret
    * @returns RotateSecretPayload
@@ -13992,7 +13992,7 @@ export class LinearSdk extends Request {
     return new OauthClientRotateSecretMutation(this._request).fetch(id);
   }
   /**
-   * Mutation oauthClientUpdate for OauthClientPayload
+   * Updates an OAuth client.
    *
    * @param id - required id to pass to oauthClientUpdate
    * @param input - required input to pass to oauthClientUpdate
@@ -14002,7 +14002,7 @@ export class LinearSdk extends Request {
     return new OauthClientUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation oauthTokenRevoke for OauthTokenRevokePayload
+   * Revokes an OAuth token.
    *
    * @param appId - required appId to pass to oauthTokenRevoke
    * @param scope - required scope to pass to oauthTokenRevoke
@@ -14012,7 +14012,7 @@ export class LinearSdk extends Request {
     return new OauthTokenRevokeMutation(this._request).fetch(appId, scope);
   }
   /**
-   * Mutation organizationDelete for OrganizationDeletePayload
+   * Delete's an organization. Administrator privileges required.
    *
    * @param input - required input to pass to organizationDelete
    * @returns OrganizationDeletePayload
@@ -14021,7 +14021,7 @@ export class LinearSdk extends Request {
     return new OrganizationDeleteMutation(this._request).fetch(input);
   }
   /**
-   * Mutation organizationDeleteChallenge for OrganizationDeletePayload
+   * Get an organization's delete confirmation token. Administrator privileges required.
    *
    * @returns OrganizationDeletePayload
    */
@@ -14029,7 +14029,7 @@ export class LinearSdk extends Request {
     return new OrganizationDeleteChallengeMutation(this._request).fetch();
   }
   /**
-   * Mutation organizationDomainCreate for OrganizationDomainPayload
+   * Adds a domain to be allowed for an organization.
    *
    * @param input - required input to pass to organizationDomainCreate
    * @returns OrganizationDomainPayload
@@ -14038,7 +14038,7 @@ export class LinearSdk extends Request {
     return new OrganizationDomainCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation organizationDomainDelete for ArchivePayload
+   * Deletes a domain.
    *
    * @param id - required id to pass to organizationDomainDelete
    * @returns ArchivePayload
@@ -14047,7 +14047,7 @@ export class LinearSdk extends Request {
     return new OrganizationDomainDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation organizationDomainVerify for OrganizationDomainPayload
+   * Verifies a domain to be added to an organization.
    *
    * @param input - required input to pass to organizationDomainVerify
    * @returns OrganizationDomainPayload
@@ -14058,7 +14058,7 @@ export class LinearSdk extends Request {
     return new OrganizationDomainVerifyMutation(this._request).fetch(input);
   }
   /**
-   * Mutation organizationInviteCreate for OrganizationInvitePayload
+   * Creates a new organization invite.
    *
    * @param input - required input to pass to organizationInviteCreate
    * @returns OrganizationInvitePayload
@@ -14067,7 +14067,7 @@ export class LinearSdk extends Request {
     return new OrganizationInviteCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation organizationInviteDelete for ArchivePayload
+   * Deletes an organization invite.
    *
    * @param id - required id to pass to organizationInviteDelete
    * @returns ArchivePayload
@@ -14076,7 +14076,7 @@ export class LinearSdk extends Request {
     return new OrganizationInviteDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation organizationUpdate for OrganizationPayload
+   * Updates the user's organization.
    *
    * @param input - required input to pass to organizationUpdate
    * @returns OrganizationPayload
@@ -14085,7 +14085,7 @@ export class LinearSdk extends Request {
     return new OrganizationUpdateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation projectArchive for ArchivePayload
+   * Archives a project.
    *
    * @param id - required id to pass to projectArchive
    * @returns ArchivePayload
@@ -14094,7 +14094,7 @@ export class LinearSdk extends Request {
     return new ProjectArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation projectCreate for ProjectPayload
+   * Creates a new project.
    *
    * @param input - required input to pass to projectCreate
    * @returns ProjectPayload
@@ -14103,7 +14103,7 @@ export class LinearSdk extends Request {
     return new ProjectCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation projectLinkCreate for ProjectLinkPayload
+   * Creates a new project link.
    *
    * @param input - required input to pass to projectLinkCreate
    * @returns ProjectLinkPayload
@@ -14112,7 +14112,7 @@ export class LinearSdk extends Request {
     return new ProjectLinkCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation projectLinkDelete for ArchivePayload
+   * Deletes a project link.
    *
    * @param id - required id to pass to projectLinkDelete
    * @returns ArchivePayload
@@ -14121,7 +14121,7 @@ export class LinearSdk extends Request {
     return new ProjectLinkDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation projectUpdate for ProjectPayload
+   * Updates a project.
    *
    * @param id - required id to pass to projectUpdate
    * @param input - required input to pass to projectUpdate
@@ -14131,7 +14131,7 @@ export class LinearSdk extends Request {
     return new ProjectUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation pushSubscriptionCreate for PushSubscriptionPayload
+   * Creates a push subscription.
    *
    * @param input - required input to pass to pushSubscriptionCreate
    * @returns PushSubscriptionPayload
@@ -14140,7 +14140,7 @@ export class LinearSdk extends Request {
     return new PushSubscriptionCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation pushSubscriptionDelete for PushSubscriptionPayload
+   * Deletes a push subscription.
    *
    * @param id - required id to pass to pushSubscriptionDelete
    * @returns PushSubscriptionPayload
@@ -14149,7 +14149,7 @@ export class LinearSdk extends Request {
     return new PushSubscriptionDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation reactionCreate for ReactionPayload
+   * Creates a new reaction.
    *
    * @param input - required input to pass to reactionCreate
    * @returns ReactionPayload
@@ -14158,7 +14158,7 @@ export class LinearSdk extends Request {
     return new ReactionCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation reactionDelete for ArchivePayload
+   * Deletes a reaction.
    *
    * @param id - required id to pass to reactionDelete
    * @returns ArchivePayload
@@ -14167,7 +14167,7 @@ export class LinearSdk extends Request {
     return new ReactionDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation refreshGoogleSheetsData for IntegrationPayload
+   * Manually update Google Sheets data.
    *
    * @param id - required id to pass to refreshGoogleSheetsData
    * @returns IntegrationPayload
@@ -14176,7 +14176,7 @@ export class LinearSdk extends Request {
     return new RefreshGoogleSheetsDataMutation(this._request).fetch(id);
   }
   /**
-   * Mutation resentOrganizationInvite for ArchivePayload
+   * Re-send an organization invite.
    *
    * @param id - required id to pass to resentOrganizationInvite
    * @returns ArchivePayload
@@ -14185,7 +14185,7 @@ export class LinearSdk extends Request {
     return new ResentOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation samlTokenUserAccountAuth for AuthResolverResponse
+   * Authenticates a user account via email and authentication token for SAML.
    *
    * @param input - required input to pass to samlTokenUserAccountAuth
    * @returns AuthResolverResponse
@@ -14194,7 +14194,7 @@ export class LinearSdk extends Request {
     return new SamlTokenUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
-   * Mutation subscriptionArchive for ArchivePayload
+   * Archives a subscription.
    *
    * @param id - required id to pass to subscriptionArchive
    * @returns ArchivePayload
@@ -14203,7 +14203,7 @@ export class LinearSdk extends Request {
     return new SubscriptionArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation subscriptionSessionCreate for SubscriptionSessionPayload
+   * Creates a subscription session. Used internally to integrate with Stripe.
    *
    * @param plan - required plan to pass to subscriptionSessionCreate
    * @returns SubscriptionSessionPayload
@@ -14212,7 +14212,7 @@ export class LinearSdk extends Request {
     return new SubscriptionSessionCreateMutation(this._request).fetch(plan);
   }
   /**
-   * Mutation subscriptionUpdate for SubscriptionPayload
+   * Updates a subscription.
    *
    * @param id - required id to pass to subscriptionUpdate
    * @param input - required input to pass to subscriptionUpdate
@@ -14222,7 +14222,7 @@ export class LinearSdk extends Request {
     return new SubscriptionUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation subscriptionUpdateSessionCreate for SubscriptionSessionPayload
+   * Creates a subscription update session. Used internally to integrate with Stripe.
    *
    * @returns SubscriptionSessionPayload
    */
@@ -14230,7 +14230,7 @@ export class LinearSdk extends Request {
     return new SubscriptionUpdateSessionCreateMutation(this._request).fetch();
   }
   /**
-   * Mutation subscriptionUpgrade for SubscriptionPayload
+   * Upgrades a subscription plan.
    *
    * @param id - required id to pass to subscriptionUpgrade
    * @param type - required type to pass to subscriptionUpgrade
@@ -14240,7 +14240,7 @@ export class LinearSdk extends Request {
     return new SubscriptionUpgradeMutation(this._request).fetch(id, type);
   }
   /**
-   * Mutation teamArchive for ArchivePayload
+   * Archives a team.
    *
    * @param id - required id to pass to teamArchive
    * @returns ArchivePayload
@@ -14249,7 +14249,7 @@ export class LinearSdk extends Request {
     return new TeamArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation teamCreate for TeamPayload
+   * Creates a new team. The user who creates the team will automatically be added as a member to the newly created team.
    *
    * @param input - required input to pass to teamCreate
    * @param variables - variables without 'input' to pass into the TeamCreateMutation
@@ -14262,7 +14262,7 @@ export class LinearSdk extends Request {
     return new TeamCreateMutation(this._request).fetch(input, variables);
   }
   /**
-   * Mutation teamDelete for ArchivePayload
+   * Deletes a team.
    *
    * @param id - required id to pass to teamDelete
    * @returns ArchivePayload
@@ -14271,7 +14271,7 @@ export class LinearSdk extends Request {
     return new TeamDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation teamMembershipCreate for TeamMembershipPayload
+   * Creates a new team membership.
    *
    * @param input - required input to pass to teamMembershipCreate
    * @returns TeamMembershipPayload
@@ -14280,7 +14280,7 @@ export class LinearSdk extends Request {
     return new TeamMembershipCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation teamMembershipDelete for ArchivePayload
+   * Deletes a team membership.
    *
    * @param id - required id to pass to teamMembershipDelete
    * @returns ArchivePayload
@@ -14289,7 +14289,7 @@ export class LinearSdk extends Request {
     return new TeamMembershipDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation teamMembershipUpdate for TeamMembershipPayload
+   * Updates a team membership.
    *
    * @param id - required id to pass to teamMembershipUpdate
    * @param input - required input to pass to teamMembershipUpdate
@@ -14299,7 +14299,7 @@ export class LinearSdk extends Request {
     return new TeamMembershipUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation teamUpdate for TeamPayload
+   * Updates a team.
    *
    * @param id - required id to pass to teamUpdate
    * @param input - required input to pass to teamUpdate
@@ -14309,7 +14309,7 @@ export class LinearSdk extends Request {
     return new TeamUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation templateCreate for TemplatePayload
+   * Creates a new template.
    *
    * @param input - required input to pass to templateCreate
    * @returns TemplatePayload
@@ -14318,7 +14318,7 @@ export class LinearSdk extends Request {
     return new TemplateCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation templateDelete for ArchivePayload
+   * Deletes a template.
    *
    * @param id - required id to pass to templateDelete
    * @returns ArchivePayload
@@ -14327,7 +14327,7 @@ export class LinearSdk extends Request {
     return new TemplateDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation templateUpdate for TemplatePayload
+   * Updates an existing template.
    *
    * @param id - required id to pass to templateUpdate
    * @param input - required input to pass to templateUpdate
@@ -14337,7 +14337,7 @@ export class LinearSdk extends Request {
     return new TemplateUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation userDemoteAdmin for UserAdminPayload
+   * Makes user a regular user. Can only be called by an admin.
    *
    * @param id - required id to pass to userDemoteAdmin
    * @returns UserAdminPayload
@@ -14346,7 +14346,7 @@ export class LinearSdk extends Request {
     return new UserDemoteAdminMutation(this._request).fetch(id);
   }
   /**
-   * Mutation userFlagUpdate for UserSettingsFlagPayload
+   * Updates a user's settings flag.
    *
    * @param flag - required flag to pass to userFlagUpdate
    * @param operation - required operation to pass to userFlagUpdate
@@ -14359,7 +14359,7 @@ export class LinearSdk extends Request {
     return new UserFlagUpdateMutation(this._request).fetch(flag, operation);
   }
   /**
-   * Mutation userPromoteAdmin for UserAdminPayload
+   * Makes user an admin. Can only be called by an admin.
    *
    * @param id - required id to pass to userPromoteAdmin
    * @returns UserAdminPayload
@@ -14368,7 +14368,7 @@ export class LinearSdk extends Request {
     return new UserPromoteAdminMutation(this._request).fetch(id);
   }
   /**
-   * Mutation userSettingsFlagIncrement for UserSettingsFlagPayload
+   * [Deprecated] Updates a user's settings flag.
    *
    * @param flag - required flag to pass to userSettingsFlagIncrement
    * @returns UserSettingsFlagPayload
@@ -14377,7 +14377,7 @@ export class LinearSdk extends Request {
     return new UserSettingsFlagIncrementMutation(this._request).fetch(flag);
   }
   /**
-   * Mutation userSettingsFlagsReset for UserSettingsFlagsResetPayload
+   * Resets user's setting flags.
    *
    * @returns UserSettingsFlagsResetPayload
    */
@@ -14385,7 +14385,7 @@ export class LinearSdk extends Request {
     return new UserSettingsFlagsResetMutation(this._request).fetch();
   }
   /**
-   * Mutation userSettingsUpdate for UserSettingsPayload
+   * Updates the user's settings.
    *
    * @param id - required id to pass to userSettingsUpdate
    * @param input - required input to pass to userSettingsUpdate
@@ -14395,7 +14395,7 @@ export class LinearSdk extends Request {
     return new UserSettingsUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation userSubscribeToNewsletter for UserSubscribeToNewsletterPayload
+   * Subscribes user to changelog newsletter.
    *
    * @returns UserSubscribeToNewsletterPayload
    */
@@ -14403,7 +14403,7 @@ export class LinearSdk extends Request {
     return new UserSubscribeToNewsletterMutation(this._request).fetch();
   }
   /**
-   * Mutation userSuspend for UserAdminPayload
+   * Suspends a user. Can only be called by an admin.
    *
    * @param id - required id to pass to userSuspend
    * @returns UserAdminPayload
@@ -14412,7 +14412,7 @@ export class LinearSdk extends Request {
     return new UserSuspendMutation(this._request).fetch(id);
   }
   /**
-   * Mutation userUnsuspend for UserAdminPayload
+   * Un-suspends a user. Can only be called by an admin.
    *
    * @param id - required id to pass to userUnsuspend
    * @returns UserAdminPayload
@@ -14421,7 +14421,7 @@ export class LinearSdk extends Request {
     return new UserUnsuspendMutation(this._request).fetch(id);
   }
   /**
-   * Mutation userUpdate for UserPayload
+   * Updates a user. Only available to organization admins and the user themselves.
    *
    * @param id - required id to pass to userUpdate
    * @param input - required input to pass to userUpdate
@@ -14431,7 +14431,7 @@ export class LinearSdk extends Request {
     return new UserUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation viewPreferencesCreate for ViewPreferencesPayload
+   * Creates a new ViewPreferences object.
    *
    * @param input - required input to pass to viewPreferencesCreate
    * @returns ViewPreferencesPayload
@@ -14440,7 +14440,7 @@ export class LinearSdk extends Request {
     return new ViewPreferencesCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation viewPreferencesDelete for ArchivePayload
+   * Deletes a ViewPreferences.
    *
    * @param id - required id to pass to viewPreferencesDelete
    * @returns ArchivePayload
@@ -14449,7 +14449,7 @@ export class LinearSdk extends Request {
     return new ViewPreferencesDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation viewPreferencesUpdate for ViewPreferencesPayload
+   * Updates an existing ViewPreferences object.
    *
    * @param id - required id to pass to viewPreferencesUpdate
    * @param input - required input to pass to viewPreferencesUpdate
@@ -14459,7 +14459,7 @@ export class LinearSdk extends Request {
     return new ViewPreferencesUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation webhookCreate for WebhookPayload
+   * Creates a new webhook.
    *
    * @param input - required input to pass to webhookCreate
    * @returns WebhookPayload
@@ -14468,7 +14468,7 @@ export class LinearSdk extends Request {
     return new WebhookCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation webhookDelete for ArchivePayload
+   * Deletes a Webhook.
    *
    * @param id - required id to pass to webhookDelete
    * @returns ArchivePayload
@@ -14477,7 +14477,7 @@ export class LinearSdk extends Request {
     return new WebhookDeleteMutation(this._request).fetch(id);
   }
   /**
-   * Mutation webhookUpdate for WebhookPayload
+   * Updates an existing Webhook.
    *
    * @param id - required id to pass to webhookUpdate
    * @param input - required input to pass to webhookUpdate
@@ -14487,7 +14487,7 @@ export class LinearSdk extends Request {
     return new WebhookUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Mutation workflowStateArchive for ArchivePayload
+   * Archives a state. Only states with issues that have all been archived can be archived.
    *
    * @param id - required id to pass to workflowStateArchive
    * @returns ArchivePayload
@@ -14496,7 +14496,7 @@ export class LinearSdk extends Request {
     return new WorkflowStateArchiveMutation(this._request).fetch(id);
   }
   /**
-   * Mutation workflowStateCreate for WorkflowStatePayload
+   * Creates a new state, adding it to the workflow of a team.
    *
    * @param input - required input to pass to workflowStateCreate
    * @returns WorkflowStatePayload
@@ -14505,7 +14505,7 @@ export class LinearSdk extends Request {
     return new WorkflowStateCreateMutation(this._request).fetch(input);
   }
   /**
-   * Mutation workflowStateUpdate for WorkflowStatePayload
+   * Updates a state.
    *
    * @param id - required id to pass to workflowStateUpdate
    * @param input - required input to pass to workflowStateUpdate
