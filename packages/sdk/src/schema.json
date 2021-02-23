@@ -6736,13 +6736,9 @@
             "description": "Period after which issues are automatically closed in months. Null/undefined means disabled.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6764,13 +6760,9 @@
             "description": "Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -20604,6 +20596,39 @@
             "deprecationReason": null
           },
           {
+            "name": "issueImportDelete",
+            "description": "Deletes an import job.",
+            "args": [
+              {
+                "name": "issueImportId",
+                "description": "ID of the issue import to delete.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IssueImportDeletePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueLabelCreate",
             "description": "Creates a new label.",
             "args": [
@@ -26274,6 +26299,61 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "IssueImportDeletePayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "lastSyncId",
+            "description": "The identifier of the last sync operation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueImport",
+            "description": "The import job that was deleted.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "IssueImport",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "IssueLabelCreateInput",
         "description": null,
@@ -31771,7 +31851,7 @@
               "name": "Boolean",
               "ofType": null
             },
-            "defaultValue": null,
+            "defaultValue": "true",
             "isDeprecated": false,
             "deprecationReason": null
           },

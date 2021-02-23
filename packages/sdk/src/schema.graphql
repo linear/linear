@@ -2242,6 +2242,20 @@ type IssueImport implements Node {
   """
   updatedAt: DateTime!
 }
+type IssueImportDeletePayload {
+  """
+  The import job that was deleted.
+  """
+  issueImport: IssueImport
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
 type IssueImportPayload {
   """
   The import job that was created or updated.
@@ -3268,6 +3282,15 @@ type Mutation {
     """
     teamId: String!
   ): IssueImportPayload!
+  """
+  Deletes an import job.
+  """
+  issueImportDelete(
+    """
+    ID of the issue import to delete.
+    """
+    issueImportId: String!
+  ): IssueImportDeletePayload!
   """
   Archives an issue label.
   """
@@ -6682,11 +6705,11 @@ type Team implements Node {
   """
   Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.
   """
-  autoArchivePeriod: Float!
+  autoArchivePeriod: Float
   """
   Period after which issues are automatically closed in months. Null/undefined means disabled.
   """
-  autoClosePeriod: Float!
+  autoClosePeriod: Float
   """
   The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state.
   """
@@ -8261,7 +8284,7 @@ input WebhookCreateInput {
   """
   Whether this webhook is enabled.
   """
-  enabled: Boolean
+  enabled: Boolean = true
   """
   The identifier. If none is provided, the backend will generate one.
   """

@@ -2175,6 +2175,32 @@ export class IssueImport extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+
+  /** Deletes an import job. */
+  public delete(issueImportId: string) {
+    return new IssueImportDeleteMutation(this._request).fetch(issueImportId);
+  }
+}
+/**
+ * IssueImportDeletePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueImportDeletePayloadFragment response data
+ */
+export class IssueImportDeletePayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueImportDeletePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.success = data.success ?? undefined;
+    this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId?: number;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** The import job that was deleted. */
+  public issueImport?: IssueImport;
 }
 /**
  * IssueImportPayload model
@@ -8477,6 +8503,35 @@ export class IssueImportCreateJiraMutation extends Request {
 }
 
 /**
+ * A fetchable IssueImportDelete Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportDeleteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportDelete mutation and return a IssueImportDeletePayload
+   *
+   * @param issueImportId - required issueImportId to pass to issueImportDelete
+   * @returns parsed response from IssueImportDeleteMutation
+   */
+  public async fetch(issueImportId: string): LinearFetch<IssueImportDeletePayload> {
+    return this._request<L.IssueImportDeleteMutation, L.IssueImportDeleteMutationVariables>(
+      L.IssueImportDeleteDocument,
+      {
+        issueImportId,
+      }
+    ).then(response => {
+      const data = response?.issueImportDelete;
+      return data ? new IssueImportDeletePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable IssueLabelArchive Mutation
  *
  * @param request - function to call the graphql client
@@ -14045,6 +14100,15 @@ export class LinearSdk extends Request {
       jiraToken,
       teamId
     );
+  }
+  /**
+   * Deletes an import job.
+   *
+   * @param issueImportId - required issueImportId to pass to issueImportDelete
+   * @returns IssueImportDeletePayload
+   */
+  public issueImportDelete(issueImportId: string): LinearFetch<IssueImportDeletePayload> {
+    return new IssueImportDeleteMutation(this._request).fetch(issueImportId);
   }
   /**
    * Archives an issue label.

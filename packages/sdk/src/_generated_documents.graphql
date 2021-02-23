@@ -1802,6 +1802,17 @@ fragment IssueHistoryConnection on IssueHistoryConnection {
   }
 }
 
+fragment IssueImportDeletePayload on IssueImportDeletePayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The import job that was deleted.
+  issueImport {
+    ...IssueImport
+  }
+  # Whether the operation was successful.
+  success
+}
+
 fragment IssueImportPayload on IssueImportPayload {
   # The identifier of the last sync operation.
   lastSyncId
@@ -5195,6 +5206,15 @@ mutation issueImportCreateJira(
     teamId: $teamId
   ) {
     ...IssueImportPayload
+  }
+}
+# Deletes an import job.
+mutation issueImportDelete(
+  # ID of the issue import to delete.
+  $issueImportId: String!
+) {
+  issueImportDelete(issueImportId: $issueImportId) {
+    ...IssueImportDeletePayload
   }
 }
 # Archives an issue label.

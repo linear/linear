@@ -1427,6 +1427,16 @@ export type IssueImport = Node & {
   updatedAt: Scalars["DateTime"];
 };
 
+export type IssueImportDeletePayload = {
+  __typename?: "IssueImportDeletePayload";
+  /** The import job that was deleted. */
+  issueImport?: Maybe<IssueImport>;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 export type IssueImportPayload = {
   __typename?: "IssueImportPayload";
   /** The import job that was created or updated. */
@@ -1826,6 +1836,8 @@ export type Mutation = {
   issueImportCreateGithub: IssueImportPayload;
   /** Kicks off a Jira import job. */
   issueImportCreateJira: IssueImportPayload;
+  /** Deletes an import job. */
+  issueImportDelete: IssueImportDeletePayload;
   /** Archives an issue label. */
   issueLabelArchive: ArchivePayload;
   /** Creates a new label. */
@@ -2207,6 +2219,10 @@ export type MutationIssueImportCreateJiraArgs = {
   jiraProject: Scalars["String"];
   jiraToken: Scalars["String"];
   teamId: Scalars["String"];
+};
+
+export type MutationIssueImportDeleteArgs = {
+  issueImportId: Scalars["String"];
 };
 
 export type MutationIssueLabelArchiveArgs = {
@@ -4079,9 +4095,9 @@ export type Team = Node & {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled. */
-  autoArchivePeriod: Scalars["Float"];
+  autoArchivePeriod?: Maybe<Scalars["Float"]>;
   /** Period after which issues are automatically closed in months. Null/undefined means disabled. */
-  autoClosePeriod: Scalars["Float"];
+  autoClosePeriod?: Maybe<Scalars["Float"]>;
   /** The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state. */
   autoCloseStateId?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
@@ -5817,6 +5833,11 @@ export type IssueHistoryConnectionFragment = { __typename?: "IssueHistoryConnect
   nodes: Array<{ __typename?: "IssueHistory" } & IssueHistoryFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
+
+export type IssueImportDeletePayloadFragment = { __typename?: "IssueImportDeletePayload" } & Pick<
+  IssueImportDeletePayload,
+  "lastSyncId" | "success"
+> & { issueImport?: Maybe<{ __typename?: "IssueImport" } & IssueImportFragment> };
 
 export type IssueImportPayloadFragment = { __typename?: "IssueImportPayload" } & Pick<
   IssueImportPayload,
@@ -7891,6 +7912,14 @@ export type IssueImportCreateJiraMutationVariables = Exact<{
 
 export type IssueImportCreateJiraMutation = { __typename?: "Mutation" } & {
   issueImportCreateJira: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type IssueImportDeleteMutationVariables = Exact<{
+  issueImportId: Scalars["String"];
+}>;
+
+export type IssueImportDeleteMutation = { __typename?: "Mutation" } & {
+  issueImportDelete: { __typename?: "IssueImportDeletePayload" } & IssueImportDeletePayloadFragment;
 };
 
 export type IssueLabelArchiveMutationVariables = Exact<{
@@ -10818,6 +10847,32 @@ export const IssueImportFragmentDoc: DocumentNode<IssueImportFragment, unknown> 
         ],
       },
     },
+  ],
+};
+export const IssueImportDeletePayloadFragmentDoc: DocumentNode<IssueImportDeletePayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueImportDeletePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueImportDeletePayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImport" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImport" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+    ...IssueImportFragmentDoc.definitions,
   ],
 };
 export const IssueImportPayloadFragmentDoc: DocumentNode<IssueImportPayloadFragment, unknown> = {
@@ -24251,6 +24306,44 @@ export const IssueImportCreateJiraDocument: DocumentNode<
       },
     },
     ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+};
+export const IssueImportDeleteDocument: DocumentNode<IssueImportDeleteMutation, IssueImportDeleteMutationVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportDelete" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueImportId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportDeletePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportDeletePayloadFragmentDoc.definitions,
   ],
 };
 export const IssueLabelArchiveDocument: DocumentNode<IssueLabelArchiveMutation, IssueLabelArchiveMutationVariables> = {
