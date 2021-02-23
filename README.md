@@ -1,7 +1,7 @@
 <!-- TEXT_SECTION:header:START -->
 <p align="center">
   <a href="https://linear.app" target="_blank" rel="noopener noreferrer">
-    <img width="64" src="./docs/logo.svg" alt="Linear logo">
+    <img width="64" src="https://raw.githubusercontent.com/linear/linear/master/docs/logo.svg" alt="Linear logo">
   </a> 
 </p>
 <h1 align="center">
@@ -29,6 +29,19 @@
 <!-- TEXT_SECTION:contribute:START -->
 The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins to produce a typed SDK for all operations and models exposed by the Linear production API.
 
+### Structure
+
+This monorepo uses `yarn workspaces` and `lerna` to publish packages.
+
+Generated code uses file prefix `_generated` and should never be manually updated.
+
+Open source packages:
+- [sdk](https://github.com/linear/linear/tree/master/packages/sdk/README.md) - The Linear Client SDK for interacting with the Linear GraphQL API
+- [import](https://github.com/linear/linear/tree/master/packages/import/README.md) - Import tooling for uploading from other systems
+- [codegen-doc](https://github.com/linear/linear/tree/master/packages/codegen-doc/README.md) - GraphQL codegen plugin to generate GraphQL fragments and documents
+- [codegen-sdk](https://github.com/linear/linear/tree/master/packages/codegen-sdk/README.md) - GraphQL codegen plugin to generate Typescript SDK from fragments and documents
+- [codegen-test](https://github.com/linear/linear/tree/master/packages/codegen-test/README.md) - GraphQL codegen plugin to generate a jest test for the Typescript SDK
+
 ### Get Started
 
 ```shell
@@ -49,21 +62,6 @@ yarn schema
 
 # create changeset for generating CHANGELOG.md
 yarn changeset
-```
-
-### Project Structure
-
-This monorepo uses `yarn workspaces` and `lerna` to publish packages independently.
-
-Generated code uses file prefix `_generated` and should never be manually updated.
-
-```
-packages
-  import        - Import tooling for uploading from other systems
-  sdk           - The Linear Client SDK for interacting with the Linear GraphQL API
-  codegen-doc   - GraphQL codegen plugin to generate GraphQL fragments and documents
-  codegen-sdk   - GraphQL codegen plugin to generate Typescript SDK from fragments and documents
-  codegen-test  - GraphQL codegen plugin to generate a jest test for the Typescript SDK
 ```
 
 ### Plugin Flow
