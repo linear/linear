@@ -28,7 +28,7 @@
 
 ## ⚠️ Monorepo Readme
 
-If you are looking for the Linear SDK documentation head [over here](https://github.com/linear/linear/tree/master/packages/sdk/README.md)
+If you are looking for the **Linear SDK documentation** head ✨[**over here**](./packages/sdk/README.md)✨
 
 <!-- TEXT_SECTION:contribute:START -->
 The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins to produce a typed SDK for all operations and models exposed by the Linear production API.
