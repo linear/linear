@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.5.0
+
+### Minor Changes
+
+- bcec326: Add mutations to models
+
+### Patch Changes
+
+- Updated dependencies [bcec326]
+  - @linear/sdk@1.6.0
+
 ## 1.4.9
 
 ### Patch Changes

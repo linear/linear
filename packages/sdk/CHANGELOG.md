@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.0
+
+### Minor Changes
+
+- bcec326: Add mutations to models
+
 ## 1.5.3
 
 ### Patch Changes
