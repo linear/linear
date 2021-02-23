@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.3
+
+### Patch Changes
+
+- 66d320b: Update readme
+
 ## 1.6.2
 
 ### Patch Changes
