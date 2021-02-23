@@ -135,7 +135,7 @@ describe("e2e", () => {
 
       /** Update issue */
       const updatedInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
-      const updated = await client.issueUpdate(createdId, updatedInput);
+      const updated = await issue?.update(updatedInput);
       const updatedIssue = await updated?.issue;
 
       if (process.env.E2E) {
@@ -144,7 +144,7 @@ describe("e2e", () => {
       }
 
       /** Archive issue */
-      const archivedIssue = await client.issueArchive(createdId);
+      const archivedIssue = await updatedIssue?.archive();
       if (process.env.E2E) {
         expect(archivedIssue?.success).toBe(true);
       }

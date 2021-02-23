@@ -152,30 +152,37 @@ describe("readme.md", () => {
       /** CODE_SECTION:4_2:START */
       const me = await linearClient.viewer;
       if (me?.id) {
-        await linearClient.userUpdate(me.id, { displayName: "My Updated Name" });
+        await linearClient.userUpdate(me.id, { displayName: "Alice" });
       }
       /** CODE_SECTION:4_2:END */
     });
 
-    it("All mutations are exposed in the same way", async () => {
+    it("Or call the mutation from the model", async () => {
       /** CODE_SECTION:4_3:START */
+      const me = await linearClient.viewer;
+      await me?.update({ displayName: "Alice" });
+      /** CODE_SECTION:4_3:END */
+    });
+
+    it("All mutations are exposed in the same way", async () => {
+      /** CODE_SECTION:4_4:START */
       const projects = await linearClient.projects();
       const project = projects?.nodes?.[0];
       if (project?.id) {
         await linearClient.projectArchive(project.id);
       }
-      /** CODE_SECTION:4_3:END */
+      /** CODE_SECTION:4_4:END */
     });
 
     it("Mutations will often return a success boolean and the mutated entity", async () => {
-      /** CODE_SECTION:4_4:START */
+      /** CODE_SECTION:4_5:START */
       const commentPayload = await linearClient.commentCreate({ issueId: "some-issue-id" });
       if (commentPayload?.success) {
         return commentPayload.comment;
       } else {
         return new Error("Failed to create comment");
       }
-      /** CODE_SECTION:4_4:END */
+      /** CODE_SECTION:4_5:END */
     });
   });
 

@@ -223,13 +223,22 @@ To update a model, call the Linear Client mutation and pass in the required vari
 ```ts
 const me = await linearClient.viewer;
 if (me?.id) {
-  await linearClient.userUpdate(me.id, { displayName: "My Updated Name" });
+  await linearClient.userUpdate(me.id, { displayName: "Alice" });
 }
 ```
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-All mutations are exposed in the same way:
+Or call the mutation from the model:
 <!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=4_3&src=./src/_tests/readme.test.ts) -->
+<!-- The below code snippet is automatically added from ./src/_tests/readme.test.ts -->
+```ts
+const me = await linearClient.viewer;
+await me?.update({ displayName: "Alice" });
+```
+<!-- AUTO-GENERATED-CONTENT:END -->
+
+All mutations are exposed in the same way:
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=4_4&src=./src/_tests/readme.test.ts) -->
 <!-- The below code snippet is automatically added from ./src/_tests/readme.test.ts -->
 ```ts
 const projects = await linearClient.projects();
@@ -241,7 +250,7 @@ if (project?.id) {
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 Mutations will often return a success boolean and the mutated entity:
-<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=4_4&src=./src/_tests/readme.test.ts) -->
+<!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=4_5&src=./src/_tests/readme.test.ts) -->
 <!-- The below code snippet is automatically added from ./src/_tests/readme.test.ts -->
 ```ts
 const commentPayload = await linearClient.commentCreate({ issueId: "some-issue-id" });
