@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.2
+
+### Patch Changes
+
+- a92d49c: Add mutation models to readme
+
 ## 1.6.1
 
 ### Patch Changes
