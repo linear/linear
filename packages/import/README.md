@@ -105,3 +105,11 @@ Following fields are supported:
 - [x] Automatic image uploads
 - [ ] Assignees (pick from a list)
 - [ ] Created at (requires API change)
+
+<!-- AUTO-GENERATED-CONTENT:START (TEXT_SECTION:id=license&src=../../README.md) -->
+## License
+
+<br/>
+
+Licensed under the [MIT License](./LICENSE).
+<!-- AUTO-GENERATED-CONTENT:END -->

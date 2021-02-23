@@ -79,6 +79,3 @@ TODO
 # Rollup
 .rollup.cache
 .size-snapshot.json
-
-# Readme for publishing sdk
-packages/sdk/README.md

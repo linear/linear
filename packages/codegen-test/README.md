@@ -28,3 +28,11 @@ A describe block for each root query, that returns a model that is not an item o
 3. The models and context are [parsed](../codegen-sdk/src/parse-operation.ts) to return a map of all operations for each nested resource
 4. The parsed models, operations and context are used to print [tests](./src/print-test.ts)
 5. The printed tests are returned to be printed
+
+<!-- AUTO-GENERATED-CONTENT:START (TEXT_SECTION:id=license&src=../../README.md) -->
+## License
+
+<br/>
+
+Licensed under the [MIT License](./LICENSE).
+<!-- AUTO-GENERATED-CONTENT:END -->

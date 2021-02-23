@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-module.exports = function CODE_SECTION(content, options, config) {
-  let code;
+module.exports = function TEXT_SECTION(content, options, config) {
+  let text;
   let syntax = options.syntax;
   if (!options.id || !options.src) {
     return false;
@@ -12,7 +12,7 @@ module.exports = function CODE_SECTION(content, options, config) {
   const filePath = path.join(fileDir, options.src);
 
   try {
-    code = fs.readFileSync(filePath, "utf8", (err, contents) => {
+    text = fs.readFileSync(filePath, "utf8", (err, contents) => {
       if (err) {
         console.log(`FILE NOT FOUND ${filePath}`);
         console.log(err);
@@ -29,24 +29,16 @@ module.exports = function CODE_SECTION(content, options, config) {
   }
 
   // trim leading and trailing spaces/line breaks in code
-  code = code.replace(/^\s+|\s+$/g, "");
+  text = text.replace(/^\s+|\s+$/g, "");
 
-  const lines = code.split("\n");
+  const lines = text.split("\n");
 
-  const startLine = lines.findIndex(line => line.includes(`CODE_SECTION:${options.id}:START`)) ?? 0;
-  const endLine = lines.findIndex(line => line.includes(`CODE_SECTION:${options.id}:END`)) ?? lines.length - 1;
+  const startLine = lines.findIndex(line => line.includes(`TEXT_SECTION:${options.id}:START`)) ?? 0;
+  const endLine = lines.findIndex(line => line.includes(`TEXT_SECTION:${options.id}:END`)) ?? lines.length - 1;
 
   const selectedLines = lines.slice(startLine + 1, endLine);
 
   const trimBy = selectedLines[0]?.match(/^(\s*)/)?.[1]?.length;
 
-  let header = "";
-  if (options.header) {
-    header = `\n${options.header}`;
-  }
-
-  return `<!-- The below code snippet is automatically added from ${options.src} -->
-\`\`\`${syntax}${header}
-${selectedLines.map(line => line.substring(trimBy).replace(/^\/\/ CODE_SECTION:INCLUDE /g, "")).join("\n")}
-\`\`\``;
+  return selectedLines.map(line => line.substring(trimBy)).join("\n");
 };
