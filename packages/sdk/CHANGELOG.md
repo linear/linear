@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.1
+
+### Patch Changes
+
+- bf7fed1: Add import issue delete
+
 ## 1.6.0
 
 ### Minor Changes
