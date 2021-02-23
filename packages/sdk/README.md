@@ -245,6 +245,7 @@ const projects = await linearClient.projects();
 const project = projects?.nodes?.[0];
 if (project?.id) {
   await linearClient.projectArchive(project.id);
+  await project?.archive();
 }
 ```
 <!-- AUTO-GENERATED-CONTENT:END -->

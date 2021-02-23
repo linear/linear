@@ -170,6 +170,7 @@ describe("readme.md", () => {
       const project = projects?.nodes?.[0];
       if (project?.id) {
         await linearClient.projectArchive(project.id);
+        await project?.archive();
       }
       /** CODE_SECTION:4_4:END */
     });
