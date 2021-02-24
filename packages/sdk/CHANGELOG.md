@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.4
+
+### Patch Changes
+
+- 021c972: Add umd output for sdk
+
 ## 1.6.3
 
 ### Patch Changes
