@@ -1,6 +1,6 @@
-import { TrelloJsonImporter } from "./TrelloJsonImporter";
 import * as inquirer from "inquirer";
 import { Importer } from "../../types";
+import { TrelloJsonImporter } from "./TrelloJsonImporter";
 
 const BASE_PATH = process.cwd();
 

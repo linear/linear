@@ -1,5 +1,7 @@
 import {
   getArgList,
+  getLast,
+  lowerFirst,
   printComment,
   printDebug,
   printLines,
@@ -9,10 +11,11 @@ import {
   printTernary,
   printTypescriptType,
 } from "@linear/codegen-doc";
-import { getLast, lowerFirst } from "@linear/common";
 import { Sdk } from "./constants";
+import { findMutations, getMutationName } from "./mutation";
 import { isConnectionModel, printConnectionModel } from "./print-connection";
 import { getRequestArg } from "./print-request";
+import { printModelScalar } from "./print-scalar";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
 
 /**
@@ -34,6 +37,7 @@ function printModelField(field: SdkModelField, content: string): string {
  * Print the exported return type for an sdk operation
  */
 function printModel(context: SdkPluginContext, model: SdkModel): string {
+  const mutations = findMutations(context, model);
   const operations = context.sdkDefinitions[lowerFirst(model.name)]?.operations ?? [];
   const operationFieldNames = operations.map(operation => getLast(operation.path));
 
@@ -72,14 +76,12 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           `super(${Sdk.REQUEST_NAME})`,
           printDebug("fields.scalar"),
           printLines(
-            model.fields.scalar.map(field =>
-              printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name} ?? undefined`)
-            )
+            model.fields.scalar.map(field => printSet(`this.${field.name}`, `${printModelScalar(field)} ?? undefined`))
           ),
           printDebug("fields.scalarList"),
           printLines(
             model.fields.scalarList.map(field =>
-              printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name} ?? undefined`)
+              printSet(`this.${field.name}`, `${printModelScalar(field)} ?? undefined`)
             )
           ),
           printDebug("fields.object"),
@@ -191,6 +193,47 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               `public ${operation.optionalArgs.args.length ? "" : "get"} ${fieldName}(${
                 operation.optionalArgs?.printInput ?? ""
               }) {
+                return ${printTernary(variableCheck, operationCall)}
+              }`,
+            ]);
+          })
+        ),
+      ])}
+      ${printLines([
+        printDebug("mutations"),
+        printLines(
+          mutations.map(({ field, operation }) => {
+            const modelFieldNames = [
+              ...model.fields.scalar,
+              ...model.fields.scalarList,
+              ...model.fields.object,
+              ...model.fields.list,
+            ].map(f => f.name);
+
+            const modelArgs = getArgList(
+              operation.requiredArgs.args.filter(variable => modelFieldNames.includes(variable.name))
+            );
+            const mutationArgs = getArgList(
+              operation.args.args.filter(variable => !modelFieldNames.includes(variable.name))
+            );
+
+            const variableCheck = printList(
+              modelArgs.args.map(variable => `this.${variable.name}`),
+              " && "
+            );
+
+            const operationArgs = printList([
+              ...operation.requiredArgs.args.map(variable =>
+                modelFieldNames.includes(variable.name) ? `this.${variable.name}` : variable.name
+              ),
+            ]);
+
+            const operationCall = `new ${operation.print.name}${operation.print.type}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${operationArgs})`;
+
+            return printLines([
+              printComment([field.description?.value]),
+              printDebug(operation),
+              `public ${getMutationName(model, operation.name)}(${printList([mutationArgs.printInput]) ?? ""}) {
                 return ${printTernary(variableCheck, operationCall)}
               }`,
             ]);

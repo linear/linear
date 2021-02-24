@@ -1,7 +1,7 @@
-import { nonNullable } from "@linear/common";
 import { FieldDefinitionNode, InputValueDefinitionNode, Kind } from "graphql";
 import { printGraphqlComment, printGraphqlType, printLines, printList } from "./print";
 import { ArgDefinition, ArgList } from "./types";
+import { nonNullable } from "./utils";
 
 /**
  * Return only the required arguments

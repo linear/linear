@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import * as L from "../index";
-import { startTestClient, stopTestClient } from "./test-client";
+import { startClient, stopClient } from "./test-client";
 
 /** Auto generated API tests */
 describe("generated", () => {
@@ -7,11 +8,11 @@ describe("generated", () => {
   let client: L.LinearClient;
 
   beforeAll(async () => {
-    client = await startTestClient();
+    client = await startClient();
   });
 
   afterAll(() => {
-    stopTestClient();
+    stopClient();
   });
 
   /** Test all ApiKey queries */
@@ -50,7 +51,143 @@ describe("generated", () => {
     });
   });
 
-  // AuthorizedApplications - no model for query
+  /** Test AttachmentIssue query */
+  describe("AttachmentIssue", () => {
+    let _attachmentIssue: L.Issue | undefined;
+
+    /** Test the root model query for AttachmentIssue */
+    it("attachmentIssue", async () => {
+      const attachmentIssue = await client.attachmentIssue("mock-id");
+      _attachmentIssue = attachmentIssue;
+      expect(attachmentIssue instanceof L.Issue);
+    });
+
+    /** Test the attachmentIssue connection query for the Attachment */
+    it("attachmentIssue.attachments", async () => {
+      if (_attachmentIssue) {
+        const attachments = await _attachmentIssue.attachments();
+        expect(attachments instanceof L.AttachmentConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.attachments query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the Issue */
+    it("attachmentIssue.children", async () => {
+      if (_attachmentIssue) {
+        const children = await _attachmentIssue.children();
+        expect(children instanceof L.IssueConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.children query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the Comment */
+    it("attachmentIssue.comments", async () => {
+      if (_attachmentIssue) {
+        const comments = await _attachmentIssue.comments();
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.comments query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the IssueHistory */
+    it("attachmentIssue.history", async () => {
+      if (_attachmentIssue) {
+        const history = await _attachmentIssue.history();
+        expect(history instanceof L.IssueHistoryConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.history query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the IssueRelation */
+    it("attachmentIssue.inverseRelations", async () => {
+      if (_attachmentIssue) {
+        const inverseRelations = await _attachmentIssue.inverseRelations();
+        expect(inverseRelations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.inverseRelations query"
+        );
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the IssueLabel */
+    it("attachmentIssue.labels", async () => {
+      if (_attachmentIssue) {
+        const labels = await _attachmentIssue.labels();
+        expect(labels instanceof L.IssueLabelConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.labels query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the IssueRelation */
+    it("attachmentIssue.relations", async () => {
+      if (_attachmentIssue) {
+        const relations = await _attachmentIssue.relations();
+        expect(relations instanceof L.IssueRelationConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.relations query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the User */
+    it("attachmentIssue.subscribers", async () => {
+      if (_attachmentIssue) {
+        const subscribers = await _attachmentIssue.subscribers();
+        expect(subscribers instanceof L.UserConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.subscribers query");
+      }
+    });
+  });
+
+  /** Test all Attachment queries */
+  describe("Attachments", () => {
+    let _attachment: L.Attachment | undefined;
+    let _attachment_id: string | undefined;
+
+    /** Test the root connection query for the Attachment */
+    it("attachments", async () => {
+      const attachments = await client.attachments();
+      const attachment = attachments?.nodes?.[0];
+      _attachment_id = attachment?.id;
+      expect(attachments instanceof L.AttachmentConnection);
+    });
+
+    /** Test the root query for a single Attachment */
+    it("attachment", async () => {
+      if (_attachment_id) {
+        const attachment = await client.attachment(_attachment_id);
+        _attachment = attachment;
+        expect(attachment instanceof L.Attachment);
+      } else {
+        throw new Error("codegen-doc:print: No first Attachment found in connection - cannot test attachment query");
+      }
+    });
+
+    /** Test the attachment.issue query for L.Issue */
+    it("attachment.issue", async () => {
+      if (_attachment) {
+        const attachment_issue = await _attachment.issue;
+        expect(attachment_issue instanceof L.Issue);
+      } else {
+        throw new Error("codegen-doc:print: No Attachment found - cannot test attachment.issue query");
+      }
+    });
+  });
+
+  /** Test AuthorizedApplications query */
+  describe("AuthorizedApplications", () => {
+    /** Test the root model query for AuthorizedApplications */
+    it("authorizedApplications", async () => {
+      const authorizedApplications = await client.authorizedApplications;
+      authorizedApplications?.map(node => expect(node instanceof L.AuthorizedApplication));
+    });
+  });
 
   /** Test AvailableUsers query */
   describe("AvailableUsers", () => {
@@ -491,6 +628,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test IssueImportFinishGithubOAuth query */
+  describe("IssueImportFinishGithubOAuth", () => {
+    /** Test the root model query for IssueImportFinishGithubOAuth */
+    it("issueImportFinishGithubOAuth", async () => {
+      const issueImportFinishGithubOAuth = await client.issueImportFinishGithubOAuth("mock-code");
+      expect(issueImportFinishGithubOAuth instanceof L.OAuthTokenPayload);
+    });
+  });
+
   /** Test all IssueLabel queries */
   describe("IssueLabels", () => {
     let _issueLabel: L.IssueLabel | undefined;
@@ -595,330 +741,354 @@ describe("generated", () => {
 
   /** Test all Issue queries */
   describe("IssueSearch", () => {
-    let _issue: L.Issue | undefined;
-    let _issue_id: string | undefined;
+    let _attachmentIssue: L.Issue | undefined;
+    let _attachmentIssue_id: string | undefined;
 
     /** Test the root connection query for the Issue */
     it("issueSearch", async () => {
       const issueSearch = await client.issueSearch("mock-query");
-      const issue = issueSearch?.nodes?.[0];
-      _issue_id = issue?.id;
+      const attachmentIssue = issueSearch?.nodes?.[0];
+      _attachmentIssue_id = attachmentIssue?.id;
       expect(issueSearch instanceof L.IssueConnection);
     });
 
     /** Test the root query for a single Issue */
-    it("issue", async () => {
-      if (_issue_id) {
-        const issue = await client.issue(_issue_id);
-        _issue = issue;
-        expect(issue instanceof L.Issue);
+    it("attachmentIssue", async () => {
+      if (_attachmentIssue_id) {
+        const attachmentIssue = await client.attachmentIssue(_attachmentIssue_id);
+        _attachmentIssue = attachmentIssue;
+        expect(attachmentIssue instanceof L.Issue);
       } else {
-        throw new Error("codegen-doc:print: No first Issue found in connection - cannot test issue query");
+        throw new Error("codegen-doc:print: No first Issue found in connection - cannot test attachmentIssue query");
       }
     });
 
-    /** Test the issue connection query for the Issue */
-    it("issue.children", async () => {
-      if (_issue) {
-        const children = await _issue.children();
+    /** Test the attachmentIssue connection query for the Attachment */
+    it("attachmentIssue.attachments", async () => {
+      if (_attachmentIssue) {
+        const attachments = await _attachmentIssue.attachments();
+        expect(attachments instanceof L.AttachmentConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.attachments query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the Issue */
+    it("attachmentIssue.children", async () => {
+      if (_attachmentIssue) {
+        const children = await _attachmentIssue.children();
         expect(children instanceof L.IssueConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.children query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.children query");
       }
     });
 
-    /** Test the issue connection query for the Comment */
-    it("issue.comments", async () => {
-      if (_issue) {
-        const comments = await _issue.comments();
+    /** Test the attachmentIssue connection query for the Comment */
+    it("attachmentIssue.comments", async () => {
+      if (_attachmentIssue) {
+        const comments = await _attachmentIssue.comments();
         expect(comments instanceof L.CommentConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.comments query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.comments query");
       }
     });
 
-    /** Test the issue connection query for the IssueHistory */
-    it("issue.history", async () => {
-      if (_issue) {
-        const history = await _issue.history();
+    /** Test the attachmentIssue connection query for the IssueHistory */
+    it("attachmentIssue.history", async () => {
+      if (_attachmentIssue) {
+        const history = await _attachmentIssue.history();
         expect(history instanceof L.IssueHistoryConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.history query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.history query");
       }
     });
 
-    /** Test the issue connection query for the IssueRelation */
-    it("issue.inverseRelations", async () => {
-      if (_issue) {
-        const inverseRelations = await _issue.inverseRelations();
+    /** Test the attachmentIssue connection query for the IssueRelation */
+    it("attachmentIssue.inverseRelations", async () => {
+      if (_attachmentIssue) {
+        const inverseRelations = await _attachmentIssue.inverseRelations();
         expect(inverseRelations instanceof L.IssueRelationConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.inverseRelations query");
+        throw new Error(
+          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.inverseRelations query"
+        );
       }
     });
 
-    /** Test the issue connection query for the IssueLabel */
-    it("issue.labels", async () => {
-      if (_issue) {
-        const labels = await _issue.labels();
+    /** Test the attachmentIssue connection query for the IssueLabel */
+    it("attachmentIssue.labels", async () => {
+      if (_attachmentIssue) {
+        const labels = await _attachmentIssue.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.labels query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.labels query");
       }
     });
 
-    /** Test the issue connection query for the IssueRelation */
-    it("issue.relations", async () => {
-      if (_issue) {
-        const relations = await _issue.relations();
+    /** Test the attachmentIssue connection query for the IssueRelation */
+    it("attachmentIssue.relations", async () => {
+      if (_attachmentIssue) {
+        const relations = await _attachmentIssue.relations();
         expect(relations instanceof L.IssueRelationConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.relations query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.relations query");
       }
     });
 
-    /** Test the issue connection query for the User */
-    it("issue.subscribers", async () => {
-      if (_issue) {
-        const subscribers = await _issue.subscribers();
+    /** Test the attachmentIssue connection query for the User */
+    it("attachmentIssue.subscribers", async () => {
+      if (_attachmentIssue) {
+        const subscribers = await _attachmentIssue.subscribers();
         expect(subscribers instanceof L.UserConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.subscribers query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.subscribers query");
       }
     });
 
-    /** Test the issue.assignee query for L.User */
-    it("issue.assignee", async () => {
-      if (_issue) {
-        const issue_assignee = await _issue.assignee;
-        expect(issue_assignee instanceof L.User);
+    /** Test the attachmentIssue.assignee query for L.User */
+    it("attachmentIssue.assignee", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_assignee = await _attachmentIssue.assignee;
+        expect(attachmentIssue_assignee instanceof L.User);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.assignee query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.assignee query");
       }
     });
 
-    /** Test the issue.creator query for L.User */
-    it("issue.creator", async () => {
-      if (_issue) {
-        const issue_creator = await _issue.creator;
-        expect(issue_creator instanceof L.User);
+    /** Test the attachmentIssue.creator query for L.User */
+    it("attachmentIssue.creator", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_creator = await _attachmentIssue.creator;
+        expect(attachmentIssue_creator instanceof L.User);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.creator query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.creator query");
       }
     });
 
-    /** Test the issue.cycle query for L.Cycle */
-    it("issue.cycle", async () => {
-      if (_issue) {
-        const issue_cycle = await _issue.cycle;
-        expect(issue_cycle instanceof L.Cycle);
+    /** Test the attachmentIssue.cycle query for L.Cycle */
+    it("attachmentIssue.cycle", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_cycle = await _attachmentIssue.cycle;
+        expect(attachmentIssue_cycle instanceof L.Cycle);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.cycle query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.cycle query");
       }
     });
 
-    /** Test the issue.parent query for L.Issue */
-    it("issue.parent", async () => {
-      if (_issue) {
-        const issue_parent = await _issue.parent;
-        expect(issue_parent instanceof L.Issue);
+    /** Test the attachmentIssue.parent query for L.Issue */
+    it("attachmentIssue.parent", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_parent = await _attachmentIssue.parent;
+        expect(attachmentIssue_parent instanceof L.Issue);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.parent query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.parent query");
       }
     });
 
-    /** Test the issue.project query for L.Project */
-    it("issue.project", async () => {
-      if (_issue) {
-        const issue_project = await _issue.project;
-        expect(issue_project instanceof L.Project);
+    /** Test the attachmentIssue.project query for L.Project */
+    it("attachmentIssue.project", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_project = await _attachmentIssue.project;
+        expect(attachmentIssue_project instanceof L.Project);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.project query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.project query");
       }
     });
 
-    /** Test the issue.state query for L.WorkflowState */
-    it("issue.state", async () => {
-      if (_issue) {
-        const issue_state = await _issue.state;
-        expect(issue_state instanceof L.WorkflowState);
+    /** Test the attachmentIssue.state query for L.WorkflowState */
+    it("attachmentIssue.state", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_state = await _attachmentIssue.state;
+        expect(attachmentIssue_state instanceof L.WorkflowState);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.state query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.state query");
       }
     });
 
-    /** Test the issue.team query for L.Team */
-    it("issue.team", async () => {
-      if (_issue) {
-        const issue_team = await _issue.team;
-        expect(issue_team instanceof L.Team);
+    /** Test the attachmentIssue.team query for L.Team */
+    it("attachmentIssue.team", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_team = await _attachmentIssue.team;
+        expect(attachmentIssue_team instanceof L.Team);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.team query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.team query");
       }
     });
   });
 
   /** Test all Issue queries */
   describe("Issues", () => {
-    let _issue: L.Issue | undefined;
-    let _issue_id: string | undefined;
+    let _attachmentIssue: L.Issue | undefined;
+    let _attachmentIssue_id: string | undefined;
 
     /** Test the root connection query for the Issue */
     it("issues", async () => {
       const issues = await client.issues();
-      const issue = issues?.nodes?.[0];
-      _issue_id = issue?.id;
+      const attachmentIssue = issues?.nodes?.[0];
+      _attachmentIssue_id = attachmentIssue?.id;
       expect(issues instanceof L.IssueConnection);
     });
 
     /** Test the root query for a single Issue */
-    it("issue", async () => {
-      if (_issue_id) {
-        const issue = await client.issue(_issue_id);
-        _issue = issue;
-        expect(issue instanceof L.Issue);
+    it("attachmentIssue", async () => {
+      if (_attachmentIssue_id) {
+        const attachmentIssue = await client.attachmentIssue(_attachmentIssue_id);
+        _attachmentIssue = attachmentIssue;
+        expect(attachmentIssue instanceof L.Issue);
       } else {
-        throw new Error("codegen-doc:print: No first Issue found in connection - cannot test issue query");
+        throw new Error("codegen-doc:print: No first Issue found in connection - cannot test attachmentIssue query");
       }
     });
 
-    /** Test the issue connection query for the Issue */
-    it("issue.children", async () => {
-      if (_issue) {
-        const children = await _issue.children();
+    /** Test the attachmentIssue connection query for the Attachment */
+    it("attachmentIssue.attachments", async () => {
+      if (_attachmentIssue) {
+        const attachments = await _attachmentIssue.attachments();
+        expect(attachments instanceof L.AttachmentConnection);
+      } else {
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.attachments query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the Issue */
+    it("attachmentIssue.children", async () => {
+      if (_attachmentIssue) {
+        const children = await _attachmentIssue.children();
         expect(children instanceof L.IssueConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.children query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.children query");
       }
     });
 
-    /** Test the issue connection query for the Comment */
-    it("issue.comments", async () => {
-      if (_issue) {
-        const comments = await _issue.comments();
+    /** Test the attachmentIssue connection query for the Comment */
+    it("attachmentIssue.comments", async () => {
+      if (_attachmentIssue) {
+        const comments = await _attachmentIssue.comments();
         expect(comments instanceof L.CommentConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.comments query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.comments query");
       }
     });
 
-    /** Test the issue connection query for the IssueHistory */
-    it("issue.history", async () => {
-      if (_issue) {
-        const history = await _issue.history();
+    /** Test the attachmentIssue connection query for the IssueHistory */
+    it("attachmentIssue.history", async () => {
+      if (_attachmentIssue) {
+        const history = await _attachmentIssue.history();
         expect(history instanceof L.IssueHistoryConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.history query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.history query");
       }
     });
 
-    /** Test the issue connection query for the IssueRelation */
-    it("issue.inverseRelations", async () => {
-      if (_issue) {
-        const inverseRelations = await _issue.inverseRelations();
+    /** Test the attachmentIssue connection query for the IssueRelation */
+    it("attachmentIssue.inverseRelations", async () => {
+      if (_attachmentIssue) {
+        const inverseRelations = await _attachmentIssue.inverseRelations();
         expect(inverseRelations instanceof L.IssueRelationConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.inverseRelations query");
+        throw new Error(
+          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.inverseRelations query"
+        );
       }
     });
 
-    /** Test the issue connection query for the IssueLabel */
-    it("issue.labels", async () => {
-      if (_issue) {
-        const labels = await _issue.labels();
+    /** Test the attachmentIssue connection query for the IssueLabel */
+    it("attachmentIssue.labels", async () => {
+      if (_attachmentIssue) {
+        const labels = await _attachmentIssue.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.labels query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.labels query");
       }
     });
 
-    /** Test the issue connection query for the IssueRelation */
-    it("issue.relations", async () => {
-      if (_issue) {
-        const relations = await _issue.relations();
+    /** Test the attachmentIssue connection query for the IssueRelation */
+    it("attachmentIssue.relations", async () => {
+      if (_attachmentIssue) {
+        const relations = await _attachmentIssue.relations();
         expect(relations instanceof L.IssueRelationConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.relations query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.relations query");
       }
     });
 
-    /** Test the issue connection query for the User */
-    it("issue.subscribers", async () => {
-      if (_issue) {
-        const subscribers = await _issue.subscribers();
+    /** Test the attachmentIssue connection query for the User */
+    it("attachmentIssue.subscribers", async () => {
+      if (_attachmentIssue) {
+        const subscribers = await _attachmentIssue.subscribers();
         expect(subscribers instanceof L.UserConnection);
       } else {
-        throw new Error("codegen-doc:print: No issue found - cannot test _issue.subscribers query");
+        throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.subscribers query");
       }
     });
 
-    /** Test the issue.assignee query for L.User */
-    it("issue.assignee", async () => {
-      if (_issue) {
-        const issue_assignee = await _issue.assignee;
-        expect(issue_assignee instanceof L.User);
+    /** Test the attachmentIssue.assignee query for L.User */
+    it("attachmentIssue.assignee", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_assignee = await _attachmentIssue.assignee;
+        expect(attachmentIssue_assignee instanceof L.User);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.assignee query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.assignee query");
       }
     });
 
-    /** Test the issue.creator query for L.User */
-    it("issue.creator", async () => {
-      if (_issue) {
-        const issue_creator = await _issue.creator;
-        expect(issue_creator instanceof L.User);
+    /** Test the attachmentIssue.creator query for L.User */
+    it("attachmentIssue.creator", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_creator = await _attachmentIssue.creator;
+        expect(attachmentIssue_creator instanceof L.User);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.creator query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.creator query");
       }
     });
 
-    /** Test the issue.cycle query for L.Cycle */
-    it("issue.cycle", async () => {
-      if (_issue) {
-        const issue_cycle = await _issue.cycle;
-        expect(issue_cycle instanceof L.Cycle);
+    /** Test the attachmentIssue.cycle query for L.Cycle */
+    it("attachmentIssue.cycle", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_cycle = await _attachmentIssue.cycle;
+        expect(attachmentIssue_cycle instanceof L.Cycle);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.cycle query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.cycle query");
       }
     });
 
-    /** Test the issue.parent query for L.Issue */
-    it("issue.parent", async () => {
-      if (_issue) {
-        const issue_parent = await _issue.parent;
-        expect(issue_parent instanceof L.Issue);
+    /** Test the attachmentIssue.parent query for L.Issue */
+    it("attachmentIssue.parent", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_parent = await _attachmentIssue.parent;
+        expect(attachmentIssue_parent instanceof L.Issue);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.parent query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.parent query");
       }
     });
 
-    /** Test the issue.project query for L.Project */
-    it("issue.project", async () => {
-      if (_issue) {
-        const issue_project = await _issue.project;
-        expect(issue_project instanceof L.Project);
+    /** Test the attachmentIssue.project query for L.Project */
+    it("attachmentIssue.project", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_project = await _attachmentIssue.project;
+        expect(attachmentIssue_project instanceof L.Project);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.project query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.project query");
       }
     });
 
-    /** Test the issue.state query for L.WorkflowState */
-    it("issue.state", async () => {
-      if (_issue) {
-        const issue_state = await _issue.state;
-        expect(issue_state instanceof L.WorkflowState);
+    /** Test the attachmentIssue.state query for L.WorkflowState */
+    it("attachmentIssue.state", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_state = await _attachmentIssue.state;
+        expect(attachmentIssue_state instanceof L.WorkflowState);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.state query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.state query");
       }
     });
 
-    /** Test the issue.team query for L.Team */
-    it("issue.team", async () => {
-      if (_issue) {
-        const issue_team = await _issue.team;
-        expect(issue_team instanceof L.Team);
+    /** Test the attachmentIssue.team query for L.Team */
+    it("attachmentIssue.team", async () => {
+      if (_attachmentIssue) {
+        const attachmentIssue_team = await _attachmentIssue.team;
+        expect(attachmentIssue_team instanceof L.Team);
       } else {
-        throw new Error("codegen-doc:print: No Issue found - cannot test issue.team query");
+        throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.team query");
       }
     });
   });
@@ -1621,7 +1791,14 @@ describe("generated", () => {
     });
   });
 
-  // Templates - no model for query
+  /** Test Templates query */
+  describe("Templates", () => {
+    /** Test the root model query for Templates */
+    it("templates", async () => {
+      const templates = await client.templates;
+      templates?.map(node => expect(node instanceof L.Template));
+    });
+  });
 
   /** Test UserSettings query */
   describe("UserSettings", () => {

@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig",
   "compilerOptions": {
-    "baseUrl": "src",
-    "outDir": "dist"
-  }
+    "rootDir": "src",
+    "outDir": "dist",
+    "declarationDir": "dist"
+  },
+  "exclude": ["scripts", "src/_tests", "dist", "rollup.config.js", "src/scratch.ts"]
 }

@@ -1,4 +1,3 @@
-import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
 import {
   InputValueDefinitionNode,
@@ -9,6 +8,7 @@ import {
   VariableDefinitionNode,
 } from "graphql";
 import { printList } from "./print";
+import { printTypescriptScalar } from "./scalar";
 import { Named, PluginContext } from "./types";
 
 /**
@@ -46,7 +46,7 @@ export class ArgumentTypescriptVisitor {
     leave: (_node: NamedTypeNode): string => {
       const node = (_node as unknown) as Named<NamedTypeNode>;
       if (this._context.scalars[node.name]) {
-        return DEFAULT_SCALARS[node.name] ?? `${printList([this._namespace, "Scalars"], ".")}['${node.name}']`;
+        return printTypescriptScalar(node.name, this._namespace);
       } else {
         return printList([this._namespace, node.name], ".");
       }

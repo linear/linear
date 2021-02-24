@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable eqeqeq */
 import csv from "csvtojson";
 import { Importer, ImportResult } from "../../types";
 
@@ -36,7 +37,7 @@ interface ClubhouseIssueType {
   is_archived: boolean;
 }
 
-const parseBooleanColumn = (item: string) => item === "TRUE";
+const parseBooleanColumn = (item: string) => item == "TRUE";
 const parseStringArrayColumn = (item: string) => item.split(";").filter(s => s.length > 0);
 const parseInt = (item: string) => Number.parseInt(item) || 0;
 const parseDate = (item: string, _: any, __: any, row: string[]) => {

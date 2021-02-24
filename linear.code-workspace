@@ -12,12 +12,7 @@
     }
   ],
   "extensions": {
-    "recommendations": [
-      "dbaeumer.vscode-eslint",
-      "christian-kohler.path-intellisense",
-      "eamodio.gitlens",
-      "esbenp.prettier-vscode"
-    ]
+    "recommendations": ["dbaeumer.vscode-eslint", "christian-kohler.path-intellisense", "esbenp.prettier-vscode"]
   },
   "settings": {
     "editor.tabSize": 2,
@@ -29,9 +24,7 @@
       "**/.rollup.cache": true,
       "**/*.tsbuildinfo": true
     },
-    "editor.rulers": [
-      120
-    ],
+    "editor.rulers": [120],
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true,
       "source.organizeImports": true

@@ -1,7 +1,6 @@
 import { PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
-import { validateExtension } from "@linear/codegen-doc";
+import { logger, validateExtension } from "@linear/codegen-doc";
 import { SdkPluginConfig } from "@linear/codegen-sdk";
-import { logger } from "@linear/common";
 import { GraphQLSchema } from "graphql";
 
 const log = "codegen-test:validate:";

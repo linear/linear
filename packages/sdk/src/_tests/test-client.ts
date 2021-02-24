@@ -1,4 +1,4 @@
-import { logger } from "@linear/common";
+/* eslint-disable no-console */
 import dotenv from "dotenv";
 import execa, { ExecaChildProcess } from "execa";
 import getPort from "get-port";
@@ -13,14 +13,14 @@ dotenv.config();
 /** Initialize mock server variable */
 let mockServer: ExecaChildProcess;
 
-export async function startTestClient(): Promise<LinearClient> {
+export async function startClient(): Promise<LinearClient> {
   /** Determine whether to use production or a mock server */
   if (Boolean(process.env.E2E)) {
-    logger.info(log, "Using Linear API production endpoint for end-to-end test");
+    console.log(log, "Using Linear API production endpoint for end-to-end test");
 
     /** Create Linear client with production server endpoint */
     return new LinearClient({
-      apiKey: process.env.E2E_API_KEY,
+      apiKey: process.env.API_KEY,
     });
   } else {
     /** Create sleep function */
@@ -31,10 +31,10 @@ export async function startTestClient(): Promise<LinearClient> {
 
     /** Start the mock server */
     try {
-      logger.info(log, `Using mock server on http://localhost:${port}/graphql`);
+      console.log(log, `Using mock server on http://localhost:${port}/graphql`);
       mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", `-p ${port}`]);
     } catch (error) {
-      logger.fatal(log, error);
+      console.error(log, error);
       throw new Error(`${log} Failed to start the mock server`);
     }
 
@@ -49,7 +49,7 @@ export async function startTestClient(): Promise<LinearClient> {
   }
 }
 
-export function stopTestClient(): void {
+export function stopClient(): void {
   /** Kill the mock server */
   try {
     if (mockServer) {
@@ -58,7 +58,7 @@ export function stopTestClient(): void {
       });
     }
   } catch (error) {
-    logger.fatal(log, error);
+    console.error(log, error);
     throw new Error(`${log} Failed to kill the mock server`);
   }
 }

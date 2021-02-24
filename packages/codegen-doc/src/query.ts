@@ -11,15 +11,24 @@ export function findQuery(
 ): FieldDefinitionNode | undefined {
   const type = reduceTypeName(field.type);
   const listType = reduceListType(field.type);
+  const fieldName = typeof field.name === "string" ? field.name : field.name.value;
 
   /** Ignore queries for connections and lists */
   if (type?.endsWith("Connection")) {
     return undefined;
   }
 
-  const match = context.queries.find(query => {
+  const matchedNameAndType = context.queries.find(query => {
+    return (
+      query.name.value.toLowerCase() === fieldName.toLowerCase() &&
+      reduceTypeName(query.type) === type &&
+      reduceListType(query.type) === listType
+    );
+  });
+
+  const matchedType = context.queries.find(query => {
     return reduceTypeName(query.type) === type && reduceListType(query.type) === listType;
   });
 
-  return match;
+  return matchedNameAndType ?? matchedType;
 }

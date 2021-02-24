@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { LinearClient } from "../index";
 import { LinearErrorType } from "./../types";
-import { startTestClient, stopTestClient } from "./test-client";
+import { startClient, stopClient } from "./test-client";
 
 // https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid/2117523#2117523
 function uuid() {
@@ -30,11 +30,11 @@ describe("e2e", () => {
   let linearClient: LinearClient;
 
   beforeAll(async () => {
-    linearClient = await startTestClient();
+    linearClient = await startClient();
   });
 
   afterAll(() => {
-    stopTestClient();
+    stopClient();
   });
 
   /**
@@ -135,7 +135,7 @@ describe("e2e", () => {
 
       /** Update issue */
       const updatedInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
-      const updated = await client.issueUpdate(createdId, updatedInput);
+      const updated = await issue?.update(updatedInput);
       const updatedIssue = await updated?.issue;
 
       if (process.env.E2E) {
@@ -144,7 +144,7 @@ describe("e2e", () => {
       }
 
       /** Archive issue */
-      const archivedIssue = await client.issueArchive(createdId);
+      const archivedIssue = await updatedIssue?.archive();
       if (process.env.E2E) {
         expect(archivedIssue?.success).toBe(true);
       }

@@ -1,6 +1,5 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
-import { ContextVisitor, PluginContext, printLines } from "@linear/codegen-doc";
-import { logger, nonNullable } from "@linear/common";
+import { ContextVisitor, logger, nonNullable, PluginContext, printLines } from "@linear/codegen-doc";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
 import { Sdk } from "./constants";
 import { ModelVisitor } from "./model-visitor";
@@ -9,6 +8,7 @@ import { printConnection } from "./print-connection";
 import { printModels } from "./print-model";
 import { printOperations } from "./print-operation";
 import { printRequest } from "./print-request";
+import { printScalarParsers } from "./print-scalar";
 import { printSdk } from "./print-sdk";
 import { SdkModel, SdkPluginConfig, SdkPluginContext } from "./types";
 
@@ -69,6 +69,8 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
         printRequest(),
         /** Print the connection base class */
         printConnection(),
+        /** Print the custom scalar parsers */
+        printScalarParsers(),
         /** Print the api models */
         printedModels,
         /** Print the api operations */

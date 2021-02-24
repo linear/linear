@@ -1,3 +1,6 @@
+import commonjs from "@rollup/plugin-commonjs";
+import json from "@rollup/plugin-json";
+import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import gzip from "rollup-plugin-gzip";
 import { sizeSnapshot } from "rollup-plugin-size-snapshot";
@@ -6,8 +9,19 @@ import { brotliCompressSync } from "zlib";
 
 export default [
   {
+    input: "src/cli.ts",
+    output: [
+      {
+        dir: "./",
+        entryFileNames: "dist/cli.js",
+        format: "cjs",
+        sourcemap: true,
+      },
+    ],
+    plugins: [typescript(), commonjs(), json()],
+  },
+  {
     input: "src/index.ts",
-    external: ["tracer"],
     output: [
       {
         dir: "./",
@@ -24,6 +38,9 @@ export default [
     ],
     plugins: [
       typescript(),
+      resolve(),
+      commonjs(),
+      json(),
       sizeSnapshot(),
       terser(),
       gzip(),
@@ -35,7 +52,6 @@ export default [
   },
   {
     input: "src/index.ts",
-    external: ["tracer"],
     output: [
       {
         dir: "./",

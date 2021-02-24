@@ -11,7 +11,7 @@ export function findFragment(
   node?: OperationTypeDefinitionNode | FieldDefinitionNode | Named<FieldDefinitionNode>
 ): NamedFields<ObjectTypeDefinitionNode> | undefined {
   if (node) {
-    const type = printTypescriptType(context, node.type);
+    const type = printTypescriptType(context, node.type).replace("[]", "");
     return context.fragments.find(operation => operation.name === type);
   }
   return undefined;

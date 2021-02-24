@@ -1,12 +1,8 @@
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { LinearClient } from "@linear/sdk";
 import chalk from "chalk";
 import * as inquirer from "inquirer";
 import _ from "lodash";
-import linearClient from "./client";
-import { GraphQLClientRequest } from "./client/types";
 import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
 
@@ -21,20 +17,10 @@ interface ImportAnswers {
   teamName?: string;
 }
 
-interface LabelCreateResponse {
-  issueLabelCreate: {
-    issueLabel: {
-      id: string;
-    };
-    success: boolean;
-  };
-}
-
 /**
  * Import issues into Linear via the API.
  */
-export const importIssues = async (apiKey: string, importer: Importer) => {
-  const linear = linearClient(apiKey);
+export const importIssues = async (apiKey: string, importer: Importer): Promise<void> => {
   const client = new LinearClient({ apiKey });
   const importData = await importer.import();
 
@@ -149,46 +135,39 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
     },
   ]);
 
-  let teamKey: string;
-  let teamId: string;
+  let teamKey: string | undefined;
+  let teamId: string | undefined;
   if (importAnswers.newTeam) {
     // Create a new team
-    const teamResponse = await linear(
-      `mutation createIssuesTeam($name: String!) {
-            teamCreate(input: { name: $name }) {
-              success
-              team {
-                id
-                name
-                key
-              }
-            }
-          }
-        `,
-      {
-        name: importAnswers.teamName as string,
-      }
-    );
-    teamKey = (teamResponse as any).teamCreate.team.key;
-    teamId = (teamResponse as any).teamCreate.team.id;
+    const teamResponse = await client.teamCreate({
+      name: importAnswers.teamName as string,
+    });
+    const team = await teamResponse?.team;
+
+    teamKey = team?.key;
+    teamId = team?.id;
   } else {
     // Use existing team
-    teamKey = teams.find(team => team.id === importAnswers.targetTeamId)?.key ?? "unknown";
+    const existingTeam = teams?.find(team => team.id === importAnswers.targetTeamId);
+
+    teamKey = existingTeam?.key;
     teamId = importAnswers.targetTeamId as string;
   }
 
-  const teamQuery = await client.team(teamId);
-  const teamLabelsQuery = await teamQuery?.labels();
-  const teamStatesQuery = await teamQuery?.states();
+  if (!teamId) {
+    throw new Error("No team id found");
+  }
 
-  const issueLabels = teamLabelsQuery?.nodes ?? [];
-  const workflowStates = teamStatesQuery?.nodes ?? [];
+  const teamInfo = await client.team(teamId);
+
+  const issueLabels = await teamInfo?.labels();
+  const workflowStates = await teamInfo?.states();
 
   const existingLabelMap = {} as { [name: string]: string };
-  for (const label of issueLabels) {
-    const labelName = label.name?.toLowerCase() ?? "";
-    if (!existingLabelMap[labelName]) {
-      existingLabelMap[labelName] = label.id ?? "";
+  for (const label of issueLabels?.nodes ?? []) {
+    const labelName = label.name?.toLowerCase();
+    if (labelName && label.id && !existingLabelMap[labelName]) {
+      existingLabelMap[labelName] = label.id;
     }
   }
 
@@ -202,56 +181,47 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
     let actualLabelId = existingLabelMap[labelName.toLowerCase()];
 
     if (!actualLabelId) {
-      const labelResponse = (await linear(
-        `
-          mutation createLabel($teamId: String!, $name: String!, $description: String, $color: String) {
-            issueLabelCreate(input: { name: $name, description: $description, color: $color, teamId: $teamId }) {
-              issueLabel {
-                id
-              }
-              success
-            }
-          }
-        `,
-        {
-          name: labelName,
-          description: label.description,
-          color: label.color,
-          teamId,
-        }
-      )) as LabelCreateResponse;
+      const labelResponse = await client.issueLabelCreate({
+        name: labelName,
+        description: label.description,
+        color: label.color,
+        teamId,
+      });
 
-      actualLabelId = labelResponse.issueLabelCreate.issueLabel.id;
+      const issueLabel = await labelResponse?.issueLabel;
+      if (issueLabel?.id) {
+        actualLabelId = issueLabel?.id;
+      }
       existingLabelMap[labelName.toLowerCase()] = actualLabelId;
     }
     labelMapping[labelId] = actualLabelId;
   }
 
   const existingStateMap = {} as { [name: string]: string };
-  for (const state of workflowStates) {
-    const stateName = state.name?.toLowerCase() ?? "";
-    if (!existingStateMap[stateName]) {
-      existingStateMap[stateName] = state.id ?? "";
+  for (const state of workflowStates?.nodes ?? []) {
+    const stateName = state.name?.toLowerCase();
+    if (stateName && state.id && !existingStateMap[stateName]) {
+      existingStateMap[stateName] = state.id;
     }
   }
 
   const existingUserMap = {} as { [name: string]: string };
   for (const user of users) {
-    const userName = user.name?.toLowerCase() ?? "";
-    if (!existingUserMap[userName]) {
-      existingUserMap[userName] = user.id ?? "";
+    const userName = user.name?.toLowerCase();
+    if (userName && user.id && !existingUserMap[userName]) {
+      existingUserMap[userName] = user.id;
     }
   }
 
   // Create issues
   for (const issue of importData.issues) {
     const issueDescription = issue.description
-      ? await replaceImagesInMarkdown(linear, issue.description, importData.resourceURLSuffix)
+      ? await replaceImagesInMarkdown(client, issue.description, importData.resourceURLSuffix)
       : undefined;
 
     const description =
       importAnswers.includeComments && issue.comments
-        ? await buildComments(linear, issueDescription || "", issue.comments, importData)
+        ? await buildComments(client, issueDescription || "", issue.comments, importData)
         : issueDescription;
 
     const labelIds = issue.labels ? issue.labels.map(labelId => labelMapping[labelId]) : undefined;
@@ -269,43 +239,16 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
         ? importAnswers.targetAssignee
         : undefined;
 
-    await linear(
-      `
-          mutation createIssue(
-              $teamId: String!,
-              $projectId: String,
-              $title: String!,
-              $description: String,
-              $priority: Int,
-              $labelIds: [String!]
-              $stateId: String
-              $assigneeId: String
-            ) {
-            issueCreate(input: {
-                                teamId: $teamId,
-                                projectId: $projectId,
-                                title: $title,
-                                description: $description,
-                                priority: $priority,
-                                labelIds: $labelIds
-                                stateId: $stateId
-                                assigneeId: $assigneeId
-                              }) {
-              success
-            }
-          }
-        `,
-      {
-        teamId,
-        projectId,
-        title: issue.title,
-        description,
-        priority: issue.priority,
-        labelIds,
-        stateId,
-        assigneeId,
-      }
-    );
+    await client.issueCreate({
+      teamId,
+      projectId: (projectId as unknown) as string,
+      title: issue.title,
+      description,
+      priority: issue.priority,
+      labelIds,
+      stateId,
+      assigneeId,
+    });
   }
 
   console.error(
@@ -315,7 +258,7 @@ export const importIssues = async (apiKey: string, importer: Importer) => {
 
 // Build comments into issue description
 const buildComments = async (
-  client: GraphQLClientRequest,
+  client: LinearClient,
   description: string,
   comments: Comment[],
   importData: ImportResult

@@ -31,8 +31,10 @@ export function printSdk(context: SdkPluginContext): string {
 export function printSdkOperation(operation: SdkOperation): string {
   return printLines([
     printComment([
-      `${operation.print.type} ${operation.print.field} for ${operation.print.model}${operation.print.list ? "s" : ""}`,
-      operation.query?.description?.value ?? "",
+      operation.query?.description?.value ??
+        `${operation.print.type} ${operation.print.field} for ${operation.print.model}${
+          operation.print.list ? "s" : ""
+        }`,
       ...operation.args.jsdoc,
       `@returns ${operation.print.model}${operation.print.list ? "[]" : ""}`,
     ]),
