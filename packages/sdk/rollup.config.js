@@ -7,6 +7,21 @@ import { sizeSnapshot } from "rollup-plugin-size-snapshot";
 import { terser } from "rollup-plugin-terser";
 import { brotliCompressSync } from "zlib";
 
+const plugins = [typescript()];
+
+const minPlugins = [
+  ...plugins,
+  commonjs(),
+  json(),
+  sizeSnapshot(),
+  terser(),
+  gzip(),
+  gzip({
+    customCompression: content => brotliCompressSync(Buffer.from(content)),
+    fileName: ".br",
+  }),
+];
+
 export default [
   {
     input: "src/index.ts",
@@ -24,19 +39,20 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [
-      typescript(),
-      resolve(),
-      commonjs(),
-      json(),
-      sizeSnapshot(),
-      terser(),
-      gzip(),
-      gzip({
-        customCompression: content => brotliCompressSync(Buffer.from(content)),
-        fileName: ".br",
-      }),
+    plugins: [...minPlugins, resolve()],
+  },
+  {
+    input: "src/index.ts",
+    output: [
+      {
+        dir: "./",
+        entryFileNames: "dist/index-umd.min.js",
+        format: "umd",
+        sourcemap: true,
+        name: "Linear",
+      },
     ],
+    plugins: minPlugins,
   },
   {
     input: "src/index.ts",
@@ -53,7 +69,14 @@ export default [
         format: "es",
         sourcemap: true,
       },
+      {
+        dir: "./",
+        entryFileNames: "dist/index-umd.js",
+        format: "umd",
+        sourcemap: true,
+        name: "Linear",
+      },
     ],
-    plugins: [typescript()],
+    plugins,
   },
 ];
