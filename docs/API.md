@@ -216,7 +216,7 @@ query {
 }
 ```
 
-We can do the same thing with `workflowStates` which reprecent status fields for teams:
+We can do the same thing with `workflowStates` which represent status fields for teams:
 
 ```graphql
 query {
