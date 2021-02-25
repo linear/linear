@@ -1,11 +1,12 @@
 {
   "name": "@linear/sdk",
   "description": "The Linear Client SDK for interacting with the Linear GraphQL API",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
   "module": "dist/index-es.min.js",
+  "unpkg": "dist/index-umd.min.js",
   "types": "dist/index.d.ts",
   "repository": "https://github.com/linear/linear",
   "engines": {
