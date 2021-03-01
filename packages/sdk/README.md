@@ -49,6 +49,8 @@
 
 <br/>
 
+> ⚠️ Visit our [API docs site](https://developers.linear.app/docs/sdk/getting-started) for the most up to date documentation
+
 ## 🦋 Your First Query
 
 <br/>
