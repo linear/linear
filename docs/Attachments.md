@@ -1,3 +1,5 @@
+> ⚠️ Visit our [API docs site](https://developers.linear.app/docs/graphql/attachments) for the most up to date documentation
+
 # [Alpha] Issue Attachments
 
 Issue attachments allow you to link external resources to issues and display them inside Linear similarly to GitHub Pull Requests. They are designed API developers in mind and we also use them for upcoming integrations inside Linear.
