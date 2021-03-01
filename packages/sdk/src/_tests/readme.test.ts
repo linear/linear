@@ -351,7 +351,7 @@ describe("readme.md", () => {
       /** CODE_SECTION:7_6:END */
     });
 
-    it("The `raw` error returned by the graphql-request client is still available", async () => {
+    it("The `raw` error returned by the LinearGraphQLClient is still available", async () => {
       /** CODE_SECTION:7_7:START */
       run().catch(error => {
         if (error instanceof LinearError) {
@@ -407,12 +407,9 @@ describe("readme.md", () => {
       });
 
       /** Create the custom request function */
-      const customLinearRequest: LinearRequest = <Response, Variables>(
-        document: DocumentNode,
-        variables?: Variables
-      ) => {
+      const customLinearRequest: LinearRequest = <Data, Variables>(document: DocumentNode, variables?: Variables) => {
         /** The request must take a GraphQL document and variables, then return a promise for the result */
-        return customGraphqlClient.request<Response>(print(document), variables).catch(error => {
+        return customGraphqlClient.request<Data>(print(document), variables).catch(error => {
           /** Optionally catch and parse errors from the Linear API */
           throw parseLinearError(error);
         });

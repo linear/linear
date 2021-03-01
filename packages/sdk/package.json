@@ -32,7 +32,7 @@
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.1.0",
     "graphql": "^15.4.0",
-    "graphql-request": "^3.3.0"
+    "isomorphic-unfetch": "^3.1.0"
   },
   "devDependencies": {
     "@graphql-codegen/introspection": "^1.18.0",
@@ -47,6 +47,7 @@
     "dotenv": "^8.2.0",
     "execa": "^5.0.0",
     "get-port": "^5.1.1",
+    "graphql-request": "^3.3.0",
     "replace-in-file": "^6.2.0",
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",

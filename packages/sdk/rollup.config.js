@@ -8,18 +8,20 @@ import { sizeSnapshot } from "rollup-plugin-size-snapshot";
 import { terser } from "rollup-plugin-terser";
 import { brotliCompressSync } from "zlib";
 
-const plugins = [
-  typescript(),
+const plugins = [typescript(), json()];
+
+const nodePlugins = [...plugins, resolve(), commonjs()];
+
+const browserPlugins = [
+  ...plugins,
+  resolve({ browser: true }),
   commonjs(),
-  json(),
   injectProcessEnv({
     NODE_ENV: process.env.NODE_ENV,
     npm_package_name: process.env.npm_package_name,
     npm_package_version: process.env.npm_package_version,
   }),
 ];
-
-const nodePlugins = [...plugins, resolve()];
 
 const minPlugins = [
   sizeSnapshot(),
@@ -36,16 +38,18 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        dir: "./",
+        dir: ".",
         entryFileNames: "dist/index-cjs.min.js",
         format: "cjs",
         sourcemap: true,
+        exports: "named",
       },
       {
-        dir: "./",
+        dir: ".",
         entryFileNames: "dist/index-es.min.js",
         format: "es",
         sourcemap: true,
+        exports: "named",
       },
     ],
     plugins: [...nodePlugins, ...minPlugins],
@@ -54,31 +58,50 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        dir: "./",
-        entryFileNames: "dist/index-umd.min.js",
-        format: "umd",
+        dir: ".",
+        entryFileNames: "dist/index-cjs.js",
+        format: "cjs",
         sourcemap: true,
-        name: "Linear",
+        exports: "named",
+      },
+      {
+        dir: ".",
+        entryFileNames: "dist/index-es.js",
+        format: "es",
+        sourcemap: true,
+        exports: "named",
       },
     ],
-    plugins: [...plugins, ...minPlugins],
+    plugins: nodePlugins,
   },
   {
     input: "src/index.ts",
     output: [
       {
-        dir: "./",
-        entryFileNames: "dist/index-cjs.js",
-        format: "cjs",
+        dir: ".",
+        entryFileNames: "dist/index-umd.min.js",
+        format: "umd",
+        esModule: false,
         sourcemap: true,
-      },
-      {
-        dir: "./",
-        entryFileNames: "dist/index-es.js",
-        format: "es",
-        sourcemap: true,
+        exports: "named",
+        name: "Linear",
       },
     ],
-    plugins: nodePlugins,
+    plugins: [...browserPlugins, ...minPlugins],
+  },
+  {
+    input: "src/index.ts",
+    output: [
+      {
+        dir: ".",
+        entryFileNames: "dist/index-umd.js",
+        format: "umd",
+        esModule: false,
+        sourcemap: true,
+        exports: "named",
+        name: "Linear",
+      },
+    ],
+    plugins: [...browserPlugins],
   },
 ];

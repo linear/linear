@@ -60,7 +60,7 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
         /** Ignore unused variables */
         "/* eslint-disable @typescript-eslint/no-unused-vars */",
         /** Import DocumentNode */
-        "import { DocumentNode } from 'graphql'",
+        "import { DocumentNode } from 'graphql/language/ast'",
         /** Import document namespace */
         `import * as ${Sdk.NAMESPACE} from '${config.documentFile}'`,
       ].filter(nonNullable),

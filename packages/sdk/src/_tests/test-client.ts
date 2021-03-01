@@ -13,13 +13,13 @@ dotenv.config();
 /** Initialize mock server variable */
 let mockServer: ExecaChildProcess;
 
-export async function startClient(): Promise<LinearClient> {
+export async function startClient(Client: typeof LinearClient = LinearClient): Promise<LinearClient> {
   /** Determine whether to use production or a mock server */
   if (Boolean(process.env.E2E)) {
     console.log(log, "Using Linear API production endpoint for end-to-end test");
 
     /** Create Linear client with production server endpoint */
-    return new LinearClient({
+    return new Client({
       apiKey: process.env.API_KEY,
     });
   } else {
@@ -42,7 +42,7 @@ export async function startClient(): Promise<LinearClient> {
     await sleep(1000);
 
     /** Create Linear client with mock server endpoint */
-    return new LinearClient({
+    return new Client({
       apiKey: "test",
       apiUrl: `http://localhost:${port}/graphql`,
     });

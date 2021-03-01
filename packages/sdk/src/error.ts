@@ -60,7 +60,7 @@ export class LinearGraphQLError {
 /**
  * An error from the Linear API
  *
- * @param error a raw error returned from the graphql-request client
+ * @param error a raw error returned from the LinearGraphQLClient
  */
 export class LinearError extends Error {
   /** The type of the first error returned by the Linear API */
@@ -75,7 +75,7 @@ export class LinearError extends Error {
   public data?: unknown;
   /** The http status of this request */
   public status?: number;
-  /** The raw graphql-request error */
+  /** The raw LinearGraphQLClient error */
   public raw?: LinearErrorRaw;
 
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[], type?: LinearErrorType) {
@@ -201,7 +201,11 @@ const errorConstructorMap: Record<LinearErrorType, typeof LinearError> = {
   [LinearErrorType.LockTimeout]: LockTimeoutLinearError,
 };
 
-export function parseLinearError(error?: LinearErrorRaw): LinearError {
+export function parseLinearError(error?: LinearErrorRaw | LinearError): LinearError {
+  if (error instanceof LinearError) {
+    return error;
+  }
+
   /** Parse graphQL errors */
   const errors = (error?.response?.errors ?? []).map(graphqlError => {
     return new LinearGraphQLError(graphqlError);

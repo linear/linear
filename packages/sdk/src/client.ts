@@ -1,12 +1,12 @@
-import { DocumentNode, print } from "graphql";
-import { GraphQLClient } from "graphql-request";
+import { DocumentNode } from "graphql/language/ast";
 import { parseLinearError } from "./error";
+import { LinearGraphQLClient } from "./graphql-client";
 import { LinearClientOptions, LinearClientParsedOptions } from "./types";
 import { serializeUserAgent } from "./utils";
 import { LinearSdk } from "./_generated_sdk";
 
 /**
- * Validate and return default graphql-request client options
+ * Validate and return default LinearGraphQLClient options
  *
  * @param options initial request options to pass to the graphql client
  * @returns parsed graphql client options
@@ -42,20 +42,20 @@ function parseClientOptions({ apiKey, accessToken, apiUrl, ...opts }: LinearClie
 /**
  * Create a Linear API client
  *
- * @param options request options to pass to the graphql-request client
+ * @param options request options to pass to the LinearGraphQLClient
  */
 export class LinearClient extends LinearSdk {
   public options: LinearClientParsedOptions;
-  public client: GraphQLClient;
+  public client: LinearGraphQLClient;
 
   public constructor(options: LinearClientOptions) {
     const parsedOptions = parseClientOptions(options);
-    const graphQLClient = new GraphQLClient(parsedOptions.apiUrl, parsedOptions);
+    const graphQLClient = new LinearGraphQLClient(parsedOptions.apiUrl, parsedOptions);
 
-    super(<Response, Variables>(doc: DocumentNode, vars?: Variables) =>
-      /** Call the graphql-request client */
-      this.client.request<Response, Variables>(print(doc), vars).catch(error => {
-        /** Catch and wrap errors from the graphql-request client */
+    super(<Data, Variables extends Record<string, unknown>>(doc: DocumentNode, vars?: Variables) =>
+      /** Call the LinearGraphQLClient */
+      this.client.request<Data, Variables>(doc, vars).catch(error => {
+        /** Catch and wrap errors from the LinearGraphQLClient */
         throw parseLinearError(error);
       })
     );

@@ -1,7 +1,5 @@
-import { RequestInit } from "graphql-request/dist/types.dom";
-
 /**
- * Input options for creating a Linear sdk with graphql-request
+ * Input options for creating a Linear Client
  */
 export interface LinearClientOptions extends RequestInit {
   /** Personal api token generated from https://linear.app/settings/api */
@@ -13,11 +11,29 @@ export interface LinearClientOptions extends RequestInit {
 }
 
 /**
- * Validated graphql-request client options
+ * Validated LinearGraphQLClient options
  */
 export interface LinearClientParsedOptions extends RequestInit {
   /** The url to the Linear graphql api defaulted to production */
   apiUrl: string;
+}
+
+/**
+ * The raw response from the Linear GraphQL Client
+ */
+export interface LinearRawResponse<Data> {
+  /** The returned data */
+  data?: Data;
+  /** Any extensions returned by the Linear API */
+  extensions?: unknown;
+  /** Response headers */
+  headers?: Headers;
+  /** Response status */
+  status?: number;
+  /** An error message */
+  error?: string;
+  /** Any GraphQL errors returned by the Linear API */
+  errors?: LinearGraphQLErrorRaw[];
 }
 
 /**
@@ -58,25 +74,23 @@ export interface LinearGraphQLErrorRaw {
 }
 
 /**
+ * Description of a GraphQL request used in error handling
+ */
+export interface GraphQLRequestContext<Variables extends Record<string, unknown>> {
+  query: string;
+  variables?: Variables;
+}
+
+/**
  * The raw error returned by the Linear API
  */
-export interface LinearErrorRaw extends Error {
+export interface LinearErrorRaw {
+  /** Error name if available */
+  name?: string;
+  /** Error message if available */
+  message?: string;
   /** Error information for the request */
-  request?: {
-    /** The graphql query that caused this error */
-    query?: string;
-    /** The graphql variables that caused this error */
-    variables?: Record<string, unknown>;
-  };
+  request?: GraphQLRequestContext<Record<string, unknown>>;
   /** Error information for the response */
-  response?: {
-    /** An error message */
-    error?: string;
-    /** Any data returned by this request */
-    data?: unknown;
-    /** The http status of this request */
-    status?: number;
-    /** A list of graphql errors returned by the Linear API */
-    errors?: LinearGraphQLErrorRaw[];
-  };
+  response?: LinearRawResponse<unknown>;
 }

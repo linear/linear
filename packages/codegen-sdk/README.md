@@ -23,14 +23,14 @@ A model class for each model in the Linear API, initialized by the response frag
 An operation class for each query and mutation in the Linear API, containing a fetch function which:
 - accepts all required variables as args
 - accepts all optional variables as a final object arg
-- calls the `graphql-request.request` function to return the model from the production Linear API
+- calls the `LinearGraphQLClient.request` function to return the model from the production Linear API
 - constructs the model and returns
 
 An operation class for each nested query within a model, containing a fetch function which:
 - uses the parent variables defined by the constructor scope
 - accepts all required variables for the child query as args
 - accepts all optional variables for the child query as a final object arg
-- calls the `graphql-request.request` function to return the model from the production Linear API
+- calls the `LinearGraphQLClient.request` function to return the model from the production Linear API
 - constructs the model and returns
 
 An SDK class containing a public getter for each root query and mutation which:

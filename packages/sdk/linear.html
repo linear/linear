@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Static Template</title>
+    <script src="./dist/index-umd.min.js"></script>
+  </head>
+  <body>
+    <h1>test linear umd</h1>
+    <p>
+      Result:
+      <span id="result" style="color: seagreen">...pending</span>
+    </p>
+    <p>Error: <span id="error" style="color: tomato">...pending</span></p>
+    <script>
+      try {
+        const client = new Linear.LinearClient({
+          apiKey: "asd",
+        });
+        client.viewer
+          .then(me => {
+            document.getElementById("result").innerHTML = JSON.stringify(me);
+            document.getElementById("error").innerHTML = "";
+          })
+          .catch(error => {
+            document.getElementById("result").innerHTML = "";
+            document.getElementById("error").innerHTML = error;
+          });
+      } catch (error) {
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("error").innerHTML = error;
+      }
+    </script>
+  </body>
+</html>
