@@ -1,3 +1,5 @@
+> ⚠️ Visit our [API docs site](https://developers.linear.app/docs/graphql/working-with-the-graphql-api) for the most up to date documentation
+
 # Linear GraphQL API
 
 Linear's public API is built using GraphQL. It's the same API we use internally for developing our applications.
