@@ -50,12 +50,12 @@
     "replace-in-file": "^6.2.0",
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-inject-process-env": "^1.3.1",
     "rollup-plugin-size-snapshot": "^0.12.0",
     "rollup-plugin-terser": "^7.0.2",
     "ts-node": "^9.1.1"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "gitHead": "ac77c2c674a4266bd263b18213354572d3e8f9eb"
+  }
 }

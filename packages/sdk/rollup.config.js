@@ -3,16 +3,25 @@ import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import gzip from "rollup-plugin-gzip";
+import injectProcessEnv from "rollup-plugin-inject-process-env";
 import { sizeSnapshot } from "rollup-plugin-size-snapshot";
 import { terser } from "rollup-plugin-terser";
 import { brotliCompressSync } from "zlib";
 
-const plugins = [typescript()];
-
-const minPlugins = [
-  ...plugins,
+const plugins = [
+  typescript(),
   commonjs(),
   json(),
+  injectProcessEnv({
+    NODE_ENV: process.env.NODE_ENV,
+    npm_package_name: process.env.npm_package_name,
+    npm_package_version: process.env.npm_package_version,
+  }),
+];
+
+const nodePlugins = [...plugins, resolve()];
+
+const minPlugins = [
   sizeSnapshot(),
   terser(),
   gzip(),
@@ -39,7 +48,7 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [...minPlugins, resolve()],
+    plugins: [...nodePlugins, ...minPlugins],
   },
   {
     input: "src/index.ts",
@@ -52,7 +61,7 @@ export default [
         name: "Linear",
       },
     ],
-    plugins: minPlugins,
+    plugins: [...plugins, ...minPlugins],
   },
   {
     input: "src/index.ts",
@@ -69,14 +78,7 @@ export default [
         format: "es",
         sourcemap: true,
       },
-      {
-        dir: "./",
-        entryFileNames: "dist/index-umd.js",
-        format: "umd",
-        sourcemap: true,
-        name: "Linear",
-      },
     ],
-    plugins,
+    plugins: nodePlugins,
   },
 ];
