@@ -1,3 +1,5 @@
+> ⚠️ Visit our [API docs site](https://developers.linear.app/docs/graphql/webhooks) for the most up to date documentation
+
 # Linear Webhooks
 
 Linear provides **webhooks** which allow you to receive HTTP push notifications whenever data is created or updated. This allows you to build integrations on top of Linear. You could trigger CI builds, perform calculations on issue data, or send messages on specific conditions – you name it.
