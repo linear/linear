@@ -1,3 +1,5 @@
+> ⚠️ Visit our [API docs site](https://developers.linear.app/docs/oauth/authentication) for the most up to date documentation
+
 # OAuth2 auth guide
 
 # Linear OAuth2
