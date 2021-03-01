@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.5
+
+### Patch Changes
+
+- f937b3c: Replace process.env for umd builds
+
 ## 1.6.4
 
 ### Patch Changes
