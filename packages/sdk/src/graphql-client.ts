@@ -1,7 +1,7 @@
-import { parseLinearError } from "@linear/sdk";
 import { DocumentNode } from "graphql/language/ast";
 import { print } from "graphql/language/printer";
 import isoFetch from "isomorphic-unfetch";
+import { parseLinearError } from "./error";
 import { GraphQLRequestContext, LinearRawResponse } from "./types";
 
 /**

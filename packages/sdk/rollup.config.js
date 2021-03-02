@@ -38,14 +38,14 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        dir: ".",
+        dir: "./",
         entryFileNames: "dist/index-cjs.min.js",
         format: "cjs",
         sourcemap: true,
         exports: "named",
       },
       {
-        dir: ".",
+        dir: "./",
         entryFileNames: "dist/index-es.min.js",
         format: "es",
         sourcemap: true,
@@ -58,14 +58,14 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        dir: ".",
+        dir: "./",
         entryFileNames: "dist/index-cjs.js",
         format: "cjs",
         sourcemap: true,
         exports: "named",
       },
       {
-        dir: ".",
+        dir: "./",
         entryFileNames: "dist/index-es.js",
         format: "es",
         sourcemap: true,
@@ -78,7 +78,7 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        dir: ".",
+        dir: "./",
         entryFileNames: "dist/index-umd.min.js",
         format: "umd",
         esModule: false,
@@ -93,7 +93,7 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        dir: ".",
+        dir: "./",
         entryFileNames: "dist/index-umd.js",
         format: "umd",
         esModule: false,
