@@ -48,4 +48,15 @@ describe("LinearClient", () => {
       expect(error.type).toEqual(LinearErrorType.AuthenticationError);
     }
   });
+
+  it("rawRequest fails auth with incorrect api key", async () => {
+    const client = new LinearClient({ apiKey: "asd", apiUrl: ctx.url }).client;
+
+    try {
+      await client.rawRequest("");
+    } catch (error) {
+      expect(error.message).toEqual(expect.stringContaining("GraphQL Error (Code: 401) - Unauthorized"));
+      expect(error.type).toEqual(LinearErrorType.AuthenticationError);
+    }
+  });
 });

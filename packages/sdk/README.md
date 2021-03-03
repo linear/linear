@@ -448,7 +448,7 @@ run().catch(error => {
 ```
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-The `raw` error returned by the graphql-request client is still available:
+The `raw` error returned by the `LinearGraphQLClient` is still available:
 <!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=7_7&src=./src/_tests/readme.test.ts) -->
 <!-- The below code snippet is automatically added from ./src/_tests/readme.test.ts -->
 ```ts
@@ -611,11 +611,11 @@ Both options are available through the user menu in [Linear](https://linear.app)
 
 <br/>
 
-The Linear Client wraps the [Linear SDK](./src/_generated_sdk.ts), provides a [graphql-request](https://github.com/prisma-labs/graphql-request) client, and [parses errors](./src/error.ts).
+The Linear Client wraps the [Linear SDK](./src/_generated_sdk.ts), provides a [LinearGraphQLClient](./src/graphql-client.ts), and [parses errors](./src/error.ts).
 
 ### Request Configuration
 
-The graphql-request client can be configured by passing the `RequestInit` object to the Linear Client constructor:
+The `LinearGraphQLClient` can be configured by passing the `RequestInit` object to the Linear Client constructor:
 <!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=8_1&src=./src/_tests/readme.test.ts) -->
 <!-- The below code snippet is automatically added from ./src/_tests/readme.test.ts -->
 ```ts
@@ -625,7 +625,7 @@ const linearClient = new LinearClient({ apiKey, headers: { "my-header": "value" 
 
 ### Raw GraphQL Client
 
-The graphql-request client is accessible through the Linear Client:
+The `LinearGraphQLClient` is accessible through the Linear Client:
 <!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=8_2&src=./src/_tests/readme.test.ts) -->
 <!-- The below code snippet is automatically added from ./src/_tests/readme.test.ts -->
 ```ts
@@ -636,7 +636,7 @@ graphQLClient.setHeader("my-header", "value");
 
 ### Raw GraphQL Queries
 
-The Linear GraphQL API can be queried directly by passing a raw GraphQL query to the graphql-request client:
+The Linear GraphQL API can be queried directly by passing a raw GraphQL query to the `LinearGraphQLClient`:
 <!-- AUTO-GENERATED-CONTENT:START (CODE_SECTION:id=8_3&src=./src/_tests/readme.test.ts) -->
 <!-- The below code snippet is automatically added from ./src/_tests/readme.test.ts -->
 ```ts
@@ -672,12 +672,9 @@ const customGraphqlClient = new CustomGraphqlClient("https://api.linear.app/grap
 });
 
 /** Create the custom request function */
-const customLinearRequest: LinearRequest = <Response, Variables>(
-  document: DocumentNode,
-  variables?: Variables
-) => {
+const customLinearRequest: LinearRequest = <Data, Variables>(document: DocumentNode, variables?: Variables) => {
   /** The request must take a GraphQL document and variables, then return a promise for the result */
-  return customGraphqlClient.request<Response>(print(document), variables).catch(error => {
+  return customGraphqlClient.request<Data>(print(document), variables).catch(error => {
     /** Optionally catch and parse errors from the Linear API */
     throw parseLinearError(error);
   });
