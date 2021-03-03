@@ -52,9 +52,10 @@ export function printRequest(): string {
   return printLines([
     "\n",
     printComment([`The function for calling the graphql client`]),
-    `export type ${Sdk.REQUEST_TYPE} = <${printList([Sdk.RESPONSE_TYPE, Sdk.VARIABLE_TYPE])}>(doc: DocumentNode, ${
-      Sdk.VARIABLE_NAME
-    }?: ${Sdk.VARIABLE_TYPE}) => Promise<${Sdk.RESPONSE_TYPE}>`,
+    `export type ${Sdk.REQUEST_TYPE} = <${printList([
+      Sdk.RESPONSE_TYPE,
+      `${Sdk.VARIABLE_TYPE} extends Record<string, unknown>`,
+    ])}>(doc: DocumentNode, ${Sdk.VARIABLE_NAME}?: ${Sdk.VARIABLE_TYPE}) => Promise<${Sdk.RESPONSE_TYPE}>`,
     "\n",
     printComment(["Base class to provide a request function", ...args.jsdoc]),
     `export class ${Sdk.REQUEST_CLASS} {

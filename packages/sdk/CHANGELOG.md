@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.7.0
+
+### Minor Changes
+
+- 8875ff0: Remove graphql-request dependency
+
+## 1.6.5
+
+### Patch Changes
+
+- f937b3c: Replace process.env for umd builds
+
 ## 1.6.4
 
 ### Patch Changes
