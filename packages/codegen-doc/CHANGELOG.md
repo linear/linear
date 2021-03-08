@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7.3
+
+### Patch Changes
+
+- 111595f: chore(publish): use changeset access public
+
 ## 1.7.2
 
 ### Patch Changes

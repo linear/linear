@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.5.3
+
+### Patch Changes
+
+- 111595f: chore(publish): use changeset access public
+- Updated dependencies [111595f]
+  - @linear/sdk@1.8.2
+
 ## 1.5.2
 
 ### Patch Changes
