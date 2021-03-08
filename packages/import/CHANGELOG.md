@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.5.4
+
+### Patch Changes
+
+- 7bf0153: chore(release): use npm token from secrets
+- Updated dependencies [7bf0153]
+  - @linear/sdk@1.8.3
+
 ## 1.5.3
 
 ### Patch Changes

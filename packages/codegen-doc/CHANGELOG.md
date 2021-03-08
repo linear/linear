@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7.4
+
+### Patch Changes
+
+- 7bf0153: chore(release): use npm token from secrets
+
 ## 1.7.3
 
 ### Patch Changes
