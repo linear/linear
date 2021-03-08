@@ -9,6 +9,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -35,7 +36,6 @@ jobs:
 
       - name: Create release pull request
         uses: changesets/action@master
-        environment: release
         with:
           publish: yarn changeset publish
         env:
