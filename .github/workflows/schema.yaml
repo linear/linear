@@ -9,7 +9,7 @@ on:
       - littlemooon/schema-action
 
 jobs:
-  release:
+  schema:
     name: Schema
     runs-on: ubuntu-latest
     steps:
@@ -39,10 +39,10 @@ jobs:
         run: yarn changeset add --empty
 
       - name: Create schema pull request
-        uses: peter-evans/create-pull-request
+        uses: peter-evans/create-pull-request@v3
         with:
           commit-message: "feat(sdk): update schema"
           title: "feat(sdk): update schema"
-          body: Update schema, regenerate types and SDK
+          body: "Update schema, regenerate types and SDK"
           branch: schema
           base: master
