@@ -1916,6 +1916,12 @@ export class Issue extends Request {
   public history(variables?: Omit<L.Issue_HistoryQueryVariables, "id">) {
     return this.id ? new Issue_HistoryQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
+  /** Integration resources for this issue. */
+  public integrationResources(variables?: Omit<L.Issue_IntegrationResourcesQueryVariables, "id">) {
+    return this.id
+      ? new Issue_IntegrationResourcesQuery(this._request, this.id, variables).fetch(variables)
+      : undefined;
+  }
   /** Inverse relations associated with this issue. */
   public inverseRelations(variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">) {
     return this.id ? new Issue_InverseRelationsQuery(this._request, this.id, variables).fetch(variables) : undefined;
@@ -5884,6 +5890,68 @@ export class IntegrationQuery extends Request {
     }).then(response => {
       const data = response?.integration;
       return data ? new Integration(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationResource Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationResourceQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationResource query and return a IntegrationResource
+   *
+   * @param id - required id to pass to integrationResource
+   * @returns parsed response from IntegrationResourceQuery
+   */
+  public async fetch(id: string): LinearFetch<IntegrationResource> {
+    return this._request<L.IntegrationResourceQuery, L.IntegrationResourceQueryVariables>(
+      L.IntegrationResourceDocument,
+      {
+        id,
+      }
+    ).then(response => {
+      const data = response?.integrationResource;
+      return data ? new IntegrationResource(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationResources Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationResourcesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationResources query and return a IntegrationResourceConnection
+   *
+   * @param variables - variables to pass into the IntegrationResourcesQuery
+   * @returns parsed response from IntegrationResourcesQuery
+   */
+  public async fetch(variables?: L.IntegrationResourcesQueryVariables): LinearFetch<IntegrationResourceConnection> {
+    return this._request<L.IntegrationResourcesQuery, L.IntegrationResourcesQueryVariables>(
+      L.IntegrationResourcesDocument,
+      variables
+    ).then(response => {
+      const data = response?.integrationResources;
+      return data
+        ? new IntegrationResourceConnection(
+            this._request,
+            connection => this.fetch({ ...variables, ...connection }),
+            data
+          )
+        : undefined;
     });
   }
 }
@@ -11128,6 +11196,56 @@ export class AttachmentIssue_HistoryQuery extends Request {
 }
 
 /**
+ * A fetchable AttachmentIssue_IntegrationResources Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_IntegrationResourcesQuery
+ */
+export class AttachmentIssue_IntegrationResourcesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_IntegrationResourcesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_IntegrationResourcesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_IntegrationResources query and return a IntegrationResourceConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_IntegrationResourcesQuery
+   * @returns parsed response from AttachmentIssue_IntegrationResourcesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_IntegrationResourcesQueryVariables, "id">
+  ): LinearFetch<IntegrationResourceConnection> {
+    return this._request<
+      L.AttachmentIssue_IntegrationResourcesQuery,
+      L.AttachmentIssue_IntegrationResourcesQueryVariables
+    >(L.AttachmentIssue_IntegrationResourcesDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
+    }).then(response => {
+      const data = response?.attachmentIssue?.integrationResources;
+      return data
+        ? new IntegrationResourceConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable AttachmentIssue_InverseRelations Query
  *
  * @param request - function to call the graphql client
@@ -11525,6 +11643,198 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
 }
 
 /**
+ * A fetchable IntegrationResource_Data Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to integrationResource
+ */
+export class IntegrationResource_DataQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the IntegrationResource_Data query and return a IntegrationResourceData
+   *
+   * @returns parsed response from IntegrationResource_DataQuery
+   */
+  public async fetch(): LinearFetch<IntegrationResourceData> {
+    return this._request<L.IntegrationResource_DataQuery, L.IntegrationResource_DataQueryVariables>(
+      L.IntegrationResource_DataDocument,
+      {
+        id: this._id,
+      }
+    ).then(response => {
+      const data = response?.integrationResource?.data;
+      return data ? new IntegrationResourceData(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationResource_PullRequest Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to integrationResource
+ */
+export class IntegrationResource_PullRequestQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the IntegrationResource_PullRequest query and return a PullRequestPayload
+   *
+   * @returns parsed response from IntegrationResource_PullRequestQuery
+   */
+  public async fetch(): LinearFetch<PullRequestPayload> {
+    return this._request<L.IntegrationResource_PullRequestQuery, L.IntegrationResource_PullRequestQueryVariables>(
+      L.IntegrationResource_PullRequestDocument,
+      {
+        id: this._id,
+      }
+    ).then(response => {
+      const data = response?.integrationResource?.pullRequest;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationResource_Data_GithubCommit Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to integrationResource_data
+ */
+export class IntegrationResource_Data_GithubCommitQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the IntegrationResource_Data_GithubCommit query and return a CommitPayload
+   *
+   * @returns parsed response from IntegrationResource_Data_GithubCommitQuery
+   */
+  public async fetch(): LinearFetch<CommitPayload> {
+    return this._request<
+      L.IntegrationResource_Data_GithubCommitQuery,
+      L.IntegrationResource_Data_GithubCommitQueryVariables
+    >(L.IntegrationResource_Data_GithubCommitDocument, {
+      id: this._id,
+    }).then(response => {
+      const data = response?.integrationResource?.data?.githubCommit;
+      return data ? new CommitPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationResource_Data_GithubPullRequest Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to integrationResource_data
+ */
+export class IntegrationResource_Data_GithubPullRequestQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the IntegrationResource_Data_GithubPullRequest query and return a PullRequestPayload
+   *
+   * @returns parsed response from IntegrationResource_Data_GithubPullRequestQuery
+   */
+  public async fetch(): LinearFetch<PullRequestPayload> {
+    return this._request<
+      L.IntegrationResource_Data_GithubPullRequestQuery,
+      L.IntegrationResource_Data_GithubPullRequestQueryVariables
+    >(L.IntegrationResource_Data_GithubPullRequestDocument, {
+      id: this._id,
+    }).then(response => {
+      const data = response?.integrationResource?.data?.githubPullRequest;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationResource_Data_GitlabMergeRequest Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to integrationResource_data
+ */
+export class IntegrationResource_Data_GitlabMergeRequestQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the IntegrationResource_Data_GitlabMergeRequest query and return a PullRequestPayload
+   *
+   * @returns parsed response from IntegrationResource_Data_GitlabMergeRequestQuery
+   */
+  public async fetch(): LinearFetch<PullRequestPayload> {
+    return this._request<
+      L.IntegrationResource_Data_GitlabMergeRequestQuery,
+      L.IntegrationResource_Data_GitlabMergeRequestQueryVariables
+    >(L.IntegrationResource_Data_GitlabMergeRequestDocument, {
+      id: this._id,
+    }).then(response => {
+      const data = response?.integrationResource?.data?.gitlabMergeRequest;
+      return data ? new PullRequestPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationResource_Data_SentryIssue Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to integrationResource_data
+ */
+export class IntegrationResource_Data_SentryIssueQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the IntegrationResource_Data_SentryIssue query and return a SentryIssuePayload
+   *
+   * @returns parsed response from IntegrationResource_Data_SentryIssueQuery
+   */
+  public async fetch(): LinearFetch<SentryIssuePayload> {
+    return this._request<
+      L.IntegrationResource_Data_SentryIssueQuery,
+      L.IntegrationResource_Data_SentryIssueQueryVariables
+    >(L.IntegrationResource_Data_SentryIssueDocument, {
+      id: this._id,
+    }).then(response => {
+      const data = response?.integrationResource?.data?.sentryIssue;
+      return data ? new SentryIssuePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable InviteInfo_InviteData Query
  *
  * @param request - function to call the graphql client
@@ -11721,6 +12031,56 @@ export class Issue_HistoryQuery extends Request {
       const data = response?.issue?.history;
       return data
         ? new IssueHistoryConnection(
+            this._request,
+            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+            data
+          )
+        : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable Issue_IntegrationResources Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_IntegrationResourcesQuery
+ */
+export class Issue_IntegrationResourcesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Issue_IntegrationResourcesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Issue_IntegrationResourcesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Issue_IntegrationResources query and return a IntegrationResourceConnection
+   *
+   * @param variables - variables without 'id' to pass into the Issue_IntegrationResourcesQuery
+   * @returns parsed response from Issue_IntegrationResourcesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Issue_IntegrationResourcesQueryVariables, "id">
+  ): LinearFetch<IntegrationResourceConnection> {
+    return this._request<L.Issue_IntegrationResourcesQuery, L.Issue_IntegrationResourcesQueryVariables>(
+      L.Issue_IntegrationResourcesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.issue?.integrationResources;
+      return data
+        ? new IntegrationResourceConnection(
             this._request,
             connection => this.fetch({ ...this._variables, ...variables, ...connection }),
             data
@@ -13315,6 +13675,26 @@ export class LinearSdk extends Request {
    */
   public integration(id: string): LinearFetch<Integration> {
     return new IntegrationQuery(this._request).fetch(id);
+  }
+  /**
+   * One specific integration resource. (e.g. linked GitHub pull requests for an issue)
+   *
+   * @param id - required id to pass to integrationResource
+   * @returns IntegrationResource
+   */
+  public integrationResource(id: string): LinearFetch<IntegrationResource> {
+    return new IntegrationResourceQuery(this._request).fetch(id);
+  }
+  /**
+   * All integrations resources (e.g. linked GitHub pull requests for issues).
+   *
+   * @param variables - variables to pass into the IntegrationResourcesQuery
+   * @returns IntegrationResourceConnection
+   */
+  public integrationResources(
+    variables?: L.IntegrationResourcesQueryVariables
+  ): LinearFetch<IntegrationResourceConnection> {
+    return new IntegrationResourcesQuery(this._request).fetch(variables);
   }
   /**
    * All integrations.

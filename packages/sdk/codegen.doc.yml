@@ -5,8 +5,7 @@ hooks:
     - prettier --write
 config:
   skipFields:
-    - integrationResource
-    - integrationResources
+    # - integrationResource
 generates:
   src/_generated_documents.graphql:
     plugins:

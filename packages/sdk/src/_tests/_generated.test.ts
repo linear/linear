@@ -19,7 +19,7 @@ describe("generated", () => {
   describe("ApiKeys", () => {
     /** Test the root connection query for the ApiKey */
     it("apiKeys", async () => {
-      const apiKeys = await client.apiKeys();
+      const apiKeys: L.ApiKeyConnection | undefined = await client.apiKeys();
       expect(apiKeys instanceof L.ApiKeyConnection);
     });
   });
@@ -28,7 +28,9 @@ describe("generated", () => {
   describe("ApplicationWithAuthorization", () => {
     /** Test the root model query for ApplicationWithAuthorization */
     it("applicationWithAuthorization", async () => {
-      const applicationWithAuthorization = await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
+      const applicationWithAuthorization:
+        | L.UserAuthorizedApplication
+        | undefined = await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
       expect(applicationWithAuthorization instanceof L.UserAuthorizedApplication);
     });
   });
@@ -37,7 +39,10 @@ describe("generated", () => {
   describe("ArchivedModelSync", () => {
     /** Test the root model query for ArchivedModelSync */
     it("archivedModelSync", async () => {
-      const archivedModelSync = await client.archivedModelSync("mock-identifier", "mock-modelClass");
+      const archivedModelSync: L.ArchiveResponse | undefined = await client.archivedModelSync(
+        "mock-identifier",
+        "mock-modelClass"
+      );
       expect(archivedModelSync instanceof L.ArchiveResponse);
     });
   });
@@ -46,7 +51,10 @@ describe("generated", () => {
   describe("ArchivedModelsSync", () => {
     /** Test the root model query for ArchivedModelsSync */
     it("archivedModelsSync", async () => {
-      const archivedModelsSync = await client.archivedModelsSync("mock-modelClass", "mock-teamId");
+      const archivedModelsSync: L.ArchiveResponse | undefined = await client.archivedModelsSync(
+        "mock-modelClass",
+        "mock-teamId"
+      );
       expect(archivedModelsSync instanceof L.ArchiveResponse);
     });
   });
@@ -57,7 +65,7 @@ describe("generated", () => {
 
     /** Test the root model query for AttachmentIssue */
     it("attachmentIssue", async () => {
-      const attachmentIssue = await client.attachmentIssue("mock-id");
+      const attachmentIssue: L.Issue | undefined = await client.attachmentIssue("mock-id");
       _attachmentIssue = attachmentIssue;
       expect(attachmentIssue instanceof L.Issue);
     });
@@ -65,7 +73,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Attachment */
     it("attachmentIssue.attachments", async () => {
       if (_attachmentIssue) {
-        const attachments = await _attachmentIssue.attachments();
+        const attachments: L.AttachmentConnection | undefined = await _attachmentIssue.attachments();
         expect(attachments instanceof L.AttachmentConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.attachments query");
@@ -75,7 +83,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Issue */
     it("attachmentIssue.children", async () => {
       if (_attachmentIssue) {
-        const children = await _attachmentIssue.children();
+        const children: L.IssueConnection | undefined = await _attachmentIssue.children();
         expect(children instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.children query");
@@ -85,7 +93,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Comment */
     it("attachmentIssue.comments", async () => {
       if (_attachmentIssue) {
-        const comments = await _attachmentIssue.comments();
+        const comments: L.CommentConnection | undefined = await _attachmentIssue.comments();
         expect(comments instanceof L.CommentConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.comments query");
@@ -95,17 +103,31 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueHistory */
     it("attachmentIssue.history", async () => {
       if (_attachmentIssue) {
-        const history = await _attachmentIssue.history();
+        const history: L.IssueHistoryConnection | undefined = await _attachmentIssue.history();
         expect(history instanceof L.IssueHistoryConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.history query");
       }
     });
 
+    /** Test the attachmentIssue connection query for the IntegrationResource */
+    it("attachmentIssue.integrationResources", async () => {
+      if (_attachmentIssue) {
+        const integrationResources:
+          | L.IntegrationResourceConnection
+          | undefined = await _attachmentIssue.integrationResources();
+        expect(integrationResources instanceof L.IntegrationResourceConnection);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.integrationResources query"
+        );
+      }
+    });
+
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.inverseRelations", async () => {
       if (_attachmentIssue) {
-        const inverseRelations = await _attachmentIssue.inverseRelations();
+        const inverseRelations: L.IssueRelationConnection | undefined = await _attachmentIssue.inverseRelations();
         expect(inverseRelations instanceof L.IssueRelationConnection);
       } else {
         throw new Error(
@@ -117,7 +139,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueLabel */
     it("attachmentIssue.labels", async () => {
       if (_attachmentIssue) {
-        const labels = await _attachmentIssue.labels();
+        const labels: L.IssueLabelConnection | undefined = await _attachmentIssue.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.labels query");
@@ -127,7 +149,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.relations", async () => {
       if (_attachmentIssue) {
-        const relations = await _attachmentIssue.relations();
+        const relations: L.IssueRelationConnection | undefined = await _attachmentIssue.relations();
         expect(relations instanceof L.IssueRelationConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.relations query");
@@ -137,7 +159,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the User */
     it("attachmentIssue.subscribers", async () => {
       if (_attachmentIssue) {
-        const subscribers = await _attachmentIssue.subscribers();
+        const subscribers: L.UserConnection | undefined = await _attachmentIssue.subscribers();
         expect(subscribers instanceof L.UserConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.subscribers query");
@@ -152,7 +174,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Attachment */
     it("attachments", async () => {
-      const attachments = await client.attachments();
+      const attachments: L.AttachmentConnection | undefined = await client.attachments();
       const attachment = attachments?.nodes?.[0];
       _attachment_id = attachment?.id;
       expect(attachments instanceof L.AttachmentConnection);
@@ -161,7 +183,7 @@ describe("generated", () => {
     /** Test the root query for a single Attachment */
     it("attachment", async () => {
       if (_attachment_id) {
-        const attachment = await client.attachment(_attachment_id);
+        const attachment: L.Attachment | undefined = await client.attachment(_attachment_id);
         _attachment = attachment;
         expect(attachment instanceof L.Attachment);
       } else {
@@ -172,7 +194,7 @@ describe("generated", () => {
     /** Test the attachment.issue query for L.Issue */
     it("attachment.issue", async () => {
       if (_attachment) {
-        const attachment_issue = await _attachment.issue;
+        const attachment_issue: L.Issue | undefined = await _attachment.issue;
         expect(attachment_issue instanceof L.Issue);
       } else {
         throw new Error("codegen-doc:print: No Attachment found - cannot test attachment.issue query");
@@ -184,7 +206,7 @@ describe("generated", () => {
   describe("AuthorizedApplications", () => {
     /** Test the root model query for AuthorizedApplications */
     it("authorizedApplications", async () => {
-      const authorizedApplications = await client.authorizedApplications;
+      const authorizedApplications: L.AuthorizedApplication[] | undefined = await client.authorizedApplications;
       authorizedApplications?.map(node => expect(node instanceof L.AuthorizedApplication));
     });
   });
@@ -193,7 +215,7 @@ describe("generated", () => {
   describe("AvailableUsers", () => {
     /** Test the root model query for AvailableUsers */
     it("availableUsers", async () => {
-      const availableUsers = await client.availableUsers;
+      const availableUsers: L.AuthResolverResponse | undefined = await client.availableUsers;
       expect(availableUsers instanceof L.AuthResolverResponse);
     });
   });
@@ -204,7 +226,7 @@ describe("generated", () => {
 
     /** Test the root model query for BillingDetails */
     it("billingDetails", async () => {
-      const billingDetails = await client.billingDetails;
+      const billingDetails: L.BillingDetailsPayload | undefined = await client.billingDetails;
       _billingDetails = billingDetails;
       expect(billingDetails instanceof L.BillingDetailsPayload);
     });
@@ -212,7 +234,7 @@ describe("generated", () => {
     /** Test the billingDetails model query for BillingDetails_PaymentMethod */
     it("billingDetails.paymentMethod", async () => {
       if (_billingDetails) {
-        const paymentMethod = _billingDetails.paymentMethod;
+        const paymentMethod: L.Card | undefined = _billingDetails.paymentMethod;
         expect(paymentMethod instanceof L.Card);
       } else {
         throw new Error("codegen-doc:print: No billingDetails found - cannot test _billingDetails.paymentMethod query");
@@ -226,7 +248,9 @@ describe("generated", () => {
 
     /** Test the root model query for CollaborativeDocumentJoin */
     it("collaborativeDocumentJoin", async () => {
-      const collaborativeDocumentJoin = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
+      const collaborativeDocumentJoin:
+        | L.CollaborationDocumentUpdatePayload
+        | undefined = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
       _collaborativeDocumentJoin = collaborativeDocumentJoin;
       expect(collaborativeDocumentJoin instanceof L.CollaborationDocumentUpdatePayload);
     });
@@ -234,7 +258,7 @@ describe("generated", () => {
     /** Test the collaborativeDocumentJoin model query for CollaborativeDocumentJoin_Steps */
     it("collaborativeDocumentJoin.steps", async () => {
       if (_collaborativeDocumentJoin) {
-        const steps = _collaborativeDocumentJoin.steps;
+        const steps: L.StepsResponse | undefined = _collaborativeDocumentJoin.steps;
         expect(steps instanceof L.StepsResponse);
       } else {
         throw new Error(
@@ -251,7 +275,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Comment */
     it("comments", async () => {
-      const comments = await client.comments();
+      const comments: L.CommentConnection | undefined = await client.comments();
       const comment = comments?.nodes?.[0];
       _comment_id = comment?.id;
       expect(comments instanceof L.CommentConnection);
@@ -260,7 +284,7 @@ describe("generated", () => {
     /** Test the root query for a single Comment */
     it("comment", async () => {
       if (_comment_id) {
-        const comment = await client.comment(_comment_id);
+        const comment: L.Comment | undefined = await client.comment(_comment_id);
         _comment = comment;
         expect(comment instanceof L.Comment);
       } else {
@@ -271,7 +295,7 @@ describe("generated", () => {
     /** Test the comment.issue query for L.Issue */
     it("comment.issue", async () => {
       if (_comment) {
-        const comment_issue = await _comment.issue;
+        const comment_issue: L.Issue | undefined = await _comment.issue;
         expect(comment_issue instanceof L.Issue);
       } else {
         throw new Error("codegen-doc:print: No Comment found - cannot test comment.issue query");
@@ -281,7 +305,7 @@ describe("generated", () => {
     /** Test the comment.user query for L.User */
     it("comment.user", async () => {
       if (_comment) {
-        const comment_user = await _comment.user;
+        const comment_user: L.User | undefined = await _comment.user;
         expect(comment_user instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Comment found - cannot test comment.user query");
@@ -296,7 +320,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the CustomView */
     it("customViews", async () => {
-      const customViews = await client.customViews();
+      const customViews: L.CustomViewConnection | undefined = await client.customViews();
       const customView = customViews?.nodes?.[0];
       _customView_id = customView?.id;
       expect(customViews instanceof L.CustomViewConnection);
@@ -305,7 +329,7 @@ describe("generated", () => {
     /** Test the root query for a single CustomView */
     it("customView", async () => {
       if (_customView_id) {
-        const customView = await client.customView(_customView_id);
+        const customView: L.CustomView | undefined = await client.customView(_customView_id);
         _customView = customView;
         expect(customView instanceof L.CustomView);
       } else {
@@ -316,7 +340,7 @@ describe("generated", () => {
     /** Test the customView.creator query for L.User */
     it("customView.creator", async () => {
       if (_customView) {
-        const customView_creator = await _customView.creator;
+        const customView_creator: L.User | undefined = await _customView.creator;
         expect(customView_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No CustomView found - cannot test customView.creator query");
@@ -326,7 +350,7 @@ describe("generated", () => {
     /** Test the customView.organization query for L.Organization */
     it("customView.organization", async () => {
       if (_customView) {
-        const customView_organization = await _customView.organization;
+        const customView_organization: L.Organization | undefined = await _customView.organization;
         expect(customView_organization instanceof L.Organization);
       } else {
         throw new Error("codegen-doc:print: No CustomView found - cannot test customView.organization query");
@@ -336,7 +360,7 @@ describe("generated", () => {
     /** Test the customView.team query for L.Team */
     it("customView.team", async () => {
       if (_customView) {
-        const customView_team = await _customView.team;
+        const customView_team: L.Team | undefined = await _customView.team;
         expect(customView_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No CustomView found - cannot test customView.team query");
@@ -351,7 +375,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Cycle */
     it("cycles", async () => {
-      const cycles = await client.cycles();
+      const cycles: L.CycleConnection | undefined = await client.cycles();
       const cycle = cycles?.nodes?.[0];
       _cycle_id = cycle?.id;
       expect(cycles instanceof L.CycleConnection);
@@ -360,7 +384,7 @@ describe("generated", () => {
     /** Test the root query for a single Cycle */
     it("cycle", async () => {
       if (_cycle_id) {
-        const cycle = await client.cycle(_cycle_id);
+        const cycle: L.Cycle | undefined = await client.cycle(_cycle_id);
         _cycle = cycle;
         expect(cycle instanceof L.Cycle);
       } else {
@@ -371,7 +395,7 @@ describe("generated", () => {
     /** Test the cycle connection query for the Issue */
     it("cycle.issues", async () => {
       if (_cycle) {
-        const issues = await _cycle.issues();
+        const issues: L.IssueConnection | undefined = await _cycle.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No cycle found - cannot test _cycle.issues query");
@@ -381,7 +405,7 @@ describe("generated", () => {
     /** Test the cycle connection query for the Issue */
     it("cycle.uncompletedIssuesUponClose", async () => {
       if (_cycle) {
-        const uncompletedIssuesUponClose = await _cycle.uncompletedIssuesUponClose();
+        const uncompletedIssuesUponClose: L.IssueConnection | undefined = await _cycle.uncompletedIssuesUponClose();
         expect(uncompletedIssuesUponClose instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No cycle found - cannot test _cycle.uncompletedIssuesUponClose query");
@@ -391,7 +415,7 @@ describe("generated", () => {
     /** Test the cycle.team query for L.Team */
     it("cycle.team", async () => {
       if (_cycle) {
-        const cycle_team = await _cycle.team;
+        const cycle_team: L.Team | undefined = await _cycle.team;
         expect(cycle_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No Cycle found - cannot test cycle.team query");
@@ -406,7 +430,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Emoji */
     it("emojis", async () => {
-      const emojis = await client.emojis();
+      const emojis: L.EmojiConnection | undefined = await client.emojis();
       const emoji = emojis?.nodes?.[0];
       _emoji_id = emoji?.id;
       expect(emojis instanceof L.EmojiConnection);
@@ -415,7 +439,7 @@ describe("generated", () => {
     /** Test the root query for a single Emoji */
     it("emoji", async () => {
       if (_emoji_id) {
-        const emoji = await client.emoji(_emoji_id);
+        const emoji: L.Emoji | undefined = await client.emoji(_emoji_id);
         _emoji = emoji;
         expect(emoji instanceof L.Emoji);
       } else {
@@ -426,7 +450,7 @@ describe("generated", () => {
     /** Test the emoji.creator query for L.User */
     it("emoji.creator", async () => {
       if (_emoji) {
-        const emoji_creator = await _emoji.creator;
+        const emoji_creator: L.User | undefined = await _emoji.creator;
         expect(emoji_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Emoji found - cannot test emoji.creator query");
@@ -436,7 +460,7 @@ describe("generated", () => {
     /** Test the emoji.organization query for L.Organization */
     it("emoji.organization", async () => {
       if (_emoji) {
-        const emoji_organization = await _emoji.organization;
+        const emoji_organization: L.Organization | undefined = await _emoji.organization;
         expect(emoji_organization instanceof L.Organization);
       } else {
         throw new Error("codegen-doc:print: No Emoji found - cannot test emoji.organization query");
@@ -451,7 +475,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Favorite */
     it("favorites", async () => {
-      const favorites = await client.favorites();
+      const favorites: L.FavoriteConnection | undefined = await client.favorites();
       const favorite = favorites?.nodes?.[0];
       _favorite_id = favorite?.id;
       expect(favorites instanceof L.FavoriteConnection);
@@ -460,7 +484,7 @@ describe("generated", () => {
     /** Test the root query for a single Favorite */
     it("favorite", async () => {
       if (_favorite_id) {
-        const favorite = await client.favorite(_favorite_id);
+        const favorite: L.Favorite | undefined = await client.favorite(_favorite_id);
         _favorite = favorite;
         expect(favorite instanceof L.Favorite);
       } else {
@@ -471,7 +495,7 @@ describe("generated", () => {
     /** Test the favorite.cycle query for L.Cycle */
     it("favorite.cycle", async () => {
       if (_favorite) {
-        const favorite_cycle = await _favorite.cycle;
+        const favorite_cycle: L.Cycle | undefined = await _favorite.cycle;
         expect(favorite_cycle instanceof L.Cycle);
       } else {
         throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.cycle query");
@@ -481,7 +505,7 @@ describe("generated", () => {
     /** Test the favorite.issue query for L.Issue */
     it("favorite.issue", async () => {
       if (_favorite) {
-        const favorite_issue = await _favorite.issue;
+        const favorite_issue: L.Issue | undefined = await _favorite.issue;
         expect(favorite_issue instanceof L.Issue);
       } else {
         throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.issue query");
@@ -491,7 +515,7 @@ describe("generated", () => {
     /** Test the favorite.label query for L.IssueLabel */
     it("favorite.label", async () => {
       if (_favorite) {
-        const favorite_label = await _favorite.label;
+        const favorite_label: L.IssueLabel | undefined = await _favorite.label;
         expect(favorite_label instanceof L.IssueLabel);
       } else {
         throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.label query");
@@ -501,7 +525,7 @@ describe("generated", () => {
     /** Test the favorite.project query for L.Project */
     it("favorite.project", async () => {
       if (_favorite) {
-        const favorite_project = await _favorite.project;
+        const favorite_project: L.Project | undefined = await _favorite.project;
         expect(favorite_project instanceof L.Project);
       } else {
         throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.project query");
@@ -511,7 +535,7 @@ describe("generated", () => {
     /** Test the favorite.projectTeam query for L.Project */
     it("favorite.projectTeam", async () => {
       if (_favorite) {
-        const favorite_projectTeam = await _favorite.projectTeam;
+        const favorite_projectTeam: L.Project | undefined = await _favorite.projectTeam;
         expect(favorite_projectTeam instanceof L.Project);
       } else {
         throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.projectTeam query");
@@ -521,7 +545,7 @@ describe("generated", () => {
     /** Test the favorite.user query for L.User */
     it("favorite.user", async () => {
       if (_favorite) {
-        const favorite_user = await _favorite.user;
+        const favorite_user: L.User | undefined = await _favorite.user;
         expect(favorite_user instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Favorite found - cannot test favorite.user query");
@@ -535,7 +559,7 @@ describe("generated", () => {
 
     /** Test the root model query for FigmaEmbedInfo */
     it("figmaEmbedInfo", async () => {
-      const figmaEmbedInfo = await client.figmaEmbedInfo("mock-fileId");
+      const figmaEmbedInfo: L.FigmaEmbedPayload | undefined = await client.figmaEmbedInfo("mock-fileId");
       _figmaEmbedInfo = figmaEmbedInfo;
       expect(figmaEmbedInfo instanceof L.FigmaEmbedPayload);
     });
@@ -543,10 +567,130 @@ describe("generated", () => {
     /** Test the figmaEmbedInfo model query for FigmaEmbedInfo_FigmaEmbed */
     it("figmaEmbedInfo.figmaEmbed", async () => {
       if (_figmaEmbedInfo) {
-        const figmaEmbed = _figmaEmbedInfo.figmaEmbed;
+        const figmaEmbed: L.FigmaEmbed | undefined = _figmaEmbedInfo.figmaEmbed;
         expect(figmaEmbed instanceof L.FigmaEmbed);
       } else {
         throw new Error("codegen-doc:print: No figmaEmbedInfo found - cannot test _figmaEmbedInfo.figmaEmbed query");
+      }
+    });
+  });
+
+  /** Test all IntegrationResource queries */
+  describe("IntegrationResources", () => {
+    let _integrationResource: L.IntegrationResource | undefined;
+    let _integrationResource_id: string | undefined;
+
+    /** Test the root connection query for the IntegrationResource */
+    it("integrationResources", async () => {
+      const integrationResources: L.IntegrationResourceConnection | undefined = await client.integrationResources();
+      const integrationResource = integrationResources?.nodes?.[0];
+      _integrationResource_id = integrationResource?.id;
+      expect(integrationResources instanceof L.IntegrationResourceConnection);
+    });
+
+    /** Test the root query for a single IntegrationResource */
+    it("integrationResource", async () => {
+      if (_integrationResource_id) {
+        const integrationResource: L.IntegrationResource | undefined = await client.integrationResource(
+          _integrationResource_id
+        );
+        _integrationResource = integrationResource;
+        expect(integrationResource instanceof L.IntegrationResource);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No first IntegrationResource found in connection - cannot test integrationResource query"
+        );
+      }
+    });
+
+    let _data: L.IntegrationResourceData | undefined;
+
+    /** Test the integrationResource model query for IntegrationResource_Data */
+    it("integrationResource.data", async () => {
+      if (_integrationResource) {
+        const data: L.IntegrationResourceData | undefined = _integrationResource.data;
+        _data = data;
+        expect(data instanceof L.IntegrationResourceData);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No integrationResource found - cannot test _integrationResource.data query"
+        );
+      }
+    });
+
+    /** Test the integrationResource_data model query for IntegrationResource_Data_GithubCommit */
+    it("integrationResource_data.githubCommit", async () => {
+      if (_data) {
+        const githubCommit: L.CommitPayload | undefined = _data.githubCommit;
+        expect(githubCommit instanceof L.CommitPayload);
+      } else {
+        throw new Error("codegen-doc:print: No data found - cannot test _data.githubCommit query");
+      }
+    });
+
+    /** Test the integrationResource_data model query for IntegrationResource_Data_GithubPullRequest */
+    it("integrationResource_data.githubPullRequest", async () => {
+      if (_data) {
+        const githubPullRequest: L.PullRequestPayload | undefined = _data.githubPullRequest;
+        expect(githubPullRequest instanceof L.PullRequestPayload);
+      } else {
+        throw new Error("codegen-doc:print: No data found - cannot test _data.githubPullRequest query");
+      }
+    });
+
+    /** Test the integrationResource_data model query for IntegrationResource_Data_GitlabMergeRequest */
+    it("integrationResource_data.gitlabMergeRequest", async () => {
+      if (_data) {
+        const gitlabMergeRequest: L.PullRequestPayload | undefined = _data.gitlabMergeRequest;
+        expect(gitlabMergeRequest instanceof L.PullRequestPayload);
+      } else {
+        throw new Error("codegen-doc:print: No data found - cannot test _data.gitlabMergeRequest query");
+      }
+    });
+
+    /** Test the integrationResource_data model query for IntegrationResource_Data_SentryIssue */
+    it("integrationResource_data.sentryIssue", async () => {
+      if (_data) {
+        const sentryIssue: L.SentryIssuePayload | undefined = _data.sentryIssue;
+        expect(sentryIssue instanceof L.SentryIssuePayload);
+      } else {
+        throw new Error("codegen-doc:print: No data found - cannot test _data.sentryIssue query");
+      }
+    });
+
+    /** Test the integrationResource model query for IntegrationResource_PullRequest */
+    it("integrationResource.pullRequest", async () => {
+      if (_integrationResource) {
+        const pullRequest: L.PullRequestPayload | undefined = _integrationResource.pullRequest;
+        expect(pullRequest instanceof L.PullRequestPayload);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No integrationResource found - cannot test _integrationResource.pullRequest query"
+        );
+      }
+    });
+
+    /** Test the integrationResource.integration query for L.Integration */
+    it("integrationResource.integration", async () => {
+      if (_integrationResource) {
+        const integrationResource_integration: L.Integration | undefined = await _integrationResource.integration;
+        expect(integrationResource_integration instanceof L.Integration);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No IntegrationResource found - cannot test integrationResource.integration query"
+        );
+      }
+    });
+
+    /** Test the integrationResource.issue query for L.Issue */
+    it("integrationResource.issue", async () => {
+      if (_integrationResource) {
+        const integrationResource_issue: L.Issue | undefined = await _integrationResource.issue;
+        expect(integrationResource_issue instanceof L.Issue);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No IntegrationResource found - cannot test integrationResource.issue query"
+        );
       }
     });
   });
@@ -558,7 +702,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Integration */
     it("integrations", async () => {
-      const integrations = await client.integrations();
+      const integrations: L.IntegrationConnection | undefined = await client.integrations();
       const integration = integrations?.nodes?.[0];
       _integration_id = integration?.id;
       expect(integrations instanceof L.IntegrationConnection);
@@ -567,7 +711,7 @@ describe("generated", () => {
     /** Test the root query for a single Integration */
     it("integration", async () => {
       if (_integration_id) {
-        const integration = await client.integration(_integration_id);
+        const integration: L.Integration | undefined = await client.integration(_integration_id);
         _integration = integration;
         expect(integration instanceof L.Integration);
       } else {
@@ -578,7 +722,7 @@ describe("generated", () => {
     /** Test the integration.creator query for L.User */
     it("integration.creator", async () => {
       if (_integration) {
-        const integration_creator = await _integration.creator;
+        const integration_creator: L.User | undefined = await _integration.creator;
         expect(integration_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Integration found - cannot test integration.creator query");
@@ -588,7 +732,7 @@ describe("generated", () => {
     /** Test the integration.organization query for L.Organization */
     it("integration.organization", async () => {
       if (_integration) {
-        const integration_organization = await _integration.organization;
+        const integration_organization: L.Organization | undefined = await _integration.organization;
         expect(integration_organization instanceof L.Organization);
       } else {
         throw new Error("codegen-doc:print: No Integration found - cannot test integration.organization query");
@@ -598,7 +742,7 @@ describe("generated", () => {
     /** Test the integration.team query for L.Team */
     it("integration.team", async () => {
       if (_integration) {
-        const integration_team = await _integration.team;
+        const integration_team: L.Team | undefined = await _integration.team;
         expect(integration_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No Integration found - cannot test integration.team query");
@@ -612,7 +756,7 @@ describe("generated", () => {
 
     /** Test the root model query for InviteInfo */
     it("inviteInfo", async () => {
-      const inviteInfo = await client.inviteInfo("mock-userHash");
+      const inviteInfo: L.InvitePagePayload | undefined = await client.inviteInfo("mock-userHash");
       _inviteInfo = inviteInfo;
       expect(inviteInfo instanceof L.InvitePagePayload);
     });
@@ -620,7 +764,7 @@ describe("generated", () => {
     /** Test the inviteInfo model query for InviteInfo_InviteData */
     it("inviteInfo.inviteData", async () => {
       if (_inviteInfo) {
-        const inviteData = _inviteInfo.inviteData;
+        const inviteData: L.InviteData | undefined = _inviteInfo.inviteData;
         expect(inviteData instanceof L.InviteData);
       } else {
         throw new Error("codegen-doc:print: No inviteInfo found - cannot test _inviteInfo.inviteData query");
@@ -632,7 +776,9 @@ describe("generated", () => {
   describe("IssueImportFinishGithubOAuth", () => {
     /** Test the root model query for IssueImportFinishGithubOAuth */
     it("issueImportFinishGithubOAuth", async () => {
-      const issueImportFinishGithubOAuth = await client.issueImportFinishGithubOAuth("mock-code");
+      const issueImportFinishGithubOAuth: L.OAuthTokenPayload | undefined = await client.issueImportFinishGithubOAuth(
+        "mock-code"
+      );
       expect(issueImportFinishGithubOAuth instanceof L.OAuthTokenPayload);
     });
   });
@@ -644,7 +790,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the IssueLabel */
     it("issueLabels", async () => {
-      const issueLabels = await client.issueLabels();
+      const issueLabels: L.IssueLabelConnection | undefined = await client.issueLabels();
       const issueLabel = issueLabels?.nodes?.[0];
       _issueLabel_id = issueLabel?.id;
       expect(issueLabels instanceof L.IssueLabelConnection);
@@ -653,7 +799,7 @@ describe("generated", () => {
     /** Test the root query for a single IssueLabel */
     it("issueLabel", async () => {
       if (_issueLabel_id) {
-        const issueLabel = await client.issueLabel(_issueLabel_id);
+        const issueLabel: L.IssueLabel | undefined = await client.issueLabel(_issueLabel_id);
         _issueLabel = issueLabel;
         expect(issueLabel instanceof L.IssueLabel);
       } else {
@@ -664,7 +810,7 @@ describe("generated", () => {
     /** Test the issueLabel connection query for the Issue */
     it("issueLabel.issues", async () => {
       if (_issueLabel) {
-        const issues = await _issueLabel.issues();
+        const issues: L.IssueConnection | undefined = await _issueLabel.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No issueLabel found - cannot test _issueLabel.issues query");
@@ -674,7 +820,7 @@ describe("generated", () => {
     /** Test the issueLabel.creator query for L.User */
     it("issueLabel.creator", async () => {
       if (_issueLabel) {
-        const issueLabel_creator = await _issueLabel.creator;
+        const issueLabel_creator: L.User | undefined = await _issueLabel.creator;
         expect(issueLabel_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No IssueLabel found - cannot test issueLabel.creator query");
@@ -684,7 +830,7 @@ describe("generated", () => {
     /** Test the issueLabel.team query for L.Team */
     it("issueLabel.team", async () => {
       if (_issueLabel) {
-        const issueLabel_team = await _issueLabel.team;
+        const issueLabel_team: L.Team | undefined = await _issueLabel.team;
         expect(issueLabel_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No IssueLabel found - cannot test issueLabel.team query");
@@ -696,7 +842,7 @@ describe("generated", () => {
   describe("IssuePriorityValues", () => {
     /** Test the root model query for IssuePriorityValues */
     it("issuePriorityValues", async () => {
-      const issuePriorityValues = await client.issuePriorityValues;
+      const issuePriorityValues: L.IssuePriorityValue[] | undefined = await client.issuePriorityValues;
       issuePriorityValues?.map(node => expect(node instanceof L.IssuePriorityValue));
     });
   });
@@ -708,7 +854,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the IssueRelation */
     it("issueRelations", async () => {
-      const issueRelations = await client.issueRelations();
+      const issueRelations: L.IssueRelationConnection | undefined = await client.issueRelations();
       const issueRelation = issueRelations?.nodes?.[0];
       _issueRelation_id = issueRelation?.id;
       expect(issueRelations instanceof L.IssueRelationConnection);
@@ -717,7 +863,7 @@ describe("generated", () => {
     /** Test the root query for a single IssueRelation */
     it("issueRelation", async () => {
       if (_issueRelation_id) {
-        const issueRelation = await client.issueRelation(_issueRelation_id);
+        const issueRelation: L.IssueRelation | undefined = await client.issueRelation(_issueRelation_id);
         _issueRelation = issueRelation;
         expect(issueRelation instanceof L.IssueRelation);
       } else {
@@ -730,7 +876,7 @@ describe("generated", () => {
     /** Test the issueRelation.issue query for L.Issue */
     it("issueRelation.issue", async () => {
       if (_issueRelation) {
-        const issueRelation_issue = await _issueRelation.issue;
+        const issueRelation_issue: L.Issue | undefined = await _issueRelation.issue;
         expect(issueRelation_issue instanceof L.Issue);
       } else {
         throw new Error("codegen-doc:print: No IssueRelation found - cannot test issueRelation.issue query");
@@ -740,7 +886,7 @@ describe("generated", () => {
     /** Test the issueRelation.relatedIssue query for L.Issue */
     it("issueRelation.relatedIssue", async () => {
       if (_issueRelation) {
-        const issueRelation_relatedIssue = await _issueRelation.relatedIssue;
+        const issueRelation_relatedIssue: L.Issue | undefined = await _issueRelation.relatedIssue;
         expect(issueRelation_relatedIssue instanceof L.Issue);
       } else {
         throw new Error("codegen-doc:print: No IssueRelation found - cannot test issueRelation.relatedIssue query");
@@ -755,7 +901,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Issue */
     it("issueSearch", async () => {
-      const issueSearch = await client.issueSearch("mock-query");
+      const issueSearch: L.IssueConnection | undefined = await client.issueSearch("mock-query");
       const attachmentIssue = issueSearch?.nodes?.[0];
       _attachmentIssue_id = attachmentIssue?.id;
       expect(issueSearch instanceof L.IssueConnection);
@@ -764,7 +910,7 @@ describe("generated", () => {
     /** Test the root query for a single Issue */
     it("attachmentIssue", async () => {
       if (_attachmentIssue_id) {
-        const attachmentIssue = await client.attachmentIssue(_attachmentIssue_id);
+        const attachmentIssue: L.Issue | undefined = await client.attachmentIssue(_attachmentIssue_id);
         _attachmentIssue = attachmentIssue;
         expect(attachmentIssue instanceof L.Issue);
       } else {
@@ -775,7 +921,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Attachment */
     it("attachmentIssue.attachments", async () => {
       if (_attachmentIssue) {
-        const attachments = await _attachmentIssue.attachments();
+        const attachments: L.AttachmentConnection | undefined = await _attachmentIssue.attachments();
         expect(attachments instanceof L.AttachmentConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.attachments query");
@@ -785,7 +931,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Issue */
     it("attachmentIssue.children", async () => {
       if (_attachmentIssue) {
-        const children = await _attachmentIssue.children();
+        const children: L.IssueConnection | undefined = await _attachmentIssue.children();
         expect(children instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.children query");
@@ -795,7 +941,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Comment */
     it("attachmentIssue.comments", async () => {
       if (_attachmentIssue) {
-        const comments = await _attachmentIssue.comments();
+        const comments: L.CommentConnection | undefined = await _attachmentIssue.comments();
         expect(comments instanceof L.CommentConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.comments query");
@@ -805,17 +951,31 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueHistory */
     it("attachmentIssue.history", async () => {
       if (_attachmentIssue) {
-        const history = await _attachmentIssue.history();
+        const history: L.IssueHistoryConnection | undefined = await _attachmentIssue.history();
         expect(history instanceof L.IssueHistoryConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.history query");
       }
     });
 
+    /** Test the attachmentIssue connection query for the IntegrationResource */
+    it("attachmentIssue.integrationResources", async () => {
+      if (_attachmentIssue) {
+        const integrationResources:
+          | L.IntegrationResourceConnection
+          | undefined = await _attachmentIssue.integrationResources();
+        expect(integrationResources instanceof L.IntegrationResourceConnection);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.integrationResources query"
+        );
+      }
+    });
+
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.inverseRelations", async () => {
       if (_attachmentIssue) {
-        const inverseRelations = await _attachmentIssue.inverseRelations();
+        const inverseRelations: L.IssueRelationConnection | undefined = await _attachmentIssue.inverseRelations();
         expect(inverseRelations instanceof L.IssueRelationConnection);
       } else {
         throw new Error(
@@ -827,7 +987,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueLabel */
     it("attachmentIssue.labels", async () => {
       if (_attachmentIssue) {
-        const labels = await _attachmentIssue.labels();
+        const labels: L.IssueLabelConnection | undefined = await _attachmentIssue.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.labels query");
@@ -837,7 +997,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.relations", async () => {
       if (_attachmentIssue) {
-        const relations = await _attachmentIssue.relations();
+        const relations: L.IssueRelationConnection | undefined = await _attachmentIssue.relations();
         expect(relations instanceof L.IssueRelationConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.relations query");
@@ -847,7 +1007,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the User */
     it("attachmentIssue.subscribers", async () => {
       if (_attachmentIssue) {
-        const subscribers = await _attachmentIssue.subscribers();
+        const subscribers: L.UserConnection | undefined = await _attachmentIssue.subscribers();
         expect(subscribers instanceof L.UserConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.subscribers query");
@@ -857,7 +1017,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.assignee query for L.User */
     it("attachmentIssue.assignee", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_assignee = await _attachmentIssue.assignee;
+        const attachmentIssue_assignee: L.User | undefined = await _attachmentIssue.assignee;
         expect(attachmentIssue_assignee instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.assignee query");
@@ -867,7 +1027,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.creator query for L.User */
     it("attachmentIssue.creator", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_creator = await _attachmentIssue.creator;
+        const attachmentIssue_creator: L.User | undefined = await _attachmentIssue.creator;
         expect(attachmentIssue_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.creator query");
@@ -877,7 +1037,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.cycle query for L.Cycle */
     it("attachmentIssue.cycle", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_cycle = await _attachmentIssue.cycle;
+        const attachmentIssue_cycle: L.Cycle | undefined = await _attachmentIssue.cycle;
         expect(attachmentIssue_cycle instanceof L.Cycle);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.cycle query");
@@ -887,7 +1047,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.parent query for L.Issue */
     it("attachmentIssue.parent", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_parent = await _attachmentIssue.parent;
+        const attachmentIssue_parent: L.Issue | undefined = await _attachmentIssue.parent;
         expect(attachmentIssue_parent instanceof L.Issue);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.parent query");
@@ -897,7 +1057,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.project query for L.Project */
     it("attachmentIssue.project", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_project = await _attachmentIssue.project;
+        const attachmentIssue_project: L.Project | undefined = await _attachmentIssue.project;
         expect(attachmentIssue_project instanceof L.Project);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.project query");
@@ -907,7 +1067,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.state query for L.WorkflowState */
     it("attachmentIssue.state", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_state = await _attachmentIssue.state;
+        const attachmentIssue_state: L.WorkflowState | undefined = await _attachmentIssue.state;
         expect(attachmentIssue_state instanceof L.WorkflowState);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.state query");
@@ -917,7 +1077,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.team query for L.Team */
     it("attachmentIssue.team", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_team = await _attachmentIssue.team;
+        const attachmentIssue_team: L.Team | undefined = await _attachmentIssue.team;
         expect(attachmentIssue_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.team query");
@@ -932,7 +1092,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Issue */
     it("issues", async () => {
-      const issues = await client.issues();
+      const issues: L.IssueConnection | undefined = await client.issues();
       const attachmentIssue = issues?.nodes?.[0];
       _attachmentIssue_id = attachmentIssue?.id;
       expect(issues instanceof L.IssueConnection);
@@ -941,7 +1101,7 @@ describe("generated", () => {
     /** Test the root query for a single Issue */
     it("attachmentIssue", async () => {
       if (_attachmentIssue_id) {
-        const attachmentIssue = await client.attachmentIssue(_attachmentIssue_id);
+        const attachmentIssue: L.Issue | undefined = await client.attachmentIssue(_attachmentIssue_id);
         _attachmentIssue = attachmentIssue;
         expect(attachmentIssue instanceof L.Issue);
       } else {
@@ -952,7 +1112,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Attachment */
     it("attachmentIssue.attachments", async () => {
       if (_attachmentIssue) {
-        const attachments = await _attachmentIssue.attachments();
+        const attachments: L.AttachmentConnection | undefined = await _attachmentIssue.attachments();
         expect(attachments instanceof L.AttachmentConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.attachments query");
@@ -962,7 +1122,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Issue */
     it("attachmentIssue.children", async () => {
       if (_attachmentIssue) {
-        const children = await _attachmentIssue.children();
+        const children: L.IssueConnection | undefined = await _attachmentIssue.children();
         expect(children instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.children query");
@@ -972,7 +1132,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the Comment */
     it("attachmentIssue.comments", async () => {
       if (_attachmentIssue) {
-        const comments = await _attachmentIssue.comments();
+        const comments: L.CommentConnection | undefined = await _attachmentIssue.comments();
         expect(comments instanceof L.CommentConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.comments query");
@@ -982,17 +1142,31 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueHistory */
     it("attachmentIssue.history", async () => {
       if (_attachmentIssue) {
-        const history = await _attachmentIssue.history();
+        const history: L.IssueHistoryConnection | undefined = await _attachmentIssue.history();
         expect(history instanceof L.IssueHistoryConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.history query");
       }
     });
 
+    /** Test the attachmentIssue connection query for the IntegrationResource */
+    it("attachmentIssue.integrationResources", async () => {
+      if (_attachmentIssue) {
+        const integrationResources:
+          | L.IntegrationResourceConnection
+          | undefined = await _attachmentIssue.integrationResources();
+        expect(integrationResources instanceof L.IntegrationResourceConnection);
+      } else {
+        throw new Error(
+          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.integrationResources query"
+        );
+      }
+    });
+
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.inverseRelations", async () => {
       if (_attachmentIssue) {
-        const inverseRelations = await _attachmentIssue.inverseRelations();
+        const inverseRelations: L.IssueRelationConnection | undefined = await _attachmentIssue.inverseRelations();
         expect(inverseRelations instanceof L.IssueRelationConnection);
       } else {
         throw new Error(
@@ -1004,7 +1178,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueLabel */
     it("attachmentIssue.labels", async () => {
       if (_attachmentIssue) {
-        const labels = await _attachmentIssue.labels();
+        const labels: L.IssueLabelConnection | undefined = await _attachmentIssue.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.labels query");
@@ -1014,7 +1188,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.relations", async () => {
       if (_attachmentIssue) {
-        const relations = await _attachmentIssue.relations();
+        const relations: L.IssueRelationConnection | undefined = await _attachmentIssue.relations();
         expect(relations instanceof L.IssueRelationConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.relations query");
@@ -1024,7 +1198,7 @@ describe("generated", () => {
     /** Test the attachmentIssue connection query for the User */
     it("attachmentIssue.subscribers", async () => {
       if (_attachmentIssue) {
-        const subscribers = await _attachmentIssue.subscribers();
+        const subscribers: L.UserConnection | undefined = await _attachmentIssue.subscribers();
         expect(subscribers instanceof L.UserConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.subscribers query");
@@ -1034,7 +1208,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.assignee query for L.User */
     it("attachmentIssue.assignee", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_assignee = await _attachmentIssue.assignee;
+        const attachmentIssue_assignee: L.User | undefined = await _attachmentIssue.assignee;
         expect(attachmentIssue_assignee instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.assignee query");
@@ -1044,7 +1218,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.creator query for L.User */
     it("attachmentIssue.creator", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_creator = await _attachmentIssue.creator;
+        const attachmentIssue_creator: L.User | undefined = await _attachmentIssue.creator;
         expect(attachmentIssue_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.creator query");
@@ -1054,7 +1228,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.cycle query for L.Cycle */
     it("attachmentIssue.cycle", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_cycle = await _attachmentIssue.cycle;
+        const attachmentIssue_cycle: L.Cycle | undefined = await _attachmentIssue.cycle;
         expect(attachmentIssue_cycle instanceof L.Cycle);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.cycle query");
@@ -1064,7 +1238,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.parent query for L.Issue */
     it("attachmentIssue.parent", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_parent = await _attachmentIssue.parent;
+        const attachmentIssue_parent: L.Issue | undefined = await _attachmentIssue.parent;
         expect(attachmentIssue_parent instanceof L.Issue);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.parent query");
@@ -1074,7 +1248,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.project query for L.Project */
     it("attachmentIssue.project", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_project = await _attachmentIssue.project;
+        const attachmentIssue_project: L.Project | undefined = await _attachmentIssue.project;
         expect(attachmentIssue_project instanceof L.Project);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.project query");
@@ -1084,7 +1258,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.state query for L.WorkflowState */
     it("attachmentIssue.state", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_state = await _attachmentIssue.state;
+        const attachmentIssue_state: L.WorkflowState | undefined = await _attachmentIssue.state;
         expect(attachmentIssue_state instanceof L.WorkflowState);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.state query");
@@ -1094,7 +1268,7 @@ describe("generated", () => {
     /** Test the attachmentIssue.team query for L.Team */
     it("attachmentIssue.team", async () => {
       if (_attachmentIssue) {
-        const attachmentIssue_team = await _attachmentIssue.team;
+        const attachmentIssue_team: L.Team | undefined = await _attachmentIssue.team;
         expect(attachmentIssue_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No Issue found - cannot test attachmentIssue.team query");
@@ -1109,7 +1283,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Milestone */
     it("milestones", async () => {
-      const milestones = await client.milestones();
+      const milestones: L.MilestoneConnection | undefined = await client.milestones();
       const milestone = milestones?.nodes?.[0];
       _milestone_id = milestone?.id;
       expect(milestones instanceof L.MilestoneConnection);
@@ -1118,7 +1292,7 @@ describe("generated", () => {
     /** Test the root query for a single Milestone */
     it("milestone", async () => {
       if (_milestone_id) {
-        const milestone = await client.milestone(_milestone_id);
+        const milestone: L.Milestone | undefined = await client.milestone(_milestone_id);
         _milestone = milestone;
         expect(milestone instanceof L.Milestone);
       } else {
@@ -1129,7 +1303,7 @@ describe("generated", () => {
     /** Test the milestone connection query for the Project */
     it("milestone.projects", async () => {
       if (_milestone) {
-        const projects = await _milestone.projects();
+        const projects: L.ProjectConnection | undefined = await _milestone.projects();
         expect(projects instanceof L.ProjectConnection);
       } else {
         throw new Error("codegen-doc:print: No milestone found - cannot test _milestone.projects query");
@@ -1139,7 +1313,7 @@ describe("generated", () => {
     /** Test the milestone.organization query for L.Organization */
     it("milestone.organization", async () => {
       if (_milestone) {
-        const milestone_organization = await _milestone.organization;
+        const milestone_organization: L.Organization | undefined = await _milestone.organization;
         expect(milestone_organization instanceof L.Organization);
       } else {
         throw new Error("codegen-doc:print: No Milestone found - cannot test milestone.organization query");
@@ -1154,7 +1328,9 @@ describe("generated", () => {
 
     /** Test the root connection query for the NotificationSubscription */
     it("notificationSubscriptions", async () => {
-      const notificationSubscriptions = await client.notificationSubscriptions();
+      const notificationSubscriptions:
+        | L.NotificationSubscriptionConnection
+        | undefined = await client.notificationSubscriptions();
       const notificationSubscription = notificationSubscriptions?.nodes?.[0];
       _notificationSubscription_id = notificationSubscription?.id;
       expect(notificationSubscriptions instanceof L.NotificationSubscriptionConnection);
@@ -1163,7 +1339,9 @@ describe("generated", () => {
     /** Test the root query for a single NotificationSubscription */
     it("notificationSubscription", async () => {
       if (_notificationSubscription_id) {
-        const notificationSubscription = await client.notificationSubscription(_notificationSubscription_id);
+        const notificationSubscription: L.NotificationSubscription | undefined = await client.notificationSubscription(
+          _notificationSubscription_id
+        );
         _notificationSubscription = notificationSubscription;
         expect(notificationSubscription instanceof L.NotificationSubscription);
       } else {
@@ -1176,7 +1354,7 @@ describe("generated", () => {
     /** Test the notificationSubscription.project query for L.Project */
     it("notificationSubscription.project", async () => {
       if (_notificationSubscription) {
-        const notificationSubscription_project = await _notificationSubscription.project;
+        const notificationSubscription_project: L.Project | undefined = await _notificationSubscription.project;
         expect(notificationSubscription_project instanceof L.Project);
       } else {
         throw new Error(
@@ -1188,7 +1366,7 @@ describe("generated", () => {
     /** Test the notificationSubscription.team query for L.Team */
     it("notificationSubscription.team", async () => {
       if (_notificationSubscription) {
-        const notificationSubscription_team = await _notificationSubscription.team;
+        const notificationSubscription_team: L.Team | undefined = await _notificationSubscription.team;
         expect(notificationSubscription_team instanceof L.Team);
       } else {
         throw new Error(
@@ -1200,7 +1378,7 @@ describe("generated", () => {
     /** Test the notificationSubscription.user query for L.User */
     it("notificationSubscription.user", async () => {
       if (_notificationSubscription) {
-        const notificationSubscription_user = await _notificationSubscription.user;
+        const notificationSubscription_user: L.User | undefined = await _notificationSubscription.user;
         expect(notificationSubscription_user instanceof L.User);
       } else {
         throw new Error(
@@ -1217,7 +1395,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Notification */
     it("notifications", async () => {
-      const notifications = await client.notifications();
+      const notifications: L.NotificationConnection | undefined = await client.notifications();
       const notification = notifications?.nodes?.[0];
       _notification_id = notification?.id;
       expect(notifications instanceof L.NotificationConnection);
@@ -1226,7 +1404,7 @@ describe("generated", () => {
     /** Test the root query for a single Notification */
     it("notification", async () => {
       if (_notification_id) {
-        const notification = await client.notification(_notification_id);
+        const notification: L.Notification | undefined = await client.notification(_notification_id);
         _notification = notification;
         expect(notification instanceof L.Notification);
       } else {
@@ -1239,7 +1417,7 @@ describe("generated", () => {
     /** Test the notification.comment query for L.Comment */
     it("notification.comment", async () => {
       if (_notification) {
-        const notification_comment = await _notification.comment;
+        const notification_comment: L.Comment | undefined = await _notification.comment;
         expect(notification_comment instanceof L.Comment);
       } else {
         throw new Error("codegen-doc:print: No Notification found - cannot test notification.comment query");
@@ -1249,7 +1427,7 @@ describe("generated", () => {
     /** Test the notification.issue query for L.Issue */
     it("notification.issue", async () => {
       if (_notification) {
-        const notification_issue = await _notification.issue;
+        const notification_issue: L.Issue | undefined = await _notification.issue;
         expect(notification_issue instanceof L.Issue);
       } else {
         throw new Error("codegen-doc:print: No Notification found - cannot test notification.issue query");
@@ -1259,7 +1437,7 @@ describe("generated", () => {
     /** Test the notification.team query for L.Team */
     it("notification.team", async () => {
       if (_notification) {
-        const notification_team = await _notification.team;
+        const notification_team: L.Team | undefined = await _notification.team;
         expect(notification_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No Notification found - cannot test notification.team query");
@@ -1269,7 +1447,7 @@ describe("generated", () => {
     /** Test the notification.user query for L.User */
     it("notification.user", async () => {
       if (_notification) {
-        const notification_user = await _notification.user;
+        const notification_user: L.User | undefined = await _notification.user;
         expect(notification_user instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Notification found - cannot test notification.user query");
@@ -1283,7 +1461,7 @@ describe("generated", () => {
 
     /** Test the root model query for Organization */
     it("organization", async () => {
-      const organization = await client.organization;
+      const organization: L.Organization | undefined = await client.organization;
       _organization = organization;
       expect(organization instanceof L.Organization);
     });
@@ -1291,7 +1469,7 @@ describe("generated", () => {
     /** Test the organization connection query for the Integration */
     it("organization.integrations", async () => {
       if (_organization) {
-        const integrations = await _organization.integrations();
+        const integrations: L.IntegrationConnection | undefined = await _organization.integrations();
         expect(integrations instanceof L.IntegrationConnection);
       } else {
         throw new Error("codegen-doc:print: No organization found - cannot test _organization.integrations query");
@@ -1301,7 +1479,7 @@ describe("generated", () => {
     /** Test the organization connection query for the Milestone */
     it("organization.milestones", async () => {
       if (_organization) {
-        const milestones = await _organization.milestones();
+        const milestones: L.MilestoneConnection | undefined = await _organization.milestones();
         expect(milestones instanceof L.MilestoneConnection);
       } else {
         throw new Error("codegen-doc:print: No organization found - cannot test _organization.milestones query");
@@ -1311,7 +1489,7 @@ describe("generated", () => {
     /** Test the organization connection query for the Team */
     it("organization.teams", async () => {
       if (_organization) {
-        const teams = await _organization.teams();
+        const teams: L.TeamConnection | undefined = await _organization.teams();
         expect(teams instanceof L.TeamConnection);
       } else {
         throw new Error("codegen-doc:print: No organization found - cannot test _organization.teams query");
@@ -1321,7 +1499,7 @@ describe("generated", () => {
     /** Test the organization connection query for the User */
     it("organization.users", async () => {
       if (_organization) {
-        const users = await _organization.users();
+        const users: L.UserConnection | undefined = await _organization.users();
         expect(users instanceof L.UserConnection);
       } else {
         throw new Error("codegen-doc:print: No organization found - cannot test _organization.users query");
@@ -1333,7 +1511,9 @@ describe("generated", () => {
   describe("OrganizationExists", () => {
     /** Test the root model query for OrganizationExists */
     it("organizationExists", async () => {
-      const organizationExists = await client.organizationExists("mock-urlKey");
+      const organizationExists: L.OrganizationExistsPayload | undefined = await client.organizationExists(
+        "mock-urlKey"
+      );
       expect(organizationExists instanceof L.OrganizationExistsPayload);
     });
   });
@@ -1342,7 +1522,7 @@ describe("generated", () => {
   describe("OrganizationInvites", () => {
     /** Test the root connection query for the OrganizationInvite */
     it("organizationInvites", async () => {
-      const organizationInvites = await client.organizationInvites();
+      const organizationInvites: L.OrganizationInviteConnection | undefined = await client.organizationInvites();
       expect(organizationInvites instanceof L.OrganizationInviteConnection);
     });
   });
@@ -1354,7 +1534,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the ProjectLink */
     it("projectLinks", async () => {
-      const projectLinks = await client.projectLinks();
+      const projectLinks: L.ProjectLinkConnection | undefined = await client.projectLinks();
       const projectLink = projectLinks?.nodes?.[0];
       _projectLink_id = projectLink?.id;
       expect(projectLinks instanceof L.ProjectLinkConnection);
@@ -1363,7 +1543,7 @@ describe("generated", () => {
     /** Test the root query for a single ProjectLink */
     it("projectLink", async () => {
       if (_projectLink_id) {
-        const projectLink = await client.projectLink(_projectLink_id);
+        const projectLink: L.ProjectLink | undefined = await client.projectLink(_projectLink_id);
         _projectLink = projectLink;
         expect(projectLink instanceof L.ProjectLink);
       } else {
@@ -1374,7 +1554,7 @@ describe("generated", () => {
     /** Test the projectLink.creator query for L.User */
     it("projectLink.creator", async () => {
       if (_projectLink) {
-        const projectLink_creator = await _projectLink.creator;
+        const projectLink_creator: L.User | undefined = await _projectLink.creator;
         expect(projectLink_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No ProjectLink found - cannot test projectLink.creator query");
@@ -1384,7 +1564,7 @@ describe("generated", () => {
     /** Test the projectLink.project query for L.Project */
     it("projectLink.project", async () => {
       if (_projectLink) {
-        const projectLink_project = await _projectLink.project;
+        const projectLink_project: L.Project | undefined = await _projectLink.project;
         expect(projectLink_project instanceof L.Project);
       } else {
         throw new Error("codegen-doc:print: No ProjectLink found - cannot test projectLink.project query");
@@ -1399,7 +1579,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Project */
     it("projects", async () => {
-      const projects = await client.projects();
+      const projects: L.ProjectConnection | undefined = await client.projects();
       const project = projects?.nodes?.[0];
       _project_id = project?.id;
       expect(projects instanceof L.ProjectConnection);
@@ -1408,7 +1588,7 @@ describe("generated", () => {
     /** Test the root query for a single Project */
     it("project", async () => {
       if (_project_id) {
-        const project = await client.project(_project_id);
+        const project: L.Project | undefined = await client.project(_project_id);
         _project = project;
         expect(project instanceof L.Project);
       } else {
@@ -1419,7 +1599,7 @@ describe("generated", () => {
     /** Test the project connection query for the Issue */
     it("project.issues", async () => {
       if (_project) {
-        const issues = await _project.issues();
+        const issues: L.IssueConnection | undefined = await _project.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No project found - cannot test _project.issues query");
@@ -1429,7 +1609,7 @@ describe("generated", () => {
     /** Test the project connection query for the ProjectLink */
     it("project.links", async () => {
       if (_project) {
-        const links = await _project.links();
+        const links: L.ProjectLinkConnection | undefined = await _project.links();
         expect(links instanceof L.ProjectLinkConnection);
       } else {
         throw new Error("codegen-doc:print: No project found - cannot test _project.links query");
@@ -1439,7 +1619,7 @@ describe("generated", () => {
     /** Test the project connection query for the User */
     it("project.members", async () => {
       if (_project) {
-        const members = await _project.members();
+        const members: L.UserConnection | undefined = await _project.members();
         expect(members instanceof L.UserConnection);
       } else {
         throw new Error("codegen-doc:print: No project found - cannot test _project.members query");
@@ -1449,7 +1629,7 @@ describe("generated", () => {
     /** Test the project connection query for the Team */
     it("project.teams", async () => {
       if (_project) {
-        const teams = await _project.teams();
+        const teams: L.TeamConnection | undefined = await _project.teams();
         expect(teams instanceof L.TeamConnection);
       } else {
         throw new Error("codegen-doc:print: No project found - cannot test _project.teams query");
@@ -1459,7 +1639,7 @@ describe("generated", () => {
     /** Test the project.creator query for L.User */
     it("project.creator", async () => {
       if (_project) {
-        const project_creator = await _project.creator;
+        const project_creator: L.User | undefined = await _project.creator;
         expect(project_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Project found - cannot test project.creator query");
@@ -1469,7 +1649,7 @@ describe("generated", () => {
     /** Test the project.lead query for L.User */
     it("project.lead", async () => {
       if (_project) {
-        const project_lead = await _project.lead;
+        const project_lead: L.User | undefined = await _project.lead;
         expect(project_lead instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Project found - cannot test project.lead query");
@@ -1479,7 +1659,7 @@ describe("generated", () => {
     /** Test the project.milestone query for L.Milestone */
     it("project.milestone", async () => {
       if (_project) {
-        const project_milestone = await _project.milestone;
+        const project_milestone: L.Milestone | undefined = await _project.milestone;
         expect(project_milestone instanceof L.Milestone);
       } else {
         throw new Error("codegen-doc:print: No Project found - cannot test project.milestone query");
@@ -1491,7 +1671,7 @@ describe("generated", () => {
   describe("PushSubscriptionTest", () => {
     /** Test the root model query for PushSubscriptionTest */
     it("pushSubscriptionTest", async () => {
-      const pushSubscriptionTest = await client.pushSubscriptionTest;
+      const pushSubscriptionTest: L.PushSubscriptionPayload | undefined = await client.pushSubscriptionTest;
       expect(pushSubscriptionTest instanceof L.PushSubscriptionPayload);
     });
   });
@@ -1503,7 +1683,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Reaction */
     it("reactions", async () => {
-      const reactions = await client.reactions();
+      const reactions: L.ReactionConnection | undefined = await client.reactions();
       const reaction = reactions?.nodes?.[0];
       _reaction_id = reaction?.id;
       expect(reactions instanceof L.ReactionConnection);
@@ -1512,7 +1692,7 @@ describe("generated", () => {
     /** Test the root query for a single Reaction */
     it("reaction", async () => {
       if (_reaction_id) {
-        const reaction = await client.reaction(_reaction_id);
+        const reaction: L.Reaction | undefined = await client.reaction(_reaction_id);
         _reaction = reaction;
         expect(reaction instanceof L.Reaction);
       } else {
@@ -1523,7 +1703,7 @@ describe("generated", () => {
     /** Test the reaction.comment query for L.Comment */
     it("reaction.comment", async () => {
       if (_reaction) {
-        const reaction_comment = await _reaction.comment;
+        const reaction_comment: L.Comment | undefined = await _reaction.comment;
         expect(reaction_comment instanceof L.Comment);
       } else {
         throw new Error("codegen-doc:print: No Reaction found - cannot test reaction.comment query");
@@ -1533,7 +1713,7 @@ describe("generated", () => {
     /** Test the reaction.user query for L.User */
     it("reaction.user", async () => {
       if (_reaction) {
-        const reaction_user = await _reaction.user;
+        const reaction_user: L.User | undefined = await _reaction.user;
         expect(reaction_user instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Reaction found - cannot test reaction.user query");
@@ -1545,7 +1725,7 @@ describe("generated", () => {
   describe("SsoUrlFromEmail", () => {
     /** Test the root model query for SsoUrlFromEmail */
     it("ssoUrlFromEmail", async () => {
-      const ssoUrlFromEmail = await client.ssoUrlFromEmail("mock-email");
+      const ssoUrlFromEmail: L.SsoUrlFromEmailResponse | undefined = await client.ssoUrlFromEmail("mock-email");
       expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
     });
   });
@@ -1554,7 +1734,7 @@ describe("generated", () => {
   describe("Subscription", () => {
     /** Test the root model query for Subscription */
     it("subscription", async () => {
-      const subscription = await client.subscription;
+      const subscription: L.Subscription | undefined = await client.subscription;
       expect(subscription instanceof L.Subscription);
     });
   });
@@ -1563,7 +1743,7 @@ describe("generated", () => {
   describe("SyncBootstrap", () => {
     /** Test the root model query for SyncBootstrap */
     it("syncBootstrap", async () => {
-      const syncBootstrap = await client.syncBootstrap();
+      const syncBootstrap: L.SyncResponse | undefined = await client.syncBootstrap();
       expect(syncBootstrap instanceof L.SyncResponse);
     });
   });
@@ -1575,7 +1755,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the TeamMembership */
     it("teamMemberships", async () => {
-      const teamMemberships = await client.teamMemberships();
+      const teamMemberships: L.TeamMembershipConnection | undefined = await client.teamMemberships();
       const teamMembership = teamMemberships?.nodes?.[0];
       _teamMembership_id = teamMembership?.id;
       expect(teamMemberships instanceof L.TeamMembershipConnection);
@@ -1584,7 +1764,7 @@ describe("generated", () => {
     /** Test the root query for a single TeamMembership */
     it("teamMembership", async () => {
       if (_teamMembership_id) {
-        const teamMembership = await client.teamMembership(_teamMembership_id);
+        const teamMembership: L.TeamMembership | undefined = await client.teamMembership(_teamMembership_id);
         _teamMembership = teamMembership;
         expect(teamMembership instanceof L.TeamMembership);
       } else {
@@ -1597,7 +1777,7 @@ describe("generated", () => {
     /** Test the teamMembership.team query for L.Team */
     it("teamMembership.team", async () => {
       if (_teamMembership) {
-        const teamMembership_team = await _teamMembership.team;
+        const teamMembership_team: L.Team | undefined = await _teamMembership.team;
         expect(teamMembership_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No TeamMembership found - cannot test teamMembership.team query");
@@ -1607,7 +1787,7 @@ describe("generated", () => {
     /** Test the teamMembership.user query for L.User */
     it("teamMembership.user", async () => {
       if (_teamMembership) {
-        const teamMembership_user = await _teamMembership.user;
+        const teamMembership_user: L.User | undefined = await _teamMembership.user;
         expect(teamMembership_user instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No TeamMembership found - cannot test teamMembership.user query");
@@ -1622,7 +1802,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Team */
     it("teams", async () => {
-      const teams = await client.teams();
+      const teams: L.TeamConnection | undefined = await client.teams();
       const team = teams?.nodes?.[0];
       _team_id = team?.id;
       expect(teams instanceof L.TeamConnection);
@@ -1631,7 +1811,7 @@ describe("generated", () => {
     /** Test the root query for a single Team */
     it("team", async () => {
       if (_team_id) {
-        const team = await client.team(_team_id);
+        const team: L.Team | undefined = await client.team(_team_id);
         _team = team;
         expect(team instanceof L.Team);
       } else {
@@ -1642,7 +1822,7 @@ describe("generated", () => {
     /** Test the team connection query for the Cycle */
     it("team.cycles", async () => {
       if (_team) {
-        const cycles = await _team.cycles();
+        const cycles: L.CycleConnection | undefined = await _team.cycles();
         expect(cycles instanceof L.CycleConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.cycles query");
@@ -1652,7 +1832,7 @@ describe("generated", () => {
     /** Test the team connection query for the Issue */
     it("team.issues", async () => {
       if (_team) {
-        const issues = await _team.issues();
+        const issues: L.IssueConnection | undefined = await _team.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.issues query");
@@ -1662,7 +1842,7 @@ describe("generated", () => {
     /** Test the team connection query for the IssueLabel */
     it("team.labels", async () => {
       if (_team) {
-        const labels = await _team.labels();
+        const labels: L.IssueLabelConnection | undefined = await _team.labels();
         expect(labels instanceof L.IssueLabelConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.labels query");
@@ -1672,7 +1852,7 @@ describe("generated", () => {
     /** Test the team connection query for the User */
     it("team.members", async () => {
       if (_team) {
-        const members = await _team.members();
+        const members: L.UserConnection | undefined = await _team.members();
         expect(members instanceof L.UserConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.members query");
@@ -1682,7 +1862,7 @@ describe("generated", () => {
     /** Test the team connection query for the TeamMembership */
     it("team.memberships", async () => {
       if (_team) {
-        const memberships = await _team.memberships();
+        const memberships: L.TeamMembershipConnection | undefined = await _team.memberships();
         expect(memberships instanceof L.TeamMembershipConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.memberships query");
@@ -1692,7 +1872,7 @@ describe("generated", () => {
     /** Test the team connection query for the Project */
     it("team.projects", async () => {
       if (_team) {
-        const projects = await _team.projects();
+        const projects: L.ProjectConnection | undefined = await _team.projects();
         expect(projects instanceof L.ProjectConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.projects query");
@@ -1702,7 +1882,7 @@ describe("generated", () => {
     /** Test the team connection query for the WorkflowState */
     it("team.states", async () => {
       if (_team) {
-        const states = await _team.states();
+        const states: L.WorkflowStateConnection | undefined = await _team.states();
         expect(states instanceof L.WorkflowStateConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.states query");
@@ -1712,7 +1892,7 @@ describe("generated", () => {
     /** Test the team model query for Team_Templates */
     it("team.templates", async () => {
       if (_team) {
-        const templates = await _team.templates();
+        const templates: L.TemplateConnection | undefined = await _team.templates();
         expect(templates instanceof L.TemplateConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.templates query");
@@ -1722,7 +1902,7 @@ describe("generated", () => {
     /** Test the team connection query for the Webhook */
     it("team.webhooks", async () => {
       if (_team) {
-        const webhooks = await _team.webhooks();
+        const webhooks: L.WebhookConnection | undefined = await _team.webhooks();
         expect(webhooks instanceof L.WebhookConnection);
       } else {
         throw new Error("codegen-doc:print: No team found - cannot test _team.webhooks query");
@@ -1732,7 +1912,7 @@ describe("generated", () => {
     /** Test the team.activeCycle query for L.Cycle */
     it("team.activeCycle", async () => {
       if (_team) {
-        const team_activeCycle = await _team.activeCycle;
+        const team_activeCycle: L.Cycle | undefined = await _team.activeCycle;
         expect(team_activeCycle instanceof L.Cycle);
       } else {
         throw new Error("codegen-doc:print: No Team found - cannot test team.activeCycle query");
@@ -1742,7 +1922,7 @@ describe("generated", () => {
     /** Test the team.draftWorkflowState query for L.WorkflowState */
     it("team.draftWorkflowState", async () => {
       if (_team) {
-        const team_draftWorkflowState = await _team.draftWorkflowState;
+        const team_draftWorkflowState: L.WorkflowState | undefined = await _team.draftWorkflowState;
         expect(team_draftWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("codegen-doc:print: No Team found - cannot test team.draftWorkflowState query");
@@ -1752,7 +1932,9 @@ describe("generated", () => {
     /** Test the team.markedAsDuplicateWorkflowState query for L.WorkflowState */
     it("team.markedAsDuplicateWorkflowState", async () => {
       if (_team) {
-        const team_markedAsDuplicateWorkflowState = await _team.markedAsDuplicateWorkflowState;
+        const team_markedAsDuplicateWorkflowState:
+          | L.WorkflowState
+          | undefined = await _team.markedAsDuplicateWorkflowState;
         expect(team_markedAsDuplicateWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("codegen-doc:print: No Team found - cannot test team.markedAsDuplicateWorkflowState query");
@@ -1762,7 +1944,7 @@ describe("generated", () => {
     /** Test the team.mergeWorkflowState query for L.WorkflowState */
     it("team.mergeWorkflowState", async () => {
       if (_team) {
-        const team_mergeWorkflowState = await _team.mergeWorkflowState;
+        const team_mergeWorkflowState: L.WorkflowState | undefined = await _team.mergeWorkflowState;
         expect(team_mergeWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("codegen-doc:print: No Team found - cannot test team.mergeWorkflowState query");
@@ -1772,7 +1954,7 @@ describe("generated", () => {
     /** Test the team.organization query for L.Organization */
     it("team.organization", async () => {
       if (_team) {
-        const team_organization = await _team.organization;
+        const team_organization: L.Organization | undefined = await _team.organization;
         expect(team_organization instanceof L.Organization);
       } else {
         throw new Error("codegen-doc:print: No Team found - cannot test team.organization query");
@@ -1782,7 +1964,7 @@ describe("generated", () => {
     /** Test the team.reviewWorkflowState query for L.WorkflowState */
     it("team.reviewWorkflowState", async () => {
       if (_team) {
-        const team_reviewWorkflowState = await _team.reviewWorkflowState;
+        const team_reviewWorkflowState: L.WorkflowState | undefined = await _team.reviewWorkflowState;
         expect(team_reviewWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("codegen-doc:print: No Team found - cannot test team.reviewWorkflowState query");
@@ -1792,7 +1974,7 @@ describe("generated", () => {
     /** Test the team.startWorkflowState query for L.WorkflowState */
     it("team.startWorkflowState", async () => {
       if (_team) {
-        const team_startWorkflowState = await _team.startWorkflowState;
+        const team_startWorkflowState: L.WorkflowState | undefined = await _team.startWorkflowState;
         expect(team_startWorkflowState instanceof L.WorkflowState);
       } else {
         throw new Error("codegen-doc:print: No Team found - cannot test team.startWorkflowState query");
@@ -1804,7 +1986,7 @@ describe("generated", () => {
   describe("Template", () => {
     /** Test the root model query for Template */
     it("template", async () => {
-      const template = await client.template("mock-id");
+      const template: L.Template | undefined = await client.template("mock-id");
       expect(template instanceof L.Template);
     });
   });
@@ -1813,7 +1995,7 @@ describe("generated", () => {
   describe("Templates", () => {
     /** Test the root model query for Templates */
     it("templates", async () => {
-      const templates = await client.templates;
+      const templates: L.Template[] | undefined = await client.templates;
       templates?.map(node => expect(node instanceof L.Template));
     });
   });
@@ -1822,7 +2004,7 @@ describe("generated", () => {
   describe("UserSettings", () => {
     /** Test the root model query for UserSettings */
     it("userSettings", async () => {
-      const userSettings = await client.userSettings;
+      const userSettings: L.UserSettings | undefined = await client.userSettings;
       expect(userSettings instanceof L.UserSettings);
     });
   });
@@ -1834,7 +2016,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the User */
     it("users", async () => {
-      const users = await client.users();
+      const users: L.UserConnection | undefined = await client.users();
       const user = users?.nodes?.[0];
       _user_id = user?.id;
       expect(users instanceof L.UserConnection);
@@ -1843,7 +2025,7 @@ describe("generated", () => {
     /** Test the root query for a single User */
     it("user", async () => {
       if (_user_id) {
-        const user = await client.user(_user_id);
+        const user: L.User | undefined = await client.user(_user_id);
         _user = user;
         expect(user instanceof L.User);
       } else {
@@ -1854,7 +2036,7 @@ describe("generated", () => {
     /** Test the user connection query for the Issue */
     it("user.assignedIssues", async () => {
       if (_user) {
-        const assignedIssues = await _user.assignedIssues();
+        const assignedIssues: L.IssueConnection | undefined = await _user.assignedIssues();
         expect(assignedIssues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No user found - cannot test _user.assignedIssues query");
@@ -1864,7 +2046,7 @@ describe("generated", () => {
     /** Test the user connection query for the Issue */
     it("user.createdIssues", async () => {
       if (_user) {
-        const createdIssues = await _user.createdIssues();
+        const createdIssues: L.IssueConnection | undefined = await _user.createdIssues();
         expect(createdIssues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No user found - cannot test _user.createdIssues query");
@@ -1874,7 +2056,7 @@ describe("generated", () => {
     /** Test the user connection query for the TeamMembership */
     it("user.teamMemberships", async () => {
       if (_user) {
-        const teamMemberships = await _user.teamMemberships();
+        const teamMemberships: L.TeamMembershipConnection | undefined = await _user.teamMemberships();
         expect(teamMemberships instanceof L.TeamMembershipConnection);
       } else {
         throw new Error("codegen-doc:print: No user found - cannot test _user.teamMemberships query");
@@ -1884,7 +2066,7 @@ describe("generated", () => {
     /** Test the user connection query for the Team */
     it("user.teams", async () => {
       if (_user) {
-        const teams = await _user.teams();
+        const teams: L.TeamConnection | undefined = await _user.teams();
         expect(teams instanceof L.TeamConnection);
       } else {
         throw new Error("codegen-doc:print: No user found - cannot test _user.teams query");
@@ -1894,7 +2076,7 @@ describe("generated", () => {
     /** Test the user.organization query for L.Organization */
     it("user.organization", async () => {
       if (_user) {
-        const user_organization = await _user.organization;
+        const user_organization: L.Organization | undefined = await _user.organization;
         expect(user_organization instanceof L.Organization);
       } else {
         throw new Error("codegen-doc:print: No User found - cannot test user.organization query");
@@ -1908,7 +2090,7 @@ describe("generated", () => {
 
     /** Test the root model query for Viewer */
     it("viewer", async () => {
-      const viewer = await client.viewer;
+      const viewer: L.User | undefined = await client.viewer;
       _viewer = viewer;
       expect(viewer instanceof L.User);
     });
@@ -1916,7 +2098,7 @@ describe("generated", () => {
     /** Test the viewer connection query for the Issue */
     it("viewer.assignedIssues", async () => {
       if (_viewer) {
-        const assignedIssues = await _viewer.assignedIssues();
+        const assignedIssues: L.IssueConnection | undefined = await _viewer.assignedIssues();
         expect(assignedIssues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No viewer found - cannot test _viewer.assignedIssues query");
@@ -1926,7 +2108,7 @@ describe("generated", () => {
     /** Test the viewer connection query for the Issue */
     it("viewer.createdIssues", async () => {
       if (_viewer) {
-        const createdIssues = await _viewer.createdIssues();
+        const createdIssues: L.IssueConnection | undefined = await _viewer.createdIssues();
         expect(createdIssues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No viewer found - cannot test _viewer.createdIssues query");
@@ -1936,7 +2118,7 @@ describe("generated", () => {
     /** Test the viewer connection query for the TeamMembership */
     it("viewer.teamMemberships", async () => {
       if (_viewer) {
-        const teamMemberships = await _viewer.teamMemberships();
+        const teamMemberships: L.TeamMembershipConnection | undefined = await _viewer.teamMemberships();
         expect(teamMemberships instanceof L.TeamMembershipConnection);
       } else {
         throw new Error("codegen-doc:print: No viewer found - cannot test _viewer.teamMemberships query");
@@ -1946,7 +2128,7 @@ describe("generated", () => {
     /** Test the viewer connection query for the Team */
     it("viewer.teams", async () => {
       if (_viewer) {
-        const teams = await _viewer.teams();
+        const teams: L.TeamConnection | undefined = await _viewer.teams();
         expect(teams instanceof L.TeamConnection);
       } else {
         throw new Error("codegen-doc:print: No viewer found - cannot test _viewer.teams query");
@@ -1961,7 +2143,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the Webhook */
     it("webhooks", async () => {
-      const webhooks = await client.webhooks();
+      const webhooks: L.WebhookConnection | undefined = await client.webhooks();
       const webhook = webhooks?.nodes?.[0];
       _webhook_id = webhook?.id;
       expect(webhooks instanceof L.WebhookConnection);
@@ -1970,7 +2152,7 @@ describe("generated", () => {
     /** Test the root query for a single Webhook */
     it("webhook", async () => {
       if (_webhook_id) {
-        const webhook = await client.webhook(_webhook_id);
+        const webhook: L.Webhook | undefined = await client.webhook(_webhook_id);
         _webhook = webhook;
         expect(webhook instanceof L.Webhook);
       } else {
@@ -1981,7 +2163,7 @@ describe("generated", () => {
     /** Test the webhook.creator query for L.User */
     it("webhook.creator", async () => {
       if (_webhook) {
-        const webhook_creator = await _webhook.creator;
+        const webhook_creator: L.User | undefined = await _webhook.creator;
         expect(webhook_creator instanceof L.User);
       } else {
         throw new Error("codegen-doc:print: No Webhook found - cannot test webhook.creator query");
@@ -1991,7 +2173,7 @@ describe("generated", () => {
     /** Test the webhook.team query for L.Team */
     it("webhook.team", async () => {
       if (_webhook) {
-        const webhook_team = await _webhook.team;
+        const webhook_team: L.Team | undefined = await _webhook.team;
         expect(webhook_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No Webhook found - cannot test webhook.team query");
@@ -2006,7 +2188,7 @@ describe("generated", () => {
 
     /** Test the root connection query for the WorkflowState */
     it("workflowStates", async () => {
-      const workflowStates = await client.workflowStates();
+      const workflowStates: L.WorkflowStateConnection | undefined = await client.workflowStates();
       const workflowState = workflowStates?.nodes?.[0];
       _workflowState_id = workflowState?.id;
       expect(workflowStates instanceof L.WorkflowStateConnection);
@@ -2015,7 +2197,7 @@ describe("generated", () => {
     /** Test the root query for a single WorkflowState */
     it("workflowState", async () => {
       if (_workflowState_id) {
-        const workflowState = await client.workflowState(_workflowState_id);
+        const workflowState: L.WorkflowState | undefined = await client.workflowState(_workflowState_id);
         _workflowState = workflowState;
         expect(workflowState instanceof L.WorkflowState);
       } else {
@@ -2028,7 +2210,7 @@ describe("generated", () => {
     /** Test the workflowState connection query for the Issue */
     it("workflowState.issues", async () => {
       if (_workflowState) {
-        const issues = await _workflowState.issues();
+        const issues: L.IssueConnection | undefined = await _workflowState.issues();
         expect(issues instanceof L.IssueConnection);
       } else {
         throw new Error("codegen-doc:print: No workflowState found - cannot test _workflowState.issues query");
@@ -2038,7 +2220,7 @@ describe("generated", () => {
     /** Test the workflowState.team query for L.Team */
     it("workflowState.team", async () => {
       if (_workflowState) {
-        const workflowState_team = await _workflowState.team;
+        const workflowState_team: L.Team | undefined = await _workflowState.team;
         expect(workflowState_team instanceof L.Team);
       } else {
         throw new Error("codegen-doc:print: No WorkflowState found - cannot test workflowState.team query");

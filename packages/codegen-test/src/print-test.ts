@@ -88,6 +88,13 @@ function printOperationArgs(operation: SdkOperation): string {
 }
 
 /**
+ * Prints the type with array and undefined check
+ */
+function printResponseType(type: string, listType?: string) {
+  return `${type}${listType ? "[]" : ""} | undefined`;
+}
+
+/**
  * Prints the test for a query with associated SdkModel
  */
 function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation, index = 1): string {
@@ -113,7 +120,7 @@ function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation,
         printElseThrow(
           clientName,
           printLines([
-            `const ${fieldName} = ${
+            `const ${fieldName}: ${printResponseType(fieldType, operation.print.list)} = ${
               isModelObject
                 ? `${clientName}.${fieldName}`
                 : `await ${clientName}.${fieldName}${printOperationArgs(operation)}`
@@ -173,7 +180,10 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
         printElseThrow(
           clientName,
           printLines([
-            `const ${fieldName} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
+            `const ${fieldName}: ${printResponseType(
+              fieldType,
+              operation.print.list
+            )} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
             itemOperation
               ? printLines([
                   `const ${itemField} = ${fieldName}?.${Sdk.NODE_NAME}?.[0]`,
@@ -202,7 +212,10 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                   " && "
                 ),
                 printLines([
-                  `const ${itemField} = await ${clientName}.${itemField}${itemOperationArgs}`,
+                  `const ${itemField}: ${printResponseType(
+                    itemType,
+                    operation.print.list
+                  )} = await ${clientName}.${itemField}${itemOperationArgs}`,
                   itemOperations.length || itemQueries.length ? printSet(`_${itemField}`, itemField) : undefined,
                   operation.print.list
                     ? `${itemField}?.map(node => expect(node instanceof ${itemType}))`
@@ -227,7 +240,10 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                   printElseThrow(
                     `_${itemField}`,
                     printLines([
-                      `const ${itemField}_${field.name} = await _${itemField}.${field.name}`,
+                      `const ${itemField}_${field.name}: ${printResponseType(
+                        field.type,
+                        operation.print.list
+                      )} = await _${itemField}.${field.name}`,
                       operation.print.list
                         ? `${itemField}_${field.name}?.map(node => expect(node instanceof ${field.type}))`
                         : `expect(${itemField}_${field.name} instanceof ${field.type})`,

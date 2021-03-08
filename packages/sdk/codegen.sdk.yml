@@ -7,8 +7,7 @@ hooks:
 config:
   documentFile: ./_generated_documents
   skipFields:
-    - integrationResource
-    - integrationResources
+    # - integrationResource
 generates:
   src/_generated_documents.ts:
     plugins:
