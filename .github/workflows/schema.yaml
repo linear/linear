@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: 0 0 * * * # triggered nightly
     # - cron: 0 0 * * 0 # triggered every sunday
+  push:
+    branches:
+      - littlemooon/schema-action
 
 jobs:
   release:
