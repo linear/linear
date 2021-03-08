@@ -24,6 +24,10 @@ describe("readme.md", () => {
   /** Initialize Linear client variable */
   let linearClient: LinearClient;
 
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   beforeAll(async () => {
     linearClient = await startClient();
   });
@@ -287,7 +291,7 @@ describe("readme.md", () => {
         }
       }
 
-      archiveFirstIssue().catch(error => {
+      await archiveFirstIssue().catch(error => {
         throw error;
       });
       /** CODE_SECTION:7_2:END */
