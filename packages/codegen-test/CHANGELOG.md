@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.8.0
+
+### Minor Changes
+
+- 302b0e2: feat(sdk): update schema
+
+### Patch Changes
+
+- 47cdc52: chore(test): add jest fake timers
+- f384cdb: Bump changeset
+
 ## 1.7.0
 
 ### Minor Changes

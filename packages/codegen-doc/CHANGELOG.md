@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7.1
+
+### Patch Changes
+
+- f384cdb: Bump changeset
+
 ## 1.7.0
 
 ### Minor Changes
