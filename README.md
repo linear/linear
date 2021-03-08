@@ -18,8 +18,11 @@
   <a href="https://github.com/linear/linear/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Linear is released under the MIT license." />
   </a>
-  <a href="https://github.com/linear/linear/workflows/build">
-    <img src="https://github.com/linear/linear/workflows/build/badge.svg" alt="Current Github Action build status." />
+  <a href="https://github.com/linear/linear/actions/workflows/build.yaml">
+    <img src="https://github.com/linear/linear/actions/workflows/build.yaml/badge.svg" alt="Current Github Action build status." />
+  </a>
+  <a href="https://github.com/linear/linear/actions/workflows/release.yaml">
+    <img src="https://github.com/linear/linear/actions/workflows/release.yaml/badge.svg" alt="Current Github Action release status." />
   </a>
 </p>
 <!-- TEXT_SECTION:header:END -->
