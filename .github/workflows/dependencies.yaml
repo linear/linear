@@ -1,0 +1,48 @@
+name: dependencies
+
+on:
+  schedule:
+    - cron: 0 0 * * * # triggered nightly
+    # - cron: 0 0 * * 0 # triggered every sunday
+  push:
+    branches:
+      - littlemooon/schema-action
+
+jobs:
+  dependencies:
+    name: Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Use node 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Update dependencies
+        run: yarn upgrade
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test:ci
+
+      - name: Add empty changeset for editing later
+        run: yarn changeset add --empty
+
+      - name: Create depedencies pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: "chore(release): update depedencies"
+          title: "chore(release): update depedencies"
+          body: "Update depedencies"
+          branch: dependencies
+          base: master
