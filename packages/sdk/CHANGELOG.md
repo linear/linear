@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.8.4
+
+### Patch Changes
+
+- 7e70161: fix(client): fix custom client headers and add test
+
 ## 1.8.3
 
 ### Patch Changes
