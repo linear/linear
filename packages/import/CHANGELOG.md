@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.5.1
+
+### Patch Changes
+
+- f384cdb: Bump changeset
+- Updated dependencies [302b0e2]
+- Updated dependencies [47cdc52]
+- Updated dependencies [f384cdb]
+  - @linear/sdk@1.8.0
+
 ## 1.5.0
 
 ### Minor Changes
