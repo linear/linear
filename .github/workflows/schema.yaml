@@ -2,7 +2,8 @@ name: schema
 
 on:
   schedule:
-    - cron: 0 0 * * 0 # triggered every sunday
+    - cron: 0 0 * * * # triggered nightly
+    # - cron: 0 0 * * 0 # triggered every sunday
 
 jobs:
   release:
