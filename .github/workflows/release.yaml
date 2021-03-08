@@ -33,9 +33,6 @@ jobs:
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
 
-      - name: Set auth token
-        run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
-
       - name: Create release pull request
         uses: changesets/action@master
         with:
