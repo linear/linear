@@ -19,10 +19,16 @@
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Linear is released under the MIT license." />
   </a>
   <a href="https://github.com/linear/linear/actions/workflows/build.yaml">
-    <img src="https://github.com/linear/linear/actions/workflows/build.yaml/badge.svg" alt="Current Github Action build status." />
+    <img src="https://github.com/linear/linear/actions/workflows/build.yaml/badge.svg" alt="Build github action status." />
   </a>
   <a href="https://github.com/linear/linear/actions/workflows/release.yaml">
-    <img src="https://github.com/linear/linear/actions/workflows/release.yaml/badge.svg" alt="Current Github Action release status." />
+    <img src="https://github.com/linear/linear/actions/workflows/release.yaml/badge.svg" alt="Release github action status." />
+  </a>
+  <a href="https://github.com/linear/linear/actions/workflows/schema.yaml">
+    <img src="https://github.com/linear/linear/actions/workflows/schema.yaml/badge.svg" alt="Schema github action status." />
+  </a>
+  <a href="https://github.com/linear/linear/actions/workflows/dependencies.yaml">
+    <img src="https://github.com/linear/linear/actions/workflows/dependencies.yaml/badge.svg" alt="Dependencies github action status." />
   </a>
 </p>
 <!-- AUTO-GENERATED-CONTENT:END -->
