@@ -6,6 +6,7 @@ on:
     # - cron: 0 0 * * 0 # triggered every sunday
   push:
     branches:
+      - master
       - littlemooon/schema-action
 
 jobs:

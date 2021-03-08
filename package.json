@@ -40,6 +40,7 @@
     "@rollup/plugin-typescript": "^8.1.1",
     "@types/express": "^4.17.8",
     "@types/inquirer": "^7.3.1",
+    "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.165",
     "@types/node-fetch": "^2.5.7",
     "@typescript-eslint/eslint-plugin": "^4.8.0",
