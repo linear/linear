@@ -7,6 +7,10 @@ describe("generated", () => {
   /** Initialize Linear client variable */
   let client: L.LinearClient;
 
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   beforeAll(async () => {
     client = await startClient();
   });

@@ -4,7 +4,7 @@ import { Sdk } from "@linear/codegen-sdk";
 /**
  * Prints code required before tests
  */
-export function printBeforeSuite(): string {
+function printBeforeSuite(): string {
   return printLines([
     printComment(["Initialize Linear client variable"]),
     `let client: ${Sdk.NAMESPACE}.LinearClient`,
@@ -13,10 +13,23 @@ export function printBeforeSuite(): string {
 }
 
 /**
+ * Prints the hook to call before each test runs
+ * Sets jest fake timers
+ */
+function printBeforeEach(): string {
+  return printLines([
+    `beforeEach(() => {
+      jest.useFakeTimers()
+    })`,
+    "\n",
+  ]);
+}
+
+/**
  * Prints the hook to call before all tests run
  * Starts the mock server
  */
-export function printBeforeAll(): string {
+function printBeforeAll(): string {
   return printLines([
     `beforeAll(async () => {
       client = await startClient()
@@ -29,11 +42,18 @@ export function printBeforeAll(): string {
  * Prints the hook to call after all test have run
  * Kills the mock server
  */
-export function printAfterAll(): string {
+function printAfterAll(): string {
   return printLines([
     `afterAll(() => {
       stopClient()
     })`,
     "\n",
   ]);
+}
+
+/**
+ * Print all jest hooks
+ */
+export function printTestHooks(): string {
+  return printLines([printBeforeSuite(), printBeforeEach(), printBeforeAll(), printAfterAll()]);
 }
