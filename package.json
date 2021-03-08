@@ -12,10 +12,9 @@
   ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "build:common": "lerna run build:common",
     "build:import": "lerna run build:import",
     "build:sdk": "lerna run build:sdk",
-    "build": "run-s build:common generate build:sdk generate:test build:import docs",
+    "build": "run-s generate build:sdk generate:test build:import docs",
     "dev": "NODE_ENV=development yarn build",
     "docs": "npx md-magic --path './packages/**/README.md' --config ./docs/markdown-magic.config.js",
     "generate": "run-s generate:clean generate:doc generate:sdk",

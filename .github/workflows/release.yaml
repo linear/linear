@@ -9,12 +9,10 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    environment: release
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
       - name: Use node 14
@@ -40,4 +38,4 @@ jobs:
           publish: yarn changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ env.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
