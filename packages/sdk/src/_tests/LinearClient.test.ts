@@ -27,6 +27,13 @@ describe("LinearClient", () => {
     expect(response).toEqual(expect.objectContaining({ id: "viewerId" }));
   });
 
+  it("supports overriding headers", async () => {
+    const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url, headers: { user: "asd" } });
+    const response = await client.viewer;
+
+    expect(response).toEqual(expect.objectContaining({ id: "viewerId" }));
+  });
+
   it("has chained api", async () => {
     const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url });
     const team = await client.team("someTeamId");

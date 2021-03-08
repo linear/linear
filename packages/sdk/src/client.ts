@@ -11,7 +11,13 @@ import { LinearSdk } from "./_generated_sdk";
  * @param options initial request options to pass to the graphql client
  * @returns parsed graphql client options
  */
-function parseClientOptions({ apiKey, accessToken, apiUrl, ...opts }: LinearClientOptions): LinearClientParsedOptions {
+function parseClientOptions({
+  apiKey,
+  accessToken,
+  apiUrl,
+  headers,
+  ...opts
+}: LinearClientOptions): LinearClientParsedOptions {
   if (!accessToken && !apiKey) {
     throw new Error(
       "No accessToken or apiKey provided to the LinearClient - create one here: https://linear.app/settings/api"
@@ -27,7 +33,7 @@ function parseClientOptions({ apiKey, accessToken, apiUrl, ...opts }: LinearClie
           : `Bearer ${accessToken}`
         : apiKey ?? "",
       /** Use configured headers */
-      ...opts.headers,
+      ...headers,
       /** Override any user agent with the sdk name and version */
       "User-Agent": serializeUserAgent({
         [process.env.npm_package_name ?? "@linear/sdk"]: process.env.npm_package_version ?? "unknown",
