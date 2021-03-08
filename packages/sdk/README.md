@@ -26,14 +26,6 @@
 
 # Visit [developers.linear.app](https://developers.linear.app/docs/sdk/getting-started) for the most up to date documentation
 
-- [🔥 Contribute](#-contribute)
-  - [Structure](#structure)
-  - [Get Started](#get-started)
-  - [Plugin Flow](#plugin-flow)
-- [License](#license)
-
-<br/>
-
 ## 🔥 Contribute
 
 <br/>

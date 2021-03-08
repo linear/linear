@@ -20,7 +20,7 @@ describe("LinearClient", () => {
     });
   });
 
-  it("makes query to apiUrl", async () => {
+  it.skip("makes query to apiUrl", async () => {
     const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url });
     const response = await client.viewer;
 

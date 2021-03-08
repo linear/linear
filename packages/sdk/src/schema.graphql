@@ -414,6 +414,10 @@ type Comment implements Node {
   """
   updatedAt: DateTime!
   """
+  Comment's URL.
+  """
+  url: String!
+  """
   The user who wrote the comment.
   """
   user: User!
@@ -1524,6 +1528,7 @@ type IntegrationSettings {
   sentry: SentrySettings
   slackPost: SlackPostSettings
   slackProjectPost: SlackPostSettings
+  zendesk: ZendeskSettings
 }
 type InviteData {
   """
@@ -1965,6 +1970,10 @@ type Issue implements Node {
   """
   title: String!
   """
+  A flag that indicates whether the issue is in the trash bin.
+  """
+  trashed: Boolean
+  """
   The last time at which the entity was updated. This is the same as the creation time if the
       entity hasn't been update after creation.
   """
@@ -2133,7 +2142,7 @@ type IssueHistory implements Node {
   """
   Changed issue relationships.
   """
-  relationChanges: [String!]
+  relationChanges: String
   """
   ID's of labels that were removed.
   """
@@ -2416,6 +2425,16 @@ type IssuePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+type IssuePriorityValue {
+  """
+  Priority's label.
+  """
+  label: String!
+  """
+  Priority's number value.
+  """
+  priority: Int!
 }
 """
 A relation between two issues.
@@ -2820,7 +2839,7 @@ type Mutation {
   """
   Create CSV export report for the organization.
   """
-  createCsvExportReport: CreateCsvExportReportPayload!
+  createCsvExportReport(includePrivateTeamIds: [String!]): CreateCsvExportReportPayload!
   """
   Creates an organization from onboarding.
   """
@@ -3202,6 +3221,27 @@ type Mutation {
     redirectUri: String!
   ): IntegrationPayload!
   """
+  Integrates the organization with Zendesk.
+  """
+  integrationZendesk(
+    """
+    The Zendesk OAuth code.
+    """
+    code: String!
+    """
+    The Zendesk OAuth redirect URI.
+    """
+    redirectUri: String!
+    """
+    The Zendesk OAuth scopes.
+    """
+    scope: String!
+    """
+    The Zendesk installation subdomain.
+    """
+    subdomain: String!
+  ): IntegrationPayload!
+  """
   Archives an issue.
   """
   issueArchive(
@@ -3209,6 +3249,10 @@ type Mutation {
     The identifier of the issue to archive.
     """
     id: String!
+    """
+    Whether to trash the issue
+    """
+    trash: Boolean
   ): ArchivePayload!
   """
   Creates a new issue.
@@ -3219,6 +3263,23 @@ type Mutation {
     """
     input: IssueCreateInput!
   ): IssuePayload!
+  """
+  Kicks off an Asana import job.
+  """
+  issueImportCreateAsana(
+    """
+    Asana team name to choose which issues we should import.
+    """
+    asanaTeamName: String!
+    """
+    Asana token to fetch information from the Asana API.
+    """
+    asanaToken: String!
+    """
+    ID of the team into which to import data.
+    """
+    teamId: String!
+  ): IssueImportPayload!
   """
   Kicks off a Clubhouse import job.
   """
@@ -3248,6 +3309,10 @@ type Mutation {
     Github owner (user or org) for the repository from which we will import data.
     """
     githubRepoOwner: String!
+    """
+    Whether or not we should import GitHub organization level projects.
+    """
+    githubShouldImportOrgProjects: Boolean
     """
     Github token to fetch information from the Github API.
     """
@@ -5406,6 +5471,10 @@ type Query {
     The teamId for which to load archived models.
     """
     teamId: String!
+    """
+    How trashed issues should be loaded. Defaults to TrashOptionType.excludeTrash
+    """
+    trashOption: TrashOptionType
   ): ArchiveResponse!
   """
   [Alpha] One specific issue attachment. `url` can be used as the `id` parameter.
@@ -5792,6 +5861,10 @@ type Query {
     orderBy: PaginationOrderBy
   ): IssueLabelConnection!
   """
+  Issue priority values and corresponding labels.
+  """
+  issuePriorityValues: [IssuePriorityValue!]!
+  """
   One specific issue relation.
   """
   issueRelation(id: String!): IssueRelation!
@@ -6163,6 +6236,10 @@ type Query {
     Deprecated.
     """
     sinceSyncId: Int
+    """
+    If defined, only entities for the given sync groups will be loaded
+    """
+    syncGroups: [String!]
   ): SyncResponse!
   """
   One specific team.
@@ -6662,10 +6739,6 @@ Contains either the full serialized state of the application or delta packets th
 """
 type SyncResponse {
   """
-  A JSON serialized collection of model objects loaded from the archive
-  """
-  archive: String
-  """
   The version of the remote database. Incremented by 1 for each migration run on the database.
   """
   databaseVersion: Float!
@@ -6683,6 +6756,10 @@ type SyncResponse {
       Mutually exclusive with the delta property
   """
   state: String
+  """
+  The sync groups that the user is subscribed to.
+  """
+  subscribedSyncGroups: [String!]!
 }
 type SynchronizedPayload {
   """
@@ -7588,6 +7665,14 @@ input TokenUserAccountAuthInput {
   The magic login code.
   """
   token: String!
+}
+"""
+How trashed issues should be loaded.
+"""
+enum TrashOptionType {
+  excludeTrash
+  includeTrash
+  trashOnly
 }
 input UpdateOrganizationInput {
   """
@@ -8501,4 +8586,21 @@ input WorkflowStateUpdateInput {
   The position of the state.
   """
   position: Float
+}
+"""
+Zendesk specific settings.
+"""
+type ZendeskSettings {
+  """
+  The ID of the Linear bot user.
+  """
+  botUserId: String!
+  """
+  The subdomain of the Zendesk organization being connected.
+  """
+  subdomain: String!
+  """
+  The URL of the connected Zendesk organization.
+  """
+  url: String!
 }

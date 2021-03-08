@@ -39,7 +39,7 @@ function printModelField(field: SdkModelField, content: string): string {
 function printModel(context: SdkPluginContext, model: SdkModel): string {
   const mutations = findMutations(context, model);
   const operations = context.sdkDefinitions[lowerFirst(model.name)]?.operations ?? [];
-  const operationFieldNames = operations.map(operation => getLast(operation.path));
+  const modelObjectNames = model.fields.object.map(field => field.name);
 
   /** Handle connection models separately */
   if (isConnectionModel(model)) {
@@ -87,13 +87,10 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           printDebug("fields.object"),
           printLines(
             model.fields.object.map(field =>
-              /** Ignore objects returned by an operation */
-              operationFieldNames.includes(field.name)
-                ? undefined
-                : printTernary(
-                    printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`),
-                    `new ${field.object.name.value}(${Sdk.REQUEST_NAME}, ${Sdk.DATA_NAME}.${field.name}) `
-                  )
+              printTernary(
+                printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`),
+                `new ${field.object.name.value}(${Sdk.REQUEST_NAME}, ${Sdk.DATA_NAME}.${field.name}) `
+              )
             )
           ),
           printDebug("fields.list"),
@@ -130,9 +127,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
         printDebug("fields.object"),
         printLines(
           model.fields.object.map((field /** Ignore objects returned by an operation */) =>
-            operationFieldNames.includes(field.name)
-              ? undefined
-              : printModelField(field, `public ${field.name}?: ${field.object.name.value}`)
+            printModelField(field, `public ${field.name}?: ${field.object.name.value}`)
           )
         ),
       ])}
@@ -170,33 +165,35 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
       ${printLines([
         printDebug("operations"),
         printLines(
-          operations.map(operation => {
-            const fieldName = getLast(operation.path);
-            const field = model.fields.all.find(_field => _field.name === fieldName);
+          operations
+            .filter(operation => !modelObjectNames.includes(getLast(operation.path) ?? ""))
+            .map(operation => {
+              const fieldName = getLast(operation.path);
+              const field = model.fields.all.find(_field => _field.name === fieldName);
 
-            const operationArgs = printList([
-              `this._${Sdk.REQUEST_NAME}`,
-              ...operation.requiredArgs.args.map(variable => `this.${variable.name}`),
-              operation.optionalArgs.printOutput,
-            ]);
-            const variableCheck = printList(
-              operation.requiredArgs.args.map(variable => `this.${variable.name}`),
-              " && "
-            );
-            const operationCall = `new ${operation.print.name}${operation.print.type}(${operationArgs}).${
-              Sdk.FETCH_NAME
-            }(${operation.optionalArgs.printOutput ?? ""})`;
+              const operationArgs = printList([
+                `this._${Sdk.REQUEST_NAME}`,
+                ...operation.requiredArgs.args.map(variable => `this.${variable.name}`),
+                operation.optionalArgs.printOutput,
+              ]);
+              const variableCheck = printList(
+                operation.requiredArgs.args.map(variable => `this.${variable.name}`),
+                " && "
+              );
+              const operationCall = `new ${operation.print.name}${operation.print.type}(${operationArgs}).${
+                Sdk.FETCH_NAME
+              }(${operation.optionalArgs.printOutput ?? ""})`;
 
-            return printLines([
-              printComment([field?.node.description?.value]),
-              printDebug(operation),
-              `public ${operation.optionalArgs.args.length ? "" : "get"} ${fieldName}(${
-                operation.optionalArgs?.printInput ?? ""
-              }) {
+              return printLines([
+                printComment([field?.node.description?.value]),
+                printDebug(operation),
+                `public ${operation.optionalArgs.args.length ? "" : "get"} ${fieldName}(${
+                  operation.optionalArgs?.printInput ?? ""
+                }) {
                 return ${printTernary(variableCheck, operationCall)}
               }`,
-            ]);
-          })
+              ]);
+            })
         ),
       ])}
       ${printLines([

@@ -1,5 +1,7 @@
 # A comment associated with an issue.
 fragment Comment on Comment {
+  # Comment's URL.
+  url
   # The comment content in markdown format.
   body
   # The issue that the comment is associated with.
@@ -479,6 +481,8 @@ fragment User on User {
   avatarUrl
   # Number of issues created.
   createdIssueCount
+  # Reason why is the account disabled.
+  disableReason
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
@@ -696,6 +700,8 @@ fragment OrganizationInvite on OrganizationInvite {
 
 # An issue.
 fragment Issue on Issue {
+  # A flag that indicates whether the issue is in the trash bin.
+  trashed
   # Issue URL.
   url
   # Issue's human readable identifier (e.g. ENG-123).
@@ -836,6 +842,10 @@ fragment Team on Team {
   cycleCooldownTime
   # The day of the week that a new cycle starts.
   cycleStartDay
+  # The default template to use for new issues created by members of the team.
+  defaultTemplateForMembersId
+  # The default template to use for new issues created by non-members of the team.
+  defaultTemplateForNonMembersId
   # The duration of a cycle in weeks.
   cycleDuration
   # The issue estimation type to use.
@@ -919,8 +929,6 @@ fragment DocumentStep on DocumentStep {
 # Contains either the full serialized state of the application or delta packets that the requester can
 # apply to the local data set in order to be up-to-date.
 fragment SyncResponse on SyncResponse {
-  # A JSON serialized collection of model objects loaded from the archive
-  archive
   # JSON serialized delta changes that the client can apply to its local state
   #     in order to catch up with the state of the world.
   delta
@@ -929,6 +937,8 @@ fragment SyncResponse on SyncResponse {
   state
   # The last sync id covered by the response.
   lastSyncId
+  # The sync groups that the user is subscribed to.
+  subscribedSyncGroups
   # The version of the remote database. Incremented by 1 for each migration run on the database.
   databaseVersion
 }
@@ -1300,6 +1310,9 @@ fragment IntegrationSettings on IntegrationSettings {
   slackProjectPost {
     ...SlackPostSettings
   }
+  zendesk {
+    ...ZendeskSettings
+  }
 }
 
 # The integration resource's settings
@@ -1418,6 +1431,16 @@ fragment ViewPreferences on ViewPreferences {
   type
   # The view type.
   viewType
+}
+
+# Zendesk specific settings.
+fragment ZendeskSettings on ZendeskSettings {
+  # The ID of the Linear bot user.
+  botUserId
+  # The URL of the connected Zendesk organization.
+  url
+  # The subdomain of the Zendesk organization being connected.
+  subdomain
 }
 
 # [Alpha] Issue attachment (e.g. support ticket, pull request).
@@ -1853,6 +1876,13 @@ fragment IssuePayload on IssuePayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment IssuePriorityValue on IssuePriorityValue {
+  # Priority's label.
+  label
+  # Priority's number value.
+  priority
 }
 
 fragment IssueRelationConnection on IssueRelationConnection {
@@ -2374,8 +2404,16 @@ query archivedModelsSync(
   $modelClass: String!
   # The teamId for which to load archived models.
   $teamId: String!
+  # How trashed issues should be loaded. Defaults to TrashOptionType.excludeTrash
+  $trashOption: TrashOptionType
 ) {
-  archivedModelsSync(before: $before, last: $last, modelClass: $modelClass, teamId: $teamId) {
+  archivedModelsSync(
+    before: $before
+    last: $last
+    modelClass: $modelClass
+    teamId: $teamId
+    trashOption: $trashOption
+  ) {
     ...ArchiveResponse
   }
 }
@@ -3326,6 +3364,12 @@ query issueLabels(
     ...IssueLabelConnection
   }
 }
+# Issue priority values and corresponding labels.
+query issuePriorityValues {
+  issuePriorityValues {
+    ...IssuePriorityValue
+  }
+}
 # One specific issue relation.
 query issueRelation($id: String!) {
   issueRelation(id: $id) {
@@ -3955,14 +3999,22 @@ query ssoUrlFromEmail(
     ...SsoUrlFromEmailResponse
   }
 }
+# The organization's subscription.
+query subscription {
+  subscription {
+    ...Subscription
+  }
+}
 # Fetch data to catch up the client to the state of the world.
 query syncBootstrap(
   # Deprecated.
   $databaseVersion: Int
   # Deprecated.
   $sinceSyncId: Int
+  # If defined, only entities for the given sync groups will be loaded
+  $syncGroups: [String!]
 ) {
-  syncBootstrap(databaseVersion: $databaseVersion, sinceSyncId: $sinceSyncId) {
+  syncBootstrap(databaseVersion: $databaseVersion, sinceSyncId: $sinceSyncId, syncGroups: $syncGroups) {
     ...SyncResponse
   }
 }
@@ -4782,8 +4834,8 @@ mutation contactCreate(
   }
 }
 # Create CSV export report for the organization.
-mutation createCsvExportReport {
-  createCsvExportReport {
+mutation createCsvExportReport($includePrivateTeamIds: [String!]) {
+  createCsvExportReport(includePrivateTeamIds: $includePrivateTeamIds) {
     ...CreateCsvExportReportPayload
   }
 }
@@ -5134,12 +5186,29 @@ mutation integrationSlackProjectPost(
     ...IntegrationPayload
   }
 }
+# Integrates the organization with Zendesk.
+mutation integrationZendesk(
+  # The Zendesk OAuth code.
+  $code: String!
+  # The Zendesk OAuth redirect URI.
+  $redirectUri: String!
+  # The Zendesk OAuth scopes.
+  $scope: String!
+  # The Zendesk installation subdomain.
+  $subdomain: String!
+) {
+  integrationZendesk(code: $code, redirectUri: $redirectUri, scope: $scope, subdomain: $subdomain) {
+    ...IntegrationPayload
+  }
+}
 # Archives an issue.
 mutation issueArchive(
   # The identifier of the issue to archive.
   $id: String!
+  # Whether to trash the issue
+  $trash: Boolean
 ) {
-  issueArchive(id: $id) {
+  issueArchive(id: $id, trash: $trash) {
     ...ArchivePayload
   }
 }
@@ -5150,6 +5219,19 @@ mutation issueCreate(
 ) {
   issueCreate(input: $input) {
     ...IssuePayload
+  }
+}
+# Kicks off an Asana import job.
+mutation issueImportCreateAsana(
+  # Asana team name to choose which issues we should import.
+  $asanaTeamName: String!
+  # Asana token to fetch information from the Asana API.
+  $asanaToken: String!
+  # ID of the team into which to import data.
+  $teamId: String!
+) {
+  issueImportCreateAsana(asanaTeamName: $asanaTeamName, asanaToken: $asanaToken, teamId: $teamId) {
+    ...IssueImportPayload
   }
 }
 # Kicks off a Clubhouse import job.
@@ -5171,6 +5253,8 @@ mutation issueImportCreateGithub(
   $githubRepoName: String!
   # Github owner (user or org) for the repository from which we will import data.
   $githubRepoOwner: String!
+  # Whether or not we should import GitHub organization level projects.
+  $githubShouldImportOrgProjects: Boolean
   # Github token to fetch information from the Github API.
   $githubToken: String!
   # ID of the team into which to import data.
@@ -5179,6 +5263,7 @@ mutation issueImportCreateGithub(
   issueImportCreateGithub(
     githubRepoName: $githubRepoName
     githubRepoOwner: $githubRepoOwner
+    githubShouldImportOrgProjects: $githubShouldImportOrgProjects
     githubToken: $githubToken
     teamId: $teamId
   ) {
