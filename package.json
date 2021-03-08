@@ -26,7 +26,7 @@
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
     "mock": "npx graphql-faker packages/sdk/src/schema.graphql",
     "publish:ci": "lerna publish from-package -y --no-verify-access",
-    "schema": "lerna run generate:schema",
+    "schema": "lerna run generate:schema && yarn build && yarn test",
     "test:ci": "npx jest -w 1",
     "test:e2e": "E2E=true yarn test _generated.test",
     "test:update": "yarn test -u",

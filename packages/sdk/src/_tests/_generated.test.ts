@@ -692,6 +692,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test IssuePriorityValues query */
+  describe("IssuePriorityValues", () => {
+    /** Test the root model query for IssuePriorityValues */
+    it("issuePriorityValues", async () => {
+      const issuePriorityValues = await client.issuePriorityValues;
+      issuePriorityValues?.map(node => expect(node instanceof L.IssuePriorityValue));
+    });
+  });
+
   /** Test all IssueRelation queries */
   describe("IssueRelations", () => {
     let _issueRelation: L.IssueRelation | undefined;

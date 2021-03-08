@@ -555,6 +555,7 @@ export class Comment extends Request {
     this.editedAt = parseDate(data.editedAt) ?? undefined;
     this.id = data.id ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.url = data.url ?? undefined;
     this._issue = data.issue ?? undefined;
     this._user = data.user ?? undefined;
   }
@@ -574,6 +575,8 @@ export class Comment extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+  /** Comment's URL. */
+  public url?: string;
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
@@ -1681,12 +1684,14 @@ export class IntegrationSettings extends Request {
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
     this.slackPost = data.slackPost ? new SlackPostSettings(request, data.slackPost) : undefined;
     this.slackProjectPost = data.slackProjectPost ? new SlackPostSettings(request, data.slackProjectPost) : undefined;
+    this.zendesk = data.zendesk ? new ZendeskSettings(request, data.zendesk) : undefined;
   }
 
   public googleSheets?: GoogleSheetsSettings;
   public sentry?: SentrySettings;
   public slackPost?: SlackPostSettings;
   public slackProjectPost?: SlackPostSettings;
+  public zendesk?: ZendeskSettings;
 }
 /**
  * InviteData model
@@ -1806,6 +1811,7 @@ export class Issue extends Request {
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.subIssueSortOrder = data.subIssueSortOrder ?? undefined;
     this.title = data.title ?? undefined;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.url = data.url ?? undefined;
     this._assignee = data.assignee ?? undefined;
@@ -1857,6 +1863,8 @@ export class Issue extends Request {
   public subIssueSortOrder?: number;
   /** The issue's title. */
   public title?: string;
+  /** A flag that indicates whether the issue is in the trash bin. */
+  public trashed?: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -1925,7 +1933,7 @@ export class Issue extends Request {
     return this.id ? new Issue_SubscribersQuery(this._request, this.id, variables).fetch(variables) : undefined;
   }
   /** Archives an issue. */
-  public archive() {
+  public archive(variables?: Omit<L.IssueArchiveMutationVariables, "id">) {
     return this.id ? new IssueArchiveMutation(this._request).fetch(this.id) : undefined;
   }
   /** Unarchives an issue. */
@@ -2039,7 +2047,7 @@ export class IssueHistory extends Request {
   /** The unique identifier of the entity. */
   public id?: string;
   /** Changed issue relationships. */
-  public relationChanges?: string[];
+  public relationChanges?: string;
   /** ID's of labels that were removed. */
   public removedLabelIds?: string[];
   /** Information about the integration or application which created this history entry. */
@@ -2354,6 +2362,24 @@ export class IssuePayload extends Request {
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
+}
+/**
+ * IssuePriorityValue model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssuePriorityValueFragment response data
+ */
+export class IssuePriorityValue extends Request {
+  public constructor(request: LinearRequest, data: L.IssuePriorityValueFragment) {
+    super(request);
+    this.label = data.label ?? undefined;
+    this.priority = data.priority ?? undefined;
+  }
+
+  /** Priority's label. */
+  public label?: string;
+  /** Priority's number value. */
+  public priority?: number;
 }
 /**
  * A relation between two issues.
@@ -4002,15 +4028,13 @@ export class SubscriptionSessionPayload extends Request {
 export class SyncResponse extends Request {
   public constructor(request: LinearRequest, data: L.SyncResponseFragment) {
     super(request);
-    this.archive = data.archive ?? undefined;
     this.databaseVersion = data.databaseVersion ?? undefined;
     this.delta = data.delta ?? undefined;
     this.lastSyncId = data.lastSyncId ?? undefined;
     this.state = data.state ?? undefined;
+    this.subscribedSyncGroups = data.subscribedSyncGroups ?? undefined;
   }
 
-  /** A JSON serialized collection of model objects loaded from the archive */
-  public archive?: string;
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   public databaseVersion?: number;
   /**
@@ -4025,6 +4049,8 @@ export class SyncResponse extends Request {
    *     Mutually exclusive with the delta property
    */
   public state?: string;
+  /** The sync groups that the user is subscribed to. */
+  public subscribedSyncGroups?: string[];
 }
 /**
  * SynchronizedPayload model
@@ -5189,6 +5215,27 @@ export class WorkflowStatePayload extends Request {
   }
 }
 /**
+ * Zendesk specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ZendeskSettingsFragment response data
+ */
+export class ZendeskSettings extends Request {
+  public constructor(request: LinearRequest, data: L.ZendeskSettingsFragment) {
+    super(request);
+    this.botUserId = data.botUserId ?? undefined;
+    this.subdomain = data.subdomain ?? undefined;
+    this.url = data.url ?? undefined;
+  }
+
+  /** The ID of the Linear bot user. */
+  public botUserId?: string;
+  /** The subdomain of the Zendesk organization being connected. */
+  public subdomain?: string;
+  /** The URL of the connected Zendesk organization. */
+  public url?: string;
+}
+/**
  * A fetchable ApiKeys Query
  *
  * @param request - function to call the graphql client
@@ -5990,6 +6037,32 @@ export class IssueLabelsQuery extends Request {
           : undefined;
       }
     );
+  }
+}
+
+/**
+ * A fetchable IssuePriorityValues Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssuePriorityValuesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssuePriorityValues query and return a IssuePriorityValue list
+   *
+   * @returns parsed response from IssuePriorityValuesQuery
+   */
+  public async fetch(): LinearFetch<IssuePriorityValue[]> {
+    return this._request<L.IssuePriorityValuesQuery, L.IssuePriorityValuesQueryVariables>(
+      L.IssuePriorityValuesDocument,
+      {}
+    ).then(response => {
+      const data = response?.issuePriorityValues;
+      return data ? data.map(node => new IssuePriorityValue(this._request, node)) : undefined;
+    });
   }
 }
 
@@ -7305,12 +7378,13 @@ export class CreateCsvExportReportMutation extends Request {
   /**
    * Call the CreateCsvExportReport mutation and return a CreateCsvExportReportPayload
    *
+   * @param variables - variables to pass into the CreateCsvExportReportMutation
    * @returns parsed response from CreateCsvExportReportMutation
    */
-  public async fetch(): LinearFetch<CreateCsvExportReportPayload> {
+  public async fetch(variables?: L.CreateCsvExportReportMutationVariables): LinearFetch<CreateCsvExportReportPayload> {
     return this._request<L.CreateCsvExportReportMutation, L.CreateCsvExportReportMutationVariables>(
       L.CreateCsvExportReportDocument,
-      {}
+      variables
     ).then(response => {
       const data = response?.createCsvExportReport;
       return data ? new CreateCsvExportReportPayload(this._request, data) : undefined;
@@ -8331,6 +8405,46 @@ export class IntegrationSlackProjectPostMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationZendesk Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationZendeskMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationZendesk mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationZendesk
+   * @param redirectUri - required redirectUri to pass to integrationZendesk
+   * @param scope - required scope to pass to integrationZendesk
+   * @param subdomain - required subdomain to pass to integrationZendesk
+   * @returns parsed response from IntegrationZendeskMutation
+   */
+  public async fetch(
+    code: string,
+    redirectUri: string,
+    scope: string,
+    subdomain: string
+  ): LinearFetch<IntegrationPayload> {
+    return this._request<L.IntegrationZendeskMutation, L.IntegrationZendeskMutationVariables>(
+      L.IntegrationZendeskDocument,
+      {
+        code,
+        redirectUri,
+        scope,
+        subdomain,
+      }
+    ).then(response => {
+      const data = response?.integrationZendesk;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable IssueArchive Mutation
  *
  * @param request - function to call the graphql client
@@ -8344,11 +8458,13 @@ export class IssueArchiveMutation extends Request {
    * Call the IssueArchive mutation and return a ArchivePayload
    *
    * @param id - required id to pass to issueArchive
+   * @param variables - variables without 'id' to pass into the IssueArchiveMutation
    * @returns parsed response from IssueArchiveMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string, variables?: Omit<L.IssueArchiveMutationVariables, "id">): LinearFetch<ArchivePayload> {
     return this._request<L.IssueArchiveMutation, L.IssueArchiveMutationVariables>(L.IssueArchiveDocument, {
       id,
+      ...variables,
     }).then(response => {
       const data = response?.issueArchive;
       return data ? new ArchivePayload(this._request, data) : undefined;
@@ -8436,13 +8552,18 @@ export class IssueImportCreateGithubMutation extends Request {
    * @param githubRepoOwner - required githubRepoOwner to pass to issueImportCreateGithub
    * @param githubToken - required githubToken to pass to issueImportCreateGithub
    * @param teamId - required teamId to pass to issueImportCreateGithub
+   * @param variables - variables without 'githubRepoName', 'githubRepoOwner', 'githubToken', 'teamId' to pass into the IssueImportCreateGithubMutation
    * @returns parsed response from IssueImportCreateGithubMutation
    */
   public async fetch(
     githubRepoName: string,
     githubRepoOwner: string,
     githubToken: string,
-    teamId: string
+    teamId: string,
+    variables?: Omit<
+      L.IssueImportCreateGithubMutationVariables,
+      "githubRepoName" | "githubRepoOwner" | "githubToken" | "teamId"
+    >
   ): LinearFetch<IssueImportPayload> {
     return this._request<L.IssueImportCreateGithubMutation, L.IssueImportCreateGithubMutationVariables>(
       L.IssueImportCreateGithubDocument,
@@ -8451,6 +8572,7 @@ export class IssueImportCreateGithubMutation extends Request {
         githubRepoOwner,
         githubToken,
         teamId,
+        ...variables,
       }
     ).then(response => {
       const data = response?.issueImportCreateGithub;
@@ -13212,6 +13334,14 @@ export class LinearSdk extends Request {
     return new IssueLabelsQuery(this._request).fetch(variables);
   }
   /**
+   * Issue priority values and corresponding labels.
+   *
+   * @returns IssuePriorityValue[]
+   */
+  public get issuePriorityValues(): LinearFetch<IssuePriorityValue[]> {
+    return new IssuePriorityValuesQuery(this._request).fetch();
+  }
+  /**
    * One specific issue relation.
    *
    * @param id - required id to pass to issueRelation
@@ -13657,10 +13787,13 @@ export class LinearSdk extends Request {
   /**
    * Create CSV export report for the organization.
    *
+   * @param variables - variables to pass into the CreateCsvExportReportMutation
    * @returns CreateCsvExportReportPayload
    */
-  public get createCsvExportReport(): LinearFetch<CreateCsvExportReportPayload> {
-    return new CreateCsvExportReportMutation(this._request).fetch();
+  public createCsvExportReport(
+    variables?: L.CreateCsvExportReportMutationVariables
+  ): LinearFetch<CreateCsvExportReportPayload> {
+    return new CreateCsvExportReportMutation(this._request).fetch(variables);
   }
   /**
    * Creates an organization from onboarding.
@@ -14022,13 +14155,34 @@ export class LinearSdk extends Request {
     return new IntegrationSlackProjectPostMutation(this._request).fetch(code, projectId, redirectUri);
   }
   /**
+   * Integrates the organization with Zendesk.
+   *
+   * @param code - required code to pass to integrationZendesk
+   * @param redirectUri - required redirectUri to pass to integrationZendesk
+   * @param scope - required scope to pass to integrationZendesk
+   * @param subdomain - required subdomain to pass to integrationZendesk
+   * @returns IntegrationPayload
+   */
+  public integrationZendesk(
+    code: string,
+    redirectUri: string,
+    scope: string,
+    subdomain: string
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationZendeskMutation(this._request).fetch(code, redirectUri, scope, subdomain);
+  }
+  /**
    * Archives an issue.
    *
    * @param id - required id to pass to issueArchive
+   * @param variables - variables without 'id' to pass into the IssueArchiveMutation
    * @returns ArchivePayload
    */
-  public issueArchive(id: string): LinearFetch<ArchivePayload> {
-    return new IssueArchiveMutation(this._request).fetch(id);
+  public issueArchive(
+    id: string,
+    variables?: Omit<L.IssueArchiveMutationVariables, "id">
+  ): LinearFetch<ArchivePayload> {
+    return new IssueArchiveMutation(this._request).fetch(id, variables);
   }
   /**
    * Creates a new issue.
@@ -14061,19 +14215,25 @@ export class LinearSdk extends Request {
    * @param githubRepoOwner - required githubRepoOwner to pass to issueImportCreateGithub
    * @param githubToken - required githubToken to pass to issueImportCreateGithub
    * @param teamId - required teamId to pass to issueImportCreateGithub
+   * @param variables - variables without 'githubRepoName', 'githubRepoOwner', 'githubToken', 'teamId' to pass into the IssueImportCreateGithubMutation
    * @returns IssueImportPayload
    */
   public issueImportCreateGithub(
     githubRepoName: string,
     githubRepoOwner: string,
     githubToken: string,
-    teamId: string
+    teamId: string,
+    variables?: Omit<
+      L.IssueImportCreateGithubMutationVariables,
+      "githubRepoName" | "githubRepoOwner" | "githubToken" | "teamId"
+    >
   ): LinearFetch<IssueImportPayload> {
     return new IssueImportCreateGithubMutation(this._request).fetch(
       githubRepoName,
       githubRepoOwner,
       githubToken,
-      teamId
+      teamId,
+      variables
     );
   }
   /**

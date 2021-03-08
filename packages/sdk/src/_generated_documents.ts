@@ -296,6 +296,8 @@ export type Comment = Node & {
    *     entity hasn't been update after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** Comment's URL. */
+  url: Scalars["String"];
   /** The user who wrote the comment. */
   user: User;
 };
@@ -1046,6 +1048,7 @@ export type IntegrationSettings = {
   sentry?: Maybe<SentrySettings>;
   slackPost?: Maybe<SlackPostSettings>;
   slackProjectPost?: Maybe<SlackPostSettings>;
+  zendesk?: Maybe<ZendeskSettings>;
 };
 
 export type InviteData = {
@@ -1165,6 +1168,8 @@ export type Issue = Node & {
   team: Team;
   /** The issue's title. */
   title: Scalars["String"];
+  /** A flag that indicates whether the issue is in the trash bin. */
+  trashed?: Maybe<Scalars["Boolean"]>;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -1355,7 +1360,7 @@ export type IssueHistory = Node & {
   /** The issue that was changed. */
   issue: Issue;
   /** Changed issue relationships. */
-  relationChanges?: Maybe<Array<Scalars["String"]>>;
+  relationChanges?: Maybe<Scalars["String"]>;
   /** ID's of labels that were removed. */
   removedLabelIds?: Maybe<Array<Scalars["String"]>>;
   /** Information about the integration or application which created this history entry. */
@@ -1539,6 +1544,14 @@ export type IssuePayload = {
   lastSyncId: Scalars["Float"];
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+export type IssuePriorityValue = {
+  __typename?: "IssuePriorityValue";
+  /** Priority's label. */
+  label: Scalars["String"];
+  /** Priority's number value. */
+  priority: Scalars["Int"];
 };
 
 /** A relation between two issues. */
@@ -1826,6 +1839,8 @@ export type Mutation = {
   integrationSlackPost: IntegrationPayload;
   /** Slack integration for project notifications. */
   integrationSlackProjectPost: IntegrationPayload;
+  /** Integrates the organization with Zendesk. */
+  integrationZendesk: IntegrationPayload;
   /** Archives an issue. */
   issueArchive: ArchivePayload;
   /** Creates a new issue. */
@@ -2044,6 +2059,10 @@ export type MutationContactCreateArgs = {
   input: ContactCreateInput;
 };
 
+export type MutationCreateCsvExportReportArgs = {
+  includePrivateTeamIds?: Maybe<Array<Scalars["String"]>>;
+};
+
 export type MutationCreateOrganizationFromOnboardingArgs = {
   input: CreateOrganizationInput;
   survey?: Maybe<OnboardingCustomerSurvey>;
@@ -2192,8 +2211,16 @@ export type MutationIntegrationSlackProjectPostArgs = {
   redirectUri: Scalars["String"];
 };
 
+export type MutationIntegrationZendeskArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+  scope: Scalars["String"];
+  subdomain: Scalars["String"];
+};
+
 export type MutationIssueArchiveArgs = {
   id: Scalars["String"];
+  trash?: Maybe<Scalars["Boolean"]>;
 };
 
 export type MutationIssueCreateArgs = {
@@ -2209,6 +2236,7 @@ export type MutationIssueImportCreateClubhouseArgs = {
 export type MutationIssueImportCreateGithubArgs = {
   githubRepoName: Scalars["String"];
   githubRepoOwner: Scalars["String"];
+  githubShouldImportOrgProjects?: Maybe<Scalars["Boolean"]>;
   githubToken: Scalars["String"];
   teamId: Scalars["String"];
 };
@@ -3399,6 +3427,8 @@ export type Query = {
   issueLabel: IssueLabel;
   /** All issue labels. */
   issueLabels: IssueLabelConnection;
+  /** Issue priority values and corresponding labels. */
+  issuePriorityValues: Array<IssuePriorityValue>;
   /** One specific issue relation. */
   issueRelation: IssueRelation;
   /** All issue relationships. */
@@ -3502,6 +3532,7 @@ export type QueryArchivedModelsSyncArgs = {
   last?: Maybe<Scalars["Int"]>;
   modelClass: Scalars["String"];
   teamId: Scalars["String"];
+  trashOption?: Maybe<TrashOptionType>;
 };
 
 export type QueryAttachmentArgs = {
@@ -3784,6 +3815,7 @@ export type QuerySsoUrlFromEmailArgs = {
 export type QuerySyncBootstrapArgs = {
   databaseVersion?: Maybe<Scalars["Int"]>;
   sinceSyncId?: Maybe<Scalars["Int"]>;
+  syncGroups?: Maybe<Array<Scalars["String"]>>;
 };
 
 export type QueryTeamArgs = {
@@ -4063,8 +4095,6 @@ export type SubscriptionUpdateInput = {
  */
 export type SyncResponse = {
   __typename?: "SyncResponse";
-  /** A JSON serialized collection of model objects loaded from the archive */
-  archive?: Maybe<Scalars["String"]>;
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   databaseVersion: Scalars["Float"];
   /**
@@ -4079,6 +4109,8 @@ export type SyncResponse = {
    *     Mutually exclusive with the delta property
    */
   state?: Maybe<Scalars["String"]>;
+  /** The sync groups that the user is subscribed to. */
+  subscribedSyncGroups: Array<Scalars["String"]>;
 };
 
 export type SynchronizedPayload = {
@@ -4573,6 +4605,13 @@ export type TokenUserAccountAuthInput = {
   /** The magic login code. */
   token: Scalars["String"];
 };
+
+/** How trashed issues should be loaded. */
+export enum TrashOptionType {
+  ExcludeTrash = "excludeTrash",
+  IncludeTrash = "includeTrash",
+  TrashOnly = "trashOnly",
+}
 
 export type UpdateOrganizationInput = {
   /** List of services that are allowed to be used for login. */
@@ -5149,9 +5188,20 @@ export type WorkflowStateUpdateInput = {
   position?: Maybe<Scalars["Float"]>;
 };
 
+/** Zendesk specific settings. */
+export type ZendeskSettings = {
+  __typename?: "ZendeskSettings";
+  /** The ID of the Linear bot user. */
+  botUserId: Scalars["String"];
+  /** The subdomain of the Zendesk organization being connected. */
+  subdomain: Scalars["String"];
+  /** The URL of the connected Zendesk organization. */
+  url: Scalars["String"];
+};
+
 export type CommentFragment = { __typename?: "Comment" } & Pick<
   Comment,
-  "body" | "updatedAt" | "archivedAt" | "createdAt" | "editedAt" | "id"
+  "url" | "body" | "updatedAt" | "archivedAt" | "createdAt" | "editedAt" | "id"
 > & { issue: { __typename?: "Issue" } & Pick<Issue, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type EmojiFragment = { __typename?: "Emoji" } & Pick<
@@ -5362,6 +5412,7 @@ export type OrganizationInviteFragment = { __typename?: "OrganizationInvite" } &
 
 export type IssueFragment = { __typename?: "Issue" } & Pick<
   Issue,
+  | "trashed"
   | "url"
   | "identifier"
   | "priorityLabel"
@@ -5462,7 +5513,7 @@ export type DocumentStepFragment = { __typename?: "DocumentStep" } & Pick<
 
 export type SyncResponseFragment = { __typename?: "SyncResponse" } & Pick<
   SyncResponse,
-  "archive" | "delta" | "state" | "lastSyncId" | "databaseVersion"
+  "delta" | "state" | "lastSyncId" | "subscribedSyncGroups" | "databaseVersion"
 >;
 
 export type ArchiveResponseFragment = { __typename?: "ArchiveResponse" } & Pick<
@@ -5608,6 +5659,7 @@ export type IntegrationSettingsFragment = { __typename?: "IntegrationSettings" }
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
   slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackProjectPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
+  zendesk?: Maybe<{ __typename?: "ZendeskSettings" } & ZendeskSettingsFragment>;
 };
 
 export type SamlConfigurationFragment = { __typename?: "SamlConfiguration" } & Pick<
@@ -5640,6 +5692,11 @@ export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
 export type ViewPreferencesFragment = { __typename?: "ViewPreferences" } & Pick<
   ViewPreferences,
   "updatedAt" | "archivedAt" | "createdAt" | "id" | "type" | "viewType"
+>;
+
+export type ZendeskSettingsFragment = { __typename?: "ZendeskSettings" } & Pick<
+  ZendeskSettings,
+  "botUserId" | "url" | "subdomain"
 >;
 
 export type AttachmentFragment = { __typename?: "Attachment" } & Pick<
@@ -5857,6 +5914,11 @@ export type IssueLabelPayloadFragment = { __typename?: "IssueLabelPayload" } & P
 export type IssuePayloadFragment = { __typename?: "IssuePayload" } & Pick<IssuePayload, "lastSyncId" | "success"> & {
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
   };
+
+export type IssuePriorityValueFragment = { __typename?: "IssuePriorityValue" } & Pick<
+  IssuePriorityValue,
+  "label" | "priority"
+>;
 
 export type IssueRelationConnectionFragment = { __typename?: "IssueRelationConnection" } & {
   nodes: Array<{ __typename?: "IssueRelation" } & IssueRelationFragment>;
@@ -6145,6 +6207,7 @@ export type ArchivedModelsSyncQueryVariables = Exact<{
   last?: Maybe<Scalars["Int"]>;
   modelClass: Scalars["String"];
   teamId: Scalars["String"];
+  trashOption?: Maybe<TrashOptionType>;
 }>;
 
 export type ArchivedModelsSyncQuery = { __typename?: "Query" } & {
@@ -6715,6 +6778,12 @@ export type IssueLabelsQuery = { __typename?: "Query" } & {
   issueLabels: { __typename?: "IssueLabelConnection" } & IssueLabelConnectionFragment;
 };
 
+export type IssuePriorityValuesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type IssuePriorityValuesQuery = { __typename?: "Query" } & {
+  issuePriorityValues: Array<{ __typename?: "IssuePriorityValue" } & IssuePriorityValueFragment>;
+};
+
 export type IssueRelationQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -7084,6 +7153,7 @@ export type SsoUrlFromEmailQuery = { __typename?: "Query" } & {
 export type SyncBootstrapQueryVariables = Exact<{
   databaseVersion?: Maybe<Scalars["Int"]>;
   sinceSyncId?: Maybe<Scalars["Int"]>;
+  syncGroups?: Maybe<Array<Scalars["String"]> | Scalars["String"]>;
 }>;
 
 export type SyncBootstrapQuery = { __typename?: "Query" } & {
@@ -7561,7 +7631,9 @@ export type ContactCreateMutation = { __typename?: "Mutation" } & {
   contactCreate: { __typename?: "ContactPayload" } & ContactPayloadFragment;
 };
 
-export type CreateCsvExportReportMutationVariables = Exact<{ [key: string]: never }>;
+export type CreateCsvExportReportMutationVariables = Exact<{
+  includePrivateTeamIds?: Maybe<Array<Scalars["String"]> | Scalars["String"]>;
+}>;
 
 export type CreateCsvExportReportMutation = { __typename?: "Mutation" } & {
   createCsvExportReport: { __typename?: "CreateCsvExportReportPayload" } & CreateCsvExportReportPayloadFragment;
@@ -7865,8 +7937,20 @@ export type IntegrationSlackProjectPostMutation = { __typename?: "Mutation" } & 
   integrationSlackProjectPost: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
+export type IntegrationZendeskMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+  scope: Scalars["String"];
+  subdomain: Scalars["String"];
+}>;
+
+export type IntegrationZendeskMutation = { __typename?: "Mutation" } & {
+  integrationZendesk: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
 export type IssueArchiveMutationVariables = Exact<{
   id: Scalars["String"];
+  trash?: Maybe<Scalars["Boolean"]>;
 }>;
 
 export type IssueArchiveMutation = { __typename?: "Mutation" } & {
@@ -7894,6 +7978,7 @@ export type IssueImportCreateClubhouseMutation = { __typename?: "Mutation" } & {
 export type IssueImportCreateGithubMutationVariables = Exact<{
   githubRepoName: Scalars["String"];
   githubRepoOwner: Scalars["String"];
+  githubShouldImportOrgProjects?: Maybe<Scalars["Boolean"]>;
   githubToken: Scalars["String"];
   teamId: Scalars["String"];
 }>;
@@ -8732,10 +8817,10 @@ export const SyncResponseFragmentDoc: DocumentNode<SyncResponseFragment, unknown
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "archive" } },
           { kind: "Field", name: { kind: "Name", value: "delta" } },
           { kind: "Field", name: { kind: "Name", value: "state" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "subscribedSyncGroups" } },
           { kind: "Field", name: { kind: "Name", value: "databaseVersion" } },
         ],
       },
@@ -8946,6 +9031,24 @@ export const SlackPostSettingsFragmentDoc: DocumentNode<SlackPostSettingsFragmen
     },
   ],
 };
+export const ZendeskSettingsFragmentDoc: DocumentNode<ZendeskSettingsFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ZendeskSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ZendeskSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "botUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "subdomain" } },
+        ],
+      },
+    },
+  ],
+};
 export const IntegrationSettingsFragmentDoc: DocumentNode<IntegrationSettingsFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -8988,12 +9091,21 @@ export const IntegrationSettingsFragmentDoc: DocumentNode<IntegrationSettingsFra
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackPostSettings" } }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "zendesk" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ZendeskSettings" } }],
+            },
+          },
         ],
       },
     },
     ...GoogleSheetsSettingsFragmentDoc.definitions,
     ...SentrySettingsFragmentDoc.definitions,
     ...SlackPostSettingsFragmentDoc.definitions,
+    ...ZendeskSettingsFragmentDoc.definitions,
   ],
 };
 export const SamlConfigurationFragmentDoc: DocumentNode<SamlConfigurationFragment, unknown> = {
@@ -9495,6 +9607,7 @@ export const CommentFragmentDoc: DocumentNode<CommentFragment, unknown> = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "body" } },
           {
             kind: "Field",
@@ -10530,6 +10643,7 @@ export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "identifier" } },
           { kind: "Field", name: { kind: "Name", value: "priorityLabel" } },
@@ -11017,6 +11131,23 @@ export const IssuePayloadFragmentDoc: DocumentNode<IssuePayloadFragment, unknown
             },
           },
           { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+};
+export const IssuePriorityValueFragmentDoc: DocumentNode<IssuePriorityValueFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssuePriorityValue" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssuePriorityValue" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "label" } },
+          { kind: "Field", name: { kind: "Name", value: "priority" } },
         ],
       },
     },
@@ -13116,6 +13247,11 @@ export const ArchivedModelsSyncDocument: DocumentNode<ArchivedModelsSyncQuery, A
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "trashOption" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "TrashOptionType" } },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -13143,6 +13279,11 @@ export const ArchivedModelsSyncDocument: DocumentNode<ArchivedModelsSyncQuery, A
                 kind: "Argument",
                 name: { kind: "Name", value: "teamId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "trashOption" },
+                value: { kind: "Variable", name: { kind: "Name", value: "trashOption" } },
               },
             ],
             selectionSet: {
@@ -16842,6 +16983,30 @@ export const IssueLabelsDocument: DocumentNode<IssueLabelsQuery, IssueLabelsQuer
     ...IssueLabelConnectionFragmentDoc.definitions,
   ],
 };
+export const IssuePriorityValuesDocument: DocumentNode<IssuePriorityValuesQuery, IssuePriorityValuesQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issuePriorityValues" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issuePriorityValues" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePriorityValue" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssuePriorityValueFragmentDoc.definitions,
+  ],
+};
 export const IssueRelationDocument: DocumentNode<IssueRelationQuery, IssueRelationQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -19250,6 +19415,14 @@ export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstr
           variable: { kind: "Variable", name: { kind: "Name", value: "sinceSyncId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "syncGroups" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -19267,6 +19440,11 @@ export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstr
                 kind: "Argument",
                 name: { kind: "Name", value: "sinceSyncId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "sinceSyncId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "syncGroups" },
+                value: { kind: "Variable", name: { kind: "Name", value: "syncGroups" } },
               },
             ],
             selectionSet: {
@@ -22429,12 +22607,29 @@ export const CreateCsvExportReportDocument: DocumentNode<
       kind: "OperationDefinition",
       operation: "mutation",
       name: { kind: "Name", value: "createCsvExportReport" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includePrivateTeamIds" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          },
+        },
+      ],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "createCsvExportReport" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includePrivateTeamIds" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includePrivateTeamIds" } },
+              },
+            ],
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CreateCsvExportReportPayload" } }],
@@ -24019,6 +24214,77 @@ export const IntegrationSlackProjectPostDocument: DocumentNode<
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 };
+export const IntegrationZendeskDocument: DocumentNode<
+  IntegrationZendeskMutation,
+  IntegrationZendeskMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationZendesk" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "scope" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "subdomain" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationZendesk" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "scope" },
+                value: { kind: "Variable", name: { kind: "Name", value: "scope" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "subdomain" },
+                value: { kind: "Variable", name: { kind: "Name", value: "subdomain" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+};
 export const IssueArchiveDocument: DocumentNode<IssueArchiveMutation, IssueArchiveMutationVariables> = {
   kind: "Document",
   definitions: [
@@ -24032,6 +24298,11 @@ export const IssueArchiveDocument: DocumentNode<IssueArchiveMutation, IssueArchi
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "trash" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -24044,6 +24315,11 @@ export const IssueArchiveDocument: DocumentNode<IssueArchiveMutation, IssueArchi
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "trash" },
+                value: { kind: "Variable", name: { kind: "Name", value: "trash" } },
               },
             ],
             selectionSet: {
@@ -24179,6 +24455,11 @@ export const IssueImportCreateGithubDocument: DocumentNode<
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubShouldImportOrgProjects" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -24204,6 +24485,11 @@ export const IssueImportCreateGithubDocument: DocumentNode<
                 kind: "Argument",
                 name: { kind: "Name", value: "githubRepoOwner" },
                 value: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "githubShouldImportOrgProjects" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubShouldImportOrgProjects" } },
               },
               {
                 kind: "Argument",
