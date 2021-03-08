@@ -2986,7 +2986,10 @@ export class Organization extends Request {
   public urlKey?: string;
   /** Number of active users in the organization. */
   public userCount?: number;
-
+  /** The organization's subscription to a paid plan. */
+  public get subscription(): LinearFetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
+  }
   /** Integrations associated with the organization. */
   public integrations(variables?: L.Organization_IntegrationsQueryVariables) {
     return new Organization_IntegrationsQuery(this._request, variables).fetch(variables);
@@ -4002,6 +4005,10 @@ export class SubscriptionPayload extends Request {
   public lastSyncId?: number;
   /** Whether the operation was successful. */
   public success?: boolean;
+  /** The subscription entity being mutated. */
+  public get subscription(): LinearFetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
+  }
 }
 /**
  * SubscriptionSessionPayload model
@@ -4097,6 +4104,8 @@ export class Team extends Request {
     this.cycleStartDay = data.cycleStartDay ?? undefined;
     this.cyclesEnabled = data.cyclesEnabled ?? undefined;
     this.defaultIssueEstimate = data.defaultIssueEstimate ?? undefined;
+    this.defaultTemplateForMembersId = data.defaultTemplateForMembersId ?? undefined;
+    this.defaultTemplateForNonMembersId = data.defaultTemplateForNonMembersId ?? undefined;
     this.description = data.description ?? undefined;
     this.groupIssueHistory = data.groupIssueHistory ?? undefined;
     this.id = data.id ?? undefined;
@@ -4149,6 +4158,10 @@ export class Team extends Request {
   public cyclesEnabled?: boolean;
   /** What to use as an default estimate for unestimated issues. */
   public defaultIssueEstimate?: number;
+  /** The default template to use for new issues created by members of the team. */
+  public defaultTemplateForMembersId?: string;
+  /** The default template to use for new issues created by non-members of the team. */
+  public defaultTemplateForNonMembersId?: string;
   /** The team's description. */
   public description?: string;
   /** Whether to group recent issue history entries. */
@@ -4605,6 +4618,7 @@ export class User extends Request {
     this.avatarUrl = data.avatarUrl ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.createdIssueCount = data.createdIssueCount ?? undefined;
+    this.disableReason = data.disableReason ?? undefined;
     this.displayName = data.displayName ?? undefined;
     this.email = data.email ?? undefined;
     this.id = data.id ?? undefined;
@@ -4626,6 +4640,8 @@ export class User extends Request {
   public createdAt?: Date;
   /** Number of issues created. */
   public createdIssueCount?: number;
+  /** Reason why is the account disabled. */
+  public disableReason?: string;
   /** The user's display (nick) name. Unique within each organization. */
   public displayName?: string;
   /** The user's email address. */
@@ -6674,6 +6690,31 @@ export class SsoUrlFromEmailQuery extends Request {
       const data = response?.ssoUrlFromEmail;
       return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
     });
+  }
+}
+
+/**
+ * A fetchable Subscription Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SubscriptionQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Subscription query and return a Subscription
+   *
+   * @returns parsed response from SubscriptionQuery
+   */
+  public async fetch(): LinearFetch<Subscription> {
+    return this._request<L.SubscriptionQuery, L.SubscriptionQueryVariables>(L.SubscriptionDocument, {}).then(
+      response => {
+        const data = response?.subscription;
+        return data ? new Subscription(this._request, data) : undefined;
+      }
+    );
   }
 }
 
@@ -13548,6 +13589,14 @@ export class LinearSdk extends Request {
     variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email">
   ): LinearFetch<SsoUrlFromEmailResponse> {
     return new SsoUrlFromEmailQuery(this._request).fetch(email, variables);
+  }
+  /**
+   * The organization's subscription.
+   *
+   * @returns Subscription
+   */
+  public get subscription(): LinearFetch<Subscription> {
+    return new SubscriptionQuery(this._request).fetch();
   }
   /**
    * Fetch data to catch up the client to the state of the world.

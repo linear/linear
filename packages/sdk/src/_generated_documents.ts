@@ -5349,6 +5349,7 @@ export type UserFragment = { __typename?: "User" } & Pick<
   User,
   | "avatarUrl"
   | "createdIssueCount"
+  | "disableReason"
   | "updatedAt"
   | "lastSeen"
   | "archivedAt"
@@ -5478,6 +5479,8 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
   | "autoCloseStateId"
   | "cycleCooldownTime"
   | "cycleStartDay"
+  | "defaultTemplateForMembersId"
+  | "defaultTemplateForNonMembersId"
   | "cycleDuration"
   | "issueEstimationType"
   | "updatedAt"
@@ -7150,6 +7153,12 @@ export type SsoUrlFromEmailQuery = { __typename?: "Query" } & {
   ssoUrlFromEmail: { __typename?: "SsoUrlFromEmailResponse" } & SsoUrlFromEmailResponseFragment;
 };
 
+export type SubscriptionQueryVariables = Exact<{ [key: string]: never }>;
+
+export type SubscriptionQuery = { __typename?: "Query" } & {
+  subscription?: Maybe<{ __typename?: "Subscription" } & SubscriptionFragment>;
+};
+
 export type SyncBootstrapQueryVariables = Exact<{
   databaseVersion?: Maybe<Scalars["Int"]>;
   sinceSyncId?: Maybe<Scalars["Int"]>;
@@ -8738,6 +8747,7 @@ export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
           { kind: "Field", name: { kind: "Name", value: "createdIssueCount" } },
+          { kind: "Field", name: { kind: "Name", value: "disableReason" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "lastSeen" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
@@ -12307,6 +12317,8 @@ export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "autoCloseStateId" } },
           { kind: "Field", name: { kind: "Name", value: "cycleCooldownTime" } },
           { kind: "Field", name: { kind: "Name", value: "cycleStartDay" } },
+          { kind: "Field", name: { kind: "Name", value: "defaultTemplateForMembersId" } },
+          { kind: "Field", name: { kind: "Name", value: "defaultTemplateForNonMembersId" } },
           { kind: "Field", name: { kind: "Name", value: "cycleDuration" } },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationType" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -19395,6 +19407,30 @@ export const SsoUrlFromEmailDocument: DocumentNode<SsoUrlFromEmailQuery, SsoUrlF
       },
     },
     ...SsoUrlFromEmailResponseFragmentDoc.definitions,
+  ],
+};
+export const SubscriptionDocument: DocumentNode<SubscriptionQuery, SubscriptionQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "subscription" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "subscription" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Subscription" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...SubscriptionFragmentDoc.definitions,
   ],
 };
 export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstrapQueryVariables> = {

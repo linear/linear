@@ -1550,6 +1550,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test Subscription query */
+  describe("Subscription", () => {
+    /** Test the root model query for Subscription */
+    it("subscription", async () => {
+      const subscription = await client.subscription;
+      expect(subscription instanceof L.Subscription);
+    });
+  });
+
   /** Test SyncBootstrap query */
   describe("SyncBootstrap", () => {
     /** Test the root model query for SyncBootstrap */

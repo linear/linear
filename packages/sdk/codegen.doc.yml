@@ -5,12 +5,8 @@ hooks:
     - prettier --write
 config:
   skipFields:
-    - disableReason
-    - defaultTemplateForMembersId
-    - defaultTemplateForNonMembersId
     - integrationResource
     - integrationResources
-    - subscription
 generates:
   src/_generated_documents.graphql:
     plugins:

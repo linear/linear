@@ -481,6 +481,8 @@ fragment User on User {
   avatarUrl
   # Number of issues created.
   createdIssueCount
+  # Reason why is the account disabled.
+  disableReason
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
@@ -840,6 +842,10 @@ fragment Team on Team {
   cycleCooldownTime
   # The day of the week that a new cycle starts.
   cycleStartDay
+  # The default template to use for new issues created by members of the team.
+  defaultTemplateForMembersId
+  # The default template to use for new issues created by non-members of the team.
+  defaultTemplateForNonMembersId
   # The duration of a cycle in weeks.
   cycleDuration
   # The issue estimation type to use.
@@ -3991,6 +3997,12 @@ query ssoUrlFromEmail(
 ) {
   ssoUrlFromEmail(email: $email, isDesktop: $isDesktop) {
     ...SsoUrlFromEmailResponse
+  }
+}
+# The organization's subscription.
+query subscription {
+  subscription {
+    ...Subscription
   }
 }
 # Fetch data to catch up the client to the state of the world.
