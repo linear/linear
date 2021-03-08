@@ -3264,6 +3264,23 @@ type Mutation {
     input: IssueCreateInput!
   ): IssuePayload!
   """
+  Kicks off an Asana import job.
+  """
+  issueImportCreateAsana(
+    """
+    Asana team name to choose which issues we should import.
+    """
+    asanaTeamName: String!
+    """
+    Asana token to fetch information from the Asana API.
+    """
+    asanaToken: String!
+    """
+    ID of the team into which to import data.
+    """
+    teamId: String!
+  ): IssueImportPayload!
+  """
   Kicks off a Clubhouse import job.
   """
   issueImportCreateClubhouse(

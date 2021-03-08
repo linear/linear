@@ -110,20 +110,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the attachmentIssue connection query for the IntegrationResource */
-    it("attachmentIssue.integrationResources", async () => {
-      if (_attachmentIssue) {
-        const integrationResources:
-          | L.IntegrationResourceConnection
-          | undefined = await _attachmentIssue.integrationResources();
-        expect(integrationResources instanceof L.IntegrationResourceConnection);
-      } else {
-        throw new Error(
-          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.integrationResources query"
-        );
-      }
-    });
-
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.inverseRelations", async () => {
       if (_attachmentIssue) {
@@ -575,126 +561,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test all IntegrationResource queries */
-  describe("IntegrationResources", () => {
-    let _integrationResource: L.IntegrationResource | undefined;
-    let _integrationResource_id: string | undefined;
-
-    /** Test the root connection query for the IntegrationResource */
-    it("integrationResources", async () => {
-      const integrationResources: L.IntegrationResourceConnection | undefined = await client.integrationResources();
-      const integrationResource = integrationResources?.nodes?.[0];
-      _integrationResource_id = integrationResource?.id;
-      expect(integrationResources instanceof L.IntegrationResourceConnection);
-    });
-
-    /** Test the root query for a single IntegrationResource */
-    it("integrationResource", async () => {
-      if (_integrationResource_id) {
-        const integrationResource: L.IntegrationResource | undefined = await client.integrationResource(
-          _integrationResource_id
-        );
-        _integrationResource = integrationResource;
-        expect(integrationResource instanceof L.IntegrationResource);
-      } else {
-        throw new Error(
-          "codegen-doc:print: No first IntegrationResource found in connection - cannot test integrationResource query"
-        );
-      }
-    });
-
-    let _data: L.IntegrationResourceData | undefined;
-
-    /** Test the integrationResource model query for IntegrationResource_Data */
-    it("integrationResource.data", async () => {
-      if (_integrationResource) {
-        const data: L.IntegrationResourceData | undefined = _integrationResource.data;
-        _data = data;
-        expect(data instanceof L.IntegrationResourceData);
-      } else {
-        throw new Error(
-          "codegen-doc:print: No integrationResource found - cannot test _integrationResource.data query"
-        );
-      }
-    });
-
-    /** Test the integrationResource_data model query for IntegrationResource_Data_GithubCommit */
-    it("integrationResource_data.githubCommit", async () => {
-      if (_data) {
-        const githubCommit: L.CommitPayload | undefined = _data.githubCommit;
-        expect(githubCommit instanceof L.CommitPayload);
-      } else {
-        throw new Error("codegen-doc:print: No data found - cannot test _data.githubCommit query");
-      }
-    });
-
-    /** Test the integrationResource_data model query for IntegrationResource_Data_GithubPullRequest */
-    it("integrationResource_data.githubPullRequest", async () => {
-      if (_data) {
-        const githubPullRequest: L.PullRequestPayload | undefined = _data.githubPullRequest;
-        expect(githubPullRequest instanceof L.PullRequestPayload);
-      } else {
-        throw new Error("codegen-doc:print: No data found - cannot test _data.githubPullRequest query");
-      }
-    });
-
-    /** Test the integrationResource_data model query for IntegrationResource_Data_GitlabMergeRequest */
-    it("integrationResource_data.gitlabMergeRequest", async () => {
-      if (_data) {
-        const gitlabMergeRequest: L.PullRequestPayload | undefined = _data.gitlabMergeRequest;
-        expect(gitlabMergeRequest instanceof L.PullRequestPayload);
-      } else {
-        throw new Error("codegen-doc:print: No data found - cannot test _data.gitlabMergeRequest query");
-      }
-    });
-
-    /** Test the integrationResource_data model query for IntegrationResource_Data_SentryIssue */
-    it("integrationResource_data.sentryIssue", async () => {
-      if (_data) {
-        const sentryIssue: L.SentryIssuePayload | undefined = _data.sentryIssue;
-        expect(sentryIssue instanceof L.SentryIssuePayload);
-      } else {
-        throw new Error("codegen-doc:print: No data found - cannot test _data.sentryIssue query");
-      }
-    });
-
-    /** Test the integrationResource model query for IntegrationResource_PullRequest */
-    it("integrationResource.pullRequest", async () => {
-      if (_integrationResource) {
-        const pullRequest: L.PullRequestPayload | undefined = _integrationResource.pullRequest;
-        expect(pullRequest instanceof L.PullRequestPayload);
-      } else {
-        throw new Error(
-          "codegen-doc:print: No integrationResource found - cannot test _integrationResource.pullRequest query"
-        );
-      }
-    });
-
-    /** Test the integrationResource.integration query for L.Integration */
-    it("integrationResource.integration", async () => {
-      if (_integrationResource) {
-        const integrationResource_integration: L.Integration | undefined = await _integrationResource.integration;
-        expect(integrationResource_integration instanceof L.Integration);
-      } else {
-        throw new Error(
-          "codegen-doc:print: No IntegrationResource found - cannot test integrationResource.integration query"
-        );
-      }
-    });
-
-    /** Test the integrationResource.issue query for L.Issue */
-    it("integrationResource.issue", async () => {
-      if (_integrationResource) {
-        const integrationResource_issue: L.Issue | undefined = await _integrationResource.issue;
-        expect(integrationResource_issue instanceof L.Issue);
-      } else {
-        throw new Error(
-          "codegen-doc:print: No IntegrationResource found - cannot test integrationResource.issue query"
-        );
-      }
-    });
-  });
-
   /** Test all Integration queries */
   describe("Integrations", () => {
     let _integration: L.Integration | undefined;
@@ -958,20 +824,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the attachmentIssue connection query for the IntegrationResource */
-    it("attachmentIssue.integrationResources", async () => {
-      if (_attachmentIssue) {
-        const integrationResources:
-          | L.IntegrationResourceConnection
-          | undefined = await _attachmentIssue.integrationResources();
-        expect(integrationResources instanceof L.IntegrationResourceConnection);
-      } else {
-        throw new Error(
-          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.integrationResources query"
-        );
-      }
-    });
-
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.inverseRelations", async () => {
       if (_attachmentIssue) {
@@ -1146,20 +998,6 @@ describe("generated", () => {
         expect(history instanceof L.IssueHistoryConnection);
       } else {
         throw new Error("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.history query");
-      }
-    });
-
-    /** Test the attachmentIssue connection query for the IntegrationResource */
-    it("attachmentIssue.integrationResources", async () => {
-      if (_attachmentIssue) {
-        const integrationResources:
-          | L.IntegrationResourceConnection
-          | undefined = await _attachmentIssue.integrationResources();
-        expect(integrationResources instanceof L.IntegrationResourceConnection);
-      } else {
-        throw new Error(
-          "codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.integrationResources query"
-        );
       }
     });
 

@@ -1845,6 +1845,8 @@ export type Mutation = {
   issueArchive: ArchivePayload;
   /** Creates a new issue. */
   issueCreate: IssuePayload;
+  /** Kicks off an Asana import job. */
+  issueImportCreateAsana: IssueImportPayload;
   /** Kicks off a Clubhouse import job. */
   issueImportCreateClubhouse: IssueImportPayload;
   /** Kicks off a GitHub import job. */
@@ -2225,6 +2227,12 @@ export type MutationIssueArchiveArgs = {
 
 export type MutationIssueCreateArgs = {
   input: IssueCreateInput;
+};
+
+export type MutationIssueImportCreateAsanaArgs = {
+  asanaTeamName: Scalars["String"];
+  asanaToken: Scalars["String"];
+  teamId: Scalars["String"];
 };
 
 export type MutationIssueImportCreateClubhouseArgs = {
@@ -6297,22 +6305,6 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
   };
 };
 
-export type AttachmentIssue_IntegrationResourcesQueryVariables = Exact<{
-  id: Scalars["String"];
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type AttachmentIssue_IntegrationResourcesQuery = { __typename?: "Query" } & {
-  attachmentIssue: { __typename?: "Issue" } & {
-    integrationResources: { __typename?: "IntegrationResourceConnection" } & IntegrationResourceConnectionFragment;
-  };
-};
-
 export type AttachmentIssue_InverseRelationsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
@@ -6595,95 +6587,6 @@ export type IntegrationQuery = { __typename?: "Query" } & {
   integration: { __typename?: "Integration" } & IntegrationFragment;
 };
 
-export type IntegrationResourceQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IntegrationResourceQuery = { __typename?: "Query" } & {
-  integrationResource: { __typename?: "IntegrationResource" } & IntegrationResourceFragment;
-};
-
-export type IntegrationResource_DataQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IntegrationResource_DataQuery = { __typename?: "Query" } & {
-  integrationResource: { __typename?: "IntegrationResource" } & {
-    data: { __typename?: "IntegrationResourceData" } & IntegrationResourceDataFragment;
-  };
-};
-
-export type IntegrationResource_Data_GithubCommitQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IntegrationResource_Data_GithubCommitQuery = { __typename?: "Query" } & {
-  integrationResource: { __typename?: "IntegrationResource" } & {
-    data: { __typename?: "IntegrationResourceData" } & {
-      githubCommit?: Maybe<{ __typename?: "CommitPayload" } & CommitPayloadFragment>;
-    };
-  };
-};
-
-export type IntegrationResource_Data_GithubPullRequestQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IntegrationResource_Data_GithubPullRequestQuery = { __typename?: "Query" } & {
-  integrationResource: { __typename?: "IntegrationResource" } & {
-    data: { __typename?: "IntegrationResourceData" } & {
-      githubPullRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
-    };
-  };
-};
-
-export type IntegrationResource_Data_GitlabMergeRequestQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IntegrationResource_Data_GitlabMergeRequestQuery = { __typename?: "Query" } & {
-  integrationResource: { __typename?: "IntegrationResource" } & {
-    data: { __typename?: "IntegrationResourceData" } & {
-      gitlabMergeRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
-    };
-  };
-};
-
-export type IntegrationResource_Data_SentryIssueQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IntegrationResource_Data_SentryIssueQuery = { __typename?: "Query" } & {
-  integrationResource: { __typename?: "IntegrationResource" } & {
-    data: { __typename?: "IntegrationResourceData" } & {
-      sentryIssue?: Maybe<{ __typename?: "SentryIssuePayload" } & SentryIssuePayloadFragment>;
-    };
-  };
-};
-
-export type IntegrationResource_PullRequestQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type IntegrationResource_PullRequestQuery = { __typename?: "Query" } & {
-  integrationResource: { __typename?: "IntegrationResource" } & {
-    pullRequest: { __typename?: "PullRequestPayload" } & PullRequestPayloadFragment;
-  };
-};
-
-export type IntegrationResourcesQueryVariables = Exact<{
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type IntegrationResourcesQuery = { __typename?: "Query" } & {
-  integrationResources: { __typename?: "IntegrationResourceConnection" } & IntegrationResourceConnectionFragment;
-};
-
 export type IntegrationsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -6780,22 +6683,6 @@ export type Issue_HistoryQueryVariables = Exact<{
 export type Issue_HistoryQuery = { __typename?: "Query" } & {
   issue: { __typename?: "Issue" } & {
     history: { __typename?: "IssueHistoryConnection" } & IssueHistoryConnectionFragment;
-  };
-};
-
-export type Issue_IntegrationResourcesQueryVariables = Exact<{
-  id: Scalars["String"];
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type Issue_IntegrationResourcesQuery = { __typename?: "Query" } & {
-  issue: { __typename?: "Issue" } & {
-    integrationResources: { __typename?: "IntegrationResourceConnection" } & IntegrationResourceConnectionFragment;
   };
 };
 
@@ -8093,6 +7980,16 @@ export type IssueCreateMutationVariables = Exact<{
 
 export type IssueCreateMutation = { __typename?: "Mutation" } & {
   issueCreate: { __typename?: "IssuePayload" } & IssuePayloadFragment;
+};
+
+export type IssueImportCreateAsanaMutationVariables = Exact<{
+  asanaTeamName: Scalars["String"];
+  asanaToken: Scalars["String"];
+  teamId: Scalars["String"];
+}>;
+
+export type IssueImportCreateAsanaMutation = { __typename?: "Mutation" } & {
+  issueImportCreateAsana: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
 };
 
 export type IssueImportCreateClubhouseMutationVariables = Exact<{
@@ -13954,120 +13851,6 @@ export const AttachmentIssue_HistoryDocument: DocumentNode<
     ...IssueHistoryConnectionFragmentDoc.definitions,
   ],
 };
-export const AttachmentIssue_IntegrationResourcesDocument: DocumentNode<
-  AttachmentIssue_IntegrationResourcesQuery,
-  AttachmentIssue_IntegrationResourcesQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "attachmentIssue_integrationResources" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentIssue" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "integrationResources" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "after" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "before" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "includeArchived" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "last" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "orderBy" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceConnection" } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceConnectionFragmentDoc.definitions,
-  ],
-};
 export const AttachmentIssue_InverseRelationsDocument: DocumentNode<
   AttachmentIssue_InverseRelationsQuery,
   AttachmentIssue_InverseRelationsQueryVariables
@@ -15845,471 +15628,6 @@ export const IntegrationDocument: DocumentNode<IntegrationQuery, IntegrationQuer
     ...IntegrationFragmentDoc.definitions,
   ],
 };
-export const IntegrationResourceDocument: DocumentNode<IntegrationResourceQuery, IntegrationResourceQueryVariables> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResource" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResource" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResource" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResource_DataDocument: DocumentNode<
-  IntegrationResource_DataQuery,
-  IntegrationResource_DataQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResource_data" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResource" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "data" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceData" } }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceDataFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResource_Data_GithubCommitDocument: DocumentNode<
-  IntegrationResource_Data_GithubCommitQuery,
-  IntegrationResource_Data_GithubCommitQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResource_data_githubCommit" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResource" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "data" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "githubCommit" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommitPayload" } }],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...CommitPayloadFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResource_Data_GithubPullRequestDocument: DocumentNode<
-  IntegrationResource_Data_GithubPullRequestQuery,
-  IntegrationResource_Data_GithubPullRequestQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResource_data_githubPullRequest" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResource" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "data" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "githubPullRequest" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...PullRequestPayloadFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResource_Data_GitlabMergeRequestDocument: DocumentNode<
-  IntegrationResource_Data_GitlabMergeRequestQuery,
-  IntegrationResource_Data_GitlabMergeRequestQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResource_data_gitlabMergeRequest" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResource" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "data" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "gitlabMergeRequest" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...PullRequestPayloadFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResource_Data_SentryIssueDocument: DocumentNode<
-  IntegrationResource_Data_SentryIssueQuery,
-  IntegrationResource_Data_SentryIssueQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResource_data_sentryIssue" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResource" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "data" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "sentryIssue" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentryIssuePayload" } }],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...SentryIssuePayloadFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResource_PullRequestDocument: DocumentNode<
-  IntegrationResource_PullRequestQuery,
-  IntegrationResource_PullRequestQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResource_pullRequest" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResource" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "pullRequest" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...PullRequestPayloadFragmentDoc.definitions,
-  ],
-};
-export const IntegrationResourcesDocument: DocumentNode<
-  IntegrationResourcesQuery,
-  IntegrationResourcesQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "integrationResources" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResources" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceConnection" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceConnectionFragmentDoc.definitions,
-  ],
-};
 export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -16978,120 +16296,6 @@ export const Issue_HistoryDocument: DocumentNode<Issue_HistoryQuery, Issue_Histo
       },
     },
     ...IssueHistoryConnectionFragmentDoc.definitions,
-  ],
-};
-export const Issue_IntegrationResourcesDocument: DocumentNode<
-  Issue_IntegrationResourcesQuery,
-  Issue_IntegrationResourcesQueryVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "issue_integrationResources" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "integrationResources" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "after" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "before" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "includeArchived" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "last" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "orderBy" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceConnection" } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceConnectionFragmentDoc.definitions,
   ],
 };
 export const Issue_InverseRelationsDocument: DocumentNode<
@@ -25219,6 +24423,67 @@ export const IssueCreateDocument: DocumentNode<IssueCreateMutation, IssueCreateM
       },
     },
     ...IssuePayloadFragmentDoc.definitions,
+  ],
+};
+export const IssueImportCreateAsanaDocument: DocumentNode<
+  IssueImportCreateAsanaMutation,
+  IssueImportCreateAsanaMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportCreateAsana" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "asanaTeamName" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "asanaToken" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportCreateAsana" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "asanaTeamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "asanaTeamName" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "asanaToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "asanaToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
   ],
 };
 export const IssueImportCreateClubhouseDocument: DocumentNode<
