@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.5.2
+
+### Patch Changes
+
+- 867d226: chore(release): bump changeset
+- 80561d9: chore(release): fix release environment
+- Updated dependencies [867d226]
+- Updated dependencies [80561d9]
+  - @linear/sdk@1.8.1
+
 ## 1.5.1
 
 ### Patch Changes

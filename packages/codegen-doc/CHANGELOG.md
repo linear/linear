@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.7.2
+
+### Patch Changes
+
+- 867d226: chore(release): bump changeset
+- 80561d9: chore(release): fix release environment
+
 ## 1.7.1
 
 ### Patch Changes
