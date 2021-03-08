@@ -9,7 +9,7 @@ import {
   printSet,
 } from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
-import { printAfterAll, printBeforeAll, printBeforeSuite } from "./print-hooks";
+import { printTestHooks } from "./print-hooks";
 
 /**
  * Print all tests
@@ -19,9 +19,7 @@ export function printTests(context: SdkPluginContext): string {
     "generated",
     ["Auto generated API tests"],
     printLines([
-      printBeforeSuite(),
-      printBeforeAll(),
-      printAfterAll(),
+      printTestHooks(),
       ...context.sdkDefinitions[""].operations?.map(operation =>
         operation.node.operation === OperationType.query ? printQueryTest(context, operation) : undefined
       ),
