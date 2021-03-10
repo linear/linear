@@ -2,11 +2,10 @@ name: dependencies
 
 on:
   schedule:
-    - cron: 0 0 * * * # triggered nightly
-    # - cron: 0 0 * * 0 # triggered every sunday
+    - cron: "0 0 * * *" # triggered nightly
+    # - cron: "0 0 * * 0" # triggered every sunday
   push:
     branches:
-      - master
       - littlemooon/schema-action
 
 jobs:
@@ -39,7 +38,7 @@ jobs:
       - name: Add empty changeset for editing later
         run: yarn changeset add --empty
 
-      - name: Create depedencies pull request
+      - name: Create dependencies pull request
         uses: peter-evans/create-pull-request@v3
         with:
           commit-message: "chore(release): update depedencies"
