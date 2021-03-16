@@ -24,7 +24,7 @@ jobs:
         run: yarn
 
       - name: Update schema
-        run: yarn schema
+        run: yarn update:schema
 
       - name: Build packages
         run: yarn build

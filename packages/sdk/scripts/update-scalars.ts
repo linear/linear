@@ -1,6 +1,5 @@
-/* eslint-disable no-console */
-import { Doc, logger } from "@linear/codegen-doc";
 import { replaceInFileSync } from "replace-in-file";
+import { Doc, logger } from "../../codegen-doc/src/index";
 
 function updateScalars() {
   try {

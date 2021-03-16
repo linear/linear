@@ -1,10 +1,10 @@
-/* eslint-disable no-console */
 import { CriticalityLevel, diff } from "@graphql-inspector/core";
 import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { loadSchema } from "@graphql-tools/load";
 import { UrlLoader } from "@graphql-tools/url-loader";
 import { writeFileSync } from "fs";
 import path from "path";
+import { logger } from "../../codegen-doc/src/index";
 
 const levelOrder = {
   [CriticalityLevel.Breaking]: 2,
@@ -12,7 +12,7 @@ const levelOrder = {
   [CriticalityLevel.NonBreaking]: 0,
 };
 
-async function generateChangeset() {
+async function generateSchemaChangeset() {
   /** Load main schema from github */
   const mainSchema = await loadSchema(
     "https://raw.githubusercontent.com/linear/linear/master/packages/sdk/src/schema.graphql",
@@ -34,7 +34,7 @@ async function generateChangeset() {
   /** If we have changes, write to changeset file */
   if (changes.length) {
     writeFileSync(
-      path.resolve("../../.changeset/_generated.md"),
+      path.resolve("../../.changeset/_generated_schema.md"),
       `---
 "@linear/sdk": minor
 ---
@@ -46,19 +46,19 @@ ${changes
         change.path ? ` (${change.path})` : ""
       }`
   )
-  .join("\n")}`
+  .join("\n\n")}`
     );
   }
 
   return changes;
 }
 
-generateChangeset()
+generateSchemaChangeset()
   .then(() => {
-    console.log("script:generate-changeset: Generated changeset from schema");
+    logger.info("script:generate-schema-changeset: Generated changeset from schema");
   })
   .catch(error => {
-    console.error("script:generate-changeset: Generating changeset from schema");
-    console.error(error);
+    logger.error("script:generate-schema-changeset: Generating changeset from schema");
+    logger.fatal(error);
     throw error;
   });
