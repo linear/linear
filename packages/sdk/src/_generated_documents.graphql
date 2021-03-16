@@ -594,6 +594,8 @@ fragment ProjectLink on ProjectLink {
 
 # An import job for data from an external service
 fragment IssueImport on IssueImport {
+  # The data mapping configuration for the import job.
+  mapping
   # The id for the user that started the job.
   creatorId
   # The last time at which the entity was updated. This is the same as the creation time if the
@@ -1000,8 +1002,8 @@ fragment OrganizationDomain on OrganizationDomain {
 }
 
 # GitHub OAuth token, plus information about the organizations the user is a member of.
-fragment OAuthTokenPayload on OAuthTokenPayload {
-  # A list of the GitHub orgs the user is a member of with attached repositories.
+fragment GithubOAuthTokenPayload on GithubOAuthTokenPayload {
+  # A list of the GitHub organizations the user is a member of with attached repositories.
   organizations {
     ...GithubOrg
   }
@@ -1237,15 +1239,15 @@ fragment PullRequestPayload on PullRequestPayload {
 
 # Relevant information for the GitHub organization.
 fragment GithubOrg on GithubOrg {
-  # GitHub org's id.
+  # GitHub organization id.
   id
-  # Repositories that the org owns.
+  # Repositories that the organization owns.
   repositories {
     ...GithubRepo
   }
-  # The login for the GitHub org.
+  # The login for the GitHub organization.
   login
-  # The name of the GitHub org.
+  # The name of the GitHub organization.
   name
 }
 
@@ -3300,7 +3302,7 @@ query issueImportFinishGithubOAuth(
   $code: String!
 ) {
   issueImportFinishGithubOAuth(code: $code) {
-    ...OAuthTokenPayload
+    ...GithubOAuthTokenPayload
   }
 }
 # One specific label.
@@ -5227,10 +5229,17 @@ mutation issueImportCreateAsana(
   $asanaTeamName: String!
   # Asana token to fetch information from the Asana API.
   $asanaToken: String!
+  # Whether to instantly process the import with the default configuration mapping.
+  $instantProcess: Boolean
   # ID of the team into which to import data.
   $teamId: String!
 ) {
-  issueImportCreateAsana(asanaTeamName: $asanaTeamName, asanaToken: $asanaToken, teamId: $teamId) {
+  issueImportCreateAsana(
+    asanaTeamName: $asanaTeamName
+    asanaToken: $asanaToken
+    instantProcess: $instantProcess
+    teamId: $teamId
+  ) {
     ...IssueImportPayload
   }
 }
@@ -5240,10 +5249,17 @@ mutation issueImportCreateClubhouse(
   $clubhouseTeamName: String!
   # Clubhouse token to fetch information from the Clubhouse API.
   $clubhouseToken: String!
+  # Whether to instantly process the import with the default configuration mapping.
+  $instantProcess: Boolean
   # ID of the team into which to import data.
   $teamId: String!
 ) {
-  issueImportCreateClubhouse(clubhouseTeamName: $clubhouseTeamName, clubhouseToken: $clubhouseToken, teamId: $teamId) {
+  issueImportCreateClubhouse(
+    clubhouseTeamName: $clubhouseTeamName
+    clubhouseToken: $clubhouseToken
+    instantProcess: $instantProcess
+    teamId: $teamId
+  ) {
     ...IssueImportPayload
   }
 }
@@ -5257,6 +5273,8 @@ mutation issueImportCreateGithub(
   $githubShouldImportOrgProjects: Boolean
   # Github token to fetch information from the Github API.
   $githubToken: String!
+  # Whether to instantly process the import with the default configuration mapping.
+  $instantProcess: Boolean
   # ID of the team into which to import data.
   $teamId: String!
 ) {
@@ -5265,6 +5283,7 @@ mutation issueImportCreateGithub(
     githubRepoOwner: $githubRepoOwner
     githubShouldImportOrgProjects: $githubShouldImportOrgProjects
     githubToken: $githubToken
+    instantProcess: $instantProcess
     teamId: $teamId
   ) {
     ...IssueImportPayload
@@ -5272,6 +5291,8 @@ mutation issueImportCreateGithub(
 }
 # Kicks off a Jira import job.
 mutation issueImportCreateJira(
+  # Whether to instantly process the import with the default configuration mapping.
+  $instantProcess: Boolean
   # Jira user account email.
   $jiraEmail: String!
   # Jira installation or cloud hostname.
@@ -5284,6 +5305,7 @@ mutation issueImportCreateJira(
   $teamId: String!
 ) {
   issueImportCreateJira(
+    instantProcess: $instantProcess
     jiraEmail: $jiraEmail
     jiraHostname: $jiraHostname
     jiraProject: $jiraProject
@@ -5300,6 +5322,17 @@ mutation issueImportDelete(
 ) {
   issueImportDelete(issueImportId: $issueImportId) {
     ...IssueImportDeletePayload
+  }
+}
+# Kicks off import processing.
+mutation issueImportProcess(
+  # ID of the issue import which we're going to process.
+  $issueImportId: String!
+  # The mapping configuration to use for processing the import.
+  $mapping: JSONObject!
+) {
+  issueImportProcess(issueImportId: $issueImportId, mapping: $mapping) {
+    ...IssueImportPayload
   }
 }
 # Archives an issue label.
