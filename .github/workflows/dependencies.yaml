@@ -41,8 +41,9 @@ jobs:
       - name: Create dependencies pull request
         uses: peter-evans/create-pull-request@v3
         with:
+          committer: "GitHub <noreply@github.com>"
           commit-message: "chore(release): update depedencies"
           title: "chore(release): update depedencies"
-          body: "Update depedencies"
+          body: "Update dependencies"
           branch: dependencies
           base: master
