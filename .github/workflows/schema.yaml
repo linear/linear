@@ -38,12 +38,6 @@ jobs:
       - name: Generate changeset for schema changes
         run: yarn generate:changeset
 
-      - uses: kamilkisiela/graphql-inspector@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          schema: "master:packages/sdk/src/schema.graphql"
-          fail-on-breaking: false
-
       - name: Create schema pull request
         uses: peter-evans/create-pull-request@v3
         with:
