@@ -42,9 +42,6 @@ jobs:
       - name: Add empty changeset for editing later
         run: yarn changeset add --empty
 
-      - name: Generate changeset for schema changes
-        run: yarn generate:changeset
-
       - name: Create schema pull request
         uses: peter-evans/create-pull-request@v3
         with:
