@@ -2,11 +2,8 @@ name: dependencies
 
 on:
   schedule:
-    - cron: "0 0 * * *" # triggered nightly
-    # - cron: "0 0 * * 0" # triggered every sunday
-  push:
-    branches:
-      - littlemooon/schema-action
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
   dependencies:
