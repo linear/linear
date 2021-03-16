@@ -18,6 +18,7 @@
     "dev": "NODE_ENV=development yarn build",
     "docs": "npx md-magic --path './packages/**/README.md' --config ./docs/markdown-magic.config.js",
     "generate": "run-s generate:clean generate:doc generate:sdk",
+    "generate:changeset": "lerna run generate:changeset",
     "generate:clean": "lerna run generate:clean",
     "generate:doc": "lerna run build:codegen-doc && lerna run generate:doc",
     "generate:sdk": "lerna run build:codegen-sdk && lerna run generate:sdk",

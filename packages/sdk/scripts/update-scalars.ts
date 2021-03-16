@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { replaceInFileSync } from "replace-in-file";
 import { Doc, logger } from "../../codegen-doc/src/index";
 
