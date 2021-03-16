@@ -1,13 +1,13 @@
-name: release
+name: schema
 
 on:
-  push:
-    branches:
-      - master
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
-  release:
-    name: Release
+  schema:
+    name: Schema
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: yarn
 
+      - name: Update schema
+        run: yarn schema
+
       - name: Build packages
         run: yarn build
 
@@ -36,15 +39,15 @@ jobs:
           schema: "master:packages/sdk/src/schema.graphql"
           fail-on-breaking: false
 
-      - name: Check for no generated changes
-        run: git update-index --refresh && git diff-index HEAD
+      - name: Add empty changeset for editing later
+        run: yarn changeset add --empty
 
-      - name: Create release pull request
-        uses: changesets/action@master
+      - name: Create schema pull request
+        uses: peter-evans/create-pull-request@v3
         with:
-          publish: yarn changeset publish
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          committer: "GitHub <noreply@github.com>"
+          commit-message: "feat(sdk): update schema"
+          title: "feat(sdk): update schema"
+          body: "Update schema, regenerate types and SDK"
+          branch: schema
+          base: master
