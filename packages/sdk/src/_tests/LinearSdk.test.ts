@@ -24,10 +24,10 @@ describe("LinearSdk", () => {
   });
 
   it("parses TimelessDateScalar", async () => {
-    const sdk = new LinearSdk(resolveWithData({ project: { id: "test", targetDate: "2021-02-26T00:00:00.000Z" } }));
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "test", targetDate: "2021-02-26" } }));
     const response = await sdk.project("test");
 
-    expect(response?.targetDate?.getFullYear()).toEqual(2021);
+    expect(response?.targetDate).toEqual("2021-02-26");
   });
 
   it("parses JSONObject", async () => {

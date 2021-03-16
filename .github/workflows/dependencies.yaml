@@ -24,7 +24,7 @@ jobs:
         run: yarn
 
       - name: Update dependencies
-        run: yarn upgrade
+        run: yarn update:dependencies
 
       - name: Build packages
         run: yarn build

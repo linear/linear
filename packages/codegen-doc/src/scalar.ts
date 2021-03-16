@@ -14,7 +14,9 @@ export function printTypescriptScalar(name: string, namespace?: string): string 
   if (defaultName) {
     return defaultName;
   } else {
-    if (Doc.SCALAR_DATE_NAMES.includes(name)) {
+    if (Doc.SCALAR_STRING_NAMES.includes(name)) {
+      return Doc.SCALAR_STRING_TYPE;
+    } else if (Doc.SCALAR_DATE_NAMES.includes(name)) {
       return Doc.SCALAR_DATE_TYPE;
     } else if (Doc.SCALAR_JSON_NAMES.includes(name)) {
       return Doc.SCALAR_JSON_TYPE;
