@@ -1774,17 +1774,17 @@ export class InvitePagePayload extends Request {
 export class Invoice extends Request {
   public constructor(request: LinearRequest, data: L.InvoiceFragment) {
     super(request);
-    this.created = parseDate(data.created) ?? undefined;
-    this.dueDate = parseDate(data.dueDate) ?? undefined;
+    this.created = data.created ?? undefined;
+    this.dueDate = data.dueDate ?? undefined;
     this.status = data.status ?? undefined;
     this.total = data.total ?? undefined;
     this.url = data.url ?? undefined;
   }
 
   /** The creation date of the invoice. */
-  public created?: Date;
+  public created?: string;
   /** The due date of the invoice. */
-  public dueDate?: Date;
+  public dueDate?: string;
   /** The status of the invoice. */
   public status?: string;
   /** The invoice total, in cents. */
@@ -1818,7 +1818,7 @@ export class Issue extends Request {
     this.completedAt = parseDate(data.completedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.description = data.description ?? undefined;
-    this.dueDate = parseDate(data.dueDate) ?? undefined;
+    this.dueDate = data.dueDate ?? undefined;
     this.estimate = data.estimate ?? undefined;
     this.id = data.id ?? undefined;
     this.identifier = data.identifier ?? undefined;
@@ -1860,7 +1860,7 @@ export class Issue extends Request {
   /** The issue's description in markdown format. */
   public description?: string;
   /** The date at which the issue is due. */
-  public dueDate?: Date;
+  public dueDate?: string;
   /** The estimate of the complexity of the issue.. */
   public estimate?: number;
   /** The unique identifier of the entity. */
@@ -2014,7 +2014,7 @@ export class IssueHistory extends Request {
     this.autoArchived = data.autoArchived ?? undefined;
     this.autoClosed = data.autoClosed ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.fromDueDate = parseDate(data.fromDueDate) ?? undefined;
+    this.fromDueDate = data.fromDueDate ?? undefined;
     this.fromEstimate = data.fromEstimate ?? undefined;
     this.fromPriority = data.fromPriority ?? undefined;
     this.fromTitle = data.fromTitle ?? undefined;
@@ -2022,7 +2022,7 @@ export class IssueHistory extends Request {
     this.relationChanges = data.relationChanges ?? undefined;
     this.removedLabelIds = data.removedLabelIds ?? undefined;
     this.source = parseJson(data.source) ?? undefined;
-    this.toDueDate = parseDate(data.toDueDate) ?? undefined;
+    this.toDueDate = data.toDueDate ?? undefined;
     this.toEstimate = data.toEstimate ?? undefined;
     this.toPriority = data.toPriority ?? undefined;
     this.toTitle = data.toTitle ?? undefined;
@@ -2055,7 +2055,7 @@ export class IssueHistory extends Request {
   /** The time at which the entity was created. */
   public createdAt?: Date;
   /** What the due date was changed from */
-  public fromDueDate?: Date;
+  public fromDueDate?: string;
   /** What the estimate was changed from. */
   public fromEstimate?: number;
   /** What the priority was changed from. */
@@ -2071,7 +2071,7 @@ export class IssueHistory extends Request {
   /** Information about the integration or application which created this history entry. */
   public source?: Record<string, unknown>;
   /** What the due date was changed to */
-  public toDueDate?: Date;
+  public toDueDate?: string;
   /** What the estimate was changed to. */
   public toEstimate?: number;
   /** What the priority was changed to. */
@@ -3324,7 +3324,7 @@ export class Project extends Request {
     this.sortOrder = data.sortOrder ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state ?? undefined;
-    this.targetDate = parseDate(data.targetDate) ?? undefined;
+    this.targetDate = data.targetDate ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._creator = data.creator ?? undefined;
     this._lead = data.lead ?? undefined;
@@ -3372,7 +3372,7 @@ export class Project extends Request {
   /** The type of the state. */
   public state?: string;
   /** The estimated completion date of the project. */
-  public targetDate?: Date;
+  public targetDate?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.

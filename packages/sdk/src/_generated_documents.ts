@@ -17,7 +17,7 @@ export type Scalars = {
   /** The `JSONObject` scalar type represents JSON values as a string */
   JSONObject: Record<string, unknown>;
   /** The `TimelessDateScalar` scalar type represents Date values without a timestamp. It expects strings in the format YYYY-MM-DD */
-  TimelessDateScalar: Date;
+  TimelessDateScalar: string;
 };
 
 /** An API key. Grants access to the user's resources. */
