@@ -1,6 +1,7 @@
 import csv from "csvtojson";
-import j2m from "jira2md";
 import { Importer, ImportResult } from "../../types";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const j2m = require("jira2md");
 
 type PivotalStoryType = "epic" | "feature" | "bug" | "chore" | "release";
 
