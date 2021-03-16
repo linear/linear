@@ -39,8 +39,8 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           committer: "GitHub <noreply@github.com>"
-          commit-message: "chore(release): update depedencies"
-          title: "chore(release): update depedencies"
+          commit-message: "chore(release): update dependencies"
+          title: "chore(release): update dependencies"
           body: "Update dependencies"
           branch: dependencies
           base: master
