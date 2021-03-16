@@ -2814,6 +2814,18 @@
             "deprecationReason": null
           },
           {
+            "name": "mapping",
+            "description": "The data mapping configuration for the import job.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "error",
             "description": "User readable error message, if one has occurred during the import.",
             "args": [],
@@ -13091,6 +13103,220 @@
       },
       {
         "kind": "OBJECT",
+        "name": "FileUpload",
+        "description": "A recorded entry of a file uploaded by a user.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "creator",
+            "description": "The user who uploaded the file.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organization",
+            "description": "The organization the upload belongs to.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Organization",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "assetUrl",
+            "description": "The asset URL this file is available at.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contentType",
+            "description": "The MIME type of the uploaded file.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "filename",
+            "description": "The name of the uploaded file.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "metaData",
+            "description": "Additional metadata of the file.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSON",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "size",
+            "description": "Size of the uploaded file in bytes.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SyncResponse",
+        "description": "Contains either the full serialized state of the application or delta packets that the requester can \n  apply to the local data set in order to be up-to-date.",
+        "fields": [
+          {
+            "name": "state",
+            "description": "The full state of the organization as a serialized JSON object.\n    Mutually exclusive with the delta property",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "delta",
+            "description": "JSON serialized delta changes that the client can apply to its local state \n    in order to catch up with the state of the world.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subscribedSyncGroups",
+            "description": "The sync groups that the user is subscribed to.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastSyncId",
+            "description": "The last sync id covered by the response.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "databaseVersion",
+            "description": "The version of the remote database. Incremented by 1 for each migration run on the database.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "UserAccount",
         "description": "A user account.",
         "fields": [
@@ -14731,220 +14957,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "PageInfo",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "FileUpload",
-        "description": "A recorded entry of a file uploaded by a user.",
-        "fields": [
-          {
-            "name": "id",
-            "description": "The unique identifier of the entity.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "creator",
-            "description": "The user who uploaded the file.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "User",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "organization",
-            "description": "The organization the upload belongs to.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Organization",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "assetUrl",
-            "description": "The asset URL this file is available at.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "contentType",
-            "description": "The MIME type of the uploaded file.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filename",
-            "description": "The name of the uploaded file.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "metaData",
-            "description": "Additional metadata of the file.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "JSON",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "size",
-            "description": "Size of the uploaded file in bytes.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SyncResponse",
-        "description": "Contains either the full serialized state of the application or delta packets that the requester can \n  apply to the local data set in order to be up-to-date.",
-        "fields": [
-          {
-            "name": "state",
-            "description": "The full state of the organization as a serialized JSON object.\n    Mutually exclusive with the delta property",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "delta",
-            "description": "JSON serialized delta changes that the client can apply to its local state \n    in order to catch up with the state of the world.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "subscribedSyncGroups",
-            "description": "The sync groups that the user is subscribed to.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "lastSyncId",
-            "description": "The last sync id covered by the response.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "databaseVersion",
-            "description": "The version of the remote database. Incremented by 1 for each migration run on the database.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
                 "ofType": null
               }
             },
@@ -17132,7 +17144,7 @@
         "fields": [
           {
             "name": "id",
-            "description": "GitHub org's id.",
+            "description": "GitHub organization id.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -17148,7 +17160,7 @@
           },
           {
             "name": "name",
-            "description": "The name of the GitHub org.",
+            "description": "The name of the GitHub organization.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -17164,7 +17176,7 @@
           },
           {
             "name": "login",
-            "description": "The login for the GitHub org.",
+            "description": "The login for the GitHub organization.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -17180,7 +17192,7 @@
           },
           {
             "name": "repositories",
-            "description": "Repositories that the org owns.",
+            "description": "Repositories that the organization owns.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -17210,7 +17222,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "OAuthTokenPayload",
+        "name": "GithubOAuthTokenPayload",
         "description": "GitHub OAuth token, plus information about the organizations the user is a member of.",
         "fields": [
           {
@@ -17227,7 +17239,7 @@
           },
           {
             "name": "organizations",
-            "description": "A list of the GitHub orgs the user is a member of with attached repositories.",
+            "description": "A list of the GitHub organizations the user is a member of with attached repositories.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -19280,6 +19292,53 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "IssueImportMappingInput",
+        "description": "Issue import mapping input",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "users",
+            "description": "The mapping configuration for users",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workflowStates",
+            "description": "The mapping configuration for workflow states",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "epics",
+            "description": "The mapping configuration for epics",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -24111,6 +24170,18 @@
             "deprecationReason": null
           },
           {
+            "name": "userId",
+            "description": "The user profile these view preferences are associated with.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "cycleId",
             "description": "The cycle these view preferences are associated with.",
             "type": {
@@ -24178,6 +24249,12 @@
           },
           {
             "name": "myIssues",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "userProfile",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -26291,7 +26368,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "OAuthTokenPayload",
+                "name": "GithubOAuthTokenPayload",
                 "ofType": null
               }
             },
@@ -28432,7 +28509,7 @@
       {
         "kind": "ENUM",
         "name": "TrashOptionType",
-        "description": "How trashed issues should be loaded.",
+        "description": "How trashed models should be loaded.",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
@@ -30484,6 +30561,18 @@
             "description": "Kicks off a GitHub import job.",
             "args": [
               {
+                "name": "instantProcess",
+                "description": "Whether to instantly process the import with the default configuration mapping.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "githubShouldImportOrgProjects",
                 "description": "Whether or not we should import GitHub organization level projects.",
                 "type": {
@@ -30576,6 +30665,18 @@
             "name": "issueImportCreateJira",
             "description": "Kicks off a Jira import job.",
             "args": [
+              {
+                "name": "instantProcess",
+                "description": "Whether to instantly process the import with the default configuration mapping.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "jiraHostname",
                 "description": "Jira installation or cloud hostname.",
@@ -30674,6 +30775,18 @@
             "description": "Kicks off a Clubhouse import job.",
             "args": [
               {
+                "name": "instantProcess",
+                "description": "Whether to instantly process the import with the default configuration mapping.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "clubhouseTeamName",
                 "description": "Clubhouse team name to choose which issues we should import.",
                 "type": {
@@ -30738,6 +30851,18 @@
             "name": "issueImportCreateAsana",
             "description": "Kicks off an Asana import job.",
             "args": [
+              {
+                "name": "instantProcess",
+                "description": "Whether to instantly process the import with the default configuration mapping.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "asanaTeamName",
                 "description": "Asana team name to choose which issues we should import.",
@@ -30826,6 +30951,55 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "IssueImportDeletePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueImportProcess",
+            "description": "Kicks off import processing.",
+            "args": [
+              {
+                "name": "mapping",
+                "description": "The mapping configuration to use for processing the import.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "JSONObject",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "issueImportId",
+                "description": "ID of the issue import which we're going to process.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IssueImportPayload",
                 "ofType": null
               }
             },

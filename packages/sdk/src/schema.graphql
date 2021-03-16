@@ -1299,23 +1299,36 @@ type FileUpload {
   size: Float!
 }
 """
+GitHub OAuth token, plus information about the organizations the user is a member of.
+"""
+type GithubOAuthTokenPayload {
+  """
+  A list of the GitHub organizations the user is a member of with attached repositories.
+  """
+  organizations: [GithubOrg!]
+  """
+  The OAuth token if the operation to fetch it was successful.
+  """
+  token: String
+}
+"""
 Relevant information for the GitHub organization.
 """
 type GithubOrg {
   """
-  GitHub org's id.
+  GitHub organization id.
   """
   id: String!
   """
-  The login for the GitHub org.
+  The login for the GitHub organization.
   """
   login: String!
   """
-  The name of the GitHub org.
+  The name of the GitHub organization.
   """
   name: String!
   """
-  Repositories that the org owns.
+  Repositories that the organization owns.
   """
   repositories: [GithubRepo!]!
 }
@@ -2238,6 +2251,10 @@ type IssueImport implements Node {
   """
   id: ID!
   """
+  The data mapping configuration for the import job.
+  """
+  mapping: JSONObject
+  """
   The service from which data will be imported.
   """
   service: String!
@@ -2264,6 +2281,23 @@ type IssueImportDeletePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+"""
+Issue import mapping input
+"""
+input IssueImportMappingInput {
+  """
+  The mapping configuration for epics
+  """
+  epics: JSONObject
+  """
+  The mapping configuration for users
+  """
+  users: JSONObject
+  """
+  The mapping configuration for workflow states
+  """
+  workflowStates: JSONObject
 }
 type IssueImportPayload {
   """
@@ -3276,6 +3310,10 @@ type Mutation {
     """
     asanaToken: String!
     """
+    Whether to instantly process the import with the default configuration mapping.
+    """
+    instantProcess: Boolean
+    """
     ID of the team into which to import data.
     """
     teamId: String!
@@ -3292,6 +3330,10 @@ type Mutation {
     Clubhouse token to fetch information from the Clubhouse API.
     """
     clubhouseToken: String!
+    """
+    Whether to instantly process the import with the default configuration mapping.
+    """
+    instantProcess: Boolean
     """
     ID of the team into which to import data.
     """
@@ -3318,6 +3360,10 @@ type Mutation {
     """
     githubToken: String!
     """
+    Whether to instantly process the import with the default configuration mapping.
+    """
+    instantProcess: Boolean
+    """
     ID of the team into which to import data.
     """
     teamId: String!
@@ -3326,6 +3372,10 @@ type Mutation {
   Kicks off a Jira import job.
   """
   issueImportCreateJira(
+    """
+    Whether to instantly process the import with the default configuration mapping.
+    """
+    instantProcess: Boolean
     """
     Jira user account email.
     """
@@ -3356,6 +3406,19 @@ type Mutation {
     """
     issueImportId: String!
   ): IssueImportDeletePayload!
+  """
+  Kicks off import processing.
+  """
+  issueImportProcess(
+    """
+    ID of the issue import which we're going to process.
+    """
+    issueImportId: String!
+    """
+    The mapping configuration to use for processing the import.
+    """
+    mapping: JSONObject!
+  ): IssueImportPayload!
   """
   Archives an issue label.
   """
@@ -4302,19 +4365,6 @@ input NotificationUpdateInput {
   The time when notification was marked as read.
   """
   readAt: DateTime
-}
-"""
-GitHub OAuth token, plus information about the organizations the user is a member of.
-"""
-type OAuthTokenPayload {
-  """
-  A list of the GitHub orgs the user is a member of with attached repositories.
-  """
-  organizations: [GithubOrg!]
-  """
-  The OAuth token if the operation to fetch it was successful.
-  """
-  token: String
 }
 """
 OAuth2 client application
@@ -5826,7 +5876,7 @@ type Query {
     OAuth code.
     """
     code: String!
-  ): OAuthTokenPayload!
+  ): GithubOAuthTokenPayload!
   """
   One specific label.
   """
@@ -7667,7 +7717,7 @@ input TokenUserAccountAuthInput {
   token: String!
 }
 """
-How trashed issues should be loaded.
+How trashed models should be loaded.
 """
 enum TrashOptionType {
   excludeTrash
@@ -8261,6 +8311,10 @@ input ViewPreferencesCreateInput {
   """
   type: ViewPreferencesType!
   """
+  The user profile these view preferences are associated with.
+  """
+  userId: String
+  """
   The view type of the view preferences are associated with.
   """
   viewType: ViewType!
@@ -8309,6 +8363,7 @@ enum ViewType {
   project
   projects
   roadmap
+  userProfile
 }
 """
 A webhook used to send HTTP notifications over data updates

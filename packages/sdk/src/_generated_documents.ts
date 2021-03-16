@@ -884,16 +884,25 @@ export type FileUpload = {
   size: Scalars["Float"];
 };
 
+/** GitHub OAuth token, plus information about the organizations the user is a member of. */
+export type GithubOAuthTokenPayload = {
+  __typename?: "GithubOAuthTokenPayload";
+  /** A list of the GitHub organizations the user is a member of with attached repositories. */
+  organizations?: Maybe<Array<GithubOrg>>;
+  /** The OAuth token if the operation to fetch it was successful. */
+  token?: Maybe<Scalars["String"]>;
+};
+
 /** Relevant information for the GitHub organization. */
 export type GithubOrg = {
   __typename?: "GithubOrg";
-  /** GitHub org's id. */
+  /** GitHub organization id. */
   id: Scalars["String"];
-  /** The login for the GitHub org. */
+  /** The login for the GitHub organization. */
   login: Scalars["String"];
-  /** The name of the GitHub org. */
+  /** The name of the GitHub organization. */
   name: Scalars["String"];
-  /** Repositories that the org owns. */
+  /** Repositories that the organization owns. */
   repositories: Array<GithubRepo>;
 };
 
@@ -1421,6 +1430,8 @@ export type IssueImport = Node & {
   error?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The data mapping configuration for the import job. */
+  mapping?: Maybe<Scalars["JSONObject"]>;
   /** The service from which data will be imported. */
   service: Scalars["String"];
   /** The status for the import job. */
@@ -1440,6 +1451,16 @@ export type IssueImportDeletePayload = {
   lastSyncId: Scalars["Float"];
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** Issue import mapping input */
+export type IssueImportMappingInput = {
+  /** The mapping configuration for epics */
+  epics?: Maybe<Scalars["JSONObject"]>;
+  /** The mapping configuration for users */
+  users?: Maybe<Scalars["JSONObject"]>;
+  /** The mapping configuration for workflow states */
+  workflowStates?: Maybe<Scalars["JSONObject"]>;
 };
 
 export type IssueImportPayload = {
@@ -1855,6 +1876,8 @@ export type Mutation = {
   issueImportCreateJira: IssueImportPayload;
   /** Deletes an import job. */
   issueImportDelete: IssueImportDeletePayload;
+  /** Kicks off import processing. */
+  issueImportProcess: IssueImportPayload;
   /** Archives an issue label. */
   issueLabelArchive: ArchivePayload;
   /** Creates a new label. */
@@ -2232,12 +2255,14 @@ export type MutationIssueCreateArgs = {
 export type MutationIssueImportCreateAsanaArgs = {
   asanaTeamName: Scalars["String"];
   asanaToken: Scalars["String"];
+  instantProcess?: Maybe<Scalars["Boolean"]>;
   teamId: Scalars["String"];
 };
 
 export type MutationIssueImportCreateClubhouseArgs = {
   clubhouseTeamName: Scalars["String"];
   clubhouseToken: Scalars["String"];
+  instantProcess?: Maybe<Scalars["Boolean"]>;
   teamId: Scalars["String"];
 };
 
@@ -2246,10 +2271,12 @@ export type MutationIssueImportCreateGithubArgs = {
   githubRepoOwner: Scalars["String"];
   githubShouldImportOrgProjects?: Maybe<Scalars["Boolean"]>;
   githubToken: Scalars["String"];
+  instantProcess?: Maybe<Scalars["Boolean"]>;
   teamId: Scalars["String"];
 };
 
 export type MutationIssueImportCreateJiraArgs = {
+  instantProcess?: Maybe<Scalars["Boolean"]>;
   jiraEmail: Scalars["String"];
   jiraHostname: Scalars["String"];
   jiraProject: Scalars["String"];
@@ -2259,6 +2286,11 @@ export type MutationIssueImportCreateJiraArgs = {
 
 export type MutationIssueImportDeleteArgs = {
   issueImportId: Scalars["String"];
+};
+
+export type MutationIssueImportProcessArgs = {
+  issueImportId: Scalars["String"];
+  mapping: Scalars["JSONObject"];
 };
 
 export type MutationIssueLabelArchiveArgs = {
@@ -2706,15 +2738,6 @@ export type NotificationSubscriptionPayload = {
 export type NotificationUpdateInput = {
   /** The time when notification was marked as read. */
   readAt?: Maybe<Scalars["DateTime"]>;
-};
-
-/** GitHub OAuth token, plus information about the organizations the user is a member of. */
-export type OAuthTokenPayload = {
-  __typename?: "OAuthTokenPayload";
-  /** A list of the GitHub orgs the user is a member of with attached repositories. */
-  organizations?: Maybe<Array<GithubOrg>>;
-  /** The OAuth token if the operation to fetch it was successful. */
-  token?: Maybe<Scalars["String"]>;
 };
 
 /** OAuth2 client application */
@@ -3430,7 +3453,7 @@ export type Query = {
   /** One specific issue. */
   issue: Issue;
   /** Fetches the GitHub token, completing the OAuth flow. */
-  issueImportFinishGithubOAuth: OAuthTokenPayload;
+  issueImportFinishGithubOAuth: GithubOAuthTokenPayload;
   /** One specific label. */
   issueLabel: IssueLabel;
   /** All issue labels. */
@@ -4614,7 +4637,7 @@ export type TokenUserAccountAuthInput = {
   token: Scalars["String"];
 };
 
-/** How trashed issues should be loaded. */
+/** How trashed models should be loaded. */
 export enum TrashOptionType {
   ExcludeTrash = "excludeTrash",
   IncludeTrash = "includeTrash",
@@ -4978,6 +5001,8 @@ export type ViewPreferencesCreateInput = {
   teamId?: Maybe<Scalars["String"]>;
   /** The type of view preferences (either user or organization level preferences). */
   type: ViewPreferencesType;
+  /** The user profile these view preferences are associated with. */
+  userId?: Maybe<Scalars["String"]>;
   /** The view type of the view preferences are associated with. */
   viewType: ViewType;
 };
@@ -5018,6 +5043,7 @@ export enum ViewType {
   Project = "project",
   Projects = "projects",
   Roadmap = "roadmap",
+  UserProfile = "userProfile",
 }
 
 /** A webhook used to send HTTP notifications over data updates */
@@ -5393,7 +5419,7 @@ export type ProjectLinkFragment = { __typename?: "ProjectLink" } & Pick<
 
 export type IssueImportFragment = { __typename?: "IssueImport" } & Pick<
   IssueImport,
-  "creatorId" | "updatedAt" | "service" | "status" | "archivedAt" | "createdAt" | "id" | "error"
+  "mapping" | "creatorId" | "updatedAt" | "service" | "status" | "archivedAt" | "createdAt" | "id" | "error"
 >;
 
 export type IntegrationResourceFragment = { __typename?: "IntegrationResource" } & Pick<
@@ -5542,9 +5568,10 @@ export type OrganizationDomainFragment = { __typename?: "OrganizationDomain" } &
   "name" | "verificationEmail" | "verified" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
-export type OAuthTokenPayloadFragment = { __typename?: "OAuthTokenPayload" } & Pick<OAuthTokenPayload, "token"> & {
-    organizations?: Maybe<Array<{ __typename?: "GithubOrg" } & GithubOrgFragment>>;
-  };
+export type GithubOAuthTokenPayloadFragment = { __typename?: "GithubOAuthTokenPayload" } & Pick<
+  GithubOAuthTokenPayload,
+  "token"
+> & { organizations?: Maybe<Array<{ __typename?: "GithubOrg" } & GithubOrgFragment>> };
 
 export type CommitPayloadFragment = { __typename?: "CommitPayload" } & Pick<
   CommitPayload,
@@ -6751,7 +6778,7 @@ export type IssueImportFinishGithubOAuthQueryVariables = Exact<{
 }>;
 
 export type IssueImportFinishGithubOAuthQuery = { __typename?: "Query" } & {
-  issueImportFinishGithubOAuth: { __typename?: "OAuthTokenPayload" } & OAuthTokenPayloadFragment;
+  issueImportFinishGithubOAuth: { __typename?: "GithubOAuthTokenPayload" } & GithubOAuthTokenPayloadFragment;
 };
 
 export type IssueLabelQueryVariables = Exact<{
@@ -7985,6 +8012,7 @@ export type IssueCreateMutation = { __typename?: "Mutation" } & {
 export type IssueImportCreateAsanaMutationVariables = Exact<{
   asanaTeamName: Scalars["String"];
   asanaToken: Scalars["String"];
+  instantProcess?: Maybe<Scalars["Boolean"]>;
   teamId: Scalars["String"];
 }>;
 
@@ -7995,6 +8023,7 @@ export type IssueImportCreateAsanaMutation = { __typename?: "Mutation" } & {
 export type IssueImportCreateClubhouseMutationVariables = Exact<{
   clubhouseTeamName: Scalars["String"];
   clubhouseToken: Scalars["String"];
+  instantProcess?: Maybe<Scalars["Boolean"]>;
   teamId: Scalars["String"];
 }>;
 
@@ -8007,6 +8036,7 @@ export type IssueImportCreateGithubMutationVariables = Exact<{
   githubRepoOwner: Scalars["String"];
   githubShouldImportOrgProjects?: Maybe<Scalars["Boolean"]>;
   githubToken: Scalars["String"];
+  instantProcess?: Maybe<Scalars["Boolean"]>;
   teamId: Scalars["String"];
 }>;
 
@@ -8015,6 +8045,7 @@ export type IssueImportCreateGithubMutation = { __typename?: "Mutation" } & {
 };
 
 export type IssueImportCreateJiraMutationVariables = Exact<{
+  instantProcess?: Maybe<Scalars["Boolean"]>;
   jiraEmail: Scalars["String"];
   jiraHostname: Scalars["String"];
   jiraProject: Scalars["String"];
@@ -8032,6 +8063,15 @@ export type IssueImportDeleteMutationVariables = Exact<{
 
 export type IssueImportDeleteMutation = { __typename?: "Mutation" } & {
   issueImportDelete: { __typename?: "IssueImportDeletePayload" } & IssueImportDeletePayloadFragment;
+};
+
+export type IssueImportProcessMutationVariables = Exact<{
+  issueImportId: Scalars["String"];
+  mapping: Scalars["JSONObject"];
+}>;
+
+export type IssueImportProcessMutation = { __typename?: "Mutation" } & {
+  issueImportProcess: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
 };
 
 export type IssueLabelArchiveMutationVariables = Exact<{
@@ -8917,13 +8957,13 @@ export const GithubOrgFragmentDoc: DocumentNode<GithubOrgFragment, unknown> = {
     ...GithubRepoFragmentDoc.definitions,
   ],
 };
-export const OAuthTokenPayloadFragmentDoc: DocumentNode<OAuthTokenPayloadFragment, unknown> = {
+export const GithubOAuthTokenPayloadFragmentDoc: DocumentNode<GithubOAuthTokenPayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OAuthTokenPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OAuthTokenPayload" } },
+      name: { kind: "Name", value: "GithubOAuthTokenPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "GithubOAuthTokenPayload" } },
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -10978,6 +11018,7 @@ export const IssueImportFragmentDoc: DocumentNode<IssueImportFragment, unknown> 
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "mapping" } },
           { kind: "Field", name: { kind: "Name", value: "creatorId" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "service" } },
@@ -16769,13 +16810,13 @@ export const IssueImportFinishGithubOAuthDocument: DocumentNode<
             ],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OAuthTokenPayload" } }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "GithubOAuthTokenPayload" } }],
             },
           },
         ],
       },
     },
-    ...OAuthTokenPayloadFragmentDoc.definitions,
+    ...GithubOAuthTokenPayloadFragmentDoc.definitions,
   ],
 };
 export const IssueLabelDocument: DocumentNode<IssueLabelQuery, IssueLabelQueryVariables> = {
@@ -24448,6 +24489,11 @@ export const IssueImportCreateAsanaDocument: DocumentNode<
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -24468,6 +24514,11 @@ export const IssueImportCreateAsanaDocument: DocumentNode<
                 kind: "Argument",
                 name: { kind: "Name", value: "asanaToken" },
                 value: { kind: "Variable", name: { kind: "Name", value: "asanaToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "instantProcess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
               },
               {
                 kind: "Argument",
@@ -24509,6 +24560,11 @@ export const IssueImportCreateClubhouseDocument: DocumentNode<
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -24529,6 +24585,11 @@ export const IssueImportCreateClubhouseDocument: DocumentNode<
                 kind: "Argument",
                 name: { kind: "Name", value: "clubhouseToken" },
                 value: { kind: "Variable", name: { kind: "Name", value: "clubhouseToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "instantProcess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
               },
               {
                 kind: "Argument",
@@ -24580,6 +24641,11 @@ export const IssueImportCreateGithubDocument: DocumentNode<
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -24613,6 +24679,11 @@ export const IssueImportCreateGithubDocument: DocumentNode<
               },
               {
                 kind: "Argument",
+                name: { kind: "Name", value: "instantProcess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+              },
+              {
+                kind: "Argument",
                 name: { kind: "Name", value: "teamId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
@@ -24639,6 +24710,11 @@ export const IssueImportCreateJiraDocument: DocumentNode<
       operation: "mutation",
       name: { kind: "Name", value: "issueImportCreateJira" },
       variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
@@ -24672,6 +24748,11 @@ export const IssueImportCreateJiraDocument: DocumentNode<
             kind: "Field",
             name: { kind: "Name", value: "issueImportCreateJira" },
             arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "instantProcess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+              },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "jiraEmail" },
@@ -24745,6 +24826,57 @@ export const IssueImportDeleteDocument: DocumentNode<IssueImportDeleteMutation, 
       },
     },
     ...IssueImportDeletePayloadFragmentDoc.definitions,
+  ],
+};
+export const IssueImportProcessDocument: DocumentNode<
+  IssueImportProcessMutation,
+  IssueImportProcessMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportProcess" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "mapping" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "JSONObject" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportProcess" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueImportId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "mapping" },
+                value: { kind: "Variable", name: { kind: "Name", value: "mapping" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
   ],
 };
 export const IssueLabelArchiveDocument: DocumentNode<IssueLabelArchiveMutation, IssueLabelArchiveMutationVariables> = {

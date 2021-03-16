@@ -1381,6 +1381,24 @@ export class FileUpload extends Request {
   }
 }
 /**
+ * GitHub OAuth token, plus information about the organizations the user is a member of.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GithubOAuthTokenPayloadFragment response data
+ */
+export class GithubOAuthTokenPayload extends Request {
+  public constructor(request: LinearRequest, data: L.GithubOAuthTokenPayloadFragment) {
+    super(request);
+    this.token = data.token ?? undefined;
+    this.organizations = data.organizations ? data.organizations.map(node => new GithubOrg(request, node)) : undefined;
+  }
+
+  /** The OAuth token if the operation to fetch it was successful. */
+  public token?: string;
+  /** A list of the GitHub organizations the user is a member of with attached repositories. */
+  public organizations?: GithubOrg[];
+}
+/**
  * Relevant information for the GitHub organization.
  *
  * @param request - function to call the graphql client
@@ -1395,13 +1413,13 @@ export class GithubOrg extends Request {
     this.repositories = data.repositories ? data.repositories.map(node => new GithubRepo(request, node)) : undefined;
   }
 
-  /** GitHub org's id. */
+  /** GitHub organization id. */
   public id?: string;
-  /** The login for the GitHub org. */
+  /** The login for the GitHub organization. */
   public login?: string;
-  /** The name of the GitHub org. */
+  /** The name of the GitHub organization. */
   public name?: string;
-  /** Repositories that the org owns. */
+  /** Repositories that the organization owns. */
   public repositories?: GithubRepo[];
 }
 /**
@@ -2159,6 +2177,7 @@ export class IssueImport extends Request {
     this.creatorId = data.creatorId ?? undefined;
     this.error = data.error ?? undefined;
     this.id = data.id ?? undefined;
+    this.mapping = parseJson(data.mapping) ?? undefined;
     this.service = data.service ?? undefined;
     this.status = data.status ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
@@ -2174,6 +2193,8 @@ export class IssueImport extends Request {
   public error?: string;
   /** The unique identifier of the entity. */
   public id?: string;
+  /** The data mapping configuration for the import job. */
+  public mapping?: Record<string, unknown>;
   /** The service from which data will be imported. */
   public service?: string;
   /** The status for the import job. */
@@ -2805,24 +2826,6 @@ export class NotificationSubscriptionPayload extends Request {
       ? new NotificationSubscriptionQuery(this._request).fetch(this._notificationSubscription?.id)
       : undefined;
   }
-}
-/**
- * GitHub OAuth token, plus information about the organizations the user is a member of.
- *
- * @param request - function to call the graphql client
- * @param data - L.OAuthTokenPayloadFragment response data
- */
-export class OAuthTokenPayload extends Request {
-  public constructor(request: LinearRequest, data: L.OAuthTokenPayloadFragment) {
-    super(request);
-    this.token = data.token ?? undefined;
-    this.organizations = data.organizations ? data.organizations.map(node => new GithubOrg(request, node)) : undefined;
-  }
-
-  /** The OAuth token if the operation to fetch it was successful. */
-  public token?: string;
-  /** A list of the GitHub orgs the user is a member of with attached repositories. */
-  public organizations?: GithubOrg[];
 }
 /**
  * OAuth2 client application
@@ -5984,12 +5987,12 @@ export class IssueImportFinishGithubOAuthQuery extends Request {
   }
 
   /**
-   * Call the IssueImportFinishGithubOAuth query and return a OAuthTokenPayload
+   * Call the IssueImportFinishGithubOAuth query and return a GithubOAuthTokenPayload
    *
    * @param code - required code to pass to issueImportFinishGithubOAuth
    * @returns parsed response from IssueImportFinishGithubOAuthQuery
    */
-  public async fetch(code: string): LinearFetch<OAuthTokenPayload> {
+  public async fetch(code: string): LinearFetch<GithubOAuthTokenPayload> {
     return this._request<L.IssueImportFinishGithubOAuthQuery, L.IssueImportFinishGithubOAuthQueryVariables>(
       L.IssueImportFinishGithubOAuthDocument,
       {
@@ -5997,7 +6000,7 @@ export class IssueImportFinishGithubOAuthQuery extends Request {
       }
     ).then(response => {
       const data = response?.issueImportFinishGithubOAuth;
-      return data ? new OAuthTokenPayload(this._request, data) : undefined;
+      return data ? new GithubOAuthTokenPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8555,15 +8558,22 @@ export class IssueImportCreateAsanaMutation extends Request {
    * @param asanaTeamName - required asanaTeamName to pass to issueImportCreateAsana
    * @param asanaToken - required asanaToken to pass to issueImportCreateAsana
    * @param teamId - required teamId to pass to issueImportCreateAsana
+   * @param variables - variables without 'asanaTeamName', 'asanaToken', 'teamId' to pass into the IssueImportCreateAsanaMutation
    * @returns parsed response from IssueImportCreateAsanaMutation
    */
-  public async fetch(asanaTeamName: string, asanaToken: string, teamId: string): LinearFetch<IssueImportPayload> {
+  public async fetch(
+    asanaTeamName: string,
+    asanaToken: string,
+    teamId: string,
+    variables?: Omit<L.IssueImportCreateAsanaMutationVariables, "asanaTeamName" | "asanaToken" | "teamId">
+  ): LinearFetch<IssueImportPayload> {
     return this._request<L.IssueImportCreateAsanaMutation, L.IssueImportCreateAsanaMutationVariables>(
       L.IssueImportCreateAsanaDocument,
       {
         asanaTeamName,
         asanaToken,
         teamId,
+        ...variables,
       }
     ).then(response => {
       const data = response?.issueImportCreateAsana;
@@ -8588,12 +8598,14 @@ export class IssueImportCreateClubhouseMutation extends Request {
    * @param clubhouseTeamName - required clubhouseTeamName to pass to issueImportCreateClubhouse
    * @param clubhouseToken - required clubhouseToken to pass to issueImportCreateClubhouse
    * @param teamId - required teamId to pass to issueImportCreateClubhouse
+   * @param variables - variables without 'clubhouseTeamName', 'clubhouseToken', 'teamId' to pass into the IssueImportCreateClubhouseMutation
    * @returns parsed response from IssueImportCreateClubhouseMutation
    */
   public async fetch(
     clubhouseTeamName: string,
     clubhouseToken: string,
-    teamId: string
+    teamId: string,
+    variables?: Omit<L.IssueImportCreateClubhouseMutationVariables, "clubhouseTeamName" | "clubhouseToken" | "teamId">
   ): LinearFetch<IssueImportPayload> {
     return this._request<L.IssueImportCreateClubhouseMutation, L.IssueImportCreateClubhouseMutationVariables>(
       L.IssueImportCreateClubhouseDocument,
@@ -8601,6 +8613,7 @@ export class IssueImportCreateClubhouseMutation extends Request {
         clubhouseTeamName,
         clubhouseToken,
         teamId,
+        ...variables,
       }
     ).then(response => {
       const data = response?.issueImportCreateClubhouse;
@@ -8673,6 +8686,7 @@ export class IssueImportCreateJiraMutation extends Request {
    * @param jiraProject - required jiraProject to pass to issueImportCreateJira
    * @param jiraToken - required jiraToken to pass to issueImportCreateJira
    * @param teamId - required teamId to pass to issueImportCreateJira
+   * @param variables - variables without 'jiraEmail', 'jiraHostname', 'jiraProject', 'jiraToken', 'teamId' to pass into the IssueImportCreateJiraMutation
    * @returns parsed response from IssueImportCreateJiraMutation
    */
   public async fetch(
@@ -8680,7 +8694,11 @@ export class IssueImportCreateJiraMutation extends Request {
     jiraHostname: string,
     jiraProject: string,
     jiraToken: string,
-    teamId: string
+    teamId: string,
+    variables?: Omit<
+      L.IssueImportCreateJiraMutationVariables,
+      "jiraEmail" | "jiraHostname" | "jiraProject" | "jiraToken" | "teamId"
+    >
   ): LinearFetch<IssueImportPayload> {
     return this._request<L.IssueImportCreateJiraMutation, L.IssueImportCreateJiraMutationVariables>(
       L.IssueImportCreateJiraDocument,
@@ -8690,6 +8708,7 @@ export class IssueImportCreateJiraMutation extends Request {
         jiraProject,
         jiraToken,
         teamId,
+        ...variables,
       }
     ).then(response => {
       const data = response?.issueImportCreateJira;
@@ -8723,6 +8742,37 @@ export class IssueImportDeleteMutation extends Request {
     ).then(response => {
       const data = response?.issueImportDelete;
       return data ? new IssueImportDeletePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IssueImportProcess Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportProcessMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportProcess mutation and return a IssueImportPayload
+   *
+   * @param issueImportId - required issueImportId to pass to issueImportProcess
+   * @param mapping - required mapping to pass to issueImportProcess
+   * @returns parsed response from IssueImportProcessMutation
+   */
+  public async fetch(issueImportId: string, mapping: Record<string, unknown>): LinearFetch<IssueImportPayload> {
+    return this._request<L.IssueImportProcessMutation, L.IssueImportProcessMutationVariables>(
+      L.IssueImportProcessDocument,
+      {
+        issueImportId,
+        mapping,
+      }
+    ).then(response => {
+      const data = response?.issueImportProcess;
+      return data ? new IssueImportPayload(this._request, data) : undefined;
     });
   }
 }
@@ -13384,9 +13434,9 @@ export class LinearSdk extends Request {
    * Fetches the GitHub token, completing the OAuth flow.
    *
    * @param code - required code to pass to issueImportFinishGithubOAuth
-   * @returns OAuthTokenPayload
+   * @returns GithubOAuthTokenPayload
    */
-  public issueImportFinishGithubOAuth(code: string): LinearFetch<OAuthTokenPayload> {
+  public issueImportFinishGithubOAuth(code: string): LinearFetch<GithubOAuthTokenPayload> {
     return new IssueImportFinishGithubOAuthQuery(this._request).fetch(code);
   }
   /**
@@ -14281,14 +14331,16 @@ export class LinearSdk extends Request {
    * @param asanaTeamName - required asanaTeamName to pass to issueImportCreateAsana
    * @param asanaToken - required asanaToken to pass to issueImportCreateAsana
    * @param teamId - required teamId to pass to issueImportCreateAsana
+   * @param variables - variables without 'asanaTeamName', 'asanaToken', 'teamId' to pass into the IssueImportCreateAsanaMutation
    * @returns IssueImportPayload
    */
   public issueImportCreateAsana(
     asanaTeamName: string,
     asanaToken: string,
-    teamId: string
+    teamId: string,
+    variables?: Omit<L.IssueImportCreateAsanaMutationVariables, "asanaTeamName" | "asanaToken" | "teamId">
   ): LinearFetch<IssueImportPayload> {
-    return new IssueImportCreateAsanaMutation(this._request).fetch(asanaTeamName, asanaToken, teamId);
+    return new IssueImportCreateAsanaMutation(this._request).fetch(asanaTeamName, asanaToken, teamId, variables);
   }
   /**
    * Kicks off a Clubhouse import job.
@@ -14296,14 +14348,21 @@ export class LinearSdk extends Request {
    * @param clubhouseTeamName - required clubhouseTeamName to pass to issueImportCreateClubhouse
    * @param clubhouseToken - required clubhouseToken to pass to issueImportCreateClubhouse
    * @param teamId - required teamId to pass to issueImportCreateClubhouse
+   * @param variables - variables without 'clubhouseTeamName', 'clubhouseToken', 'teamId' to pass into the IssueImportCreateClubhouseMutation
    * @returns IssueImportPayload
    */
   public issueImportCreateClubhouse(
     clubhouseTeamName: string,
     clubhouseToken: string,
-    teamId: string
+    teamId: string,
+    variables?: Omit<L.IssueImportCreateClubhouseMutationVariables, "clubhouseTeamName" | "clubhouseToken" | "teamId">
   ): LinearFetch<IssueImportPayload> {
-    return new IssueImportCreateClubhouseMutation(this._request).fetch(clubhouseTeamName, clubhouseToken, teamId);
+    return new IssueImportCreateClubhouseMutation(this._request).fetch(
+      clubhouseTeamName,
+      clubhouseToken,
+      teamId,
+      variables
+    );
   }
   /**
    * Kicks off a GitHub import job.
@@ -14341,6 +14400,7 @@ export class LinearSdk extends Request {
    * @param jiraProject - required jiraProject to pass to issueImportCreateJira
    * @param jiraToken - required jiraToken to pass to issueImportCreateJira
    * @param teamId - required teamId to pass to issueImportCreateJira
+   * @param variables - variables without 'jiraEmail', 'jiraHostname', 'jiraProject', 'jiraToken', 'teamId' to pass into the IssueImportCreateJiraMutation
    * @returns IssueImportPayload
    */
   public issueImportCreateJira(
@@ -14348,14 +14408,19 @@ export class LinearSdk extends Request {
     jiraHostname: string,
     jiraProject: string,
     jiraToken: string,
-    teamId: string
+    teamId: string,
+    variables?: Omit<
+      L.IssueImportCreateJiraMutationVariables,
+      "jiraEmail" | "jiraHostname" | "jiraProject" | "jiraToken" | "teamId"
+    >
   ): LinearFetch<IssueImportPayload> {
     return new IssueImportCreateJiraMutation(this._request).fetch(
       jiraEmail,
       jiraHostname,
       jiraProject,
       jiraToken,
-      teamId
+      teamId,
+      variables
     );
   }
   /**
@@ -14366,6 +14431,16 @@ export class LinearSdk extends Request {
    */
   public issueImportDelete(issueImportId: string): LinearFetch<IssueImportDeletePayload> {
     return new IssueImportDeleteMutation(this._request).fetch(issueImportId);
+  }
+  /**
+   * Kicks off import processing.
+   *
+   * @param issueImportId - required issueImportId to pass to issueImportProcess
+   * @param mapping - required mapping to pass to issueImportProcess
+   * @returns IssueImportPayload
+   */
+  public issueImportProcess(issueImportId: string, mapping: Record<string, unknown>): LinearFetch<IssueImportPayload> {
+    return new IssueImportProcessMutation(this._request).fetch(issueImportId, mapping);
   }
   /**
    * Archives an issue label.
