@@ -646,10 +646,10 @@ describe("generated", () => {
   describe("IssueImportFinishGithubOAuth", () => {
     /** Test the root model query for IssueImportFinishGithubOAuth */
     it("issueImportFinishGithubOAuth", async () => {
-      const issueImportFinishGithubOAuth: L.OAuthTokenPayload | undefined = await client.issueImportFinishGithubOAuth(
-        "mock-code"
-      );
-      expect(issueImportFinishGithubOAuth instanceof L.OAuthTokenPayload);
+      const issueImportFinishGithubOAuth:
+        | L.GithubOAuthTokenPayload
+        | undefined = await client.issueImportFinishGithubOAuth("mock-code");
+      expect(issueImportFinishGithubOAuth instanceof L.GithubOAuthTokenPayload);
     });
   });
 
