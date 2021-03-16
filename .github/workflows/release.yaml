@@ -29,6 +29,13 @@ jobs:
       - name: Run tests
         run: yarn test:ci
 
+      - name: Compare schema for changes
+        uses: kamilkisiela/graphql-inspector@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          schema: "master:packages/sdk/src/schema.graphql"
+          fail-on-breaking: false
+
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
 
