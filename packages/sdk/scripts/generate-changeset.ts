@@ -6,7 +6,14 @@ import { UrlLoader } from "@graphql-tools/url-loader";
 import { writeFileSync } from "fs";
 import path from "path";
 
+const levelOrder = {
+  [CriticalityLevel.Breaking]: 2,
+  [CriticalityLevel.Dangerous]: 1,
+  [CriticalityLevel.NonBreaking]: 0,
+};
+
 async function generateChangeset() {
+  /** Load main schema from github */
   const mainSchema = await loadSchema(
     "https://raw.githubusercontent.com/linear/linear/master/packages/sdk/src/schema.graphql",
     {
@@ -14,24 +21,34 @@ async function generateChangeset() {
     }
   );
 
+  /** Load branch schema from path */
   const branchSchema = await loadSchema(path.resolve("./src/schema.graphql"), {
     loaders: [new GraphQLFileLoader()],
   });
 
-  const changes = diff(mainSchema, branchSchema);
+  /** Calculate diff between main and branch schemas */
+  const changes = diff(mainSchema, branchSchema).sort((a, b) => {
+    return levelOrder[b.criticality.level] - levelOrder[a.criticality.level];
+  });
 
-  const changeLevel = changes.some(change => change.criticality.level === CriticalityLevel.Breaking)
-    ? "major"
-    : "minor";
-
-  writeFileSync(
-    path.resolve("../../.changeset/_generated.md"),
-    `---
-"@linear/sdk": ${changeLevel}
+  /** If we have changes, write to changeset file */
+  if (changes.length) {
+    writeFileSync(
+      path.resolve("../../.changeset/_generated.md"),
+      `---
+"@linear/sdk": minor
 ---
   
-${changes.map(change => `feat(schema): ${change.message}${change.path ? ` (${change.path})` : ""}`).join("\n")}`
-  );
+${changes
+  .map(
+    change =>
+      `feat(schema): [${change.criticality.level.toLowerCase()}] ${change.message}${
+        change.path ? ` (${change.path})` : ""
+      }`
+  )
+  .join("\n")}`
+    );
+  }
 
   return changes;
 }
