@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.5.5
+
+### Patch Changes
+
+- ef6ca3b: fix(import): create name for Trello labels with no name
+- Updated dependencies [7a42d64]
+- Updated dependencies [4976448]
+  - @linear/sdk@1.9.0
+
 ## 1.5.4
 
 ### Patch Changes

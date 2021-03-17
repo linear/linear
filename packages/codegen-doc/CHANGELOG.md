@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.8.0
+
+### Minor Changes
+
+- 4976448: Change TimelessDateScalar from Date to string type
+
 ## 1.7.4
 
 ### Patch Changes
