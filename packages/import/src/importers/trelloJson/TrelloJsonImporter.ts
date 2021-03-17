@@ -61,7 +61,8 @@ export class TrelloJsonImporter implements Importer {
       const allLabels = card.labels.map(label => ({
         id: label.id,
         color: mapLabelColor(label.color),
-        name: label.name,
+        // Trello allows labels with no name and only a color value, but we must specify a name
+        name: label.name || `Trello-${label.color}`,
       }));
 
       for (const label of allLabels) {
