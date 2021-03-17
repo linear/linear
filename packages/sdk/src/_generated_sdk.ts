@@ -2666,10 +2666,6 @@ export class Notification extends Request {
   public archive() {
     return this.id ? new NotificationArchiveMutation(this._request).fetch(this.id) : undefined;
   }
-  /** [Deprecated] Deletes a notification. */
-  public delete() {
-    return this.id ? new NotificationDeleteMutation(this._request).fetch(this.id) : undefined;
-  }
   /** Unarchives a notification. */
   public unarchive() {
     return this.id ? new NotificationUnarchiveMutation(this._request).fetch(this.id) : undefined;
@@ -9202,35 +9198,6 @@ export class NotificationCreateMutation extends Request {
 }
 
 /**
- * A fetchable NotificationDelete Mutation
- *
- * @param request - function to call the graphql client
- */
-export class NotificationDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the NotificationDelete mutation and return a ArchivePayload
-   *
-   * @param id - required id to pass to notificationDelete
-   * @returns parsed response from NotificationDeleteMutation
-   */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.NotificationDeleteMutation, L.NotificationDeleteMutationVariables>(
-      L.NotificationDeleteDocument,
-      {
-        id,
-      }
-    ).then(response => {
-      const data = response?.notificationDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
  * A fetchable NotificationSubscriptionCreate Mutation
  *
  * @param request - function to call the graphql client
@@ -14581,15 +14548,6 @@ export class LinearSdk extends Request {
    */
   public notificationCreate(id: string, input: L.NotificationUpdateInput): LinearFetch<NotificationPayload> {
     return new NotificationCreateMutation(this._request).fetch(id, input);
-  }
-  /**
-   * [Deprecated] Deletes a notification.
-   *
-   * @param id - required id to pass to notificationDelete
-   * @returns ArchivePayload
-   */
-  public notificationDelete(id: string): LinearFetch<ArchivePayload> {
-    return new NotificationDeleteMutation(this._request).fetch(id);
   }
   /**
    * Creates a new notification subscription for a team or a project.

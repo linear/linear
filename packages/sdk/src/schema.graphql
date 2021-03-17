@@ -3575,15 +3575,6 @@ type Mutation {
     input: NotificationUpdateInput!
   ): NotificationPayload!
   """
-  [Deprecated] Deletes a notification.
-  """
-  notificationDelete(
-    """
-    The identifier of the notification to delete.
-    """
-    id: String!
-  ): ArchivePayload!
-  """
   Creates a new notification subscription for a team or a project.
   """
   notificationSubscriptionCreate(

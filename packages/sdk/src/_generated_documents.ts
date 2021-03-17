@@ -1908,8 +1908,6 @@ export type Mutation = {
   notificationArchive: ArchivePayload;
   /** Creates a notification. */
   notificationCreate: NotificationPayload;
-  /** [Deprecated] Deletes a notification. */
-  notificationDelete: ArchivePayload;
   /** Creates a new notification subscription for a team or a project. */
   notificationSubscriptionCreate: NotificationSubscriptionPayload;
   /** Deletes a notification subscription reference. */
@@ -2356,10 +2354,6 @@ export type MutationNotificationArchiveArgs = {
 export type MutationNotificationCreateArgs = {
   id: Scalars["String"];
   input: NotificationUpdateInput;
-};
-
-export type MutationNotificationDeleteArgs = {
-  id: Scalars["String"];
 };
 
 export type MutationNotificationSubscriptionCreateArgs = {
@@ -8199,14 +8193,6 @@ export type NotificationCreateMutationVariables = Exact<{
 
 export type NotificationCreateMutation = { __typename?: "Mutation" } & {
   notificationCreate: { __typename?: "NotificationPayload" } & NotificationPayloadFragment;
-};
-
-export type NotificationDeleteMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type NotificationDeleteMutation = { __typename?: "Mutation" } & {
-  notificationDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
 export type NotificationSubscriptionCreateMutationVariables = Exact<{
@@ -25543,47 +25529,6 @@ export const NotificationCreateDocument: DocumentNode<
       },
     },
     ...NotificationPayloadFragmentDoc.definitions,
-  ],
-};
-export const NotificationDeleteDocument: DocumentNode<
-  NotificationDeleteMutation,
-  NotificationDeleteMutationVariables
-> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "notificationDelete" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notificationDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
   ],
 };
 export const NotificationSubscriptionCreateDocument: DocumentNode<
