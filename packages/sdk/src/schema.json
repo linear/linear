@@ -31610,39 +31610,6 @@
             "deprecationReason": null
           },
           {
-            "name": "notificationDelete",
-            "description": "[Deprecated] Deletes a notification.",
-            "args": [
-              {
-                "name": "id",
-                "description": "The identifier of the notification to delete.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ArchivePayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "notificationArchive",
             "description": "Archives a notification.",
             "args": [

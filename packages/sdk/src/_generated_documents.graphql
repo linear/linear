@@ -5480,15 +5480,6 @@ mutation notificationCreate(
     ...NotificationPayload
   }
 }
-# [Deprecated] Deletes a notification.
-mutation notificationDelete(
-  # The identifier of the notification to delete.
-  $id: String!
-) {
-  notificationDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
 # Creates a new notification subscription for a team or a project.
 mutation notificationSubscriptionCreate(
   # The subscription object to create.
