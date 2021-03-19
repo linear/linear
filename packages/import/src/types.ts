@@ -18,6 +18,8 @@ export interface Issue {
   url?: string;
   /** When the issue was created. */
   createdAt?: Date;
+  /** When the issue is due. This is a date string of the format yyyy-MM-dd. */
+  dueDate?: Date;
 }
 
 /** Issue comment */
