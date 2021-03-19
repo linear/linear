@@ -72,6 +72,8 @@ export class AsanaCsvImporter implements Importer {
 
       const priority = mapPriority(row.Priority);
 
+      const dueDate = row["Due Date"] ? new Date(row["Due Date"]) : undefined;
+
       const tags = row.Tags.split(",");
 
       const assigneeId = row.Assignee && row.Assignee.length > 0 ? row.Assignee : undefined;
@@ -88,6 +90,7 @@ export class AsanaCsvImporter implements Importer {
         url,
         assigneeId,
         labels,
+        dueDate,
       });
 
       for (const lab of labels) {

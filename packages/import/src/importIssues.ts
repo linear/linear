@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { LinearClient } from "@linear/sdk";
+import { format } from "date-fns";
 import chalk from "chalk";
 import * as inquirer from "inquirer";
 import _ from "lodash";
@@ -239,6 +240,8 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
         ? importAnswers.targetAssignee
         : undefined;
 
+    const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
+
     await client.issueCreate({
       teamId,
       projectId: (projectId as unknown) as string,
@@ -248,6 +251,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       labelIds,
       stateId,
       assigneeId,
+      dueDate: formattedDueDate,
     });
   }
 
