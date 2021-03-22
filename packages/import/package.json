@@ -19,7 +19,7 @@
     "dist"
   ],
   "scripts": {
-    "cli": "npx ts-node src/cli",
+    "cli": "ts-node -r tsconfig-paths/register src/cli",
     "dev:import": "NODE_ENV=development yarn build:import",
     "build:import": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",
@@ -46,7 +46,8 @@
     "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-size-snapshot": "^0.12.0",
     "rollup-plugin-terser": "^7.0.2",
-    "ts-node": "^9.1.1"
+    "ts-node": "^9.1.1",
+    "tsconfig-paths": "^3.9.0"
   },
   "publishConfig": {
     "access": "public"
