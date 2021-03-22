@@ -23121,7 +23121,7 @@
           },
           {
             "name": "key",
-            "description": "The key of the team. If not given, rc key will be generated based on the name of the team.",
+            "description": "The key of the team. If not given, the key will be generated based on the name of the team.",
             "type": {
               "kind": "SCALAR",
               "name": "String",

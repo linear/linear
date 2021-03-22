@@ -7314,7 +7314,7 @@ input TeamCreateInput {
   """
   issueEstimationType: String
   """
-  The key of the team. If not given, rc key will be generated based on the name of the team.
+  The key of the team. If not given, the key will be generated based on the name of the team.
   """
   key: String
   """
