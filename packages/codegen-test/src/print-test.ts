@@ -150,9 +150,13 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
 
   const connectionType = getConnectionNode(operation)?.listType;
 
-  const itemOperation = context.sdkDefinitions[sdkKey].operations.find(sdkOperation => {
-    return sdkOperation.print.model === connectionType;
-  });
+  /** Find item that matches type and start of name, or just type */
+  const sdkOperations = context.sdkDefinitions[sdkKey].operations;
+  const matchesType = (sdkOperation: SdkOperation) => sdkOperation.print.model === connectionType;
+  const itemOperation =
+    sdkOperations.find(sdkOperation => matchesType(sdkOperation) && fieldName.startsWith(sdkOperation.print.field)) ??
+    sdkOperations.find(matchesType);
+
   const itemField = itemOperation?.print.field;
   const itemSdkKey = itemOperation?.path.join("_");
   const itemOperations = itemSdkKey ? context.sdkDefinitions[itemSdkKey]?.operations ?? [] : [];

@@ -19,7 +19,7 @@
     "dist"
   ],
   "scripts": {
-    "cli": "npx ts-node src/cli",
+    "cli": "ts-node src/cli",
     "dev:import": "NODE_ENV=development yarn build:import",
     "build:import": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",
