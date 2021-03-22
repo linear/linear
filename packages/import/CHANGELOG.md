@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.5.6
+
+### Patch Changes
+
+- 261a562: feat(import): adding due dates to Asana importer
+
 ## 1.5.5
 
 ### Patch Changes
