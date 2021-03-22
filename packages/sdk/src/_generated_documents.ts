@@ -4384,7 +4384,7 @@ export type TeamCreateInput = {
   issueEstimationExtended?: Maybe<Scalars["Boolean"]>;
   /** The issue estimation type to use. */
   issueEstimationType?: Maybe<Scalars["String"]>;
-  /** The key of the team. If not given, rc key will be generated based on the name of the team. */
+  /** The key of the team. If not given, the key will be generated based on the name of the team. */
   key?: Maybe<Scalars["String"]>;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. */
   markedAsDuplicateWorkflowStateId?: Maybe<Scalars["String"]>;
