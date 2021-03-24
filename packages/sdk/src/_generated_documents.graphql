@@ -223,7 +223,9 @@ fragment Reaction on Reaction {
 # A record of changes to an issue.
 fragment IssueHistory on IssueHistory {
   # Changed issue relationships.
-  relationChanges
+  relationChanges {
+    ...IssueRelationHistoryPayload
+  }
   # ID's of labels that were added.
   addedLabelIds
   # ID's of labels that were removed.
@@ -1048,6 +1050,14 @@ fragment IntegrationResourceData on IntegrationResourceData {
   sentryIssue {
     ...SentryIssuePayload
   }
+}
+
+# Issue relation history's payload
+fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
+  # The identifier of the related issue.
+  identifier
+  # The type of the change.
+  type
 }
 
 # Labels that can be associated with issues.

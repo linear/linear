@@ -2155,7 +2155,7 @@ type IssueHistory implements Node {
   """
   Changed issue relationships.
   """
-  relationChanges: String
+  relationChanges: [IssueRelationHistoryPayload!]
   """
   ID's of labels that were removed.
   """
@@ -2533,6 +2533,19 @@ type IssueRelationEdge {
   """
   cursor: String!
   node: IssueRelation!
+}
+"""
+Issue relation history's payload
+"""
+type IssueRelationHistoryPayload {
+  """
+  The identifier of the related issue.
+  """
+  identifier: String!
+  """
+  The type of the change.
+  """
+  type: String!
 }
 type IssueRelationPayload {
   """
