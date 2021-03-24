@@ -3,7 +3,7 @@ import path from "path";
 import { promisify } from "util";
 import { logger, printLines } from "../../codegen-doc/src/index";
 
-const filename = path.resolve(`../../.changeset/_generated_dependencies_${Math.ceil(Math.random() * 100000000)}.md`);
+const filename = path.resolve(`../../.changeset/_generated_dependencies.md`);
 
 const changeset = printLines([
   "---",
