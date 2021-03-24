@@ -32,9 +32,6 @@ jobs:
       - name: Run tests
         run: yarn test:ci
 
-      - name: Add empty changeset for editing later
-        run: yarn changeset add --empty
-
       - name: Create dependencies pull request
         uses: peter-evans/create-pull-request@v3
         with:

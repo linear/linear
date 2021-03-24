@@ -1,21 +1,25 @@
-import { writeFileSync } from "fs";
+import { writeFile } from "fs";
 import path from "path";
-import { logger } from "../../codegen-doc/src/index";
+import { promisify } from "util";
+import { logger, printLines } from "../../codegen-doc/src/index";
 
+const filename = path.resolve(`../../.changeset/_generated_dependencies.md`);
+
+const changeset = printLines([
+  "---",
+  '"@linear/sdk": patch',
+  '"@linear/import": patch',
+  '"@linear/codegen-doc": patch',
+  '"@linear/codegen-sdk": patch',
+  '"@linear/codegen-test": patch',
+  "---",
+]);
+
+/**
+ * Generate a changeset file for updating patch dependencies
+ */
 async function generateChangeset() {
-  writeFileSync(
-    path.resolve("../../.changeset/_generated_dependencies.md"),
-    `---
-"@linear/sdk": patch
-"@linear/import": patch
-"@linear/codegen-doc": patch
-"@linear/codegen-sdk": patch
-"@linear/codegen-test": patch
----
-  
-chore(deps): update dependency patch versions
-`
-  );
+  await promisify(writeFile)(filename, printLines([changeset, "\n", "chore(deps): update dependency patch versions"]));
 }
 
 generateChangeset()

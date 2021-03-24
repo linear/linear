@@ -39,9 +39,6 @@ jobs:
           schema: "master:packages/sdk/src/schema.graphql"
           fail-on-breaking: false
 
-      - name: Add empty changeset for editing later
-        run: yarn changeset add --empty
-
       - name: Create schema pull request
         uses: peter-evans/create-pull-request@v3
         with:
