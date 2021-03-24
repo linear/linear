@@ -13,7 +13,7 @@ const levelOrder = {
   [CriticalityLevel.NonBreaking]: 0,
 };
 
-const filename = path.resolve(`../../.changeset/_generated_schema+${Math.ceil(Math.random() * 100000000)}.md`);
+const filename = path.resolve(`../../.changeset/_generated_schema_${Math.ceil(Math.random() * 100000000)}.md`);
 
 const changeset = printLines(["---", '"@linear/sdk": minor', "---"]);
 
