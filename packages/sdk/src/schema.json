@@ -7568,6 +7568,18 @@
             "deprecationReason": null
           },
           {
+            "name": "startDate",
+            "description": "[Internal] The estimated start date of the project.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDateScalar",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetDate",
             "description": "The estimated completion date of the project.",
             "args": [],
@@ -8263,6 +8275,49 @@
       },
       {
         "kind": "OBJECT",
+        "name": "IssueRelationHistoryPayload",
+        "description": "Issue relation history's payload",
+        "fields": [
+          {
+            "name": "identifier",
+            "description": "The identifier of the related issue.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The type of the change.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "IssueHistory",
         "description": "A record of changes to an issue.",
         "fields": [
@@ -8651,9 +8706,17 @@
             "description": "Changed issue relationships.",
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "IssueRelationHistoryPayload",
+                  "ofType": null
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -22615,6 +22678,18 @@
             "deprecationReason": null
           },
           {
+            "name": "startDate",
+            "description": "[Internal] The planned start date of the project.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDateScalar",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetDate",
             "description": "The planned target date of the project.",
             "type": {
@@ -22768,6 +22843,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startDate",
+            "description": "[Internal] The planned start date of the project.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDateScalar",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,

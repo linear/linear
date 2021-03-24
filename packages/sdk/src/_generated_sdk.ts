@@ -2019,7 +2019,6 @@ export class IssueHistory extends Request {
     this.fromPriority = data.fromPriority ?? undefined;
     this.fromTitle = data.fromTitle ?? undefined;
     this.id = data.id ?? undefined;
-    this.relationChanges = data.relationChanges ?? undefined;
     this.removedLabelIds = data.removedLabelIds ?? undefined;
     this.source = parseJson(data.source) ?? undefined;
     this.toDueDate = data.toDueDate ?? undefined;
@@ -2028,6 +2027,9 @@ export class IssueHistory extends Request {
     this.toTitle = data.toTitle ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.updatedDescription = data.updatedDescription ?? undefined;
+    this.relationChanges = data.relationChanges
+      ? data.relationChanges.map(node => new IssueRelationHistoryPayload(request, node))
+      : undefined;
     this._actor = data.actor ?? undefined;
     this._fromAssignee = data.fromAssignee ?? undefined;
     this._fromCycle = data.fromCycle ?? undefined;
@@ -2064,8 +2066,6 @@ export class IssueHistory extends Request {
   public fromTitle?: string;
   /** The unique identifier of the entity. */
   public id?: string;
-  /** Changed issue relationships. */
-  public relationChanges?: string;
   /** ID's of labels that were removed. */
   public removedLabelIds?: string[];
   /** Information about the integration or application which created this history entry. */
@@ -2085,6 +2085,8 @@ export class IssueHistory extends Request {
   public updatedAt?: Date;
   /** Whether the issue's description was updated. */
   public updatedDescription?: boolean;
+  /** Changed issue relationships. */
+  public relationChanges?: IssueRelationHistoryPayload[];
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -2474,6 +2476,24 @@ export class IssueRelationConnection extends Connection<IssueRelation> {
       data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
     );
   }
+}
+/**
+ * Issue relation history's payload
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueRelationHistoryPayloadFragment response data
+ */
+export class IssueRelationHistoryPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueRelationHistoryPayloadFragment) {
+    super(request);
+    this.identifier = data.identifier ?? undefined;
+    this.type = data.type ?? undefined;
+  }
+
+  /** The identifier of the related issue. */
+  public identifier?: string;
+  /** The type of the change. */
+  public type?: string;
 }
 /**
  * IssueRelationPayload model
@@ -3318,6 +3338,7 @@ export class Project extends Request {
     this.slackNewIssue = data.slackNewIssue ?? undefined;
     this.slugId = data.slugId ?? undefined;
     this.sortOrder = data.sortOrder ?? undefined;
+    this.startDate = data.startDate ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state ?? undefined;
     this.targetDate = data.targetDate ?? undefined;
@@ -3363,6 +3384,8 @@ export class Project extends Request {
   public slugId?: string;
   /** The sort order for the project within its milestone. */
   public sortOrder?: number;
+  /** [Internal] The estimated start date of the project. */
+  public startDate?: string;
   /** The time at which the project was moved into started state. */
   public startedAt?: Date;
   /** The type of the state. */

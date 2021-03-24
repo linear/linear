@@ -2155,7 +2155,7 @@ type IssueHistory implements Node {
   """
   Changed issue relationships.
   """
-  relationChanges: String
+  relationChanges: [IssueRelationHistoryPayload!]
   """
   ID's of labels that were removed.
   """
@@ -2533,6 +2533,19 @@ type IssueRelationEdge {
   """
   cursor: String!
   node: IssueRelation!
+}
+"""
+Issue relation history's payload
+"""
+type IssueRelationHistoryPayload {
+  """
+  The identifier of the related issue.
+  """
+  identifier: String!
+  """
+  The type of the change.
+  """
+  type: String!
 }
 type IssueRelationPayload {
   """
@@ -5092,6 +5105,10 @@ type Project implements Node {
   """
   sortOrder: Float!
   """
+  [Internal] The estimated start date of the project.
+  """
+  startDate: TimelessDateScalar
+  """
   The time at which the project was moved into started state.
   """
   startedAt: DateTime
@@ -5180,6 +5197,10 @@ input ProjectCreateInput {
   The sort order for the project within its milestone.
   """
   sortOrder: Float
+  """
+  [Internal] The planned start date of the project.
+  """
+  startDate: TimelessDateScalar
   """
   The state of the project.
   """
@@ -5341,6 +5362,10 @@ input ProjectUpdateInput {
   The sort order for the project within its milestone.
   """
   sortOrder: Float
+  """
+  [Internal] The planned start date of the project.
+  """
+  startDate: TimelessDateScalar
   """
   The state of the project.
   """

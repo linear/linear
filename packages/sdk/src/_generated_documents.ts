@@ -1369,7 +1369,7 @@ export type IssueHistory = Node & {
   /** The issue that was changed. */
   issue: Issue;
   /** Changed issue relationships. */
-  relationChanges?: Maybe<Scalars["String"]>;
+  relationChanges?: Maybe<Array<IssueRelationHistoryPayload>>;
   /** ID's of labels that were removed. */
   removedLabelIds?: Maybe<Array<Scalars["String"]>>;
   /** Information about the integration or application which created this history entry. */
@@ -1620,6 +1620,15 @@ export type IssueRelationEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: IssueRelation;
+};
+
+/** Issue relation history's payload */
+export type IssueRelationHistoryPayload = {
+  __typename?: "IssueRelationHistoryPayload";
+  /** The identifier of the related issue. */
+  identifier: Scalars["String"];
+  /** The type of the change. */
+  type: Scalars["String"];
 };
 
 export type IssueRelationPayload = {
@@ -3125,6 +3134,8 @@ export type Project = Node & {
   slugId: Scalars["String"];
   /** The sort order for the project within its milestone. */
   sortOrder: Scalars["Float"];
+  /** [Internal] The estimated start date of the project. */
+  startDate?: Maybe<Scalars["TimelessDateScalar"]>;
   /** The time at which the project was moved into started state. */
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The type of the state. */
@@ -3206,6 +3217,8 @@ export type ProjectCreateInput = {
   name: Scalars["String"];
   /** The sort order for the project within its milestone. */
   sortOrder?: Maybe<Scalars["Float"]>;
+  /** [Internal] The planned start date of the project. */
+  startDate?: Maybe<Scalars["TimelessDateScalar"]>;
   /** The state of the project. */
   state?: Maybe<Scalars["String"]>;
   /** The planned target date of the project. */
@@ -3313,6 +3326,8 @@ export type ProjectUpdateInput = {
   slackNewIssue?: Maybe<Scalars["Boolean"]>;
   /** The sort order for the project within its milestone. */
   sortOrder?: Maybe<Scalars["Float"]>;
+  /** [Internal] The planned start date of the project. */
+  startDate?: Maybe<Scalars["TimelessDateScalar"]>;
   /** The state of the project. */
   state?: Maybe<Scalars["String"]>;
   /** The planned target date of the project. */
@@ -5281,6 +5296,7 @@ export type ProjectFragment = { __typename?: "Project" } & Pick<
   | "slackIssueComments"
   | "slackNewIssue"
   | "slackIssueStatuses"
+  | "startDate"
 > & {
     milestone?: Maybe<{ __typename?: "Milestone" } & Pick<Milestone, "id">>;
     lead?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -5294,7 +5310,6 @@ export type ReactionFragment = { __typename?: "Reaction" } & Pick<
 
 export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
   IssueHistory,
-  | "relationChanges"
   | "addedLabelIds"
   | "removedLabelIds"
   | "source"
@@ -5315,6 +5330,9 @@ export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
   | "autoArchived"
   | "autoClosed"
 > & {
+    relationChanges?: Maybe<
+      Array<{ __typename?: "IssueRelationHistoryPayload" } & IssueRelationHistoryPayloadFragment>
+    >;
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
     toCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     toParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
@@ -5583,6 +5601,11 @@ export type IntegrationResourceDataFragment = { __typename?: "IntegrationResourc
   gitlabMergeRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
   sentryIssue?: Maybe<{ __typename?: "SentryIssuePayload" } & SentryIssuePayloadFragment>;
 };
+
+export type IssueRelationHistoryPayloadFragment = { __typename?: "IssueRelationHistoryPayload" } & Pick<
+  IssueRelationHistoryPayload,
+  "identifier" | "type"
+>;
 
 export type IssueLabelFragment = { __typename?: "IssueLabel" } & Pick<
   IssueLabel,
@@ -10814,6 +10837,23 @@ export const IssueConnectionFragmentDoc: DocumentNode<IssueConnectionFragment, u
     ...PageInfoFragmentDoc.definitions,
   ],
 };
+export const IssueRelationHistoryPayloadFragmentDoc: DocumentNode<IssueRelationHistoryPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueRelationHistoryPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationHistoryPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "identifier" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+};
 export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -10824,7 +10864,14 @@ export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown
       selectionSet: {
         kind: "SelectionSet",
         selections: [
-          { kind: "Field", name: { kind: "Name", value: "relationChanges" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "relationChanges" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationHistoryPayload" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "addedLabelIds" } },
           { kind: "Field", name: { kind: "Name", value: "removedLabelIds" } },
           { kind: "Field", name: { kind: "Name", value: "source" } },
@@ -10959,6 +11006,7 @@ export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown
         ],
       },
     },
+    ...IssueRelationHistoryPayloadFragmentDoc.definitions,
   ],
 };
 export const IssueHistoryConnectionFragmentDoc: DocumentNode<IssueHistoryConnectionFragment, unknown> = {
@@ -11935,6 +11983,7 @@ export const ProjectFragmentDoc: DocumentNode<ProjectFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "slackIssueComments" } },
           { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
+          { kind: "Field", name: { kind: "Name", value: "startDate" } },
         ],
       },
     },
