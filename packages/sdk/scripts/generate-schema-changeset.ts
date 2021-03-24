@@ -2,7 +2,7 @@ import { CriticalityLevel, diff } from "@graphql-inspector/core";
 import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { loadSchema } from "@graphql-tools/load";
 import { UrlLoader } from "@graphql-tools/url-loader";
-import { appendFile, exists, writeFile } from "fs";
+import { writeFile } from "fs";
 import path from "path";
 import { promisify } from "util";
 import { logger, printLines } from "../../codegen-doc/src/index";
@@ -13,7 +13,7 @@ const levelOrder = {
   [CriticalityLevel.NonBreaking]: 0,
 };
 
-const filename = path.resolve("../../.changeset/_generated_schema.md");
+const filename = path.resolve(`../../.changeset/_generated_schema+${Math.ceil(Math.random() * 100000000)}.md`);
 
 const changeset = printLines(["---", '"@linear/sdk": minor', "---"]);
 
@@ -41,23 +41,21 @@ async function generateSchemaChangeset() {
 
   /** If we have changes, write to changeset file */
   if (changes.length) {
-    const fileExists = await promisify(exists)(filename);
-    const changeLines = changes
-      .map(
-        change =>
-          `feat(schema): [${change.criticality.level.toLowerCase()}] ${change.message}${
-            change.path ? ` (${change.path})` : ""
-          }`
-      )
-      .join("\n\n");
-
-    if (fileExists) {
-      /** Append to file if it exists */
-      await promisify(appendFile)(filename, printLines(["\n", changeLines]));
-    } else {
-      /** Otherwise write with changeset title */
-      await promisify(writeFile)(filename, printLines([changeset, "\n", changeLines]));
-    }
+    await promisify(writeFile)(
+      filename,
+      printLines([
+        changeset,
+        "\n",
+        changes
+          .map(
+            change =>
+              `feat(schema): [${change.criticality.level.toLowerCase()}] ${change.message}${
+                change.path ? ` (${change.path})` : ""
+              }`
+          )
+          .join("\n\n"),
+      ])
+    );
   }
 
   return changes;
