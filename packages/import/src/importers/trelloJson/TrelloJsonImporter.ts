@@ -14,12 +14,19 @@ interface TrelloCard {
     name: string;
     color: TrelloLabelColor;
   }[];
+  idList: string
+}
+
+interface TrelloList {
+  id: string;
+  closed: boolean;
 }
 
 export class TrelloJsonImporter implements Importer {
-  public constructor(filePath: string, discardArchived: boolean) {
+  public constructor(filePath: string, discardArchivedCards: boolean, discardArchivedLists: boolean) {
     this.filePath = filePath;
-    this.discardArchived = discardArchived;
+    this.discardArchivedCards = discardArchivedCards;
+    this.discardArchivedLists = discardArchivedLists;
   }
 
   public get name(): string {
@@ -47,7 +54,14 @@ export class TrelloJsonImporter implements Importer {
       const description = `${mdDesc}\n\n[View original card in Trello](${url})`;
       const labels = card.labels.map(l => l.id);
 
-      if (this.discardArchived && card.closed) {
+      if (this.discardArchivedCards && card.closed) {
+        continue;
+      }
+
+      if (
+        this.discardArchivedLists
+        && (data.lists as TrelloList[]).find((list) => list.id === card.idList && list.closed)
+      ) {
         continue;
       }
 
@@ -76,7 +90,8 @@ export class TrelloJsonImporter implements Importer {
 
   // -- Private interface
   private filePath: string;
-  private discardArchived: boolean;
+  private discardArchivedCards: boolean;
+  private discardArchivedLists: boolean;
 }
 
 // Maps Trello colors to Linear branded colors
