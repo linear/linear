@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.5.7
+
+### Patch Changes
+
+- 387ff7f: chore(deps): update dependency patch versions
+- 3333d1a: feat(import): added option to discard archived lists with the Trello JSON file import.
+- Updated dependencies [387ff7f]
+- Updated dependencies [19a8db2]
+- Updated dependencies [b3d86d1]
+  - @linear/sdk@1.11.0
+
 ## 1.5.6
 
 ### Patch Changes
