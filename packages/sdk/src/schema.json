@@ -1798,6 +1798,18 @@
             "deprecationReason": null
           },
           {
+            "name": "autoArchivedAt",
+            "description": "The time at which the cycle was automatically archived by the auto pruning process.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueCountHistory",
             "description": "The total number of issues in the cycle after each day.",
             "args": [],
@@ -7568,6 +7580,18 @@
             "deprecationReason": null
           },
           {
+            "name": "startDate",
+            "description": "[Internal] The estimated start date of the project.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDateScalar",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetDate",
             "description": "The estimated completion date of the project.",
             "args": [],
@@ -7606,6 +7630,18 @@
           {
             "name": "canceledAt",
             "description": "The time at which the project was moved into canceled state.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "autoArchivedAt",
+            "description": "The time at which the project was automatically archived by the auto pruning process.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -8263,6 +8299,49 @@
       },
       {
         "kind": "OBJECT",
+        "name": "IssueRelationHistoryPayload",
+        "description": "Issue relation history's payload",
+        "fields": [
+          {
+            "name": "identifier",
+            "description": "The identifier of the related issue.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The type of the change.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "IssueHistory",
         "description": "A record of changes to an issue.",
         "fields": [
@@ -8651,9 +8730,17 @@
             "description": "Changed issue relationships.",
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "IssueRelationHistoryPayload",
+                  "ofType": null
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -16986,6 +17073,140 @@
       },
       {
         "kind": "OBJECT",
+        "name": "IssueDescriptionHistory",
+        "description": null,
+        "fields": [
+          {
+            "name": "id",
+            "description": "The UUID of the change.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The date when the description was updated.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "descriptionData",
+            "description": "The description data of the issue as a JSON serialized string.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorId",
+            "description": "The ID of the author of the change.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The type of the revision, whether it was the creation or update of the issue.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "IssueDescriptionHistoryPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "history",
+            "description": "The issue that was created or updated.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "IssueDescriptionHistory",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "IssueImportPayload",
         "description": null,
         "fields": [
@@ -18186,6 +18407,33 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PushSubscriptionTestPayload",
+        "description": null,
+        "fields": [
           {
             "name": "success",
             "description": "Whether the operation was successful.",
@@ -22615,6 +22863,18 @@
             "deprecationReason": null
           },
           {
+            "name": "startDate",
+            "description": "[Internal] The planned start date of the project.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDateScalar",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetDate",
             "description": "The planned target date of the project.",
             "type": {
@@ -22768,6 +23028,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startDate",
+            "description": "[Internal] The planned start date of the project.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDateScalar",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -26343,6 +26615,39 @@
             "deprecationReason": null
           },
           {
+            "name": "issueDescriptionHistory",
+            "description": "[Internal] The history of issue descriptions.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IssueDescriptionHistoryPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueImportFinishGithubOAuth",
             "description": "Fetches the GitHub token, completing the OAuth flow.",
             "args": [
@@ -27660,7 +27965,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PushSubscriptionPayload",
+                "name": "PushSubscriptionTestPayload",
                 "ofType": null
               }
             },
@@ -28722,8 +29027,90 @@
             "deprecationReason": null
           },
           {
+            "name": "attachmentLinkZendesk",
+            "description": "Link an existing Zendesk ticket to an issue.",
+            "args": [
+              {
+                "name": "issueId",
+                "description": "The issue for which to link the .",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "ticketId",
+                "description": "The Zendesk ticket ID to link.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AttachmentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "attachmentArchive",
-            "description": "[Alpha] Archives an issue attachment.",
+            "description": "[DEPRECATED] Archives an issue attachment.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the attachment to archive.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": true,
+            "deprecationReason": "This mutation is deprecated, please use `attachmentDelete` instead"
+          },
+          {
+            "name": "attachmentDelete",
+            "description": "[Alpha] Deletes an issue attachment.",
             "args": [
               {
                 "name": "id",
@@ -30561,6 +30948,18 @@
             "description": "Kicks off a GitHub import job.",
             "args": [
               {
+                "name": "id",
+                "description": "ID of issue import. If not provided it will be generated.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "instantProcess",
                 "description": "Whether to instantly process the import with the default configuration mapping.",
                 "type": {
@@ -30665,6 +31064,18 @@
             "name": "issueImportCreateJira",
             "description": "Kicks off a Jira import job.",
             "args": [
+              {
+                "name": "id",
+                "description": "ID of issue import. If not provided it will be generated.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "instantProcess",
                 "description": "Whether to instantly process the import with the default configuration mapping.",
@@ -30775,6 +31186,18 @@
             "description": "Kicks off a Clubhouse import job.",
             "args": [
               {
+                "name": "id",
+                "description": "ID of issue import. If not provided it will be generated.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "instantProcess",
                 "description": "Whether to instantly process the import with the default configuration mapping.",
                 "type": {
@@ -30851,6 +31274,18 @@
             "name": "issueImportCreateAsana",
             "description": "Kicks off an Asana import job.",
             "args": [
+              {
+                "name": "id",
+                "description": "ID of issue import. If not provided it will be generated.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "instantProcess",
                 "description": "Whether to instantly process the import with the default configuration mapping.",
@@ -32381,6 +32816,39 @@
               {
                 "name": "id",
                 "description": "The identifier of the project to archive. Also the identifier from the URL is accepted.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUnarchive",
+            "description": "Unarchives a project.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the project to restore. Also the identifier from the URL is accepted.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,

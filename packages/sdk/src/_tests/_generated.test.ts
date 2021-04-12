@@ -642,6 +642,17 @@ describe("generated", () => {
     });
   });
 
+  /** Test IssueDescriptionHistory query */
+  describe("IssueDescriptionHistory", () => {
+    /** Test the root model query for IssueDescriptionHistory */
+    it("issueDescriptionHistory", async () => {
+      const issueDescriptionHistory:
+        | L.IssueDescriptionHistoryPayload
+        | undefined = await client.issueDescriptionHistory("mock-id");
+      expect(issueDescriptionHistory instanceof L.IssueDescriptionHistoryPayload);
+    });
+  });
+
   /** Test IssueImportFinishGithubOAuth query */
   describe("IssueImportFinishGithubOAuth", () => {
     /** Test the root model query for IssueImportFinishGithubOAuth */
@@ -1509,8 +1520,8 @@ describe("generated", () => {
   describe("PushSubscriptionTest", () => {
     /** Test the root model query for PushSubscriptionTest */
     it("pushSubscriptionTest", async () => {
-      const pushSubscriptionTest: L.PushSubscriptionPayload | undefined = await client.pushSubscriptionTest;
-      expect(pushSubscriptionTest instanceof L.PushSubscriptionPayload);
+      const pushSubscriptionTest: L.PushSubscriptionTestPayload | undefined = await client.pushSubscriptionTest;
+      expect(pushSubscriptionTest instanceof L.PushSubscriptionTestPayload);
     });
   });
 
