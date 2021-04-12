@@ -2,7 +2,7 @@
   "name": "@linear/codegen-sdk",
   "private": true,
   "description": "Plugin for generating the Linear SDK from fragments and documents",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",

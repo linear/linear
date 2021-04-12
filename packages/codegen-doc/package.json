@@ -2,7 +2,7 @@
   "name": "@linear/codegen-doc",
   "private": true,
   "description": "Plugin for generating GraphQL fragments and documents from a schema",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
