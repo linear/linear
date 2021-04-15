@@ -413,6 +413,18 @@ describe("generated", () => {
     });
   });
 
+  /** Test DependentModelSync query */
+  describe("DependentModelSync", () => {
+    /** Test the root model query for DependentModelSync */
+    it("dependentModelSync", async () => {
+      const dependentModelSync: L.DependencyResponse | undefined = await client.dependentModelSync(
+        "mock-identifier",
+        "mock-modelClass"
+      );
+      expect(dependentModelSync instanceof L.DependencyResponse);
+    });
+  });
+
   /** Test all Emoji queries */
   describe("Emojis", () => {
     let _emoji: L.Emoji | undefined;

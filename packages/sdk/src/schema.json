@@ -238,6 +238,33 @@
       },
       {
         "kind": "OBJECT",
+        "name": "DependencyResponse",
+        "description": "Contains the requested dependencies.",
+        "fields": [
+          {
+            "name": "dependencies",
+            "description": "A JSON serialized collection of model objects loaded from the archive",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "ApiKey",
         "description": "An API key. Grants access to the user's resources.",
         "fields": [
@@ -15709,7 +15736,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "TimelessDateScalar",
+                "name": "DateTime",
                 "ofType": null
               }
             },
@@ -24998,7 +25025,7 @@
         "fields": [
           {
             "name": "syncBootstrap",
-            "description": "Fetch data to catch up the client to the state of the world.",
+            "description": "[Internal] Fetch data to catch up the client to the state of the world.",
             "args": [
               {
                 "name": "databaseVersion",
@@ -25058,8 +25085,57 @@
             "deprecationReason": null
           },
           {
+            "name": "dependentModelSync",
+            "description": "[Internal] Fetches the dependencies of a model.",
+            "args": [
+              {
+                "name": "identifier",
+                "description": "The identifier of the model whose dependencies to load.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "modelClass",
+                "description": "The class name of the model to load.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DependencyResponse",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "archivedModelSync",
-            "description": "Fetches an archived model.",
+            "description": "[Internal] Fetches an archived model.",
             "args": [
               {
                 "name": "identifier",
@@ -25108,7 +25184,7 @@
           },
           {
             "name": "archivedModelsSync",
-            "description": "Fetches archived models.",
+            "description": "[Internal] Fetches archived models.",
             "args": [
               {
                 "name": "modelClass",

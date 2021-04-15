@@ -911,6 +911,15 @@ input DeleteOrganizationInput {
   deletionCode: String!
 }
 """
+Contains the requested dependencies.
+"""
+type DependencyResponse {
+  """
+  A JSON serialized collection of model objects loaded from the archive
+  """
+  dependencies: String!
+}
+"""
 Collaborative editing steps for documents.
 """
 type DocumentStep implements Node {
@@ -1595,7 +1604,7 @@ type Invoice {
   """
   The creation date of the invoice.
   """
-  created: TimelessDateScalar!
+  created: DateTime!
   """
   The due date of the invoice.
   """
@@ -5598,7 +5607,7 @@ type Query {
     scope: [String!]!
   ): UserAuthorizedApplication!
   """
-  Fetches an archived model.
+  [Internal] Fetches an archived model.
   """
   archivedModelSync(
     """
@@ -5611,7 +5620,7 @@ type Query {
     modelClass: String!
   ): ArchiveResponse!
   """
-  Fetches archived models.
+  [Internal] Fetches archived models.
   """
   archivedModelsSync(
     """
@@ -5810,6 +5819,19 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): CycleConnection!
+  """
+  [Internal] Fetches the dependencies of a model.
+  """
+  dependentModelSync(
+    """
+    The identifier of the model whose dependencies to load.
+    """
+    identifier: String!
+    """
+    The class name of the model to load.
+    """
+    modelClass: String!
+  ): DependencyResponse!
   """
   A specific emoji.
   """
@@ -6388,7 +6410,7 @@ type Query {
   """
   subscription: Subscription
   """
-  Fetch data to catch up the client to the state of the world.
+  [Internal] Fetch data to catch up the client to the state of the world.
   """
   syncBootstrap(
     """
