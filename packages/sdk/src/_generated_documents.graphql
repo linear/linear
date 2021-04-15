@@ -963,6 +963,12 @@ fragment ArchiveResponse on ArchiveResponse {
   databaseVersion
 }
 
+# Contains the requested dependencies.
+fragment DependencyResponse on DependencyResponse {
+  # A JSON serialized collection of model objects loaded from the archive
+  dependencies
+}
+
 # Defines the membership of a user to a team.
 fragment TeamMembership on TeamMembership {
   # The last time at which the entity was updated. This is the same as the creation time if the
@@ -2428,7 +2434,7 @@ query applicationWithAuthorization(
     ...UserAuthorizedApplication
   }
 }
-# Fetches an archived model.
+# [Internal] Fetches an archived model.
 query archivedModelSync(
   # The identifier of the model to load. What an identifier is specific to the model class.
   $identifier: String!
@@ -2439,7 +2445,7 @@ query archivedModelSync(
     ...ArchiveResponse
   }
 }
-# Fetches archived models.
+# [Internal] Fetches archived models.
 query archivedModelsSync(
   # Retrieve issues that have been archived before this date.
   $before: DateTime
@@ -2952,6 +2958,17 @@ query cycles(
     orderBy: $orderBy
   ) {
     ...CycleConnection
+  }
+}
+# [Internal] Fetches the dependencies of a model.
+query dependentModelSync(
+  # The identifier of the model whose dependencies to load.
+  $identifier: String!
+  # The class name of the model to load.
+  $modelClass: String!
+) {
+  dependentModelSync(identifier: $identifier, modelClass: $modelClass) {
+    ...DependencyResponse
   }
 }
 # A specific emoji.
@@ -4056,7 +4073,7 @@ query subscription {
     ...Subscription
   }
 }
-# Fetch data to catch up the client to the state of the world.
+# [Internal] Fetch data to catch up the client to the state of the world.
 query syncBootstrap(
   # Deprecated.
   $databaseVersion: Int

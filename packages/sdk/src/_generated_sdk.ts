@@ -983,6 +983,21 @@ export class DebugPayload extends Request {
   public success?: boolean;
 }
 /**
+ * Contains the requested dependencies.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DependencyResponseFragment response data
+ */
+export class DependencyResponse extends Request {
+  public constructor(request: LinearRequest, data: L.DependencyResponseFragment) {
+    super(request);
+    this.dependencies = data.dependencies ?? undefined;
+  }
+
+  /** A JSON serialized collection of model objects loaded from the archive */
+  public dependencies?: string;
+}
+/**
  * Collaborative editing steps for documents.
  *
  * @param request - function to call the graphql client
@@ -1781,7 +1796,7 @@ export class InvitePagePayload extends Request {
 export class Invoice extends Request {
   public constructor(request: LinearRequest, data: L.InvoiceFragment) {
     super(request);
-    this.created = data.created ?? undefined;
+    this.created = parseDate(data.created) ?? undefined;
     this.dueDate = data.dueDate ?? undefined;
     this.status = data.status ?? undefined;
     this.total = data.total ?? undefined;
@@ -1789,7 +1804,7 @@ export class Invoice extends Request {
   }
 
   /** The creation date of the invoice. */
-  public created?: string;
+  public created?: Date;
   /** The due date of the invoice. */
   public dueDate?: string;
   /** The status of the invoice. */
@@ -5819,6 +5834,34 @@ export class CyclesQuery extends Request {
       return data
         ? new CycleConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
         : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable DependentModelSync Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class DependentModelSyncQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DependentModelSync query and return a DependencyResponse
+   *
+   * @param identifier - required identifier to pass to dependentModelSync
+   * @param modelClass - required modelClass to pass to dependentModelSync
+   * @returns parsed response from DependentModelSyncQuery
+   */
+  public async fetch(identifier: string, modelClass: string): LinearFetch<DependencyResponse> {
+    return this._request<L.DependentModelSyncQuery, L.DependentModelSyncQueryVariables>(L.DependentModelSyncDocument, {
+      identifier,
+      modelClass,
+    }).then(response => {
+      const data = response?.dependentModelSync;
+      return data ? new DependencyResponse(this._request, data) : undefined;
     });
   }
 }
@@ -13373,7 +13416,7 @@ export class LinearSdk extends Request {
     return new ApplicationWithAuthorizationQuery(this._request).fetch(clientId, scope, variables);
   }
   /**
-   * Fetches an archived model.
+   * [Internal] Fetches an archived model.
    *
    * @param identifier - required identifier to pass to archivedModelSync
    * @param modelClass - required modelClass to pass to archivedModelSync
@@ -13383,7 +13426,7 @@ export class LinearSdk extends Request {
     return new ArchivedModelSyncQuery(this._request).fetch(identifier, modelClass);
   }
   /**
-   * Fetches archived models.
+   * [Internal] Fetches archived models.
    *
    * @param modelClass - required modelClass to pass to archivedModelsSync
    * @param teamId - required teamId to pass to archivedModelsSync
@@ -13516,6 +13559,16 @@ export class LinearSdk extends Request {
    */
   public cycles(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
     return new CyclesQuery(this._request).fetch(variables);
+  }
+  /**
+   * [Internal] Fetches the dependencies of a model.
+   *
+   * @param identifier - required identifier to pass to dependentModelSync
+   * @param modelClass - required modelClass to pass to dependentModelSync
+   * @returns DependencyResponse
+   */
+  public dependentModelSync(identifier: string, modelClass: string): LinearFetch<DependencyResponse> {
+    return new DependentModelSyncQuery(this._request).fetch(identifier, modelClass);
   }
   /**
    * A specific emoji.
@@ -13867,7 +13920,7 @@ export class LinearSdk extends Request {
     return new SubscriptionQuery(this._request).fetch();
   }
   /**
-   * Fetch data to catch up the client to the state of the world.
+   * [Internal] Fetch data to catch up the client to the state of the world.
    *
    * @param variables - variables to pass into the SyncBootstrapQuery
    * @returns SyncResponse

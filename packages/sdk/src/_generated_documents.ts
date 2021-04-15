@@ -619,6 +619,13 @@ export type DeleteOrganizationInput = {
   deletionCode: Scalars["String"];
 };
 
+/** Contains the requested dependencies. */
+export type DependencyResponse = {
+  __typename?: "DependencyResponse";
+  /** A JSON serialized collection of model objects loaded from the archive */
+  dependencies: Scalars["String"];
+};
+
 /** Collaborative editing steps for documents. */
 export type DocumentStep = Node & {
   __typename?: "DocumentStep";
@@ -1093,7 +1100,7 @@ export type InvitePagePayload = {
 export type Invoice = {
   __typename?: "Invoice";
   /** The creation date of the invoice. */
-  created: Scalars["TimelessDateScalar"];
+  created: Scalars["DateTime"];
   /** The due date of the invoice. */
   dueDate?: Maybe<Scalars["TimelessDateScalar"]>;
   /** The status of the invoice. */
@@ -3467,9 +3474,9 @@ export type Query = {
   apiKeys: ApiKeyConnection;
   /** Get information for an application and whether a user has approved it for the given scopes. */
   applicationWithAuthorization: UserAuthorizedApplication;
-  /** Fetches an archived model. */
+  /** [Internal] Fetches an archived model. */
   archivedModelSync: ArchiveResponse;
-  /** Fetches archived models. */
+  /** [Internal] Fetches archived models. */
   archivedModelsSync: ArchiveResponse;
   /** [Alpha] One specific issue attachment. `url` can be used as the `id` parameter. */
   attachment: Attachment;
@@ -3497,6 +3504,8 @@ export type Query = {
   cycle: Cycle;
   /** All cycles. */
   cycles: CycleConnection;
+  /** [Internal] Fetches the dependencies of a model. */
+  dependentModelSync: DependencyResponse;
   /** A specific emoji. */
   emoji: Emoji;
   /** All custom emojis. */
@@ -3575,7 +3584,7 @@ export type Query = {
   ssoUrlFromEmail: SsoUrlFromEmailResponse;
   /** The organization's subscription. */
   subscription?: Maybe<Subscription>;
-  /** Fetch data to catch up the client to the state of the world. */
+  /** [Internal] Fetch data to catch up the client to the state of the world. */
   syncBootstrap: SyncResponse;
   /** One specific team. */
   team: Team;
@@ -3695,6 +3704,11 @@ export type QueryCyclesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryDependentModelSyncArgs = {
+  identifier: Scalars["String"];
+  modelClass: Scalars["String"];
 };
 
 export type QueryEmojiArgs = {
@@ -5636,6 +5650,11 @@ export type ArchiveResponseFragment = { __typename?: "ArchiveResponse" } & Pick<
   "archive" | "totalCount" | "databaseVersion"
 >;
 
+export type DependencyResponseFragment = { __typename?: "DependencyResponse" } & Pick<
+  DependencyResponse,
+  "dependencies"
+>;
+
 export type TeamMembershipFragment = { __typename?: "TeamMembership" } & Pick<
   TeamMembership,
   "updatedAt" | "archivedAt" | "createdAt" | "id" | "owner"
@@ -6644,6 +6663,15 @@ export type CyclesQueryVariables = Exact<{
 
 export type CyclesQuery = { __typename?: "Query" } & {
   cycles: { __typename?: "CycleConnection" } & CycleConnectionFragment;
+};
+
+export type DependentModelSyncQueryVariables = Exact<{
+  identifier: Scalars["String"];
+  modelClass: Scalars["String"];
+}>;
+
+export type DependentModelSyncQuery = { __typename?: "Query" } & {
+  dependentModelSync: { __typename?: "DependencyResponse" } & DependencyResponseFragment;
 };
 
 export type EmojiQueryVariables = Exact<{
@@ -9036,6 +9064,20 @@ export const ArchiveResponseFragmentDoc: DocumentNode<ArchiveResponseFragment, u
           { kind: "Field", name: { kind: "Name", value: "totalCount" } },
           { kind: "Field", name: { kind: "Name", value: "databaseVersion" } },
         ],
+      },
+    },
+  ],
+};
+export const DependencyResponseFragmentDoc: DocumentNode<DependencyResponseFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DependencyResponse" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DependencyResponse" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [{ kind: "Field", name: { kind: "Name", value: "dependencies" } }],
       },
     },
   ],
@@ -15483,6 +15525,54 @@ export const CyclesDocument: DocumentNode<CyclesQuery, CyclesQueryVariables> = {
       },
     },
     ...CycleConnectionFragmentDoc.definitions,
+  ],
+};
+export const DependentModelSyncDocument: DocumentNode<DependentModelSyncQuery, DependentModelSyncQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "dependentModelSync" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "identifier" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "modelClass" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "dependentModelSync" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "identifier" },
+                value: { kind: "Variable", name: { kind: "Name", value: "identifier" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "modelClass" },
+                value: { kind: "Variable", name: { kind: "Name", value: "modelClass" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DependencyResponse" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DependencyResponseFragmentDoc.definitions,
   ],
 };
 export const EmojiDocument: DocumentNode<EmojiQuery, EmojiQueryVariables> = {
