@@ -20,6 +20,10 @@ export interface Issue {
   createdAt?: Date;
   /** When the issue is due. This is a date string of the format yyyy-MM-dd. */
   dueDate?: Date;
+  /** When the issue was completed. */
+  completedAt?: Date;
+  /** When the issue was started. */
+  startedAt?: Date;
 }
 
 /** Issue comment */

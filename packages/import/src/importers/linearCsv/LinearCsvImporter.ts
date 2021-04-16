@@ -77,6 +77,8 @@ export class LinearCsvImporter implements Importer {
         priority: mapPriority(row.Priority),
         status: row.Status,
         assigneeId: row.Assignee,
+        completedAt: !!row.Completed ? new Date(row.Completed) : undefined,
+        startedAt: !!row.Started ? new Date(row.Started) : undefined,
         labels,
       });
 
