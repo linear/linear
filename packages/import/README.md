@@ -100,6 +100,18 @@ Following fields are supported:
 - `URL` - URL of Trello card
 - `Labels` - Added as a label
 
+### Linear CSV
+
+Linear CSV exports (Settings → Import / Export → Export CSV) can be imported into Linear again. You can use this to import issues from one workspace to another. Archived issues won't be imported.
+
+Following fields are supported:
+
+- `Title` - Issue title
+- `Description` - Issue description
+- `Priority` - Issue priority
+- `Status` - Issue state (workflow)
+- `Assignee` - Issue assignee
+- `Labels` - Added as a label
 ## Todo
 
 - [x] Automatic image uploads

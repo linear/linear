@@ -18,6 +18,12 @@ interface ImportAnswers {
   teamName?: string;
 }
 
+const defaultStateColors = {
+  backlog: "#bec2c8",
+  started: "#f2c94c",
+  completed: "#5e6ad2",
+};
+
 /**
  * Import issues into Linear via the API.
  */
@@ -227,7 +233,29 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     const labelIds = issue.labels ? issue.labels.map(labelId => labelMapping[labelId]) : undefined;
 
-    const stateId = !!issue.status ? existingStateMap[issue.status.toLowerCase()] : undefined;
+    let stateId = !!issue.status ? existingStateMap[issue.status.toLowerCase()] : undefined;
+    // Create a new state since one doesn't already exist with this name
+    if (!stateId && issue.status) {
+      let stateType = "backlog";
+      if (issue.completedAt) {
+        stateType = "completed";
+      } else if (issue.startedAt) {
+        stateType = "started";
+      }
+      const newStateResult = await client.workflowStateCreate({
+        name: issue.status,
+        teamId,
+        color: defaultStateColors[stateType],
+        type: stateType,
+      });
+      if (newStateResult?.success) {
+        const newState = await newStateResult.workflowState;
+        if (newState?.id) {
+          existingStateMap[issue.status.toLowerCase()] = newState.id;
+          stateId = newState.id;
+        }
+      }
+    }
 
     const existingAssigneeId: string | undefined = !!issue.assigneeId
       ? existingUserMap[issue.assigneeId.toLowerCase()]
