@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.5.8
+
+### Patch Changes
+
+- d29d7b1: feat(import): transferring Linear to Linear CSV importer from old repo
+- Updated dependencies [8533968]
+  - @linear/sdk@1.12.0
+
 ## 1.5.7
 
 ### Patch Changes
