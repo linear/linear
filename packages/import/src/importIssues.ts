@@ -28,7 +28,7 @@ const defaultStateColors = {
  * Import issues into Linear via the API.
  */
 export const importIssues = async (apiKey: string, importer: Importer): Promise<void> => {
-  const client = new LinearClient({ apiKey, apiUrl: "http://localhost:8090/graphql" });
+  const client = new LinearClient({ apiKey });
   const importData = await importer.import();
 
   const teamsQuery = await client.teams();
