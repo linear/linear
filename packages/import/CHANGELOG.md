@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.5.9
+
+### Patch Changes
+
+- e3c045c: chore(deps): update dependency patch versions
+- Updated dependencies [e3c045c]
+  - @linear/sdk@1.12.1
+
 ## 1.5.8
 
 ### Patch Changes
