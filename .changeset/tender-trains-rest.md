@@ -6,4 +6,4 @@
 "@linear/sdk": patch
 ---
 
-Update dev dependencies
+Fix typescript type check
