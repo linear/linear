@@ -1754,6 +1754,10 @@ type Issue implements Node {
   """
   creator: User
   """
+  Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk).
+  """
+  customerTicketCount: Int!
+  """
   The cycle that the issue is associated with.
   """
   cycle: Cycle
@@ -2697,6 +2701,10 @@ input IssueUpdateInput {
   The issue title.
   """
   title: String
+  """
+  [Deprecated] Wether the issue has been trashed.
+  """
+  trashed: Boolean
 }
 """
 The `JSON` scalar type represents JSON values
@@ -3377,6 +3385,15 @@ type Mutation {
     """
     input: IssueCreateInput!
   ): IssuePayload!
+  """
+  Deletes (trashes) an issue.
+  """
+  issueDelete(
+    """
+    The identifier of the issue to delete.
+    """
+    id: String!
+  ): ArchivePayload!
   """
   Kicks off an Asana import job.
   """
@@ -4507,6 +4524,10 @@ type OauthClient implements Node {
   """
   name: String!
   """
+  Whether the OAuth application is publicly visible, or only visible to the creating workspace.
+  """
+  publicEnabled: Boolean!
+  """
   List of allowed redirect URIs for the application.
   """
   redirectUris: [String!]!
@@ -4581,6 +4602,10 @@ input OauthClientUpdateInput {
   The application's name.
   """
   name: String
+  """
+  Whether the OAuth application should be publicly visible, or only visible to the creating workspace.
+  """
+  publicEnabled: Boolean
   """
   List of allowed redirect URIs for the application.
   """
@@ -6862,6 +6887,10 @@ type Subscription implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The date the subscription will be billed next.
+  """
+  nextBillingAt: DateTime
   """
   The organization that the subscription is associated with.
   """

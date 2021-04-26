@@ -720,6 +720,8 @@ fragment Issue on Issue {
   priorityLabel
   # Previous identifiers of the issue if it has been moved between teams.
   previousIdentifiers
+  # Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk).
+  customerTicketCount
   # Suggested branch name for the issue.
   branchName
   # The cycle that the issue is associated with.
@@ -1153,6 +1155,8 @@ fragment OauthClient on OauthClient {
   id
   # Url of the developer.
   developerUrl
+  # Whether the OAuth application is publicly visible, or only visible to the creating workspace.
+  publicEnabled
 }
 
 # Object representing Figma preview information.
@@ -1382,6 +1386,8 @@ fragment Subscription on Subscription {
   }
   # The date the subscription was canceled, if any.
   canceledAt
+  # The date the subscription will be billed next.
+  nextBillingAt
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
@@ -5307,6 +5313,15 @@ mutation issueCreate(
 ) {
   issueCreate(input: $input) {
     ...IssuePayload
+  }
+}
+# Deletes (trashes) an issue.
+mutation issueDelete(
+  # The identifier of the issue to delete.
+  $id: String!
+) {
+  issueDelete(id: $id) {
+    ...ArchivePayload
   }
 }
 # Kicks off an Asana import job.
