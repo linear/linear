@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.8.6
+
+### Patch Changes
+
+- 56c1a6c: chore(deps): update dependency patch versions
+- df71ee5: Fix typescript type check
+
 ## 1.8.5
 
 ### Patch Changes

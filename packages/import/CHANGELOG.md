@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.5.10
+
+### Patch Changes
+
+- 56c1a6c: chore(deps): update dependency patch versions
+- df71ee5: Fix typescript type check
+- Updated dependencies [56c1a6c]
+- Updated dependencies [8553690]
+- Updated dependencies [df71ee5]
+  - @linear/sdk@1.13.0
+
 ## 1.5.9
 
 ### Patch Changes
