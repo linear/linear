@@ -15,7 +15,7 @@
     "build:import": "lerna run build:import",
     "build:sdk": "lerna run build:sdk",
     "build:types": "npx tsc --project tsconfig.check.json",
-    "build": "run-s generate build:types build:sdk generate:test build:import docs",
+    "build": "run-s generate build:sdk generate:test build:import build:types docs",
     "dev": "NODE_ENV=development yarn build",
     "docs": "npx md-magic --path './packages/**/README.md' --config ./docs/markdown-magic.config.js",
     "generate:clean": "lerna run generate:clean",
