@@ -14,7 +14,8 @@
     "bootstrap": "lerna bootstrap",
     "build:import": "lerna run build:import",
     "build:sdk": "lerna run build:sdk",
-    "build": "run-s generate build:sdk generate:test build:import docs",
+    "build:types": "npx tsc --project tsconfig.check.json",
+    "build": "run-s generate build:types build:sdk generate:test build:import docs",
     "dev": "NODE_ENV=development yarn build",
     "docs": "npx md-magic --path './packages/**/README.md' --config ./docs/markdown-magic.config.js",
     "generate:clean": "lerna run generate:clean",
@@ -113,5 +114,9 @@
         "tsconfig": "tsconfig.json"
       }
     }
+  },
+  "devDependencies": {
+    "@types/isomorphic-fetch": "^0.0.35",
+    "@types/ws": "^7.4.1"
   }
 }
