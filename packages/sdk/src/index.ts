@@ -1,3 +1,5 @@
+/// <reference lib="dom"/>
+
 export * from "./client";
 export * from "./error";
 export * from "./graphql-client";
