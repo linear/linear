@@ -1839,6 +1839,7 @@ export class Issue extends Request {
     this.canceledAt = parseDate(data.canceledAt) ?? undefined;
     this.completedAt = parseDate(data.completedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.customerTicketCount = data.customerTicketCount ?? undefined;
     this.description = data.description ?? undefined;
     this.dueDate = data.dueDate ?? undefined;
     this.estimate = data.estimate ?? undefined;
@@ -1879,6 +1880,8 @@ export class Issue extends Request {
   public completedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt?: Date;
+  /** Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk). */
+  public customerTicketCount?: number;
   /** The issue's description in markdown format. */
   public description?: string;
   /** The date at which the issue is due. */
@@ -1975,6 +1978,10 @@ export class Issue extends Request {
   /** Archives an issue. */
   public archive(variables?: Omit<L.IssueArchiveMutationVariables, "id">) {
     return this.id ? new IssueArchiveMutation(this._request).fetch(this.id) : undefined;
+  }
+  /** Deletes (trashes) an issue. */
+  public delete() {
+    return this.id ? new IssueDeleteMutation(this._request).fetch(this.id) : undefined;
   }
   /** Unarchives an issue. */
   public unarchive() {
@@ -2929,6 +2936,7 @@ export class OauthClient extends Request {
     this.id = data.id ?? undefined;
     this.imageUrl = data.imageUrl ?? undefined;
     this.name = data.name ?? undefined;
+    this.publicEnabled = data.publicEnabled ?? undefined;
     this.redirectUris = data.redirectUris ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
   }
@@ -2953,6 +2961,8 @@ export class OauthClient extends Request {
   public imageUrl?: string;
   /** OAuth application's client name. */
   public name?: string;
+  /** Whether the OAuth application is publicly visible, or only visible to the creating workspace. */
+  public publicEnabled?: boolean;
   /** List of allowed redirect URIs for the application. */
   public redirectUris?: string[];
   /**
@@ -4048,6 +4058,7 @@ export class Subscription extends Request {
     this.canceledAt = parseDate(data.canceledAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.id = data.id ?? undefined;
+    this.nextBillingAt = parseDate(data.nextBillingAt) ?? undefined;
     this.pendingChangeType = data.pendingChangeType ?? undefined;
     this.seats = data.seats ?? undefined;
     this.type = data.type ?? undefined;
@@ -4063,6 +4074,8 @@ export class Subscription extends Request {
   public createdAt?: Date;
   /** The unique identifier of the entity. */
   public id?: string;
+  /** The date the subscription will be billed next. */
+  public nextBillingAt?: Date;
   /** The subscription type of a pending change. Null if no change pending. */
   public pendingChangeType?: string;
   /** The number of seats in the subscription. */
@@ -8760,6 +8773,32 @@ export class IssueCreateMutation extends Request {
     }).then(response => {
       const data = response?.issueCreate;
       return data ? new IssuePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IssueDelete Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueDeleteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueDelete mutation and return a ArchivePayload
+   *
+   * @param id - required id to pass to issueDelete
+   * @returns parsed response from IssueDeleteMutation
+   */
+  public async fetch(id: string): LinearFetch<ArchivePayload> {
+    return this._request<L.IssueDeleteMutation, L.IssueDeleteMutationVariables>(L.IssueDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.issueDelete;
+      return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
 }
@@ -14581,6 +14620,15 @@ export class LinearSdk extends Request {
    */
   public issueCreate(input: L.IssueCreateInput): LinearFetch<IssuePayload> {
     return new IssueCreateMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes (trashes) an issue.
+   *
+   * @param id - required id to pass to issueDelete
+   * @returns ArchivePayload
+   */
+  public issueDelete(id: string): LinearFetch<ArchivePayload> {
+    return new IssueDeleteMutation(this._request).fetch(id);
   }
   /**
    * Kicks off an Asana import job.

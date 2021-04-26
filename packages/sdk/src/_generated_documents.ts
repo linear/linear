@@ -1140,6 +1140,8 @@ export type Issue = Node & {
   createdAt: Scalars["DateTime"];
   /** The user who created the issue. */
   creator?: Maybe<User>;
+  /** Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk). */
+  customerTicketCount: Scalars["Int"];
   /** The cycle that the issue is associated with. */
   cycle?: Maybe<Cycle>;
   /** The issue's description in markdown format. */
@@ -1723,6 +1725,8 @@ export type IssueUpdateInput = {
   teamId?: Maybe<Scalars["String"]>;
   /** The issue title. */
   title?: Maybe<Scalars["String"]>;
+  /** [Deprecated] Wether the issue has been trashed. */
+  trashed?: Maybe<Scalars["Boolean"]>;
 };
 
 export type JoinOrganizationInput = {
@@ -1913,6 +1917,8 @@ export type Mutation = {
   issueArchive: ArchivePayload;
   /** Creates a new issue. */
   issueCreate: IssuePayload;
+  /** Deletes (trashes) an issue. */
+  issueDelete: ArchivePayload;
   /** Kicks off an Asana import job. */
   issueImportCreateAsana: IssueImportPayload;
   /** Kicks off a Clubhouse import job. */
@@ -2306,6 +2312,10 @@ export type MutationIssueArchiveArgs = {
 
 export type MutationIssueCreateArgs = {
   input: IssueCreateInput;
+};
+
+export type MutationIssueDeleteArgs = {
+  id: Scalars["String"];
 };
 
 export type MutationIssueImportCreateAsanaArgs = {
@@ -2823,6 +2833,8 @@ export type OauthClient = Node & {
   imageUrl: Scalars["String"];
   /** OAuth application's client name. */
   name: Scalars["String"];
+  /** Whether the OAuth application is publicly visible, or only visible to the creating workspace. */
+  publicEnabled: Scalars["Boolean"];
   /** List of allowed redirect URIs for the application. */
   redirectUris: Array<Scalars["String"]>;
   /**
@@ -2870,6 +2882,8 @@ export type OauthClientUpdateInput = {
   imageUrl?: Maybe<Scalars["String"]>;
   /** The application's name. */
   name?: Maybe<Scalars["String"]>;
+  /** Whether the OAuth application should be publicly visible, or only visible to the creating workspace. */
+  publicEnabled?: Maybe<Scalars["Boolean"]>;
   /** List of allowed redirect URIs for the application. */
   redirectUris?: Maybe<Array<Scalars["String"]>>;
 };
@@ -4167,6 +4181,8 @@ export type Subscription = Node & {
   creator?: Maybe<User>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The date the subscription will be billed next. */
+  nextBillingAt?: Maybe<Scalars["DateTime"]>;
   /** The organization that the subscription is associated with. */
   organization: Organization;
   /** The subscription type of a pending change. Null if no change pending. */
@@ -5544,6 +5560,7 @@ export type IssueFragment = { __typename?: "Issue" } & Pick<
   | "identifier"
   | "priorityLabel"
   | "previousIdentifiers"
+  | "customerTicketCount"
   | "branchName"
   | "dueDate"
   | "estimate"
@@ -5720,6 +5737,7 @@ export type OauthClientFragment = { __typename?: "OauthClient" } & Pick<
   | "createdAt"
   | "id"
   | "developerUrl"
+  | "publicEnabled"
 >;
 
 export type FigmaEmbedFragment = { __typename?: "FigmaEmbed" } & Pick<
@@ -5814,7 +5832,15 @@ export type UserSettingsFragment = { __typename?: "UserSettings" } & Pick<
 
 export type SubscriptionFragment = { __typename?: "Subscription" } & Pick<
   Subscription,
-  "canceledAt" | "updatedAt" | "seats" | "pendingChangeType" | "type" | "archivedAt" | "createdAt" | "id"
+  | "canceledAt"
+  | "nextBillingAt"
+  | "updatedAt"
+  | "seats"
+  | "pendingChangeType"
+  | "type"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
@@ -8160,6 +8186,14 @@ export type IssueCreateMutation = { __typename?: "Mutation" } & {
   issueCreate: { __typename?: "IssuePayload" } & IssuePayloadFragment;
 };
 
+export type IssueDeleteMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type IssueDeleteMutation = { __typename?: "Mutation" } & {
+  issueDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
 export type IssueImportCreateAsanaMutationVariables = Exact<{
   asanaTeamName: Scalars["String"];
   asanaToken: Scalars["String"];
@@ -9413,6 +9447,7 @@ export const SubscriptionFragmentDoc: DocumentNode<SubscriptionFragment, unknown
             },
           },
           { kind: "Field", name: { kind: "Name", value: "canceledAt" } },
+          { kind: "Field", name: { kind: "Name", value: "nextBillingAt" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "seats" } },
           { kind: "Field", name: { kind: "Name", value: "pendingChangeType" } },
@@ -10886,6 +10921,7 @@ export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
           { kind: "Field", name: { kind: "Name", value: "identifier" } },
           { kind: "Field", name: { kind: "Name", value: "priorityLabel" } },
           { kind: "Field", name: { kind: "Name", value: "previousIdentifiers" } },
+          { kind: "Field", name: { kind: "Name", value: "customerTicketCount" } },
           { kind: "Field", name: { kind: "Name", value: "branchName" } },
           {
             kind: "Field",
@@ -11881,6 +11917,7 @@ export const OauthClientFragmentDoc: DocumentNode<OauthClientFragment, unknown> 
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "publicEnabled" } },
         ],
       },
     },
@@ -24898,6 +24935,44 @@ export const IssueCreateDocument: DocumentNode<IssueCreateMutation, IssueCreateM
       },
     },
     ...IssuePayloadFragmentDoc.definitions,
+  ],
+};
+export const IssueDeleteDocument: DocumentNode<IssueDeleteMutation, IssueDeleteMutationVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueDelete" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
   ],
 };
 export const IssueImportCreateAsanaDocument: DocumentNode<
