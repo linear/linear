@@ -1819,7 +1819,6 @@ export type Mutation = {
   apiKeyDelete: ArchivePayload;
   /**
    * [DEPRECATED] Archives an issue attachment.
-   *
    * @deprecated This mutation is deprecated, please use `attachmentDelete` instead
    */
   attachmentArchive: ArchivePayload;
@@ -3544,7 +3543,6 @@ export type Query = {
   attachment: Attachment;
   /**
    * [Alpha] Query an issue by its associated attachment, and its id.
-   *
    * @deprecated Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead.
    */
   attachmentIssue: Issue;
