@@ -23,7 +23,7 @@
     "generate:changeset:dependencies": "ts-node scripts/generate-dependencies-changeset.ts",
     "generate:changeset:schema": "ts-node scripts/generate-schema-changeset.ts",
     "generate:clean": "npx rimraf src/**/_generated*",
-    "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
+    "generate:doc": "npx graphql-codegen --config codegen.doc.yml && npx prettier --write **/_generated_documents.ts",
     "generate:schema": "npx graphql-codegen --config codegen.schema.yml",
     "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml && yarn update:scalars",
     "generate:test": "npx graphql-codegen --config codegen.test.yml",
