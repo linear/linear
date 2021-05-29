@@ -19,22 +19,6 @@ export function findQuery(
     return undefined;
   }
 
-  /** Get all queries matching type */
-  const queriesMatchingType = context.queries.filter(query => {
-    return reduceTypeName(query.type) === type && reduceListType(query.type) === listType;
-  });
-  if (!queriesMatchingType.length) {
-    return undefined;
-  }
-
-  /** Select query if matching name and type */
-  const queryMatchingNameAndType = queriesMatchingType.find(query => {
-    return query.name.value.toLowerCase() === fieldName.toLowerCase();
-  });
-  if (queryMatchingNameAndType) {
-    return queryMatchingNameAndType;
-  }
-
   /** Get the matching object definition */
   const responseObject = context.objects.find(obj => type === obj.name.value);
   const responseFieldNames = responseObject?.fields?.map(responseField => responseField.name.value);
@@ -42,9 +26,17 @@ export function findQuery(
     return undefined;
   }
 
-  /** Find a query with required args available on the response object */
-  return queriesMatchingType.find(query => {
-    const hasAvailableArgs = getRequiredArgs(query.arguments).every(arg => responseFieldNames.includes(arg.name.value));
-    return hasAvailableArgs ? query : undefined;
+  /** Get all queries matching type and have required args available on the response object */
+  const matchingQueries = context.queries.filter(query => {
+    return (
+      reduceTypeName(query.type) === type &&
+      reduceListType(query.type) === listType &&
+      getRequiredArgs(query.arguments).every(arg => responseFieldNames.includes(arg.name.value))
+    );
   });
+
+  /** Prefer matching query names */
+  return (
+    matchingQueries.find(query => query.name.value.toLowerCase() === fieldName.toLowerCase()) ?? matchingQueries[0]
+  );
 }
