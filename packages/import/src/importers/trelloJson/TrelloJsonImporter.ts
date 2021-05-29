@@ -14,7 +14,7 @@ interface TrelloCard {
     name: string;
     color: TrelloLabelColor;
   }[];
-  idList: string
+  idList: string;
 }
 
 interface TrelloList {
@@ -59,8 +59,8 @@ export class TrelloJsonImporter implements Importer {
       }
 
       if (
-        this.discardArchivedLists
-        && (data.lists as TrelloList[]).find((list) => list.id === card.idList && list.closed)
+        this.discardArchivedLists &&
+        (data.lists as TrelloList[]).find(list => list.id === card.idList && list.closed)
       ) {
         continue;
       }
