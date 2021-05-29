@@ -133,7 +133,7 @@ export type Attachment = Node & {
    *     entity hasn't been update after creation.
    */
   updatedAt: Scalars["DateTime"];
-  /** Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL. */
+  /** Location of the attachment which is also used as an identifier. */
   url: Scalars["String"];
 };
 
@@ -197,6 +197,8 @@ export type AuthResolverResponse = {
   email?: Maybe<Scalars["String"]>;
   /** User account ID. */
   id: Scalars["String"];
+  /** ID of the organization last accessed by the user. */
+  lastUsedOrganizationId?: Maybe<Scalars["String"]>;
   /** JWT token for authentication of the account. */
   token?: Maybe<Scalars["String"]>;
   /** Users belonging to this account. */
@@ -1285,6 +1287,7 @@ export type IssueSubscribersArgs = {
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 };
@@ -1816,13 +1819,16 @@ export type Mutation = {
   apiKeyDelete: ArchivePayload;
   /**
    * [DEPRECATED] Archives an issue attachment.
+   *
    * @deprecated This mutation is deprecated, please use `attachmentDelete` instead
    */
   attachmentArchive: ArchivePayload;
-  /** [Alpha] Creates a new attachment, or updates existing if the same `uri` is used. */
+  /** [Alpha] Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
   attachmentCreate: AttachmentPayload;
   /** [Alpha] Deletes an issue attachment. */
   attachmentDelete: ArchivePayload;
+  /** Link an existing Front conversation to an issue. */
+  attachmentLinkFront: AttachmentPayload;
   /** Link an existing Zendesk ticket to an issue. */
   attachmentLinkZendesk: AttachmentPayload;
   /** [Alpha] Updates an existing issue attachment. */
@@ -1891,12 +1897,16 @@ export type Mutation = {
   integrationDelete: ArchivePayload;
   /** Integrates the organization with Figma. */
   integrationFigma: IntegrationPayload;
+  /** Integrates the organization with Front. */
+  integrationFront: IntegrationPayload;
   /** Connects the organization with the GitHub App. */
   integrationGithubConnect: IntegrationPayload;
   /** Connects the organization with a GitLab Access Token. */
   integrationGitlabConnect: IntegrationPayload;
   /** Integrates the organization with Google Sheets. */
   integrationGoogleSheets: IntegrationPayload;
+  /** Integrates the organization with Intercom. */
+  integrationIntercom: IntegrationPayload;
   /** Archives an integration resource. */
   integrationResourceArchive: ArchivePayload;
   /** Integrates the organization with Sentry. */
@@ -1979,6 +1989,8 @@ export type Mutation = {
   oauthClientUpdate: OauthClientPayload;
   /** Revokes an OAuth token. */
   oauthTokenRevoke: OauthTokenRevokePayload;
+  /** Cancels the deletion of an organization. Administrator privileges required. */
+  organizationCancelDelete: OrganizationCancelDeletePayload;
   /** Delete's an organization. Administrator privileges required. */
   organizationDelete: OrganizationDeletePayload;
   /** Get an organization's delete confirmation token. Administrator privileges required. */
@@ -2037,6 +2049,8 @@ export type Mutation = {
   teamCreate: TeamPayload;
   /** Deletes a team. */
   teamDelete: ArchivePayload;
+  /** Deletes a previously used team key. */
+  teamKeyDelete: ArchivePayload;
   /** Creates a new team membership. */
   teamMembershipCreate: TeamMembershipPayload;
   /** Deletes a team membership. */
@@ -2109,6 +2123,11 @@ export type MutationAttachmentCreateArgs = {
 
 export type MutationAttachmentDeleteArgs = {
   id: Scalars["String"];
+};
+
+export type MutationAttachmentLinkFrontArgs = {
+  conversationId: Scalars["String"];
+  issueId: Scalars["String"];
 };
 
 export type MutationAttachmentLinkZendeskArgs = {
@@ -2246,6 +2265,11 @@ export type MutationIntegrationFigmaArgs = {
   redirectUri: Scalars["String"];
 };
 
+export type MutationIntegrationFrontArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+};
+
 export type MutationIntegrationGithubConnectArgs = {
   installationId: Scalars["String"];
 };
@@ -2257,6 +2281,11 @@ export type MutationIntegrationGitlabConnectArgs = {
 
 export type MutationIntegrationGoogleSheetsArgs = {
   code: Scalars["String"];
+};
+
+export type MutationIntegrationIntercomArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
 };
 
 export type MutationIntegrationResourceArchiveArgs = {
@@ -2579,6 +2608,10 @@ export type MutationTeamDeleteArgs = {
   id: Scalars["String"];
 };
 
+export type MutationTeamKeyDeleteArgs = {
+  id: Scalars["String"];
+};
+
 export type MutationTeamMembershipCreateArgs = {
   input: TeamMembershipCreateInput;
 };
@@ -2857,6 +2890,8 @@ export type OauthClientCreateInput = {
   imageUrl?: Maybe<Scalars["String"]>;
   /** The application's name. */
   name: Scalars["String"];
+  /** Whether the OAuth application should be publicly visible, or only visible to the creating workspace. */
+  publicEnabled?: Maybe<Scalars["Boolean"]>;
   /** List of allowed redirect URIs for the application. */
   redirectUris: Array<Scalars["String"]>;
 };
@@ -2910,6 +2945,8 @@ export type Organization = Node & {
   createdAt: Scalars["DateTime"];
   /** Number of issues in the organization. */
   createdIssueCount: Scalars["Int"];
+  /** The time at which deletion of the organization was requested. */
+  deletionRequestedAt?: Maybe<Scalars["DateTime"]>;
   /** How git branches are formatted. If null, default formatting will be used. */
   gitBranchFormat?: Maybe<Scalars["String"]>;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
@@ -2985,8 +3022,15 @@ export type OrganizationUsersArgs = {
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type OrganizationCancelDeletePayload = {
+  __typename?: "OrganizationCancelDeletePayload";
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
 };
 
 export type OrganizationDeletePayload = {
@@ -3250,6 +3294,7 @@ export type ProjectMembersArgs = {
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 };
@@ -3492,12 +3537,25 @@ export type Query = {
   archivedModelSync: ArchiveResponse;
   /** [Internal] Fetches archived models. */
   archivedModelsSync: ArchiveResponse;
-  /** [Alpha] One specific issue attachment. `url` can be used as the `id` parameter. */
+  /**
+   * [Alpha] One specific issue attachment.
+   * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
+   */
   attachment: Attachment;
-  /** [Alpha] Query an issue by its associated attachment, and its id or URI. */
+  /**
+   * [Alpha] Query an issue by its associated attachment, and its id.
+   *
+   * @deprecated Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead.
+   */
   attachmentIssue: Issue;
-  /** [Alpha] All issue attachments. */
+  /**
+   * [Alpha] All issue attachments.
+   *
+   * To get attachments for a given URL, use `attachmentsForURL` query.
+   */
   attachments: AttachmentConnection;
+  /** [Alpha] Returns issue attachments for a given `url`. */
+  attachmentsForURL: AttachmentConnection;
   /** Get all authorized applications for a user */
   authorizedApplications: Array<AuthorizedApplication>;
   /** Fetch users belonging to this user account. */
@@ -3594,12 +3652,16 @@ export type Query = {
   reaction: Reaction;
   /** All comment emoji reactions. */
   reactions: ReactionConnection;
+  /** [Internal] Search in Linear. This query is for internal purposes only and is subject to change without notice. */
+  search: SearchResultPayload;
   /** Fetch SSO login URL for the email provided. */
   ssoUrlFromEmail: SsoUrlFromEmailResponse;
   /** The organization's subscription. */
   subscription?: Maybe<Subscription>;
   /** [Internal] Fetch data to catch up the client to the state of the world. */
   syncBootstrap: SyncResponse;
+  /** [Internal] Fetches delta sync packets. */
+  syncDelta: SyncDeltaResponse;
   /** One specific team. */
   team: Team;
   /** One specific team membership. */
@@ -3673,6 +3735,16 @@ export type QueryAttachmentsArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryAttachmentsForUrlArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+  url: Scalars["String"];
 };
 
 export type QueryCollaborativeDocumentJoinArgs = {
@@ -3939,15 +4011,25 @@ export type QueryReactionsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+export type QuerySearchArgs = {
+  from?: Maybe<Scalars["Int"]>;
+  term: Scalars["String"];
+};
+
 export type QuerySsoUrlFromEmailArgs = {
   email: Scalars["String"];
   isDesktop?: Maybe<Scalars["Boolean"]>;
 };
 
 export type QuerySyncBootstrapArgs = {
-  databaseVersion?: Maybe<Scalars["Int"]>;
-  sinceSyncId?: Maybe<Scalars["Int"]>;
+  onlyModels?: Maybe<Array<Scalars["String"]>>;
   syncGroups?: Maybe<Array<Scalars["String"]>>;
+};
+
+export type QuerySyncDeltaArgs = {
+  lastSyncId: Scalars["Int"];
+  offset?: Maybe<Scalars["Int"]>;
+  toSyncId: Scalars["Int"];
 };
 
 export type QueryTeamArgs = {
@@ -3989,6 +4071,7 @@ export type QueryUsersArgs = {
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 };
@@ -4108,6 +4191,16 @@ export type SamlConfigurationInput = {
   ssoSigningCert?: Maybe<Scalars["String"]>;
 };
 
+export type SearchResultPayload = {
+  __typename?: "SearchResultPayload";
+  /** Archived issues matching the search term along with all their dependencies. */
+  archivePayload: ArchiveResponse;
+  /** Active issue IDs returned matching the search term. */
+  issueIds: Array<Scalars["String"]>;
+  /** Total number of search results. */
+  totalCount: Scalars["Int"];
+};
+
 /** Sentry issue data */
 export type SentryIssuePayload = {
   __typename?: "SentryIssuePayload";
@@ -4221,6 +4314,17 @@ export type SubscriptionUpdateInput = {
   canceledAt?: Maybe<Scalars["DateTime"]>;
   /** The subscription type of a pending change. Null if no change pending. */
   pendingChangeType?: Maybe<Scalars["String"]>;
+};
+
+/** Contains a delta sync. */
+export type SyncDeltaResponse = {
+  __typename?: "SyncDeltaResponse";
+  /** Whether the client should try loading more. */
+  loadMore: Scalars["Boolean"];
+  /** Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap. */
+  success: Scalars["Boolean"];
+  /** A JSON serialized collection of delta packets. */
+  updates?: Maybe<Scalars["String"]>;
 };
 
 /**
@@ -4393,6 +4497,7 @@ export type TeamMembersArgs = {
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 };
@@ -4493,6 +4598,8 @@ export type TeamCreateInput = {
   issueEstimationExtended?: Maybe<Scalars["Boolean"]>;
   /** The issue estimation type to use. */
   issueEstimationType?: Maybe<Scalars["String"]>;
+  /** Whether issues without priority should be sorted first. */
+  issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
   /** The key of the team. If not given, the key will be generated based on the name of the team. */
   key?: Maybe<Scalars["String"]>;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. */
@@ -4627,6 +4734,8 @@ export type TeamUpdateInput = {
   issueEstimationExtended?: Maybe<Scalars["Boolean"]>;
   /** The issue estimation type to use. */
   issueEstimationType?: Maybe<Scalars["String"]>;
+  /** Whether issues without priority should be sorted first. */
+  issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
   /** The key of the team. */
   key?: Maybe<Scalars["String"]>;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. */
@@ -4821,7 +4930,7 @@ export type UploadPayload = {
 /** A user that has access to the the resources of an organization. */
 export type User = Node & {
   __typename?: "User";
-  /** Whether the user account is active or disabled. */
+  /** Whether the user account is active or disabled (suspended). */
   active: Scalars["Boolean"];
   /** Whether the user is an organization administrator. */
   admin: Scalars["Boolean"];
@@ -4936,6 +5045,8 @@ export type UserAuthorizedApplication = {
   __typename?: "UserAuthorizedApplication";
   /** OAuth application's client ID. */
   clientId: Scalars["String"];
+  /** Whether the application was created by Linear */
+  createdByLinear: Scalars["Boolean"];
   /** Information about the application. */
   description?: Maybe<Scalars["String"]>;
   /** Name of the developer. */
@@ -4972,11 +5083,13 @@ export enum UserFlagType {
   CycleWelcomeDismissed = "cycleWelcomeDismissed",
   DesktopDownloadToastDismissed = "desktopDownloadToastDismissed",
   DesktopInstalled = "desktopInstalled",
+  DueDateShortcutMigration = "dueDateShortcutMigration",
   EmptyActiveIssuesDismissed = "emptyActiveIssuesDismissed",
   EmptyBacklogDismissed = "emptyBacklogDismissed",
   EmptyCustomViewsDismissed = "emptyCustomViewsDismissed",
   EmptyMyIssuesDismissed = "emptyMyIssuesDismissed",
   FigmaPromptDismissed = "figmaPromptDismissed",
+  ImportBannerDismissed = "importBannerDismissed",
   ListSelectionTip = "listSelectionTip",
   MigrateThemePreference = "migrateThemePreference",
   ProjectWelcomeDismissed = "projectWelcomeDismissed",
@@ -5600,6 +5713,7 @@ export type OrganizationFragment = { __typename?: "Organization" } & Pick<
   | "logoUrl"
   | "name"
   | "urlKey"
+  | "deletionRequestedAt"
   | "archivedAt"
   | "createdAt"
   | "id"
@@ -5655,6 +5769,11 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
 export type DocumentStepFragment = { __typename?: "DocumentStep" } & Pick<
   DocumentStep,
   "clientId" | "step" | "version" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
+export type SyncDeltaResponseFragment = { __typename?: "SyncDeltaResponse" } & Pick<
+  SyncDeltaResponse,
+  "updates" | "success" | "loadMore"
 >;
 
 export type SyncResponseFragment = { __typename?: "SyncResponse" } & Pick<
@@ -5757,7 +5876,7 @@ export type AuthorizedApplicationFragment = { __typename?: "AuthorizedApplicatio
 
 export type UserAuthorizedApplicationFragment = { __typename?: "UserAuthorizedApplication" } & Pick<
   UserAuthorizedApplication,
-  "name" | "imageUrl" | "description" | "developer" | "clientId" | "developerUrl" | "isAuthorized"
+  "name" | "imageUrl" | "description" | "developer" | "clientId" | "developerUrl" | "createdByLinear" | "isAuthorized"
 >;
 
 export type ApplicationFragment = { __typename?: "Application" } & Pick<
@@ -5902,7 +6021,7 @@ export type AttachmentPayloadFragment = { __typename?: "AttachmentPayload" } & P
 
 export type AuthResolverResponseFragment = { __typename?: "AuthResolverResponse" } & Pick<
   AuthResolverResponse,
-  "email" | "token" | "allowDomainAccess" | "id"
+  "email" | "lastUsedOrganizationId" | "token" | "allowDomainAccess" | "id"
 > & {
     availableOrganizations?: Maybe<Array<{ __typename?: "Organization" } & OrganizationFragment>>;
     users: Array<{ __typename?: "User" } & UserFragment>;
@@ -6146,6 +6265,11 @@ export type OauthTokenRevokePayloadFragment = { __typename?: "OauthTokenRevokePa
   "success"
 >;
 
+export type OrganizationCancelDeletePayloadFragment = { __typename?: "OrganizationCancelDeletePayload" } & Pick<
+  OrganizationCancelDeletePayload,
+  "success"
+>;
+
 export type OrganizationDeletePayloadFragment = { __typename?: "OrganizationDeletePayload" } & Pick<
   OrganizationDeletePayload,
   "success"
@@ -6235,6 +6359,11 @@ export type RotateSecretPayloadFragment = { __typename?: "RotateSecretPayload" }
   RotateSecretPayload,
   "lastSyncId" | "success"
 >;
+
+export type SearchResultPayloadFragment = { __typename?: "SearchResultPayload" } & Pick<
+  SearchResultPayload,
+  "issueIds" | "totalCount"
+> & { archivePayload: { __typename?: "ArchiveResponse" } & ArchiveResponseFragment };
 
 export type SsoUrlFromEmailResponseFragment = { __typename?: "SsoUrlFromEmailResponse" } & Pick<
   SsoUrlFromEmailResponse,
@@ -6529,6 +6658,7 @@ export type AttachmentIssue_SubscribersQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
@@ -6550,6 +6680,20 @@ export type AttachmentsQueryVariables = Exact<{
 
 export type AttachmentsQuery = { __typename?: "Query" } & {
   attachments: { __typename?: "AttachmentConnection" } & AttachmentConnectionFragment;
+};
+
+export type AttachmentsForUrlQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+  url: Scalars["String"];
+}>;
+
+export type AttachmentsForUrlQuery = { __typename?: "Query" } & {
+  attachmentsForURL: { __typename?: "AttachmentConnection" } & AttachmentConnectionFragment;
 };
 
 export type AuthorizedApplicationsQueryVariables = Exact<{ [key: string]: never }>;
@@ -6917,6 +7061,7 @@ export type Issue_SubscribersQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
@@ -7163,6 +7308,7 @@ export type Organization_UsersQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
@@ -7258,6 +7404,7 @@ export type Project_MembersQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
@@ -7339,6 +7486,26 @@ export type ReactionsQuery = { __typename?: "Query" } & {
   reactions: { __typename?: "ReactionConnection" } & ReactionConnectionFragment;
 };
 
+export type SearchQueryVariables = Exact<{
+  from?: Maybe<Scalars["Int"]>;
+  term: Scalars["String"];
+}>;
+
+export type SearchQuery = { __typename?: "Query" } & {
+  search: { __typename?: "SearchResultPayload" } & SearchResultPayloadFragment;
+};
+
+export type Search_ArchivePayloadQueryVariables = Exact<{
+  from?: Maybe<Scalars["Int"]>;
+  term: Scalars["String"];
+}>;
+
+export type Search_ArchivePayloadQuery = { __typename?: "Query" } & {
+  search: { __typename?: "SearchResultPayload" } & {
+    archivePayload: { __typename?: "ArchiveResponse" } & ArchiveResponseFragment;
+  };
+};
+
 export type SsoUrlFromEmailQueryVariables = Exact<{
   email: Scalars["String"];
   isDesktop?: Maybe<Scalars["Boolean"]>;
@@ -7355,13 +7522,22 @@ export type SubscriptionQuery = { __typename?: "Query" } & {
 };
 
 export type SyncBootstrapQueryVariables = Exact<{
-  databaseVersion?: Maybe<Scalars["Int"]>;
-  sinceSyncId?: Maybe<Scalars["Int"]>;
+  onlyModels?: Maybe<Array<Scalars["String"]> | Scalars["String"]>;
   syncGroups?: Maybe<Array<Scalars["String"]> | Scalars["String"]>;
 }>;
 
 export type SyncBootstrapQuery = { __typename?: "Query" } & {
   syncBootstrap: { __typename?: "SyncResponse" } & SyncResponseFragment;
+};
+
+export type SyncDeltaQueryVariables = Exact<{
+  lastSyncId: Scalars["Int"];
+  offset?: Maybe<Scalars["Int"]>;
+  toSyncId: Scalars["Int"];
+}>;
+
+export type SyncDeltaQuery = { __typename?: "Query" } & {
+  syncDelta: { __typename?: "SyncDeltaResponse" } & SyncDeltaResponseFragment;
 };
 
 export type TeamQueryVariables = Exact<{
@@ -7418,6 +7594,7 @@ export type Team_MembersQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
@@ -7621,6 +7798,7 @@ export type UsersQueryVariables = Exact<{
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
+  includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 }>;
@@ -7781,6 +7959,15 @@ export type AttachmentDeleteMutationVariables = Exact<{
 
 export type AttachmentDeleteMutation = { __typename?: "Mutation" } & {
   attachmentDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type AttachmentLinkFrontMutationVariables = Exact<{
+  conversationId: Scalars["String"];
+  issueId: Scalars["String"];
+}>;
+
+export type AttachmentLinkFrontMutation = { __typename?: "Mutation" } & {
+  attachmentLinkFront: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
 };
 
 export type AttachmentLinkZendeskMutationVariables = Exact<{
@@ -8066,6 +8253,15 @@ export type IntegrationFigmaMutation = { __typename?: "Mutation" } & {
   integrationFigma: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
+export type IntegrationFrontMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationFrontMutation = { __typename?: "Mutation" } & {
+  integrationFront: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
 export type IntegrationGithubConnectMutationVariables = Exact<{
   installationId: Scalars["String"];
 }>;
@@ -8089,6 +8285,15 @@ export type IntegrationGoogleSheetsMutationVariables = Exact<{
 
 export type IntegrationGoogleSheetsMutation = { __typename?: "Mutation" } & {
   integrationGoogleSheets: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationIntercomMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationIntercomMutation = { __typename?: "Mutation" } & {
+  integrationIntercom: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationResourceArchiveMutationVariables = Exact<{
@@ -8467,6 +8672,14 @@ export type OauthTokenRevokeMutation = { __typename?: "Mutation" } & {
   oauthTokenRevoke: { __typename?: "OauthTokenRevokePayload" } & OauthTokenRevokePayloadFragment;
 };
 
+export type OrganizationCancelDeleteMutationVariables = Exact<{ [key: string]: never }>;
+
+export type OrganizationCancelDeleteMutation = { __typename?: "Mutation" } & {
+  organizationCancelDelete: {
+    __typename?: "OrganizationCancelDeletePayload";
+  } & OrganizationCancelDeletePayloadFragment;
+};
+
 export type OrganizationDeleteMutationVariables = Exact<{
   input: DeleteOrganizationInput;
 }>;
@@ -8697,6 +8910,14 @@ export type TeamDeleteMutationVariables = Exact<{
 
 export type TeamDeleteMutation = { __typename?: "Mutation" } & {
   teamDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type TeamKeyDeleteMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type TeamKeyDeleteMutation = { __typename?: "Mutation" } & {
+  teamKeyDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
 export type TeamMembershipCreateMutationVariables = Exact<{
@@ -9064,6 +9285,24 @@ export const DocumentStepFragmentDoc: DocumentNode<DocumentStepFragment, unknown
     },
   ],
 };
+export const SyncDeltaResponseFragmentDoc: DocumentNode<SyncDeltaResponseFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SyncDeltaResponse" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SyncDeltaResponse" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "updates" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+          { kind: "Field", name: { kind: "Name", value: "loadMore" } },
+        ],
+      },
+    },
+  ],
+};
 export const SyncResponseFragmentDoc: DocumentNode<SyncResponseFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -9078,24 +9317,6 @@ export const SyncResponseFragmentDoc: DocumentNode<SyncResponseFragment, unknown
           { kind: "Field", name: { kind: "Name", value: "state" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "subscribedSyncGroups" } },
-          { kind: "Field", name: { kind: "Name", value: "databaseVersion" } },
-        ],
-      },
-    },
-  ],
-};
-export const ArchiveResponseFragmentDoc: DocumentNode<ArchiveResponseFragment, unknown> = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ArchiveResponse" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ArchiveResponse" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "archive" } },
-          { kind: "Field", name: { kind: "Name", value: "totalCount" } },
           { kind: "Field", name: { kind: "Name", value: "databaseVersion" } },
         ],
       },
@@ -9224,6 +9445,7 @@ export const UserAuthorizedApplicationFragmentDoc: DocumentNode<UserAuthorizedAp
           { kind: "Field", name: { kind: "Name", value: "developer" } },
           { kind: "Field", name: { kind: "Name", value: "clientId" } },
           { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "createdByLinear" } },
           { kind: "Field", name: { kind: "Name", value: "isAuthorized" } },
         ],
       },
@@ -9685,6 +9907,7 @@ export const OrganizationFragmentDoc: DocumentNode<OrganizationFragment, unknown
           { kind: "Field", name: { kind: "Name", value: "logoUrl" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "urlKey" } },
+          { kind: "Field", name: { kind: "Name", value: "deletionRequestedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
@@ -9708,6 +9931,7 @@ export const AuthResolverResponseFragmentDoc: DocumentNode<AuthResolverResponseF
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "email" } },
+          { kind: "Field", name: { kind: "Name", value: "lastUsedOrganizationId" } },
           { kind: "Field", name: { kind: "Name", value: "token" } },
           {
             kind: "Field",
@@ -11960,6 +12184,20 @@ export const OauthTokenRevokePayloadFragmentDoc: DocumentNode<OauthTokenRevokePa
     },
   ],
 };
+export const OrganizationCancelDeletePayloadFragmentDoc: DocumentNode<
+  OrganizationCancelDeletePayloadFragment,
+  unknown
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationCancelDeletePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationCancelDeletePayload" } },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+    },
+  ],
+};
 export const OrganizationDeletePayloadFragmentDoc: DocumentNode<OrganizationDeletePayloadFragment, unknown> = {
   kind: "Document",
   definitions: [
@@ -12578,6 +12816,50 @@ export const RotateSecretPayloadFragmentDoc: DocumentNode<RotateSecretPayloadFra
         ],
       },
     },
+  ],
+};
+export const ArchiveResponseFragmentDoc: DocumentNode<ArchiveResponseFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ArchiveResponse" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ArchiveResponse" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "archive" } },
+          { kind: "Field", name: { kind: "Name", value: "totalCount" } },
+          { kind: "Field", name: { kind: "Name", value: "databaseVersion" } },
+        ],
+      },
+    },
+  ],
+};
+export const SearchResultPayloadFragmentDoc: DocumentNode<SearchResultPayloadFragment, unknown> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SearchResultPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SearchResultPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "issueIds" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "archivePayload" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchiveResponse" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "totalCount" } },
+        ],
+      },
+    },
+    ...ArchiveResponseFragmentDoc.definitions,
   ],
 };
 export const SsoUrlFromEmailResponseFragmentDoc: DocumentNode<SsoUrlFromEmailResponseFragment, unknown> = {
@@ -14559,6 +14841,11 @@ export const AttachmentIssue_SubscribersDocument: DocumentNode<
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -14607,6 +14894,11 @@ export const AttachmentIssue_SubscribersDocument: DocumentNode<
                       kind: "Argument",
                       name: { kind: "Name", value: "includeArchived" },
                       value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeDisabled" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
                     },
                     {
                       kind: "Argument",
@@ -14708,6 +15000,104 @@ export const AttachmentsDocument: DocumentNode<AttachmentsQuery, AttachmentsQuer
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentConnectionFragmentDoc.definitions,
+  ],
+};
+export const AttachmentsForUrlDocument: DocumentNode<AttachmentsForUrlQuery, AttachmentsForUrlQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "attachmentsForURL" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentsForURL" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "url" },
+                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
               },
             ],
             selectionSet: {
@@ -17045,6 +17435,11 @@ export const Issue_SubscribersDocument: DocumentNode<Issue_SubscribersQuery, Iss
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -17093,6 +17488,11 @@ export const Issue_SubscribersDocument: DocumentNode<Issue_SubscribersQuery, Iss
                       kind: "Argument",
                       name: { kind: "Name", value: "includeArchived" },
                       value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeDisabled" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
                     },
                     {
                       kind: "Argument",
@@ -18618,6 +19018,11 @@ export const Organization_UsersDocument: DocumentNode<Organization_UsersQuery, O
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -18659,6 +19064,11 @@ export const Organization_UsersDocument: DocumentNode<Organization_UsersQuery, O
                       kind: "Argument",
                       name: { kind: "Name", value: "includeArchived" },
                       value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeDisabled" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
                     },
                     {
                       kind: "Argument",
@@ -19252,6 +19662,11 @@ export const Project_MembersDocument: DocumentNode<Project_MembersQuery, Project
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -19300,6 +19715,11 @@ export const Project_MembersDocument: DocumentNode<Project_MembersQuery, Project
                       kind: "Argument",
                       name: { kind: "Name", value: "includeArchived" },
                       value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeDisabled" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
                     },
                     {
                       kind: "Argument",
@@ -19802,6 +20222,114 @@ export const ReactionsDocument: DocumentNode<ReactionsQuery, ReactionsQueryVaria
     ...ReactionConnectionFragmentDoc.definitions,
   ],
 };
+export const SearchDocument: DocumentNode<SearchQuery, SearchQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "search" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "from" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "search" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "from" },
+                value: { kind: "Variable", name: { kind: "Name", value: "from" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "term" },
+                value: { kind: "Variable", name: { kind: "Name", value: "term" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SearchResultPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...SearchResultPayloadFragmentDoc.definitions,
+  ],
+};
+export const Search_ArchivePayloadDocument: DocumentNode<
+  Search_ArchivePayloadQuery,
+  Search_ArchivePayloadQueryVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "search_archivePayload" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "from" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "search" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "from" },
+                value: { kind: "Variable", name: { kind: "Name", value: "from" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "term" },
+                value: { kind: "Variable", name: { kind: "Name", value: "term" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "archivePayload" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchiveResponse" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchiveResponseFragmentDoc.definitions,
+  ],
+};
 export const SsoUrlFromEmailDocument: DocumentNode<SsoUrlFromEmailQuery, SsoUrlFromEmailQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -19884,13 +20412,11 @@ export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstr
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "databaseVersion" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "sinceSyncId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "onlyModels" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          },
         },
         {
           kind: "VariableDefinition",
@@ -19910,13 +20436,8 @@ export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstr
             arguments: [
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "databaseVersion" },
-                value: { kind: "Variable", name: { kind: "Name", value: "databaseVersion" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "sinceSyncId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "sinceSyncId" } },
+                name: { kind: "Name", value: "onlyModels" },
+                value: { kind: "Variable", name: { kind: "Name", value: "onlyModels" } },
               },
               {
                 kind: "Argument",
@@ -19933,6 +20454,64 @@ export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstr
       },
     },
     ...SyncResponseFragmentDoc.definitions,
+  ],
+};
+export const SyncDeltaDocument: DocumentNode<SyncDeltaQuery, SyncDeltaQueryVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "syncDelta" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "lastSyncId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "offset" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "toSyncId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "syncDelta" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "lastSyncId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "lastSyncId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "offset" },
+                value: { kind: "Variable", name: { kind: "Name", value: "offset" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "toSyncId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "toSyncId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SyncDeltaResponse" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...SyncDeltaResponseFragmentDoc.definitions,
   ],
 };
 export const TeamDocument: DocumentNode<TeamQuery, TeamQueryVariables> = {
@@ -20335,6 +20914,11 @@ export const Team_MembersDocument: DocumentNode<Team_MembersQuery, Team_MembersQ
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -20383,6 +20967,11 @@ export const Team_MembersDocument: DocumentNode<Team_MembersQuery, Team_MembersQ
                       kind: "Argument",
                       name: { kind: "Name", value: "includeArchived" },
                       value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeDisabled" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
                     },
                     {
                       kind: "Argument",
@@ -21761,6 +22350,11 @@ export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -21796,6 +22390,11 @@ export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
                 kind: "Argument",
                 name: { kind: "Name", value: "includeArchived" },
                 value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeDisabled" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeDisabled" } },
               },
               {
                 kind: "Argument",
@@ -22798,6 +23397,57 @@ export const AttachmentDeleteDocument: DocumentNode<AttachmentDeleteMutation, At
       },
     },
     ...ArchivePayloadFragmentDoc.definitions,
+  ],
+};
+export const AttachmentLinkFrontDocument: DocumentNode<
+  AttachmentLinkFrontMutation,
+  AttachmentLinkFrontMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkFront" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkFront" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "conversationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
   ],
 };
 export const AttachmentLinkZendeskDocument: DocumentNode<
@@ -24253,6 +24903,54 @@ export const IntegrationFigmaDocument: DocumentNode<IntegrationFigmaMutation, In
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 };
+export const IntegrationFrontDocument: DocumentNode<IntegrationFrontMutation, IntegrationFrontMutationVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationFront" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationFront" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+};
 export const IntegrationGithubConnectDocument: DocumentNode<
   IntegrationGithubConnectMutation,
   IntegrationGithubConnectMutationVariables
@@ -24373,6 +25071,57 @@ export const IntegrationGoogleSheetsDocument: DocumentNode<
                 kind: "Argument",
                 name: { kind: "Name", value: "code" },
                 value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+};
+export const IntegrationIntercomDocument: DocumentNode<
+  IntegrationIntercomMutation,
+  IntegrationIntercomMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationIntercom" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationIntercom" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
               },
             ],
             selectionSet: {
@@ -26504,6 +27253,35 @@ export const OauthTokenRevokeDocument: DocumentNode<OauthTokenRevokeMutation, Oa
     ...OauthTokenRevokePayloadFragmentDoc.definitions,
   ],
 };
+export const OrganizationCancelDeleteDocument: DocumentNode<
+  OrganizationCancelDeleteMutation,
+  OrganizationCancelDeleteMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "organizationCancelDelete" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationCancelDelete" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationCancelDeletePayload" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationCancelDeletePayloadFragmentDoc.definitions,
+  ],
+};
 export const OrganizationDeleteDocument: DocumentNode<
   OrganizationDeleteMutation,
   OrganizationDeleteMutationVariables
@@ -27690,6 +28468,44 @@ export const TeamDeleteDocument: DocumentNode<TeamDeleteMutation, TeamDeleteMuta
           {
             kind: "Field",
             name: { kind: "Name", value: "teamDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+};
+export const TeamKeyDeleteDocument: DocumentNode<TeamKeyDeleteMutation, TeamKeyDeleteMutationVariables> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "teamKeyDelete" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamKeyDelete" },
             arguments: [
               {
                 kind: "Argument",

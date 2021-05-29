@@ -510,7 +510,7 @@ fragment User on User {
   name
   # Unique hash for the user to be used in invite URLs.
   inviteHash
-  # Whether the user account is active or disabled.
+  # Whether the user account is active or disabled (suspended).
   active
   # Whether the user is an organization administrator.
   admin
@@ -810,6 +810,8 @@ fragment Organization on Organization {
   name
   # The organization's unique URL key.
   urlKey
+  # The time at which deletion of the organization was requested.
+  deletionRequestedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -936,6 +938,16 @@ fragment DocumentStep on DocumentStep {
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# Contains a delta sync.
+fragment SyncDeltaResponse on SyncDeltaResponse {
+  # A JSON serialized collection of delta packets.
+  updates
+  # Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap.
+  success
+  # Whether the client should try loading more.
+  loadMore
 }
 
 # Contains either the full serialized state of the application or delta packets that the requester can
@@ -1224,6 +1236,8 @@ fragment UserAuthorizedApplication on UserAuthorizedApplication {
   clientId
   # Url of the developer (homepage or docs).
   developerUrl
+  # Whether the application was created by Linear
+  createdByLinear
   # Whether the user has authorized the application for the given scopes.
   isAuthorized
 }
@@ -1485,7 +1499,7 @@ fragment Attachment on Attachment {
   groupBySource
   # Information about the source which created the attachment.
   source
-  # Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL.
+  # Location of the attachment which is also used as an identifier.
   url
   # The issue this attachment belongs to.
   issue {
@@ -1552,6 +1566,8 @@ fragment AttachmentPayload on AttachmentPayload {
 fragment AuthResolverResponse on AuthResolverResponse {
   # Email for the authenticated account.
   email
+  # ID of the organization last accessed by the user.
+  lastUsedOrganizationId
   # JWT token for authentication of the account.
   token
   # Organizations this account has access to, but is not yet a member.
@@ -2033,6 +2049,11 @@ fragment OauthTokenRevokePayload on OauthTokenRevokePayload {
   success
 }
 
+fragment OrganizationCancelDeletePayload on OrganizationCancelDeletePayload {
+  # Whether the operation was successful.
+  success
+}
+
 fragment OrganizationDeletePayload on OrganizationDeletePayload {
   # Whether the operation was successful.
   success
@@ -2183,6 +2204,17 @@ fragment RotateSecretPayload on RotateSecretPayload {
   lastSyncId
   # Whether the operation was successful.
   success
+}
+
+fragment SearchResultPayload on SearchResultPayload {
+  # Active issue IDs returned matching the search term.
+  issueIds
+  # Archived issues matching the search term along with all their dependencies.
+  archivePayload {
+    ...ArchiveResponse
+  }
+  # Total number of search results.
+  totalCount
 }
 
 fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
@@ -2474,15 +2506,16 @@ query archivedModelsSync(
     ...ArchiveResponse
   }
 }
-# [Alpha] One specific issue attachment. `url` can be used as the `id` parameter.
+# [Alpha] One specific issue attachment.
+# [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
 query attachment($id: String!) {
   attachment(id: $id) {
     ...Attachment
   }
 }
-# [Alpha] Query an issue by its associated attachment, and its id or URI.
+# [Alpha] Query an issue by its associated attachment, and its id.
 query attachmentIssue(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
 ) {
   attachmentIssue(id: $id) {
@@ -2491,7 +2524,7 @@ query attachmentIssue(
 }
 # Attachments associated with the issue.
 query attachmentIssue_attachments(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2521,7 +2554,7 @@ query attachmentIssue_attachments(
 }
 # Children of the issue.
 query attachmentIssue_children(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2551,7 +2584,7 @@ query attachmentIssue_children(
 }
 # Comments associated with the issue.
 query attachmentIssue_comments(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2581,7 +2614,7 @@ query attachmentIssue_comments(
 }
 # History entries associated with the issue.
 query attachmentIssue_history(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2611,7 +2644,7 @@ query attachmentIssue_history(
 }
 # Inverse relations associated with this issue.
 query attachmentIssue_inverseRelations(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2641,7 +2674,7 @@ query attachmentIssue_inverseRelations(
 }
 # Labels associated with this issue.
 query attachmentIssue_labels(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2671,7 +2704,7 @@ query attachmentIssue_labels(
 }
 # Relations associated with this issue.
 query attachmentIssue_relations(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2701,7 +2734,7 @@ query attachmentIssue_relations(
 }
 # Users who are subscribed to the issue.
 query attachmentIssue_subscribers(
-  # `id` or `url` of the attachment for which you'll want to get the issue for.
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2711,6 +2744,8 @@ query attachmentIssue_subscribers(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should query return disabled/suspended users (default: false).
+  $includeDisabled: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -2722,6 +2757,7 @@ query attachmentIssue_subscribers(
       before: $before
       first: $first
       includeArchived: $includeArchived
+      includeDisabled: $includeDisabled
       last: $last
       orderBy: $orderBy
     ) {
@@ -2730,6 +2766,8 @@ query attachmentIssue_subscribers(
   }
 }
 # [Alpha] All issue attachments.
+#
+# To get attachments for a given URL, use `attachmentsForURL` query.
 query attachments(
   # A cursor to be used with first for forward pagination
   $after: String
@@ -2751,6 +2789,35 @@ query attachments(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+  ) {
+    ...AttachmentConnection
+  }
+}
+# [Alpha] Returns issue attachments for a given `url`.
+query attachmentsForURL(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # The attachment URL.
+  $url: String!
+) {
+  attachmentsForURL(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    url: $url
   ) {
     ...AttachmentConnection
   }
@@ -3344,6 +3411,8 @@ query issue_subscribers(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should query return disabled/suspended users (default: false).
+  $includeDisabled: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -3355,6 +3424,7 @@ query issue_subscribers(
       before: $before
       first: $first
       includeArchived: $includeArchived
+      includeDisabled: $includeDisabled
       last: $last
       orderBy: $orderBy
     ) {
@@ -3756,6 +3826,8 @@ query organization_users(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should query return disabled/suspended users (default: false).
+  $includeDisabled: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -3767,6 +3839,7 @@ query organization_users(
       before: $before
       first: $first
       includeArchived: $includeArchived
+      includeDisabled: $includeDisabled
       last: $last
       orderBy: $orderBy
     ) {
@@ -3916,6 +3989,8 @@ query project_members(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should query return disabled/suspended users (default: false).
+  $includeDisabled: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -3927,6 +4002,7 @@ query project_members(
       before: $before
       first: $first
       includeArchived: $includeArchived
+      includeDisabled: $includeDisabled
       last: $last
       orderBy: $orderBy
     ) {
@@ -4062,6 +4138,31 @@ query reactions(
     ...ReactionConnection
   }
 }
+# [Internal] Search in Linear. This query is for internal purposes only and is subject to change
+# without notice.
+query search(
+  # From which result index number to load results.
+  $from: Int
+  # Search string to look for.
+  $term: String!
+) {
+  search(from: $from, term: $term) {
+    ...SearchResultPayload
+  }
+}
+# Archived issues matching the search term along with all their dependencies.
+query search_archivePayload(
+  # From which result index number to load results.
+  $from: Int
+  # Search string to look for.
+  $term: String!
+) {
+  search(from: $from, term: $term) {
+    archivePayload {
+      ...ArchiveResponse
+    }
+  }
+}
 # Fetch SSO login URL for the email provided.
 query ssoUrlFromEmail(
   # Email to query the SSO login URL by.
@@ -4081,15 +4182,26 @@ query subscription {
 }
 # [Internal] Fetch data to catch up the client to the state of the world.
 query syncBootstrap(
-  # Deprecated.
-  $databaseVersion: Int
-  # Deprecated.
-  $sinceSyncId: Int
-  # If defined, only entities for the given sync groups will be loaded
+  # If defined, only models of the given type will be loaded.
+  $onlyModels: [String!]
+  # If defined, only models for the given sync groups will be loaded.
   $syncGroups: [String!]
 ) {
-  syncBootstrap(databaseVersion: $databaseVersion, sinceSyncId: $sinceSyncId, syncGroups: $syncGroups) {
+  syncBootstrap(onlyModels: $onlyModels, syncGroups: $syncGroups) {
     ...SyncResponse
+  }
+}
+# [Internal] Fetches delta sync packets.
+query syncDelta(
+  # The last sync id the client has seen.
+  $lastSyncId: Int!
+  # After which update to start, used for pagination.
+  $offset: Int
+  # Up until which sync id to load data for.
+  $toSyncId: Int!
+) {
+  syncDelta(lastSyncId: $lastSyncId, offset: $offset, toSyncId: $toSyncId) {
+    ...SyncDeltaResponse
   }
 }
 # One specific team.
@@ -4196,6 +4308,8 @@ query team_members(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should query return disabled/suspended users (default: false).
+  $includeDisabled: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -4207,6 +4321,7 @@ query team_members(
       before: $before
       first: $first
       includeArchived: $includeArchived
+      includeDisabled: $includeDisabled
       last: $last
       orderBy: $orderBy
     ) {
@@ -4577,6 +4692,8 @@ query users(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should query return disabled/suspended users (default: false).
+  $includeDisabled: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -4587,6 +4704,7 @@ query users(
     before: $before
     first: $first
     includeArchived: $includeArchived
+    includeDisabled: $includeDisabled
     last: $last
     orderBy: $orderBy
   ) {
@@ -4834,7 +4952,7 @@ mutation attachmentArchive(
     ...ArchivePayload
   }
 }
-# [Alpha] Creates a new attachment, or updates existing if the same `uri` is used.
+# [Alpha] Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
 mutation attachmentCreate(
   # The attachment object to create.
   $input: AttachmentCreateInput!
@@ -4852,6 +4970,17 @@ mutation attachmentDelete(
     ...ArchivePayload
   }
 }
+# Link an existing Front conversation to an issue.
+mutation attachmentLinkFront(
+  # The Front conversation ID to link.
+  $conversationId: String!
+  # The issue for which to link the .
+  $issueId: String!
+) {
+  attachmentLinkFront(conversationId: $conversationId, issueId: $issueId) {
+    ...AttachmentPayload
+  }
+}
 # Link an existing Zendesk ticket to an issue.
 mutation attachmentLinkZendesk(
   # The issue for which to link the .
@@ -4865,7 +4994,7 @@ mutation attachmentLinkZendesk(
 }
 # [Alpha] Updates an existing issue attachment.
 mutation attachmentUpdate(
-  # The identifier of the comment to update.
+  # The identifier of the attachment to update.
   $id: String!
   # A partial attachment object to update the attachment with.
   $input: AttachmentUpdateInput!
@@ -5166,6 +5295,17 @@ mutation integrationFigma(
     ...IntegrationPayload
   }
 }
+# Integrates the organization with Front.
+mutation integrationFront(
+  # The Front OAuth code.
+  $code: String!
+  # The Front OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationFront(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
 # Connects the organization with the GitHub App.
 mutation integrationGithubConnect(
   # The GitHub data to connect with.
@@ -5192,6 +5332,17 @@ mutation integrationGoogleSheets(
   $code: String!
 ) {
   integrationGoogleSheets(code: $code) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Intercom.
+mutation integrationIntercom(
+  # The Intercom OAuth code.
+  $code: String!
+  # The Intercom OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationIntercom(code: $code, redirectUri: $redirectUri) {
     ...IntegrationPayload
   }
 }
@@ -5680,6 +5831,12 @@ mutation oauthTokenRevoke(
     ...OauthTokenRevokePayload
   }
 }
+# Cancels the deletion of an organization. Administrator privileges required.
+mutation organizationCancelDelete {
+  organizationCancelDelete {
+    ...OrganizationCancelDeletePayload
+  }
+}
 # Delete's an organization. Administrator privileges required.
 mutation organizationDelete(
   # Information required to delete an organization.
@@ -5941,6 +6098,15 @@ mutation teamDelete(
   $id: String!
 ) {
   teamDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Deletes a previously used team key.
+mutation teamKeyDelete(
+  # The identifier of the team key to delete.
+  $id: String!
+) {
+  teamKeyDelete(id: $id) {
     ...ArchivePayload
   }
 }
