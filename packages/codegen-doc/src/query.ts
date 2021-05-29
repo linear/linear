@@ -19,42 +19,32 @@ export function findQuery(
     return undefined;
   }
 
+  /** Get all queries matching type */
+  const queriesMatchingType = context.queries.filter(query => {
+    return reduceTypeName(query.type) === type && reduceListType(query.type) === listType;
+  });
+  if (!queriesMatchingType.length) {
+    return undefined;
+  }
+
   /** Select query if matching name and type */
-  const queryMatchingNameAndType = context.queries.find(query => {
-    return (
-      query.name.value.toLowerCase() === fieldName.toLowerCase() &&
-      reduceTypeName(query.type) === type &&
-      reduceListType(query.type) === listType
-    );
+  const queryMatchingNameAndType = queriesMatchingType.find(query => {
+    return query.name.value.toLowerCase() === fieldName.toLowerCase();
   });
   if (queryMatchingNameAndType) {
     return queryMatchingNameAndType;
   }
 
-  /** Otherwise look for a matching type */
-  const queryMatchingType = context.queries.find(query => {
-    return reduceTypeName(query.type) === type && reduceListType(query.type) === listType;
-  });
-  if (!queryMatchingType) {
-    return undefined;
-  }
-
   /** Get the matching object definition */
-  const responseFieldNames = context.objects
-    .find(obj => reduceTypeName(queryMatchingType.type) === obj.name.value)
-    ?.fields?.map(responseField => responseField.name.value);
-
-  if (!responseFieldNames) {
+  const responseObject = context.objects.find(obj => type === obj.name.value);
+  const responseFieldNames = responseObject?.fields?.map(responseField => responseField.name.value);
+  if (!responseFieldNames?.length) {
     return undefined;
   }
 
-  /** Ensure the fields are available on the object */
-  const responseHasFields = getRequiredArgs(queryMatchingType.arguments).every(arg => {
-    return responseFieldNames.includes(arg.name.value);
+  /** Find a query with required args available on the response object */
+  return queriesMatchingType.find(query => {
+    const hasAvailableArgs = getRequiredArgs(query.arguments).every(arg => responseFieldNames.includes(arg.name.value));
+    return hasAvailableArgs ? query : undefined;
   });
-  if (responseHasFields) {
-    return queryMatchingType;
-  } else {
-    return undefined;
-  }
 }
