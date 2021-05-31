@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.8.4
+
+### Patch Changes
+
+- fd2915c: fix(query): do not match queries unless all required args are present in the response object
+
 ## 1.8.3
 
 ### Patch Changes
