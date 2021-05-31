@@ -32,9 +32,8 @@ describe("generated", () => {
   describe("ApplicationWithAuthorization", () => {
     /** Test the root model query for ApplicationWithAuthorization */
     it("applicationWithAuthorization", async () => {
-      const applicationWithAuthorization:
-        | L.UserAuthorizedApplication
-        | undefined = await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
+      const applicationWithAuthorization: L.UserAuthorizedApplication | undefined =
+        await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
       expect(applicationWithAuthorization instanceof L.UserAuthorizedApplication);
     });
   });
@@ -273,9 +272,8 @@ describe("generated", () => {
 
     /** Test the root model query for CollaborativeDocumentJoin */
     it("collaborativeDocumentJoin", async () => {
-      const collaborativeDocumentJoin:
-        | L.CollaborationDocumentUpdatePayload
-        | undefined = await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
+      const collaborativeDocumentJoin: L.CollaborationDocumentUpdatePayload | undefined =
+        await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
       _collaborativeDocumentJoin = collaborativeDocumentJoin;
       expect(collaborativeDocumentJoin instanceof L.CollaborationDocumentUpdatePayload);
     });
@@ -693,9 +691,8 @@ describe("generated", () => {
   describe("IssueDescriptionHistory", () => {
     /** Test the root model query for IssueDescriptionHistory */
     it("issueDescriptionHistory", async () => {
-      const issueDescriptionHistory:
-        | L.IssueDescriptionHistoryPayload
-        | undefined = await client.issueDescriptionHistory("mock-id");
+      const issueDescriptionHistory: L.IssueDescriptionHistoryPayload | undefined =
+        await client.issueDescriptionHistory("mock-id");
       expect(issueDescriptionHistory instanceof L.IssueDescriptionHistoryPayload);
     });
   });
@@ -704,9 +701,8 @@ describe("generated", () => {
   describe("IssueImportFinishGithubOAuth", () => {
     /** Test the root model query for IssueImportFinishGithubOAuth */
     it("issueImportFinishGithubOAuth", async () => {
-      const issueImportFinishGithubOAuth:
-        | L.GithubOAuthTokenPayload
-        | undefined = await client.issueImportFinishGithubOAuth("mock-code");
+      const issueImportFinishGithubOAuth: L.GithubOAuthTokenPayload | undefined =
+        await client.issueImportFinishGithubOAuth("mock-code");
       expect(issueImportFinishGithubOAuth instanceof L.GithubOAuthTokenPayload);
     });
   });
@@ -1222,9 +1218,8 @@ describe("generated", () => {
 
     /** Test the root connection query for the NotificationSubscription */
     it("notificationSubscriptions", async () => {
-      const notificationSubscriptions:
-        | L.NotificationSubscriptionConnection
-        | undefined = await client.notificationSubscriptions();
+      const notificationSubscriptions: L.NotificationSubscriptionConnection | undefined =
+        await client.notificationSubscriptions();
       const notificationSubscription = notificationSubscriptions?.nodes?.[0];
       _notificationSubscription_id = notificationSubscription?.id;
       expect(notificationSubscriptions instanceof L.NotificationSubscriptionConnection);
@@ -1855,9 +1850,8 @@ describe("generated", () => {
     /** Test the team.markedAsDuplicateWorkflowState query for L.WorkflowState */
     it("team.markedAsDuplicateWorkflowState", async () => {
       if (_team) {
-        const team_markedAsDuplicateWorkflowState:
-          | L.WorkflowState
-          | undefined = await _team.markedAsDuplicateWorkflowState;
+        const team_markedAsDuplicateWorkflowState: L.WorkflowState | undefined =
+          await _team.markedAsDuplicateWorkflowState;
         expect(team_markedAsDuplicateWorkflowState instanceof L.WorkflowState);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.markedAsDuplicateWorkflowState query");
