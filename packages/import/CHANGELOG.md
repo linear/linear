@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.5.11
+
+### Patch Changes
+
+- fd2915c: fix(query): do not match queries unless all required args are present in the response object
+- Updated dependencies [fd2915c]
+- Updated dependencies [fd2915c]
+  - @linear/sdk@1.14.0
+
 ## 1.5.10
 
 ### Patch Changes
