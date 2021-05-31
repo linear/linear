@@ -1,4 +1,5 @@
 import { FieldDefinitionNode } from "graphql";
+import { getRequiredArgs } from "./args";
 import { Named, PluginContext } from "./types";
 import { reduceListType, reduceTypeName } from "./utils";
 
@@ -18,17 +19,24 @@ export function findQuery(
     return undefined;
   }
 
-  const matchedNameAndType = context.queries.find(query => {
+  /** Get the matching object definition */
+  const responseObject = context.objects.find(obj => type === obj.name.value);
+  const responseFieldNames = responseObject?.fields?.map(responseField => responseField.name.value);
+  if (!responseFieldNames?.length) {
+    return undefined;
+  }
+
+  /** Get all queries matching type and have required args available on the response object */
+  const matchingQueries = context.queries.filter(query => {
     return (
-      query.name.value.toLowerCase() === fieldName.toLowerCase() &&
       reduceTypeName(query.type) === type &&
-      reduceListType(query.type) === listType
+      reduceListType(query.type) === listType &&
+      getRequiredArgs(query.arguments).every(arg => responseFieldNames.includes(arg.name.value))
     );
   });
 
-  const matchedType = context.queries.find(query => {
-    return reduceTypeName(query.type) === type && reduceListType(query.type) === listType;
-  });
-
-  return matchedNameAndType ?? matchedType;
+  /** Prefer matching query names */
+  return (
+    matchingQueries.find(query => query.name.value.toLowerCase() === fieldName.toLowerCase()) ?? matchingQueries[0]
+  );
 }

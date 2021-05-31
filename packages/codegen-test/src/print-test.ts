@@ -3,7 +3,7 @@ import {
   nonNullable,
   OperationType,
   printComment,
-  printElseThrow,
+  printElseWarn,
   printLines,
   printList,
   printSet,
@@ -115,7 +115,7 @@ function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation,
       printComment([`Test the ${sdkKey || "root"} model query for ${operation.name}`]),
       printIt(
         printList([sdkKey ? sdkKey : undefined, fieldName], "."),
-        printElseThrow(
+        printElseWarn(
           clientName,
           printLines([
             `const ${fieldName}: ${printResponseType(fieldType, operation.print.list)} = ${
@@ -179,7 +179,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
       printComment([`Test the ${sdkKey || "root"} connection query for the ${connectionType}`]),
       printIt(
         printList([sdkKey ? sdkKey : undefined, fieldName], "."),
-        printElseThrow(
+        printElseWarn(
           clientName,
           printLines([
             `const ${fieldName}: ${printResponseType(
@@ -208,7 +208,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
             printComment([`Test the root query for a single ${connectionType}`]),
             printIt(
               printList([sdkKey ? sdkKey : undefined, itemField], "."),
-              printElseThrow(
+              printElseWarn(
                 printList(
                   itemArgs.map(arg => `_${itemField}_${arg.name}`),
                   " && "
@@ -239,7 +239,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                 printComment([`Test the ${itemField}.${field.name} query for ${field.type}`]),
                 printIt(
                   printList([sdkKey ? sdkKey : undefined, itemField, field.name], "."),
-                  printElseThrow(
+                  printElseWarn(
                     `_${itemField}`,
                     printLines([
                       `const ${itemField}_${field.name}: ${printResponseType(

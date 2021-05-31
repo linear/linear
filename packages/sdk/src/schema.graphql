@@ -171,7 +171,7 @@ type Attachment implements Node {
   """
   updatedAt: DateTime!
   """
-  Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL.
+  Location of the attachment which is also used as an identifier.
   """
   url: String!
 }
@@ -262,6 +262,10 @@ type AuthResolverResponse {
   User account ID.
   """
   id: String!
+  """
+  ID of the organization last accessed by the user.
+  """
+  lastUsedOrganizationId: String
   """
   JWT token for authentication of the account.
   """
@@ -1983,6 +1987,10 @@ type Issue implements Node {
     """
     includeArchived: Boolean
     """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
+    """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
     last: Int
@@ -2862,7 +2870,7 @@ type Mutation {
     id: String!
   ): ArchivePayload! @deprecated(reason: "This mutation is deprecated, please use `attachmentDelete` instead")
   """
-  [Alpha] Creates a new attachment, or updates existing if the same `uri` is used.
+  [Alpha] Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
   """
   attachmentCreate(
     """
@@ -2879,6 +2887,19 @@ type Mutation {
     """
     id: String!
   ): ArchivePayload!
+  """
+  Link an existing Front conversation to an issue.
+  """
+  attachmentLinkFront(
+    """
+    The Front conversation ID to link.
+    """
+    conversationId: String!
+    """
+    The issue for which to link the .
+    """
+    issueId: String!
+  ): AttachmentPayload!
   """
   Link an existing Zendesk ticket to an issue.
   """
@@ -2897,7 +2918,7 @@ type Mutation {
   """
   attachmentUpdate(
     """
-    The identifier of the comment to update.
+    The identifier of the attachment to update.
     """
     id: String!
     """
@@ -3205,6 +3226,19 @@ type Mutation {
     redirectUri: String!
   ): IntegrationPayload!
   """
+  Integrates the organization with Front.
+  """
+  integrationFront(
+    """
+    The Front OAuth code.
+    """
+    code: String!
+    """
+    The Front OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
+  """
   Connects the organization with the GitHub App.
   """
   integrationGithubConnect(
@@ -3234,6 +3268,19 @@ type Mutation {
     The Google OAuth code.
     """
     code: String!
+  ): IntegrationPayload!
+  """
+  Integrates the organization with Intercom.
+  """
+  integrationIntercom(
+    """
+    The Intercom OAuth code.
+    """
+    code: String!
+    """
+    The Intercom OAuth redirect URI.
+    """
+    redirectUri: String!
   ): IntegrationPayload!
   """
   Archives an integration resource.
@@ -3781,6 +3828,10 @@ type Mutation {
     scope: [String!]!
   ): OauthTokenRevokePayload!
   """
+  Cancels the deletion of an organization. Administrator privileges required.
+  """
+  organizationCancelDelete: OrganizationCancelDeletePayload!
+  """
   Delete's an organization. Administrator privileges required.
   """
   organizationDelete(
@@ -4044,6 +4095,15 @@ type Mutation {
   teamDelete(
     """
     The identifier of the team to delete.
+    """
+    id: String!
+  ): ArchivePayload!
+  """
+  Deletes a previously used team key.
+  """
+  teamKeyDelete(
+    """
+    The identifier of the team key to delete.
     """
     id: String!
   ): ArchivePayload!
@@ -4563,6 +4623,10 @@ input OauthClientCreateInput {
   """
   name: String!
   """
+  Whether the OAuth application should be publicly visible, or only visible to the creating workspace.
+  """
+  publicEnabled: Boolean
+  """
   List of allowed redirect URIs for the application.
   """
   redirectUris: [String!]!
@@ -4641,6 +4705,10 @@ type Organization implements Node {
   Number of issues in the organization.
   """
   createdIssueCount: Int!
+  """
+  The time at which deletion of the organization was requested.
+  """
+  deletionRequestedAt: DateTime
   """
   How git branches are formatted. If null, default formatting will be used.
   """
@@ -4802,6 +4870,10 @@ type Organization implements Node {
     """
     includeArchived: Boolean
     """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
+    """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
     last: Int
@@ -4810,6 +4882,12 @@ type Organization implements Node {
     """
     orderBy: PaginationOrderBy
   ): UserConnection!
+}
+type OrganizationCancelDeletePayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 type OrganizationDeletePayload {
   """
@@ -5184,6 +5262,10 @@ type Project implements Node {
     Should archived resources be included (default: false)
     """
     includeArchived: Boolean
+    """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
     """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
@@ -5670,20 +5752,26 @@ type Query {
     trashOption: TrashOptionType
   ): ArchiveResponse!
   """
-  [Alpha] One specific issue attachment. `url` can be used as the `id` parameter.
+  [Alpha] One specific issue attachment.
+  [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
   """
   attachment(id: String!): Attachment!
   """
-  [Alpha] Query an issue by its associated attachment, and its id or URI.
+  [Alpha] Query an issue by its associated attachment, and its id.
   """
   attachmentIssue(
     """
-    `id` or `url` of the attachment for which you'll want to get the issue for.
+    `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
     """
     id: String!
   ): Issue!
+    @deprecated(
+      reason: "Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead."
+    )
   """
   [Alpha] All issue attachments.
+
+  To get attachments for a given URL, use `attachmentsForURL` query.
   """
   attachments(
     """
@@ -5710,6 +5798,39 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+  ): AttachmentConnection!
+  """
+  [Alpha] Returns issue attachments for a given `url`.
+  """
+  attachmentsForURL(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+    """
+    The attachment URL.
+    """
+    url: String!
   ): AttachmentConnection!
   """
   Get all authorized applications for a user
@@ -6418,6 +6539,19 @@ type Query {
     orderBy: PaginationOrderBy
   ): ReactionConnection!
   """
+  [Internal] Search in Linear. This query is for internal purposes only and is subject to change without notice.
+  """
+  search(
+    """
+    From which result index number to load results.
+    """
+    from: Int
+    """
+    Search string to look for.
+    """
+    term: String!
+  ): SearchResultPayload!
+  """
   Fetch SSO login URL for the email provided.
   """
   ssoUrlFromEmail(
@@ -6439,18 +6573,31 @@ type Query {
   """
   syncBootstrap(
     """
-    Deprecated.
+    If defined, only models of the given type will be loaded.
     """
-    databaseVersion: Int
+    onlyModels: [String!]
     """
-    Deprecated.
-    """
-    sinceSyncId: Int
-    """
-    If defined, only entities for the given sync groups will be loaded
+    If defined, only models for the given sync groups will be loaded.
     """
     syncGroups: [String!]
   ): SyncResponse!
+  """
+  [Internal] Fetches delta sync packets.
+  """
+  syncDelta(
+    """
+    The last sync id the client has seen.
+    """
+    lastSyncId: Int!
+    """
+    After which update to start, used for pagination.
+    """
+    offset: Int
+    """
+    Up until which sync id to load data for.
+    """
+    toSyncId: Int!
+  ): SyncDeltaResponse!
   """
   One specific team.
   """
@@ -6563,6 +6710,10 @@ type Query {
     Should archived resources be included (default: false)
     """
     includeArchived: Boolean
+    """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
     """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
@@ -6773,6 +6924,20 @@ input SamlConfigurationInput {
   """
   ssoSigningCert: String
 }
+type SearchResultPayload {
+  """
+  Archived issues matching the search term along with all their dependencies.
+  """
+  archivePayload: ArchiveResponse!
+  """
+  Active issue IDs returned matching the search term.
+  """
+  issueIds: [String!]!
+  """
+  Total number of search results.
+  """
+  totalCount: Int!
+}
 """
 Sentry issue data
 """
@@ -6946,6 +7111,23 @@ input SubscriptionUpdateInput {
   The subscription type of a pending change. Null if no change pending.
   """
   pendingChangeType: String
+}
+"""
+Contains a delta sync.
+"""
+type SyncDeltaResponse {
+  """
+  Whether the client should try loading more.
+  """
+  loadMore: Boolean!
+  """
+  Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap.
+  """
+  success: Boolean!
+  """
+  A JSON serialized collection of delta packets.
+  """
+  updates: String
 }
 """
 Contains either the full serialized state of the application or delta packets that the requester can
@@ -7200,6 +7382,10 @@ type Team implements Node {
     Should archived resources be included (default: false)
     """
     includeArchived: Boolean
+    """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
     """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
@@ -7487,6 +7673,10 @@ input TeamCreateInput {
   """
   issueEstimationType: String
   """
+  Whether issues without priority should be sorted first.
+  """
+  issueOrderingNoPriorityFirst: Boolean
+  """
   The key of the team. If not given, the key will be generated based on the name of the team.
   """
   key: String
@@ -7697,6 +7887,10 @@ input TeamUpdateInput {
   The issue estimation type to use.
   """
   issueEstimationType: String
+  """
+  Whether issues without priority should be sorted first.
+  """
+  issueOrderingNoPriorityFirst: Boolean
   """
   The key of the team.
   """
@@ -8008,7 +8202,7 @@ A user that has access to the the resources of an organization.
 """
 type User implements Node {
   """
-  Whether the user account is active or disabled.
+  Whether the user account is active or disabled (suspended).
   """
   active: Boolean!
   """
@@ -8237,6 +8431,10 @@ type UserAuthorizedApplication {
   """
   clientId: String!
   """
+  Whether the application was created by Linear
+  """
+  createdByLinear: Boolean!
+  """
   Information about the application.
   """
   description: String
@@ -8283,11 +8481,13 @@ enum UserFlagType {
   cycleWelcomeDismissed
   desktopDownloadToastDismissed
   desktopInstalled
+  dueDateShortcutMigration
   emptyActiveIssuesDismissed
   emptyBacklogDismissed
   emptyCustomViewsDismissed
   emptyMyIssuesDismissed
   figmaPromptDismissed
+  importBannerDismissed
   listSelectionTip
   migrateThemePreference
   projectWelcomeDismissed

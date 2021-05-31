@@ -671,7 +671,7 @@
           },
           {
             "name": "url",
-            "description": "Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL.",
+            "description": "Location of the attachment which is also used as an identifier.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -1189,6 +1189,18 @@
                   "ofType": null
                 }
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastUsedOrganizationId",
+            "description": "ID of the organization last accessed by the user.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -7380,6 +7392,18 @@
             "description": "Users who are subscribed to the issue.",
             "args": [
               {
+                "name": "includeDisabled",
+                "description": "Should query return disabled/suspended users (default: false).",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "before",
                 "description": "A cursor to be used with last for backward pagination.",
                 "type": {
@@ -11580,7 +11604,7 @@
           },
           {
             "name": "attachmentCreate",
-            "description": "[Alpha] Creates a new attachment, or updates existing if the same `uri` is used.",
+            "description": "[Alpha] Creates a new attachment, or updates existing if the same `url` and `issueId` is used.",
             "args": [
               {
                 "name": "input",
@@ -11633,7 +11657,7 @@
               },
               {
                 "name": "id",
-                "description": "The identifier of the comment to update.",
+                "description": "The identifier of the attachment to update.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -11683,6 +11707,55 @@
               {
                 "name": "ticketId",
                 "description": "The Zendesk ticket ID to link.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AttachmentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "attachmentLinkFront",
+            "description": "Link an existing Front conversation to an issue.",
+            "args": [
+              {
+                "name": "issueId",
+                "description": "The issue for which to link the .",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "conversationId",
+                "description": "The Front conversation ID to link.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -12950,6 +13023,55 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationIntercom",
+            "description": "Integrates the organization with Intercom.",
+            "args": [
+              {
+                "name": "redirectUri",
+                "description": "The Intercom OAuth redirect URI.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "code",
+                "description": "The Intercom OAuth code.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationSlack",
             "description": "Integrates the organization with Slack.",
             "args": [
@@ -13404,6 +13526,55 @@
               {
                 "name": "installationId",
                 "description": "The Sentry installationId to connect with.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationFront",
+            "description": "Integrates the organization with Front.",
+            "args": [
+              {
+                "name": "redirectUri",
+                "description": "The Front OAuth redirect URI.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "code",
+                "description": "The Front OAuth code.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -15329,6 +15500,22 @@
             "deprecationReason": null
           },
           {
+            "name": "organizationCancelDelete",
+            "description": "Cancels the deletion of an organization. Administrator privileges required.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OrganizationCancelDeletePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "projectLinkCreate",
             "description": "Creates a new project link.",
             "args": [
@@ -15865,6 +16052,39 @@
               {
                 "name": "id",
                 "description": "The identifier of the subscription to archive.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamKeyDelete",
+            "description": "Deletes a previously used team key.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the team key to delete.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -18267,6 +18487,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "publicEnabled",
+            "description": "Whether the OAuth application should be publicly visible, or only visible to the creating workspace.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -18723,9 +18955,33 @@
             "deprecationReason": null
           },
           {
+            "name": "deletionRequestedAt",
+            "description": "The time at which deletion of the organization was requested.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "users",
             "description": "Users associated with the organization.",
             "args": [
+              {
+                "name": "includeDisabled",
+                "description": "Should query return disabled/suspended users (default: false).",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "before",
                 "description": "A cursor to be used with last for backward pagination.",
@@ -19131,6 +19387,33 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OrganizationCancelDeletePayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -20629,6 +20912,18 @@
             "name": "members",
             "description": "Users that are members of the project.",
             "args": [
+              {
+                "name": "includeDisabled",
+                "description": "Should query return disabled/suspended users (default: false).",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "before",
                 "description": "A cursor to be used with last for backward pagination.",
@@ -22445,24 +22740,20 @@
             "description": "[Internal] Fetch data to catch up the client to the state of the world.",
             "args": [
               {
-                "name": "databaseVersion",
-                "description": "Deprecated.",
+                "name": "onlyModels",
+                "description": "If defined, only models of the given type will be loaded.",
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "sinceSyncId",
-                "description": "Deprecated.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -22470,7 +22761,7 @@
               },
               {
                 "name": "syncGroups",
-                "description": "If defined, only entities for the given sync groups will be loaded",
+                "description": "If defined, only models for the given sync groups will be loaded.",
                 "type": {
                   "kind": "LIST",
                   "name": null,
@@ -22495,6 +22786,67 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "SyncResponse",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "syncDelta",
+            "description": "[Internal] Fetches delta sync packets.",
+            "args": [
+              {
+                "name": "offset",
+                "description": "After which update to start, used for pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "toSyncId",
+                "description": "Up until which sync id to load data for.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "lastSyncId",
+                "description": "The last sync id the client has seen.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SyncDeltaResponse",
                 "ofType": null
               }
             },
@@ -22868,7 +23220,7 @@
           },
           {
             "name": "attachments",
-            "description": "[Alpha] All issue attachments.",
+            "description": "[Alpha] All issue attachments.\n  \nTo get attachments for a given URL, use `attachmentsForURL` query.",
             "args": [
               {
                 "name": "before",
@@ -22957,7 +23309,7 @@
           },
           {
             "name": "attachment",
-            "description": "[Alpha] One specific issue attachment. `url` can be used as the `id` parameter.",
+            "description": "\n[Alpha] One specific issue attachment.\n[Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead",
             "args": [
               {
                 "name": "id",
@@ -22989,12 +23341,117 @@
             "deprecationReason": null
           },
           {
+            "name": "attachmentsForURL",
+            "description": "[Alpha] Returns issue attachments for a given `url`.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "url",
+                "description": "The attachment URL.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AttachmentConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "attachmentIssue",
-            "description": "[Alpha] Query an issue by its associated attachment, and its id or URI.",
+            "description": "\n[Alpha] Query an issue by its associated attachment, and its id.\n",
             "args": [
               {
                 "name": "id",
-                "description": "`id` or `url` of the attachment for which you'll want to get the issue for.",
+                "description": "`id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -23018,8 +23475,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead."
           },
           {
             "name": "availableUsers",
@@ -25588,6 +26045,51 @@
             "deprecationReason": null
           },
           {
+            "name": "search",
+            "description": "[Internal] Search in Linear. This query is for internal purposes only and is subject to change without notice.",
+            "args": [
+              {
+                "name": "from",
+                "description": "From which result index number to load results.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "term",
+                "description": "Search string to look for.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SearchResultPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "subscription",
             "description": "The organization's subscription.",
             "args": [],
@@ -25904,6 +26406,18 @@
             "name": "users",
             "description": "All users for the organization.",
             "args": [
+              {
+                "name": "includeDisabled",
+                "description": "Should query return disabled/suspended users (default: false).",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "before",
                 "description": "A cursor to be used with last for backward pagination.",
@@ -26860,6 +27374,73 @@
       },
       {
         "kind": "OBJECT",
+        "name": "SearchResultPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "issueIds",
+            "description": "Active issue IDs returned matching the search term.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivePayload",
+            "description": "Archived issues matching the search term along with all their dependencies.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ArchiveResponse",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalCount",
+            "description": "Total number of search results.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "SentryIssuePayload",
         "description": "Sentry issue data",
         "fields": [
@@ -27540,6 +28121,61 @@
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SyncDeltaResponse",
+        "description": "Contains a delta sync.",
+        "fields": [
+          {
+            "name": "updates",
+            "description": "A JSON serialized collection of delta packets.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "loadMore",
+            "description": "Whether the client should try loading more.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -28388,6 +29024,18 @@
             "name": "members",
             "description": "Users who are members of this team.",
             "args": [
+              {
+                "name": "includeDisabled",
+                "description": "Should query return disabled/suspended users (default: false).",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "before",
                 "description": "A cursor to be used with last for backward pagination.",
@@ -29305,6 +29953,18 @@
             "deprecationReason": null
           },
           {
+            "name": "issueOrderingNoPriorityFirst",
+            "description": "Whether issues without priority should be sorted first.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueEstimationType",
             "description": "The issue estimation type to use.",
             "type": {
@@ -30083,6 +30743,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueOrderingNoPriorityFirst",
+            "description": "Whether issues without priority should be sorted first.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -31546,7 +32218,7 @@
           },
           {
             "name": "active",
-            "description": "Whether the user account is active or disabled.",
+            "description": "Whether the user account is active or disabled (suspended).",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -32234,6 +32906,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "createdByLinear",
+            "description": "Whether the application was created by Linear",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -32447,6 +33135,18 @@
           },
           {
             "name": "canPlaySnake",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "importBannerDismissed",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "dueDateShortcutMigration",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

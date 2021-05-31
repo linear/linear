@@ -90,6 +90,7 @@ module.exports = {
     "no-var": "warn",
     "prefer-arrow-functions": "off",
     "prefer-const": "warn",
+    "jsdoc/newline-after-description": "off",
   },
   overrides: [
     {

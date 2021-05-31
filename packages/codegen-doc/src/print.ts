@@ -159,3 +159,16 @@ export function printElseThrow(_if: string, content: string, error: string, omit
         throw new Error('codegen-doc:print: ${error}')
       }`;
 }
+
+/**
+ * Print a string wrapping the content in an if and logging a warning if invalid
+ */
+export function printElseWarn(_if: string, content: string, error: string, omit = false): string {
+  return omit
+    ? content
+    : `if (${_if}) {
+        ${content}
+      } else {
+        console.warn('codegen-doc:print: ${error}')
+      }`;
+}

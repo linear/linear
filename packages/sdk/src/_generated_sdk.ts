@@ -329,7 +329,7 @@ export class Attachment extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
-  /** Location of the attachment which is also used as an identifier. Attachment URLs are unique and calls to create a new attachment are idempotent with the URL. */
+  /** Location of the attachment which is also used as an identifier. */
   public url?: string;
   /** The issue this attachment belongs to. */
   public get issue(): LinearFetch<Issue> | undefined {
@@ -407,6 +407,7 @@ export class AuthResolverResponse extends Request {
     this.allowDomainAccess = data.allowDomainAccess ?? undefined;
     this.email = data.email ?? undefined;
     this.id = data.id ?? undefined;
+    this.lastUsedOrganizationId = data.lastUsedOrganizationId ?? undefined;
     this.token = data.token ?? undefined;
     this.availableOrganizations = data.availableOrganizations
       ? data.availableOrganizations.map(node => new Organization(request, node))
@@ -420,6 +421,8 @@ export class AuthResolverResponse extends Request {
   public email?: string;
   /** User account ID. */
   public id?: string;
+  /** ID of the organization last accessed by the user. */
+  public lastUsedOrganizationId?: string;
   /** JWT token for authentication of the account. */
   public token?: string;
   /** Organizations this account has access to, but is not yet a member. */
@@ -3033,6 +3036,7 @@ export class Organization extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? undefined;
     this.createdIssueCount = data.createdIssueCount ?? undefined;
+    this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.gitBranchFormat = data.gitBranchFormat ?? undefined;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled ?? undefined;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled ?? undefined;
@@ -3055,6 +3059,8 @@ export class Organization extends Request {
   public createdAt?: Date;
   /** Number of issues in the organization. */
   public createdIssueCount?: number;
+  /** The time at which deletion of the organization was requested. */
+  public deletionRequestedAt?: Date;
   /** How git branches are formatted. If null, default formatting will be used. */
   public gitBranchFormat?: string;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
@@ -3110,6 +3116,21 @@ export class Organization extends Request {
   public update(input: L.UpdateOrganizationInput) {
     return new OrganizationUpdateMutation(this._request).fetch(input);
   }
+}
+/**
+ * OrganizationCancelDeletePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationCancelDeletePayloadFragment response data
+ */
+export class OrganizationCancelDeletePayload extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationCancelDeletePayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
 }
 /**
  * OrganizationDeletePayload model
@@ -3927,6 +3948,27 @@ export class SamlConfiguration extends Request {
   public ssoSigningCert?: string;
 }
 /**
+ * SearchResultPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SearchResultPayloadFragment response data
+ */
+export class SearchResultPayload extends Request {
+  public constructor(request: LinearRequest, data: L.SearchResultPayloadFragment) {
+    super(request);
+    this.issueIds = data.issueIds ?? undefined;
+    this.totalCount = data.totalCount ?? undefined;
+    this.archivePayload = data.archivePayload ? new ArchiveResponse(request, data.archivePayload) : undefined;
+  }
+
+  /** Active issue IDs returned matching the search term. */
+  public issueIds?: string[];
+  /** Total number of search results. */
+  public totalCount?: number;
+  /** Archived issues matching the search term along with all their dependencies. */
+  public archivePayload?: ArchiveResponse;
+}
+/**
  * Sentry issue data
  *
  * @param request - function to call the graphql client
@@ -4148,6 +4190,27 @@ export class SubscriptionSessionPayload extends Request {
 
   /** The subscription session that was created or updated. */
   public session?: string;
+}
+/**
+ * Contains a delta sync.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SyncDeltaResponseFragment response data
+ */
+export class SyncDeltaResponse extends Request {
+  public constructor(request: LinearRequest, data: L.SyncDeltaResponseFragment) {
+    super(request);
+    this.loadMore = data.loadMore ?? undefined;
+    this.success = data.success ?? undefined;
+    this.updates = data.updates ?? undefined;
+  }
+
+  /** Whether the client should try loading more. */
+  public loadMore?: boolean;
+  /** Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap. */
+  public success?: boolean;
+  /** A JSON serialized collection of delta packets. */
+  public updates?: string;
 }
 /**
  * Contains either the full serialized state of the application or delta packets that the requester can
@@ -4752,7 +4815,7 @@ export class User extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
   }
 
-  /** Whether the user account is active or disabled. */
+  /** Whether the user account is active or disabled (suspended). */
   public active?: boolean;
   /** Whether the user is an organization administrator. */
   public admin?: boolean;
@@ -4881,6 +4944,7 @@ export class UserAuthorizedApplication extends Request {
   public constructor(request: LinearRequest, data: L.UserAuthorizedApplicationFragment) {
     super(request);
     this.clientId = data.clientId ?? undefined;
+    this.createdByLinear = data.createdByLinear ?? undefined;
     this.description = data.description ?? undefined;
     this.developer = data.developer ?? undefined;
     this.developerUrl = data.developerUrl ?? undefined;
@@ -4891,6 +4955,8 @@ export class UserAuthorizedApplication extends Request {
 
   /** OAuth application's client ID. */
   public clientId?: string;
+  /** Whether the application was created by Linear */
+  public createdByLinear?: boolean;
   /** Information about the application. */
   public description?: string;
   /** Name of the developer. */
@@ -5577,6 +5643,39 @@ export class AttachmentsQuery extends Request {
           : undefined;
       }
     );
+  }
+}
+
+/**
+ * A fetchable AttachmentsForUrl Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentsForUrlQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentsForUrl query and return a AttachmentConnection
+   *
+   * @param url - required url to pass to attachmentsForURL
+   * @param variables - variables without 'url' to pass into the AttachmentsForUrlQuery
+   * @returns parsed response from AttachmentsForUrlQuery
+   */
+  public async fetch(
+    url: string,
+    variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
+  ): LinearFetch<AttachmentConnection> {
+    return this._request<L.AttachmentsForUrlQuery, L.AttachmentsForUrlQueryVariables>(L.AttachmentsForUrlDocument, {
+      url,
+      ...variables,
+    }).then(response => {
+      const data = response?.attachmentsForURL;
+      return data
+        ? new AttachmentConnection(this._request, connection => this.fetch(url, { ...variables, ...connection }), data)
+        : undefined;
+    });
   }
 }
 
@@ -6844,6 +6943,34 @@ export class ReactionsQuery extends Request {
 }
 
 /**
+ * A fetchable Search Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SearchQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Search query and return a SearchResultPayload
+   *
+   * @param term - required term to pass to search
+   * @param variables - variables without 'term' to pass into the SearchQuery
+   * @returns parsed response from SearchQuery
+   */
+  public async fetch(term: string, variables?: Omit<L.SearchQueryVariables, "term">): LinearFetch<SearchResultPayload> {
+    return this._request<L.SearchQuery, L.SearchQueryVariables>(L.SearchDocument, {
+      term,
+      ...variables,
+    }).then(response => {
+      const data = response?.search;
+      return data ? new SearchResultPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable SsoUrlFromEmail Query
  *
  * @param request - function to call the graphql client
@@ -6922,6 +7049,40 @@ export class SyncBootstrapQuery extends Request {
         return data ? new SyncResponse(this._request, data) : undefined;
       }
     );
+  }
+}
+
+/**
+ * A fetchable SyncDelta Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SyncDeltaQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the SyncDelta query and return a SyncDeltaResponse
+   *
+   * @param lastSyncId - required lastSyncId to pass to syncDelta
+   * @param toSyncId - required toSyncId to pass to syncDelta
+   * @param variables - variables without 'lastSyncId', 'toSyncId' to pass into the SyncDeltaQuery
+   * @returns parsed response from SyncDeltaQuery
+   */
+  public async fetch(
+    lastSyncId: number,
+    toSyncId: number,
+    variables?: Omit<L.SyncDeltaQueryVariables, "lastSyncId" | "toSyncId">
+  ): LinearFetch<SyncDeltaResponse> {
+    return this._request<L.SyncDeltaQuery, L.SyncDeltaQueryVariables>(L.SyncDeltaDocument, {
+      lastSyncId,
+      toSyncId,
+      ...variables,
+    }).then(response => {
+      const data = response?.syncDelta;
+      return data ? new SyncDeltaResponse(this._request, data) : undefined;
+    });
   }
 }
 
@@ -7417,6 +7578,37 @@ export class AttachmentDeleteMutation extends Request {
     }).then(response => {
       const data = response?.attachmentDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentLinkFront Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentLinkFrontMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentLinkFront mutation and return a AttachmentPayload
+   *
+   * @param conversationId - required conversationId to pass to attachmentLinkFront
+   * @param issueId - required issueId to pass to attachmentLinkFront
+   * @returns parsed response from AttachmentLinkFrontMutation
+   */
+  public async fetch(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
+    return this._request<L.AttachmentLinkFrontMutation, L.AttachmentLinkFrontMutationVariables>(
+      L.AttachmentLinkFrontDocument,
+      {
+        conversationId,
+        issueId,
+      }
+    ).then(response => {
+      const data = response?.attachmentLinkFront;
+      return data ? new AttachmentPayload(this._request, data) : undefined;
     });
   }
 }
@@ -8364,6 +8556,34 @@ export class IntegrationFigmaMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationFront Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationFrontMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationFront mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationFront
+   * @param redirectUri - required redirectUri to pass to integrationFront
+   * @returns parsed response from IntegrationFrontMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return this._request<L.IntegrationFrontMutation, L.IntegrationFrontMutationVariables>(L.IntegrationFrontDocument, {
+      code,
+      redirectUri,
+    }).then(response => {
+      const data = response?.integrationFront;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable IntegrationGithubConnect Mutation
  *
  * @param request - function to call the graphql client
@@ -8447,6 +8667,37 @@ export class IntegrationGoogleSheetsMutation extends Request {
       }
     ).then(response => {
       const data = response?.integrationGoogleSheets;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationIntercom Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationIntercomMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationIntercom mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationIntercom
+   * @param redirectUri - required redirectUri to pass to integrationIntercom
+   * @returns parsed response from IntegrationIntercomMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return this._request<L.IntegrationIntercomMutation, L.IntegrationIntercomMutationVariables>(
+      L.IntegrationIntercomDocument,
+      {
+        code,
+        redirectUri,
+      }
+    ).then(response => {
+      const data = response?.integrationIntercom;
       return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
@@ -9727,6 +9978,32 @@ export class OauthTokenRevokeMutation extends Request {
 }
 
 /**
+ * A fetchable OrganizationCancelDelete Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationCancelDeleteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OrganizationCancelDelete mutation and return a OrganizationCancelDeletePayload
+   *
+   * @returns parsed response from OrganizationCancelDeleteMutation
+   */
+  public async fetch(): LinearFetch<OrganizationCancelDeletePayload> {
+    return this._request<L.OrganizationCancelDeleteMutation, L.OrganizationCancelDeleteMutationVariables>(
+      L.OrganizationCancelDeleteDocument,
+      {}
+    ).then(response => {
+      const data = response?.organizationCancelDelete;
+      return data ? new OrganizationCancelDeletePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable OrganizationDelete Mutation
  *
  * @param request - function to call the graphql client
@@ -10540,6 +10817,32 @@ export class TeamDeleteMutation extends Request {
       id,
     }).then(response => {
       const data = response?.teamDelete;
+      return data ? new ArchivePayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable TeamKeyDelete Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class TeamKeyDeleteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TeamKeyDelete mutation and return a ArchivePayload
+   *
+   * @param id - required id to pass to teamKeyDelete
+   * @returns parsed response from TeamKeyDeleteMutation
+   */
+  public async fetch(id: string): LinearFetch<ArchivePayload> {
+    return this._request<L.TeamKeyDeleteMutation, L.TeamKeyDeleteMutationVariables>(L.TeamKeyDeleteDocument, {
+      id,
+    }).then(response => {
+      const data = response?.teamKeyDelete;
       return data ? new ArchivePayload(this._request, data) : undefined;
     });
   }
@@ -12691,6 +12994,48 @@ export class Project_TeamsQuery extends Request {
 }
 
 /**
+ * A fetchable Search_ArchivePayload Query
+ *
+ * @param request - function to call the graphql client
+ * @param term - required term to pass to search
+ * @param variables - variables without 'term' to pass into the Search_ArchivePayloadQuery
+ */
+export class Search_ArchivePayloadQuery extends Request {
+  private _term: string;
+  private _variables?: Omit<L.Search_ArchivePayloadQueryVariables, "term">;
+
+  public constructor(
+    request: LinearRequest,
+    term: string,
+    variables?: Omit<L.Search_ArchivePayloadQueryVariables, "term">
+  ) {
+    super(request);
+    this._term = term;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Search_ArchivePayload query and return a ArchiveResponse
+   *
+   * @param variables - variables without 'term' to pass into the Search_ArchivePayloadQuery
+   * @returns parsed response from Search_ArchivePayloadQuery
+   */
+  public async fetch(variables?: Omit<L.Search_ArchivePayloadQueryVariables, "term">): LinearFetch<ArchiveResponse> {
+    return this._request<L.Search_ArchivePayloadQuery, L.Search_ArchivePayloadQueryVariables>(
+      L.Search_ArchivePayloadDocument,
+      {
+        term: this._term,
+        ...this._variables,
+        ...variables,
+      }
+    ).then(response => {
+      const data = response?.search?.archivePayload;
+      return data ? new ArchiveResponse(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable Team_Cycles Query
  *
  * @param request - function to call the graphql client
@@ -13480,7 +13825,8 @@ export class LinearSdk extends Request {
     return new ArchivedModelsSyncQuery(this._request).fetch(modelClass, teamId, variables);
   }
   /**
-   * [Alpha] One specific issue attachment. `url` can be used as the `id` parameter.
+   * [Alpha] One specific issue attachment.
+   * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
    *
    * @param id - required id to pass to attachment
    * @returns Attachment
@@ -13489,7 +13835,7 @@ export class LinearSdk extends Request {
     return new AttachmentQuery(this._request).fetch(id);
   }
   /**
-   * [Alpha] Query an issue by its associated attachment, and its id or URI.
+   * [Alpha] Query an issue by its associated attachment, and its id.
    *
    * @param id - required id to pass to attachmentIssue
    * @returns Issue
@@ -13500,11 +13846,26 @@ export class LinearSdk extends Request {
   /**
    * [Alpha] All issue attachments.
    *
+   * To get attachments for a given URL, use `attachmentsForURL` query.
+   *
    * @param variables - variables to pass into the AttachmentsQuery
    * @returns AttachmentConnection
    */
   public attachments(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
     return new AttachmentsQuery(this._request).fetch(variables);
+  }
+  /**
+   * [Alpha] Returns issue attachments for a given `url`.
+   *
+   * @param url - required url to pass to attachmentsForURL
+   * @param variables - variables without 'url' to pass into the AttachmentsForUrlQuery
+   * @returns AttachmentConnection
+   */
+  public attachmentsForURL(
+    url: string,
+    variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
+  ): LinearFetch<AttachmentConnection> {
+    return new AttachmentsForUrlQuery(this._request).fetch(url, variables);
   }
   /**
    * Get all authorized applications for a user
@@ -13938,6 +14299,16 @@ export class LinearSdk extends Request {
     return new ReactionsQuery(this._request).fetch(variables);
   }
   /**
+   * [Internal] Search in Linear. This query is for internal purposes only and is subject to change without notice.
+   *
+   * @param term - required term to pass to search
+   * @param variables - variables without 'term' to pass into the SearchQuery
+   * @returns SearchResultPayload
+   */
+  public search(term: string, variables?: Omit<L.SearchQueryVariables, "term">): LinearFetch<SearchResultPayload> {
+    return new SearchQuery(this._request).fetch(term, variables);
+  }
+  /**
    * Fetch SSO login URL for the email provided.
    *
    * @param email - required email to pass to ssoUrlFromEmail
@@ -13966,6 +14337,21 @@ export class LinearSdk extends Request {
    */
   public syncBootstrap(variables?: L.SyncBootstrapQueryVariables): LinearFetch<SyncResponse> {
     return new SyncBootstrapQuery(this._request).fetch(variables);
+  }
+  /**
+   * [Internal] Fetches delta sync packets.
+   *
+   * @param lastSyncId - required lastSyncId to pass to syncDelta
+   * @param toSyncId - required toSyncId to pass to syncDelta
+   * @param variables - variables without 'lastSyncId', 'toSyncId' to pass into the SyncDeltaQuery
+   * @returns SyncDeltaResponse
+   */
+  public syncDelta(
+    lastSyncId: number,
+    toSyncId: number,
+    variables?: Omit<L.SyncDeltaQueryVariables, "lastSyncId" | "toSyncId">
+  ): LinearFetch<SyncDeltaResponse> {
+    return new SyncDeltaQuery(this._request).fetch(lastSyncId, toSyncId, variables);
   }
   /**
    * One specific team.
@@ -14118,7 +14504,7 @@ export class LinearSdk extends Request {
     return new AttachmentArchiveMutation(this._request).fetch(id);
   }
   /**
-   * [Alpha] Creates a new attachment, or updates existing if the same `uri` is used.
+   * [Alpha] Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
    *
    * @param input - required input to pass to attachmentCreate
    * @returns AttachmentPayload
@@ -14134,6 +14520,16 @@ export class LinearSdk extends Request {
    */
   public attachmentDelete(id: string): LinearFetch<ArchivePayload> {
     return new AttachmentDeleteMutation(this._request).fetch(id);
+  }
+  /**
+   * Link an existing Front conversation to an issue.
+   *
+   * @param conversationId - required conversationId to pass to attachmentLinkFront
+   * @param issueId - required issueId to pass to attachmentLinkFront
+   * @returns AttachmentPayload
+   */
+  public attachmentLinkFront(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkFrontMutation(this._request).fetch(conversationId, issueId);
   }
   /**
    * Link an existing Zendesk ticket to an issue.
@@ -14464,6 +14860,16 @@ export class LinearSdk extends Request {
     return new IntegrationFigmaMutation(this._request).fetch(code, redirectUri);
   }
   /**
+   * Integrates the organization with Front.
+   *
+   * @param code - required code to pass to integrationFront
+   * @param redirectUri - required redirectUri to pass to integrationFront
+   * @returns IntegrationPayload
+   */
+  public integrationFront(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationFrontMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
    * Connects the organization with the GitHub App.
    *
    * @param installationId - required installationId to pass to integrationGithubConnect
@@ -14490,6 +14896,16 @@ export class LinearSdk extends Request {
    */
   public integrationGoogleSheets(code: string): LinearFetch<IntegrationPayload> {
     return new IntegrationGoogleSheetsMutation(this._request).fetch(code);
+  }
+  /**
+   * Integrates the organization with Intercom.
+   *
+   * @param code - required code to pass to integrationIntercom
+   * @param redirectUri - required redirectUri to pass to integrationIntercom
+   * @returns IntegrationPayload
+   */
+  public integrationIntercom(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationIntercomMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Archives an integration resource.
@@ -14974,6 +15390,14 @@ export class LinearSdk extends Request {
     return new OauthTokenRevokeMutation(this._request).fetch(appId, scope);
   }
   /**
+   * Cancels the deletion of an organization. Administrator privileges required.
+   *
+   * @returns OrganizationCancelDeletePayload
+   */
+  public get organizationCancelDelete(): LinearFetch<OrganizationCancelDeletePayload> {
+    return new OrganizationCancelDeleteMutation(this._request).fetch();
+  }
+  /**
    * Delete's an organization. Administrator privileges required.
    *
    * @param input - required input to pass to organizationDelete
@@ -15240,6 +15664,15 @@ export class LinearSdk extends Request {
    */
   public teamDelete(id: string): LinearFetch<ArchivePayload> {
     return new TeamDeleteMutation(this._request).fetch(id);
+  }
+  /**
+   * Deletes a previously used team key.
+   *
+   * @param id - required id to pass to teamKeyDelete
+   * @returns ArchivePayload
+   */
+  public teamKeyDelete(id: string): LinearFetch<ArchivePayload> {
+    return new TeamKeyDeleteMutation(this._request).fetch(id);
   }
   /**
    * Creates a new team membership.
