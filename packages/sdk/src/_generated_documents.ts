@@ -9133,7 +9133,7 @@ export type WorkflowStateUpdateMutation = { __typename?: "Mutation" } & {
   workflowStateUpdate: { __typename?: "WorkflowStatePayload" } & WorkflowStatePayloadFragment;
 };
 
-export const FileUploadFragmentDoc: DocumentNode<FileUploadFragment, unknown> = {
+export const FileUploadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9161,8 +9161,8 @@ export const FileUploadFragmentDoc: DocumentNode<FileUploadFragment, unknown> = 
       },
     },
   ],
-};
-export const TemplateFragmentDoc: DocumentNode<TemplateFragment, unknown> = {
+} as unknown as DocumentNode<FileUploadFragment, unknown>;
+export const TemplateFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9200,8 +9200,8 @@ export const TemplateFragmentDoc: DocumentNode<TemplateFragment, unknown> = {
       },
     },
   ],
-};
-export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
+} as unknown as DocumentNode<TemplateFragment, unknown>;
+export const UserFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9229,8 +9229,8 @@ export const UserFragmentDoc: DocumentNode<UserFragment, unknown> = {
       },
     },
   ],
-};
-export const UserAccountFragmentDoc: DocumentNode<UserAccountFragment, unknown> = {
+} as unknown as DocumentNode<UserFragment, unknown>;
+export const UserAccountFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9260,8 +9260,8 @@ export const UserAccountFragmentDoc: DocumentNode<UserAccountFragment, unknown> 
     },
     ...UserFragmentDoc.definitions,
   ],
-};
-export const DocumentStepFragmentDoc: DocumentNode<DocumentStepFragment, unknown> = {
+} as unknown as DocumentNode<UserAccountFragment, unknown>;
+export const DocumentStepFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9282,8 +9282,8 @@ export const DocumentStepFragmentDoc: DocumentNode<DocumentStepFragment, unknown
       },
     },
   ],
-};
-export const SyncDeltaResponseFragmentDoc: DocumentNode<SyncDeltaResponseFragment, unknown> = {
+} as unknown as DocumentNode<DocumentStepFragment, unknown>;
+export const SyncDeltaResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9300,8 +9300,8 @@ export const SyncDeltaResponseFragmentDoc: DocumentNode<SyncDeltaResponseFragmen
       },
     },
   ],
-};
-export const SyncResponseFragmentDoc: DocumentNode<SyncResponseFragment, unknown> = {
+} as unknown as DocumentNode<SyncDeltaResponseFragment, unknown>;
+export const SyncResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9320,8 +9320,8 @@ export const SyncResponseFragmentDoc: DocumentNode<SyncResponseFragment, unknown
       },
     },
   ],
-};
-export const DependencyResponseFragmentDoc: DocumentNode<DependencyResponseFragment, unknown> = {
+} as unknown as DocumentNode<SyncResponseFragment, unknown>;
+export const DependencyResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9334,8 +9334,8 @@ export const DependencyResponseFragmentDoc: DocumentNode<DependencyResponseFragm
       },
     },
   ],
-};
-export const GithubRepoFragmentDoc: DocumentNode<GithubRepoFragment, unknown> = {
+} as unknown as DocumentNode<DependencyResponseFragment, unknown>;
+export const GithubRepoFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9351,8 +9351,8 @@ export const GithubRepoFragmentDoc: DocumentNode<GithubRepoFragment, unknown> = 
       },
     },
   ],
-};
-export const GithubOrgFragmentDoc: DocumentNode<GithubOrgFragment, unknown> = {
+} as unknown as DocumentNode<GithubRepoFragment, unknown>;
+export const GithubOrgFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9378,8 +9378,8 @@ export const GithubOrgFragmentDoc: DocumentNode<GithubOrgFragment, unknown> = {
     },
     ...GithubRepoFragmentDoc.definitions,
   ],
-};
-export const GithubOAuthTokenPayloadFragmentDoc: DocumentNode<GithubOAuthTokenPayloadFragment, unknown> = {
+} as unknown as DocumentNode<GithubOrgFragment, unknown>;
+export const GithubOAuthTokenPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9403,8 +9403,8 @@ export const GithubOAuthTokenPayloadFragmentDoc: DocumentNode<GithubOAuthTokenPa
     },
     ...GithubOrgFragmentDoc.definitions,
   ],
-};
-export const AuthorizedApplicationFragmentDoc: DocumentNode<AuthorizedApplicationFragment, unknown> = {
+} as unknown as DocumentNode<GithubOAuthTokenPayloadFragment, unknown>;
+export const AuthorizedApplicationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9426,8 +9426,8 @@ export const AuthorizedApplicationFragmentDoc: DocumentNode<AuthorizedApplicatio
       },
     },
   ],
-};
-export const UserAuthorizedApplicationFragmentDoc: DocumentNode<UserAuthorizedApplicationFragment, unknown> = {
+} as unknown as DocumentNode<AuthorizedApplicationFragment, unknown>;
+export const UserAuthorizedApplicationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9449,8 +9449,8 @@ export const UserAuthorizedApplicationFragmentDoc: DocumentNode<UserAuthorizedAp
       },
     },
   ],
-};
-export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> = {
+} as unknown as DocumentNode<UserAuthorizedApplicationFragment, unknown>;
+export const ApplicationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9470,8 +9470,8 @@ export const ApplicationFragmentDoc: DocumentNode<ApplicationFragment, unknown> 
       },
     },
   ],
-};
-export const GoogleSheetsSettingsFragmentDoc: DocumentNode<GoogleSheetsSettingsFragment, unknown> = {
+} as unknown as DocumentNode<ApplicationFragment, unknown>;
+export const GoogleSheetsSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9489,8 +9489,8 @@ export const GoogleSheetsSettingsFragmentDoc: DocumentNode<GoogleSheetsSettingsF
       },
     },
   ],
-};
-export const SentrySettingsFragmentDoc: DocumentNode<SentrySettingsFragment, unknown> = {
+} as unknown as DocumentNode<GoogleSheetsSettingsFragment, unknown>;
+export const SentrySettingsFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9503,8 +9503,8 @@ export const SentrySettingsFragmentDoc: DocumentNode<SentrySettingsFragment, unk
       },
     },
   ],
-};
-export const SlackPostSettingsFragmentDoc: DocumentNode<SlackPostSettingsFragment, unknown> = {
+} as unknown as DocumentNode<SentrySettingsFragment, unknown>;
+export const SlackPostSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9521,8 +9521,8 @@ export const SlackPostSettingsFragmentDoc: DocumentNode<SlackPostSettingsFragmen
       },
     },
   ],
-};
-export const ZendeskSettingsFragmentDoc: DocumentNode<ZendeskSettingsFragment, unknown> = {
+} as unknown as DocumentNode<SlackPostSettingsFragment, unknown>;
+export const ZendeskSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9539,8 +9539,8 @@ export const ZendeskSettingsFragmentDoc: DocumentNode<ZendeskSettingsFragment, u
       },
     },
   ],
-};
-export const IntegrationSettingsFragmentDoc: DocumentNode<IntegrationSettingsFragment, unknown> = {
+} as unknown as DocumentNode<ZendeskSettingsFragment, unknown>;
+export const IntegrationSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9598,8 +9598,8 @@ export const IntegrationSettingsFragmentDoc: DocumentNode<IntegrationSettingsFra
     ...SlackPostSettingsFragmentDoc.definitions,
     ...ZendeskSettingsFragmentDoc.definitions,
   ],
-};
-export const SamlConfigurationFragmentDoc: DocumentNode<SamlConfigurationFragment, unknown> = {
+} as unknown as DocumentNode<IntegrationSettingsFragment, unknown>;
+export const SamlConfigurationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9618,8 +9618,8 @@ export const SamlConfigurationFragmentDoc: DocumentNode<SamlConfigurationFragmen
       },
     },
   ],
-};
-export const UserSettingsFragmentDoc: DocumentNode<UserSettingsFragment, unknown> = {
+} as unknown as DocumentNode<SamlConfigurationFragment, unknown>;
+export const UserSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9647,8 +9647,8 @@ export const UserSettingsFragmentDoc: DocumentNode<UserSettingsFragment, unknown
       },
     },
   ],
-};
-export const SubscriptionFragmentDoc: DocumentNode<SubscriptionFragment, unknown> = {
+} as unknown as DocumentNode<UserSettingsFragment, unknown>;
+export const SubscriptionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9679,8 +9679,8 @@ export const SubscriptionFragmentDoc: DocumentNode<SubscriptionFragment, unknown
       },
     },
   ],
-};
-export const ApiKeyFragmentDoc: DocumentNode<ApiKeyFragment, unknown> = {
+} as unknown as DocumentNode<SubscriptionFragment, unknown>;
+export const ApiKeyFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9699,8 +9699,8 @@ export const ApiKeyFragmentDoc: DocumentNode<ApiKeyFragment, unknown> = {
       },
     },
   ],
-};
-export const PageInfoFragmentDoc: DocumentNode<PageInfoFragment, unknown> = {
+} as unknown as DocumentNode<ApiKeyFragment, unknown>;
+export const PageInfoFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9718,8 +9718,8 @@ export const PageInfoFragmentDoc: DocumentNode<PageInfoFragment, unknown> = {
       },
     },
   ],
-};
-export const ApiKeyConnectionFragmentDoc: DocumentNode<ApiKeyConnectionFragment, unknown> = {
+} as unknown as DocumentNode<PageInfoFragment, unknown>;
+export const ApiKeyConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9751,8 +9751,8 @@ export const ApiKeyConnectionFragmentDoc: DocumentNode<ApiKeyConnectionFragment,
     ...ApiKeyFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const ApiKeyPayloadFragmentDoc: DocumentNode<ApiKeyPayloadFragment, unknown> = {
+} as unknown as DocumentNode<ApiKeyConnectionFragment, unknown>;
+export const ApiKeyPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9777,8 +9777,8 @@ export const ApiKeyPayloadFragmentDoc: DocumentNode<ApiKeyPayloadFragment, unkno
     },
     ...ApiKeyFragmentDoc.definitions,
   ],
-};
-export const ArchivePayloadFragmentDoc: DocumentNode<ArchivePayloadFragment, unknown> = {
+} as unknown as DocumentNode<ApiKeyPayloadFragment, unknown>;
+export const ArchivePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9794,8 +9794,8 @@ export const ArchivePayloadFragmentDoc: DocumentNode<ArchivePayloadFragment, unk
       },
     },
   ],
-};
-export const AttachmentFragmentDoc: DocumentNode<AttachmentFragment, unknown> = {
+} as unknown as DocumentNode<ArchivePayloadFragment, unknown>;
+export const AttachmentFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9827,8 +9827,8 @@ export const AttachmentFragmentDoc: DocumentNode<AttachmentFragment, unknown> = 
       },
     },
   ],
-};
-export const AttachmentConnectionFragmentDoc: DocumentNode<AttachmentConnectionFragment, unknown> = {
+} as unknown as DocumentNode<AttachmentFragment, unknown>;
+export const AttachmentConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9860,8 +9860,8 @@ export const AttachmentConnectionFragmentDoc: DocumentNode<AttachmentConnectionF
     ...AttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const AttachmentPayloadFragmentDoc: DocumentNode<AttachmentPayloadFragment, unknown> = {
+} as unknown as DocumentNode<AttachmentConnectionFragment, unknown>;
+export const AttachmentPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9885,8 +9885,8 @@ export const AttachmentPayloadFragmentDoc: DocumentNode<AttachmentPayloadFragmen
       },
     },
   ],
-};
-export const OrganizationFragmentDoc: DocumentNode<OrganizationFragment, unknown> = {
+} as unknown as DocumentNode<AttachmentPayloadFragment, unknown>;
+export const OrganizationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9917,8 +9917,8 @@ export const OrganizationFragmentDoc: DocumentNode<OrganizationFragment, unknown
       },
     },
   ],
-};
-export const AuthResolverResponseFragmentDoc: DocumentNode<AuthResolverResponseFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationFragment, unknown>;
+export const AuthResolverResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9955,8 +9955,8 @@ export const AuthResolverResponseFragmentDoc: DocumentNode<AuthResolverResponseF
     ...OrganizationFragmentDoc.definitions,
     ...UserFragmentDoc.definitions,
   ],
-};
-export const InvoiceFragmentDoc: DocumentNode<InvoiceFragment, unknown> = {
+} as unknown as DocumentNode<AuthResolverResponseFragment, unknown>;
+export const InvoiceFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9975,8 +9975,8 @@ export const InvoiceFragmentDoc: DocumentNode<InvoiceFragment, unknown> = {
       },
     },
   ],
-};
-export const CardFragmentDoc: DocumentNode<CardFragment, unknown> = {
+} as unknown as DocumentNode<InvoiceFragment, unknown>;
+export const CardFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -9992,8 +9992,8 @@ export const CardFragmentDoc: DocumentNode<CardFragment, unknown> = {
       },
     },
   ],
-};
-export const BillingDetailsPayloadFragmentDoc: DocumentNode<BillingDetailsPayloadFragment, unknown> = {
+} as unknown as DocumentNode<CardFragment, unknown>;
+export const BillingDetailsPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10027,8 +10027,8 @@ export const BillingDetailsPayloadFragmentDoc: DocumentNode<BillingDetailsPayloa
     ...InvoiceFragmentDoc.definitions,
     ...CardFragmentDoc.definitions,
   ],
-};
-export const BillingEmailPayloadFragmentDoc: DocumentNode<BillingEmailPayloadFragment, unknown> = {
+} as unknown as DocumentNode<BillingDetailsPayloadFragment, unknown>;
+export const BillingEmailPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10044,8 +10044,8 @@ export const BillingEmailPayloadFragmentDoc: DocumentNode<BillingEmailPayloadFra
       },
     },
   ],
-};
-export const StepsResponseFragmentDoc: DocumentNode<StepsResponseFragment, unknown> = {
+} as unknown as DocumentNode<BillingEmailPayloadFragment, unknown>;
+export const StepsResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10062,11 +10062,8 @@ export const StepsResponseFragmentDoc: DocumentNode<StepsResponseFragment, unkno
       },
     },
   ],
-};
-export const CollaborationDocumentUpdatePayloadFragmentDoc: DocumentNode<
-  CollaborationDocumentUpdatePayloadFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<StepsResponseFragment, unknown>;
+export const CollaborationDocumentUpdatePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10090,8 +10087,8 @@ export const CollaborationDocumentUpdatePayloadFragmentDoc: DocumentNode<
     },
     ...StepsResponseFragmentDoc.definitions,
   ],
-};
-export const CommentFragmentDoc: DocumentNode<CommentFragment, unknown> = {
+} as unknown as DocumentNode<CollaborationDocumentUpdatePayloadFragment, unknown>;
+export const CommentFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10128,8 +10125,8 @@ export const CommentFragmentDoc: DocumentNode<CommentFragment, unknown> = {
       },
     },
   ],
-};
-export const CommentConnectionFragmentDoc: DocumentNode<CommentConnectionFragment, unknown> = {
+} as unknown as DocumentNode<CommentFragment, unknown>;
+export const CommentConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10161,8 +10158,8 @@ export const CommentConnectionFragmentDoc: DocumentNode<CommentConnectionFragmen
     ...CommentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const CommentPayloadFragmentDoc: DocumentNode<CommentPayloadFragment, unknown> = {
+} as unknown as DocumentNode<CommentConnectionFragment, unknown>;
+export const CommentPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10186,8 +10183,8 @@ export const CommentPayloadFragmentDoc: DocumentNode<CommentPayloadFragment, unk
       },
     },
   ],
-};
-export const ContactPayloadFragmentDoc: DocumentNode<ContactPayloadFragment, unknown> = {
+} as unknown as DocumentNode<CommentPayloadFragment, unknown>;
+export const ContactPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10197,8 +10194,8 @@ export const ContactPayloadFragmentDoc: DocumentNode<ContactPayloadFragment, unk
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const CreateCsvExportReportPayloadFragmentDoc: DocumentNode<CreateCsvExportReportPayloadFragment, unknown> = {
+} as unknown as DocumentNode<ContactPayloadFragment, unknown>;
+export const CreateCsvExportReportPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10208,11 +10205,8 @@ export const CreateCsvExportReportPayloadFragmentDoc: DocumentNode<CreateCsvExpo
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const CreateOrJoinOrganizationResponseFragmentDoc: DocumentNode<
-  CreateOrJoinOrganizationResponseFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<CreateCsvExportReportPayloadFragment, unknown>;
+export const CreateOrJoinOrganizationResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10234,8 +10228,8 @@ export const CreateOrJoinOrganizationResponseFragmentDoc: DocumentNode<
       },
     },
   ],
-};
-export const CustomViewFragmentDoc: DocumentNode<CustomViewFragment, unknown> = {
+} as unknown as DocumentNode<CreateOrJoinOrganizationResponseFragment, unknown>;
+export const CustomViewFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10275,8 +10269,8 @@ export const CustomViewFragmentDoc: DocumentNode<CustomViewFragment, unknown> = 
       },
     },
   ],
-};
-export const CustomViewConnectionFragmentDoc: DocumentNode<CustomViewConnectionFragment, unknown> = {
+} as unknown as DocumentNode<CustomViewFragment, unknown>;
+export const CustomViewConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10308,8 +10302,8 @@ export const CustomViewConnectionFragmentDoc: DocumentNode<CustomViewConnectionF
     ...CustomViewFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const CustomViewPayloadFragmentDoc: DocumentNode<CustomViewPayloadFragment, unknown> = {
+} as unknown as DocumentNode<CustomViewConnectionFragment, unknown>;
+export const CustomViewPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10333,8 +10327,8 @@ export const CustomViewPayloadFragmentDoc: DocumentNode<CustomViewPayloadFragmen
       },
     },
   ],
-};
-export const CycleFragmentDoc: DocumentNode<CycleFragment, unknown> = {
+} as unknown as DocumentNode<CustomViewPayloadFragment, unknown>;
+export const CycleFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10370,8 +10364,8 @@ export const CycleFragmentDoc: DocumentNode<CycleFragment, unknown> = {
       },
     },
   ],
-};
-export const CycleConnectionFragmentDoc: DocumentNode<CycleConnectionFragment, unknown> = {
+} as unknown as DocumentNode<CycleFragment, unknown>;
+export const CycleConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10403,8 +10397,8 @@ export const CycleConnectionFragmentDoc: DocumentNode<CycleConnectionFragment, u
     ...CycleFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const CyclePayloadFragmentDoc: DocumentNode<CyclePayloadFragment, unknown> = {
+} as unknown as DocumentNode<CycleConnectionFragment, unknown>;
+export const CyclePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10428,8 +10422,8 @@ export const CyclePayloadFragmentDoc: DocumentNode<CyclePayloadFragment, unknown
       },
     },
   ],
-};
-export const DebugPayloadFragmentDoc: DocumentNode<DebugPayloadFragment, unknown> = {
+} as unknown as DocumentNode<CyclePayloadFragment, unknown>;
+export const DebugPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10439,8 +10433,8 @@ export const DebugPayloadFragmentDoc: DocumentNode<DebugPayloadFragment, unknown
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const EmailUnsubscribePayloadFragmentDoc: DocumentNode<EmailUnsubscribePayloadFragment, unknown> = {
+} as unknown as DocumentNode<DebugPayloadFragment, unknown>;
+export const EmailUnsubscribePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10450,11 +10444,8 @@ export const EmailUnsubscribePayloadFragmentDoc: DocumentNode<EmailUnsubscribePa
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const EmailUserAccountAuthChallengeResponseFragmentDoc: DocumentNode<
-  EmailUserAccountAuthChallengeResponseFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<EmailUnsubscribePayloadFragment, unknown>;
+export const EmailUserAccountAuthChallengeResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10470,8 +10461,8 @@ export const EmailUserAccountAuthChallengeResponseFragmentDoc: DocumentNode<
       },
     },
   ],
-};
-export const EmojiFragmentDoc: DocumentNode<EmojiFragment, unknown> = {
+} as unknown as DocumentNode<EmailUserAccountAuthChallengeResponseFragment, unknown>;
+export const EmojiFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10500,8 +10491,8 @@ export const EmojiFragmentDoc: DocumentNode<EmojiFragment, unknown> = {
       },
     },
   ],
-};
-export const EmojiConnectionFragmentDoc: DocumentNode<EmojiConnectionFragment, unknown> = {
+} as unknown as DocumentNode<EmojiFragment, unknown>;
+export const EmojiConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10533,8 +10524,8 @@ export const EmojiConnectionFragmentDoc: DocumentNode<EmojiConnectionFragment, u
     ...EmojiFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const EmojiPayloadFragmentDoc: DocumentNode<EmojiPayloadFragment, unknown> = {
+} as unknown as DocumentNode<EmojiConnectionFragment, unknown>;
+export const EmojiPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10558,8 +10549,8 @@ export const EmojiPayloadFragmentDoc: DocumentNode<EmojiPayloadFragment, unknown
       },
     },
   ],
-};
-export const EventPayloadFragmentDoc: DocumentNode<EventPayloadFragment, unknown> = {
+} as unknown as DocumentNode<EmojiPayloadFragment, unknown>;
+export const EventPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10569,8 +10560,8 @@ export const EventPayloadFragmentDoc: DocumentNode<EventPayloadFragment, unknown
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const FavoriteFragmentDoc: DocumentNode<FavoriteFragment, unknown> = {
+} as unknown as DocumentNode<EventPayloadFragment, unknown>;
+export const FavoriteFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10638,8 +10629,8 @@ export const FavoriteFragmentDoc: DocumentNode<FavoriteFragment, unknown> = {
       },
     },
   ],
-};
-export const FavoriteConnectionFragmentDoc: DocumentNode<FavoriteConnectionFragment, unknown> = {
+} as unknown as DocumentNode<FavoriteFragment, unknown>;
+export const FavoriteConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10671,8 +10662,8 @@ export const FavoriteConnectionFragmentDoc: DocumentNode<FavoriteConnectionFragm
     ...FavoriteFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const FavoritePayloadFragmentDoc: DocumentNode<FavoritePayloadFragment, unknown> = {
+} as unknown as DocumentNode<FavoriteConnectionFragment, unknown>;
+export const FavoritePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10696,8 +10687,8 @@ export const FavoritePayloadFragmentDoc: DocumentNode<FavoritePayloadFragment, u
       },
     },
   ],
-};
-export const FeedbackPayloadFragmentDoc: DocumentNode<FeedbackPayloadFragment, unknown> = {
+} as unknown as DocumentNode<FavoritePayloadFragment, unknown>;
+export const FeedbackPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10707,8 +10698,8 @@ export const FeedbackPayloadFragmentDoc: DocumentNode<FeedbackPayloadFragment, u
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const FigmaEmbedFragmentDoc: DocumentNode<FigmaEmbedFragment, unknown> = {
+} as unknown as DocumentNode<FeedbackPayloadFragment, unknown>;
+export const FigmaEmbedFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10726,8 +10717,8 @@ export const FigmaEmbedFragmentDoc: DocumentNode<FigmaEmbedFragment, unknown> = 
       },
     },
   ],
-};
-export const FigmaEmbedPayloadFragmentDoc: DocumentNode<FigmaEmbedPayloadFragment, unknown> = {
+} as unknown as DocumentNode<FigmaEmbedFragment, unknown>;
+export const FigmaEmbedPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10751,8 +10742,8 @@ export const FigmaEmbedPayloadFragmentDoc: DocumentNode<FigmaEmbedPayloadFragmen
     },
     ...FigmaEmbedFragmentDoc.definitions,
   ],
-};
-export const ImageUploadFromUrlPayloadFragmentDoc: DocumentNode<ImageUploadFromUrlPayloadFragment, unknown> = {
+} as unknown as DocumentNode<FigmaEmbedPayloadFragment, unknown>;
+export const ImageUploadFromUrlPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10769,8 +10760,8 @@ export const ImageUploadFromUrlPayloadFragmentDoc: DocumentNode<ImageUploadFromU
       },
     },
   ],
-};
-export const IntegrationFragmentDoc: DocumentNode<IntegrationFragment, unknown> = {
+} as unknown as DocumentNode<ImageUploadFromUrlPayloadFragment, unknown>;
+export const IntegrationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10805,8 +10796,8 @@ export const IntegrationFragmentDoc: DocumentNode<IntegrationFragment, unknown> 
       },
     },
   ],
-};
-export const IntegrationConnectionFragmentDoc: DocumentNode<IntegrationConnectionFragment, unknown> = {
+} as unknown as DocumentNode<IntegrationFragment, unknown>;
+export const IntegrationConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10838,8 +10829,8 @@ export const IntegrationConnectionFragmentDoc: DocumentNode<IntegrationConnectio
     ...IntegrationFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const IntegrationPayloadFragmentDoc: DocumentNode<IntegrationPayloadFragment, unknown> = {
+} as unknown as DocumentNode<IntegrationConnectionFragment, unknown>;
+export const IntegrationPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10863,8 +10854,8 @@ export const IntegrationPayloadFragmentDoc: DocumentNode<IntegrationPayloadFragm
       },
     },
   ],
-};
-export const CommitPayloadFragmentDoc: DocumentNode<CommitPayloadFragment, unknown> = {
+} as unknown as DocumentNode<IntegrationPayloadFragment, unknown>;
+export const CommitPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10885,8 +10876,8 @@ export const CommitPayloadFragmentDoc: DocumentNode<CommitPayloadFragment, unkno
       },
     },
   ],
-};
-export const PullRequestPayloadFragmentDoc: DocumentNode<PullRequestPayloadFragment, unknown> = {
+} as unknown as DocumentNode<CommitPayloadFragment, unknown>;
+export const PullRequestPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10915,8 +10906,8 @@ export const PullRequestPayloadFragmentDoc: DocumentNode<PullRequestPayloadFragm
       },
     },
   ],
-};
-export const SentryIssuePayloadFragmentDoc: DocumentNode<SentryIssuePayloadFragment, unknown> = {
+} as unknown as DocumentNode<PullRequestPayloadFragment, unknown>;
+export const SentryIssuePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10941,8 +10932,8 @@ export const SentryIssuePayloadFragmentDoc: DocumentNode<SentryIssuePayloadFragm
       },
     },
   ],
-};
-export const IntegrationResourceDataFragmentDoc: DocumentNode<IntegrationResourceDataFragment, unknown> = {
+} as unknown as DocumentNode<SentryIssuePayloadFragment, unknown>;
+export const IntegrationResourceDataFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -10991,8 +10982,8 @@ export const IntegrationResourceDataFragmentDoc: DocumentNode<IntegrationResourc
     ...PullRequestPayloadFragmentDoc.definitions,
     ...SentryIssuePayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationResourceFragmentDoc: DocumentNode<IntegrationResourceFragment, unknown> = {
+} as unknown as DocumentNode<IntegrationResourceDataFragment, unknown>;
+export const IntegrationResourceFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11046,8 +11037,8 @@ export const IntegrationResourceFragmentDoc: DocumentNode<IntegrationResourceFra
     ...IntegrationResourceDataFragmentDoc.definitions,
     ...PullRequestPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationResourceConnectionFragmentDoc: DocumentNode<IntegrationResourceConnectionFragment, unknown> = {
+} as unknown as DocumentNode<IntegrationResourceFragment, unknown>;
+export const IntegrationResourceConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11079,8 +11070,8 @@ export const IntegrationResourceConnectionFragmentDoc: DocumentNode<IntegrationR
     ...IntegrationResourceFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const InviteDataFragmentDoc: DocumentNode<InviteDataFragment, unknown> = {
+} as unknown as DocumentNode<IntegrationResourceConnectionFragment, unknown>;
+export const InviteDataFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11102,8 +11093,8 @@ export const InviteDataFragmentDoc: DocumentNode<InviteDataFragment, unknown> = 
       },
     },
   ],
-};
-export const InvitePagePayloadFragmentDoc: DocumentNode<InvitePagePayloadFragment, unknown> = {
+} as unknown as DocumentNode<InviteDataFragment, unknown>;
+export const InvitePagePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11127,8 +11118,8 @@ export const InvitePagePayloadFragmentDoc: DocumentNode<InvitePagePayloadFragmen
     },
     ...InviteDataFragmentDoc.definitions,
   ],
-};
-export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
+} as unknown as DocumentNode<InvitePagePayloadFragment, unknown>;
+export const IssueFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11222,8 +11213,8 @@ export const IssueFragmentDoc: DocumentNode<IssueFragment, unknown> = {
       },
     },
   ],
-};
-export const IssueConnectionFragmentDoc: DocumentNode<IssueConnectionFragment, unknown> = {
+} as unknown as DocumentNode<IssueFragment, unknown>;
+export const IssueConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11255,8 +11246,8 @@ export const IssueConnectionFragmentDoc: DocumentNode<IssueConnectionFragment, u
     ...IssueFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const IssueDescriptionHistoryFragmentDoc: DocumentNode<IssueDescriptionHistoryFragment, unknown> = {
+} as unknown as DocumentNode<IssueConnectionFragment, unknown>;
+export const IssueDescriptionHistoryFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11275,11 +11266,8 @@ export const IssueDescriptionHistoryFragmentDoc: DocumentNode<IssueDescriptionHi
       },
     },
   ],
-};
-export const IssueDescriptionHistoryPayloadFragmentDoc: DocumentNode<
-  IssueDescriptionHistoryPayloadFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<IssueDescriptionHistoryFragment, unknown>;
+export const IssueDescriptionHistoryPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11303,8 +11291,8 @@ export const IssueDescriptionHistoryPayloadFragmentDoc: DocumentNode<
     },
     ...IssueDescriptionHistoryFragmentDoc.definitions,
   ],
-};
-export const IssueRelationHistoryPayloadFragmentDoc: DocumentNode<IssueRelationHistoryPayloadFragment, unknown> = {
+} as unknown as DocumentNode<IssueDescriptionHistoryPayloadFragment, unknown>;
+export const IssueRelationHistoryPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11320,8 +11308,8 @@ export const IssueRelationHistoryPayloadFragmentDoc: DocumentNode<IssueRelationH
       },
     },
   ],
-};
-export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown> = {
+} as unknown as DocumentNode<IssueRelationHistoryPayloadFragment, unknown>;
+export const IssueHistoryFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11475,8 +11463,8 @@ export const IssueHistoryFragmentDoc: DocumentNode<IssueHistoryFragment, unknown
     },
     ...IssueRelationHistoryPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueHistoryConnectionFragmentDoc: DocumentNode<IssueHistoryConnectionFragment, unknown> = {
+} as unknown as DocumentNode<IssueHistoryFragment, unknown>;
+export const IssueHistoryConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11508,8 +11496,8 @@ export const IssueHistoryConnectionFragmentDoc: DocumentNode<IssueHistoryConnect
     ...IssueHistoryFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const IssueImportFragmentDoc: DocumentNode<IssueImportFragment, unknown> = {
+} as unknown as DocumentNode<IssueHistoryConnectionFragment, unknown>;
+export const IssueImportFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11532,8 +11520,8 @@ export const IssueImportFragmentDoc: DocumentNode<IssueImportFragment, unknown> 
       },
     },
   ],
-};
-export const IssueImportDeletePayloadFragmentDoc: DocumentNode<IssueImportDeletePayloadFragment, unknown> = {
+} as unknown as DocumentNode<IssueImportFragment, unknown>;
+export const IssueImportDeletePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11558,8 +11546,8 @@ export const IssueImportDeletePayloadFragmentDoc: DocumentNode<IssueImportDelete
     },
     ...IssueImportFragmentDoc.definitions,
   ],
-};
-export const IssueImportPayloadFragmentDoc: DocumentNode<IssueImportPayloadFragment, unknown> = {
+} as unknown as DocumentNode<IssueImportDeletePayloadFragment, unknown>;
+export const IssueImportPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11584,8 +11572,8 @@ export const IssueImportPayloadFragmentDoc: DocumentNode<IssueImportPayloadFragm
     },
     ...IssueImportFragmentDoc.definitions,
   ],
-};
-export const IssueLabelFragmentDoc: DocumentNode<IssueLabelFragment, unknown> = {
+} as unknown as DocumentNode<IssueImportPayloadFragment, unknown>;
+export const IssueLabelFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11622,8 +11610,8 @@ export const IssueLabelFragmentDoc: DocumentNode<IssueLabelFragment, unknown> = 
       },
     },
   ],
-};
-export const IssueLabelConnectionFragmentDoc: DocumentNode<IssueLabelConnectionFragment, unknown> = {
+} as unknown as DocumentNode<IssueLabelFragment, unknown>;
+export const IssueLabelConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11655,8 +11643,8 @@ export const IssueLabelConnectionFragmentDoc: DocumentNode<IssueLabelConnectionF
     ...IssueLabelFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const IssueLabelPayloadFragmentDoc: DocumentNode<IssueLabelPayloadFragment, unknown> = {
+} as unknown as DocumentNode<IssueLabelConnectionFragment, unknown>;
+export const IssueLabelPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11680,8 +11668,8 @@ export const IssueLabelPayloadFragmentDoc: DocumentNode<IssueLabelPayloadFragmen
       },
     },
   ],
-};
-export const IssuePayloadFragmentDoc: DocumentNode<IssuePayloadFragment, unknown> = {
+} as unknown as DocumentNode<IssueLabelPayloadFragment, unknown>;
+export const IssuePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11705,8 +11693,8 @@ export const IssuePayloadFragmentDoc: DocumentNode<IssuePayloadFragment, unknown
       },
     },
   ],
-};
-export const IssuePriorityValueFragmentDoc: DocumentNode<IssuePriorityValueFragment, unknown> = {
+} as unknown as DocumentNode<IssuePayloadFragment, unknown>;
+export const IssuePriorityValueFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11722,8 +11710,8 @@ export const IssuePriorityValueFragmentDoc: DocumentNode<IssuePriorityValueFragm
       },
     },
   ],
-};
-export const IssueRelationFragmentDoc: DocumentNode<IssueRelationFragment, unknown> = {
+} as unknown as DocumentNode<IssuePriorityValueFragment, unknown>;
+export const IssueRelationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11758,8 +11746,8 @@ export const IssueRelationFragmentDoc: DocumentNode<IssueRelationFragment, unkno
       },
     },
   ],
-};
-export const IssueRelationConnectionFragmentDoc: DocumentNode<IssueRelationConnectionFragment, unknown> = {
+} as unknown as DocumentNode<IssueRelationFragment, unknown>;
+export const IssueRelationConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11791,8 +11779,8 @@ export const IssueRelationConnectionFragmentDoc: DocumentNode<IssueRelationConne
     ...IssueRelationFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const IssueRelationPayloadFragmentDoc: DocumentNode<IssueRelationPayloadFragment, unknown> = {
+} as unknown as DocumentNode<IssueRelationConnectionFragment, unknown>;
+export const IssueRelationPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11816,8 +11804,8 @@ export const IssueRelationPayloadFragmentDoc: DocumentNode<IssueRelationPayloadF
       },
     },
   ],
-};
-export const MilestoneFragmentDoc: DocumentNode<MilestoneFragment, unknown> = {
+} as unknown as DocumentNode<IssueRelationPayloadFragment, unknown>;
+export const MilestoneFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11837,8 +11825,8 @@ export const MilestoneFragmentDoc: DocumentNode<MilestoneFragment, unknown> = {
       },
     },
   ],
-};
-export const MilestoneConnectionFragmentDoc: DocumentNode<MilestoneConnectionFragment, unknown> = {
+} as unknown as DocumentNode<MilestoneFragment, unknown>;
+export const MilestoneConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11870,8 +11858,8 @@ export const MilestoneConnectionFragmentDoc: DocumentNode<MilestoneConnectionFra
     ...MilestoneFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const MilestonePayloadFragmentDoc: DocumentNode<MilestonePayloadFragment, unknown> = {
+} as unknown as DocumentNode<MilestoneConnectionFragment, unknown>;
+export const MilestonePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11895,8 +11883,8 @@ export const MilestonePayloadFragmentDoc: DocumentNode<MilestonePayloadFragment,
       },
     },
   ],
-};
-export const NotificationFragmentDoc: DocumentNode<NotificationFragment, unknown> = {
+} as unknown as DocumentNode<MilestonePayloadFragment, unknown>;
+export const NotificationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11950,8 +11938,8 @@ export const NotificationFragmentDoc: DocumentNode<NotificationFragment, unknown
       },
     },
   ],
-};
-export const NotificationConnectionFragmentDoc: DocumentNode<NotificationConnectionFragment, unknown> = {
+} as unknown as DocumentNode<NotificationFragment, unknown>;
+export const NotificationConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -11983,8 +11971,8 @@ export const NotificationConnectionFragmentDoc: DocumentNode<NotificationConnect
     ...NotificationFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const NotificationPayloadFragmentDoc: DocumentNode<NotificationPayloadFragment, unknown> = {
+} as unknown as DocumentNode<NotificationConnectionFragment, unknown>;
+export const NotificationPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12008,8 +11996,8 @@ export const NotificationPayloadFragmentDoc: DocumentNode<NotificationPayloadFra
       },
     },
   ],
-};
-export const NotificationSubscriptionFragmentDoc: DocumentNode<NotificationSubscriptionFragment, unknown> = {
+} as unknown as DocumentNode<NotificationPayloadFragment, unknown>;
+export const NotificationSubscriptionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12052,11 +12040,8 @@ export const NotificationSubscriptionFragmentDoc: DocumentNode<NotificationSubsc
       },
     },
   ],
-};
-export const NotificationSubscriptionConnectionFragmentDoc: DocumentNode<
-  NotificationSubscriptionConnectionFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<NotificationSubscriptionFragment, unknown>;
+export const NotificationSubscriptionConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12088,11 +12073,8 @@ export const NotificationSubscriptionConnectionFragmentDoc: DocumentNode<
     ...NotificationSubscriptionFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const NotificationSubscriptionPayloadFragmentDoc: DocumentNode<
-  NotificationSubscriptionPayloadFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<NotificationSubscriptionConnectionFragment, unknown>;
+export const NotificationSubscriptionPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12116,8 +12098,8 @@ export const NotificationSubscriptionPayloadFragmentDoc: DocumentNode<
       },
     },
   ],
-};
-export const OauthClientFragmentDoc: DocumentNode<OauthClientFragment, unknown> = {
+} as unknown as DocumentNode<NotificationSubscriptionPayloadFragment, unknown>;
+export const OauthClientFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12144,8 +12126,8 @@ export const OauthClientFragmentDoc: DocumentNode<OauthClientFragment, unknown> 
       },
     },
   ],
-};
-export const OauthClientPayloadFragmentDoc: DocumentNode<OauthClientPayloadFragment, unknown> = {
+} as unknown as DocumentNode<OauthClientFragment, unknown>;
+export const OauthClientPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12170,8 +12152,8 @@ export const OauthClientPayloadFragmentDoc: DocumentNode<OauthClientPayloadFragm
     },
     ...OauthClientFragmentDoc.definitions,
   ],
-};
-export const OauthTokenRevokePayloadFragmentDoc: DocumentNode<OauthTokenRevokePayloadFragment, unknown> = {
+} as unknown as DocumentNode<OauthClientPayloadFragment, unknown>;
+export const OauthTokenRevokePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12181,11 +12163,8 @@ export const OauthTokenRevokePayloadFragmentDoc: DocumentNode<OauthTokenRevokePa
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const OrganizationCancelDeletePayloadFragmentDoc: DocumentNode<
-  OrganizationCancelDeletePayloadFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<OauthTokenRevokePayloadFragment, unknown>;
+export const OrganizationCancelDeletePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12195,8 +12174,8 @@ export const OrganizationCancelDeletePayloadFragmentDoc: DocumentNode<
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const OrganizationDeletePayloadFragmentDoc: DocumentNode<OrganizationDeletePayloadFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationCancelDeletePayloadFragment, unknown>;
+export const OrganizationDeletePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12206,8 +12185,8 @@ export const OrganizationDeletePayloadFragmentDoc: DocumentNode<OrganizationDele
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const OrganizationDomainFragmentDoc: DocumentNode<OrganizationDomainFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationDeletePayloadFragment, unknown>;
+export const OrganizationDomainFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12236,8 +12215,8 @@ export const OrganizationDomainFragmentDoc: DocumentNode<OrganizationDomainFragm
       },
     },
   ],
-};
-export const OrganizationDomainPayloadFragmentDoc: DocumentNode<OrganizationDomainPayloadFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationDomainFragment, unknown>;
+export const OrganizationDomainPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12262,11 +12241,8 @@ export const OrganizationDomainPayloadFragmentDoc: DocumentNode<OrganizationDoma
     },
     ...OrganizationDomainFragmentDoc.definitions,
   ],
-};
-export const OrganizationDomainSimplePayloadFragmentDoc: DocumentNode<
-  OrganizationDomainSimplePayloadFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<OrganizationDomainPayloadFragment, unknown>;
+export const OrganizationDomainSimplePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12276,8 +12252,8 @@ export const OrganizationDomainSimplePayloadFragmentDoc: DocumentNode<
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const OrganizationExistsPayloadFragmentDoc: DocumentNode<OrganizationExistsPayloadFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationDomainSimplePayloadFragment, unknown>;
+export const OrganizationExistsPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12293,8 +12269,8 @@ export const OrganizationExistsPayloadFragmentDoc: DocumentNode<OrganizationExis
       },
     },
   ],
-};
-export const OrganizationInviteFragmentDoc: DocumentNode<OrganizationInviteFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationExistsPayloadFragment, unknown>;
+export const OrganizationInviteFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12332,8 +12308,8 @@ export const OrganizationInviteFragmentDoc: DocumentNode<OrganizationInviteFragm
       },
     },
   ],
-};
-export const OrganizationInviteConnectionFragmentDoc: DocumentNode<OrganizationInviteConnectionFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationInviteFragment, unknown>;
+export const OrganizationInviteConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12365,8 +12341,8 @@ export const OrganizationInviteConnectionFragmentDoc: DocumentNode<OrganizationI
     ...OrganizationInviteFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const OrganizationInvitePayloadFragmentDoc: DocumentNode<OrganizationInvitePayloadFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationInviteConnectionFragment, unknown>;
+export const OrganizationInvitePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12391,8 +12367,8 @@ export const OrganizationInvitePayloadFragmentDoc: DocumentNode<OrganizationInvi
     },
     ...OrganizationInviteFragmentDoc.definitions,
   ],
-};
-export const OrganizationPayloadFragmentDoc: DocumentNode<OrganizationPayloadFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationInvitePayloadFragment, unknown>;
+export const OrganizationPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12408,8 +12384,8 @@ export const OrganizationPayloadFragmentDoc: DocumentNode<OrganizationPayloadFra
       },
     },
   ],
-};
-export const ProjectFragmentDoc: DocumentNode<ProjectFragment, unknown> = {
+} as unknown as DocumentNode<OrganizationPayloadFragment, unknown>;
+export const ProjectFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12471,8 +12447,8 @@ export const ProjectFragmentDoc: DocumentNode<ProjectFragment, unknown> = {
       },
     },
   ],
-};
-export const ProjectConnectionFragmentDoc: DocumentNode<ProjectConnectionFragment, unknown> = {
+} as unknown as DocumentNode<ProjectFragment, unknown>;
+export const ProjectConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12504,8 +12480,8 @@ export const ProjectConnectionFragmentDoc: DocumentNode<ProjectConnectionFragmen
     ...ProjectFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const ProjectLinkFragmentDoc: DocumentNode<ProjectLinkFragment, unknown> = {
+} as unknown as DocumentNode<ProjectConnectionFragment, unknown>;
+export const ProjectLinkFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12541,8 +12517,8 @@ export const ProjectLinkFragmentDoc: DocumentNode<ProjectLinkFragment, unknown> 
       },
     },
   ],
-};
-export const ProjectLinkConnectionFragmentDoc: DocumentNode<ProjectLinkConnectionFragment, unknown> = {
+} as unknown as DocumentNode<ProjectLinkFragment, unknown>;
+export const ProjectLinkConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12574,8 +12550,8 @@ export const ProjectLinkConnectionFragmentDoc: DocumentNode<ProjectLinkConnectio
     ...ProjectLinkFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const ProjectLinkPayloadFragmentDoc: DocumentNode<ProjectLinkPayloadFragment, unknown> = {
+} as unknown as DocumentNode<ProjectLinkConnectionFragment, unknown>;
+export const ProjectLinkPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12599,8 +12575,8 @@ export const ProjectLinkPayloadFragmentDoc: DocumentNode<ProjectLinkPayloadFragm
       },
     },
   ],
-};
-export const ProjectPayloadFragmentDoc: DocumentNode<ProjectPayloadFragment, unknown> = {
+} as unknown as DocumentNode<ProjectLinkPayloadFragment, unknown>;
+export const ProjectPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12624,8 +12600,8 @@ export const ProjectPayloadFragmentDoc: DocumentNode<ProjectPayloadFragment, unk
       },
     },
   ],
-};
-export const PushSubscriptionFragmentDoc: DocumentNode<PushSubscriptionFragment, unknown> = {
+} as unknown as DocumentNode<ProjectPayloadFragment, unknown>;
+export const PushSubscriptionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12643,8 +12619,8 @@ export const PushSubscriptionFragmentDoc: DocumentNode<PushSubscriptionFragment,
       },
     },
   ],
-};
-export const PushSubscriptionConnectionFragmentDoc: DocumentNode<PushSubscriptionConnectionFragment, unknown> = {
+} as unknown as DocumentNode<PushSubscriptionFragment, unknown>;
+export const PushSubscriptionConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12676,8 +12652,8 @@ export const PushSubscriptionConnectionFragmentDoc: DocumentNode<PushSubscriptio
     ...PushSubscriptionFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const PushSubscriptionPayloadFragmentDoc: DocumentNode<PushSubscriptionPayloadFragment, unknown> = {
+} as unknown as DocumentNode<PushSubscriptionConnectionFragment, unknown>;
+export const PushSubscriptionPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12693,8 +12669,8 @@ export const PushSubscriptionPayloadFragmentDoc: DocumentNode<PushSubscriptionPa
       },
     },
   ],
-};
-export const PushSubscriptionTestPayloadFragmentDoc: DocumentNode<PushSubscriptionTestPayloadFragment, unknown> = {
+} as unknown as DocumentNode<PushSubscriptionPayloadFragment, unknown>;
+export const PushSubscriptionTestPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12704,8 +12680,8 @@ export const PushSubscriptionTestPayloadFragmentDoc: DocumentNode<PushSubscripti
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const ReactionFragmentDoc: DocumentNode<ReactionFragment, unknown> = {
+} as unknown as DocumentNode<PushSubscriptionTestPayloadFragment, unknown>;
+export const ReactionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12740,8 +12716,8 @@ export const ReactionFragmentDoc: DocumentNode<ReactionFragment, unknown> = {
       },
     },
   ],
-};
-export const ReactionConnectionFragmentDoc: DocumentNode<ReactionConnectionFragment, unknown> = {
+} as unknown as DocumentNode<ReactionFragment, unknown>;
+export const ReactionConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12773,8 +12749,8 @@ export const ReactionConnectionFragmentDoc: DocumentNode<ReactionConnectionFragm
     ...ReactionFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const ReactionPayloadFragmentDoc: DocumentNode<ReactionPayloadFragment, unknown> = {
+} as unknown as DocumentNode<ReactionConnectionFragment, unknown>;
+export const ReactionPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12798,8 +12774,8 @@ export const ReactionPayloadFragmentDoc: DocumentNode<ReactionPayloadFragment, u
       },
     },
   ],
-};
-export const RotateSecretPayloadFragmentDoc: DocumentNode<RotateSecretPayloadFragment, unknown> = {
+} as unknown as DocumentNode<ReactionPayloadFragment, unknown>;
+export const RotateSecretPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12815,8 +12791,8 @@ export const RotateSecretPayloadFragmentDoc: DocumentNode<RotateSecretPayloadFra
       },
     },
   ],
-};
-export const ArchiveResponseFragmentDoc: DocumentNode<ArchiveResponseFragment, unknown> = {
+} as unknown as DocumentNode<RotateSecretPayloadFragment, unknown>;
+export const ArchiveResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12833,8 +12809,8 @@ export const ArchiveResponseFragmentDoc: DocumentNode<ArchiveResponseFragment, u
       },
     },
   ],
-};
-export const SearchResultPayloadFragmentDoc: DocumentNode<SearchResultPayloadFragment, unknown> = {
+} as unknown as DocumentNode<ArchiveResponseFragment, unknown>;
+export const SearchResultPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12859,8 +12835,8 @@ export const SearchResultPayloadFragmentDoc: DocumentNode<SearchResultPayloadFra
     },
     ...ArchiveResponseFragmentDoc.definitions,
   ],
-};
-export const SsoUrlFromEmailResponseFragmentDoc: DocumentNode<SsoUrlFromEmailResponseFragment, unknown> = {
+} as unknown as DocumentNode<SearchResultPayloadFragment, unknown>;
+export const SsoUrlFromEmailResponseFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12876,8 +12852,8 @@ export const SsoUrlFromEmailResponseFragmentDoc: DocumentNode<SsoUrlFromEmailRes
       },
     },
   ],
-};
-export const SubscriptionPayloadFragmentDoc: DocumentNode<SubscriptionPayloadFragment, unknown> = {
+} as unknown as DocumentNode<SsoUrlFromEmailResponseFragment, unknown>;
+export const SubscriptionPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12894,8 +12870,8 @@ export const SubscriptionPayloadFragmentDoc: DocumentNode<SubscriptionPayloadFra
       },
     },
   ],
-};
-export const SubscriptionSessionPayloadFragmentDoc: DocumentNode<SubscriptionSessionPayloadFragment, unknown> = {
+} as unknown as DocumentNode<SubscriptionPayloadFragment, unknown>;
+export const SubscriptionSessionPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12905,8 +12881,8 @@ export const SubscriptionSessionPayloadFragmentDoc: DocumentNode<SubscriptionSes
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "session" } }] },
     },
   ],
-};
-export const SynchronizedPayloadFragmentDoc: DocumentNode<SynchronizedPayloadFragment, unknown> = {
+} as unknown as DocumentNode<SubscriptionSessionPayloadFragment, unknown>;
+export const SynchronizedPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -12919,8 +12895,8 @@ export const SynchronizedPayloadFragmentDoc: DocumentNode<SynchronizedPayloadFra
       },
     },
   ],
-};
-export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
+} as unknown as DocumentNode<SynchronizedPayloadFragment, unknown>;
+export const TeamFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13014,8 +12990,8 @@ export const TeamFragmentDoc: DocumentNode<TeamFragment, unknown> = {
       },
     },
   ],
-};
-export const TeamConnectionFragmentDoc: DocumentNode<TeamConnectionFragment, unknown> = {
+} as unknown as DocumentNode<TeamFragment, unknown>;
+export const TeamConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13047,8 +13023,8 @@ export const TeamConnectionFragmentDoc: DocumentNode<TeamConnectionFragment, unk
     ...TeamFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const TeamMembershipFragmentDoc: DocumentNode<TeamMembershipFragment, unknown> = {
+} as unknown as DocumentNode<TeamConnectionFragment, unknown>;
+export const TeamMembershipFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13083,8 +13059,8 @@ export const TeamMembershipFragmentDoc: DocumentNode<TeamMembershipFragment, unk
       },
     },
   ],
-};
-export const TeamMembershipConnectionFragmentDoc: DocumentNode<TeamMembershipConnectionFragment, unknown> = {
+} as unknown as DocumentNode<TeamMembershipFragment, unknown>;
+export const TeamMembershipConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13116,8 +13092,8 @@ export const TeamMembershipConnectionFragmentDoc: DocumentNode<TeamMembershipCon
     ...TeamMembershipFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const TeamMembershipPayloadFragmentDoc: DocumentNode<TeamMembershipPayloadFragment, unknown> = {
+} as unknown as DocumentNode<TeamMembershipConnectionFragment, unknown>;
+export const TeamMembershipPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13141,8 +13117,8 @@ export const TeamMembershipPayloadFragmentDoc: DocumentNode<TeamMembershipPayloa
       },
     },
   ],
-};
-export const TeamPayloadFragmentDoc: DocumentNode<TeamPayloadFragment, unknown> = {
+} as unknown as DocumentNode<TeamMembershipPayloadFragment, unknown>;
+export const TeamPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13166,8 +13142,8 @@ export const TeamPayloadFragmentDoc: DocumentNode<TeamPayloadFragment, unknown> 
       },
     },
   ],
-};
-export const TemplateConnectionFragmentDoc: DocumentNode<TemplateConnectionFragment, unknown> = {
+} as unknown as DocumentNode<TeamPayloadFragment, unknown>;
+export const TemplateConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13190,8 +13166,8 @@ export const TemplateConnectionFragmentDoc: DocumentNode<TemplateConnectionFragm
     },
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const TemplatePayloadFragmentDoc: DocumentNode<TemplatePayloadFragment, unknown> = {
+} as unknown as DocumentNode<TemplateConnectionFragment, unknown>;
+export const TemplatePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13215,8 +13191,8 @@ export const TemplatePayloadFragmentDoc: DocumentNode<TemplatePayloadFragment, u
       },
     },
   ],
-};
-export const UploadFileHeaderFragmentDoc: DocumentNode<UploadFileHeaderFragment, unknown> = {
+} as unknown as DocumentNode<TemplatePayloadFragment, unknown>;
+export const UploadFileHeaderFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13232,8 +13208,8 @@ export const UploadFileHeaderFragmentDoc: DocumentNode<UploadFileHeaderFragment,
       },
     },
   ],
-};
-export const UploadFileFragmentDoc: DocumentNode<UploadFileFragment, unknown> = {
+} as unknown as DocumentNode<UploadFileHeaderFragment, unknown>;
+export const UploadFileFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13262,8 +13238,8 @@ export const UploadFileFragmentDoc: DocumentNode<UploadFileFragment, unknown> = 
     },
     ...UploadFileHeaderFragmentDoc.definitions,
   ],
-};
-export const UploadPayloadFragmentDoc: DocumentNode<UploadPayloadFragment, unknown> = {
+} as unknown as DocumentNode<UploadFileFragment, unknown>;
+export const UploadPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13288,8 +13264,8 @@ export const UploadPayloadFragmentDoc: DocumentNode<UploadPayloadFragment, unkno
     },
     ...UploadFileFragmentDoc.definitions,
   ],
-};
-export const UserAdminPayloadFragmentDoc: DocumentNode<UserAdminPayloadFragment, unknown> = {
+} as unknown as DocumentNode<UploadPayloadFragment, unknown>;
+export const UserAdminPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13299,8 +13275,8 @@ export const UserAdminPayloadFragmentDoc: DocumentNode<UserAdminPayloadFragment,
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const UserConnectionFragmentDoc: DocumentNode<UserConnectionFragment, unknown> = {
+} as unknown as DocumentNode<UserAdminPayloadFragment, unknown>;
+export const UserConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13332,8 +13308,8 @@ export const UserConnectionFragmentDoc: DocumentNode<UserConnectionFragment, unk
     ...UserFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const UserPayloadFragmentDoc: DocumentNode<UserPayloadFragment, unknown> = {
+} as unknown as DocumentNode<UserConnectionFragment, unknown>;
+export const UserPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13357,8 +13333,8 @@ export const UserPayloadFragmentDoc: DocumentNode<UserPayloadFragment, unknown> 
       },
     },
   ],
-};
-export const UserSettingsFlagPayloadFragmentDoc: DocumentNode<UserSettingsFlagPayloadFragment, unknown> = {
+} as unknown as DocumentNode<UserPayloadFragment, unknown>;
+export const UserSettingsFlagPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13376,8 +13352,8 @@ export const UserSettingsFlagPayloadFragmentDoc: DocumentNode<UserSettingsFlagPa
       },
     },
   ],
-};
-export const UserSettingsFlagsResetPayloadFragmentDoc: DocumentNode<UserSettingsFlagsResetPayloadFragment, unknown> = {
+} as unknown as DocumentNode<UserSettingsFlagPayloadFragment, unknown>;
+export const UserSettingsFlagsResetPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13393,8 +13369,8 @@ export const UserSettingsFlagsResetPayloadFragmentDoc: DocumentNode<UserSettings
       },
     },
   ],
-};
-export const UserSettingsPayloadFragmentDoc: DocumentNode<UserSettingsPayloadFragment, unknown> = {
+} as unknown as DocumentNode<UserSettingsFlagsResetPayloadFragment, unknown>;
+export const UserSettingsPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13410,11 +13386,8 @@ export const UserSettingsPayloadFragmentDoc: DocumentNode<UserSettingsPayloadFra
       },
     },
   ],
-};
-export const UserSubscribeToNewsletterPayloadFragmentDoc: DocumentNode<
-  UserSubscribeToNewsletterPayloadFragment,
-  unknown
-> = {
+} as unknown as DocumentNode<UserSettingsPayloadFragment, unknown>;
+export const UserSubscribeToNewsletterPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13424,8 +13397,8 @@ export const UserSubscribeToNewsletterPayloadFragmentDoc: DocumentNode<
       selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
     },
   ],
-};
-export const ViewPreferencesFragmentDoc: DocumentNode<ViewPreferencesFragment, unknown> = {
+} as unknown as DocumentNode<UserSubscribeToNewsletterPayloadFragment, unknown>;
+export const ViewPreferencesFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13445,8 +13418,8 @@ export const ViewPreferencesFragmentDoc: DocumentNode<ViewPreferencesFragment, u
       },
     },
   ],
-};
-export const ViewPreferencesPayloadFragmentDoc: DocumentNode<ViewPreferencesPayloadFragment, unknown> = {
+} as unknown as DocumentNode<ViewPreferencesFragment, unknown>;
+export const ViewPreferencesPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13471,8 +13444,8 @@ export const ViewPreferencesPayloadFragmentDoc: DocumentNode<ViewPreferencesPayl
     },
     ...ViewPreferencesFragmentDoc.definitions,
   ],
-};
-export const WebhookFragmentDoc: DocumentNode<WebhookFragment, unknown> = {
+} as unknown as DocumentNode<ViewPreferencesPayloadFragment, unknown>;
+export const WebhookFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13511,8 +13484,8 @@ export const WebhookFragmentDoc: DocumentNode<WebhookFragment, unknown> = {
       },
     },
   ],
-};
-export const WebhookConnectionFragmentDoc: DocumentNode<WebhookConnectionFragment, unknown> = {
+} as unknown as DocumentNode<WebhookFragment, unknown>;
+export const WebhookConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13544,8 +13517,8 @@ export const WebhookConnectionFragmentDoc: DocumentNode<WebhookConnectionFragmen
     ...WebhookFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const WebhookPayloadFragmentDoc: DocumentNode<WebhookPayloadFragment, unknown> = {
+} as unknown as DocumentNode<WebhookConnectionFragment, unknown>;
+export const WebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13569,8 +13542,8 @@ export const WebhookPayloadFragmentDoc: DocumentNode<WebhookPayloadFragment, unk
       },
     },
   ],
-};
-export const WorkflowStateFragmentDoc: DocumentNode<WorkflowStateFragment, unknown> = {
+} as unknown as DocumentNode<WebhookPayloadFragment, unknown>;
+export const WorkflowStateFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13601,8 +13574,8 @@ export const WorkflowStateFragmentDoc: DocumentNode<WorkflowStateFragment, unkno
       },
     },
   ],
-};
-export const WorkflowStateConnectionFragmentDoc: DocumentNode<WorkflowStateConnectionFragment, unknown> = {
+} as unknown as DocumentNode<WorkflowStateFragment, unknown>;
+export const WorkflowStateConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13634,8 +13607,8 @@ export const WorkflowStateConnectionFragmentDoc: DocumentNode<WorkflowStateConne
     ...WorkflowStateFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
-};
-export const WorkflowStatePayloadFragmentDoc: DocumentNode<WorkflowStatePayloadFragment, unknown> = {
+} as unknown as DocumentNode<WorkflowStateConnectionFragment, unknown>;
+export const WorkflowStatePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
@@ -13659,8 +13632,8 @@ export const WorkflowStatePayloadFragmentDoc: DocumentNode<WorkflowStatePayloadF
       },
     },
   ],
-};
-export const ApiKeysDocument: DocumentNode<ApiKeysQuery, ApiKeysQueryVariables> = {
+} as unknown as DocumentNode<WorkflowStatePayloadFragment, unknown>;
+export const ApiKeysDocument = {
   kind: "Document",
   definitions: [
     {
@@ -13747,11 +13720,8 @@ export const ApiKeysDocument: DocumentNode<ApiKeysQuery, ApiKeysQueryVariables> 
     },
     ...ApiKeyConnectionFragmentDoc.definitions,
   ],
-};
-export const ApplicationWithAuthorizationDocument: DocumentNode<
-  ApplicationWithAuthorizationQuery,
-  ApplicationWithAuthorizationQueryVariables
-> = {
+} as unknown as DocumentNode<ApiKeysQuery, ApiKeysQueryVariables>;
+export const ApplicationWithAuthorizationDocument = {
   kind: "Document",
   definitions: [
     {
@@ -13814,8 +13784,8 @@ export const ApplicationWithAuthorizationDocument: DocumentNode<
     },
     ...UserAuthorizedApplicationFragmentDoc.definitions,
   ],
-};
-export const ArchivedModelSyncDocument: DocumentNode<ArchivedModelSyncQuery, ArchivedModelSyncQueryVariables> = {
+} as unknown as DocumentNode<ApplicationWithAuthorizationQuery, ApplicationWithAuthorizationQueryVariables>;
+export const ArchivedModelSyncDocument = {
   kind: "Document",
   definitions: [
     {
@@ -13862,8 +13832,8 @@ export const ArchivedModelSyncDocument: DocumentNode<ArchivedModelSyncQuery, Arc
     },
     ...ArchiveResponseFragmentDoc.definitions,
   ],
-};
-export const ArchivedModelsSyncDocument: DocumentNode<ArchivedModelsSyncQuery, ArchivedModelsSyncQueryVariables> = {
+} as unknown as DocumentNode<ArchivedModelSyncQuery, ArchivedModelSyncQueryVariables>;
+export const ArchivedModelsSyncDocument = {
   kind: "Document",
   definitions: [
     {
@@ -13940,8 +13910,8 @@ export const ArchivedModelsSyncDocument: DocumentNode<ArchivedModelsSyncQuery, A
     },
     ...ArchiveResponseFragmentDoc.definitions,
   ],
-};
-export const AttachmentDocument: DocumentNode<AttachmentQuery, AttachmentQueryVariables> = {
+} as unknown as DocumentNode<ArchivedModelsSyncQuery, ArchivedModelsSyncQueryVariables>;
+export const AttachmentDocument = {
   kind: "Document",
   definitions: [
     {
@@ -13978,8 +13948,8 @@ export const AttachmentDocument: DocumentNode<AttachmentQuery, AttachmentQueryVa
     },
     ...AttachmentFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssueDocument: DocumentNode<AttachmentIssueQuery, AttachmentIssueQueryVariables> = {
+} as unknown as DocumentNode<AttachmentQuery, AttachmentQueryVariables>;
+export const AttachmentIssueDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14016,11 +13986,8 @@ export const AttachmentIssueDocument: DocumentNode<AttachmentIssueQuery, Attachm
     },
     ...IssueFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssue_AttachmentsDocument: DocumentNode<
-  AttachmentIssue_AttachmentsQuery,
-  AttachmentIssue_AttachmentsQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentIssueQuery, AttachmentIssueQueryVariables>;
+export const AttachmentIssue_AttachmentsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14128,11 +14095,8 @@ export const AttachmentIssue_AttachmentsDocument: DocumentNode<
     },
     ...AttachmentConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssue_ChildrenDocument: DocumentNode<
-  AttachmentIssue_ChildrenQuery,
-  AttachmentIssue_ChildrenQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentIssue_AttachmentsQuery, AttachmentIssue_AttachmentsQueryVariables>;
+export const AttachmentIssue_ChildrenDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14240,11 +14204,8 @@ export const AttachmentIssue_ChildrenDocument: DocumentNode<
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssue_CommentsDocument: DocumentNode<
-  AttachmentIssue_CommentsQuery,
-  AttachmentIssue_CommentsQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentIssue_ChildrenQuery, AttachmentIssue_ChildrenQueryVariables>;
+export const AttachmentIssue_CommentsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14352,11 +14313,8 @@ export const AttachmentIssue_CommentsDocument: DocumentNode<
     },
     ...CommentConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssue_HistoryDocument: DocumentNode<
-  AttachmentIssue_HistoryQuery,
-  AttachmentIssue_HistoryQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentIssue_CommentsQuery, AttachmentIssue_CommentsQueryVariables>;
+export const AttachmentIssue_HistoryDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14464,11 +14422,8 @@ export const AttachmentIssue_HistoryDocument: DocumentNode<
     },
     ...IssueHistoryConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssue_InverseRelationsDocument: DocumentNode<
-  AttachmentIssue_InverseRelationsQuery,
-  AttachmentIssue_InverseRelationsQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentIssue_HistoryQuery, AttachmentIssue_HistoryQueryVariables>;
+export const AttachmentIssue_InverseRelationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14576,11 +14531,8 @@ export const AttachmentIssue_InverseRelationsDocument: DocumentNode<
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssue_LabelsDocument: DocumentNode<
-  AttachmentIssue_LabelsQuery,
-  AttachmentIssue_LabelsQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentIssue_InverseRelationsQuery, AttachmentIssue_InverseRelationsQueryVariables>;
+export const AttachmentIssue_LabelsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14688,11 +14640,8 @@ export const AttachmentIssue_LabelsDocument: DocumentNode<
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssue_RelationsDocument: DocumentNode<
-  AttachmentIssue_RelationsQuery,
-  AttachmentIssue_RelationsQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentIssue_LabelsQuery, AttachmentIssue_LabelsQueryVariables>;
+export const AttachmentIssue_RelationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14800,11 +14749,8 @@ export const AttachmentIssue_RelationsDocument: DocumentNode<
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentIssue_SubscribersDocument: DocumentNode<
-  AttachmentIssue_SubscribersQuery,
-  AttachmentIssue_SubscribersQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentIssue_RelationsQuery, AttachmentIssue_RelationsQueryVariables>;
+export const AttachmentIssue_SubscribersDocument = {
   kind: "Document",
   definitions: [
     {
@@ -14922,8 +14868,8 @@ export const AttachmentIssue_SubscribersDocument: DocumentNode<
     },
     ...UserConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentsDocument: DocumentNode<AttachmentsQuery, AttachmentsQueryVariables> = {
+} as unknown as DocumentNode<AttachmentIssue_SubscribersQuery, AttachmentIssue_SubscribersQueryVariables>;
+export const AttachmentsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15010,8 +14956,8 @@ export const AttachmentsDocument: DocumentNode<AttachmentsQuery, AttachmentsQuer
     },
     ...AttachmentConnectionFragmentDoc.definitions,
   ],
-};
-export const AttachmentsForUrlDocument: DocumentNode<AttachmentsForUrlQuery, AttachmentsForUrlQueryVariables> = {
+} as unknown as DocumentNode<AttachmentsQuery, AttachmentsQueryVariables>;
+export const AttachmentsForUrlDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15108,11 +15054,8 @@ export const AttachmentsForUrlDocument: DocumentNode<AttachmentsForUrlQuery, Att
     },
     ...AttachmentConnectionFragmentDoc.definitions,
   ],
-};
-export const AuthorizedApplicationsDocument: DocumentNode<
-  AuthorizedApplicationsQuery,
-  AuthorizedApplicationsQueryVariables
-> = {
+} as unknown as DocumentNode<AttachmentsForUrlQuery, AttachmentsForUrlQueryVariables>;
+export const AuthorizedApplicationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15135,8 +15078,8 @@ export const AuthorizedApplicationsDocument: DocumentNode<
     },
     ...AuthorizedApplicationFragmentDoc.definitions,
   ],
-};
-export const AvailableUsersDocument: DocumentNode<AvailableUsersQuery, AvailableUsersQueryVariables> = {
+} as unknown as DocumentNode<AuthorizedApplicationsQuery, AuthorizedApplicationsQueryVariables>;
+export const AvailableUsersDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15159,8 +15102,8 @@ export const AvailableUsersDocument: DocumentNode<AvailableUsersQuery, Available
     },
     ...AuthResolverResponseFragmentDoc.definitions,
   ],
-};
-export const BillingDetailsDocument: DocumentNode<BillingDetailsQuery, BillingDetailsQueryVariables> = {
+} as unknown as DocumentNode<AvailableUsersQuery, AvailableUsersQueryVariables>;
+export const BillingDetailsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15183,11 +15126,8 @@ export const BillingDetailsDocument: DocumentNode<BillingDetailsQuery, BillingDe
     },
     ...BillingDetailsPayloadFragmentDoc.definitions,
   ],
-};
-export const BillingDetails_PaymentMethodDocument: DocumentNode<
-  BillingDetails_PaymentMethodQuery,
-  BillingDetails_PaymentMethodQueryVariables
-> = {
+} as unknown as DocumentNode<BillingDetailsQuery, BillingDetailsQueryVariables>;
+export const BillingDetails_PaymentMethodDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15219,11 +15159,8 @@ export const BillingDetails_PaymentMethodDocument: DocumentNode<
     },
     ...CardFragmentDoc.definitions,
   ],
-};
-export const CollaborativeDocumentJoinDocument: DocumentNode<
-  CollaborativeDocumentJoinQuery,
-  CollaborativeDocumentJoinQueryVariables
-> = {
+} as unknown as DocumentNode<BillingDetails_PaymentMethodQuery, BillingDetails_PaymentMethodQueryVariables>;
+export const CollaborativeDocumentJoinDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15282,11 +15219,8 @@ export const CollaborativeDocumentJoinDocument: DocumentNode<
     },
     ...CollaborationDocumentUpdatePayloadFragmentDoc.definitions,
   ],
-};
-export const CollaborativeDocumentJoin_StepsDocument: DocumentNode<
-  CollaborativeDocumentJoin_StepsQuery,
-  CollaborativeDocumentJoin_StepsQueryVariables
-> = {
+} as unknown as DocumentNode<CollaborativeDocumentJoinQuery, CollaborativeDocumentJoinQueryVariables>;
+export const CollaborativeDocumentJoin_StepsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15352,8 +15286,8 @@ export const CollaborativeDocumentJoin_StepsDocument: DocumentNode<
     },
     ...StepsResponseFragmentDoc.definitions,
   ],
-};
-export const CommentDocument: DocumentNode<CommentQuery, CommentQueryVariables> = {
+} as unknown as DocumentNode<CollaborativeDocumentJoin_StepsQuery, CollaborativeDocumentJoin_StepsQueryVariables>;
+export const CommentDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15390,8 +15324,8 @@ export const CommentDocument: DocumentNode<CommentQuery, CommentQueryVariables> 
     },
     ...CommentFragmentDoc.definitions,
   ],
-};
-export const CommentsDocument: DocumentNode<CommentsQuery, CommentsQueryVariables> = {
+} as unknown as DocumentNode<CommentQuery, CommentQueryVariables>;
+export const CommentsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15478,8 +15412,8 @@ export const CommentsDocument: DocumentNode<CommentsQuery, CommentsQueryVariable
     },
     ...CommentConnectionFragmentDoc.definitions,
   ],
-};
-export const CustomViewDocument: DocumentNode<CustomViewQuery, CustomViewQueryVariables> = {
+} as unknown as DocumentNode<CommentsQuery, CommentsQueryVariables>;
+export const CustomViewDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15516,8 +15450,8 @@ export const CustomViewDocument: DocumentNode<CustomViewQuery, CustomViewQueryVa
     },
     ...CustomViewFragmentDoc.definitions,
   ],
-};
-export const CustomViewsDocument: DocumentNode<CustomViewsQuery, CustomViewsQueryVariables> = {
+} as unknown as DocumentNode<CustomViewQuery, CustomViewQueryVariables>;
+export const CustomViewsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15604,8 +15538,8 @@ export const CustomViewsDocument: DocumentNode<CustomViewsQuery, CustomViewsQuer
     },
     ...CustomViewConnectionFragmentDoc.definitions,
   ],
-};
-export const CycleDocument: DocumentNode<CycleQuery, CycleQueryVariables> = {
+} as unknown as DocumentNode<CustomViewsQuery, CustomViewsQueryVariables>;
+export const CycleDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15642,8 +15576,8 @@ export const CycleDocument: DocumentNode<CycleQuery, CycleQueryVariables> = {
     },
     ...CycleFragmentDoc.definitions,
   ],
-};
-export const Cycle_IssuesDocument: DocumentNode<Cycle_IssuesQuery, Cycle_IssuesQueryVariables> = {
+} as unknown as DocumentNode<CycleQuery, CycleQueryVariables>;
+export const Cycle_IssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15751,11 +15685,8 @@ export const Cycle_IssuesDocument: DocumentNode<Cycle_IssuesQuery, Cycle_IssuesQ
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const Cycle_UncompletedIssuesUponCloseDocument: DocumentNode<
-  Cycle_UncompletedIssuesUponCloseQuery,
-  Cycle_UncompletedIssuesUponCloseQueryVariables
-> = {
+} as unknown as DocumentNode<Cycle_IssuesQuery, Cycle_IssuesQueryVariables>;
+export const Cycle_UncompletedIssuesUponCloseDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15863,8 +15794,8 @@ export const Cycle_UncompletedIssuesUponCloseDocument: DocumentNode<
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const CyclesDocument: DocumentNode<CyclesQuery, CyclesQueryVariables> = {
+} as unknown as DocumentNode<Cycle_UncompletedIssuesUponCloseQuery, Cycle_UncompletedIssuesUponCloseQueryVariables>;
+export const CyclesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15951,8 +15882,8 @@ export const CyclesDocument: DocumentNode<CyclesQuery, CyclesQueryVariables> = {
     },
     ...CycleConnectionFragmentDoc.definitions,
   ],
-};
-export const DependentModelSyncDocument: DocumentNode<DependentModelSyncQuery, DependentModelSyncQueryVariables> = {
+} as unknown as DocumentNode<CyclesQuery, CyclesQueryVariables>;
+export const DependentModelSyncDocument = {
   kind: "Document",
   definitions: [
     {
@@ -15999,8 +15930,8 @@ export const DependentModelSyncDocument: DocumentNode<DependentModelSyncQuery, D
     },
     ...DependencyResponseFragmentDoc.definitions,
   ],
-};
-export const EmojiDocument: DocumentNode<EmojiQuery, EmojiQueryVariables> = {
+} as unknown as DocumentNode<DependentModelSyncQuery, DependentModelSyncQueryVariables>;
+export const EmojiDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16037,8 +15968,8 @@ export const EmojiDocument: DocumentNode<EmojiQuery, EmojiQueryVariables> = {
     },
     ...EmojiFragmentDoc.definitions,
   ],
-};
-export const EmojisDocument: DocumentNode<EmojisQuery, EmojisQueryVariables> = {
+} as unknown as DocumentNode<EmojiQuery, EmojiQueryVariables>;
+export const EmojisDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16125,8 +16056,8 @@ export const EmojisDocument: DocumentNode<EmojisQuery, EmojisQueryVariables> = {
     },
     ...EmojiConnectionFragmentDoc.definitions,
   ],
-};
-export const FavoriteDocument: DocumentNode<FavoriteQuery, FavoriteQueryVariables> = {
+} as unknown as DocumentNode<EmojisQuery, EmojisQueryVariables>;
+export const FavoriteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16163,8 +16094,8 @@ export const FavoriteDocument: DocumentNode<FavoriteQuery, FavoriteQueryVariable
     },
     ...FavoriteFragmentDoc.definitions,
   ],
-};
-export const FavoritesDocument: DocumentNode<FavoritesQuery, FavoritesQueryVariables> = {
+} as unknown as DocumentNode<FavoriteQuery, FavoriteQueryVariables>;
+export const FavoritesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16251,8 +16182,8 @@ export const FavoritesDocument: DocumentNode<FavoritesQuery, FavoritesQueryVaria
     },
     ...FavoriteConnectionFragmentDoc.definitions,
   ],
-};
-export const FigmaEmbedInfoDocument: DocumentNode<FigmaEmbedInfoQuery, FigmaEmbedInfoQueryVariables> = {
+} as unknown as DocumentNode<FavoritesQuery, FavoritesQueryVariables>;
+export const FigmaEmbedInfoDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16299,11 +16230,8 @@ export const FigmaEmbedInfoDocument: DocumentNode<FigmaEmbedInfoQuery, FigmaEmbe
     },
     ...FigmaEmbedPayloadFragmentDoc.definitions,
   ],
-};
-export const FigmaEmbedInfo_FigmaEmbedDocument: DocumentNode<
-  FigmaEmbedInfo_FigmaEmbedQuery,
-  FigmaEmbedInfo_FigmaEmbedQueryVariables
-> = {
+} as unknown as DocumentNode<FigmaEmbedInfoQuery, FigmaEmbedInfoQueryVariables>;
+export const FigmaEmbedInfo_FigmaEmbedDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16359,8 +16287,8 @@ export const FigmaEmbedInfo_FigmaEmbedDocument: DocumentNode<
     },
     ...FigmaEmbedFragmentDoc.definitions,
   ],
-};
-export const IntegrationDocument: DocumentNode<IntegrationQuery, IntegrationQueryVariables> = {
+} as unknown as DocumentNode<FigmaEmbedInfo_FigmaEmbedQuery, FigmaEmbedInfo_FigmaEmbedQueryVariables>;
+export const IntegrationDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16397,8 +16325,8 @@ export const IntegrationDocument: DocumentNode<IntegrationQuery, IntegrationQuer
     },
     ...IntegrationFragmentDoc.definitions,
   ],
-};
-export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQueryVariables> = {
+} as unknown as DocumentNode<IntegrationQuery, IntegrationQueryVariables>;
+export const IntegrationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16485,8 +16413,8 @@ export const IntegrationsDocument: DocumentNode<IntegrationsQuery, IntegrationsQ
     },
     ...IntegrationConnectionFragmentDoc.definitions,
   ],
-};
-export const InviteInfoDocument: DocumentNode<InviteInfoQuery, InviteInfoQueryVariables> = {
+} as unknown as DocumentNode<IntegrationsQuery, IntegrationsQueryVariables>;
+export const InviteInfoDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16533,11 +16461,8 @@ export const InviteInfoDocument: DocumentNode<InviteInfoQuery, InviteInfoQueryVa
     },
     ...InvitePagePayloadFragmentDoc.definitions,
   ],
-};
-export const InviteInfo_InviteDataDocument: DocumentNode<
-  InviteInfo_InviteDataQuery,
-  InviteInfo_InviteDataQueryVariables
-> = {
+} as unknown as DocumentNode<InviteInfoQuery, InviteInfoQueryVariables>;
+export const InviteInfo_InviteDataDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16593,8 +16518,8 @@ export const InviteInfo_InviteDataDocument: DocumentNode<
     },
     ...InviteDataFragmentDoc.definitions,
   ],
-};
-export const IssueDocument: DocumentNode<IssueQuery, IssueQueryVariables> = {
+} as unknown as DocumentNode<InviteInfo_InviteDataQuery, InviteInfo_InviteDataQueryVariables>;
+export const IssueDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16631,8 +16556,8 @@ export const IssueDocument: DocumentNode<IssueQuery, IssueQueryVariables> = {
     },
     ...IssueFragmentDoc.definitions,
   ],
-};
-export const Issue_AttachmentsDocument: DocumentNode<Issue_AttachmentsQuery, Issue_AttachmentsQueryVariables> = {
+} as unknown as DocumentNode<IssueQuery, IssueQueryVariables>;
+export const Issue_AttachmentsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16740,8 +16665,8 @@ export const Issue_AttachmentsDocument: DocumentNode<Issue_AttachmentsQuery, Iss
     },
     ...AttachmentConnectionFragmentDoc.definitions,
   ],
-};
-export const Issue_ChildrenDocument: DocumentNode<Issue_ChildrenQuery, Issue_ChildrenQueryVariables> = {
+} as unknown as DocumentNode<Issue_AttachmentsQuery, Issue_AttachmentsQueryVariables>;
+export const Issue_ChildrenDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16849,8 +16774,8 @@ export const Issue_ChildrenDocument: DocumentNode<Issue_ChildrenQuery, Issue_Chi
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const Issue_CommentsDocument: DocumentNode<Issue_CommentsQuery, Issue_CommentsQueryVariables> = {
+} as unknown as DocumentNode<Issue_ChildrenQuery, Issue_ChildrenQueryVariables>;
+export const Issue_CommentsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -16958,8 +16883,8 @@ export const Issue_CommentsDocument: DocumentNode<Issue_CommentsQuery, Issue_Com
     },
     ...CommentConnectionFragmentDoc.definitions,
   ],
-};
-export const Issue_HistoryDocument: DocumentNode<Issue_HistoryQuery, Issue_HistoryQueryVariables> = {
+} as unknown as DocumentNode<Issue_CommentsQuery, Issue_CommentsQueryVariables>;
+export const Issue_HistoryDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17067,11 +16992,8 @@ export const Issue_HistoryDocument: DocumentNode<Issue_HistoryQuery, Issue_Histo
     },
     ...IssueHistoryConnectionFragmentDoc.definitions,
   ],
-};
-export const Issue_InverseRelationsDocument: DocumentNode<
-  Issue_InverseRelationsQuery,
-  Issue_InverseRelationsQueryVariables
-> = {
+} as unknown as DocumentNode<Issue_HistoryQuery, Issue_HistoryQueryVariables>;
+export const Issue_InverseRelationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17179,8 +17101,8 @@ export const Issue_InverseRelationsDocument: DocumentNode<
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
   ],
-};
-export const Issue_LabelsDocument: DocumentNode<Issue_LabelsQuery, Issue_LabelsQueryVariables> = {
+} as unknown as DocumentNode<Issue_InverseRelationsQuery, Issue_InverseRelationsQueryVariables>;
+export const Issue_LabelsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17288,8 +17210,8 @@ export const Issue_LabelsDocument: DocumentNode<Issue_LabelsQuery, Issue_LabelsQ
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
   ],
-};
-export const Issue_RelationsDocument: DocumentNode<Issue_RelationsQuery, Issue_RelationsQueryVariables> = {
+} as unknown as DocumentNode<Issue_LabelsQuery, Issue_LabelsQueryVariables>;
+export const Issue_RelationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17397,8 +17319,8 @@ export const Issue_RelationsDocument: DocumentNode<Issue_RelationsQuery, Issue_R
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
   ],
-};
-export const Issue_SubscribersDocument: DocumentNode<Issue_SubscribersQuery, Issue_SubscribersQueryVariables> = {
+} as unknown as DocumentNode<Issue_RelationsQuery, Issue_RelationsQueryVariables>;
+export const Issue_SubscribersDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17516,11 +17438,8 @@ export const Issue_SubscribersDocument: DocumentNode<Issue_SubscribersQuery, Iss
     },
     ...UserConnectionFragmentDoc.definitions,
   ],
-};
-export const IssueDescriptionHistoryDocument: DocumentNode<
-  IssueDescriptionHistoryQuery,
-  IssueDescriptionHistoryQueryVariables
-> = {
+} as unknown as DocumentNode<Issue_SubscribersQuery, Issue_SubscribersQueryVariables>;
+export const IssueDescriptionHistoryDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17557,11 +17476,8 @@ export const IssueDescriptionHistoryDocument: DocumentNode<
     },
     ...IssueDescriptionHistoryPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueImportFinishGithubOAuthDocument: DocumentNode<
-  IssueImportFinishGithubOAuthQuery,
-  IssueImportFinishGithubOAuthQueryVariables
-> = {
+} as unknown as DocumentNode<IssueDescriptionHistoryQuery, IssueDescriptionHistoryQueryVariables>;
+export const IssueImportFinishGithubOAuthDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17598,8 +17514,8 @@ export const IssueImportFinishGithubOAuthDocument: DocumentNode<
     },
     ...GithubOAuthTokenPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueLabelDocument: DocumentNode<IssueLabelQuery, IssueLabelQueryVariables> = {
+} as unknown as DocumentNode<IssueImportFinishGithubOAuthQuery, IssueImportFinishGithubOAuthQueryVariables>;
+export const IssueLabelDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17636,8 +17552,8 @@ export const IssueLabelDocument: DocumentNode<IssueLabelQuery, IssueLabelQueryVa
     },
     ...IssueLabelFragmentDoc.definitions,
   ],
-};
-export const IssueLabel_IssuesDocument: DocumentNode<IssueLabel_IssuesQuery, IssueLabel_IssuesQueryVariables> = {
+} as unknown as DocumentNode<IssueLabelQuery, IssueLabelQueryVariables>;
+export const IssueLabel_IssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17745,8 +17661,8 @@ export const IssueLabel_IssuesDocument: DocumentNode<IssueLabel_IssuesQuery, Iss
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const IssueLabelsDocument: DocumentNode<IssueLabelsQuery, IssueLabelsQueryVariables> = {
+} as unknown as DocumentNode<IssueLabel_IssuesQuery, IssueLabel_IssuesQueryVariables>;
+export const IssueLabelsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17833,8 +17749,8 @@ export const IssueLabelsDocument: DocumentNode<IssueLabelsQuery, IssueLabelsQuer
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
   ],
-};
-export const IssuePriorityValuesDocument: DocumentNode<IssuePriorityValuesQuery, IssuePriorityValuesQueryVariables> = {
+} as unknown as DocumentNode<IssueLabelsQuery, IssueLabelsQueryVariables>;
+export const IssuePriorityValuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17857,8 +17773,8 @@ export const IssuePriorityValuesDocument: DocumentNode<IssuePriorityValuesQuery,
     },
     ...IssuePriorityValueFragmentDoc.definitions,
   ],
-};
-export const IssueRelationDocument: DocumentNode<IssueRelationQuery, IssueRelationQueryVariables> = {
+} as unknown as DocumentNode<IssuePriorityValuesQuery, IssuePriorityValuesQueryVariables>;
+export const IssueRelationDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17895,8 +17811,8 @@ export const IssueRelationDocument: DocumentNode<IssueRelationQuery, IssueRelati
     },
     ...IssueRelationFragmentDoc.definitions,
   ],
-};
-export const IssueRelationsDocument: DocumentNode<IssueRelationsQuery, IssueRelationsQueryVariables> = {
+} as unknown as DocumentNode<IssueRelationQuery, IssueRelationQueryVariables>;
+export const IssueRelationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -17983,8 +17899,8 @@ export const IssueRelationsDocument: DocumentNode<IssueRelationsQuery, IssueRela
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
   ],
-};
-export const IssueSearchDocument: DocumentNode<IssueSearchQuery, IssueSearchQueryVariables> = {
+} as unknown as DocumentNode<IssueRelationsQuery, IssueRelationsQueryVariables>;
+export const IssueSearchDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18081,8 +17997,8 @@ export const IssueSearchDocument: DocumentNode<IssueSearchQuery, IssueSearchQuer
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const IssuesDocument: DocumentNode<IssuesQuery, IssuesQueryVariables> = {
+} as unknown as DocumentNode<IssueSearchQuery, IssueSearchQueryVariables>;
+export const IssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18169,8 +18085,8 @@ export const IssuesDocument: DocumentNode<IssuesQuery, IssuesQueryVariables> = {
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const MilestoneDocument: DocumentNode<MilestoneQuery, MilestoneQueryVariables> = {
+} as unknown as DocumentNode<IssuesQuery, IssuesQueryVariables>;
+export const MilestoneDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18207,8 +18123,8 @@ export const MilestoneDocument: DocumentNode<MilestoneQuery, MilestoneQueryVaria
     },
     ...MilestoneFragmentDoc.definitions,
   ],
-};
-export const Milestone_ProjectsDocument: DocumentNode<Milestone_ProjectsQuery, Milestone_ProjectsQueryVariables> = {
+} as unknown as DocumentNode<MilestoneQuery, MilestoneQueryVariables>;
+export const Milestone_ProjectsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18316,8 +18232,8 @@ export const Milestone_ProjectsDocument: DocumentNode<Milestone_ProjectsQuery, M
     },
     ...ProjectConnectionFragmentDoc.definitions,
   ],
-};
-export const MilestonesDocument: DocumentNode<MilestonesQuery, MilestonesQueryVariables> = {
+} as unknown as DocumentNode<Milestone_ProjectsQuery, Milestone_ProjectsQueryVariables>;
+export const MilestonesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18404,8 +18320,8 @@ export const MilestonesDocument: DocumentNode<MilestonesQuery, MilestonesQueryVa
     },
     ...MilestoneConnectionFragmentDoc.definitions,
   ],
-};
-export const NotificationDocument: DocumentNode<NotificationQuery, NotificationQueryVariables> = {
+} as unknown as DocumentNode<MilestonesQuery, MilestonesQueryVariables>;
+export const NotificationDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18442,11 +18358,8 @@ export const NotificationDocument: DocumentNode<NotificationQuery, NotificationQ
     },
     ...NotificationFragmentDoc.definitions,
   ],
-};
-export const NotificationSubscriptionDocument: DocumentNode<
-  NotificationSubscriptionQuery,
-  NotificationSubscriptionQueryVariables
-> = {
+} as unknown as DocumentNode<NotificationQuery, NotificationQueryVariables>;
+export const NotificationSubscriptionDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18483,11 +18396,8 @@ export const NotificationSubscriptionDocument: DocumentNode<
     },
     ...NotificationSubscriptionFragmentDoc.definitions,
   ],
-};
-export const NotificationSubscriptionsDocument: DocumentNode<
-  NotificationSubscriptionsQuery,
-  NotificationSubscriptionsQueryVariables
-> = {
+} as unknown as DocumentNode<NotificationSubscriptionQuery, NotificationSubscriptionQueryVariables>;
+export const NotificationSubscriptionsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18576,8 +18486,8 @@ export const NotificationSubscriptionsDocument: DocumentNode<
     },
     ...NotificationSubscriptionConnectionFragmentDoc.definitions,
   ],
-};
-export const NotificationsDocument: DocumentNode<NotificationsQuery, NotificationsQueryVariables> = {
+} as unknown as DocumentNode<NotificationSubscriptionsQuery, NotificationSubscriptionsQueryVariables>;
+export const NotificationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18664,8 +18574,8 @@ export const NotificationsDocument: DocumentNode<NotificationsQuery, Notificatio
     },
     ...NotificationConnectionFragmentDoc.definitions,
   ],
-};
-export const OrganizationDocument: DocumentNode<OrganizationQuery, OrganizationQueryVariables> = {
+} as unknown as DocumentNode<NotificationsQuery, NotificationsQueryVariables>;
+export const OrganizationDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18688,11 +18598,8 @@ export const OrganizationDocument: DocumentNode<OrganizationQuery, OrganizationQ
     },
     ...OrganizationFragmentDoc.definitions,
   ],
-};
-export const Organization_IntegrationsDocument: DocumentNode<
-  Organization_IntegrationsQuery,
-  Organization_IntegrationsQueryVariables
-> = {
+} as unknown as DocumentNode<OrganizationQuery, OrganizationQueryVariables>;
+export const Organization_IntegrationsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18788,11 +18695,8 @@ export const Organization_IntegrationsDocument: DocumentNode<
     },
     ...IntegrationConnectionFragmentDoc.definitions,
   ],
-};
-export const Organization_MilestonesDocument: DocumentNode<
-  Organization_MilestonesQuery,
-  Organization_MilestonesQueryVariables
-> = {
+} as unknown as DocumentNode<Organization_IntegrationsQuery, Organization_IntegrationsQueryVariables>;
+export const Organization_MilestonesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18888,8 +18792,8 @@ export const Organization_MilestonesDocument: DocumentNode<
     },
     ...MilestoneConnectionFragmentDoc.definitions,
   ],
-};
-export const Organization_TeamsDocument: DocumentNode<Organization_TeamsQuery, Organization_TeamsQueryVariables> = {
+} as unknown as DocumentNode<Organization_MilestonesQuery, Organization_MilestonesQueryVariables>;
+export const Organization_TeamsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -18985,8 +18889,8 @@ export const Organization_TeamsDocument: DocumentNode<Organization_TeamsQuery, O
     },
     ...TeamConnectionFragmentDoc.definitions,
   ],
-};
-export const Organization_UsersDocument: DocumentNode<Organization_UsersQuery, Organization_UsersQueryVariables> = {
+} as unknown as DocumentNode<Organization_TeamsQuery, Organization_TeamsQueryVariables>;
+export const Organization_UsersDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19092,8 +18996,8 @@ export const Organization_UsersDocument: DocumentNode<Organization_UsersQuery, O
     },
     ...UserConnectionFragmentDoc.definitions,
   ],
-};
-export const OrganizationExistsDocument: DocumentNode<OrganizationExistsQuery, OrganizationExistsQueryVariables> = {
+} as unknown as DocumentNode<Organization_UsersQuery, Organization_UsersQueryVariables>;
+export const OrganizationExistsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19130,8 +19034,8 @@ export const OrganizationExistsDocument: DocumentNode<OrganizationExistsQuery, O
     },
     ...OrganizationExistsPayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationInviteDocument: DocumentNode<OrganizationInviteQuery, OrganizationInviteQueryVariables> = {
+} as unknown as DocumentNode<OrganizationExistsQuery, OrganizationExistsQueryVariables>;
+export const OrganizationInviteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19168,11 +19072,8 @@ export const OrganizationInviteDocument: DocumentNode<OrganizationInviteQuery, O
     },
     ...IssueLabelFragmentDoc.definitions,
   ],
-};
-export const OrganizationInvite_IssuesDocument: DocumentNode<
-  OrganizationInvite_IssuesQuery,
-  OrganizationInvite_IssuesQueryVariables
-> = {
+} as unknown as DocumentNode<OrganizationInviteQuery, OrganizationInviteQueryVariables>;
+export const OrganizationInvite_IssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19280,8 +19181,8 @@ export const OrganizationInvite_IssuesDocument: DocumentNode<
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const OrganizationInvitesDocument: DocumentNode<OrganizationInvitesQuery, OrganizationInvitesQueryVariables> = {
+} as unknown as DocumentNode<OrganizationInvite_IssuesQuery, OrganizationInvite_IssuesQueryVariables>;
+export const OrganizationInvitesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19368,8 +19269,8 @@ export const OrganizationInvitesDocument: DocumentNode<OrganizationInvitesQuery,
     },
     ...OrganizationInviteConnectionFragmentDoc.definitions,
   ],
-};
-export const ProjectDocument: DocumentNode<ProjectQuery, ProjectQueryVariables> = {
+} as unknown as DocumentNode<OrganizationInvitesQuery, OrganizationInvitesQueryVariables>;
+export const ProjectDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19406,8 +19307,8 @@ export const ProjectDocument: DocumentNode<ProjectQuery, ProjectQueryVariables> 
     },
     ...ProjectFragmentDoc.definitions,
   ],
-};
-export const Project_IssuesDocument: DocumentNode<Project_IssuesQuery, Project_IssuesQueryVariables> = {
+} as unknown as DocumentNode<ProjectQuery, ProjectQueryVariables>;
+export const Project_IssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19515,8 +19416,8 @@ export const Project_IssuesDocument: DocumentNode<Project_IssuesQuery, Project_I
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const Project_LinksDocument: DocumentNode<Project_LinksQuery, Project_LinksQueryVariables> = {
+} as unknown as DocumentNode<Project_IssuesQuery, Project_IssuesQueryVariables>;
+export const Project_LinksDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19624,8 +19525,8 @@ export const Project_LinksDocument: DocumentNode<Project_LinksQuery, Project_Lin
     },
     ...ProjectLinkConnectionFragmentDoc.definitions,
   ],
-};
-export const Project_MembersDocument: DocumentNode<Project_MembersQuery, Project_MembersQueryVariables> = {
+} as unknown as DocumentNode<Project_LinksQuery, Project_LinksQueryVariables>;
+export const Project_MembersDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19743,8 +19644,8 @@ export const Project_MembersDocument: DocumentNode<Project_MembersQuery, Project
     },
     ...UserConnectionFragmentDoc.definitions,
   ],
-};
-export const Project_TeamsDocument: DocumentNode<Project_TeamsQuery, Project_TeamsQueryVariables> = {
+} as unknown as DocumentNode<Project_MembersQuery, Project_MembersQueryVariables>;
+export const Project_TeamsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19852,8 +19753,8 @@ export const Project_TeamsDocument: DocumentNode<Project_TeamsQuery, Project_Tea
     },
     ...TeamConnectionFragmentDoc.definitions,
   ],
-};
-export const ProjectLinkDocument: DocumentNode<ProjectLinkQuery, ProjectLinkQueryVariables> = {
+} as unknown as DocumentNode<Project_TeamsQuery, Project_TeamsQueryVariables>;
+export const ProjectLinkDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19890,8 +19791,8 @@ export const ProjectLinkDocument: DocumentNode<ProjectLinkQuery, ProjectLinkQuer
     },
     ...ProjectLinkFragmentDoc.definitions,
   ],
-};
-export const ProjectLinksDocument: DocumentNode<ProjectLinksQuery, ProjectLinksQueryVariables> = {
+} as unknown as DocumentNode<ProjectLinkQuery, ProjectLinkQueryVariables>;
+export const ProjectLinksDocument = {
   kind: "Document",
   definitions: [
     {
@@ -19978,8 +19879,8 @@ export const ProjectLinksDocument: DocumentNode<ProjectLinksQuery, ProjectLinksQ
     },
     ...ProjectLinkConnectionFragmentDoc.definitions,
   ],
-};
-export const ProjectsDocument: DocumentNode<ProjectsQuery, ProjectsQueryVariables> = {
+} as unknown as DocumentNode<ProjectLinksQuery, ProjectLinksQueryVariables>;
+export const ProjectsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20066,11 +19967,8 @@ export const ProjectsDocument: DocumentNode<ProjectsQuery, ProjectsQueryVariable
     },
     ...ProjectConnectionFragmentDoc.definitions,
   ],
-};
-export const PushSubscriptionTestDocument: DocumentNode<
-  PushSubscriptionTestQuery,
-  PushSubscriptionTestQueryVariables
-> = {
+} as unknown as DocumentNode<ProjectsQuery, ProjectsQueryVariables>;
+export const PushSubscriptionTestDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20093,8 +19991,8 @@ export const PushSubscriptionTestDocument: DocumentNode<
     },
     ...PushSubscriptionTestPayloadFragmentDoc.definitions,
   ],
-};
-export const ReactionDocument: DocumentNode<ReactionQuery, ReactionQueryVariables> = {
+} as unknown as DocumentNode<PushSubscriptionTestQuery, PushSubscriptionTestQueryVariables>;
+export const ReactionDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20131,8 +20029,8 @@ export const ReactionDocument: DocumentNode<ReactionQuery, ReactionQueryVariable
     },
     ...ReactionFragmentDoc.definitions,
   ],
-};
-export const ReactionsDocument: DocumentNode<ReactionsQuery, ReactionsQueryVariables> = {
+} as unknown as DocumentNode<ReactionQuery, ReactionQueryVariables>;
+export const ReactionsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20219,8 +20117,8 @@ export const ReactionsDocument: DocumentNode<ReactionsQuery, ReactionsQueryVaria
     },
     ...ReactionConnectionFragmentDoc.definitions,
   ],
-};
-export const SearchDocument: DocumentNode<SearchQuery, SearchQueryVariables> = {
+} as unknown as DocumentNode<ReactionsQuery, ReactionsQueryVariables>;
+export const SearchDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20267,11 +20165,8 @@ export const SearchDocument: DocumentNode<SearchQuery, SearchQueryVariables> = {
     },
     ...SearchResultPayloadFragmentDoc.definitions,
   ],
-};
-export const Search_ArchivePayloadDocument: DocumentNode<
-  Search_ArchivePayloadQuery,
-  Search_ArchivePayloadQueryVariables
-> = {
+} as unknown as DocumentNode<SearchQuery, SearchQueryVariables>;
+export const Search_ArchivePayloadDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20327,8 +20222,8 @@ export const Search_ArchivePayloadDocument: DocumentNode<
     },
     ...ArchiveResponseFragmentDoc.definitions,
   ],
-};
-export const SsoUrlFromEmailDocument: DocumentNode<SsoUrlFromEmailQuery, SsoUrlFromEmailQueryVariables> = {
+} as unknown as DocumentNode<Search_ArchivePayloadQuery, Search_ArchivePayloadQueryVariables>;
+export const SsoUrlFromEmailDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20375,8 +20270,8 @@ export const SsoUrlFromEmailDocument: DocumentNode<SsoUrlFromEmailQuery, SsoUrlF
     },
     ...SsoUrlFromEmailResponseFragmentDoc.definitions,
   ],
-};
-export const SubscriptionDocument: DocumentNode<SubscriptionQuery, SubscriptionQueryVariables> = {
+} as unknown as DocumentNode<SsoUrlFromEmailQuery, SsoUrlFromEmailQueryVariables>;
+export const SubscriptionDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20399,8 +20294,8 @@ export const SubscriptionDocument: DocumentNode<SubscriptionQuery, SubscriptionQ
     },
     ...SubscriptionFragmentDoc.definitions,
   ],
-};
-export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstrapQueryVariables> = {
+} as unknown as DocumentNode<SubscriptionQuery, SubscriptionQueryVariables>;
+export const SyncBootstrapDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20453,8 +20348,8 @@ export const SyncBootstrapDocument: DocumentNode<SyncBootstrapQuery, SyncBootstr
     },
     ...SyncResponseFragmentDoc.definitions,
   ],
-};
-export const SyncDeltaDocument: DocumentNode<SyncDeltaQuery, SyncDeltaQueryVariables> = {
+} as unknown as DocumentNode<SyncBootstrapQuery, SyncBootstrapQueryVariables>;
+export const SyncDeltaDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20511,8 +20406,8 @@ export const SyncDeltaDocument: DocumentNode<SyncDeltaQuery, SyncDeltaQueryVaria
     },
     ...SyncDeltaResponseFragmentDoc.definitions,
   ],
-};
-export const TeamDocument: DocumentNode<TeamQuery, TeamQueryVariables> = {
+} as unknown as DocumentNode<SyncDeltaQuery, SyncDeltaQueryVariables>;
+export const TeamDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20549,8 +20444,8 @@ export const TeamDocument: DocumentNode<TeamQuery, TeamQueryVariables> = {
     },
     ...TeamFragmentDoc.definitions,
   ],
-};
-export const Team_CyclesDocument: DocumentNode<Team_CyclesQuery, Team_CyclesQueryVariables> = {
+} as unknown as DocumentNode<TeamQuery, TeamQueryVariables>;
+export const Team_CyclesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20658,8 +20553,8 @@ export const Team_CyclesDocument: DocumentNode<Team_CyclesQuery, Team_CyclesQuer
     },
     ...CycleConnectionFragmentDoc.definitions,
   ],
-};
-export const Team_IssuesDocument: DocumentNode<Team_IssuesQuery, Team_IssuesQueryVariables> = {
+} as unknown as DocumentNode<Team_CyclesQuery, Team_CyclesQueryVariables>;
+export const Team_IssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20767,8 +20662,8 @@ export const Team_IssuesDocument: DocumentNode<Team_IssuesQuery, Team_IssuesQuer
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const Team_LabelsDocument: DocumentNode<Team_LabelsQuery, Team_LabelsQueryVariables> = {
+} as unknown as DocumentNode<Team_IssuesQuery, Team_IssuesQueryVariables>;
+export const Team_LabelsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20876,8 +20771,8 @@ export const Team_LabelsDocument: DocumentNode<Team_LabelsQuery, Team_LabelsQuer
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
   ],
-};
-export const Team_MembersDocument: DocumentNode<Team_MembersQuery, Team_MembersQueryVariables> = {
+} as unknown as DocumentNode<Team_LabelsQuery, Team_LabelsQueryVariables>;
+export const Team_MembersDocument = {
   kind: "Document",
   definitions: [
     {
@@ -20995,8 +20890,8 @@ export const Team_MembersDocument: DocumentNode<Team_MembersQuery, Team_MembersQ
     },
     ...UserConnectionFragmentDoc.definitions,
   ],
-};
-export const Team_MembershipsDocument: DocumentNode<Team_MembershipsQuery, Team_MembershipsQueryVariables> = {
+} as unknown as DocumentNode<Team_MembersQuery, Team_MembersQueryVariables>;
+export const Team_MembershipsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21104,8 +20999,8 @@ export const Team_MembershipsDocument: DocumentNode<Team_MembershipsQuery, Team_
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
   ],
-};
-export const Team_ProjectsDocument: DocumentNode<Team_ProjectsQuery, Team_ProjectsQueryVariables> = {
+} as unknown as DocumentNode<Team_MembershipsQuery, Team_MembershipsQueryVariables>;
+export const Team_ProjectsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21213,8 +21108,8 @@ export const Team_ProjectsDocument: DocumentNode<Team_ProjectsQuery, Team_Projec
     },
     ...ProjectConnectionFragmentDoc.definitions,
   ],
-};
-export const Team_StatesDocument: DocumentNode<Team_StatesQuery, Team_StatesQueryVariables> = {
+} as unknown as DocumentNode<Team_ProjectsQuery, Team_ProjectsQueryVariables>;
+export const Team_StatesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21322,8 +21217,8 @@ export const Team_StatesDocument: DocumentNode<Team_StatesQuery, Team_StatesQuer
     },
     ...WorkflowStateConnectionFragmentDoc.definitions,
   ],
-};
-export const Team_TemplatesDocument: DocumentNode<Team_TemplatesQuery, Team_TemplatesQueryVariables> = {
+} as unknown as DocumentNode<Team_StatesQuery, Team_StatesQueryVariables>;
+export const Team_TemplatesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21431,8 +21326,8 @@ export const Team_TemplatesDocument: DocumentNode<Team_TemplatesQuery, Team_Temp
     },
     ...TemplateConnectionFragmentDoc.definitions,
   ],
-};
-export const Team_WebhooksDocument: DocumentNode<Team_WebhooksQuery, Team_WebhooksQueryVariables> = {
+} as unknown as DocumentNode<Team_TemplatesQuery, Team_TemplatesQueryVariables>;
+export const Team_WebhooksDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21540,8 +21435,8 @@ export const Team_WebhooksDocument: DocumentNode<Team_WebhooksQuery, Team_Webhoo
     },
     ...WebhookConnectionFragmentDoc.definitions,
   ],
-};
-export const TeamMembershipDocument: DocumentNode<TeamMembershipQuery, TeamMembershipQueryVariables> = {
+} as unknown as DocumentNode<Team_WebhooksQuery, Team_WebhooksQueryVariables>;
+export const TeamMembershipDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21578,8 +21473,8 @@ export const TeamMembershipDocument: DocumentNode<TeamMembershipQuery, TeamMembe
     },
     ...TeamMembershipFragmentDoc.definitions,
   ],
-};
-export const TeamMembershipsDocument: DocumentNode<TeamMembershipsQuery, TeamMembershipsQueryVariables> = {
+} as unknown as DocumentNode<TeamMembershipQuery, TeamMembershipQueryVariables>;
+export const TeamMembershipsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21666,8 +21561,8 @@ export const TeamMembershipsDocument: DocumentNode<TeamMembershipsQuery, TeamMem
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
   ],
-};
-export const TeamsDocument: DocumentNode<TeamsQuery, TeamsQueryVariables> = {
+} as unknown as DocumentNode<TeamMembershipsQuery, TeamMembershipsQueryVariables>;
+export const TeamsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21754,8 +21649,8 @@ export const TeamsDocument: DocumentNode<TeamsQuery, TeamsQueryVariables> = {
     },
     ...TeamConnectionFragmentDoc.definitions,
   ],
-};
-export const TemplateDocument: DocumentNode<TemplateQuery, TemplateQueryVariables> = {
+} as unknown as DocumentNode<TeamsQuery, TeamsQueryVariables>;
+export const TemplateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21792,8 +21687,8 @@ export const TemplateDocument: DocumentNode<TemplateQuery, TemplateQueryVariable
     },
     ...TemplateFragmentDoc.definitions,
   ],
-};
-export const TemplatesDocument: DocumentNode<TemplatesQuery, TemplatesQueryVariables> = {
+} as unknown as DocumentNode<TemplateQuery, TemplateQueryVariables>;
+export const TemplatesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21816,8 +21711,8 @@ export const TemplatesDocument: DocumentNode<TemplatesQuery, TemplatesQueryVaria
     },
     ...TemplateFragmentDoc.definitions,
   ],
-};
-export const UserDocument: DocumentNode<UserQuery, UserQueryVariables> = {
+} as unknown as DocumentNode<TemplatesQuery, TemplatesQueryVariables>;
+export const UserDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21854,8 +21749,8 @@ export const UserDocument: DocumentNode<UserQuery, UserQueryVariables> = {
     },
     ...UserFragmentDoc.definitions,
   ],
-};
-export const User_AssignedIssuesDocument: DocumentNode<User_AssignedIssuesQuery, User_AssignedIssuesQueryVariables> = {
+} as unknown as DocumentNode<UserQuery, UserQueryVariables>;
+export const User_AssignedIssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -21963,8 +21858,8 @@ export const User_AssignedIssuesDocument: DocumentNode<User_AssignedIssuesQuery,
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const User_CreatedIssuesDocument: DocumentNode<User_CreatedIssuesQuery, User_CreatedIssuesQueryVariables> = {
+} as unknown as DocumentNode<User_AssignedIssuesQuery, User_AssignedIssuesQueryVariables>;
+export const User_CreatedIssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22072,11 +21967,8 @@ export const User_CreatedIssuesDocument: DocumentNode<User_CreatedIssuesQuery, U
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const User_TeamMembershipsDocument: DocumentNode<
-  User_TeamMembershipsQuery,
-  User_TeamMembershipsQueryVariables
-> = {
+} as unknown as DocumentNode<User_CreatedIssuesQuery, User_CreatedIssuesQueryVariables>;
+export const User_TeamMembershipsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22184,8 +22076,8 @@ export const User_TeamMembershipsDocument: DocumentNode<
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
   ],
-};
-export const User_TeamsDocument: DocumentNode<User_TeamsQuery, User_TeamsQueryVariables> = {
+} as unknown as DocumentNode<User_TeamMembershipsQuery, User_TeamMembershipsQueryVariables>;
+export const User_TeamsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22293,8 +22185,8 @@ export const User_TeamsDocument: DocumentNode<User_TeamsQuery, User_TeamsQueryVa
     },
     ...TeamConnectionFragmentDoc.definitions,
   ],
-};
-export const UserSettingsDocument: DocumentNode<UserSettingsQuery, UserSettingsQueryVariables> = {
+} as unknown as DocumentNode<User_TeamsQuery, User_TeamsQueryVariables>;
+export const UserSettingsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22317,8 +22209,8 @@ export const UserSettingsDocument: DocumentNode<UserSettingsQuery, UserSettingsQ
     },
     ...UserSettingsFragmentDoc.definitions,
   ],
-};
-export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
+} as unknown as DocumentNode<UserSettingsQuery, UserSettingsQueryVariables>;
+export const UsersDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22415,8 +22307,8 @@ export const UsersDocument: DocumentNode<UsersQuery, UsersQueryVariables> = {
     },
     ...UserConnectionFragmentDoc.definitions,
   ],
-};
-export const ViewerDocument: DocumentNode<ViewerQuery, ViewerQueryVariables> = {
+} as unknown as DocumentNode<UsersQuery, UsersQueryVariables>;
+export const ViewerDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22439,11 +22331,8 @@ export const ViewerDocument: DocumentNode<ViewerQuery, ViewerQueryVariables> = {
     },
     ...UserFragmentDoc.definitions,
   ],
-};
-export const Viewer_AssignedIssuesDocument: DocumentNode<
-  Viewer_AssignedIssuesQuery,
-  Viewer_AssignedIssuesQueryVariables
-> = {
+} as unknown as DocumentNode<ViewerQuery, ViewerQueryVariables>;
+export const Viewer_AssignedIssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22539,11 +22428,8 @@ export const Viewer_AssignedIssuesDocument: DocumentNode<
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const Viewer_CreatedIssuesDocument: DocumentNode<
-  Viewer_CreatedIssuesQuery,
-  Viewer_CreatedIssuesQueryVariables
-> = {
+} as unknown as DocumentNode<Viewer_AssignedIssuesQuery, Viewer_AssignedIssuesQueryVariables>;
+export const Viewer_CreatedIssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22639,11 +22525,8 @@ export const Viewer_CreatedIssuesDocument: DocumentNode<
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const Viewer_TeamMembershipsDocument: DocumentNode<
-  Viewer_TeamMembershipsQuery,
-  Viewer_TeamMembershipsQueryVariables
-> = {
+} as unknown as DocumentNode<Viewer_CreatedIssuesQuery, Viewer_CreatedIssuesQueryVariables>;
+export const Viewer_TeamMembershipsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22739,8 +22622,8 @@ export const Viewer_TeamMembershipsDocument: DocumentNode<
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
   ],
-};
-export const Viewer_TeamsDocument: DocumentNode<Viewer_TeamsQuery, Viewer_TeamsQueryVariables> = {
+} as unknown as DocumentNode<Viewer_TeamMembershipsQuery, Viewer_TeamMembershipsQueryVariables>;
+export const Viewer_TeamsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22836,8 +22719,8 @@ export const Viewer_TeamsDocument: DocumentNode<Viewer_TeamsQuery, Viewer_TeamsQ
     },
     ...TeamConnectionFragmentDoc.definitions,
   ],
-};
-export const WebhookDocument: DocumentNode<WebhookQuery, WebhookQueryVariables> = {
+} as unknown as DocumentNode<Viewer_TeamsQuery, Viewer_TeamsQueryVariables>;
+export const WebhookDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22874,8 +22757,8 @@ export const WebhookDocument: DocumentNode<WebhookQuery, WebhookQueryVariables> 
     },
     ...WebhookFragmentDoc.definitions,
   ],
-};
-export const WebhooksDocument: DocumentNode<WebhooksQuery, WebhooksQueryVariables> = {
+} as unknown as DocumentNode<WebhookQuery, WebhookQueryVariables>;
+export const WebhooksDocument = {
   kind: "Document",
   definitions: [
     {
@@ -22962,8 +22845,8 @@ export const WebhooksDocument: DocumentNode<WebhooksQuery, WebhooksQueryVariable
     },
     ...WebhookConnectionFragmentDoc.definitions,
   ],
-};
-export const WorkflowStateDocument: DocumentNode<WorkflowStateQuery, WorkflowStateQueryVariables> = {
+} as unknown as DocumentNode<WebhooksQuery, WebhooksQueryVariables>;
+export const WorkflowStateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23000,11 +22883,8 @@ export const WorkflowStateDocument: DocumentNode<WorkflowStateQuery, WorkflowSta
     },
     ...WorkflowStateFragmentDoc.definitions,
   ],
-};
-export const WorkflowState_IssuesDocument: DocumentNode<
-  WorkflowState_IssuesQuery,
-  WorkflowState_IssuesQueryVariables
-> = {
+} as unknown as DocumentNode<WorkflowStateQuery, WorkflowStateQueryVariables>;
+export const WorkflowState_IssuesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23112,8 +22992,8 @@ export const WorkflowState_IssuesDocument: DocumentNode<
     },
     ...IssueConnectionFragmentDoc.definitions,
   ],
-};
-export const WorkflowStatesDocument: DocumentNode<WorkflowStatesQuery, WorkflowStatesQueryVariables> = {
+} as unknown as DocumentNode<WorkflowState_IssuesQuery, WorkflowState_IssuesQueryVariables>;
+export const WorkflowStatesDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23200,8 +23080,8 @@ export const WorkflowStatesDocument: DocumentNode<WorkflowStatesQuery, WorkflowS
     },
     ...WorkflowStateConnectionFragmentDoc.definitions,
   ],
-};
-export const ApiKeyCreateDocument: DocumentNode<ApiKeyCreateMutation, ApiKeyCreateMutationVariables> = {
+} as unknown as DocumentNode<WorkflowStatesQuery, WorkflowStatesQueryVariables>;
+export const ApiKeyCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23241,8 +23121,8 @@ export const ApiKeyCreateDocument: DocumentNode<ApiKeyCreateMutation, ApiKeyCrea
     },
     ...ApiKeyPayloadFragmentDoc.definitions,
   ],
-};
-export const ApiKeyDeleteDocument: DocumentNode<ApiKeyDeleteMutation, ApiKeyDeleteMutationVariables> = {
+} as unknown as DocumentNode<ApiKeyCreateMutation, ApiKeyCreateMutationVariables>;
+export const ApiKeyDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23279,8 +23159,8 @@ export const ApiKeyDeleteDocument: DocumentNode<ApiKeyDeleteMutation, ApiKeyDele
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const AttachmentArchiveDocument: DocumentNode<AttachmentArchiveMutation, AttachmentArchiveMutationVariables> = {
+} as unknown as DocumentNode<ApiKeyDeleteMutation, ApiKeyDeleteMutationVariables>;
+export const AttachmentArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23317,8 +23197,8 @@ export const AttachmentArchiveDocument: DocumentNode<AttachmentArchiveMutation, 
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const AttachmentCreateDocument: DocumentNode<AttachmentCreateMutation, AttachmentCreateMutationVariables> = {
+} as unknown as DocumentNode<AttachmentArchiveMutation, AttachmentArchiveMutationVariables>;
+export const AttachmentCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23358,8 +23238,8 @@ export const AttachmentCreateDocument: DocumentNode<AttachmentCreateMutation, At
     },
     ...AttachmentPayloadFragmentDoc.definitions,
   ],
-};
-export const AttachmentDeleteDocument: DocumentNode<AttachmentDeleteMutation, AttachmentDeleteMutationVariables> = {
+} as unknown as DocumentNode<AttachmentCreateMutation, AttachmentCreateMutationVariables>;
+export const AttachmentDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23396,11 +23276,8 @@ export const AttachmentDeleteDocument: DocumentNode<AttachmentDeleteMutation, At
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const AttachmentLinkFrontDocument: DocumentNode<
-  AttachmentLinkFrontMutation,
-  AttachmentLinkFrontMutationVariables
-> = {
+} as unknown as DocumentNode<AttachmentDeleteMutation, AttachmentDeleteMutationVariables>;
+export const AttachmentLinkFrontDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23447,11 +23324,8 @@ export const AttachmentLinkFrontDocument: DocumentNode<
     },
     ...AttachmentPayloadFragmentDoc.definitions,
   ],
-};
-export const AttachmentLinkZendeskDocument: DocumentNode<
-  AttachmentLinkZendeskMutation,
-  AttachmentLinkZendeskMutationVariables
-> = {
+} as unknown as DocumentNode<AttachmentLinkFrontMutation, AttachmentLinkFrontMutationVariables>;
+export const AttachmentLinkZendeskDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23498,8 +23372,8 @@ export const AttachmentLinkZendeskDocument: DocumentNode<
     },
     ...AttachmentPayloadFragmentDoc.definitions,
   ],
-};
-export const AttachmentUpdateDocument: DocumentNode<AttachmentUpdateMutation, AttachmentUpdateMutationVariables> = {
+} as unknown as DocumentNode<AttachmentLinkZendeskMutation, AttachmentLinkZendeskMutationVariables>;
+export const AttachmentUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23549,11 +23423,8 @@ export const AttachmentUpdateDocument: DocumentNode<AttachmentUpdateMutation, At
     },
     ...AttachmentPayloadFragmentDoc.definitions,
   ],
-};
-export const BillingEmailUpdateDocument: DocumentNode<
-  BillingEmailUpdateMutation,
-  BillingEmailUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<AttachmentUpdateMutation, AttachmentUpdateMutationVariables>;
+export const BillingEmailUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23593,11 +23464,8 @@ export const BillingEmailUpdateDocument: DocumentNode<
     },
     ...BillingEmailPayloadFragmentDoc.definitions,
   ],
-};
-export const CollaborativeDocumentUpdateDocument: DocumentNode<
-  CollaborativeDocumentUpdateMutation,
-  CollaborativeDocumentUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<BillingEmailUpdateMutation, BillingEmailUpdateMutationVariables>;
+export const CollaborativeDocumentUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23639,8 +23507,8 @@ export const CollaborativeDocumentUpdateDocument: DocumentNode<
     },
     ...CollaborationDocumentUpdatePayloadFragmentDoc.definitions,
   ],
-};
-export const CommentCreateDocument: DocumentNode<CommentCreateMutation, CommentCreateMutationVariables> = {
+} as unknown as DocumentNode<CollaborativeDocumentUpdateMutation, CollaborativeDocumentUpdateMutationVariables>;
+export const CommentCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23680,8 +23548,8 @@ export const CommentCreateDocument: DocumentNode<CommentCreateMutation, CommentC
     },
     ...CommentPayloadFragmentDoc.definitions,
   ],
-};
-export const CommentDeleteDocument: DocumentNode<CommentDeleteMutation, CommentDeleteMutationVariables> = {
+} as unknown as DocumentNode<CommentCreateMutation, CommentCreateMutationVariables>;
+export const CommentDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23718,8 +23586,8 @@ export const CommentDeleteDocument: DocumentNode<CommentDeleteMutation, CommentD
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const CommentUpdateDocument: DocumentNode<CommentUpdateMutation, CommentUpdateMutationVariables> = {
+} as unknown as DocumentNode<CommentDeleteMutation, CommentDeleteMutationVariables>;
+export const CommentUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23769,8 +23637,8 @@ export const CommentUpdateDocument: DocumentNode<CommentUpdateMutation, CommentU
     },
     ...CommentPayloadFragmentDoc.definitions,
   ],
-};
-export const ContactCreateDocument: DocumentNode<ContactCreateMutation, ContactCreateMutationVariables> = {
+} as unknown as DocumentNode<CommentUpdateMutation, CommentUpdateMutationVariables>;
+export const ContactCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23810,11 +23678,8 @@ export const ContactCreateDocument: DocumentNode<ContactCreateMutation, ContactC
     },
     ...ContactPayloadFragmentDoc.definitions,
   ],
-};
-export const CreateCsvExportReportDocument: DocumentNode<
-  CreateCsvExportReportMutation,
-  CreateCsvExportReportMutationVariables
-> = {
+} as unknown as DocumentNode<ContactCreateMutation, ContactCreateMutationVariables>;
+export const CreateCsvExportReportDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23854,11 +23719,8 @@ export const CreateCsvExportReportDocument: DocumentNode<
     },
     ...CreateCsvExportReportPayloadFragmentDoc.definitions,
   ],
-};
-export const CreateOrganizationFromOnboardingDocument: DocumentNode<
-  CreateOrganizationFromOnboardingMutation,
-  CreateOrganizationFromOnboardingMutationVariables
-> = {
+} as unknown as DocumentNode<CreateCsvExportReportMutation, CreateCsvExportReportMutationVariables>;
+export const CreateOrganizationFromOnboardingDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23910,8 +23772,11 @@ export const CreateOrganizationFromOnboardingDocument: DocumentNode<
     },
     ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
   ],
-};
-export const CustomViewCreateDocument: DocumentNode<CustomViewCreateMutation, CustomViewCreateMutationVariables> = {
+} as unknown as DocumentNode<
+  CreateOrganizationFromOnboardingMutation,
+  CreateOrganizationFromOnboardingMutationVariables
+>;
+export const CustomViewCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23951,8 +23816,8 @@ export const CustomViewCreateDocument: DocumentNode<CustomViewCreateMutation, Cu
     },
     ...CustomViewPayloadFragmentDoc.definitions,
   ],
-};
-export const CustomViewDeleteDocument: DocumentNode<CustomViewDeleteMutation, CustomViewDeleteMutationVariables> = {
+} as unknown as DocumentNode<CustomViewCreateMutation, CustomViewCreateMutationVariables>;
+export const CustomViewDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -23989,8 +23854,8 @@ export const CustomViewDeleteDocument: DocumentNode<CustomViewDeleteMutation, Cu
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const CustomViewUpdateDocument: DocumentNode<CustomViewUpdateMutation, CustomViewUpdateMutationVariables> = {
+} as unknown as DocumentNode<CustomViewDeleteMutation, CustomViewDeleteMutationVariables>;
+export const CustomViewUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24040,8 +23905,8 @@ export const CustomViewUpdateDocument: DocumentNode<CustomViewUpdateMutation, Cu
     },
     ...CustomViewPayloadFragmentDoc.definitions,
   ],
-};
-export const CycleArchiveDocument: DocumentNode<CycleArchiveMutation, CycleArchiveMutationVariables> = {
+} as unknown as DocumentNode<CustomViewUpdateMutation, CustomViewUpdateMutationVariables>;
+export const CycleArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24078,8 +23943,8 @@ export const CycleArchiveDocument: DocumentNode<CycleArchiveMutation, CycleArchi
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const CycleCreateDocument: DocumentNode<CycleCreateMutation, CycleCreateMutationVariables> = {
+} as unknown as DocumentNode<CycleArchiveMutation, CycleArchiveMutationVariables>;
+export const CycleCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24116,8 +23981,8 @@ export const CycleCreateDocument: DocumentNode<CycleCreateMutation, CycleCreateM
     },
     ...CyclePayloadFragmentDoc.definitions,
   ],
-};
-export const CycleUpdateDocument: DocumentNode<CycleUpdateMutation, CycleUpdateMutationVariables> = {
+} as unknown as DocumentNode<CycleCreateMutation, CycleCreateMutationVariables>;
+export const CycleUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24164,11 +24029,8 @@ export const CycleUpdateDocument: DocumentNode<CycleUpdateMutation, CycleUpdateM
     },
     ...CyclePayloadFragmentDoc.definitions,
   ],
-};
-export const DebugCreateSamlOrgDocument: DocumentNode<
-  DebugCreateSamlOrgMutation,
-  DebugCreateSamlOrgMutationVariables
-> = {
+} as unknown as DocumentNode<CycleUpdateMutation, CycleUpdateMutationVariables>;
+export const DebugCreateSamlOrgDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24191,11 +24053,8 @@ export const DebugCreateSamlOrgDocument: DocumentNode<
     },
     ...DebugPayloadFragmentDoc.definitions,
   ],
-};
-export const DebugFailWithInternalErrorDocument: DocumentNode<
-  DebugFailWithInternalErrorMutation,
-  DebugFailWithInternalErrorMutationVariables
-> = {
+} as unknown as DocumentNode<DebugCreateSamlOrgMutation, DebugCreateSamlOrgMutationVariables>;
+export const DebugFailWithInternalErrorDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24218,11 +24077,8 @@ export const DebugFailWithInternalErrorDocument: DocumentNode<
     },
     ...DebugPayloadFragmentDoc.definitions,
   ],
-};
-export const DebugFailWithWarningDocument: DocumentNode<
-  DebugFailWithWarningMutation,
-  DebugFailWithWarningMutationVariables
-> = {
+} as unknown as DocumentNode<DebugFailWithInternalErrorMutation, DebugFailWithInternalErrorMutationVariables>;
+export const DebugFailWithWarningDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24245,11 +24101,8 @@ export const DebugFailWithWarningDocument: DocumentNode<
     },
     ...DebugPayloadFragmentDoc.definitions,
   ],
-};
-export const EmailTokenUserAccountAuthDocument: DocumentNode<
-  EmailTokenUserAccountAuthMutation,
-  EmailTokenUserAccountAuthMutationVariables
-> = {
+} as unknown as DocumentNode<DebugFailWithWarningMutation, DebugFailWithWarningMutationVariables>;
+export const EmailTokenUserAccountAuthDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24289,8 +24142,8 @@ export const EmailTokenUserAccountAuthDocument: DocumentNode<
     },
     ...AuthResolverResponseFragmentDoc.definitions,
   ],
-};
-export const EmailUnsubscribeDocument: DocumentNode<EmailUnsubscribeMutation, EmailUnsubscribeMutationVariables> = {
+} as unknown as DocumentNode<EmailTokenUserAccountAuthMutation, EmailTokenUserAccountAuthMutationVariables>;
+export const EmailUnsubscribeDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24330,11 +24183,8 @@ export const EmailUnsubscribeDocument: DocumentNode<EmailUnsubscribeMutation, Em
     },
     ...EmailUnsubscribePayloadFragmentDoc.definitions,
   ],
-};
-export const EmailUserAccountAuthChallengeDocument: DocumentNode<
-  EmailUserAccountAuthChallengeMutation,
-  EmailUserAccountAuthChallengeMutationVariables
-> = {
+} as unknown as DocumentNode<EmailUnsubscribeMutation, EmailUnsubscribeMutationVariables>;
+export const EmailUserAccountAuthChallengeDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24376,8 +24226,8 @@ export const EmailUserAccountAuthChallengeDocument: DocumentNode<
     },
     ...EmailUserAccountAuthChallengeResponseFragmentDoc.definitions,
   ],
-};
-export const EmojiCreateDocument: DocumentNode<EmojiCreateMutation, EmojiCreateMutationVariables> = {
+} as unknown as DocumentNode<EmailUserAccountAuthChallengeMutation, EmailUserAccountAuthChallengeMutationVariables>;
+export const EmojiCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24414,8 +24264,8 @@ export const EmojiCreateDocument: DocumentNode<EmojiCreateMutation, EmojiCreateM
     },
     ...EmojiPayloadFragmentDoc.definitions,
   ],
-};
-export const EmojiDeleteDocument: DocumentNode<EmojiDeleteMutation, EmojiDeleteMutationVariables> = {
+} as unknown as DocumentNode<EmojiCreateMutation, EmojiCreateMutationVariables>;
+export const EmojiDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24452,8 +24302,8 @@ export const EmojiDeleteDocument: DocumentNode<EmojiDeleteMutation, EmojiDeleteM
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const EventCreateDocument: DocumentNode<EventCreateMutation, EventCreateMutationVariables> = {
+} as unknown as DocumentNode<EmojiDeleteMutation, EmojiDeleteMutationVariables>;
+export const EventCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24490,8 +24340,8 @@ export const EventCreateDocument: DocumentNode<EventCreateMutation, EventCreateM
     },
     ...EventPayloadFragmentDoc.definitions,
   ],
-};
-export const FavoriteCreateDocument: DocumentNode<FavoriteCreateMutation, FavoriteCreateMutationVariables> = {
+} as unknown as DocumentNode<EventCreateMutation, EventCreateMutationVariables>;
+export const FavoriteCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24531,8 +24381,8 @@ export const FavoriteCreateDocument: DocumentNode<FavoriteCreateMutation, Favori
     },
     ...FavoritePayloadFragmentDoc.definitions,
   ],
-};
-export const FavoriteDeleteDocument: DocumentNode<FavoriteDeleteMutation, FavoriteDeleteMutationVariables> = {
+} as unknown as DocumentNode<FavoriteCreateMutation, FavoriteCreateMutationVariables>;
+export const FavoriteDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24569,8 +24419,8 @@ export const FavoriteDeleteDocument: DocumentNode<FavoriteDeleteMutation, Favori
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const FavoriteUpdateDocument: DocumentNode<FavoriteUpdateMutation, FavoriteUpdateMutationVariables> = {
+} as unknown as DocumentNode<FavoriteDeleteMutation, FavoriteDeleteMutationVariables>;
+export const FavoriteUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24620,8 +24470,8 @@ export const FavoriteUpdateDocument: DocumentNode<FavoriteUpdateMutation, Favori
     },
     ...FavoritePayloadFragmentDoc.definitions,
   ],
-};
-export const FeedbackCreateDocument: DocumentNode<FeedbackCreateMutation, FeedbackCreateMutationVariables> = {
+} as unknown as DocumentNode<FavoriteUpdateMutation, FavoriteUpdateMutationVariables>;
+export const FeedbackCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24661,8 +24511,8 @@ export const FeedbackCreateDocument: DocumentNode<FeedbackCreateMutation, Feedba
     },
     ...FeedbackPayloadFragmentDoc.definitions,
   ],
-};
-export const FileUploadDocument: DocumentNode<FileUploadMutation, FileUploadMutationVariables> = {
+} as unknown as DocumentNode<FeedbackCreateMutation, FeedbackCreateMutationVariables>;
+export const FileUploadDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24729,11 +24579,8 @@ export const FileUploadDocument: DocumentNode<FileUploadMutation, FileUploadMuta
     },
     ...UploadPayloadFragmentDoc.definitions,
   ],
-};
-export const GoogleUserAccountAuthDocument: DocumentNode<
-  GoogleUserAccountAuthMutation,
-  GoogleUserAccountAuthMutationVariables
-> = {
+} as unknown as DocumentNode<FileUploadMutation, FileUploadMutationVariables>;
+export const GoogleUserAccountAuthDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24773,11 +24620,8 @@ export const GoogleUserAccountAuthDocument: DocumentNode<
     },
     ...AuthResolverResponseFragmentDoc.definitions,
   ],
-};
-export const ImageUploadFromUrlDocument: DocumentNode<
-  ImageUploadFromUrlMutation,
-  ImageUploadFromUrlMutationVariables
-> = {
+} as unknown as DocumentNode<GoogleUserAccountAuthMutation, GoogleUserAccountAuthMutationVariables>;
+export const ImageUploadFromUrlDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24814,8 +24658,8 @@ export const ImageUploadFromUrlDocument: DocumentNode<
     },
     ...ImageUploadFromUrlPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationDeleteDocument: DocumentNode<IntegrationDeleteMutation, IntegrationDeleteMutationVariables> = {
+} as unknown as DocumentNode<ImageUploadFromUrlMutation, ImageUploadFromUrlMutationVariables>;
+export const IntegrationDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24852,8 +24696,8 @@ export const IntegrationDeleteDocument: DocumentNode<IntegrationDeleteMutation, 
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationFigmaDocument: DocumentNode<IntegrationFigmaMutation, IntegrationFigmaMutationVariables> = {
+} as unknown as DocumentNode<IntegrationDeleteMutation, IntegrationDeleteMutationVariables>;
+export const IntegrationFigmaDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24900,8 +24744,8 @@ export const IntegrationFigmaDocument: DocumentNode<IntegrationFigmaMutation, In
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationFrontDocument: DocumentNode<IntegrationFrontMutation, IntegrationFrontMutationVariables> = {
+} as unknown as DocumentNode<IntegrationFigmaMutation, IntegrationFigmaMutationVariables>;
+export const IntegrationFrontDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24948,11 +24792,8 @@ export const IntegrationFrontDocument: DocumentNode<IntegrationFrontMutation, In
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationGithubConnectDocument: DocumentNode<
-  IntegrationGithubConnectMutation,
-  IntegrationGithubConnectMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationFrontMutation, IntegrationFrontMutationVariables>;
+export const IntegrationGithubConnectDocument = {
   kind: "Document",
   definitions: [
     {
@@ -24989,11 +24830,8 @@ export const IntegrationGithubConnectDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationGitlabConnectDocument: DocumentNode<
-  IntegrationGitlabConnectMutation,
-  IntegrationGitlabConnectMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationGithubConnectMutation, IntegrationGithubConnectMutationVariables>;
+export const IntegrationGitlabConnectDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25040,11 +24878,8 @@ export const IntegrationGitlabConnectDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationGoogleSheetsDocument: DocumentNode<
-  IntegrationGoogleSheetsMutation,
-  IntegrationGoogleSheetsMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationGitlabConnectMutation, IntegrationGitlabConnectMutationVariables>;
+export const IntegrationGoogleSheetsDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25081,11 +24916,8 @@ export const IntegrationGoogleSheetsDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationIntercomDocument: DocumentNode<
-  IntegrationIntercomMutation,
-  IntegrationIntercomMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationGoogleSheetsMutation, IntegrationGoogleSheetsMutationVariables>;
+export const IntegrationIntercomDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25132,11 +24964,8 @@ export const IntegrationIntercomDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationResourceArchiveDocument: DocumentNode<
-  IntegrationResourceArchiveMutation,
-  IntegrationResourceArchiveMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationIntercomMutation, IntegrationIntercomMutationVariables>;
+export const IntegrationResourceArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25173,11 +25002,8 @@ export const IntegrationResourceArchiveDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationSentryConnectDocument: DocumentNode<
-  IntegrationSentryConnectMutation,
-  IntegrationSentryConnectMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationResourceArchiveMutation, IntegrationResourceArchiveMutationVariables>;
+export const IntegrationSentryConnectDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25234,8 +25060,8 @@ export const IntegrationSentryConnectDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationSlackDocument: DocumentNode<IntegrationSlackMutation, IntegrationSlackMutationVariables> = {
+} as unknown as DocumentNode<IntegrationSentryConnectMutation, IntegrationSentryConnectMutationVariables>;
+export const IntegrationSlackDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25292,11 +25118,8 @@ export const IntegrationSlackDocument: DocumentNode<IntegrationSlackMutation, In
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationSlackImportEmojisDocument: DocumentNode<
-  IntegrationSlackImportEmojisMutation,
-  IntegrationSlackImportEmojisMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationSlackMutation, IntegrationSlackMutationVariables>;
+export const IntegrationSlackImportEmojisDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25343,11 +25166,8 @@ export const IntegrationSlackImportEmojisDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationSlackPersonalDocument: DocumentNode<
-  IntegrationSlackPersonalMutation,
-  IntegrationSlackPersonalMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationSlackImportEmojisMutation, IntegrationSlackImportEmojisMutationVariables>;
+export const IntegrationSlackPersonalDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25394,11 +25214,8 @@ export const IntegrationSlackPersonalDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationSlackPostDocument: DocumentNode<
-  IntegrationSlackPostMutation,
-  IntegrationSlackPostMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationSlackPersonalMutation, IntegrationSlackPersonalMutationVariables>;
+export const IntegrationSlackPostDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25465,11 +25282,8 @@ export const IntegrationSlackPostDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationSlackProjectPostDocument: DocumentNode<
-  IntegrationSlackProjectPostMutation,
-  IntegrationSlackProjectPostMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationSlackPostMutation, IntegrationSlackPostMutationVariables>;
+export const IntegrationSlackProjectPostDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25526,11 +25340,8 @@ export const IntegrationSlackProjectPostDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IntegrationZendeskDocument: DocumentNode<
-  IntegrationZendeskMutation,
-  IntegrationZendeskMutationVariables
-> = {
+} as unknown as DocumentNode<IntegrationSlackProjectPostMutation, IntegrationSlackProjectPostMutationVariables>;
+export const IntegrationZendeskDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25597,8 +25408,8 @@ export const IntegrationZendeskDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueArchiveDocument: DocumentNode<IssueArchiveMutation, IssueArchiveMutationVariables> = {
+} as unknown as DocumentNode<IntegrationZendeskMutation, IntegrationZendeskMutationVariables>;
+export const IssueArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25645,8 +25456,8 @@ export const IssueArchiveDocument: DocumentNode<IssueArchiveMutation, IssueArchi
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const IssueCreateDocument: DocumentNode<IssueCreateMutation, IssueCreateMutationVariables> = {
+} as unknown as DocumentNode<IssueArchiveMutation, IssueArchiveMutationVariables>;
+export const IssueCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25683,8 +25494,8 @@ export const IssueCreateDocument: DocumentNode<IssueCreateMutation, IssueCreateM
     },
     ...IssuePayloadFragmentDoc.definitions,
   ],
-};
-export const IssueDeleteDocument: DocumentNode<IssueDeleteMutation, IssueDeleteMutationVariables> = {
+} as unknown as DocumentNode<IssueCreateMutation, IssueCreateMutationVariables>;
+export const IssueDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25721,11 +25532,8 @@ export const IssueDeleteDocument: DocumentNode<IssueDeleteMutation, IssueDeleteM
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const IssueImportCreateAsanaDocument: DocumentNode<
-  IssueImportCreateAsanaMutation,
-  IssueImportCreateAsanaMutationVariables
-> = {
+} as unknown as DocumentNode<IssueDeleteMutation, IssueDeleteMutationVariables>;
+export const IssueImportCreateAsanaDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25802,11 +25610,8 @@ export const IssueImportCreateAsanaDocument: DocumentNode<
     },
     ...IssueImportPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueImportCreateClubhouseDocument: DocumentNode<
-  IssueImportCreateClubhouseMutation,
-  IssueImportCreateClubhouseMutationVariables
-> = {
+} as unknown as DocumentNode<IssueImportCreateAsanaMutation, IssueImportCreateAsanaMutationVariables>;
+export const IssueImportCreateClubhouseDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25883,11 +25688,8 @@ export const IssueImportCreateClubhouseDocument: DocumentNode<
     },
     ...IssueImportPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueImportCreateGithubDocument: DocumentNode<
-  IssueImportCreateGithubMutation,
-  IssueImportCreateGithubMutationVariables
-> = {
+} as unknown as DocumentNode<IssueImportCreateClubhouseMutation, IssueImportCreateClubhouseMutationVariables>;
+export const IssueImportCreateGithubDocument = {
   kind: "Document",
   definitions: [
     {
@@ -25984,11 +25786,8 @@ export const IssueImportCreateGithubDocument: DocumentNode<
     },
     ...IssueImportPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueImportCreateJiraDocument: DocumentNode<
-  IssueImportCreateJiraMutation,
-  IssueImportCreateJiraMutationVariables
-> = {
+} as unknown as DocumentNode<IssueImportCreateGithubMutation, IssueImportCreateGithubMutationVariables>;
+export const IssueImportCreateJiraDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26085,8 +25884,8 @@ export const IssueImportCreateJiraDocument: DocumentNode<
     },
     ...IssueImportPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueImportDeleteDocument: DocumentNode<IssueImportDeleteMutation, IssueImportDeleteMutationVariables> = {
+} as unknown as DocumentNode<IssueImportCreateJiraMutation, IssueImportCreateJiraMutationVariables>;
+export const IssueImportDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26123,11 +25922,8 @@ export const IssueImportDeleteDocument: DocumentNode<IssueImportDeleteMutation, 
     },
     ...IssueImportDeletePayloadFragmentDoc.definitions,
   ],
-};
-export const IssueImportProcessDocument: DocumentNode<
-  IssueImportProcessMutation,
-  IssueImportProcessMutationVariables
-> = {
+} as unknown as DocumentNode<IssueImportDeleteMutation, IssueImportDeleteMutationVariables>;
+export const IssueImportProcessDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26174,8 +25970,8 @@ export const IssueImportProcessDocument: DocumentNode<
     },
     ...IssueImportPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueLabelArchiveDocument: DocumentNode<IssueLabelArchiveMutation, IssueLabelArchiveMutationVariables> = {
+} as unknown as DocumentNode<IssueImportProcessMutation, IssueImportProcessMutationVariables>;
+export const IssueLabelArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26212,8 +26008,8 @@ export const IssueLabelArchiveDocument: DocumentNode<IssueLabelArchiveMutation, 
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const IssueLabelCreateDocument: DocumentNode<IssueLabelCreateMutation, IssueLabelCreateMutationVariables> = {
+} as unknown as DocumentNode<IssueLabelArchiveMutation, IssueLabelArchiveMutationVariables>;
+export const IssueLabelCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26253,8 +26049,8 @@ export const IssueLabelCreateDocument: DocumentNode<IssueLabelCreateMutation, Is
     },
     ...IssueLabelPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueLabelUpdateDocument: DocumentNode<IssueLabelUpdateMutation, IssueLabelUpdateMutationVariables> = {
+} as unknown as DocumentNode<IssueLabelCreateMutation, IssueLabelCreateMutationVariables>;
+export const IssueLabelUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26304,11 +26100,8 @@ export const IssueLabelUpdateDocument: DocumentNode<IssueLabelUpdateMutation, Is
     },
     ...IssueLabelPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueRelationCreateDocument: DocumentNode<
-  IssueRelationCreateMutation,
-  IssueRelationCreateMutationVariables
-> = {
+} as unknown as DocumentNode<IssueLabelUpdateMutation, IssueLabelUpdateMutationVariables>;
+export const IssueRelationCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26348,11 +26141,8 @@ export const IssueRelationCreateDocument: DocumentNode<
     },
     ...IssueRelationPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueRelationDeleteDocument: DocumentNode<
-  IssueRelationDeleteMutation,
-  IssueRelationDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<IssueRelationCreateMutation, IssueRelationCreateMutationVariables>;
+export const IssueRelationDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26389,11 +26179,8 @@ export const IssueRelationDeleteDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const IssueRelationUpdateDocument: DocumentNode<
-  IssueRelationUpdateMutation,
-  IssueRelationUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<IssueRelationDeleteMutation, IssueRelationDeleteMutationVariables>;
+export const IssueRelationUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26443,8 +26230,8 @@ export const IssueRelationUpdateDocument: DocumentNode<
     },
     ...IssueRelationPayloadFragmentDoc.definitions,
   ],
-};
-export const IssueUnarchiveDocument: DocumentNode<IssueUnarchiveMutation, IssueUnarchiveMutationVariables> = {
+} as unknown as DocumentNode<IssueRelationUpdateMutation, IssueRelationUpdateMutationVariables>;
+export const IssueUnarchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26481,8 +26268,8 @@ export const IssueUnarchiveDocument: DocumentNode<IssueUnarchiveMutation, IssueU
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const IssueUpdateDocument: DocumentNode<IssueUpdateMutation, IssueUpdateMutationVariables> = {
+} as unknown as DocumentNode<IssueUnarchiveMutation, IssueUnarchiveMutationVariables>;
+export const IssueUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26529,11 +26316,8 @@ export const IssueUpdateDocument: DocumentNode<IssueUpdateMutation, IssueUpdateM
     },
     ...IssuePayloadFragmentDoc.definitions,
   ],
-};
-export const JoinOrganizationFromOnboardingDocument: DocumentNode<
-  JoinOrganizationFromOnboardingMutation,
-  JoinOrganizationFromOnboardingMutationVariables
-> = {
+} as unknown as DocumentNode<IssueUpdateMutation, IssueUpdateMutationVariables>;
+export const JoinOrganizationFromOnboardingDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26575,8 +26359,8 @@ export const JoinOrganizationFromOnboardingDocument: DocumentNode<
     },
     ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
   ],
-};
-export const LeaveOrganizationDocument: DocumentNode<LeaveOrganizationMutation, LeaveOrganizationMutationVariables> = {
+} as unknown as DocumentNode<JoinOrganizationFromOnboardingMutation, JoinOrganizationFromOnboardingMutationVariables>;
+export const LeaveOrganizationDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26615,8 +26399,8 @@ export const LeaveOrganizationDocument: DocumentNode<LeaveOrganizationMutation, 
     },
     ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
   ],
-};
-export const MilestoneCreateDocument: DocumentNode<MilestoneCreateMutation, MilestoneCreateMutationVariables> = {
+} as unknown as DocumentNode<LeaveOrganizationMutation, LeaveOrganizationMutationVariables>;
+export const MilestoneCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26656,8 +26440,8 @@ export const MilestoneCreateDocument: DocumentNode<MilestoneCreateMutation, Mile
     },
     ...MilestonePayloadFragmentDoc.definitions,
   ],
-};
-export const MilestoneDeleteDocument: DocumentNode<MilestoneDeleteMutation, MilestoneDeleteMutationVariables> = {
+} as unknown as DocumentNode<MilestoneCreateMutation, MilestoneCreateMutationVariables>;
+export const MilestoneDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26694,8 +26478,8 @@ export const MilestoneDeleteDocument: DocumentNode<MilestoneDeleteMutation, Mile
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const MilestoneUpdateDocument: DocumentNode<MilestoneUpdateMutation, MilestoneUpdateMutationVariables> = {
+} as unknown as DocumentNode<MilestoneDeleteMutation, MilestoneDeleteMutationVariables>;
+export const MilestoneUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26745,11 +26529,8 @@ export const MilestoneUpdateDocument: DocumentNode<MilestoneUpdateMutation, Mile
     },
     ...MilestonePayloadFragmentDoc.definitions,
   ],
-};
-export const NotificationArchiveDocument: DocumentNode<
-  NotificationArchiveMutation,
-  NotificationArchiveMutationVariables
-> = {
+} as unknown as DocumentNode<MilestoneUpdateMutation, MilestoneUpdateMutationVariables>;
+export const NotificationArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26786,11 +26567,8 @@ export const NotificationArchiveDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const NotificationCreateDocument: DocumentNode<
-  NotificationCreateMutation,
-  NotificationCreateMutationVariables
-> = {
+} as unknown as DocumentNode<NotificationArchiveMutation, NotificationArchiveMutationVariables>;
+export const NotificationCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26840,11 +26618,8 @@ export const NotificationCreateDocument: DocumentNode<
     },
     ...NotificationPayloadFragmentDoc.definitions,
   ],
-};
-export const NotificationSubscriptionCreateDocument: DocumentNode<
-  NotificationSubscriptionCreateMutation,
-  NotificationSubscriptionCreateMutationVariables
-> = {
+} as unknown as DocumentNode<NotificationCreateMutation, NotificationCreateMutationVariables>;
+export const NotificationSubscriptionCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26886,11 +26661,8 @@ export const NotificationSubscriptionCreateDocument: DocumentNode<
     },
     ...NotificationSubscriptionPayloadFragmentDoc.definitions,
   ],
-};
-export const NotificationSubscriptionDeleteDocument: DocumentNode<
-  NotificationSubscriptionDeleteMutation,
-  NotificationSubscriptionDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<NotificationSubscriptionCreateMutation, NotificationSubscriptionCreateMutationVariables>;
+export const NotificationSubscriptionDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26927,11 +26699,8 @@ export const NotificationSubscriptionDeleteDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const NotificationUnarchiveDocument: DocumentNode<
-  NotificationUnarchiveMutation,
-  NotificationUnarchiveMutationVariables
-> = {
+} as unknown as DocumentNode<NotificationSubscriptionDeleteMutation, NotificationSubscriptionDeleteMutationVariables>;
+export const NotificationUnarchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -26968,11 +26737,8 @@ export const NotificationUnarchiveDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const NotificationUpdateDocument: DocumentNode<
-  NotificationUpdateMutation,
-  NotificationUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<NotificationUnarchiveMutation, NotificationUnarchiveMutationVariables>;
+export const NotificationUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27022,11 +26788,8 @@ export const NotificationUpdateDocument: DocumentNode<
     },
     ...NotificationPayloadFragmentDoc.definitions,
   ],
-};
-export const OauthClientArchiveDocument: DocumentNode<
-  OauthClientArchiveMutation,
-  OauthClientArchiveMutationVariables
-> = {
+} as unknown as DocumentNode<NotificationUpdateMutation, NotificationUpdateMutationVariables>;
+export const OauthClientArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27063,8 +26826,8 @@ export const OauthClientArchiveDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const OauthClientCreateDocument: DocumentNode<OauthClientCreateMutation, OauthClientCreateMutationVariables> = {
+} as unknown as DocumentNode<OauthClientArchiveMutation, OauthClientArchiveMutationVariables>;
+export const OauthClientCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27104,11 +26867,8 @@ export const OauthClientCreateDocument: DocumentNode<OauthClientCreateMutation, 
     },
     ...OauthClientPayloadFragmentDoc.definitions,
   ],
-};
-export const OauthClientRotateSecretDocument: DocumentNode<
-  OauthClientRotateSecretMutation,
-  OauthClientRotateSecretMutationVariables
-> = {
+} as unknown as DocumentNode<OauthClientCreateMutation, OauthClientCreateMutationVariables>;
+export const OauthClientRotateSecretDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27145,8 +26905,8 @@ export const OauthClientRotateSecretDocument: DocumentNode<
     },
     ...RotateSecretPayloadFragmentDoc.definitions,
   ],
-};
-export const OauthClientUpdateDocument: DocumentNode<OauthClientUpdateMutation, OauthClientUpdateMutationVariables> = {
+} as unknown as DocumentNode<OauthClientRotateSecretMutation, OauthClientRotateSecretMutationVariables>;
+export const OauthClientUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27196,8 +26956,8 @@ export const OauthClientUpdateDocument: DocumentNode<OauthClientUpdateMutation, 
     },
     ...OauthClientPayloadFragmentDoc.definitions,
   ],
-};
-export const OauthTokenRevokeDocument: DocumentNode<OauthTokenRevokeMutation, OauthTokenRevokeMutationVariables> = {
+} as unknown as DocumentNode<OauthClientUpdateMutation, OauthClientUpdateMutationVariables>;
+export const OauthTokenRevokeDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27250,11 +27010,8 @@ export const OauthTokenRevokeDocument: DocumentNode<OauthTokenRevokeMutation, Oa
     },
     ...OauthTokenRevokePayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationCancelDeleteDocument: DocumentNode<
-  OrganizationCancelDeleteMutation,
-  OrganizationCancelDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<OauthTokenRevokeMutation, OauthTokenRevokeMutationVariables>;
+export const OrganizationCancelDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27279,11 +27036,8 @@ export const OrganizationCancelDeleteDocument: DocumentNode<
     },
     ...OrganizationCancelDeletePayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationDeleteDocument: DocumentNode<
-  OrganizationDeleteMutation,
-  OrganizationDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<OrganizationCancelDeleteMutation, OrganizationCancelDeleteMutationVariables>;
+export const OrganizationDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27323,11 +27077,8 @@ export const OrganizationDeleteDocument: DocumentNode<
     },
     ...OrganizationDeletePayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationDeleteChallengeDocument: DocumentNode<
-  OrganizationDeleteChallengeMutation,
-  OrganizationDeleteChallengeMutationVariables
-> = {
+} as unknown as DocumentNode<OrganizationDeleteMutation, OrganizationDeleteMutationVariables>;
+export const OrganizationDeleteChallengeDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27350,11 +27101,8 @@ export const OrganizationDeleteChallengeDocument: DocumentNode<
     },
     ...OrganizationDeletePayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationDomainCreateDocument: DocumentNode<
-  OrganizationDomainCreateMutation,
-  OrganizationDomainCreateMutationVariables
-> = {
+} as unknown as DocumentNode<OrganizationDeleteChallengeMutation, OrganizationDeleteChallengeMutationVariables>;
+export const OrganizationDomainCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27394,11 +27142,8 @@ export const OrganizationDomainCreateDocument: DocumentNode<
     },
     ...OrganizationDomainPayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationDomainDeleteDocument: DocumentNode<
-  OrganizationDomainDeleteMutation,
-  OrganizationDomainDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<OrganizationDomainCreateMutation, OrganizationDomainCreateMutationVariables>;
+export const OrganizationDomainDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27435,11 +27180,8 @@ export const OrganizationDomainDeleteDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationDomainVerifyDocument: DocumentNode<
-  OrganizationDomainVerifyMutation,
-  OrganizationDomainVerifyMutationVariables
-> = {
+} as unknown as DocumentNode<OrganizationDomainDeleteMutation, OrganizationDomainDeleteMutationVariables>;
+export const OrganizationDomainVerifyDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27479,11 +27221,8 @@ export const OrganizationDomainVerifyDocument: DocumentNode<
     },
     ...OrganizationDomainPayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationInviteCreateDocument: DocumentNode<
-  OrganizationInviteCreateMutation,
-  OrganizationInviteCreateMutationVariables
-> = {
+} as unknown as DocumentNode<OrganizationDomainVerifyMutation, OrganizationDomainVerifyMutationVariables>;
+export const OrganizationInviteCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27523,11 +27262,8 @@ export const OrganizationInviteCreateDocument: DocumentNode<
     },
     ...OrganizationInvitePayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationInviteDeleteDocument: DocumentNode<
-  OrganizationInviteDeleteMutation,
-  OrganizationInviteDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<OrganizationInviteCreateMutation, OrganizationInviteCreateMutationVariables>;
+export const OrganizationInviteDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27564,11 +27300,8 @@ export const OrganizationInviteDeleteDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const OrganizationUpdateDocument: DocumentNode<
-  OrganizationUpdateMutation,
-  OrganizationUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<OrganizationInviteDeleteMutation, OrganizationInviteDeleteMutationVariables>;
+export const OrganizationUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27608,8 +27341,8 @@ export const OrganizationUpdateDocument: DocumentNode<
     },
     ...OrganizationPayloadFragmentDoc.definitions,
   ],
-};
-export const ProjectArchiveDocument: DocumentNode<ProjectArchiveMutation, ProjectArchiveMutationVariables> = {
+} as unknown as DocumentNode<OrganizationUpdateMutation, OrganizationUpdateMutationVariables>;
+export const ProjectArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27646,8 +27379,8 @@ export const ProjectArchiveDocument: DocumentNode<ProjectArchiveMutation, Projec
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const ProjectCreateDocument: DocumentNode<ProjectCreateMutation, ProjectCreateMutationVariables> = {
+} as unknown as DocumentNode<ProjectArchiveMutation, ProjectArchiveMutationVariables>;
+export const ProjectCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27687,8 +27420,8 @@ export const ProjectCreateDocument: DocumentNode<ProjectCreateMutation, ProjectC
     },
     ...ProjectPayloadFragmentDoc.definitions,
   ],
-};
-export const ProjectLinkCreateDocument: DocumentNode<ProjectLinkCreateMutation, ProjectLinkCreateMutationVariables> = {
+} as unknown as DocumentNode<ProjectCreateMutation, ProjectCreateMutationVariables>;
+export const ProjectLinkCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27728,8 +27461,8 @@ export const ProjectLinkCreateDocument: DocumentNode<ProjectLinkCreateMutation, 
     },
     ...ProjectLinkPayloadFragmentDoc.definitions,
   ],
-};
-export const ProjectLinkDeleteDocument: DocumentNode<ProjectLinkDeleteMutation, ProjectLinkDeleteMutationVariables> = {
+} as unknown as DocumentNode<ProjectLinkCreateMutation, ProjectLinkCreateMutationVariables>;
+export const ProjectLinkDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27766,8 +27499,8 @@ export const ProjectLinkDeleteDocument: DocumentNode<ProjectLinkDeleteMutation, 
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const ProjectUnarchiveDocument: DocumentNode<ProjectUnarchiveMutation, ProjectUnarchiveMutationVariables> = {
+} as unknown as DocumentNode<ProjectLinkDeleteMutation, ProjectLinkDeleteMutationVariables>;
+export const ProjectUnarchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27804,8 +27537,8 @@ export const ProjectUnarchiveDocument: DocumentNode<ProjectUnarchiveMutation, Pr
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const ProjectUpdateDocument: DocumentNode<ProjectUpdateMutation, ProjectUpdateMutationVariables> = {
+} as unknown as DocumentNode<ProjectUnarchiveMutation, ProjectUnarchiveMutationVariables>;
+export const ProjectUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27855,11 +27588,8 @@ export const ProjectUpdateDocument: DocumentNode<ProjectUpdateMutation, ProjectU
     },
     ...ProjectPayloadFragmentDoc.definitions,
   ],
-};
-export const PushSubscriptionCreateDocument: DocumentNode<
-  PushSubscriptionCreateMutation,
-  PushSubscriptionCreateMutationVariables
-> = {
+} as unknown as DocumentNode<ProjectUpdateMutation, ProjectUpdateMutationVariables>;
+export const PushSubscriptionCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27899,11 +27629,8 @@ export const PushSubscriptionCreateDocument: DocumentNode<
     },
     ...PushSubscriptionPayloadFragmentDoc.definitions,
   ],
-};
-export const PushSubscriptionDeleteDocument: DocumentNode<
-  PushSubscriptionDeleteMutation,
-  PushSubscriptionDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<PushSubscriptionCreateMutation, PushSubscriptionCreateMutationVariables>;
+export const PushSubscriptionDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27940,8 +27667,8 @@ export const PushSubscriptionDeleteDocument: DocumentNode<
     },
     ...PushSubscriptionPayloadFragmentDoc.definitions,
   ],
-};
-export const ReactionCreateDocument: DocumentNode<ReactionCreateMutation, ReactionCreateMutationVariables> = {
+} as unknown as DocumentNode<PushSubscriptionDeleteMutation, PushSubscriptionDeleteMutationVariables>;
+export const ReactionCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -27981,8 +27708,8 @@ export const ReactionCreateDocument: DocumentNode<ReactionCreateMutation, Reacti
     },
     ...ReactionPayloadFragmentDoc.definitions,
   ],
-};
-export const ReactionDeleteDocument: DocumentNode<ReactionDeleteMutation, ReactionDeleteMutationVariables> = {
+} as unknown as DocumentNode<ReactionCreateMutation, ReactionCreateMutationVariables>;
+export const ReactionDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28019,11 +27746,8 @@ export const ReactionDeleteDocument: DocumentNode<ReactionDeleteMutation, Reacti
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const RefreshGoogleSheetsDataDocument: DocumentNode<
-  RefreshGoogleSheetsDataMutation,
-  RefreshGoogleSheetsDataMutationVariables
-> = {
+} as unknown as DocumentNode<ReactionDeleteMutation, ReactionDeleteMutationVariables>;
+export const RefreshGoogleSheetsDataDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28060,11 +27784,8 @@ export const RefreshGoogleSheetsDataDocument: DocumentNode<
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-};
-export const ResentOrganizationInviteDocument: DocumentNode<
-  ResentOrganizationInviteMutation,
-  ResentOrganizationInviteMutationVariables
-> = {
+} as unknown as DocumentNode<RefreshGoogleSheetsDataMutation, RefreshGoogleSheetsDataMutationVariables>;
+export const ResentOrganizationInviteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28101,11 +27822,8 @@ export const ResentOrganizationInviteDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const SamlTokenUserAccountAuthDocument: DocumentNode<
-  SamlTokenUserAccountAuthMutation,
-  SamlTokenUserAccountAuthMutationVariables
-> = {
+} as unknown as DocumentNode<ResentOrganizationInviteMutation, ResentOrganizationInviteMutationVariables>;
+export const SamlTokenUserAccountAuthDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28145,11 +27863,8 @@ export const SamlTokenUserAccountAuthDocument: DocumentNode<
     },
     ...AuthResolverResponseFragmentDoc.definitions,
   ],
-};
-export const SubscriptionArchiveDocument: DocumentNode<
-  SubscriptionArchiveMutation,
-  SubscriptionArchiveMutationVariables
-> = {
+} as unknown as DocumentNode<SamlTokenUserAccountAuthMutation, SamlTokenUserAccountAuthMutationVariables>;
+export const SubscriptionArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28186,11 +27901,8 @@ export const SubscriptionArchiveDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const SubscriptionSessionCreateDocument: DocumentNode<
-  SubscriptionSessionCreateMutation,
-  SubscriptionSessionCreateMutationVariables
-> = {
+} as unknown as DocumentNode<SubscriptionArchiveMutation, SubscriptionArchiveMutationVariables>;
+export const SubscriptionSessionCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28227,11 +27939,8 @@ export const SubscriptionSessionCreateDocument: DocumentNode<
     },
     ...SubscriptionSessionPayloadFragmentDoc.definitions,
   ],
-};
-export const SubscriptionUpdateDocument: DocumentNode<
-  SubscriptionUpdateMutation,
-  SubscriptionUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<SubscriptionSessionCreateMutation, SubscriptionSessionCreateMutationVariables>;
+export const SubscriptionUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28281,11 +27990,8 @@ export const SubscriptionUpdateDocument: DocumentNode<
     },
     ...SubscriptionPayloadFragmentDoc.definitions,
   ],
-};
-export const SubscriptionUpdateSessionCreateDocument: DocumentNode<
-  SubscriptionUpdateSessionCreateMutation,
-  SubscriptionUpdateSessionCreateMutationVariables
-> = {
+} as unknown as DocumentNode<SubscriptionUpdateMutation, SubscriptionUpdateMutationVariables>;
+export const SubscriptionUpdateSessionCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28308,11 +28014,8 @@ export const SubscriptionUpdateSessionCreateDocument: DocumentNode<
     },
     ...SubscriptionSessionPayloadFragmentDoc.definitions,
   ],
-};
-export const SubscriptionUpgradeDocument: DocumentNode<
-  SubscriptionUpgradeMutation,
-  SubscriptionUpgradeMutationVariables
-> = {
+} as unknown as DocumentNode<SubscriptionUpdateSessionCreateMutation, SubscriptionUpdateSessionCreateMutationVariables>;
+export const SubscriptionUpgradeDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28359,8 +28062,8 @@ export const SubscriptionUpgradeDocument: DocumentNode<
     },
     ...SubscriptionPayloadFragmentDoc.definitions,
   ],
-};
-export const TeamArchiveDocument: DocumentNode<TeamArchiveMutation, TeamArchiveMutationVariables> = {
+} as unknown as DocumentNode<SubscriptionUpgradeMutation, SubscriptionUpgradeMutationVariables>;
+export const TeamArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28397,8 +28100,8 @@ export const TeamArchiveDocument: DocumentNode<TeamArchiveMutation, TeamArchiveM
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const TeamCreateDocument: DocumentNode<TeamCreateMutation, TeamCreateMutationVariables> = {
+} as unknown as DocumentNode<TeamArchiveMutation, TeamArchiveMutationVariables>;
+export const TeamCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28445,8 +28148,8 @@ export const TeamCreateDocument: DocumentNode<TeamCreateMutation, TeamCreateMuta
     },
     ...TeamPayloadFragmentDoc.definitions,
   ],
-};
-export const TeamDeleteDocument: DocumentNode<TeamDeleteMutation, TeamDeleteMutationVariables> = {
+} as unknown as DocumentNode<TeamCreateMutation, TeamCreateMutationVariables>;
+export const TeamDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28483,8 +28186,8 @@ export const TeamDeleteDocument: DocumentNode<TeamDeleteMutation, TeamDeleteMuta
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const TeamKeyDeleteDocument: DocumentNode<TeamKeyDeleteMutation, TeamKeyDeleteMutationVariables> = {
+} as unknown as DocumentNode<TeamDeleteMutation, TeamDeleteMutationVariables>;
+export const TeamKeyDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28521,11 +28224,8 @@ export const TeamKeyDeleteDocument: DocumentNode<TeamKeyDeleteMutation, TeamKeyD
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const TeamMembershipCreateDocument: DocumentNode<
-  TeamMembershipCreateMutation,
-  TeamMembershipCreateMutationVariables
-> = {
+} as unknown as DocumentNode<TeamKeyDeleteMutation, TeamKeyDeleteMutationVariables>;
+export const TeamMembershipCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28565,11 +28265,8 @@ export const TeamMembershipCreateDocument: DocumentNode<
     },
     ...TeamMembershipPayloadFragmentDoc.definitions,
   ],
-};
-export const TeamMembershipDeleteDocument: DocumentNode<
-  TeamMembershipDeleteMutation,
-  TeamMembershipDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<TeamMembershipCreateMutation, TeamMembershipCreateMutationVariables>;
+export const TeamMembershipDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28606,11 +28303,8 @@ export const TeamMembershipDeleteDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const TeamMembershipUpdateDocument: DocumentNode<
-  TeamMembershipUpdateMutation,
-  TeamMembershipUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<TeamMembershipDeleteMutation, TeamMembershipDeleteMutationVariables>;
+export const TeamMembershipUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28660,8 +28354,8 @@ export const TeamMembershipUpdateDocument: DocumentNode<
     },
     ...TeamMembershipPayloadFragmentDoc.definitions,
   ],
-};
-export const TeamUpdateDocument: DocumentNode<TeamUpdateMutation, TeamUpdateMutationVariables> = {
+} as unknown as DocumentNode<TeamMembershipUpdateMutation, TeamMembershipUpdateMutationVariables>;
+export const TeamUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28708,8 +28402,8 @@ export const TeamUpdateDocument: DocumentNode<TeamUpdateMutation, TeamUpdateMuta
     },
     ...TeamPayloadFragmentDoc.definitions,
   ],
-};
-export const TemplateCreateDocument: DocumentNode<TemplateCreateMutation, TemplateCreateMutationVariables> = {
+} as unknown as DocumentNode<TeamUpdateMutation, TeamUpdateMutationVariables>;
+export const TemplateCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28749,8 +28443,8 @@ export const TemplateCreateDocument: DocumentNode<TemplateCreateMutation, Templa
     },
     ...TemplatePayloadFragmentDoc.definitions,
   ],
-};
-export const TemplateDeleteDocument: DocumentNode<TemplateDeleteMutation, TemplateDeleteMutationVariables> = {
+} as unknown as DocumentNode<TemplateCreateMutation, TemplateCreateMutationVariables>;
+export const TemplateDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28787,8 +28481,8 @@ export const TemplateDeleteDocument: DocumentNode<TemplateDeleteMutation, Templa
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const TemplateUpdateDocument: DocumentNode<TemplateUpdateMutation, TemplateUpdateMutationVariables> = {
+} as unknown as DocumentNode<TemplateDeleteMutation, TemplateDeleteMutationVariables>;
+export const TemplateUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28838,8 +28532,8 @@ export const TemplateUpdateDocument: DocumentNode<TemplateUpdateMutation, Templa
     },
     ...TemplatePayloadFragmentDoc.definitions,
   ],
-};
-export const UserDemoteAdminDocument: DocumentNode<UserDemoteAdminMutation, UserDemoteAdminMutationVariables> = {
+} as unknown as DocumentNode<TemplateUpdateMutation, TemplateUpdateMutationVariables>;
+export const UserDemoteAdminDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28876,8 +28570,8 @@ export const UserDemoteAdminDocument: DocumentNode<UserDemoteAdminMutation, User
     },
     ...UserAdminPayloadFragmentDoc.definitions,
   ],
-};
-export const UserFlagUpdateDocument: DocumentNode<UserFlagUpdateMutation, UserFlagUpdateMutationVariables> = {
+} as unknown as DocumentNode<UserDemoteAdminMutation, UserDemoteAdminMutationVariables>;
+export const UserFlagUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28927,8 +28621,8 @@ export const UserFlagUpdateDocument: DocumentNode<UserFlagUpdateMutation, UserFl
     },
     ...UserSettingsFlagPayloadFragmentDoc.definitions,
   ],
-};
-export const UserPromoteAdminDocument: DocumentNode<UserPromoteAdminMutation, UserPromoteAdminMutationVariables> = {
+} as unknown as DocumentNode<UserFlagUpdateMutation, UserFlagUpdateMutationVariables>;
+export const UserPromoteAdminDocument = {
   kind: "Document",
   definitions: [
     {
@@ -28965,11 +28659,8 @@ export const UserPromoteAdminDocument: DocumentNode<UserPromoteAdminMutation, Us
     },
     ...UserAdminPayloadFragmentDoc.definitions,
   ],
-};
-export const UserSettingsFlagIncrementDocument: DocumentNode<
-  UserSettingsFlagIncrementMutation,
-  UserSettingsFlagIncrementMutationVariables
-> = {
+} as unknown as DocumentNode<UserPromoteAdminMutation, UserPromoteAdminMutationVariables>;
+export const UserSettingsFlagIncrementDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29006,11 +28697,8 @@ export const UserSettingsFlagIncrementDocument: DocumentNode<
     },
     ...UserSettingsFlagPayloadFragmentDoc.definitions,
   ],
-};
-export const UserSettingsFlagsResetDocument: DocumentNode<
-  UserSettingsFlagsResetMutation,
-  UserSettingsFlagsResetMutationVariables
-> = {
+} as unknown as DocumentNode<UserSettingsFlagIncrementMutation, UserSettingsFlagIncrementMutationVariables>;
+export const UserSettingsFlagsResetDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29033,11 +28721,8 @@ export const UserSettingsFlagsResetDocument: DocumentNode<
     },
     ...UserSettingsFlagsResetPayloadFragmentDoc.definitions,
   ],
-};
-export const UserSettingsUpdateDocument: DocumentNode<
-  UserSettingsUpdateMutation,
-  UserSettingsUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<UserSettingsFlagsResetMutation, UserSettingsFlagsResetMutationVariables>;
+export const UserSettingsUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29087,11 +28772,8 @@ export const UserSettingsUpdateDocument: DocumentNode<
     },
     ...UserSettingsPayloadFragmentDoc.definitions,
   ],
-};
-export const UserSubscribeToNewsletterDocument: DocumentNode<
-  UserSubscribeToNewsletterMutation,
-  UserSubscribeToNewsletterMutationVariables
-> = {
+} as unknown as DocumentNode<UserSettingsUpdateMutation, UserSettingsUpdateMutationVariables>;
+export const UserSubscribeToNewsletterDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29116,8 +28798,8 @@ export const UserSubscribeToNewsletterDocument: DocumentNode<
     },
     ...UserSubscribeToNewsletterPayloadFragmentDoc.definitions,
   ],
-};
-export const UserSuspendDocument: DocumentNode<UserSuspendMutation, UserSuspendMutationVariables> = {
+} as unknown as DocumentNode<UserSubscribeToNewsletterMutation, UserSubscribeToNewsletterMutationVariables>;
+export const UserSuspendDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29154,8 +28836,8 @@ export const UserSuspendDocument: DocumentNode<UserSuspendMutation, UserSuspendM
     },
     ...UserAdminPayloadFragmentDoc.definitions,
   ],
-};
-export const UserUnsuspendDocument: DocumentNode<UserUnsuspendMutation, UserUnsuspendMutationVariables> = {
+} as unknown as DocumentNode<UserSuspendMutation, UserSuspendMutationVariables>;
+export const UserUnsuspendDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29192,8 +28874,8 @@ export const UserUnsuspendDocument: DocumentNode<UserUnsuspendMutation, UserUnsu
     },
     ...UserAdminPayloadFragmentDoc.definitions,
   ],
-};
-export const UserUpdateDocument: DocumentNode<UserUpdateMutation, UserUpdateMutationVariables> = {
+} as unknown as DocumentNode<UserUnsuspendMutation, UserUnsuspendMutationVariables>;
+export const UserUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29240,11 +28922,8 @@ export const UserUpdateDocument: DocumentNode<UserUpdateMutation, UserUpdateMuta
     },
     ...UserPayloadFragmentDoc.definitions,
   ],
-};
-export const ViewPreferencesCreateDocument: DocumentNode<
-  ViewPreferencesCreateMutation,
-  ViewPreferencesCreateMutationVariables
-> = {
+} as unknown as DocumentNode<UserUpdateMutation, UserUpdateMutationVariables>;
+export const ViewPreferencesCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29284,11 +28963,8 @@ export const ViewPreferencesCreateDocument: DocumentNode<
     },
     ...ViewPreferencesPayloadFragmentDoc.definitions,
   ],
-};
-export const ViewPreferencesDeleteDocument: DocumentNode<
-  ViewPreferencesDeleteMutation,
-  ViewPreferencesDeleteMutationVariables
-> = {
+} as unknown as DocumentNode<ViewPreferencesCreateMutation, ViewPreferencesCreateMutationVariables>;
+export const ViewPreferencesDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29325,11 +29001,8 @@ export const ViewPreferencesDeleteDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const ViewPreferencesUpdateDocument: DocumentNode<
-  ViewPreferencesUpdateMutation,
-  ViewPreferencesUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<ViewPreferencesDeleteMutation, ViewPreferencesDeleteMutationVariables>;
+export const ViewPreferencesUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29379,8 +29052,8 @@ export const ViewPreferencesUpdateDocument: DocumentNode<
     },
     ...ViewPreferencesPayloadFragmentDoc.definitions,
   ],
-};
-export const WebhookCreateDocument: DocumentNode<WebhookCreateMutation, WebhookCreateMutationVariables> = {
+} as unknown as DocumentNode<ViewPreferencesUpdateMutation, ViewPreferencesUpdateMutationVariables>;
+export const WebhookCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29420,8 +29093,8 @@ export const WebhookCreateDocument: DocumentNode<WebhookCreateMutation, WebhookC
     },
     ...WebhookPayloadFragmentDoc.definitions,
   ],
-};
-export const WebhookDeleteDocument: DocumentNode<WebhookDeleteMutation, WebhookDeleteMutationVariables> = {
+} as unknown as DocumentNode<WebhookCreateMutation, WebhookCreateMutationVariables>;
+export const WebhookDeleteDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29458,8 +29131,8 @@ export const WebhookDeleteDocument: DocumentNode<WebhookDeleteMutation, WebhookD
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const WebhookUpdateDocument: DocumentNode<WebhookUpdateMutation, WebhookUpdateMutationVariables> = {
+} as unknown as DocumentNode<WebhookDeleteMutation, WebhookDeleteMutationVariables>;
+export const WebhookUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29509,11 +29182,8 @@ export const WebhookUpdateDocument: DocumentNode<WebhookUpdateMutation, WebhookU
     },
     ...WebhookPayloadFragmentDoc.definitions,
   ],
-};
-export const WorkflowStateArchiveDocument: DocumentNode<
-  WorkflowStateArchiveMutation,
-  WorkflowStateArchiveMutationVariables
-> = {
+} as unknown as DocumentNode<WebhookUpdateMutation, WebhookUpdateMutationVariables>;
+export const WorkflowStateArchiveDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29550,11 +29220,8 @@ export const WorkflowStateArchiveDocument: DocumentNode<
     },
     ...ArchivePayloadFragmentDoc.definitions,
   ],
-};
-export const WorkflowStateCreateDocument: DocumentNode<
-  WorkflowStateCreateMutation,
-  WorkflowStateCreateMutationVariables
-> = {
+} as unknown as DocumentNode<WorkflowStateArchiveMutation, WorkflowStateArchiveMutationVariables>;
+export const WorkflowStateCreateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29594,11 +29261,8 @@ export const WorkflowStateCreateDocument: DocumentNode<
     },
     ...WorkflowStatePayloadFragmentDoc.definitions,
   ],
-};
-export const WorkflowStateUpdateDocument: DocumentNode<
-  WorkflowStateUpdateMutation,
-  WorkflowStateUpdateMutationVariables
-> = {
+} as unknown as DocumentNode<WorkflowStateCreateMutation, WorkflowStateCreateMutationVariables>;
+export const WorkflowStateUpdateDocument = {
   kind: "Document",
   definitions: [
     {
@@ -29648,4 +29312,4 @@ export const WorkflowStateUpdateDocument: DocumentNode<
     },
     ...WorkflowStatePayloadFragmentDoc.definitions,
   ],
-};
+} as unknown as DocumentNode<WorkflowStateUpdateMutation, WorkflowStateUpdateMutationVariables>;
