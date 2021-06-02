@@ -7614,6 +7614,37 @@ export class AttachmentLinkFrontMutation extends Request {
 }
 
 /**
+ * A fetchable AttachmentLinkIntercom Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentLinkIntercomMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentLinkIntercom mutation and return a AttachmentPayload
+   *
+   * @param conversationId - required conversationId to pass to attachmentLinkIntercom
+   * @param issueId - required issueId to pass to attachmentLinkIntercom
+   * @returns parsed response from AttachmentLinkIntercomMutation
+   */
+  public async fetch(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
+    return this._request<L.AttachmentLinkIntercomMutation, L.AttachmentLinkIntercomMutationVariables>(
+      L.AttachmentLinkIntercomDocument,
+      {
+        conversationId,
+        issueId,
+      }
+    ).then(response => {
+      const data = response?.attachmentLinkIntercom;
+      return data ? new AttachmentPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
  * A fetchable AttachmentLinkZendesk Mutation
  *
  * @param request - function to call the graphql client
@@ -8698,6 +8729,32 @@ export class IntegrationIntercomMutation extends Request {
       }
     ).then(response => {
       const data = response?.integrationIntercom;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationIntercomDelete Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationIntercomDeleteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationIntercomDelete mutation and return a IntegrationPayload
+   *
+   * @returns parsed response from IntegrationIntercomDeleteMutation
+   */
+  public async fetch(): LinearFetch<IntegrationPayload> {
+    return this._request<L.IntegrationIntercomDeleteMutation, L.IntegrationIntercomDeleteMutationVariables>(
+      L.IntegrationIntercomDeleteDocument,
+      {}
+    ).then(response => {
+      const data = response?.integrationIntercomDelete;
       return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
@@ -14532,6 +14589,16 @@ export class LinearSdk extends Request {
     return new AttachmentLinkFrontMutation(this._request).fetch(conversationId, issueId);
   }
   /**
+   * Link an existing Intercom conversation to an issue.
+   *
+   * @param conversationId - required conversationId to pass to attachmentLinkIntercom
+   * @param issueId - required issueId to pass to attachmentLinkIntercom
+   * @returns AttachmentPayload
+   */
+  public attachmentLinkIntercom(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkIntercomMutation(this._request).fetch(conversationId, issueId);
+  }
+  /**
    * Link an existing Zendesk ticket to an issue.
    *
    * @param issueId - required issueId to pass to attachmentLinkZendesk
@@ -14906,6 +14973,14 @@ export class LinearSdk extends Request {
    */
   public integrationIntercom(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     return new IntegrationIntercomMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
+   * Disconnects the organization from Intercom.
+   *
+   * @returns IntegrationPayload
+   */
+  public get integrationIntercomDelete(): LinearFetch<IntegrationPayload> {
+    return new IntegrationIntercomDeleteMutation(this._request).fetch();
   }
   /**
    * Archives an integration resource.

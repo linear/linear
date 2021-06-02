@@ -1828,6 +1828,8 @@ export type Mutation = {
   attachmentDelete: ArchivePayload;
   /** Link an existing Front conversation to an issue. */
   attachmentLinkFront: AttachmentPayload;
+  /** Link an existing Intercom conversation to an issue. */
+  attachmentLinkIntercom: AttachmentPayload;
   /** Link an existing Zendesk ticket to an issue. */
   attachmentLinkZendesk: AttachmentPayload;
   /** [Alpha] Updates an existing issue attachment. */
@@ -1906,6 +1908,8 @@ export type Mutation = {
   integrationGoogleSheets: IntegrationPayload;
   /** Integrates the organization with Intercom. */
   integrationIntercom: IntegrationPayload;
+  /** Disconnects the organization from Intercom. */
+  integrationIntercomDelete: IntegrationPayload;
   /** Archives an integration resource. */
   integrationResourceArchive: ArchivePayload;
   /** Integrates the organization with Sentry. */
@@ -2125,6 +2129,11 @@ export type MutationAttachmentDeleteArgs = {
 };
 
 export type MutationAttachmentLinkFrontArgs = {
+  conversationId: Scalars["String"];
+  issueId: Scalars["String"];
+};
+
+export type MutationAttachmentLinkIntercomArgs = {
   conversationId: Scalars["String"];
   issueId: Scalars["String"];
 };
@@ -7968,6 +7977,15 @@ export type AttachmentLinkFrontMutation = { __typename?: "Mutation" } & {
   attachmentLinkFront: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
 };
 
+export type AttachmentLinkIntercomMutationVariables = Exact<{
+  conversationId: Scalars["String"];
+  issueId: Scalars["String"];
+}>;
+
+export type AttachmentLinkIntercomMutation = { __typename?: "Mutation" } & {
+  attachmentLinkIntercom: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
 export type AttachmentLinkZendeskMutationVariables = Exact<{
   issueId: Scalars["String"];
   ticketId: Scalars["String"];
@@ -8292,6 +8310,12 @@ export type IntegrationIntercomMutationVariables = Exact<{
 
 export type IntegrationIntercomMutation = { __typename?: "Mutation" } & {
   integrationIntercom: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationIntercomDeleteMutationVariables = Exact<{ [key: string]: never }>;
+
+export type IntegrationIntercomDeleteMutation = { __typename?: "Mutation" } & {
+  integrationIntercomDelete: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationResourceArchiveMutationVariables = Exact<{
@@ -23325,6 +23349,54 @@ export const AttachmentLinkFrontDocument = {
     ...AttachmentPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentLinkFrontMutation, AttachmentLinkFrontMutationVariables>;
+export const AttachmentLinkIntercomDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkIntercom" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkIntercom" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "conversationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkIntercomMutation, AttachmentLinkIntercomMutationVariables>;
 export const AttachmentLinkZendeskDocument = {
   kind: "Document",
   definitions: [
@@ -24965,6 +25037,30 @@ export const IntegrationIntercomDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationIntercomMutation, IntegrationIntercomMutationVariables>;
+export const IntegrationIntercomDeleteDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationIntercomDelete" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationIntercomDelete" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationIntercomDeleteMutation, IntegrationIntercomDeleteMutationVariables>;
 export const IntegrationResourceArchiveDocument = {
   kind: "Document",
   definitions: [
