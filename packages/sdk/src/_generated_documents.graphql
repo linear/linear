@@ -4974,16 +4974,27 @@ mutation attachmentDelete(
 mutation attachmentLinkFront(
   # The Front conversation ID to link.
   $conversationId: String!
-  # The issue for which to link the .
+  # The issue for which to link the Front conversation.
   $issueId: String!
 ) {
   attachmentLinkFront(conversationId: $conversationId, issueId: $issueId) {
     ...AttachmentPayload
   }
 }
+# Link an existing Intercom conversation to an issue.
+mutation attachmentLinkIntercom(
+  # The Intercom conversation ID to link.
+  $conversationId: String!
+  # The issue for which to link the Intercom conversation.
+  $issueId: String!
+) {
+  attachmentLinkIntercom(conversationId: $conversationId, issueId: $issueId) {
+    ...AttachmentPayload
+  }
+}
 # Link an existing Zendesk ticket to an issue.
 mutation attachmentLinkZendesk(
-  # The issue for which to link the .
+  # The issue for which to link the Zendesk ticket.
   $issueId: String!
   # The Zendesk ticket ID to link.
   $ticketId: String!
@@ -5343,6 +5354,12 @@ mutation integrationIntercom(
   $redirectUri: String!
 ) {
   integrationIntercom(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Disconnects the organization from Intercom.
+mutation integrationIntercomDelete {
+  integrationIntercomDelete {
     ...IntegrationPayload
   }
 }

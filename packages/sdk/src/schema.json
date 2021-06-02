@@ -11690,7 +11690,7 @@
             "args": [
               {
                 "name": "issueId",
-                "description": "The issue for which to link the .",
+                "description": "The issue for which to link the Zendesk ticket.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -11739,7 +11739,7 @@
             "args": [
               {
                 "name": "issueId",
-                "description": "The issue for which to link the .",
+                "description": "The issue for which to link the Front conversation.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -11756,6 +11756,55 @@
               {
                 "name": "conversationId",
                 "description": "The Front conversation ID to link.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AttachmentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "attachmentLinkIntercom",
+            "description": "Link an existing Intercom conversation to an issue.",
+            "args": [
+              {
+                "name": "issueId",
+                "description": "The issue for which to link the Intercom conversation.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "conversationId",
+                "description": "The Intercom conversation ID to link.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -13059,6 +13108,22 @@
                 "deprecationReason": null
               }
             ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationIntercomDelete",
+            "description": "Disconnects the organization from Intercom.",
+            "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,

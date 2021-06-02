@@ -3,6 +3,7 @@ schema {
   mutation: Mutation
   subscription: Subscription
 }
+
 """
 An API key. Grants access to the user's resources.
 """
@@ -29,11 +30,13 @@ type ApiKey implements Node {
   """
   updatedAt: DateTime!
 }
+
 type ApiKeyConnection {
   edges: [ApiKeyEdge!]!
   nodes: [ApiKey!]!
   pageInfo: PageInfo!
 }
+
 input ApiKeyCreateInput {
   """
   The identifier. If none is provided, the backend will generate one.
@@ -48,6 +51,7 @@ input ApiKeyCreateInput {
   """
   label: String!
 }
+
 type ApiKeyEdge {
   """
   Used in `before` and `after` args
@@ -55,6 +59,7 @@ type ApiKeyEdge {
   cursor: String!
   node: ApiKey!
 }
+
 type ApiKeyPayload {
   """
   The API key that was created.
@@ -69,6 +74,7 @@ type ApiKeyPayload {
   """
   success: Boolean!
 }
+
 """
 Public information of the OAuth application.
 """
@@ -98,6 +104,7 @@ type Application {
   """
   name: String!
 }
+
 type ArchivePayload {
   """
   The identifier of the last sync operation.
@@ -108,6 +115,7 @@ type ArchivePayload {
   """
   success: Boolean!
 }
+
 """
 Contains requested archived model objects.
 """
@@ -125,6 +133,7 @@ type ArchiveResponse {
   """
   totalCount: Float!
 }
+
 """
 [Alpha] Issue attachment (e.g. support ticket, pull request).
 """
@@ -175,11 +184,13 @@ type Attachment implements Node {
   """
   url: String!
 }
+
 type AttachmentConnection {
   edges: [AttachmentEdge!]!
   nodes: [Attachment!]!
   pageInfo: PageInfo!
 }
+
 input AttachmentCreateInput {
   """
   Indicates if attachments for the same source application should be grouped in the Linear UI.
@@ -210,6 +221,7 @@ input AttachmentCreateInput {
   """
   url: String!
 }
+
 type AttachmentEdge {
   """
   Used in `before` and `after` args
@@ -217,6 +229,7 @@ type AttachmentEdge {
   cursor: String!
   node: Attachment!
 }
+
 type AttachmentPayload {
   """
   The issue attachment that was created.
@@ -231,6 +244,7 @@ type AttachmentPayload {
   """
   success: Boolean!
 }
+
 input AttachmentUpdateInput {
   """
   Attachment metadata object with string and number values.
@@ -245,6 +259,7 @@ input AttachmentUpdateInput {
   """
   title: String!
 }
+
 type AuthResolverResponse {
   """
   Should the signup flow allow access for the domain.
@@ -275,6 +290,7 @@ type AuthResolverResponse {
   """
   users: [User!]!
 }
+
 """
 Public information of the OAuth application, plus the authorized scopes for a given user.
 """
@@ -312,6 +328,7 @@ type AuthorizedApplication {
   """
   scope: [String!]!
 }
+
 type BillingDetailsPayload {
   """
   The customer's email address the invoices are sent to.
@@ -330,6 +347,7 @@ type BillingDetailsPayload {
   """
   success: Boolean!
 }
+
 type BillingEmailPayload {
   """
   The customer's email address the invoices are sent to.
@@ -340,12 +358,14 @@ type BillingEmailPayload {
   """
   success: Boolean!
 }
+
 input BillingEmailUpdateInput {
   """
   The email address to which to send invoices.
   """
   email: String!
 }
+
 type Card {
   """
   The brand of the card, e.g. Visa.
@@ -356,6 +376,7 @@ type Card {
   """
   last4: String!
 }
+
 input CollaborationDocumentUpdateInput {
   """
   Client identifier.
@@ -374,6 +395,7 @@ input CollaborationDocumentUpdateInput {
   """
   version: Int!
 }
+
 type CollaborationDocumentUpdatePayload {
   """
   Document steps the client has not seen yet and need to rebase it's local steps on.
@@ -384,6 +406,7 @@ type CollaborationDocumentUpdatePayload {
   """
   success: Boolean!
 }
+
 """
 A comment associated with an issue.
 """
@@ -426,11 +449,13 @@ type Comment implements Node {
   """
   user: User!
 }
+
 type CommentConnection {
   edges: [CommentEdge!]!
   nodes: [Comment!]!
   pageInfo: PageInfo!
 }
+
 input CommentCreateInput {
   """
   The comment content in markdown format.
@@ -449,6 +474,7 @@ input CommentCreateInput {
   """
   issueId: String!
 }
+
 type CommentEdge {
   """
   Used in `before` and `after` args
@@ -456,6 +482,7 @@ type CommentEdge {
   cursor: String!
   node: Comment!
 }
+
 type CommentPayload {
   """
   The comment that was created or updated.
@@ -470,6 +497,7 @@ type CommentPayload {
   """
   success: Boolean!
 }
+
 input CommentUpdateInput {
   """
   The comment content.
@@ -480,6 +508,7 @@ input CommentUpdateInput {
   """
   bodyData: JSON
 }
+
 """
 GitHub's commit data
 """
@@ -492,6 +521,7 @@ type CommitPayload {
   timestamp: String!
   url: String!
 }
+
 input ContactCreateInput {
   """
   User's browser information.
@@ -518,22 +548,26 @@ input ContactCreateInput {
   """
   type: String!
 }
+
 type ContactPayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 type CreateCsvExportReportPayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 type CreateOrJoinOrganizationResponse {
   organization: Organization!
   user: User!
 }
+
 input CreateOrganizationInput {
   """
   Whether the organization should allow email domain access.
@@ -556,6 +590,7 @@ input CreateOrganizationInput {
   """
   utm: String
 }
+
 """
 A custom view that has been saved by a user.
 """
@@ -614,11 +649,13 @@ type CustomView implements Node {
   """
   updatedAt: DateTime!
 }
+
 type CustomViewConnection {
   edges: [CustomViewEdge!]!
   nodes: [CustomView!]!
   pageInfo: PageInfo!
 }
+
 input CustomViewCreateInput {
   """
   The color of the icon of the custom view.
@@ -653,6 +690,7 @@ input CustomViewCreateInput {
   """
   teamId: String
 }
+
 type CustomViewEdge {
   """
   Used in `before` and `after` args
@@ -660,6 +698,7 @@ type CustomViewEdge {
   cursor: String!
   node: CustomView!
 }
+
 type CustomViewPayload {
   """
   The custom view that was created or updated.
@@ -674,6 +713,7 @@ type CustomViewPayload {
   """
   success: Boolean!
 }
+
 input CustomViewUpdateInput {
   """
   The color of the icon of the custom view.
@@ -704,6 +744,7 @@ input CustomViewUpdateInput {
   """
   teamId: String
 }
+
 """
 A set of issues to be resolved in a specified amount of time.
 """
@@ -828,11 +869,13 @@ type Cycle implements Node {
   """
   updatedAt: DateTime!
 }
+
 type CycleConnection {
   edges: [CycleEdge!]!
   nodes: [Cycle!]!
   pageInfo: PageInfo!
 }
+
 input CycleCreateInput {
   """
   The completion time of the cycle. If null, the cycle hasn't been completed.
@@ -859,6 +902,7 @@ input CycleCreateInput {
   """
   teamId: String!
 }
+
 type CycleEdge {
   """
   Used in `before` and `after` args
@@ -866,6 +910,7 @@ type CycleEdge {
   cursor: String!
   node: Cycle!
 }
+
 type CyclePayload {
   """
   The Cycle that was created or updated.
@@ -880,6 +925,7 @@ type CyclePayload {
   """
   success: Boolean!
 }
+
 input CycleUpdateInput {
   """
   The end date of the cycle.
@@ -898,22 +944,26 @@ input CycleUpdateInput {
   """
   startsAt: DateTime
 }
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
 scalar DateTime
+
 type DebugPayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 input DeleteOrganizationInput {
   """
   The deletion code to confirm operation.
   """
   deletionCode: String!
 }
+
 """
 Contains the requested dependencies.
 """
@@ -923,6 +973,7 @@ type DependencyResponse {
   """
   dependencies: String!
 }
+
 """
 Collaborative editing steps for documents.
 """
@@ -957,6 +1008,7 @@ type DocumentStep implements Node {
   """
   version: Float!
 }
+
 input EmailUnsubscribeInput {
   """
   The user's email validation token.
@@ -971,12 +1023,14 @@ input EmailUnsubscribeInput {
   """
   userId: String!
 }
+
 type EmailUnsubscribePayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 input EmailUserAccountAuthChallengeInput {
   """
   The email for which to generate the magic login code.
@@ -991,6 +1045,7 @@ input EmailUserAccountAuthChallengeInput {
   """
   signupCode: String
 }
+
 type EmailUserAccountAuthChallengeResponse {
   """
   Supported challenge for this user account. Can be either verificationCode or password.
@@ -1001,6 +1056,7 @@ type EmailUserAccountAuthChallengeResponse {
   """
   success: Boolean!
 }
+
 """
 A custom emoji.
 """
@@ -1043,11 +1099,13 @@ type Emoji implements Node {
   """
   url: String!
 }
+
 type EmojiConnection {
   edges: [EmojiEdge!]!
   nodes: [Emoji!]!
   pageInfo: PageInfo!
 }
+
 input EmojiCreateInput {
   """
   The identifier. If none is provided, the backend will generate one.
@@ -1062,6 +1120,7 @@ input EmojiCreateInput {
   """
   url: String!
 }
+
 type EmojiEdge {
   """
   Used in `before` and `after` args
@@ -1069,6 +1128,7 @@ type EmojiEdge {
   cursor: String!
   node: Emoji!
 }
+
 type EmojiPayload {
   """
   The emoji that was created.
@@ -1083,6 +1143,7 @@ type EmojiPayload {
   """
   success: Boolean!
 }
+
 input EventCreateInput {
   """
   The category of the event to create.
@@ -1105,12 +1166,14 @@ input EventCreateInput {
   """
   value: Float
 }
+
 type EventPayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 """
 User favorites presented in the sidebar.
 """
@@ -1165,11 +1228,13 @@ type Favorite implements Node {
   """
   user: User!
 }
+
 type FavoriteConnection {
   edges: [FavoriteEdge!]!
   nodes: [Favorite!]!
   pageInfo: PageInfo!
 }
+
 input FavoriteCreateInput {
   """
   The identifier of the custom view to favorite.
@@ -1204,6 +1269,7 @@ input FavoriteCreateInput {
   """
   sortOrder: Float
 }
+
 type FavoriteEdge {
   """
   Used in `before` and `after` args
@@ -1211,6 +1277,7 @@ type FavoriteEdge {
   cursor: String!
   node: Favorite!
 }
+
 type FavoritePayload {
   """
   The object that was added as a favorite.
@@ -1225,12 +1292,14 @@ type FavoritePayload {
   """
   success: Boolean!
 }
+
 input FavoriteUpdateInput {
   """
   The position of the item in the favorites list.
   """
   sortOrder: Float
 }
+
 input FeedbackCreateInput {
   """
   How disappointed the user would be if he/she could no longer use Linear.
@@ -1241,12 +1310,14 @@ input FeedbackCreateInput {
   """
   feedback: String!
 }
+
 type FeedbackPayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 """
 Object representing Figma preview information.
 """
@@ -1268,6 +1339,7 @@ type FigmaEmbed {
   """
   url: String
 }
+
 type FigmaEmbedPayload {
   """
   Figma embed information.
@@ -1278,6 +1350,7 @@ type FigmaEmbedPayload {
   """
   success: Boolean!
 }
+
 """
 A recorded entry of a file uploaded by a user.
 """
@@ -1315,6 +1388,7 @@ type FileUpload {
   """
   size: Float!
 }
+
 """
 GitHub OAuth token, plus information about the organizations the user is a member of.
 """
@@ -1328,6 +1402,7 @@ type GithubOAuthTokenPayload {
   """
   token: String
 }
+
 """
 Relevant information for the GitHub organization.
 """
@@ -1349,6 +1424,7 @@ type GithubOrg {
   """
   repositories: [GithubRepo!]!
 }
+
 """
 Relevant information for the GitHub repository.
 """
@@ -1362,6 +1438,7 @@ type GithubRepo {
   """
   name: String!
 }
+
 """
 Google Sheets specific settings.
 """
@@ -1371,6 +1448,7 @@ type GoogleSheetsSettings {
   spreadsheetUrl: String!
   updatedIssuesAt: DateTime!
 }
+
 input GoogleUserAccountAuthInput {
   """
   Code returned from Google's OAuth flow.
@@ -1393,6 +1471,7 @@ input GoogleUserAccountAuthInput {
   """
   timezone: String!
 }
+
 type ImageUploadFromUrlPayload {
   """
   The identifier of the last sync operation.
@@ -1407,6 +1486,7 @@ type ImageUploadFromUrlPayload {
   """
   url: String
 }
+
 """
 An integration with an external service.
 """
@@ -1445,11 +1525,13 @@ type Integration implements Node {
   """
   updatedAt: DateTime!
 }
+
 type IntegrationConnection {
   edges: [IntegrationEdge!]!
   nodes: [Integration!]!
   pageInfo: PageInfo!
 }
+
 type IntegrationEdge {
   """
   Used in `before` and `after` args
@@ -1457,6 +1539,7 @@ type IntegrationEdge {
   cursor: String!
   node: Integration!
 }
+
 type IntegrationPayload {
   """
   The integration that was created or updated.
@@ -1471,6 +1554,7 @@ type IntegrationPayload {
   """
   success: Boolean!
 }
+
 """
 An integration resource created by an external service.
 """
@@ -1517,11 +1601,13 @@ type IntegrationResource implements Node {
   """
   updatedAt: DateTime!
 }
+
 type IntegrationResourceConnection {
   edges: [IntegrationResourceEdge!]!
   nodes: [IntegrationResource!]!
   pageInfo: PageInfo!
 }
+
 """
 Integration resource's payload
 """
@@ -1543,6 +1629,7 @@ type IntegrationResourceData {
   """
   sentryIssue: SentryIssuePayload
 }
+
 type IntegrationResourceEdge {
   """
   Used in `before` and `after` args
@@ -1550,6 +1637,7 @@ type IntegrationResourceEdge {
   cursor: String!
   node: IntegrationResource!
 }
+
 """
 The integration resource's settings
 """
@@ -1560,6 +1648,7 @@ type IntegrationSettings {
   slackProjectPost: SlackPostSettings
   zendesk: ZendeskSettings
 }
+
 type InviteData {
   """
   Avatar URLs for the invitees.
@@ -1594,6 +1683,7 @@ type InviteData {
   """
   userCount: Float!
 }
+
 type InvitePagePayload {
   """
   Invite data.
@@ -1604,6 +1694,7 @@ type InvitePagePayload {
   """
   success: Boolean!
 }
+
 type Invoice {
   """
   The creation date of the invoice.
@@ -1626,6 +1717,7 @@ type Invoice {
   """
   url: String
 }
+
 """
 An issue.
 """
@@ -2021,11 +2113,13 @@ type Issue implements Node {
   """
   url: String!
 }
+
 type IssueConnection {
   edges: [IssueEdge!]!
   nodes: [Issue!]!
   pageInfo: PageInfo!
 }
+
 input IssueCreateInput {
   """
   The identifier of the user to assign the issue to.
@@ -2096,6 +2190,7 @@ input IssueCreateInput {
   """
   title: String!
 }
+
 type IssueDescriptionHistory {
   """
   The ID of the author of the change.
@@ -2118,6 +2213,7 @@ type IssueDescriptionHistory {
   """
   updatedAt: DateTime!
 }
+
 type IssueDescriptionHistoryPayload {
   """
   The issue that was created or updated.
@@ -2128,6 +2224,7 @@ type IssueDescriptionHistoryPayload {
   """
   success: Boolean!
 }
+
 type IssueEdge {
   """
   Used in `before` and `after` args
@@ -2135,6 +2232,7 @@ type IssueEdge {
   cursor: String!
   node: Issue!
 }
+
 """
 A record of changes to an issue.
 """
@@ -2271,11 +2369,13 @@ type IssueHistory implements Node {
   """
   updatedDescription: Boolean
 }
+
 type IssueHistoryConnection {
   edges: [IssueHistoryEdge!]!
   nodes: [IssueHistory!]!
   pageInfo: PageInfo!
 }
+
 type IssueHistoryEdge {
   """
   Used in `before` and `after` args
@@ -2283,6 +2383,7 @@ type IssueHistoryEdge {
   cursor: String!
   node: IssueHistory!
 }
+
 """
 An import job for data from an external service
 """
@@ -2325,6 +2426,7 @@ type IssueImport implements Node {
   """
   updatedAt: DateTime!
 }
+
 type IssueImportDeletePayload {
   """
   The import job that was deleted.
@@ -2339,6 +2441,7 @@ type IssueImportDeletePayload {
   """
   success: Boolean!
 }
+
 """
 Issue import mapping input
 """
@@ -2356,6 +2459,7 @@ input IssueImportMappingInput {
   """
   workflowStates: JSONObject
 }
+
 type IssueImportPayload {
   """
   The import job that was created or updated.
@@ -2370,6 +2474,7 @@ type IssueImportPayload {
   """
   success: Boolean!
 }
+
 """
 Labels that can be associated with issues.
 """
@@ -2441,11 +2546,13 @@ type IssueLabel implements Node {
   """
   updatedAt: DateTime!
 }
+
 type IssueLabelConnection {
   edges: [IssueLabelEdge!]!
   nodes: [IssueLabel!]!
   pageInfo: PageInfo!
 }
+
 input IssueLabelCreateInput {
   """
   The color of the label.
@@ -2468,6 +2575,7 @@ input IssueLabelCreateInput {
   """
   teamId: String!
 }
+
 type IssueLabelEdge {
   """
   Used in `before` and `after` args
@@ -2475,6 +2583,7 @@ type IssueLabelEdge {
   cursor: String!
   node: IssueLabel!
 }
+
 type IssueLabelPayload {
   """
   The label that was created or updated.
@@ -2489,6 +2598,7 @@ type IssueLabelPayload {
   """
   success: Boolean!
 }
+
 input IssueLabelUpdateInput {
   """
   The color of the label.
@@ -2503,6 +2613,7 @@ input IssueLabelUpdateInput {
   """
   name: String
 }
+
 type IssuePayload {
   """
   The issue that was created or updated.
@@ -2517,6 +2628,7 @@ type IssuePayload {
   """
   success: Boolean!
 }
+
 type IssuePriorityValue {
   """
   Priority's label.
@@ -2527,6 +2639,7 @@ type IssuePriorityValue {
   """
   priority: Int!
 }
+
 """
 A relation between two issues.
 """
@@ -2561,11 +2674,13 @@ type IssueRelation implements Node {
   """
   updatedAt: DateTime!
 }
+
 type IssueRelationConnection {
   edges: [IssueRelationEdge!]!
   nodes: [IssueRelation!]!
   pageInfo: PageInfo!
 }
+
 input IssueRelationCreateInput {
   """
   The identifier. If none is provided, the backend will generate one.
@@ -2584,6 +2699,7 @@ input IssueRelationCreateInput {
   """
   type: IssueRelationType!
 }
+
 type IssueRelationEdge {
   """
   Used in `before` and `after` args
@@ -2591,6 +2707,7 @@ type IssueRelationEdge {
   cursor: String!
   node: IssueRelation!
 }
+
 """
 Issue relation history's payload
 """
@@ -2604,6 +2721,7 @@ type IssueRelationHistoryPayload {
   """
   type: String!
 }
+
 type IssueRelationPayload {
   """
   The issue relation that was created or updated.
@@ -2618,6 +2736,7 @@ type IssueRelationPayload {
   """
   success: Boolean!
 }
+
 """
 The type of the issue relation.
 """
@@ -2626,6 +2745,7 @@ enum IssueRelationType {
   duplicate
   related
 }
+
 input IssueRelationUpdateInput {
   """
   The identifier of the issue that is related to another issue.
@@ -2640,6 +2760,7 @@ input IssueRelationUpdateInput {
   """
   type: String
 }
+
 input IssueUpdateInput {
   """
   The identifier of the user to assign the issue to.
@@ -2714,20 +2835,24 @@ input IssueUpdateInput {
   """
   trashed: Boolean
 }
+
 """
 The `JSON` scalar type represents JSON values
 """
 scalar JSON
+
 """
 The `JSONObject` scalar type represents JSON values as a string
 """
 scalar JSONObject
+
 input JoinOrganizationInput {
   """
   The identifier of the organization.
   """
   organizationId: String!
 }
+
 """
 A milestone that contains projects.
 """
@@ -2791,11 +2916,13 @@ type Milestone implements Node {
   """
   updatedAt: DateTime!
 }
+
 type MilestoneConnection {
   edges: [MilestoneEdge!]!
   nodes: [Milestone!]!
   pageInfo: PageInfo!
 }
+
 input MilestoneCreateInput {
   """
   The identifier. If none is provided, the backend will generate one.
@@ -2810,6 +2937,7 @@ input MilestoneCreateInput {
   """
   sortOrder: Float
 }
+
 type MilestoneEdge {
   """
   Used in `before` and `after` args
@@ -2817,6 +2945,7 @@ type MilestoneEdge {
   cursor: String!
   node: Milestone!
 }
+
 type MilestonePayload {
   """
   The identifier of the last sync operation.
@@ -2831,6 +2960,7 @@ type MilestonePayload {
   """
   success: Boolean!
 }
+
 input MilestoneUpdateInput {
   """
   The name of the milestone.
@@ -2841,6 +2971,7 @@ input MilestoneUpdateInput {
   """
   sortOrder: Float
 }
+
 type Mutation {
   """
   Creates a new API key.
@@ -2896,7 +3027,20 @@ type Mutation {
     """
     conversationId: String!
     """
-    The issue for which to link the .
+    The issue for which to link the Front conversation.
+    """
+    issueId: String!
+  ): AttachmentPayload!
+  """
+  Link an existing Intercom conversation to an issue.
+  """
+  attachmentLinkIntercom(
+    """
+    The Intercom conversation ID to link.
+    """
+    conversationId: String!
+    """
+    The issue for which to link the Intercom conversation.
     """
     issueId: String!
   ): AttachmentPayload!
@@ -2905,7 +3049,7 @@ type Mutation {
   """
   attachmentLinkZendesk(
     """
-    The issue for which to link the .
+    The issue for which to link the Zendesk ticket.
     """
     issueId: String!
     """
@@ -3282,6 +3426,10 @@ type Mutation {
     """
     redirectUri: String!
   ): IntegrationPayload!
+  """
+  Disconnects the organization from Intercom.
+  """
+  integrationIntercomDelete: IntegrationPayload!
   """
   Archives an integration resource.
   """
@@ -4368,12 +4516,14 @@ type Mutation {
     input: WorkflowStateUpdateInput!
   ): WorkflowStatePayload!
 }
+
 interface Node {
   """
   The unique identifier of the entity.
   """
   id: ID!
 }
+
 """
 A notification sent to a user.
 """
@@ -4429,11 +4579,13 @@ type Notification implements Node {
   """
   user: User!
 }
+
 type NotificationConnection {
   edges: [NotificationEdge!]!
   nodes: [Notification!]!
   pageInfo: PageInfo!
 }
+
 type NotificationEdge {
   """
   Used in `before` and `after` args
@@ -4441,6 +4593,7 @@ type NotificationEdge {
   cursor: String!
   node: Notification!
 }
+
 type NotificationPayload {
   """
   The identifier of the last sync operation.
@@ -4455,6 +4608,7 @@ type NotificationPayload {
   """
   success: Boolean!
 }
+
 """
 Notification subscriptions for models.
 """
@@ -4493,11 +4647,13 @@ type NotificationSubscription implements Node {
   """
   user: User!
 }
+
 type NotificationSubscriptionConnection {
   edges: [NotificationSubscriptionEdge!]!
   nodes: [NotificationSubscription!]!
   pageInfo: PageInfo!
 }
+
 input NotificationSubscriptionCreateInput {
   """
   The identifier. If none is provided, the backend will generate one.
@@ -4512,6 +4668,7 @@ input NotificationSubscriptionCreateInput {
   """
   teamId: String
 }
+
 type NotificationSubscriptionEdge {
   """
   Used in `before` and `after` args
@@ -4519,6 +4676,7 @@ type NotificationSubscriptionEdge {
   cursor: String!
   node: NotificationSubscription!
 }
+
 type NotificationSubscriptionPayload {
   """
   The identifier of the last sync operation.
@@ -4533,12 +4691,14 @@ type NotificationSubscriptionPayload {
   """
   success: Boolean!
 }
+
 input NotificationUpdateInput {
   """
   The time when notification was marked as read.
   """
   readAt: DateTime
 }
+
 """
 OAuth2 client application
 """
@@ -4597,6 +4757,7 @@ type OauthClient implements Node {
   """
   updatedAt: DateTime!
 }
+
 input OauthClientCreateInput {
   """
   User facing description of the application.
@@ -4631,6 +4792,7 @@ input OauthClientCreateInput {
   """
   redirectUris: [String!]!
 }
+
 type OauthClientPayload {
   """
   The identifier of the last sync operation.
@@ -4645,6 +4807,7 @@ type OauthClientPayload {
   """
   success: Boolean!
 }
+
 input OauthClientUpdateInput {
   """
   User facing description of the application.
@@ -4675,16 +4838,19 @@ input OauthClientUpdateInput {
   """
   redirectUris: [String!]
 }
+
 type OauthTokenRevokePayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 input OnboardingCustomerSurvey {
   companyRole: String
   companySize: String
 }
+
 """
 An organization. Organizations are root-level objects that contain user accounts and teams.
 """
@@ -4883,18 +5049,21 @@ type Organization implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
 }
+
 type OrganizationCancelDeletePayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 type OrganizationDeletePayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 """
 Defines the use of a domain by an organization.
 """
@@ -4933,6 +5102,7 @@ type OrganizationDomain implements Node {
   """
   verified: Boolean!
 }
+
 input OrganizationDomainCreateInput {
   """
   The identifier. If none is provided, the backend will generate one.
@@ -4951,6 +5121,7 @@ input OrganizationDomainCreateInput {
   """
   verified: Boolean!
 }
+
 type OrganizationDomainPayload {
   """
   The identifier of the last sync operation.
@@ -4965,12 +5136,14 @@ type OrganizationDomainPayload {
   """
   success: Boolean!
 }
+
 type OrganizationDomainSimplePayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 input OrganizationDomainVerificationInput {
   """
   The identifier of the domain being verified.
@@ -4981,6 +5154,7 @@ input OrganizationDomainVerificationInput {
   """
   verificationCode: String!
 }
+
 type OrganizationExistsPayload {
   """
   Whether the organization exists.
@@ -4991,6 +5165,7 @@ type OrganizationExistsPayload {
   """
   success: Boolean!
 }
+
 """
 An invitation to the organization that has been sent via email.
 """
@@ -5041,11 +5216,13 @@ type OrganizationInvite implements Node {
   """
   updatedAt: DateTime!
 }
+
 type OrganizationInviteConnection {
   edges: [OrganizationInviteEdge!]!
   nodes: [OrganizationInvite!]!
   pageInfo: PageInfo!
 }
+
 input OrganizationInviteCreateInput {
   """
   The email of the invitee.
@@ -5064,6 +5241,7 @@ input OrganizationInviteCreateInput {
   """
   teamIds: [String!]
 }
+
 type OrganizationInviteEdge {
   """
   Used in `before` and `after` args
@@ -5071,6 +5249,7 @@ type OrganizationInviteEdge {
   cursor: String!
   node: OrganizationInvite!
 }
+
 type OrganizationInvitePayload {
   """
   The identifier of the last sync operation.
@@ -5085,6 +5264,7 @@ type OrganizationInvitePayload {
   """
   success: Boolean!
 }
+
 type OrganizationPayload {
   """
   The identifier of the last sync operation.
@@ -5099,6 +5279,7 @@ type OrganizationPayload {
   """
   success: Boolean!
 }
+
 type PageInfo {
   """
   Cursor representing the last result in the paginated results.
@@ -5117,6 +5298,7 @@ type PageInfo {
   """
   startCursor: String
 }
+
 """
 By which field should the pagination order by
 """
@@ -5124,6 +5306,7 @@ enum PaginationOrderBy {
   createdAt
   updatedAt
 }
+
 """
 A project.
 """
@@ -5358,11 +5541,13 @@ type Project implements Node {
   """
   updatedAt: DateTime!
 }
+
 type ProjectConnection {
   edges: [ProjectEdge!]!
   nodes: [Project!]!
   pageInfo: PageInfo!
 }
+
 input ProjectCreateInput {
   """
   The color of the project.
@@ -5417,6 +5602,7 @@ input ProjectCreateInput {
   """
   teamIds: [String!]!
 }
+
 type ProjectEdge {
   """
   Used in `before` and `after` args
@@ -5424,6 +5610,7 @@ type ProjectEdge {
   cursor: String!
   node: Project!
 }
+
 """
 An external link for a project.
 """
@@ -5462,11 +5649,13 @@ type ProjectLink implements Node {
   """
   url: String!
 }
+
 type ProjectLinkConnection {
   edges: [ProjectLinkEdge!]!
   nodes: [ProjectLink!]!
   pageInfo: PageInfo!
 }
+
 input ProjectLinkCreateInput {
   """
   The identifier. If none is provided, the backend will generate one.
@@ -5485,6 +5674,7 @@ input ProjectLinkCreateInput {
   """
   url: String!
 }
+
 type ProjectLinkEdge {
   """
   Used in `before` and `after` args
@@ -5492,6 +5682,7 @@ type ProjectLinkEdge {
   cursor: String!
   node: ProjectLink!
 }
+
 type ProjectLinkPayload {
   """
   The identifier of the last sync operation.
@@ -5506,6 +5697,7 @@ type ProjectLinkPayload {
   """
   success: Boolean!
 }
+
 type ProjectPayload {
   """
   The identifier of the last sync operation.
@@ -5520,6 +5712,7 @@ type ProjectPayload {
   """
   success: Boolean!
 }
+
 input ProjectUpdateInput {
   """
   The color of the project.
@@ -5582,6 +5775,7 @@ input ProjectUpdateInput {
   """
   teamIds: [String!]
 }
+
 """
 Pull request data
 """
@@ -5602,6 +5796,7 @@ type PullRequestPayload {
   userId: String!
   userLogin: String!
 }
+
 """
 A user's web browser push notification subscription.
 """
@@ -5624,11 +5819,13 @@ type PushSubscription implements Node {
   """
   updatedAt: DateTime!
 }
+
 type PushSubscriptionConnection {
   edges: [PushSubscriptionEdge!]!
   nodes: [PushSubscription!]!
   pageInfo: PageInfo!
 }
+
 input PushSubscriptionCreateInput {
   """
   The data of the subscription in stringified JSON format.
@@ -5643,6 +5840,7 @@ input PushSubscriptionCreateInput {
   """
   userId: String!
 }
+
 type PushSubscriptionEdge {
   """
   Used in `before` and `after` args
@@ -5650,6 +5848,7 @@ type PushSubscriptionEdge {
   cursor: String!
   node: PushSubscription!
 }
+
 type PushSubscriptionPayload {
   """
   The identifier of the last sync operation.
@@ -5660,12 +5859,14 @@ type PushSubscriptionPayload {
   """
   success: Boolean!
 }
+
 type PushSubscriptionTestPayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 type Query {
   """
   All API keys for the user.
@@ -6799,6 +7000,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): WorkflowStateConnection!
 }
+
 """
 A reaction associated with a comment.
 """
@@ -6833,11 +7035,13 @@ type Reaction implements Node {
   """
   user: User!
 }
+
 type ReactionConnection {
   edges: [ReactionEdge!]!
   nodes: [Reaction!]!
   pageInfo: PageInfo!
 }
+
 input ReactionCreateInput {
   """
   The comment to associate the reaction with.
@@ -6852,6 +7056,7 @@ input ReactionCreateInput {
   """
   id: String
 }
+
 type ReactionEdge {
   """
   Used in `before` and `after` args
@@ -6859,6 +7064,7 @@ type ReactionEdge {
   cursor: String!
   node: Reaction!
 }
+
 type ReactionPayload {
   """
   The identifier of the last sync operation.
@@ -6867,6 +7073,7 @@ type ReactionPayload {
   reaction: Reaction!
   success: Boolean!
 }
+
 type RotateSecretPayload {
   """
   The identifier of the last sync operation.
@@ -6877,6 +7084,7 @@ type RotateSecretPayload {
   """
   success: Boolean!
 }
+
 """
 The integration resource's settings
 """
@@ -6902,6 +7110,7 @@ type SamlConfiguration {
   """
   ssoSigningCert: String
 }
+
 input SamlConfigurationInput {
   """
   List of allowed email domains for SAML authentication.
@@ -6924,6 +7133,7 @@ input SamlConfigurationInput {
   """
   ssoSigningCert: String
 }
+
 type SearchResultPayload {
   """
   Archived issues matching the search term along with all their dependencies.
@@ -6938,6 +7148,7 @@ type SearchResultPayload {
   """
   totalCount: Int!
 }
+
 """
 Sentry issue data
 """
@@ -6987,6 +7198,7 @@ type SentryIssuePayload {
   """
   webUrl: String!
 }
+
 """
 Sentry specific settings.
 """
@@ -6996,6 +7208,7 @@ type SentrySettings {
   """
   organizationSlug: String!
 }
+
 """
 Slack notification specific settings.
 """
@@ -7004,6 +7217,7 @@ type SlackPostSettings {
   channelId: String!
   configurationUrl: String!
 }
+
 type SsoUrlFromEmailResponse {
   """
   SAML SSO sign-in URL.
@@ -7014,6 +7228,7 @@ type SsoUrlFromEmailResponse {
   """
   success: Boolean!
 }
+
 type StepsResponse {
   """
   List of client IDs for the document steps.
@@ -7028,6 +7243,7 @@ type StepsResponse {
   """
   version: Int!
 }
+
 """
 The subscription of an organization.
 """
@@ -7078,6 +7294,7 @@ type Subscription implements Node {
   """
   updatedAt: DateTime!
 }
+
 type SubscriptionPayload {
   """
   The date the subscription was set to cancel at the end of the billing period, if any.
@@ -7096,12 +7313,14 @@ type SubscriptionPayload {
   """
   success: Boolean!
 }
+
 type SubscriptionSessionPayload {
   """
   The subscription session that was created or updated.
   """
   session: String
 }
+
 input SubscriptionUpdateInput {
   """
   The date the subscription was set to cancel, if any.
@@ -7112,6 +7331,7 @@ input SubscriptionUpdateInput {
   """
   pendingChangeType: String
 }
+
 """
 Contains a delta sync.
 """
@@ -7129,6 +7349,7 @@ type SyncDeltaResponse {
   """
   updates: String
 }
+
 """
 Contains either the full serialized state of the application or delta packets that the requester can
   apply to the local data set in order to be up-to-date.
@@ -7157,12 +7378,14 @@ type SyncResponse {
   """
   subscribedSyncGroups: [String!]!
 }
+
 type SynchronizedPayload {
   """
   The identifier of the last sync operation.
   """
   lastSyncId: Float!
 }
+
 """
 An organizational unit that contains issues.
 """
@@ -7590,11 +7813,13 @@ type Team implements Node {
     orderBy: PaginationOrderBy
   ): WebhookConnection!
 }
+
 type TeamConnection {
   edges: [TeamEdge!]!
   nodes: [Team!]!
   pageInfo: PageInfo!
 }
+
 input TeamCreateInput {
   """
   Period after which closed and completed issues are automatically archived, in months. 0 means disabled.
@@ -7705,6 +7930,7 @@ input TeamCreateInput {
   """
   upcomingCycleCount: Float
 }
+
 type TeamEdge {
   """
   Used in `before` and `after` args
@@ -7712,6 +7938,7 @@ type TeamEdge {
   cursor: String!
   node: Team!
 }
+
 """
 Defines the membership of a user to a team.
 """
@@ -7746,11 +7973,13 @@ type TeamMembership implements Node {
   """
   user: User!
 }
+
 type TeamMembershipConnection {
   edges: [TeamMembershipEdge!]!
   nodes: [TeamMembership!]!
   pageInfo: PageInfo!
 }
+
 input TeamMembershipCreateInput {
   """
   The identifier. If none is provided, the backend will generate one.
@@ -7769,6 +7998,7 @@ input TeamMembershipCreateInput {
   """
   userId: String!
 }
+
 type TeamMembershipEdge {
   """
   Used in `before` and `after` args
@@ -7776,6 +8006,7 @@ type TeamMembershipEdge {
   cursor: String!
   node: TeamMembership!
 }
+
 type TeamMembershipPayload {
   """
   The identifier of the last sync operation.
@@ -7790,12 +8021,14 @@ type TeamMembershipPayload {
   """
   teamMembership: TeamMembership
 }
+
 input TeamMembershipUpdateInput {
   """
   Internal. Whether the user is the owner of the team.
   """
   owner: Boolean!
 }
+
 type TeamPayload {
   """
   The identifier of the last sync operation.
@@ -7810,6 +8043,7 @@ type TeamPayload {
   """
   team: Team
 }
+
 input TeamUpdateInput {
   """
   Period after which closed and completed issues are automatically archived, in months.
@@ -7940,6 +8174,7 @@ input TeamUpdateInput {
   """
   upcomingCycleCount: Float
 }
+
 """
 A template object used for creating new issues faster.
 """
@@ -7986,11 +8221,13 @@ type Template implements Node {
   """
   updatedAt: DateTime!
 }
+
 type TemplateConnection {
   edges: [TemplateEdge!]!
   nodes: [Template!]!
   pageInfo: PageInfo!
 }
+
 input TemplateCreateInput {
   """
   The template description.
@@ -8017,6 +8254,7 @@ input TemplateCreateInput {
   """
   type: String!
 }
+
 type TemplateEdge {
   """
   Used in `before` and `after` args
@@ -8024,6 +8262,7 @@ type TemplateEdge {
   cursor: String!
   node: Template!
 }
+
 type TemplatePayload {
   """
   The identifier of the last sync operation.
@@ -8038,6 +8277,7 @@ type TemplatePayload {
   """
   template: Template!
 }
+
 input TemplateUpdateInput {
   """
   The template description.
@@ -8052,10 +8292,12 @@ input TemplateUpdateInput {
   """
   templateData: JSON
 }
+
 """
 The `TimelessDateScalar` scalar type represents Date values without a timestamp. It expects strings in the format YYYY-MM-DD
 """
 scalar TimelessDateScalar
+
 input TokenUserAccountAuthInput {
   """
   The email which to login via the magic login code.
@@ -8074,6 +8316,7 @@ input TokenUserAccountAuthInput {
   """
   token: String!
 }
+
 """
 How trashed models should be loaded.
 """
@@ -8082,6 +8325,7 @@ enum TrashOptionType {
   includeTrash
   trashOnly
 }
+
 input UpdateOrganizationInput {
   """
   List of services that are allowed to be used for login.
@@ -8120,6 +8364,7 @@ input UpdateOrganizationInput {
   """
   urlKey: String
 }
+
 input UpdateUserInput {
   """
   Whether the user account is active.
@@ -8146,6 +8391,7 @@ input UpdateUserInput {
   """
   name: String
 }
+
 """
 Object representing Google Cloud upload policy, plus additional data.
 """
@@ -8173,6 +8419,7 @@ type UploadFile {
   """
   uploadUrl: String!
 }
+
 type UploadFileHeader {
   """
   Upload file header key.
@@ -8183,6 +8430,7 @@ type UploadFileHeader {
   """
   value: String!
 }
+
 type UploadPayload {
   """
   The identifier of the last sync operation.
@@ -8197,6 +8445,7 @@ type UploadPayload {
   """
   uploadFile: UploadFile
 }
+
 """
 A user that has access to the the resources of an organization.
 """
@@ -8379,6 +8628,7 @@ type User implements Node {
   """
   updatedAt: DateTime!
 }
+
 """
 A user account.
 """
@@ -8416,12 +8666,14 @@ type UserAccount {
   """
   users: [User!]!
 }
+
 type UserAdminPayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 """
 Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
 """
@@ -8459,11 +8711,13 @@ type UserAuthorizedApplication {
   """
   name: String!
 }
+
 type UserConnection {
   edges: [UserEdge!]!
   nodes: [User!]!
   pageInfo: PageInfo!
 }
+
 type UserEdge {
   """
   Used in `before` and `after` args
@@ -8471,6 +8725,7 @@ type UserEdge {
   cursor: String!
   node: User!
 }
+
 """
 The types of flags that the user can have.
 """
@@ -8492,6 +8747,7 @@ enum UserFlagType {
   migrateThemePreference
   projectWelcomeDismissed
 }
+
 """
 Operations that can be applied to UserFlagType
 """
@@ -8501,6 +8757,7 @@ enum UserFlagUpdateOperation {
   incr
   lock
 }
+
 type UserPayload {
   """
   The identifier of the last sync operation.
@@ -8515,6 +8772,7 @@ type UserPayload {
   """
   user: User
 }
+
 """
 The settings of a user as a JSON object.
 """
@@ -8549,6 +8807,7 @@ type UserSettings implements Node {
   """
   user: User!
 }
+
 type UserSettingsFlagPayload {
   """
   The flag key which was updated.
@@ -8567,6 +8826,7 @@ type UserSettingsFlagPayload {
   """
   value: Int!
 }
+
 type UserSettingsFlagsResetPayload {
   """
   The identifier of the last sync operation.
@@ -8577,6 +8837,7 @@ type UserSettingsFlagsResetPayload {
   """
   success: Boolean!
 }
+
 type UserSettingsPayload {
   """
   The identifier of the last sync operation.
@@ -8591,6 +8852,7 @@ type UserSettingsPayload {
   """
   userSettings: UserSettings!
 }
+
 input UserSettingsUpdateInput {
   """
   The user's notification preferences.
@@ -8605,12 +8867,14 @@ input UserSettingsUpdateInput {
   """
   unsubscribedFrom: [String!]
 }
+
 type UserSubscribeToNewsletterPayload {
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
+
 """
 View preferences.
 """
@@ -8641,6 +8905,7 @@ type ViewPreferences implements Node {
   """
   viewType: String!
 }
+
 input ViewPreferencesCreateInput {
   """
   The custom view these view preferences are associated with.
@@ -8683,6 +8948,7 @@ input ViewPreferencesCreateInput {
   """
   viewType: ViewType!
 }
+
 type ViewPreferencesPayload {
   """
   The identifier of the last sync operation.
@@ -8697,6 +8963,7 @@ type ViewPreferencesPayload {
   """
   viewPreferences: ViewPreferences!
 }
+
 """
 The type of view preferences (either user or organization level preferences).
 """
@@ -8704,12 +8971,14 @@ enum ViewPreferencesType {
   organization
   user
 }
+
 input ViewPreferencesUpdateInput {
   """
   View preferences.
   """
   preferences: JSONObject!
 }
+
 """
 The client view this custom view is targeting.
 """
@@ -8729,6 +8998,7 @@ enum ViewType {
   roadmap
   userProfile
 }
+
 """
 A webhook used to send HTTP notifications over data updates
 """
@@ -8779,11 +9049,13 @@ type Webhook implements Node {
   """
   url: String!
 }
+
 type WebhookConnection {
   edges: [WebhookEdge!]!
   nodes: [Webhook!]!
   pageInfo: PageInfo!
 }
+
 input WebhookCreateInput {
   """
   Whether this webhook is enabled.
@@ -8814,6 +9086,7 @@ input WebhookCreateInput {
   """
   url: String!
 }
+
 type WebhookEdge {
   """
   Used in `before` and `after` args
@@ -8821,6 +9094,7 @@ type WebhookEdge {
   cursor: String!
   node: Webhook!
 }
+
 type WebhookPayload {
   """
   The identifier of the last sync operation.
@@ -8835,6 +9109,7 @@ type WebhookPayload {
   """
   webhook: Webhook!
 }
+
 input WebhookUpdateInput {
   """
   Whether this webhook is enabled.
@@ -8857,6 +9132,7 @@ input WebhookUpdateInput {
   """
   url: String
 }
+
 """
 A state in a team workflow.
 """
@@ -8932,11 +9208,13 @@ type WorkflowState implements Node {
   """
   updatedAt: DateTime!
 }
+
 type WorkflowStateConnection {
   edges: [WorkflowStateEdge!]!
   nodes: [WorkflowState!]!
   pageInfo: PageInfo!
 }
+
 input WorkflowStateCreateInput {
   """
   The color of the state.
@@ -8967,6 +9245,7 @@ input WorkflowStateCreateInput {
   """
   type: String!
 }
+
 type WorkflowStateEdge {
   """
   Used in `before` and `after` args
@@ -8974,6 +9253,7 @@ type WorkflowStateEdge {
   cursor: String!
   node: WorkflowState!
 }
+
 type WorkflowStatePayload {
   """
   The identifier of the last sync operation.
@@ -8988,6 +9268,7 @@ type WorkflowStatePayload {
   """
   workflowState: WorkflowState!
 }
+
 input WorkflowStateUpdateInput {
   """
   The color of the state.
@@ -9006,6 +9287,7 @@ input WorkflowStateUpdateInput {
   """
   position: Float
 }
+
 """
 Zendesk specific settings.
 """
