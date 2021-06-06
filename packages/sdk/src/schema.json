@@ -10963,7 +10963,7 @@
           },
           {
             "name": "trashed",
-            "description": "[Deprecated] Wether the issue has been trashed.",
+            "description": "Wether the issue has been trashed.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",

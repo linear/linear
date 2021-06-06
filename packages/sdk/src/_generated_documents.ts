@@ -1728,7 +1728,7 @@ export type IssueUpdateInput = {
   teamId?: Maybe<Scalars["String"]>;
   /** The issue title. */
   title?: Maybe<Scalars["String"]>;
-  /** [Deprecated] Wether the issue has been trashed. */
+  /** Wether the issue has been trashed. */
   trashed?: Maybe<Scalars["Boolean"]>;
 };
 
