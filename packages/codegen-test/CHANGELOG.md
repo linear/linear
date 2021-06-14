@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.8.7
+
+### Patch Changes
+
+- 7f054e3: chore(deps): update dependency patch versions
+
 ## 1.8.6
 
 ### Patch Changes
