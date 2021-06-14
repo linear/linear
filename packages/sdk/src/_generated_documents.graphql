@@ -2600,36 +2600,6 @@ query attachmentIssue_history(
     }
   }
 }
-# Integration resources for this issue.
-query attachmentIssue_integrationResources(
-  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
-  $id: String!
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  attachmentIssue(id: $id) {
-    integrationResources(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...IntegrationResourceConnection
-    }
-  }
-}
 # Inverse relations associated with this issue.
 query attachmentIssue_inverseRelations(
   # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
@@ -3118,94 +3088,6 @@ query integration($id: String!) {
     ...Integration
   }
 }
-# One specific integration resource. (e.g. linked GitHub pull requests for an issue)
-query integrationResource($id: String!) {
-  integrationResource(id: $id) {
-    ...IntegrationResource
-  }
-}
-# Detailed information about the external resource.
-query integrationResource_data($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      ...IntegrationResourceData
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'githubCommit'
-query integrationResource_data_githubCommit($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      githubCommit {
-        ...CommitPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'githubPullRequest'
-query integrationResource_data_githubPullRequest($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      githubPullRequest {
-        ...PullRequestPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'gitlabMergeRequest'
-query integrationResource_data_gitlabMergeRequest($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      gitlabMergeRequest {
-        ...PullRequestPayload
-      }
-    }
-  }
-}
-# The payload for an IntegrationResource of type 'sentryIssue'
-query integrationResource_data_sentryIssue($id: String!) {
-  integrationResource(id: $id) {
-    data {
-      sentryIssue {
-        ...SentryIssuePayload
-      }
-    }
-  }
-}
-# Pull request information for GitHub pull requests and GitLab merge requests.
-query integrationResource_pullRequest($id: String!) {
-  integrationResource(id: $id) {
-    pullRequest {
-      ...PullRequestPayload
-    }
-  }
-}
-# All integrations resources (e.g. linked GitHub pull requests for issues).
-query integrationResources(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  integrationResources(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...IntegrationResourceConnection
-  }
-}
 # All integrations.
 query integrations(
   # A cursor to be used with first for forward pagination
@@ -3375,35 +3257,6 @@ query issue_history(
       orderBy: $orderBy
     ) {
       ...IssueHistoryConnection
-    }
-  }
-}
-# Integration resources for this issue.
-query issue_integrationResources(
-  $id: String!
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  issue(id: $id) {
-    integrationResources(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...IntegrationResourceConnection
     }
   }
 }
