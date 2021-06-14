@@ -6,6 +6,8 @@ hooks:
     - prettier --write
 config:
   documentFile: ./_generated_documents
+  skipComments:
+    - "[Internal]"
   skipFields:
     - integrationResource
     - integrationResources

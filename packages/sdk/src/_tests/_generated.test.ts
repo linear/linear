@@ -38,30 +38,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test ArchivedModelSync query */
-  describe("ArchivedModelSync", () => {
-    /** Test the root model query for ArchivedModelSync */
-    it("archivedModelSync", async () => {
-      const archivedModelSync: L.ArchiveResponse | undefined = await client.archivedModelSync(
-        "mock-identifier",
-        "mock-modelClass"
-      );
-      expect(archivedModelSync instanceof L.ArchiveResponse);
-    });
-  });
-
-  /** Test ArchivedModelsSync query */
-  describe("ArchivedModelsSync", () => {
-    /** Test the root model query for ArchivedModelsSync */
-    it("archivedModelsSync", async () => {
-      const archivedModelsSync: L.ArchiveResponse | undefined = await client.archivedModelsSync(
-        "mock-modelClass",
-        "mock-teamId"
-      );
-      expect(archivedModelsSync instanceof L.ArchiveResponse);
-    });
-  });
-
   /** Test AttachmentIssue query */
   describe("AttachmentIssue", () => {
     let _attachmentIssue: L.Issue | undefined;
@@ -446,18 +422,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test DependentModelSync query */
-  describe("DependentModelSync", () => {
-    /** Test the root model query for DependentModelSync */
-    it("dependentModelSync", async () => {
-      const dependentModelSync: L.DependencyResponse | undefined = await client.dependentModelSync(
-        "mock-identifier",
-        "mock-modelClass"
-      );
-      expect(dependentModelSync instanceof L.DependencyResponse);
-    });
-  });
-
   /** Test all Emoji queries */
   describe("Emojis", () => {
     let _emoji: L.Emoji | undefined;
@@ -684,16 +648,6 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No inviteInfo found - cannot test _inviteInfo.inviteData query");
       }
-    });
-  });
-
-  /** Test IssueDescriptionHistory query */
-  describe("IssueDescriptionHistory", () => {
-    /** Test the root model query for IssueDescriptionHistory */
-    it("issueDescriptionHistory", async () => {
-      const issueDescriptionHistory: L.IssueDescriptionHistoryPayload | undefined =
-        await client.issueDescriptionHistory("mock-id");
-      expect(issueDescriptionHistory instanceof L.IssueDescriptionHistoryPayload);
     });
   });
 
@@ -1608,28 +1562,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test Search query */
-  describe("Search", () => {
-    let _search: L.SearchResultPayload | undefined;
-
-    /** Test the root model query for Search */
-    it("search", async () => {
-      const search: L.SearchResultPayload | undefined = await client.search("mock-term");
-      _search = search;
-      expect(search instanceof L.SearchResultPayload);
-    });
-
-    /** Test the search model query for Search_ArchivePayload */
-    it("search.archivePayload", async () => {
-      if (_search) {
-        const archivePayload: L.ArchiveResponse | undefined = _search.archivePayload;
-        expect(archivePayload instanceof L.ArchiveResponse);
-      } else {
-        console.warn("codegen-doc:print: No search found - cannot test _search.archivePayload query");
-      }
-    });
-  });
-
   /** Test SsoUrlFromEmail query */
   describe("SsoUrlFromEmail", () => {
     /** Test the root model query for SsoUrlFromEmail */
@@ -1645,24 +1577,6 @@ describe("generated", () => {
     it("subscription", async () => {
       const subscription: L.Subscription | undefined = await client.subscription;
       expect(subscription instanceof L.Subscription);
-    });
-  });
-
-  /** Test SyncBootstrap query */
-  describe("SyncBootstrap", () => {
-    /** Test the root model query for SyncBootstrap */
-    it("syncBootstrap", async () => {
-      const syncBootstrap: L.SyncResponse | undefined = await client.syncBootstrap();
-      expect(syncBootstrap instanceof L.SyncResponse);
-    });
-  });
-
-  /** Test SyncDelta query */
-  describe("SyncDelta", () => {
-    /** Test the root model query for SyncDelta */
-    it("syncDelta", async () => {
-      const syncDelta: L.SyncDeltaResponse | undefined = await client.syncDelta(123, 123);
-      expect(syncDelta instanceof L.SyncDeltaResponse);
     });
   });
 
@@ -1837,6 +1751,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team.defaultIssueState query for L.WorkflowState */
+    it("team.defaultIssueState", async () => {
+      if (_team) {
+        const team_defaultIssueState: L.WorkflowState | undefined = await _team.defaultIssueState;
+        expect(team_defaultIssueState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultIssueState query");
+      }
+    });
+
     /** Test the team.draftWorkflowState query for L.WorkflowState */
     it("team.draftWorkflowState", async () => {
       if (_team) {
@@ -1895,6 +1819,16 @@ describe("generated", () => {
         expect(team_startWorkflowState instanceof L.WorkflowState);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.startWorkflowState query");
+      }
+    });
+
+    /** Test the team.triageIssueState query for L.WorkflowState */
+    it("team.triageIssueState", async () => {
+      if (_team) {
+        const team_triageIssueState: L.WorkflowState | undefined = await _team.triageIssueState;
+        expect(team_triageIssueState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.triageIssueState query");
       }
     });
   });

@@ -26,11 +26,10 @@
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
     "mock": "npx graphql-faker packages/sdk/src/schema.graphql",
     "schema": "yarn update:schema",
-    "test:ci": "npx jest -w 1",
     "test:e2e": "E2E=true yarn test _generated.test",
     "test:update": "yarn test -u",
     "test:watch": "yarn test --watch",
-    "test": "npx jest -w 4",
+    "test": "npx jest -w 1",
     "update:dependencies": "yarn upgrade && lerna run generate:changeset:dependencies",
     "update:schema": "lerna run generate:schema && lerna run generate:changeset:schema"
   },
