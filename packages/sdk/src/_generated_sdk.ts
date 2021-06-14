@@ -1365,47 +1365,6 @@ export class FigmaEmbedPayload extends Request {
   public figmaEmbed?: FigmaEmbed;
 }
 /**
- * A recorded entry of a file uploaded by a user.
- *
- * @param request - function to call the graphql client
- * @param data - L.FileUploadFragment response data
- */
-export class FileUpload extends Request {
-  private _creator?: L.FileUploadFragment["creator"];
-
-  public constructor(request: LinearRequest, data: L.FileUploadFragment) {
-    super(request);
-    this.assetUrl = data.assetUrl ?? undefined;
-    this.contentType = data.contentType ?? undefined;
-    this.filename = data.filename ?? undefined;
-    this.id = data.id ?? undefined;
-    this.metaData = parseJson(data.metaData) ?? undefined;
-    this.size = data.size ?? undefined;
-    this._creator = data.creator ?? undefined;
-  }
-
-  /** The asset URL this file is available at. */
-  public assetUrl?: string;
-  /** The MIME type of the uploaded file. */
-  public contentType?: string;
-  /** The name of the uploaded file. */
-  public filename?: string;
-  /** The unique identifier of the entity. */
-  public id?: string;
-  /** Additional metadata of the file. */
-  public metaData?: Record<string, unknown>;
-  /** Size of the uploaded file in bytes. */
-  public size?: number;
-  /** The user who uploaded the file. */
-  public get creator(): LinearFetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
-  }
-  /** The organization the upload belongs to. */
-  public get organization(): LinearFetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-}
-/**
  * GitHub OAuth token, plus information about the organizations the user is a member of.
  *
  * @param request - function to call the graphql client
@@ -2712,6 +2671,7 @@ export class Notification extends Request {
     this.id = data.id ?? undefined;
     this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._comment = data.comment ?? undefined;
@@ -2735,6 +2695,8 @@ export class Notification extends Request {
   public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  public snoozedUntilAt?: Date;
   /** Notification type */
   public type?: string;
   /**
@@ -4269,11 +4231,13 @@ export class SynchronizedPayload extends Request {
  */
 export class Team extends Request {
   private _activeCycle?: L.TeamFragment["activeCycle"];
+  private _defaultIssueState?: L.TeamFragment["defaultIssueState"];
   private _draftWorkflowState?: L.TeamFragment["draftWorkflowState"];
   private _markedAsDuplicateWorkflowState?: L.TeamFragment["markedAsDuplicateWorkflowState"];
   private _mergeWorkflowState?: L.TeamFragment["mergeWorkflowState"];
   private _reviewWorkflowState?: L.TeamFragment["reviewWorkflowState"];
   private _startWorkflowState?: L.TeamFragment["startWorkflowState"];
+  private _triageIssueState?: L.TeamFragment["triageIssueState"];
 
   public constructor(request: LinearRequest, data: L.TeamFragment) {
     super(request);
@@ -4300,6 +4264,7 @@ export class Team extends Request {
     this.issueEstimationAllowZero = data.issueEstimationAllowZero ?? undefined;
     this.issueEstimationExtended = data.issueEstimationExtended ?? undefined;
     this.issueEstimationType = data.issueEstimationType ?? undefined;
+    this.issueOrderingNoPriorityFirst = data.issueOrderingNoPriorityFirst ?? undefined;
     this.key = data.key ?? undefined;
     this.name = data.name ?? undefined;
     this.private = data.private ?? undefined;
@@ -4307,14 +4272,17 @@ export class Team extends Request {
     this.slackIssueStatuses = data.slackIssueStatuses ?? undefined;
     this.slackNewIssue = data.slackNewIssue ?? undefined;
     this.timezone = data.timezone ?? undefined;
+    this.triageEnabled = data.triageEnabled ?? undefined;
     this.upcomingCycleCount = data.upcomingCycleCount ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this._activeCycle = data.activeCycle ?? undefined;
+    this._defaultIssueState = data.defaultIssueState ?? undefined;
     this._draftWorkflowState = data.draftWorkflowState ?? undefined;
     this._markedAsDuplicateWorkflowState = data.markedAsDuplicateWorkflowState ?? undefined;
     this._mergeWorkflowState = data.mergeWorkflowState ?? undefined;
     this._reviewWorkflowState = data.reviewWorkflowState ?? undefined;
     this._startWorkflowState = data.startWorkflowState ?? undefined;
+    this._triageIssueState = data.triageIssueState ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -4363,11 +4331,13 @@ export class Team extends Request {
   public issueEstimationExtended?: boolean;
   /** The issue estimation type to use. */
   public issueEstimationType?: string;
+  /** Whether issues without priority should be sorted first. */
+  public issueOrderingNoPriorityFirst?: boolean;
   /** The team's unique key. The key is used in URLs. */
   public key?: string;
   /** The team's name. */
   public name?: string;
-  /** Internal. Whether the team is private or not. */
+  /** Whether the team is private or not. */
   public private?: boolean;
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments?: boolean;
@@ -4377,6 +4347,8 @@ export class Team extends Request {
   public slackNewIssue?: boolean;
   /** The timezone of the team. Defaults to "America/Los_Angeles" */
   public timezone?: string;
+  /** Whether triage mode is enabled for the team or not. */
+  public triageEnabled?: boolean;
   /** How many upcoming cycles to create. */
   public upcomingCycleCount?: number;
   /**
@@ -4387,6 +4359,12 @@ export class Team extends Request {
   /** Team's currently active cycle. */
   public get activeCycle(): LinearFetch<Cycle> | undefined {
     return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
+  }
+  /** The default workflow state into which issues are set when they are opened by team members. */
+  public get defaultIssueState(): LinearFetch<WorkflowState> | undefined {
+    return this._defaultIssueState?.id
+      ? new WorkflowStateQuery(this._request).fetch(this._defaultIssueState?.id)
+      : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
   public get draftWorkflowState(): LinearFetch<WorkflowState> | undefined {
@@ -4420,6 +4398,12 @@ export class Team extends Request {
   public get startWorkflowState(): LinearFetch<WorkflowState> | undefined {
     return this._startWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
+      : undefined;
+  }
+  /** The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled. */
+  public get triageIssueState(): LinearFetch<WorkflowState> | undefined {
+    return this._triageIssueState?.id
+      ? new WorkflowStateQuery(this._request).fetch(this._triageIssueState?.id)
       : undefined;
   }
   /** Cycles associated with the team. */
@@ -7639,6 +7623,37 @@ export class AttachmentLinkIntercomMutation extends Request {
       }
     ).then(response => {
       const data = response?.attachmentLinkIntercom;
+      return data ? new AttachmentPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable AttachmentLinkUrl Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentLinkUrlMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentLinkUrl mutation and return a AttachmentPayload
+   *
+   * @param issueId - required issueId to pass to attachmentLinkURL
+   * @param url - required url to pass to attachmentLinkURL
+   * @returns parsed response from AttachmentLinkUrlMutation
+   */
+  public async fetch(issueId: string, url: string): LinearFetch<AttachmentPayload> {
+    return this._request<L.AttachmentLinkUrlMutation, L.AttachmentLinkUrlMutationVariables>(
+      L.AttachmentLinkUrlDocument,
+      {
+        issueId,
+        url,
+      }
+    ).then(response => {
+      const data = response?.attachmentLinkURL;
       return data ? new AttachmentPayload(this._request, data) : undefined;
     });
   }
@@ -14597,6 +14612,16 @@ export class LinearSdk extends Request {
    */
   public attachmentLinkIntercom(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
     return new AttachmentLinkIntercomMutation(this._request).fetch(conversationId, issueId);
+  }
+  /**
+   * Link any url to an issue.
+   *
+   * @param issueId - required issueId to pass to attachmentLinkURL
+   * @param url - required url to pass to attachmentLinkURL
+   * @returns AttachmentPayload
+   */
+  public attachmentLinkURL(issueId: string, url: string): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkUrlMutation(this._request).fetch(issueId, url);
   }
   /**
    * Link an existing Zendesk ticket to an issue.

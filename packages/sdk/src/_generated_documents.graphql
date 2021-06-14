@@ -132,6 +132,8 @@ fragment Notification on Notification {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
   # The unique identifier of the entity.
   id
 }
@@ -323,26 +325,6 @@ fragment IssueHistory on IssueHistory {
   updatedDescription
   autoArchived
   autoClosed
-}
-
-# A recorded entry of a file uploaded by a user.
-fragment FileUpload on FileUpload {
-  # Additional metadata of the file.
-  metaData
-  # Size of the uploaded file in bytes.
-  size
-  # The MIME type of the uploaded file.
-  contentType
-  # The asset URL this file is available at.
-  assetUrl
-  # The name of the uploaded file.
-  filename
-  # The unique identifier of the entity.
-  id
-  # The user who uploaded the file.
-  creator {
-    id
-  }
 }
 
 # A relation between two issues.
@@ -838,8 +820,6 @@ fragment Team on Team {
   cycleCalenderUrl
   # How many upcoming cycles to create.
   upcomingCycleCount
-  # Internal. Whether the team is private or not.
-  private
   # Only allow issues issues with cycles in Active Issues.
   cycleLockToActive
   # Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.
@@ -860,6 +840,10 @@ fragment Team on Team {
   defaultTemplateForMembersId
   # The default template to use for new issues created by non-members of the team.
   defaultTemplateForNonMembersId
+  # The default workflow state into which issues are set when they are opened by team members.
+  defaultIssueState {
+    id
+  }
   # The duration of a cycle in weeks.
   cycleDuration
   # The issue estimation type to use.
@@ -901,10 +885,18 @@ fragment Team on Team {
   markedAsDuplicateWorkflowState {
     id
   }
+  # The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled.
+  triageIssueState {
+    id
+  }
   # Unique hash for the team to be used in invite URLs.
   inviteHash
   # What to use as an default estimate for unestimated issues.
   defaultIssueEstimate
+  # Whether issues without priority should be sorted first.
+  issueOrderingNoPriorityFirst
+  # Whether the team is private or not.
+  private
   # Whether the team uses cycles.
   cyclesEnabled
   # Whether to add additional points to the estimate scale.
@@ -919,6 +911,8 @@ fragment Team on Team {
   slackNewIssue
   # Whether to send new issue status updates to Slack.
   slackIssueStatuses
+  # Whether triage mode is enabled for the team or not.
+  triageEnabled
 }
 
 # Collaborative editing steps for documents.
@@ -4989,6 +4983,17 @@ mutation attachmentLinkIntercom(
   $issueId: String!
 ) {
   attachmentLinkIntercom(conversationId: $conversationId, issueId: $issueId) {
+    ...AttachmentPayload
+  }
+}
+# Link any url to an issue.
+mutation attachmentLinkURL(
+  # The issue for which to link the url.
+  $issueId: String!
+  # The Zendesk ticket ID to link.
+  $url: String!
+) {
+  attachmentLinkURL(issueId: $issueId, url: $url) {
     ...AttachmentPayload
   }
 }

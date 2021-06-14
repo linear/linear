@@ -1837,6 +1837,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team.defaultIssueState query for L.WorkflowState */
+    it("team.defaultIssueState", async () => {
+      if (_team) {
+        const team_defaultIssueState: L.WorkflowState | undefined = await _team.defaultIssueState;
+        expect(team_defaultIssueState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultIssueState query");
+      }
+    });
+
     /** Test the team.draftWorkflowState query for L.WorkflowState */
     it("team.draftWorkflowState", async () => {
       if (_team) {
@@ -1895,6 +1905,16 @@ describe("generated", () => {
         expect(team_startWorkflowState instanceof L.WorkflowState);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.startWorkflowState query");
+      }
+    });
+
+    /** Test the team.triageIssueState query for L.WorkflowState */
+    it("team.triageIssueState", async () => {
+      if (_team) {
+        const team_triageIssueState: L.WorkflowState | undefined = await _team.triageIssueState;
+        expect(team_triageIssueState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.triageIssueState query");
       }
     });
   });

@@ -147,6 +147,8 @@ export type AttachmentConnection = {
 export type AttachmentCreateInput = {
   /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
   groupBySource?: Maybe<Scalars["Boolean"]>;
+  /** An icon url to display with the attachment. Should be of jpg or png format. Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality. */
+  iconUrl?: Maybe<Scalars["String"]>;
   /** The identifier. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
   /** The issue to associate the attachment with. */
@@ -179,6 +181,8 @@ export type AttachmentPayload = {
 };
 
 export type AttachmentUpdateInput = {
+  /** An icon url to display with the attachment. Should be of jpg or png format. Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality. */
+  iconUrl?: Maybe<Scalars["String"]>;
   /** Attachment metadata object with string and number values. */
   metadata?: Maybe<Scalars["JSONObject"]>;
   /** The attachment subtitle. */
@@ -872,27 +876,6 @@ export type FigmaEmbedPayload = {
   figmaEmbed?: Maybe<FigmaEmbed>;
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
-};
-
-/** A recorded entry of a file uploaded by a user. */
-export type FileUpload = {
-  __typename?: "FileUpload";
-  /** The asset URL this file is available at. */
-  assetUrl?: Maybe<Scalars["String"]>;
-  /** The MIME type of the uploaded file. */
-  contentType?: Maybe<Scalars["String"]>;
-  /** The user who uploaded the file. */
-  creator?: Maybe<User>;
-  /** The name of the uploaded file. */
-  filename?: Maybe<Scalars["String"]>;
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** Additional metadata of the file. */
-  metaData: Scalars["JSON"];
-  /** The organization the upload belongs to. */
-  organization: Organization;
-  /** Size of the uploaded file in bytes. */
-  size: Scalars["Float"];
 };
 
 /** GitHub OAuth token, plus information about the organizations the user is a member of. */
@@ -1830,6 +1813,8 @@ export type Mutation = {
   attachmentLinkFront: AttachmentPayload;
   /** Link an existing Intercom conversation to an issue. */
   attachmentLinkIntercom: AttachmentPayload;
+  /** Link any url to an issue. */
+  attachmentLinkURL: AttachmentPayload;
   /** Link an existing Zendesk ticket to an issue. */
   attachmentLinkZendesk: AttachmentPayload;
   /** [Alpha] Updates an existing issue attachment. */
@@ -2136,6 +2121,11 @@ export type MutationAttachmentLinkFrontArgs = {
 export type MutationAttachmentLinkIntercomArgs = {
   conversationId: Scalars["String"];
   issueId: Scalars["String"];
+};
+
+export type MutationAttachmentLinkUrlArgs = {
+  issueId: Scalars["String"];
+  url: Scalars["String"];
 };
 
 export type MutationAttachmentLinkZendeskArgs = {
@@ -2752,6 +2742,8 @@ export type Notification = Node & {
   reactionEmoji?: Maybe<Scalars["String"]>;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   readAt?: Maybe<Scalars["DateTime"]>;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** The team which the notification is associated with. */
   team: Team;
   /** Notification type */
@@ -2849,6 +2841,8 @@ export type NotificationSubscriptionPayload = {
 export type NotificationUpdateInput = {
   /** The time when notification was marked as read. */
   readAt?: Maybe<Scalars["DateTime"]>;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
 };
 
 /** OAuth2 client application */
@@ -3430,8 +3424,12 @@ export type ProjectPayload = {
 };
 
 export type ProjectUpdateInput = {
+  /** The date when the project was canceled. */
+  canceledAt?: Maybe<Scalars["DateTime"]>;
   /** The color of the project. */
   color?: Maybe<Scalars["String"]>;
+  /** The date when the project was completed. */
+  completedAt?: Maybe<Scalars["DateTime"]>;
   /** The description for the project. */
   description?: Maybe<Scalars["String"]>;
   /** The icon of the project. */
@@ -4399,6 +4397,8 @@ export type Team = Node & {
   cyclesEnabled: Scalars["Boolean"];
   /** What to use as an default estimate for unestimated issues. */
   defaultIssueEstimate: Scalars["Float"];
+  /** The default workflow state into which issues are set when they are opened by team members. */
+  defaultIssueState?: Maybe<WorkflowState>;
   /** The default template to use for new issues created by members of the team. */
   defaultTemplateForMembersId?: Maybe<Scalars["String"]>;
   /** The default template to use for new issues created by non-members of the team. */
@@ -4419,6 +4419,8 @@ export type Team = Node & {
   issueEstimationExtended: Scalars["Boolean"];
   /** The issue estimation type to use. */
   issueEstimationType: Scalars["String"];
+  /** Whether issues without priority should be sorted first. */
+  issueOrderingNoPriorityFirst: Scalars["Boolean"];
   /** Issues associated with the team. */
   issues: IssueConnection;
   /** The team's unique key. The key is used in URLs. */
@@ -4437,7 +4439,7 @@ export type Team = Node & {
   name: Scalars["String"];
   /** The organization that the team is associated with. */
   organization: Organization;
-  /** Internal. Whether the team is private or not. */
+  /** Whether the team is private or not. */
   private: Scalars["Boolean"];
   /** Projects associated with the team. */
   projects: ProjectConnection;
@@ -4457,6 +4459,10 @@ export type Team = Node & {
   templates: TemplateConnection;
   /** The timezone of the team. Defaults to "America/Los_Angeles" */
   timezone: Scalars["String"];
+  /** Whether triage mode is enabled for the team or not. */
+  triageEnabled: Scalars["Boolean"];
+  /** The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled. */
+  triageIssueState?: Maybe<WorkflowState>;
   /** How many upcoming cycles to create. */
   upcomingCycleCount: Scalars["Float"];
   /**
@@ -4619,6 +4625,8 @@ export type TeamCreateInput = {
   private?: Maybe<Scalars["Boolean"]>;
   /** The timezone of the team. */
   timezone?: Maybe<Scalars["String"]>;
+  /** Whether triage mode is enabled for the team. */
+  triageEnabled?: Maybe<Scalars["Boolean"]>;
   /** How many upcoming cycles to create. */
   upcomingCycleCount?: Maybe<Scalars["Float"]>;
 };
@@ -4725,6 +4733,8 @@ export type TeamUpdateInput = {
   cyclesEnabled?: Maybe<Scalars["Boolean"]>;
   /** What to use as an default estimate for unestimated issues. */
   defaultIssueEstimate?: Maybe<Scalars["Float"]>;
+  /** Default status for newly created issues. */
+  defaultIssueStateId?: Maybe<Scalars["String"]>;
   /** The identifier of the default template for members of this team. */
   defaultTemplateForMembersId?: Maybe<Scalars["String"]>;
   /** The identifier of the default template for non-members of this team. */
@@ -4751,7 +4761,7 @@ export type TeamUpdateInput = {
   mergeWorkflowStateId?: Maybe<Scalars["String"]>;
   /** The name of the team. */
   name?: Maybe<Scalars["String"]>;
-  /** Internal. Whether the team is private or not. */
+  /** Whether the team is private or not. */
   private?: Maybe<Scalars["Boolean"]>;
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   reviewWorkflowStateId?: Maybe<Scalars["String"]>;
@@ -4765,6 +4775,8 @@ export type TeamUpdateInput = {
   startWorkflowStateId?: Maybe<Scalars["String"]>;
   /** The timezone of the team. */
   timezone?: Maybe<Scalars["String"]>;
+  /** Whether triage mode is enabled for the team. */
+  triageEnabled?: Maybe<Scalars["Boolean"]>;
   /** How many upcoming cycles to create. */
   upcomingCycleCount?: Maybe<Scalars["Float"]>;
 };
@@ -5100,6 +5112,7 @@ export enum UserFlagType {
   ListSelectionTip = "listSelectionTip",
   MigrateThemePreference = "migrateThemePreference",
   ProjectWelcomeDismissed = "projectWelcomeDismissed",
+  TriageWelcomeDismissed = "triageWelcomeDismissed",
 }
 
 /** Operations that can be applied to UserFlagType */
@@ -5266,6 +5279,7 @@ export enum ViewType {
   Project = "project",
   Projects = "projects",
   Roadmap = "roadmap",
+  Triage = "triage",
   UserProfile = "userProfile",
 }
 
@@ -5478,7 +5492,7 @@ export type MilestoneFragment = { __typename?: "Milestone" } & Pick<
 
 export type NotificationFragment = { __typename?: "Notification" } & Pick<
   Notification,
-  "reactionEmoji" | "type" | "updatedAt" | "emailedAt" | "readAt" | "archivedAt" | "createdAt" | "id"
+  "reactionEmoji" | "type" | "updatedAt" | "emailedAt" | "readAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
 > & {
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
@@ -5563,11 +5577,6 @@ export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
     toAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
-
-export type FileUploadFragment = { __typename?: "FileUpload" } & Pick<
-  FileUpload,
-  "metaData" | "size" | "contentType" | "assetUrl" | "filename" | "id"
-> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type IssueRelationFragment = { __typename?: "IssueRelation" } & Pick<
   IssueRelation,
@@ -5736,7 +5745,6 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
   | "cycleIssueAutoAssignStarted"
   | "cycleCalenderUrl"
   | "upcomingCycleCount"
-  | "private"
   | "cycleLockToActive"
   | "autoArchivePeriod"
   | "autoClosePeriod"
@@ -5757,6 +5765,8 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
   | "id"
   | "inviteHash"
   | "defaultIssueEstimate"
+  | "issueOrderingNoPriorityFirst"
+  | "private"
   | "cyclesEnabled"
   | "issueEstimationExtended"
   | "issueEstimationAllowZero"
@@ -5764,13 +5774,16 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
   | "slackIssueComments"
   | "slackNewIssue"
   | "slackIssueStatuses"
+  | "triageEnabled"
 > & {
     activeCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    defaultIssueState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     mergeWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     draftWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     startWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     reviewWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     markedAsDuplicateWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    triageIssueState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
   };
 
 export type DocumentStepFragment = { __typename?: "DocumentStep" } & Pick<
@@ -7986,6 +7999,15 @@ export type AttachmentLinkIntercomMutation = { __typename?: "Mutation" } & {
   attachmentLinkIntercom: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
 };
 
+export type AttachmentLinkUrlMutationVariables = Exact<{
+  issueId: Scalars["String"];
+  url: Scalars["String"];
+}>;
+
+export type AttachmentLinkUrlMutation = { __typename?: "Mutation" } & {
+  attachmentLinkURL: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
 export type AttachmentLinkZendeskMutationVariables = Exact<{
   issueId: Scalars["String"];
   ticketId: Scalars["String"];
@@ -9157,35 +9179,6 @@ export type WorkflowStateUpdateMutation = { __typename?: "Mutation" } & {
   workflowStateUpdate: { __typename?: "WorkflowStatePayload" } & WorkflowStatePayloadFragment;
 };
 
-export const FileUploadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "FileUpload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FileUpload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "metaData" } },
-          { kind: "Field", name: { kind: "Name", value: "size" } },
-          { kind: "Field", name: { kind: "Name", value: "contentType" } },
-          { kind: "Field", name: { kind: "Name", value: "assetUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "filename" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<FileUploadFragment, unknown>;
 export const TemplateFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -11957,6 +11950,7 @@ export const NotificationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "readAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "snoozedUntilAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
@@ -12934,7 +12928,6 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "cycleIssueAutoAssignStarted" } },
           { kind: "Field", name: { kind: "Name", value: "cycleCalenderUrl" } },
           { kind: "Field", name: { kind: "Name", value: "upcomingCycleCount" } },
-          { kind: "Field", name: { kind: "Name", value: "private" } },
           { kind: "Field", name: { kind: "Name", value: "cycleLockToActive" } },
           { kind: "Field", name: { kind: "Name", value: "autoArchivePeriod" } },
           { kind: "Field", name: { kind: "Name", value: "autoClosePeriod" } },
@@ -12951,6 +12944,14 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "cycleStartDay" } },
           { kind: "Field", name: { kind: "Name", value: "defaultTemplateForMembersId" } },
           { kind: "Field", name: { kind: "Name", value: "defaultTemplateForNonMembersId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "defaultIssueState" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "cycleDuration" } },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationType" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -13001,8 +13002,18 @@ export const TeamFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageIssueState" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
           { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" } },
+          { kind: "Field", name: { kind: "Name", value: "issueOrderingNoPriorityFirst" } },
+          { kind: "Field", name: { kind: "Name", value: "private" } },
           { kind: "Field", name: { kind: "Name", value: "cyclesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationExtended" } },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationAllowZero" } },
@@ -13010,6 +13021,7 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "slackIssueComments" } },
           { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
+          { kind: "Field", name: { kind: "Name", value: "triageEnabled" } },
         ],
       },
     },
@@ -23397,6 +23409,54 @@ export const AttachmentLinkIntercomDocument = {
     ...AttachmentPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentLinkIntercomMutation, AttachmentLinkIntercomMutationVariables>;
+export const AttachmentLinkUrlDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkURL" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkURL" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "url" },
+                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkUrlMutation, AttachmentLinkUrlMutationVariables>;
 export const AttachmentLinkZendeskDocument = {
   kind: "Document",
   definitions: [

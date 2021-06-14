@@ -911,6 +911,18 @@
             "deprecationReason": null
           },
           {
+            "name": "iconUrl",
+            "description": "An icon url to display with the attachment. Should be of jpg or png format. Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "metadata",
             "description": "Attachment metadata object with string and number values.",
             "type": {
@@ -1081,6 +1093,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "iconUrl",
+            "description": "An icon url to display with the attachment. Should be of jpg or png format. Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -5421,129 +5445,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "FileUpload",
-        "description": "A recorded entry of a file uploaded by a user.",
-        "fields": [
-          {
-            "name": "id",
-            "description": "The unique identifier of the entity.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "creator",
-            "description": "The user who uploaded the file.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "User",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "organization",
-            "description": "The organization the upload belongs to.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Organization",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "assetUrl",
-            "description": "The asset URL this file is available at.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "contentType",
-            "description": "The MIME type of the uploaded file.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filename",
-            "description": "The name of the uploaded file.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "metaData",
-            "description": "Additional metadata of the file.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "JSON",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "size",
-            "description": "Size of the uploaded file in bytes.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
                 "ofType": null
               }
             },
@@ -11685,6 +11586,55 @@
             "deprecationReason": null
           },
           {
+            "name": "attachmentLinkURL",
+            "description": "Link any url to an issue.",
+            "args": [
+              {
+                "name": "issueId",
+                "description": "The issue for which to link the url.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "url",
+                "description": "The Zendesk ticket ID to link.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AttachmentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "attachmentLinkZendesk",
             "description": "Link an existing Zendesk ticket to an issue.",
             "args": [
@@ -17582,6 +17532,18 @@
             "deprecationReason": null
           },
           {
+            "name": "snoozedUntilAt",
+            "description": "The time until a notification will be snoozed. After that it will appear in the inbox again.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "user",
             "description": "The recipient of the notification.",
             "args": [],
@@ -18196,6 +18158,18 @@
           {
             "name": "readAt",
             "description": "The time when notification was marked as read.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedUntilAt",
+            "description": "The time until a notification will be snoozed. After that it will appear in the inbox again.",
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
@@ -22165,6 +22139,30 @@
             "type": {
               "kind": "SCALAR",
               "name": "TimelessDateScalar",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "completedAt",
+            "description": "The date when the project was completed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "canceledAt",
+            "description": "The date when the project was canceled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
               "ofType": null
             },
             "defaultValue": null,
@@ -28648,6 +28646,22 @@
             "deprecationReason": null
           },
           {
+            "name": "issueOrderingNoPriorityFirst",
+            "description": "Whether issues without priority should be sorted first.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueEstimationAllowZero",
             "description": "Whether to allow zeros in issues estimates.",
             "args": [],
@@ -28696,12 +28710,52 @@
             "deprecationReason": null
           },
           {
+            "name": "triageEnabled",
+            "description": "Whether triage mode is enabled for the team or not.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "defaultIssueState",
+            "description": "The default workflow state into which issues are set when they are opened by team members.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "WorkflowState",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "defaultTemplateForMembersId",
             "description": "The default template to use for new issues created by members of the team.",
             "args": [],
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "triageIssueState",
+            "description": "The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "WorkflowState",
               "ofType": null
             },
             "isDeprecated": false,
@@ -28721,7 +28775,7 @@
           },
           {
             "name": "private",
-            "description": "Internal. Whether the team is private or not.",
+            "description": "Whether the team is private or not.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -30126,6 +30180,18 @@
             "deprecationReason": null
           },
           {
+            "name": "triageEnabled",
+            "description": "Whether triage mode is enabled for the team.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "autoClosePeriod",
             "description": "Period after which issues are automatically closed, in months.",
             "type": {
@@ -30996,10 +31062,34 @@
           },
           {
             "name": "private",
-            "description": "Internal. Whether the team is private or not.",
+            "description": "Whether the team is private or not.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "triageEnabled",
+            "description": "Whether triage mode is enabled for the team.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "defaultIssueStateId",
+            "description": "Default status for newly created issues.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -33163,6 +33253,12 @@
             "deprecationReason": null
           },
           {
+            "name": "triageWelcomeDismissed",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "cycleWelcomeDismissed",
             "description": null,
             "isDeprecated": false,
@@ -34114,6 +34210,12 @@
           },
           {
             "name": "label",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "triage",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
