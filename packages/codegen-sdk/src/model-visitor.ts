@@ -51,9 +51,9 @@ export class ModelVisitor {
   public Document = {
     /** Return the definitions */
     leave: (node: DocumentNode): SdkModel[] => {
-      return ((node.definitions ?? []).filter(
-        definition => typeof ((definition as unknown) as SdkModel).name === "string"
-      ) as unknown) as SdkModel[];
+      return (node.definitions ?? []).filter(
+        definition => typeof (definition as unknown as SdkModel).name === "string"
+      ) as unknown as SdkModel[];
     },
   };
 

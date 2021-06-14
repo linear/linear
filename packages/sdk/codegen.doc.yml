@@ -4,6 +4,8 @@ hooks:
   afterOneFileWrite:
     - prettier --write
 config:
+  skipComments:
+    - "[Internal]"
   skipFields:
     - integrationResource
     - integrationResources

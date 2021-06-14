@@ -132,6 +132,8 @@ fragment Notification on Notification {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
   # The unique identifier of the entity.
   id
 }
@@ -197,8 +199,6 @@ fragment Project on Project {
   slackNewIssue
   # Whether to send new issue status updates to Slack.
   slackIssueStatuses
-  # [Internal] The estimated start date of the project.
-  startDate
 }
 
 # A reaction associated with a comment.
@@ -323,26 +323,6 @@ fragment IssueHistory on IssueHistory {
   updatedDescription
   autoArchived
   autoClosed
-}
-
-# A recorded entry of a file uploaded by a user.
-fragment FileUpload on FileUpload {
-  # Additional metadata of the file.
-  metaData
-  # Size of the uploaded file in bytes.
-  size
-  # The MIME type of the uploaded file.
-  contentType
-  # The asset URL this file is available at.
-  assetUrl
-  # The name of the uploaded file.
-  filename
-  # The unique identifier of the entity.
-  id
-  # The user who uploaded the file.
-  creator {
-    id
-  }
 }
 
 # A relation between two issues.
@@ -838,8 +818,6 @@ fragment Team on Team {
   cycleCalenderUrl
   # How many upcoming cycles to create.
   upcomingCycleCount
-  # Internal. Whether the team is private or not.
-  private
   # Only allow issues issues with cycles in Active Issues.
   cycleLockToActive
   # Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.
@@ -860,6 +838,10 @@ fragment Team on Team {
   defaultTemplateForMembersId
   # The default template to use for new issues created by non-members of the team.
   defaultTemplateForNonMembersId
+  # The default workflow state into which issues are set when they are opened by team members.
+  defaultIssueState {
+    id
+  }
   # The duration of a cycle in weeks.
   cycleDuration
   # The issue estimation type to use.
@@ -901,10 +883,18 @@ fragment Team on Team {
   markedAsDuplicateWorkflowState {
     id
   }
+  # The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled.
+  triageIssueState {
+    id
+  }
   # Unique hash for the team to be used in invite URLs.
   inviteHash
   # What to use as an default estimate for unestimated issues.
   defaultIssueEstimate
+  # Whether issues without priority should be sorted first.
+  issueOrderingNoPriorityFirst
+  # Whether the team is private or not.
+  private
   # Whether the team uses cycles.
   cyclesEnabled
   # Whether to add additional points to the estimate scale.
@@ -919,6 +909,8 @@ fragment Team on Team {
   slackNewIssue
   # Whether to send new issue status updates to Slack.
   slackIssueStatuses
+  # Whether triage mode is enabled for the team or not.
+  triageEnabled
 }
 
 # Collaborative editing steps for documents.
@@ -2472,40 +2464,6 @@ query applicationWithAuthorization(
     ...UserAuthorizedApplication
   }
 }
-# [Internal] Fetches an archived model.
-query archivedModelSync(
-  # The identifier of the model to load. What an identifier is specific to the model class.
-  $identifier: String!
-  # The class name of the model to load.
-  $modelClass: String!
-) {
-  archivedModelSync(identifier: $identifier, modelClass: $modelClass) {
-    ...ArchiveResponse
-  }
-}
-# [Internal] Fetches archived models.
-query archivedModelsSync(
-  # Retrieve issues that have been archived before this date.
-  $before: DateTime
-  # The number of issues to load.
-  $last: Int
-  # The class name of the models to load.
-  $modelClass: String!
-  # The teamId for which to load archived models.
-  $teamId: String!
-  # How trashed issues should be loaded. Defaults to TrashOptionType.excludeTrash
-  $trashOption: TrashOptionType
-) {
-  archivedModelsSync(
-    before: $before
-    last: $last
-    modelClass: $modelClass
-    teamId: $teamId
-    trashOption: $trashOption
-  ) {
-    ...ArchiveResponse
-  }
-}
 # [Alpha] One specific issue attachment.
 # [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
 query attachment($id: String!) {
@@ -3033,17 +2991,6 @@ query cycles(
     ...CycleConnection
   }
 }
-# [Internal] Fetches the dependencies of a model.
-query dependentModelSync(
-  # The identifier of the model whose dependencies to load.
-  $identifier: String!
-  # The class name of the model to load.
-  $modelClass: String!
-) {
-  dependentModelSync(identifier: $identifier, modelClass: $modelClass) {
-    ...DependencyResponse
-  }
-}
 # A specific emoji.
 query emoji(
   # The identifier of the emoji to retrieve.
@@ -3430,12 +3377,6 @@ query issue_subscribers(
     ) {
       ...UserConnection
     }
-  }
-}
-# [Internal] The history of issue descriptions.
-query issueDescriptionHistory($id: String!) {
-  issueDescriptionHistory(id: $id) {
-    ...IssueDescriptionHistoryPayload
   }
 }
 # Fetches the GitHub token, completing the OAuth flow.
@@ -4138,31 +4079,6 @@ query reactions(
     ...ReactionConnection
   }
 }
-# [Internal] Search in Linear. This query is for internal purposes only and is subject to change
-# without notice.
-query search(
-  # From which result index number to load results.
-  $from: Int
-  # Search string to look for.
-  $term: String!
-) {
-  search(from: $from, term: $term) {
-    ...SearchResultPayload
-  }
-}
-# Archived issues matching the search term along with all their dependencies.
-query search_archivePayload(
-  # From which result index number to load results.
-  $from: Int
-  # Search string to look for.
-  $term: String!
-) {
-  search(from: $from, term: $term) {
-    archivePayload {
-      ...ArchiveResponse
-    }
-  }
-}
 # Fetch SSO login URL for the email provided.
 query ssoUrlFromEmail(
   # Email to query the SSO login URL by.
@@ -4178,30 +4094,6 @@ query ssoUrlFromEmail(
 query subscription {
   subscription {
     ...Subscription
-  }
-}
-# [Internal] Fetch data to catch up the client to the state of the world.
-query syncBootstrap(
-  # If defined, only models of the given type will be loaded.
-  $onlyModels: [String!]
-  # If defined, only models for the given sync groups will be loaded.
-  $syncGroups: [String!]
-) {
-  syncBootstrap(onlyModels: $onlyModels, syncGroups: $syncGroups) {
-    ...SyncResponse
-  }
-}
-# [Internal] Fetches delta sync packets.
-query syncDelta(
-  # The last sync id the client has seen.
-  $lastSyncId: Int!
-  # After which update to start, used for pagination.
-  $offset: Int
-  # Up until which sync id to load data for.
-  $toSyncId: Int!
-) {
-  syncDelta(lastSyncId: $lastSyncId, offset: $offset, toSyncId: $toSyncId) {
-    ...SyncDeltaResponse
   }
 }
 # One specific team.
@@ -4989,6 +4881,17 @@ mutation attachmentLinkIntercom(
   $issueId: String!
 ) {
   attachmentLinkIntercom(conversationId: $conversationId, issueId: $issueId) {
+    ...AttachmentPayload
+  }
+}
+# Link any url to an issue.
+mutation attachmentLinkURL(
+  # The issue for which to link the url.
+  $issueId: String!
+  # The Zendesk ticket ID to link.
+  $url: String!
+) {
+  attachmentLinkURL(issueId: $issueId, url: $url) {
     ...AttachmentPayload
   }
 }

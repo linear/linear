@@ -48,6 +48,24 @@ export interface PluginConfig {
    */
   skipFields?: string[];
   /**
+   * @description A list of comment contents used to mark fields for skipping
+   *
+   * @exampleMarkdown
+   * ```yml
+   * schema: ./src/schema.graphql
+   * generates:
+   *   src/_gen_documents.graphql:
+   *     plugins:
+   *       - "@linear/codegen-doc"
+   *     config:
+   *       skipComments:
+   *         - "[Internal]"
+   *         - "-- Deprecated --"
+   *
+   * ```
+   */
+  skipComments?: string[];
+  /**
    * @description A list of directives to omit
    *
    * @exampleMarkdown

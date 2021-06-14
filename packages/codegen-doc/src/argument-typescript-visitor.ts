@@ -29,7 +29,7 @@ export class ArgumentTypescriptVisitor {
   public VariableDefinition = {
     /** Print variable type */
     leave(_node: VariableDefinitionNode): string {
-      const node = (_node as unknown) as Named<VariableDefinitionNode>;
+      const node = _node as unknown as Named<VariableDefinitionNode>;
       return node.type;
     },
   };
@@ -44,7 +44,7 @@ export class ArgumentTypescriptVisitor {
   public NamedType = {
     /** Print scalar name if present or attach namespace */
     leave: (_node: NamedTypeNode): string => {
-      const node = (_node as unknown) as Named<NamedTypeNode>;
+      const node = _node as unknown as Named<NamedTypeNode>;
       if (this._context.scalars[node.name]) {
         return printTypescriptScalar(node.name, this._namespace);
       } else {
@@ -56,7 +56,7 @@ export class ArgumentTypescriptVisitor {
   public NonNullType = {
     /** Print non null type */
     leave: (_node: NonNullTypeNode): string => {
-      const node = (_node as unknown) as Named<NonNullTypeNode>;
+      const node = _node as unknown as Named<NonNullTypeNode>;
       return node.type;
     },
   };
@@ -64,7 +64,7 @@ export class ArgumentTypescriptVisitor {
   public ListType = {
     /** Print the list type */
     leave: (_node: ListTypeNode): string => {
-      const node = (_node as unknown) as Named<ListTypeNode>;
+      const node = _node as unknown as Named<ListTypeNode>;
       return `${node.type}[]`;
     },
   };
@@ -72,7 +72,7 @@ export class ArgumentTypescriptVisitor {
   public InputValueDefinition = {
     /** Print the input type */
     leave: (_node: InputValueDefinitionNode): string => {
-      const node = (_node as unknown) as Named<InputValueDefinitionNode>;
+      const node = _node as unknown as Named<InputValueDefinitionNode>;
       return node.type;
     },
   };

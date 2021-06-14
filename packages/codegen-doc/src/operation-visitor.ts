@@ -37,7 +37,7 @@ export class OperationVisitor {
 
     /** Print all field operations */
     leave: (_node: ObjectTypeDefinitionNode): string | null => {
-      const node = (_node as unknown) as ObjectTypeDefinitionNode & { operationType: OperationType };
+      const node = _node as unknown as ObjectTypeDefinitionNode & { operationType: OperationType };
       return printLines(
         node.fields?.map(field => {
           return field ? printOperations(this._context, node.operationType, [field]) : undefined;
