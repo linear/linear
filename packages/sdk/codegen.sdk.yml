@@ -9,8 +9,8 @@ config:
   skipComments:
     - "[Internal]"
   skipFields:
-    - integrationResource
-    - integrationResources
+    # - integrationResource
+    # - integrationResources
 generates:
   src/_generated_documents.ts:
     plugins:

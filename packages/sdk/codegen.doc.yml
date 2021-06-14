@@ -7,8 +7,8 @@ config:
   skipComments:
     - "[Internal]"
   skipFields:
-    - integrationResource
-    - integrationResources
+    # - integrationResource
+    # - integrationResources
 generates:
   src/_generated_documents.graphql:
     plugins:
