@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.9.0
+
+### Minor Changes
+
+- 94af540: Remove fields marked with Internal comment
+
+### Patch Changes
+
+- 7f054e3: chore(deps): update dependency patch versions
+
 ## 1.8.4
 
 ### Patch Changes

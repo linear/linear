@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.5.12
+
+### Patch Changes
+
+- 7f054e3: chore(deps): update dependency patch versions
+- Updated dependencies [7f054e3]
+- Updated dependencies [8c7fb4b]
+- Updated dependencies [207353d]
+- Updated dependencies [94af540]
+- Updated dependencies [94af540]
+  - @linear/sdk@1.15.0
+
 ## 1.5.11
 
 ### Patch Changes
