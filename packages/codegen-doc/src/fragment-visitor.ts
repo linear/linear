@@ -53,7 +53,7 @@ export class FragmentVisitor {
   public ObjectTypeDefinition = {
     /** Print a fragment if there are fields */
     leave: (_node: ObjectTypeDefinitionNode): string | null => {
-      const node = (_node as unknown) as NamedFields<ObjectTypeDefinitionNode>;
+      const node = _node as unknown as NamedFields<ObjectTypeDefinitionNode>;
 
       /** Process non empty object definitions */
       if (isValidFragment(this._context, node)) {
@@ -82,7 +82,7 @@ export class FragmentVisitor {
 
       /** Skip objects defined in constants */
       if (isValidField(this._context, _node)) {
-        const node = (_node as unknown) as Named<FieldDefinitionNode>;
+        const node = _node as unknown as Named<FieldDefinitionNode>;
         const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
 
         /** Print field name if it is a scalar */
@@ -141,7 +141,7 @@ export class FragmentVisitor {
   public NamedType = {
     /** Print type value using scalar map */
     leave: (_node: NamedTypeNode): string => {
-      const node = (_node as unknown) as Named<NamedTypeNode>;
+      const node = _node as unknown as Named<NamedTypeNode>;
       return this._context.scalars[node.name] ?? node.name;
     },
   };

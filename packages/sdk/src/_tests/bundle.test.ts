@@ -40,7 +40,7 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
     beforeAll(async () => {
       if (ClientConstructor) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        linearClient = ((await startClient(ClientConstructor as any)) as unknown) as es.LinearClient;
+        linearClient = (await startClient(ClientConstructor as any)) as unknown as es.LinearClient;
       } else {
         throw new Error(`Bundle for ${bundleFormat} has no LinearClient`);
       }

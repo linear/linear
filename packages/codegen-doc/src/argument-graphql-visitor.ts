@@ -21,7 +21,7 @@ export class ArgumentGraphqlVisitor {
   public NamedType = {
     /** Print type value */
     leave(_node: NamedTypeNode): string {
-      const node = (_node as unknown) as Named<NamedTypeNode>;
+      const node = _node as unknown as Named<NamedTypeNode>;
       return node.name;
     },
   };
@@ -29,7 +29,7 @@ export class ArgumentGraphqlVisitor {
   public NonNullType = {
     /** Print non null type */
     leave(_node: NonNullTypeNode): string {
-      const node = (_node as unknown) as Named<NonNullTypeNode>;
+      const node = _node as unknown as Named<NonNullTypeNode>;
       return `${node.type}!`;
     },
   };
@@ -37,7 +37,7 @@ export class ArgumentGraphqlVisitor {
   public ListType = {
     /** Print the list type */
     leave(_node: ListTypeNode): string {
-      const node = (_node as unknown) as Named<ListTypeNode>;
+      const node = _node as unknown as Named<ListTypeNode>;
       return `[${node.type}]`;
     },
   };
@@ -45,7 +45,7 @@ export class ArgumentGraphqlVisitor {
   public InputValueDefinition = {
     /** Print the input type */
     leave(_node: InputValueDefinitionNode): string {
-      const node = (_node as unknown) as Named<InputValueDefinitionNode>;
+      const node = _node as unknown as Named<InputValueDefinitionNode>;
       return node.type;
     },
   };
