@@ -753,6 +753,8 @@ fragment Issue on Issue {
   completedAt
   # The time at which the issue was moved into started state.
   startedAt
+  # The time until an issue will be snoozed in Triage view.
+  snoozedUntilAt
   # The unique identifier of the entity.
   id
   # The user to whom the issue is assigned to.
@@ -761,6 +763,10 @@ fragment Issue on Issue {
   }
   # The user who created the issue.
   creator {
+    id
+  }
+  # The user who snoozed the issue.
+  snoozedBy {
     id
   }
   # The workflow state that the issue is associated with.

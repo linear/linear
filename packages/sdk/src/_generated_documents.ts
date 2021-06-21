@@ -1161,6 +1161,10 @@ export type Issue = Node & {
   project?: Maybe<Project>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
+  /** The user who snoozed the issue. */
+  snoozedBy?: Maybe<User>;
+  /** The time until an issue will be snoozed in Triage view. */
+  snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue was moved into started state. */
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The workflow state that the issue is associated with. */
@@ -1701,6 +1705,10 @@ export type IssueUpdateInput = {
   priority?: Maybe<Scalars["Int"]>;
   /** The project associated with the issue. */
   projectId?: Maybe<Scalars["String"]>;
+  /** The identifier of the user who snoozed the issue. */
+  snoozedById?: Maybe<Scalars["String"]>;
+  /** The time until an issue will be snoozed in Triage view. */
+  snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** The team state of the issue. */
   stateId?: Maybe<Scalars["String"]>;
   /** The position of the issue in parent's sub-issue list. */
@@ -5706,6 +5714,7 @@ export type IssueFragment = { __typename?: "Issue" } & Pick<
   | "canceledAt"
   | "completedAt"
   | "startedAt"
+  | "snoozedUntilAt"
   | "id"
 > & {
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -5714,6 +5723,7 @@ export type IssueFragment = { __typename?: "Issue" } & Pick<
     team: { __typename?: "Team" } & Pick<Team, "id">;
     assignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    snoozedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
   };
 
@@ -11123,6 +11133,7 @@ export const IssueFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "canceledAt" } },
           { kind: "Field", name: { kind: "Name", value: "completedAt" } },
           { kind: "Field", name: { kind: "Name", value: "startedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "snoozedUntilAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -11135,6 +11146,14 @@ export const IssueFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "snoozedBy" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],

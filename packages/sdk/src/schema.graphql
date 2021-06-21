@@ -2017,6 +2017,14 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
+  The user who snoozed the issue.
+  """
+  snoozedBy: User
+  """
+  The time until an issue will be snoozed in Triage view.
+  """
+  snoozedUntilAt: DateTime
+  """
   The time at which the issue was moved into started state.
   """
   startedAt: DateTime
@@ -2780,6 +2788,14 @@ input IssueUpdateInput {
   The project associated with the issue.
   """
   projectId: String
+  """
+  The identifier of the user who snoozed the issue.
+  """
+  snoozedById: String
+  """
+  The time until an issue will be snoozed in Triage view.
+  """
+  snoozedUntilAt: DateTime
   """
   The team state of the issue.
   """

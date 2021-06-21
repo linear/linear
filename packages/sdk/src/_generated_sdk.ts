@@ -1788,6 +1788,7 @@ export class Issue extends Request {
   private _cycle?: L.IssueFragment["cycle"];
   private _parent?: L.IssueFragment["parent"];
   private _project?: L.IssueFragment["project"];
+  private _snoozedBy?: L.IssueFragment["snoozedBy"];
   private _state?: L.IssueFragment["state"];
   private _team?: L.IssueFragment["team"];
 
@@ -1811,6 +1812,7 @@ export class Issue extends Request {
     this.previousIdentifiers = data.previousIdentifiers ?? undefined;
     this.priority = data.priority ?? undefined;
     this.priorityLabel = data.priorityLabel ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.subIssueSortOrder = data.subIssueSortOrder ?? undefined;
     this.title = data.title ?? undefined;
@@ -1822,6 +1824,7 @@ export class Issue extends Request {
     this._cycle = data.cycle ?? undefined;
     this._parent = data.parent ?? undefined;
     this._project = data.project ?? undefined;
+    this._snoozedBy = data.snoozedBy ?? undefined;
     this._state = data.state ?? undefined;
     this._team = data.team ?? undefined;
   }
@@ -1862,6 +1865,8 @@ export class Issue extends Request {
   public priority?: number;
   /** Label for the priority. */
   public priorityLabel?: string;
+  /** The time until an issue will be snoozed in Triage view. */
+  public snoozedUntilAt?: Date;
   /** The time at which the issue was moved into started state. */
   public startedAt?: Date;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
@@ -1896,6 +1901,10 @@ export class Issue extends Request {
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The user who snoozed the issue. */
+  public get snoozedBy(): LinearFetch<User> | undefined {
+    return this._snoozedBy?.id ? new UserQuery(this._request).fetch(this._snoozedBy?.id) : undefined;
   }
   /** The workflow state that the issue is associated with. */
   public get state(): LinearFetch<WorkflowState> | undefined {

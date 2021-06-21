@@ -924,6 +924,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.snoozedBy query for L.User */
+    it("issue.snoozedBy", async () => {
+      if (_issue) {
+        const issue_snoozedBy: L.User | undefined = await _issue.snoozedBy;
+        expect(issue_snoozedBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.snoozedBy query");
+      }
+    });
+
     /** Test the issue.state query for L.WorkflowState */
     it("issue.state", async () => {
       if (_issue) {
@@ -1096,6 +1106,16 @@ describe("generated", () => {
         expect(issue_project instanceof L.Project);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.project query");
+      }
+    });
+
+    /** Test the issue.snoozedBy query for L.User */
+    it("issue.snoozedBy", async () => {
+      if (_issue) {
+        const issue_snoozedBy: L.User | undefined = await _issue.snoozedBy;
+        expect(issue_snoozedBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.snoozedBy query");
       }
     });
 

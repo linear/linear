@@ -7093,6 +7093,18 @@
             "deprecationReason": null
           },
           {
+            "name": "snoozedUntilAt",
+            "description": "The time until an issue will be snoozed in Triage view.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "previousIdentifiers",
             "description": "Previous identifiers of the issue if it has been moved between teams.",
             "args": [],
@@ -7112,6 +7124,18 @@
                   }
                 }
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedBy",
+            "description": "The user who snoozed the issue.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -10868,6 +10892,30 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedUntilAt",
+            "description": "The time until an issue will be snoozed in Triage view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedById",
+            "description": "The identifier of the user who snoozed the issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
