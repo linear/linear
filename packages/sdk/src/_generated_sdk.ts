@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DocumentNode } from "graphql/language/ast";
 import * as L from "./_generated_documents";
 
 /** The function for calling the graphql client */
-export type LinearRequest = <LinearResponse, Variables extends Record<string, unknown>>(
+export type LinearRequest = <Response, Variables extends Record<string, unknown>>(
   doc: DocumentNode,
   variables?: Variables
-) => Promise<LinearResponse>;
+) => Promise<Response>;
 
 /**
  * Base class to provide a request function
@@ -22,7 +21,7 @@ export class Request {
 }
 
 /** Fetch return type wrapped in a promise */
-export type LinearFetch<LinearResponse> = Promise<LinearResponse | undefined>;
+export type LinearFetch<Response> = Promise<Response | undefined>;
 
 /**
  * Variables required for pagination
@@ -1943,7 +1942,7 @@ export class Issue extends Request {
   }
   /** Archives an issue. */
   public archive(variables?: Omit<L.IssueArchiveMutationVariables, "id">) {
-    return this.id ? new IssueArchiveMutation(this._request).fetch(this.id) : undefined;
+    return this.id ? new IssueArchiveMutation(this._request).fetch(this.id, variables) : undefined;
   }
   /** Deletes (trashes) an issue. */
   public delete() {
