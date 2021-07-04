@@ -19,15 +19,6 @@ describe("generated", () => {
     stopClient();
   });
 
-  /** Test all ApiKey queries */
-  describe("ApiKeys", () => {
-    /** Test the root connection query for the ApiKey */
-    it("apiKeys", async () => {
-      const apiKeys: L.ApiKeyConnection | undefined = await client.apiKeys();
-      expect(apiKeys instanceof L.ApiKeyConnection);
-    });
-  });
-
   /** Test ApplicationWithAuthorization query */
   describe("ApplicationWithAuthorization", () => {
     /** Test the root model query for ApplicationWithAuthorization */

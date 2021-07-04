@@ -167,11 +167,6 @@ export class ApiKey extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
-
-  /** Deletes an API key. */
-  public delete() {
-    return this.id ? new ApiKeyDeleteMutation(this._request).fetch(this.id) : undefined;
-  }
 }
 /**
  * ApiKeyConnection model
@@ -2072,6 +2067,7 @@ export class IssueHistory extends Request {
     this.toTitle = data.toTitle ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.updatedDescription = data.updatedDescription ?? undefined;
+    this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
     this.relationChanges = data.relationChanges
       ? data.relationChanges.map(node => new IssueRelationHistoryPayload(request, node))
       : undefined;
@@ -2132,6 +2128,8 @@ export class IssueHistory extends Request {
   public updatedDescription?: boolean;
   /** Changed issue relationships. */
   public relationChanges?: IssueRelationHistoryPayload[];
+  /** The import record. */
+  public issueImport?: IssueImport;
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -2892,6 +2890,57 @@ export class NotificationSubscriptionPayload extends Request {
   }
 }
 /**
+ * OauthAuthStringAuthorizePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OauthAuthStringAuthorizePayloadFragment response data
+ */
+export class OauthAuthStringAuthorizePayload extends Request {
+  public constructor(request: LinearRequest, data: L.OauthAuthStringAuthorizePayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * OauthAuthStringChallengePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OauthAuthStringChallengePayloadFragment response data
+ */
+export class OauthAuthStringChallengePayload extends Request {
+  public constructor(request: LinearRequest, data: L.OauthAuthStringChallengePayloadFragment) {
+    super(request);
+    this.authString = data.authString ?? undefined;
+    this.success = data.success ?? undefined;
+  }
+
+  /** The created authentication string. */
+  public authString?: string;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * OauthAuthStringCheckPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OauthAuthStringCheckPayloadFragment response data
+ */
+export class OauthAuthStringCheckPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OauthAuthStringCheckPayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+    this.token = data.token ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** Access token for use. */
+  public token?: string;
+}
+/**
  * OAuth2 client application
  *
  * @param request - function to call the graphql client
@@ -3412,6 +3461,7 @@ export class Project extends Request {
     this.state = data.state ?? undefined;
     this.targetDate = data.targetDate ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.url = data.url ?? undefined;
     this._creator = data.creator ?? undefined;
     this._lead = data.lead ?? undefined;
     this._milestone = data.milestone ?? undefined;
@@ -3466,6 +3516,8 @@ export class Project extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+  /** Project URL. */
+  public url?: string;
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -4803,6 +4855,7 @@ export class User extends Request {
     this.lastSeen = parseDate(data.lastSeen) ?? undefined;
     this.name = data.name ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.url = data.url ?? undefined;
   }
 
   /** Whether the user account is active or disabled (suspended). */
@@ -4836,6 +4889,8 @@ export class User extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+  /** User's profile URL. */
+  public url?: string;
   /** Organization in which the user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -5431,32 +5486,6 @@ export class ZendeskSettings extends Request {
   /** The URL of the connected Zendesk organization. */
   public url?: string;
 }
-/**
- * A fetchable ApiKeys Query
- *
- * @param request - function to call the graphql client
- */
-export class ApiKeysQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApiKeys query and return a ApiKeyConnection
-   *
-   * @param variables - variables to pass into the ApiKeysQuery
-   * @returns parsed response from ApiKeysQuery
-   */
-  public async fetch(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
-    return this._request<L.ApiKeysQuery, L.ApiKeysQueryVariables>(L.ApiKeysDocument, variables).then(response => {
-      const data = response?.apiKeys;
-      return data
-        ? new ApiKeyConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
-  }
-}
-
 /**
  * A fetchable ApplicationWithAuthorization Query
  *
@@ -7233,58 +7262,6 @@ export class WorkflowStatesQuery extends Request {
 }
 
 /**
- * A fetchable ApiKeyCreate Mutation
- *
- * @param request - function to call the graphql client
- */
-export class ApiKeyCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApiKeyCreate mutation and return a ApiKeyPayload
-   *
-   * @param input - required input to pass to apiKeyCreate
-   * @returns parsed response from ApiKeyCreateMutation
-   */
-  public async fetch(input: L.ApiKeyCreateInput): LinearFetch<ApiKeyPayload> {
-    return this._request<L.ApiKeyCreateMutation, L.ApiKeyCreateMutationVariables>(L.ApiKeyCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.apiKeyCreate;
-      return data ? new ApiKeyPayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable ApiKeyDelete Mutation
- *
- * @param request - function to call the graphql client
- */
-export class ApiKeyDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApiKeyDelete mutation and return a ArchivePayload
-   *
-   * @param id - required id to pass to apiKeyDelete
-   * @returns parsed response from ApiKeyDeleteMutation
-   */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.ApiKeyDeleteMutation, L.ApiKeyDeleteMutationVariables>(L.ApiKeyDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.apiKeyDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
  * A fetchable AttachmentArchive Mutation
  *
  * @param request - function to call the graphql client
@@ -8569,6 +8546,32 @@ export class IntegrationIntercomDeleteMutation extends Request {
       {}
     ).then(response => {
       const data = response?.integrationIntercomDelete;
+      return data ? new IntegrationPayload(this._request, data) : undefined;
+    });
+  }
+}
+
+/**
+ * A fetchable IntegrationLoom Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationLoomMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationLoom mutation and return a IntegrationPayload
+   *
+   * @returns parsed response from IntegrationLoomMutation
+   */
+  public async fetch(): LinearFetch<IntegrationPayload> {
+    return this._request<L.IntegrationLoomMutation, L.IntegrationLoomMutationVariables>(
+      L.IntegrationLoomDocument,
+      {}
+    ).then(response => {
+      const data = response?.integrationLoom;
       return data ? new IntegrationPayload(this._request, data) : undefined;
     });
   }
@@ -13605,15 +13608,6 @@ export class LinearSdk extends Request {
   }
 
   /**
-   * All API keys for the user.
-   *
-   * @param variables - variables to pass into the ApiKeysQuery
-   * @returns ApiKeyConnection
-   */
-  public apiKeys(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
-    return new ApiKeysQuery(this._request).fetch(variables);
-  }
-  /**
    * Get information for an application and whether a user has approved it for the given scopes.
    *
    * @param clientId - required clientId to pass to applicationWithAuthorization
@@ -14228,24 +14222,6 @@ export class LinearSdk extends Request {
     return new WorkflowStatesQuery(this._request).fetch(variables);
   }
   /**
-   * Creates a new API key.
-   *
-   * @param input - required input to pass to apiKeyCreate
-   * @returns ApiKeyPayload
-   */
-  public apiKeyCreate(input: L.ApiKeyCreateInput): LinearFetch<ApiKeyPayload> {
-    return new ApiKeyCreateMutation(this._request).fetch(input);
-  }
-  /**
-   * Deletes an API key.
-   *
-   * @param id - required id to pass to apiKeyDelete
-   * @returns ArchivePayload
-   */
-  public apiKeyDelete(id: string): LinearFetch<ArchivePayload> {
-    return new ApiKeyDeleteMutation(this._request).fetch(id);
-  }
-  /**
    * [DEPRECATED] Archives an issue attachment.
    *
    * @param id - required id to pass to attachmentArchive
@@ -14685,6 +14661,14 @@ export class LinearSdk extends Request {
    */
   public get integrationIntercomDelete(): LinearFetch<IntegrationPayload> {
     return new IntegrationIntercomDeleteMutation(this._request).fetch();
+  }
+  /**
+   * Enables Loom integration for the organization.
+   *
+   * @returns IntegrationPayload
+   */
+  public get integrationLoom(): LinearFetch<IntegrationPayload> {
+    return new IntegrationLoomMutation(this._request).fetch();
   }
   /**
    * Archives an integration resource.
