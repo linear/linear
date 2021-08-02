@@ -1,5 +1,5 @@
 import fs from "fs";
-import { Importer, ImportResult } from "../../types";
+import { Comment, Importer, ImportResult } from "../../types";
 
 type TrelloLabelColor = "green" | "yellow" | "orange" | "red" | "purple" | "blue" | "sky" | "lime" | "pink" | "black";
 
@@ -14,12 +14,35 @@ interface TrelloCard {
     name: string;
     color: TrelloLabelColor;
   }[];
+  id: string;
   idList: string;
 }
 
 interface TrelloList {
   id: string;
   closed: boolean;
+}
+
+interface TrelloChecklist {
+  id: string;
+  idCard: string;
+  checkItems: {
+    name: string;
+    state: "incomplete" | "complete";
+    pos: number;
+  }[];
+}
+
+interface TrelloComment {
+  text: string;
+  card: { id: string };
+}
+
+interface TrelloCommentAction {
+  type: "commentCard";
+  memberCreator: { id: string; fullName: string; avatarUrl: string };
+  data: TrelloComment;
+  date: string;
 }
 
 export class TrelloJsonImporter implements Importer {
@@ -39,7 +62,7 @@ export class TrelloJsonImporter implements Importer {
 
   public import = async (): Promise<ImportResult> => {
     const bytes = fs.readFileSync(this.filePath);
-    const data = JSON.parse(bytes as unknown as string);
+    const data = JSON.parse((bytes as unknown) as string);
 
     const importData: ImportResult = {
       issues: [],
@@ -48,10 +71,47 @@ export class TrelloJsonImporter implements Importer {
       statuses: {},
     };
 
+    // Map card id => checklist so we can add them to the issues in the next step
+    const checkLists: { [key: string]: TrelloChecklist } = {};
+    for (const checklist of data.checklists as TrelloChecklist[]) {
+      checkLists[checklist.idCard] = checklist;
+    }
+
+    // Map card id => comments so we can add them to the issues in the next step
+    const comments: { [key: string]: Comment[] } = {};
+    for (const action of data.actions) {
+      if (action.type !== "commentCard") {
+        continue;
+      }
+      const {
+        data: { text, card },
+        memberCreator,
+        date,
+      } = action as TrelloCommentAction;
+      importData.users[memberCreator.id] = { name: memberCreator.fullName, avatarUrl: memberCreator.avatarUrl };
+      const importComment = { body: text, userId: memberCreator.id, createdAt: new Date(date) };
+      if (card.id in comments) {
+        comments[card.id].push(importComment);
+      } else {
+        comments[card.id] = [importComment];
+      }
+    }
+
     for (const card of data.cards as TrelloCard[]) {
       const url = card.shortUrl;
       const mdDesc = card.desc;
-      const description = `${mdDesc}\n\n[View original card in Trello](${url})`;
+      const checklist = checkLists[card.id];
+      let formattedChecklist = "";
+      if (checklist) {
+        formattedChecklist = checklist.checkItems
+          .sort((item1, item2) => item1.pos - item2.pos)
+          .map(item => `- [${item.state === "complete" ? "x" : " "}] ${item.name}`)
+          .join("\n");
+      }
+
+      const description = `${mdDesc}${
+        formattedChecklist && `\n${formattedChecklist}`
+      }\n\n[View original card in Trello](${url})`;
       const labels = card.labels.map(l => l.id);
 
       if (this.discardArchivedCards && card.closed) {
@@ -70,6 +130,7 @@ export class TrelloJsonImporter implements Importer {
         description,
         url,
         labels,
+        comments: comments[card.id],
       });
 
       const allLabels = card.labels.map(label => ({
