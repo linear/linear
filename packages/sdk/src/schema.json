@@ -3558,6 +3558,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "progress",
+            "description": "The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -6579,10 +6595,92 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "intercom",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "IntercomSettings",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "IntercomSettings",
+        "description": "Intercom specific settings.",
+        "fields": [
+          {
+            "name": "sendNoteOnStatusChange",
+            "description": "Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sendNoteOnComment",
+            "description": "Whether an internal message should be added when someone comments on an issue.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "IntercomSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "sendNoteOnStatusChange",
+            "description": "Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sendNoteOnComment",
+            "description": "Whether an internal message should be added when someone comments on an issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -8988,6 +9086,18 @@
           {
             "name": "archived",
             "description": "Whether the issue was archived or un-archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trashed",
+            "description": "Whether the issue was trashed or un-trashed.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -11662,6 +11772,18 @@
             "description": "Link any url to an issue.",
             "args": [
               {
+                "name": "title",
+                "description": "The title to use for the attachment.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "issueId",
                 "description": "The issue for which to link the url.",
                 "type": {
@@ -11679,7 +11801,7 @@
               },
               {
                 "name": "url",
-                "description": "The Zendesk ticket ID to link.",
+                "description": "The url to link.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -13146,6 +13268,39 @@
             "name": "integrationIntercomDelete",
             "description": "Disconnects the organization from Intercom.",
             "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationIntercomSettingsUpdate",
+            "description": "Updates settings on the Intercom integration.",
+            "args": [
+              {
+                "name": "input",
+                "description": "A partial Intercom integration settings object to update the integration settings with.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "IntercomSettingsInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -16572,39 +16727,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TeamPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "teamArchive",
-            "description": "Archives a team.",
-            "args": [
-              {
-                "name": "id",
-                "description": "The identifier of the team to archive.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ArchivePayload",
                 "ofType": null
               }
             },
@@ -21593,6 +21715,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "progress",
+            "description": "The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -23170,6 +23308,18 @@
             "name": "syncBootstrap",
             "description": "[Internal] Fetch data to catch up the client to the state of the world.",
             "args": [
+              {
+                "name": "newVersion",
+                "description": "[Deprecated] If set, we'll use a new internal way of bootstrapping.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "onlyModels",
                 "description": "If defined, only models of the given type will be loaded.",

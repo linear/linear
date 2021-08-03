@@ -529,6 +529,8 @@ export type Cycle = Node & {
   name?: Maybe<Scalars["String"]>;
   /** The number of the cycle. */
   number: Scalars["Float"];
+  /** The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
+  progress: Scalars["Float"];
   /** The total number of estimation points after each day. */
   scopeHistory: Array<Scalars["Float"]>;
   /** The start time of the cycle. */
@@ -1050,10 +1052,27 @@ export type IntegrationResourceEdge = {
 export type IntegrationSettings = {
   __typename?: "IntegrationSettings";
   googleSheets?: Maybe<GoogleSheetsSettings>;
+  intercom?: Maybe<IntercomSettings>;
   sentry?: Maybe<SentrySettings>;
   slackPost?: Maybe<SlackPostSettings>;
   slackProjectPost?: Maybe<SlackPostSettings>;
   zendesk?: Maybe<ZendeskSettings>;
+};
+
+/** Intercom specific settings. */
+export type IntercomSettings = {
+  __typename?: "IntercomSettings";
+  /** Whether an internal message should be added when someone comments on an issue. */
+  sendNoteOnComment?: Maybe<Scalars["Boolean"]>;
+  /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
+  sendNoteOnStatusChange?: Maybe<Scalars["Boolean"]>;
+};
+
+export type IntercomSettingsInput = {
+  /** Whether an internal message should be added when someone comments on an issue. */
+  sendNoteOnComment?: Maybe<Scalars["Boolean"]>;
+  /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
+  sendNoteOnStatusChange?: Maybe<Scalars["Boolean"]>;
 };
 
 export type InviteData = {
@@ -1421,6 +1440,8 @@ export type IssueHistory = Node & {
   toTeam?: Maybe<Team>;
   /** What the title was changed to. */
   toTitle?: Maybe<Scalars["String"]>;
+  /** Whether the issue was trashed or un-trashed. */
+  trashed?: Maybe<Scalars["Boolean"]>;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -1907,6 +1928,8 @@ export type Mutation = {
   integrationIntercom: IntegrationPayload;
   /** Disconnects the organization from Intercom. */
   integrationIntercomDelete: IntegrationPayload;
+  /** Updates settings on the Intercom integration. */
+  integrationIntercomSettingsUpdate: IntegrationPayload;
   /** Enables Loom integration for the organization. */
   integrationLoom: IntegrationPayload;
   /** Archives an integration resource. */
@@ -2051,8 +2074,6 @@ export type Mutation = {
   subscriptionUpdateSessionCreate: SubscriptionSessionPayload;
   /** Upgrades a subscription plan. */
   subscriptionUpgrade: SubscriptionPayload;
-  /** Archives a team. */
-  teamArchive: ArchivePayload;
   /** Creates a new team. The user who creates the team will automatically be added as a member to the newly created team. */
   teamCreate: TeamPayload;
   /** Deletes a team. */
@@ -2145,6 +2166,7 @@ export type MutationAttachmentLinkIntercomArgs = {
 
 export type MutationAttachmentLinkUrlArgs = {
   issueId: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
   url: Scalars["String"];
 };
 
@@ -2304,6 +2326,10 @@ export type MutationIntegrationGoogleSheetsArgs = {
 export type MutationIntegrationIntercomArgs = {
   code: Scalars["String"];
   redirectUri: Scalars["String"];
+};
+
+export type MutationIntegrationIntercomSettingsUpdateArgs = {
+  input: IntercomSettingsInput;
 };
 
 export type MutationIntegrationResourceArchiveArgs = {
@@ -2626,10 +2652,6 @@ export type MutationSubscriptionUpdateArgs = {
 export type MutationSubscriptionUpgradeArgs = {
   id: Scalars["String"];
   type: Scalars["String"];
-};
-
-export type MutationTeamArchiveArgs = {
-  id: Scalars["String"];
 };
 
 export type MutationTeamCreateArgs = {
@@ -3298,6 +3320,8 @@ export type Project = Node & {
   milestone?: Maybe<Milestone>;
   /** The project's name. */
   name: Scalars["String"];
+  /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
+  progress: Scalars["Float"];
   /** The total number of estimation points after each week. */
   scopeHistory: Array<Scalars["Float"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -4086,6 +4110,7 @@ export type QuerySsoUrlFromEmailArgs = {
 };
 
 export type QuerySyncBootstrapArgs = {
+  newVersion?: Maybe<Scalars["Boolean"]>;
   onlyModels?: Maybe<Array<Scalars["String"]>>;
   syncGroups?: Maybe<Array<Scalars["String"]>>;
 };
@@ -5569,6 +5594,7 @@ export type ProjectFragment = { __typename?: "Project" } & Pick<
   | "updatedAt"
   | "completedScopeHistory"
   | "completedIssueCountHistory"
+  | "progress"
   | "color"
   | "description"
   | "name"
@@ -5616,6 +5642,7 @@ export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
   | "fromTitle"
   | "toTitle"
   | "archived"
+  | "trashed"
   | "updatedDescription"
   | "autoArchived"
   | "autoClosed"
@@ -5654,6 +5681,7 @@ export type CycleFragment = { __typename?: "Cycle" } & Pick<
   | "completedScopeHistory"
   | "completedIssueCountHistory"
   | "number"
+  | "progress"
   | "startsAt"
   | "autoArchivedAt"
   | "archivedAt"
@@ -5908,6 +5936,11 @@ export type IntegrationResourceDataFragment = { __typename?: "IntegrationResourc
   sentryIssue?: Maybe<{ __typename?: "SentryIssuePayload" } & SentryIssuePayloadFragment>;
 };
 
+export type IntercomSettingsFragment = { __typename?: "IntercomSettings" } & Pick<
+  IntercomSettings,
+  "sendNoteOnStatusChange" | "sendNoteOnComment"
+>;
+
 export type IssueRelationHistoryPayloadFragment = { __typename?: "IssueRelationHistoryPayload" } & Pick<
   IssueRelationHistoryPayload,
   "identifier" | "type"
@@ -6018,6 +6051,7 @@ export type SlackPostSettingsFragment = { __typename?: "SlackPostSettings" } & P
 
 export type IntegrationSettingsFragment = { __typename?: "IntegrationSettings" } & {
   googleSheets?: Maybe<{ __typename?: "GoogleSheetsSettings" } & GoogleSheetsSettingsFragment>;
+  intercom?: Maybe<{ __typename?: "IntercomSettings" } & IntercomSettingsFragment>;
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
   slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackProjectPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
@@ -7975,6 +8009,7 @@ export type AttachmentLinkIntercomMutation = { __typename?: "Mutation" } & {
 
 export type AttachmentLinkUrlMutationVariables = Exact<{
   issueId: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
   url: Scalars["String"];
 }>;
 
@@ -8312,6 +8347,14 @@ export type IntegrationIntercomDeleteMutationVariables = Exact<{ [key: string]: 
 
 export type IntegrationIntercomDeleteMutation = { __typename?: "Mutation" } & {
   integrationIntercomDelete: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationIntercomSettingsUpdateMutationVariables = Exact<{
+  input: IntercomSettingsInput;
+}>;
+
+export type IntegrationIntercomSettingsUpdateMutation = { __typename?: "Mutation" } & {
+  integrationIntercomSettingsUpdate: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationLoomMutationVariables = Exact<{ [key: string]: never }>;
@@ -8911,14 +8954,6 @@ export type SubscriptionUpgradeMutation = { __typename?: "Mutation" } & {
   subscriptionUpgrade: { __typename?: "SubscriptionPayload" } & SubscriptionPayloadFragment;
 };
 
-export type TeamArchiveMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type TeamArchiveMutation = { __typename?: "Mutation" } & {
-  teamArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
 export type TeamCreateMutationVariables = Exact<{
   copySettingsFromTeamId?: Maybe<Scalars["String"]>;
   input: TeamCreateInput;
@@ -9488,6 +9523,23 @@ export const GoogleSheetsSettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<GoogleSheetsSettingsFragment, unknown>;
+export const IntercomSettingsFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntercomSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntercomSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "sendNoteOnStatusChange" } },
+          { kind: "Field", name: { kind: "Name", value: "sendNoteOnComment" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IntercomSettingsFragment, unknown>;
 export const SentrySettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -9558,6 +9610,14 @@ export const IntegrationSettingsFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "intercom" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntercomSettings" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "sentry" },
             selectionSet: {
               kind: "SelectionSet",
@@ -9592,6 +9652,7 @@ export const IntegrationSettingsFragmentDoc = {
       },
     },
     ...GoogleSheetsSettingsFragmentDoc.definitions,
+    ...IntercomSettingsFragmentDoc.definitions,
     ...SentrySettingsFragmentDoc.definitions,
     ...SlackPostSettingsFragmentDoc.definitions,
     ...ZendeskSettingsFragmentDoc.definitions,
@@ -10343,6 +10404,7 @@ export const CycleFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" } },
           { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" } },
           { kind: "Field", name: { kind: "Name", value: "number" } },
+          { kind: "Field", name: { kind: "Name", value: "progress" } },
           { kind: "Field", name: { kind: "Name", value: "startsAt" } },
           {
             kind: "Field",
@@ -11494,6 +11556,7 @@ export const IssueHistoryFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "fromTitle" } },
           { kind: "Field", name: { kind: "Name", value: "toTitle" } },
           { kind: "Field", name: { kind: "Name", value: "archived" } },
+          { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "updatedDescription" } },
           { kind: "Field", name: { kind: "Name", value: "autoArchived" } },
           { kind: "Field", name: { kind: "Name", value: "autoClosed" } },
@@ -12471,6 +12534,7 @@ export const ProjectFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" } },
           { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" } },
+          { kind: "Field", name: { kind: "Name", value: "progress" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "lead" },
@@ -22872,6 +22936,11 @@ export const AttachmentLinkUrlDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "title" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -22887,6 +22956,11 @@ export const AttachmentLinkUrlDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "issueId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "title" },
+                value: { kind: "Variable", name: { kind: "Name", value: "title" } },
               },
               {
                 kind: "Argument",
@@ -24569,6 +24643,50 @@ export const IntegrationIntercomDeleteDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationIntercomDeleteMutation, IntegrationIntercomDeleteMutationVariables>;
+export const IntegrationIntercomSettingsUpdateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationIntercomSettingsUpdate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IntercomSettingsInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationIntercomSettingsUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  IntegrationIntercomSettingsUpdateMutation,
+  IntegrationIntercomSettingsUpdateMutationVariables
+>;
 export const IntegrationLoomDocument = {
   kind: "Document",
   definitions: [
@@ -27691,44 +27809,6 @@ export const SubscriptionUpgradeDocument = {
     ...SubscriptionPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SubscriptionUpgradeMutation, SubscriptionUpgradeMutationVariables>;
-export const TeamArchiveDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "teamArchive" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<TeamArchiveMutation, TeamArchiveMutationVariables>;
 export const TeamCreateDocument = {
   kind: "Document",
   definitions: [
