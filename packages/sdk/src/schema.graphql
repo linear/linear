@@ -43,7 +43,7 @@ input ApiKeyCreateInput {
   """
   id: String
   """
-  The API key value (format: /^[a-zA-Z0-9]{40}$/).
+  The API key value.
   """
   key: String!
   """
@@ -1041,6 +1041,10 @@ type EmailUnsubscribePayload {
 
 input EmailUserAccountAuthChallengeInput {
   """
+  Auth code for the client initiating the sequence.
+  """
+  clientAuthCode: String
+  """
   The email for which to generate the magic login code.
   """
   email: String!
@@ -2017,6 +2021,14 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
+  The user who snoozed the issue.
+  """
+  snoozedBy: User
+  """
+  The time until an issue will be snoozed in Triage view.
+  """
+  snoozedUntilAt: DateTime
+  """
   The time at which the issue was moved into started state.
   """
   startedAt: DateTime
@@ -2277,6 +2289,10 @@ type IssueHistory implements Node {
   The issue that was changed.
   """
   issue: Issue!
+  """
+  The import record.
+  """
+  issueImport: IssueImport
   """
   Changed issue relationships.
   """
@@ -2781,6 +2797,14 @@ input IssueUpdateInput {
   """
   projectId: String
   """
+  The identifier of the user who snoozed the issue.
+  """
+  snoozedById: String
+  """
+  The time until an issue will be snoozed in Triage view.
+  """
+  snoozedUntilAt: DateTime
+  """
   The team state of the issue.
   """
   stateId: String
@@ -2944,7 +2968,7 @@ input MilestoneUpdateInput {
 
 type Mutation {
   """
-  Creates a new API key.
+  [Internal] Creates a new API key.
   """
   apiKeyCreate(
     """
@@ -2953,7 +2977,7 @@ type Mutation {
     input: ApiKeyCreateInput!
   ): ApiKeyPayload!
   """
-  Deletes an API key.
+  [Internal] Deletes an API key.
   """
   apiKeyDelete(
     """
@@ -3414,6 +3438,10 @@ type Mutation {
   """
   integrationIntercomDelete: IntegrationPayload!
   """
+  Enables Loom integration for the organization.
+  """
+  integrationLoom: IntegrationPayload!
+  """
   Archives an integration resource.
   """
   integrationResourceArchive(
@@ -3627,11 +3655,11 @@ type Mutation {
   """
   issueImportCreateGithub(
     """
-    Github repository name from which we will import data.
+    GitHub repository name from which we will import data.
     """
     githubRepoName: String!
     """
-    Github owner (user or org) for the repository from which we will import data.
+    GitHub owner (user or org) for the repository from which we will import data.
     """
     githubRepoOwner: String!
     """
@@ -3639,7 +3667,7 @@ type Mutation {
     """
     githubShouldImportOrgProjects: Boolean
     """
-    Github token to fetch information from the Github API.
+    GitHub token to fetch information from the GitHub API.
     """
     githubToken: String!
     """
@@ -3905,6 +3933,45 @@ type Mutation {
     """
     input: NotificationUpdateInput!
   ): NotificationPayload!
+  """
+  [Internal] Authenticates an auth string by the user.
+  """
+  oauthAuthStringAuthorize(
+    """
+    The identifier of the OAuth client that's trying to authenticate.
+    """
+    appId: String!
+    """
+    The auth string to authenticate.
+    """
+    authString: String!
+  ): OauthAuthStringAuthorizePayload!
+  """
+  [Internal] Creates a temporary authentication code that can be exchanged for an OAuth token.
+  """
+  oauthAuthStringChallenge(
+    """
+    The identifier of the OAuth client that's trying to authenticate.
+    """
+    appId: String!
+    """
+    The group of scopes that are being requested.
+    """
+    scope: [String!]!
+  ): OauthAuthStringChallengePayload!
+  """
+  [Internal] Returns an access token once the auth string has been authenticated.
+  """
+  oauthAuthStringCheck(
+    """
+    The identifier of the OAuth client that's trying to authenticate.
+    """
+    appId: String!
+    """
+    The auth string to authenticate.
+    """
+    authString: String!
+  ): OauthAuthStringCheckPayload!
   """
   Archives an OAuth client.
   """
@@ -4688,6 +4755,35 @@ input NotificationUpdateInput {
   The time until a notification will be snoozed. After that it will appear in the inbox again.
   """
   snoozedUntilAt: DateTime
+}
+
+type OauthAuthStringAuthorizePayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type OauthAuthStringChallengePayload {
+  """
+  The created authentication string.
+  """
+  authString: String!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type OauthAuthStringCheckPayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+  """
+  Access token for use.
+  """
+  token: String
 }
 
 """
@@ -5531,6 +5627,10 @@ type Project implements Node {
       entity hasn't been update after creation.
   """
   updatedAt: DateTime!
+  """
+  Project URL.
+  """
+  url: String!
 }
 
 type ProjectConnection {
@@ -5868,7 +5968,7 @@ type PushSubscriptionTestPayload {
 
 type Query {
   """
-  All API keys for the user.
+  [Internal] All API keys for the user.
   """
   apiKeys(
     """
@@ -8654,6 +8754,10 @@ type User implements Node {
       entity hasn't been update after creation.
   """
   updatedAt: DateTime!
+  """
+  User's profile URL.
+  """
+  url: String!
 }
 
 """

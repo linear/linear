@@ -140,6 +140,8 @@ fragment Notification on Notification {
 
 # A project.
 fragment Project on Project {
+  # Project URL.
+  url
   # The estimated completion date of the project.
   targetDate
   # The icon of the project.
@@ -236,6 +238,10 @@ fragment IssueHistory on IssueHistory {
   removedLabelIds
   # Information about the integration or application which created this history entry.
   source
+  # The import record.
+  issueImport {
+    ...IssueImport
+  }
   # The issue that was changed.
   issue {
     id
@@ -490,6 +496,8 @@ fragment User on User {
   name
   # Unique hash for the user to be used in invite URLs.
   inviteHash
+  # User's profile URL.
+  url
   # Whether the user account is active or disabled (suspended).
   active
   # Whether the user is an organization administrator.
@@ -753,6 +761,8 @@ fragment Issue on Issue {
   completedAt
   # The time at which the issue was moved into started state.
   startedAt
+  # The time until an issue will be snoozed in Triage view.
+  snoozedUntilAt
   # The unique identifier of the entity.
   id
   # The user to whom the issue is assigned to.
@@ -761,6 +771,10 @@ fragment Issue on Issue {
   }
   # The user who created the issue.
   creator {
+    id
+  }
+  # The user who snoozed the issue.
+  snoozedBy {
     id
   }
   # The workflow state that the issue is associated with.
@@ -2025,6 +2039,25 @@ fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
   success
 }
 
+fragment OauthAuthStringAuthorizePayload on OauthAuthStringAuthorizePayload {
+  # Whether the operation was successful.
+  success
+}
+
+fragment OauthAuthStringChallengePayload on OauthAuthStringChallengePayload {
+  # The created authentication string.
+  authString
+  # Whether the operation was successful.
+  success
+}
+
+fragment OauthAuthStringCheckPayload on OauthAuthStringCheckPayload {
+  # Access token for use.
+  token
+  # Whether the operation was successful.
+  success
+}
+
 fragment OauthClientPayload on OauthClientPayload {
   # The OAuth client application that was created or updated.
   oauthClient {
@@ -2425,32 +2458,6 @@ fragment WorkflowStatePayload on WorkflowStatePayload {
   success
 }
 
-# All API keys for the user.
-query apiKeys(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  apiKeys(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...ApiKeyConnection
-  }
-}
 # Get information for an application and whether a user has approved it for the given scopes.
 query applicationWithAuthorization(
   # The client ID of the application.
@@ -4817,24 +4824,6 @@ query workflowStates(
     ...WorkflowStateConnection
   }
 }
-# Creates a new API key.
-mutation apiKeyCreate(
-  # The api key object to create.
-  $input: ApiKeyCreateInput!
-) {
-  apiKeyCreate(input: $input) {
-    ...ApiKeyPayload
-  }
-}
-# Deletes an API key.
-mutation apiKeyDelete(
-  # The identifier of the API key to delete.
-  $id: String!
-) {
-  apiKeyDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
 # [DEPRECATED] Archives an issue attachment.
 mutation attachmentArchive(
   # The identifier of the attachment to archive.
@@ -5266,6 +5255,12 @@ mutation integrationIntercomDelete {
     ...IntegrationPayload
   }
 }
+# Enables Loom integration for the organization.
+mutation integrationLoom {
+  integrationLoom {
+    ...IntegrationPayload
+  }
+}
 # Archives an integration resource.
 mutation integrationResourceArchive(
   # The identifier of the integration resource to archive.
@@ -5443,13 +5438,13 @@ mutation issueImportCreateClubhouse(
 }
 # Kicks off a GitHub import job.
 mutation issueImportCreateGithub(
-  # Github repository name from which we will import data.
+  # GitHub repository name from which we will import data.
   $githubRepoName: String!
-  # Github owner (user or org) for the repository from which we will import data.
+  # GitHub owner (user or org) for the repository from which we will import data.
   $githubRepoOwner: String!
   # Whether or not we should import GitHub organization level projects.
   $githubShouldImportOrgProjects: Boolean
-  # Github token to fetch information from the Github API.
+  # GitHub token to fetch information from the GitHub API.
   $githubToken: String!
   # ID of issue import. If not provided it will be generated.
   $id: String

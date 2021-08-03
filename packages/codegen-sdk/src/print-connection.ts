@@ -161,29 +161,23 @@ export function printConnection(): string {
       }
     
       ${printComment(["Fetch the next page of results and append to nodes"])}
-      public ${Sdk.FETCH_NAME}Next(): Promise<this> {
-        return ${printTernary(
-          `this.${Sdk.PAGEINFO_NAME}?.hasNextPage`,
-          `this._${Sdk.FETCH_NAME}({ after: this.${Sdk.PAGEINFO_NAME}?.endCursor }).then(${Sdk.RESPONSE_NAME} => {
-            this._appendNodes(${Sdk.RESPONSE_NAME}?.${Sdk.NODE_NAME})
-            this._appendPageInfo(${Sdk.RESPONSE_NAME}?.${Sdk.PAGEINFO_NAME})
-            return this
-          })`,
-          `Promise.resolve(this)`
-        )}
+      public async ${Sdk.FETCH_NAME}Next(): Promise<this> {
+        if (this.${Sdk.PAGEINFO_NAME}?.hasNextPage) {
+          const ${Sdk.RESPONSE_NAME} = await this._${Sdk.FETCH_NAME}({ after: this.${Sdk.PAGEINFO_NAME}?.endCursor })
+          this._appendNodes(${Sdk.RESPONSE_NAME}?.${Sdk.NODE_NAME})
+          this._appendPageInfo(${Sdk.RESPONSE_NAME}?.${Sdk.PAGEINFO_NAME})
+        }
+        return Promise.resolve(this)
       }
     
       ${printComment(["Fetch the previous page of results and prepend to nodes"])}
-      public ${Sdk.FETCH_NAME}Previous(): Promise<this> {
-        return ${printTernary(
-          `this.${Sdk.PAGEINFO_NAME}?.hasPreviousPage`,
-          `this._${Sdk.FETCH_NAME}({ before: this.${Sdk.PAGEINFO_NAME}?.startCursor }).then(${Sdk.RESPONSE_NAME} => {
-            this._prependNodes(${Sdk.RESPONSE_NAME}?.${Sdk.NODE_NAME})
-            this._prependPageInfo(${Sdk.RESPONSE_NAME}?.${Sdk.PAGEINFO_NAME})
-            return this
-          })`,
-          `Promise.resolve(this)`
-        )}
+      public async ${Sdk.FETCH_NAME}Previous(): Promise<this> {
+        if (this.${Sdk.PAGEINFO_NAME}?.hasPreviousPage) {
+          const ${Sdk.RESPONSE_NAME} = await this._${Sdk.FETCH_NAME}({ before: this.${Sdk.PAGEINFO_NAME}?.startCursor })
+          this._prependNodes(${Sdk.RESPONSE_NAME}?.${Sdk.NODE_NAME})
+          this._prependPageInfo(${Sdk.RESPONSE_NAME}?.${Sdk.PAGEINFO_NAME})
+        }
+        return Promise.resolve(this)
       }
     }`,
   ]);

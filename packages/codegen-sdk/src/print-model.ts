@@ -223,6 +223,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               ...operation.requiredArgs.args.map(variable =>
                 modelFieldNames.includes(variable.name) ? `this.${variable.name}` : variable.name
               ),
+              operation.optionalArgs.printOutput,
             ]);
 
             const operationCall = `new ${operation.print.name}${operation.print.type}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${operationArgs})`;

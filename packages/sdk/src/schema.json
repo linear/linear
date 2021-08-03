@@ -234,7 +234,7 @@
           },
           {
             "name": "key",
-            "description": "The API key value (format: /^[a-zA-Z0-9]{40}$/).",
+            "description": "The API key value.",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -4235,6 +4235,18 @@
             "deprecationReason": null
           },
           {
+            "name": "clientAuthCode",
+            "description": "Auth code for the client initiating the sequence.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "signupCode",
             "description": "Signup code.",
             "type": {
@@ -7093,6 +7105,18 @@
             "deprecationReason": null
           },
           {
+            "name": "snoozedUntilAt",
+            "description": "The time until an issue will be snoozed in Triage view.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "previousIdentifiers",
             "description": "Previous identifiers of the issue if it has been moved between teams.",
             "args": [],
@@ -7112,6 +7136,18 @@
                   }
                 }
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedBy",
+            "description": "The user who snoozed the issue.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -8956,6 +8992,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueImport",
+            "description": "The import record.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "IssueImport",
               "ofType": null
             },
             "isDeprecated": false,
@@ -10873,6 +10921,30 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "snoozedUntilAt",
+            "description": "The time until an issue will be snoozed in Triage view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedById",
+            "description": "The identifier of the user who snoozed the issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -11439,7 +11511,7 @@
           },
           {
             "name": "apiKeyCreate",
-            "description": "Creates a new API key.",
+            "description": "[Internal] Creates a new API key.",
             "args": [
               {
                 "name": "input",
@@ -11472,7 +11544,7 @@
           },
           {
             "name": "apiKeyDelete",
-            "description": "Deletes an API key.",
+            "description": "[Internal] Deletes an API key.",
             "args": [
               {
                 "name": "id",
@@ -13698,6 +13770,22 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationLoom",
+            "description": "Enables Loom integration for the organization.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationDelete",
             "description": "Deletes an integration.",
             "args": [
@@ -13805,7 +13893,7 @@
               },
               {
                 "name": "githubRepoOwner",
-                "description": "Github owner (user or org) for the repository from which we will import data.",
+                "description": "GitHub owner (user or org) for the repository from which we will import data.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -13821,7 +13909,7 @@
               },
               {
                 "name": "githubRepoName",
-                "description": "Github repository name from which we will import data.",
+                "description": "GitHub repository name from which we will import data.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -13837,7 +13925,7 @@
               },
               {
                 "name": "githubToken",
-                "description": "Github token to fetch information from the Github API.",
+                "description": "GitHub token to fetch information from the GitHub API.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -15023,6 +15111,161 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "ArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "oauthAuthStringChallenge",
+            "description": "[Internal] Creates a temporary authentication code that can be exchanged for an OAuth token.",
+            "args": [
+              {
+                "name": "scope",
+                "description": "The group of scopes that are being requested.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "appId",
+                "description": "The identifier of the OAuth client that's trying to authenticate.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OauthAuthStringChallengePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "oauthAuthStringAuthorize",
+            "description": "[Internal] Authenticates an auth string by the user.",
+            "args": [
+              {
+                "name": "authString",
+                "description": "The auth string to authenticate.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "appId",
+                "description": "The identifier of the OAuth client that's trying to authenticate.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OauthAuthStringAuthorizePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "oauthAuthStringCheck",
+            "description": "[Internal] Returns an access token once the auth string has been authenticated.",
+            "args": [
+              {
+                "name": "authString",
+                "description": "The auth string to authenticate.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "appId",
+                "description": "The identifier of the OAuth client that's trying to authenticate.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OauthAuthStringCheckPayload",
                 "ofType": null
               }
             },
@@ -18186,6 +18429,115 @@
       },
       {
         "kind": "OBJECT",
+        "name": "OauthAuthStringAuthorizePayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OauthAuthStringChallengePayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "authString",
+            "description": "The created authentication string.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OauthAuthStringCheckPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "token",
+            "description": "Access token for use.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "OauthClient",
         "description": "OAuth2 client application",
         "fields": [
@@ -20859,6 +21211,22 @@
             "deprecationReason": null
           },
           {
+            "name": "url",
+            "description": "Project URL.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "teams",
             "description": "Teams associated with this project.",
             "args": [
@@ -23101,7 +23469,7 @@
           },
           {
             "name": "apiKeys",
-            "description": "All API keys for the user.",
+            "description": "[Internal] All API keys for the user.",
             "args": [
               {
                 "name": "before",
@@ -32351,6 +32719,22 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "User's profile URL.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

@@ -31,7 +31,7 @@ export const Sdk = {
   REQUEST_NAME: "request",
   REQUEST_TYPE: "LinearRequest",
   RESPONSE_NAME: "response",
-  RESPONSE_TYPE: "LinearResponse",
+  RESPONSE_TYPE: "Response",
   SDK_CLASS: "LinearSdk",
   VARIABLE_NAME: "variables",
   VARIABLE_TYPE: "Variables",

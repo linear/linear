@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DocumentNode } from "graphql/language/ast";
 import * as L from "./_generated_documents";
 
 /** The function for calling the graphql client */
-export type LinearRequest = <LinearResponse, Variables extends Record<string, unknown>>(
+export type LinearRequest = <Response, Variables extends Record<string, unknown>>(
   doc: DocumentNode,
   variables?: Variables
-) => Promise<LinearResponse>;
+) => Promise<Response>;
 
 /**
  * Base class to provide a request function
@@ -22,7 +21,7 @@ export class Request {
 }
 
 /** Fetch return type wrapped in a promise */
-export type LinearFetch<LinearResponse> = Promise<LinearResponse | undefined>;
+export type LinearFetch<Response> = Promise<Response | undefined>;
 
 /**
  * Variables required for pagination
@@ -90,25 +89,23 @@ export class Connection<Node> extends LinearConnection<Node> {
   }
 
   /** Fetch the next page of results and append to nodes */
-  public fetchNext(): Promise<this> {
-    return this.pageInfo?.hasNextPage
-      ? this._fetch({ after: this.pageInfo?.endCursor }).then(response => {
-          this._appendNodes(response?.nodes);
-          this._appendPageInfo(response?.pageInfo);
-          return this;
-        })
-      : Promise.resolve(this);
+  public async fetchNext(): Promise<this> {
+    if (this.pageInfo?.hasNextPage) {
+      const response = await this._fetch({ after: this.pageInfo?.endCursor });
+      this._appendNodes(response?.nodes);
+      this._appendPageInfo(response?.pageInfo);
+    }
+    return Promise.resolve(this);
   }
 
   /** Fetch the previous page of results and prepend to nodes */
-  public fetchPrevious(): Promise<this> {
-    return this.pageInfo?.hasPreviousPage
-      ? this._fetch({ before: this.pageInfo?.startCursor }).then(response => {
-          this._prependNodes(response?.nodes);
-          this._prependPageInfo(response?.pageInfo);
-          return this;
-        })
-      : Promise.resolve(this);
+  public async fetchPrevious(): Promise<this> {
+    if (this.pageInfo?.hasPreviousPage) {
+      const response = await this._fetch({ before: this.pageInfo?.startCursor });
+      this._prependNodes(response?.nodes);
+      this._prependPageInfo(response?.pageInfo);
+    }
+    return Promise.resolve(this);
   }
 }
 
@@ -167,11 +164,6 @@ export class ApiKey extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
-
-  /** Deletes an API key. */
-  public delete() {
-    return this.id ? new ApiKeyDeleteMutation(this._request).fetch(this.id) : undefined;
-  }
 }
 /**
  * ApiKeyConnection model
@@ -1788,6 +1780,7 @@ export class Issue extends Request {
   private _cycle?: L.IssueFragment["cycle"];
   private _parent?: L.IssueFragment["parent"];
   private _project?: L.IssueFragment["project"];
+  private _snoozedBy?: L.IssueFragment["snoozedBy"];
   private _state?: L.IssueFragment["state"];
   private _team?: L.IssueFragment["team"];
 
@@ -1811,6 +1804,7 @@ export class Issue extends Request {
     this.previousIdentifiers = data.previousIdentifiers ?? undefined;
     this.priority = data.priority ?? undefined;
     this.priorityLabel = data.priorityLabel ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.subIssueSortOrder = data.subIssueSortOrder ?? undefined;
     this.title = data.title ?? undefined;
@@ -1822,6 +1816,7 @@ export class Issue extends Request {
     this._cycle = data.cycle ?? undefined;
     this._parent = data.parent ?? undefined;
     this._project = data.project ?? undefined;
+    this._snoozedBy = data.snoozedBy ?? undefined;
     this._state = data.state ?? undefined;
     this._team = data.team ?? undefined;
   }
@@ -1862,6 +1857,8 @@ export class Issue extends Request {
   public priority?: number;
   /** Label for the priority. */
   public priorityLabel?: string;
+  /** The time until an issue will be snoozed in Triage view. */
+  public snoozedUntilAt?: Date;
   /** The time at which the issue was moved into started state. */
   public startedAt?: Date;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
@@ -1896,6 +1893,10 @@ export class Issue extends Request {
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The user who snoozed the issue. */
+  public get snoozedBy(): LinearFetch<User> | undefined {
+    return this._snoozedBy?.id ? new UserQuery(this._request).fetch(this._snoozedBy?.id) : undefined;
   }
   /** The workflow state that the issue is associated with. */
   public get state(): LinearFetch<WorkflowState> | undefined {
@@ -1939,7 +1940,7 @@ export class Issue extends Request {
   }
   /** Archives an issue. */
   public archive(variables?: Omit<L.IssueArchiveMutationVariables, "id">) {
-    return this.id ? new IssueArchiveMutation(this._request).fetch(this.id) : undefined;
+    return this.id ? new IssueArchiveMutation(this._request).fetch(this.id, variables) : undefined;
   }
   /** Deletes (trashes) an issue. */
   public delete() {
@@ -2063,6 +2064,7 @@ export class IssueHistory extends Request {
     this.toTitle = data.toTitle ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.updatedDescription = data.updatedDescription ?? undefined;
+    this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
     this.relationChanges = data.relationChanges
       ? data.relationChanges.map(node => new IssueRelationHistoryPayload(request, node))
       : undefined;
@@ -2123,6 +2125,8 @@ export class IssueHistory extends Request {
   public updatedDescription?: boolean;
   /** Changed issue relationships. */
   public relationChanges?: IssueRelationHistoryPayload[];
+  /** The import record. */
+  public issueImport?: IssueImport;
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -2883,6 +2887,57 @@ export class NotificationSubscriptionPayload extends Request {
   }
 }
 /**
+ * OauthAuthStringAuthorizePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OauthAuthStringAuthorizePayloadFragment response data
+ */
+export class OauthAuthStringAuthorizePayload extends Request {
+  public constructor(request: LinearRequest, data: L.OauthAuthStringAuthorizePayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * OauthAuthStringChallengePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OauthAuthStringChallengePayloadFragment response data
+ */
+export class OauthAuthStringChallengePayload extends Request {
+  public constructor(request: LinearRequest, data: L.OauthAuthStringChallengePayloadFragment) {
+    super(request);
+    this.authString = data.authString ?? undefined;
+    this.success = data.success ?? undefined;
+  }
+
+  /** The created authentication string. */
+  public authString?: string;
+  /** Whether the operation was successful. */
+  public success?: boolean;
+}
+/**
+ * OauthAuthStringCheckPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OauthAuthStringCheckPayloadFragment response data
+ */
+export class OauthAuthStringCheckPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OauthAuthStringCheckPayloadFragment) {
+    super(request);
+    this.success = data.success ?? undefined;
+    this.token = data.token ?? undefined;
+  }
+
+  /** Whether the operation was successful. */
+  public success?: boolean;
+  /** Access token for use. */
+  public token?: string;
+}
+/**
  * OAuth2 client application
  *
  * @param request - function to call the graphql client
@@ -3403,6 +3458,7 @@ export class Project extends Request {
     this.state = data.state ?? undefined;
     this.targetDate = data.targetDate ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.url = data.url ?? undefined;
     this._creator = data.creator ?? undefined;
     this._lead = data.lead ?? undefined;
     this._milestone = data.milestone ?? undefined;
@@ -3457,6 +3513,8 @@ export class Project extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+  /** Project URL. */
+  public url?: string;
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -4794,6 +4852,7 @@ export class User extends Request {
     this.lastSeen = parseDate(data.lastSeen) ?? undefined;
     this.name = data.name ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.url = data.url ?? undefined;
   }
 
   /** Whether the user account is active or disabled (suspended). */
@@ -4827,6 +4886,8 @@ export class User extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt?: Date;
+  /** User's profile URL. */
+  public url?: string;
   /** Organization in which the user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -5423,32 +5484,6 @@ export class ZendeskSettings extends Request {
   public url?: string;
 }
 /**
- * A fetchable ApiKeys Query
- *
- * @param request - function to call the graphql client
- */
-export class ApiKeysQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApiKeys query and return a ApiKeyConnection
-   *
-   * @param variables - variables to pass into the ApiKeysQuery
-   * @returns parsed response from ApiKeysQuery
-   */
-  public async fetch(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
-    return this._request<L.ApiKeysQuery, L.ApiKeysQueryVariables>(L.ApiKeysDocument, variables).then(response => {
-      const data = response?.apiKeys;
-      return data
-        ? new ApiKeyConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
-  }
-}
-
-/**
  * A fetchable ApplicationWithAuthorization Query
  *
  * @param request - function to call the graphql client
@@ -5471,17 +5506,16 @@ export class ApplicationWithAuthorizationQuery extends Request {
     scope: string[],
     variables?: Omit<L.ApplicationWithAuthorizationQueryVariables, "clientId" | "scope">
   ): LinearFetch<UserAuthorizedApplication> {
-    return this._request<L.ApplicationWithAuthorizationQuery, L.ApplicationWithAuthorizationQueryVariables>(
-      L.ApplicationWithAuthorizationDocument,
-      {
-        clientId,
-        scope,
-        ...variables,
-      }
-    ).then(response => {
-      const data = response?.applicationWithAuthorization;
-      return data ? new UserAuthorizedApplication(this._request, data) : undefined;
+    const response = await this._request<
+      L.ApplicationWithAuthorizationQuery,
+      L.ApplicationWithAuthorizationQueryVariables
+    >(L.ApplicationWithAuthorizationDocument, {
+      clientId,
+      scope,
+      ...variables,
     });
+    const data = response?.applicationWithAuthorization;
+    return data ? new UserAuthorizedApplication(this._request, data) : undefined;
   }
 }
 
@@ -5502,12 +5536,11 @@ export class AttachmentQuery extends Request {
    * @returns parsed response from AttachmentQuery
    */
   public async fetch(id: string): LinearFetch<Attachment> {
-    return this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(L.AttachmentDocument, {
+    const response = await this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(L.AttachmentDocument, {
       id,
-    }).then(response => {
-      const data = response?.attachment;
-      return data ? new Attachment(this._request, data) : undefined;
     });
+    const data = response?.attachment;
+    return data ? new Attachment(this._request, data) : undefined;
   }
 }
 
@@ -5528,12 +5561,14 @@ export class AttachmentIssueQuery extends Request {
    * @returns parsed response from AttachmentIssueQuery
    */
   public async fetch(id: string): LinearFetch<Issue> {
-    return this._request<L.AttachmentIssueQuery, L.AttachmentIssueQueryVariables>(L.AttachmentIssueDocument, {
-      id,
-    }).then(response => {
-      const data = response?.attachmentIssue;
-      return data ? new Issue(this._request, data) : undefined;
-    });
+    const response = await this._request<L.AttachmentIssueQuery, L.AttachmentIssueQueryVariables>(
+      L.AttachmentIssueDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.attachmentIssue;
+    return data ? new Issue(this._request, data) : undefined;
   }
 }
 
@@ -5554,14 +5589,14 @@ export class AttachmentsQuery extends Request {
    * @returns parsed response from AttachmentsQuery
    */
   public async fetch(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
-    return this._request<L.AttachmentsQuery, L.AttachmentsQueryVariables>(L.AttachmentsDocument, variables).then(
-      response => {
-        const data = response?.attachments;
-        return data
-          ? new AttachmentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-          : undefined;
-      }
+    const response = await this._request<L.AttachmentsQuery, L.AttachmentsQueryVariables>(
+      L.AttachmentsDocument,
+      variables
     );
+    const data = response?.attachments;
+    return data
+      ? new AttachmentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -5586,15 +5621,17 @@ export class AttachmentsForUrlQuery extends Request {
     url: string,
     variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
   ): LinearFetch<AttachmentConnection> {
-    return this._request<L.AttachmentsForUrlQuery, L.AttachmentsForUrlQueryVariables>(L.AttachmentsForUrlDocument, {
-      url,
-      ...variables,
-    }).then(response => {
-      const data = response?.attachmentsForURL;
-      return data
-        ? new AttachmentConnection(this._request, connection => this.fetch(url, { ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.AttachmentsForUrlQuery, L.AttachmentsForUrlQueryVariables>(
+      L.AttachmentsForUrlDocument,
+      {
+        url,
+        ...variables,
+      }
+    );
+    const data = response?.attachmentsForURL;
+    return data
+      ? new AttachmentConnection(this._request, connection => this.fetch(url, { ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -5614,13 +5651,12 @@ export class AuthorizedApplicationsQuery extends Request {
    * @returns parsed response from AuthorizedApplicationsQuery
    */
   public async fetch(): LinearFetch<AuthorizedApplication[]> {
-    return this._request<L.AuthorizedApplicationsQuery, L.AuthorizedApplicationsQueryVariables>(
+    const response = await this._request<L.AuthorizedApplicationsQuery, L.AuthorizedApplicationsQueryVariables>(
       L.AuthorizedApplicationsDocument,
       {}
-    ).then(response => {
-      const data = response?.authorizedApplications;
-      return data ? data.map(node => new AuthorizedApplication(this._request, node)) : undefined;
-    });
+    );
+    const data = response?.authorizedApplications;
+    return data ? data.map(node => new AuthorizedApplication(this._request, node)) : undefined;
   }
 }
 
@@ -5640,12 +5676,12 @@ export class AvailableUsersQuery extends Request {
    * @returns parsed response from AvailableUsersQuery
    */
   public async fetch(): LinearFetch<AuthResolverResponse> {
-    return this._request<L.AvailableUsersQuery, L.AvailableUsersQueryVariables>(L.AvailableUsersDocument, {}).then(
-      response => {
-        const data = response?.availableUsers;
-        return data ? new AuthResolverResponse(this._request, data) : undefined;
-      }
+    const response = await this._request<L.AvailableUsersQuery, L.AvailableUsersQueryVariables>(
+      L.AvailableUsersDocument,
+      {}
     );
+    const data = response?.availableUsers;
+    return data ? new AuthResolverResponse(this._request, data) : undefined;
   }
 }
 
@@ -5665,12 +5701,12 @@ export class BillingDetailsQuery extends Request {
    * @returns parsed response from BillingDetailsQuery
    */
   public async fetch(): LinearFetch<BillingDetailsPayload> {
-    return this._request<L.BillingDetailsQuery, L.BillingDetailsQueryVariables>(L.BillingDetailsDocument, {}).then(
-      response => {
-        const data = response?.billingDetails;
-        return data ? new BillingDetailsPayload(this._request, data) : undefined;
-      }
+    const response = await this._request<L.BillingDetailsQuery, L.BillingDetailsQueryVariables>(
+      L.BillingDetailsDocument,
+      {}
     );
+    const data = response?.billingDetails;
+    return data ? new BillingDetailsPayload(this._request, data) : undefined;
   }
 }
 
@@ -5697,17 +5733,16 @@ export class CollaborativeDocumentJoinQuery extends Request {
     issueId: string,
     version: number
   ): LinearFetch<CollaborationDocumentUpdatePayload> {
-    return this._request<L.CollaborativeDocumentJoinQuery, L.CollaborativeDocumentJoinQueryVariables>(
+    const response = await this._request<L.CollaborativeDocumentJoinQuery, L.CollaborativeDocumentJoinQueryVariables>(
       L.CollaborativeDocumentJoinDocument,
       {
         clientId,
         issueId,
         version,
       }
-    ).then(response => {
-      const data = response?.collaborativeDocumentJoin;
-      return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.collaborativeDocumentJoin;
+    return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
   }
 }
 
@@ -5728,12 +5763,11 @@ export class CommentQuery extends Request {
    * @returns parsed response from CommentQuery
    */
   public async fetch(id: string): LinearFetch<Comment> {
-    return this._request<L.CommentQuery, L.CommentQueryVariables>(L.CommentDocument, {
+    const response = await this._request<L.CommentQuery, L.CommentQueryVariables>(L.CommentDocument, {
       id,
-    }).then(response => {
-      const data = response?.comment;
-      return data ? new Comment(this._request, data) : undefined;
     });
+    const data = response?.comment;
+    return data ? new Comment(this._request, data) : undefined;
   }
 }
 
@@ -5754,12 +5788,11 @@ export class CommentsQuery extends Request {
    * @returns parsed response from CommentsQuery
    */
   public async fetch(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
-    return this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables).then(response => {
-      const data = response?.comments;
-      return data
-        ? new CommentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables);
+    const data = response?.comments;
+    return data
+      ? new CommentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -5780,12 +5813,11 @@ export class CustomViewQuery extends Request {
    * @returns parsed response from CustomViewQuery
    */
   public async fetch(id: string): LinearFetch<CustomView> {
-    return this._request<L.CustomViewQuery, L.CustomViewQueryVariables>(L.CustomViewDocument, {
+    const response = await this._request<L.CustomViewQuery, L.CustomViewQueryVariables>(L.CustomViewDocument, {
       id,
-    }).then(response => {
-      const data = response?.customView;
-      return data ? new CustomView(this._request, data) : undefined;
     });
+    const data = response?.customView;
+    return data ? new CustomView(this._request, data) : undefined;
   }
 }
 
@@ -5806,14 +5838,14 @@ export class CustomViewsQuery extends Request {
    * @returns parsed response from CustomViewsQuery
    */
   public async fetch(variables?: L.CustomViewsQueryVariables): LinearFetch<CustomViewConnection> {
-    return this._request<L.CustomViewsQuery, L.CustomViewsQueryVariables>(L.CustomViewsDocument, variables).then(
-      response => {
-        const data = response?.customViews;
-        return data
-          ? new CustomViewConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-          : undefined;
-      }
+    const response = await this._request<L.CustomViewsQuery, L.CustomViewsQueryVariables>(
+      L.CustomViewsDocument,
+      variables
     );
+    const data = response?.customViews;
+    return data
+      ? new CustomViewConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -5834,12 +5866,11 @@ export class CycleQuery extends Request {
    * @returns parsed response from CycleQuery
    */
   public async fetch(id: string): LinearFetch<Cycle> {
-    return this._request<L.CycleQuery, L.CycleQueryVariables>(L.CycleDocument, {
+    const response = await this._request<L.CycleQuery, L.CycleQueryVariables>(L.CycleDocument, {
       id,
-    }).then(response => {
-      const data = response?.cycle;
-      return data ? new Cycle(this._request, data) : undefined;
     });
+    const data = response?.cycle;
+    return data ? new Cycle(this._request, data) : undefined;
   }
 }
 
@@ -5860,12 +5891,11 @@ export class CyclesQuery extends Request {
    * @returns parsed response from CyclesQuery
    */
   public async fetch(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
-    return this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables).then(response => {
-      const data = response?.cycles;
-      return data
-        ? new CycleConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables);
+    const data = response?.cycles;
+    return data
+      ? new CycleConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -5886,12 +5916,11 @@ export class EmojiQuery extends Request {
    * @returns parsed response from EmojiQuery
    */
   public async fetch(id: string): LinearFetch<Emoji> {
-    return this._request<L.EmojiQuery, L.EmojiQueryVariables>(L.EmojiDocument, {
+    const response = await this._request<L.EmojiQuery, L.EmojiQueryVariables>(L.EmojiDocument, {
       id,
-    }).then(response => {
-      const data = response?.emoji;
-      return data ? new Emoji(this._request, data) : undefined;
     });
+    const data = response?.emoji;
+    return data ? new Emoji(this._request, data) : undefined;
   }
 }
 
@@ -5912,12 +5941,11 @@ export class EmojisQuery extends Request {
    * @returns parsed response from EmojisQuery
    */
   public async fetch(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
-    return this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables).then(response => {
-      const data = response?.emojis;
-      return data
-        ? new EmojiConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables);
+    const data = response?.emojis;
+    return data
+      ? new EmojiConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -5938,12 +5966,11 @@ export class FavoriteQuery extends Request {
    * @returns parsed response from FavoriteQuery
    */
   public async fetch(id: string): LinearFetch<Favorite> {
-    return this._request<L.FavoriteQuery, L.FavoriteQueryVariables>(L.FavoriteDocument, {
+    const response = await this._request<L.FavoriteQuery, L.FavoriteQueryVariables>(L.FavoriteDocument, {
       id,
-    }).then(response => {
-      const data = response?.favorite;
-      return data ? new Favorite(this._request, data) : undefined;
     });
+    const data = response?.favorite;
+    return data ? new Favorite(this._request, data) : undefined;
   }
 }
 
@@ -5964,12 +5991,11 @@ export class FavoritesQuery extends Request {
    * @returns parsed response from FavoritesQuery
    */
   public async fetch(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
-    return this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables).then(response => {
-      const data = response?.favorites;
-      return data
-        ? new FavoriteConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables);
+    const data = response?.favorites;
+    return data
+      ? new FavoriteConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -5994,13 +6020,15 @@ export class FigmaEmbedInfoQuery extends Request {
     fileId: string,
     variables?: Omit<L.FigmaEmbedInfoQueryVariables, "fileId">
   ): LinearFetch<FigmaEmbedPayload> {
-    return this._request<L.FigmaEmbedInfoQuery, L.FigmaEmbedInfoQueryVariables>(L.FigmaEmbedInfoDocument, {
-      fileId,
-      ...variables,
-    }).then(response => {
-      const data = response?.figmaEmbedInfo;
-      return data ? new FigmaEmbedPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.FigmaEmbedInfoQuery, L.FigmaEmbedInfoQueryVariables>(
+      L.FigmaEmbedInfoDocument,
+      {
+        fileId,
+        ...variables,
+      }
+    );
+    const data = response?.figmaEmbedInfo;
+    return data ? new FigmaEmbedPayload(this._request, data) : undefined;
   }
 }
 
@@ -6021,12 +6049,11 @@ export class IntegrationQuery extends Request {
    * @returns parsed response from IntegrationQuery
    */
   public async fetch(id: string): LinearFetch<Integration> {
-    return this._request<L.IntegrationQuery, L.IntegrationQueryVariables>(L.IntegrationDocument, {
+    const response = await this._request<L.IntegrationQuery, L.IntegrationQueryVariables>(L.IntegrationDocument, {
       id,
-    }).then(response => {
-      const data = response?.integration;
-      return data ? new Integration(this._request, data) : undefined;
     });
+    const data = response?.integration;
+    return data ? new Integration(this._request, data) : undefined;
   }
 }
 
@@ -6047,14 +6074,14 @@ export class IntegrationsQuery extends Request {
    * @returns parsed response from IntegrationsQuery
    */
   public async fetch(variables?: L.IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
-    return this._request<L.IntegrationsQuery, L.IntegrationsQueryVariables>(L.IntegrationsDocument, variables).then(
-      response => {
-        const data = response?.integrations;
-        return data
-          ? new IntegrationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-          : undefined;
-      }
+    const response = await this._request<L.IntegrationsQuery, L.IntegrationsQueryVariables>(
+      L.IntegrationsDocument,
+      variables
     );
+    const data = response?.integrations;
+    return data
+      ? new IntegrationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6079,13 +6106,12 @@ export class InviteInfoQuery extends Request {
     userHash: string,
     variables?: Omit<L.InviteInfoQueryVariables, "userHash">
   ): LinearFetch<InvitePagePayload> {
-    return this._request<L.InviteInfoQuery, L.InviteInfoQueryVariables>(L.InviteInfoDocument, {
+    const response = await this._request<L.InviteInfoQuery, L.InviteInfoQueryVariables>(L.InviteInfoDocument, {
       userHash,
       ...variables,
-    }).then(response => {
-      const data = response?.inviteInfo;
-      return data ? new InvitePagePayload(this._request, data) : undefined;
     });
+    const data = response?.inviteInfo;
+    return data ? new InvitePagePayload(this._request, data) : undefined;
   }
 }
 
@@ -6106,12 +6132,11 @@ export class IssueQuery extends Request {
    * @returns parsed response from IssueQuery
    */
   public async fetch(id: string): LinearFetch<Issue> {
-    return this._request<L.IssueQuery, L.IssueQueryVariables>(L.IssueDocument, {
+    const response = await this._request<L.IssueQuery, L.IssueQueryVariables>(L.IssueDocument, {
       id,
-    }).then(response => {
-      const data = response?.issue;
-      return data ? new Issue(this._request, data) : undefined;
     });
+    const data = response?.issue;
+    return data ? new Issue(this._request, data) : undefined;
   }
 }
 
@@ -6132,15 +6157,14 @@ export class IssueImportFinishGithubOAuthQuery extends Request {
    * @returns parsed response from IssueImportFinishGithubOAuthQuery
    */
   public async fetch(code: string): LinearFetch<GithubOAuthTokenPayload> {
-    return this._request<L.IssueImportFinishGithubOAuthQuery, L.IssueImportFinishGithubOAuthQueryVariables>(
-      L.IssueImportFinishGithubOAuthDocument,
-      {
-        code,
-      }
-    ).then(response => {
-      const data = response?.issueImportFinishGithubOAuth;
-      return data ? new GithubOAuthTokenPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IssueImportFinishGithubOAuthQuery,
+      L.IssueImportFinishGithubOAuthQueryVariables
+    >(L.IssueImportFinishGithubOAuthDocument, {
+      code,
     });
+    const data = response?.issueImportFinishGithubOAuth;
+    return data ? new GithubOAuthTokenPayload(this._request, data) : undefined;
   }
 }
 
@@ -6161,12 +6185,11 @@ export class IssueLabelQuery extends Request {
    * @returns parsed response from IssueLabelQuery
    */
   public async fetch(id: string): LinearFetch<IssueLabel> {
-    return this._request<L.IssueLabelQuery, L.IssueLabelQueryVariables>(L.IssueLabelDocument, {
+    const response = await this._request<L.IssueLabelQuery, L.IssueLabelQueryVariables>(L.IssueLabelDocument, {
       id,
-    }).then(response => {
-      const data = response?.issueLabel;
-      return data ? new IssueLabel(this._request, data) : undefined;
     });
+    const data = response?.issueLabel;
+    return data ? new IssueLabel(this._request, data) : undefined;
   }
 }
 
@@ -6187,14 +6210,14 @@ export class IssueLabelsQuery extends Request {
    * @returns parsed response from IssueLabelsQuery
    */
   public async fetch(variables?: L.IssueLabelsQueryVariables): LinearFetch<IssueLabelConnection> {
-    return this._request<L.IssueLabelsQuery, L.IssueLabelsQueryVariables>(L.IssueLabelsDocument, variables).then(
-      response => {
-        const data = response?.issueLabels;
-        return data
-          ? new IssueLabelConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-          : undefined;
-      }
+    const response = await this._request<L.IssueLabelsQuery, L.IssueLabelsQueryVariables>(
+      L.IssueLabelsDocument,
+      variables
     );
+    const data = response?.issueLabels;
+    return data
+      ? new IssueLabelConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6214,13 +6237,12 @@ export class IssuePriorityValuesQuery extends Request {
    * @returns parsed response from IssuePriorityValuesQuery
    */
   public async fetch(): LinearFetch<IssuePriorityValue[]> {
-    return this._request<L.IssuePriorityValuesQuery, L.IssuePriorityValuesQueryVariables>(
+    const response = await this._request<L.IssuePriorityValuesQuery, L.IssuePriorityValuesQueryVariables>(
       L.IssuePriorityValuesDocument,
       {}
-    ).then(response => {
-      const data = response?.issuePriorityValues;
-      return data ? data.map(node => new IssuePriorityValue(this._request, node)) : undefined;
-    });
+    );
+    const data = response?.issuePriorityValues;
+    return data ? data.map(node => new IssuePriorityValue(this._request, node)) : undefined;
   }
 }
 
@@ -6241,12 +6263,11 @@ export class IssueRelationQuery extends Request {
    * @returns parsed response from IssueRelationQuery
    */
   public async fetch(id: string): LinearFetch<IssueRelation> {
-    return this._request<L.IssueRelationQuery, L.IssueRelationQueryVariables>(L.IssueRelationDocument, {
+    const response = await this._request<L.IssueRelationQuery, L.IssueRelationQueryVariables>(L.IssueRelationDocument, {
       id,
-    }).then(response => {
-      const data = response?.issueRelation;
-      return data ? new IssueRelation(this._request, data) : undefined;
     });
+    const data = response?.issueRelation;
+    return data ? new IssueRelation(this._request, data) : undefined;
   }
 }
 
@@ -6267,15 +6288,14 @@ export class IssueRelationsQuery extends Request {
    * @returns parsed response from IssueRelationsQuery
    */
   public async fetch(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
-    return this._request<L.IssueRelationsQuery, L.IssueRelationsQueryVariables>(
+    const response = await this._request<L.IssueRelationsQuery, L.IssueRelationsQueryVariables>(
       L.IssueRelationsDocument,
       variables
-    ).then(response => {
-      const data = response?.issueRelations;
-      return data
-        ? new IssueRelationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    );
+    const data = response?.issueRelations;
+    return data
+      ? new IssueRelationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6300,15 +6320,14 @@ export class IssueSearchQuery extends Request {
     query: string,
     variables?: Omit<L.IssueSearchQueryVariables, "query">
   ): LinearFetch<IssueConnection> {
-    return this._request<L.IssueSearchQuery, L.IssueSearchQueryVariables>(L.IssueSearchDocument, {
+    const response = await this._request<L.IssueSearchQuery, L.IssueSearchQueryVariables>(L.IssueSearchDocument, {
       query,
       ...variables,
-    }).then(response => {
-      const data = response?.issueSearch;
-      return data
-        ? new IssueConnection(this._request, connection => this.fetch(query, { ...variables, ...connection }), data)
-        : undefined;
     });
+    const data = response?.issueSearch;
+    return data
+      ? new IssueConnection(this._request, connection => this.fetch(query, { ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6329,12 +6348,11 @@ export class IssuesQuery extends Request {
    * @returns parsed response from IssuesQuery
    */
   public async fetch(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
-    return this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables).then(response => {
-      const data = response?.issues;
-      return data
-        ? new IssueConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables);
+    const data = response?.issues;
+    return data
+      ? new IssueConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6355,12 +6373,11 @@ export class MilestoneQuery extends Request {
    * @returns parsed response from MilestoneQuery
    */
   public async fetch(id: string): LinearFetch<Milestone> {
-    return this._request<L.MilestoneQuery, L.MilestoneQueryVariables>(L.MilestoneDocument, {
+    const response = await this._request<L.MilestoneQuery, L.MilestoneQueryVariables>(L.MilestoneDocument, {
       id,
-    }).then(response => {
-      const data = response?.milestone;
-      return data ? new Milestone(this._request, data) : undefined;
     });
+    const data = response?.milestone;
+    return data ? new Milestone(this._request, data) : undefined;
   }
 }
 
@@ -6381,14 +6398,14 @@ export class MilestonesQuery extends Request {
    * @returns parsed response from MilestonesQuery
    */
   public async fetch(variables?: L.MilestonesQueryVariables): LinearFetch<MilestoneConnection> {
-    return this._request<L.MilestonesQuery, L.MilestonesQueryVariables>(L.MilestonesDocument, variables).then(
-      response => {
-        const data = response?.milestones;
-        return data
-          ? new MilestoneConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-          : undefined;
-      }
+    const response = await this._request<L.MilestonesQuery, L.MilestonesQueryVariables>(
+      L.MilestonesDocument,
+      variables
     );
+    const data = response?.milestones;
+    return data
+      ? new MilestoneConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6409,12 +6426,11 @@ export class NotificationQuery extends Request {
    * @returns parsed response from NotificationQuery
    */
   public async fetch(id: string): LinearFetch<Notification> {
-    return this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
+    const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
       id,
-    }).then(response => {
-      const data = response?.notification;
-      return data ? new Notification(this._request, data) : undefined;
     });
+    const data = response?.notification;
+    return data ? new Notification(this._request, data) : undefined;
   }
 }
 
@@ -6435,15 +6451,14 @@ export class NotificationSubscriptionQuery extends Request {
    * @returns parsed response from NotificationSubscriptionQuery
    */
   public async fetch(id: string): LinearFetch<NotificationSubscription> {
-    return this._request<L.NotificationSubscriptionQuery, L.NotificationSubscriptionQueryVariables>(
+    const response = await this._request<L.NotificationSubscriptionQuery, L.NotificationSubscriptionQueryVariables>(
       L.NotificationSubscriptionDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.notificationSubscription;
-      return data ? new NotificationSubscription(this._request, data) : undefined;
-    });
+    );
+    const data = response?.notificationSubscription;
+    return data ? new NotificationSubscription(this._request, data) : undefined;
   }
 }
 
@@ -6466,19 +6481,18 @@ export class NotificationSubscriptionsQuery extends Request {
   public async fetch(
     variables?: L.NotificationSubscriptionsQueryVariables
   ): LinearFetch<NotificationSubscriptionConnection> {
-    return this._request<L.NotificationSubscriptionsQuery, L.NotificationSubscriptionsQueryVariables>(
+    const response = await this._request<L.NotificationSubscriptionsQuery, L.NotificationSubscriptionsQueryVariables>(
       L.NotificationSubscriptionsDocument,
       variables
-    ).then(response => {
-      const data = response?.notificationSubscriptions;
-      return data
-        ? new NotificationSubscriptionConnection(
-            this._request,
-            connection => this.fetch({ ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.notificationSubscriptions;
+    return data
+      ? new NotificationSubscriptionConnection(
+          this._request,
+          connection => this.fetch({ ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -6499,14 +6513,14 @@ export class NotificationsQuery extends Request {
    * @returns parsed response from NotificationsQuery
    */
   public async fetch(variables?: L.NotificationsQueryVariables): LinearFetch<NotificationConnection> {
-    return this._request<L.NotificationsQuery, L.NotificationsQueryVariables>(L.NotificationsDocument, variables).then(
-      response => {
-        const data = response?.notifications;
-        return data
-          ? new NotificationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-          : undefined;
-      }
+    const response = await this._request<L.NotificationsQuery, L.NotificationsQueryVariables>(
+      L.NotificationsDocument,
+      variables
     );
+    const data = response?.notifications;
+    return data
+      ? new NotificationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6526,12 +6540,9 @@ export class OrganizationQuery extends Request {
    * @returns parsed response from OrganizationQuery
    */
   public async fetch(): LinearFetch<Organization> {
-    return this._request<L.OrganizationQuery, L.OrganizationQueryVariables>(L.OrganizationDocument, {}).then(
-      response => {
-        const data = response?.organization;
-        return data ? new Organization(this._request, data) : undefined;
-      }
-    );
+    const response = await this._request<L.OrganizationQuery, L.OrganizationQueryVariables>(L.OrganizationDocument, {});
+    const data = response?.organization;
+    return data ? new Organization(this._request, data) : undefined;
   }
 }
 
@@ -6552,12 +6563,14 @@ export class OrganizationExistsQuery extends Request {
    * @returns parsed response from OrganizationExistsQuery
    */
   public async fetch(urlKey: string): LinearFetch<OrganizationExistsPayload> {
-    return this._request<L.OrganizationExistsQuery, L.OrganizationExistsQueryVariables>(L.OrganizationExistsDocument, {
-      urlKey,
-    }).then(response => {
-      const data = response?.organizationExists;
-      return data ? new OrganizationExistsPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.OrganizationExistsQuery, L.OrganizationExistsQueryVariables>(
+      L.OrganizationExistsDocument,
+      {
+        urlKey,
+      }
+    );
+    const data = response?.organizationExists;
+    return data ? new OrganizationExistsPayload(this._request, data) : undefined;
   }
 }
 
@@ -6578,12 +6591,14 @@ export class OrganizationInviteQuery extends Request {
    * @returns parsed response from OrganizationInviteQuery
    */
   public async fetch(id: string): LinearFetch<IssueLabel> {
-    return this._request<L.OrganizationInviteQuery, L.OrganizationInviteQueryVariables>(L.OrganizationInviteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.organizationInvite;
-      return data ? new IssueLabel(this._request, data) : undefined;
-    });
+    const response = await this._request<L.OrganizationInviteQuery, L.OrganizationInviteQueryVariables>(
+      L.OrganizationInviteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.organizationInvite;
+    return data ? new IssueLabel(this._request, data) : undefined;
   }
 }
 
@@ -6604,19 +6619,14 @@ export class OrganizationInvitesQuery extends Request {
    * @returns parsed response from OrganizationInvitesQuery
    */
   public async fetch(variables?: L.OrganizationInvitesQueryVariables): LinearFetch<OrganizationInviteConnection> {
-    return this._request<L.OrganizationInvitesQuery, L.OrganizationInvitesQueryVariables>(
+    const response = await this._request<L.OrganizationInvitesQuery, L.OrganizationInvitesQueryVariables>(
       L.OrganizationInvitesDocument,
       variables
-    ).then(response => {
-      const data = response?.organizationInvites;
-      return data
-        ? new OrganizationInviteConnection(
-            this._request,
-            connection => this.fetch({ ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.organizationInvites;
+    return data
+      ? new OrganizationInviteConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6637,12 +6647,11 @@ export class ProjectQuery extends Request {
    * @returns parsed response from ProjectQuery
    */
   public async fetch(id: string): LinearFetch<Project> {
-    return this._request<L.ProjectQuery, L.ProjectQueryVariables>(L.ProjectDocument, {
+    const response = await this._request<L.ProjectQuery, L.ProjectQueryVariables>(L.ProjectDocument, {
       id,
-    }).then(response => {
-      const data = response?.project;
-      return data ? new Project(this._request, data) : undefined;
     });
+    const data = response?.project;
+    return data ? new Project(this._request, data) : undefined;
   }
 }
 
@@ -6663,12 +6672,11 @@ export class ProjectLinkQuery extends Request {
    * @returns parsed response from ProjectLinkQuery
    */
   public async fetch(id: string): LinearFetch<ProjectLink> {
-    return this._request<L.ProjectLinkQuery, L.ProjectLinkQueryVariables>(L.ProjectLinkDocument, {
+    const response = await this._request<L.ProjectLinkQuery, L.ProjectLinkQueryVariables>(L.ProjectLinkDocument, {
       id,
-    }).then(response => {
-      const data = response?.projectLink;
-      return data ? new ProjectLink(this._request, data) : undefined;
     });
+    const data = response?.projectLink;
+    return data ? new ProjectLink(this._request, data) : undefined;
   }
 }
 
@@ -6689,14 +6697,14 @@ export class ProjectLinksQuery extends Request {
    * @returns parsed response from ProjectLinksQuery
    */
   public async fetch(variables?: L.ProjectLinksQueryVariables): LinearFetch<ProjectLinkConnection> {
-    return this._request<L.ProjectLinksQuery, L.ProjectLinksQueryVariables>(L.ProjectLinksDocument, variables).then(
-      response => {
-        const data = response?.projectLinks;
-        return data
-          ? new ProjectLinkConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-          : undefined;
-      }
+    const response = await this._request<L.ProjectLinksQuery, L.ProjectLinksQueryVariables>(
+      L.ProjectLinksDocument,
+      variables
     );
+    const data = response?.projectLinks;
+    return data
+      ? new ProjectLinkConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6717,12 +6725,11 @@ export class ProjectsQuery extends Request {
    * @returns parsed response from ProjectsQuery
    */
   public async fetch(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
-    return this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables).then(response => {
-      const data = response?.projects;
-      return data
-        ? new ProjectConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables);
+    const data = response?.projects;
+    return data
+      ? new ProjectConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6742,13 +6749,12 @@ export class PushSubscriptionTestQuery extends Request {
    * @returns parsed response from PushSubscriptionTestQuery
    */
   public async fetch(): LinearFetch<PushSubscriptionTestPayload> {
-    return this._request<L.PushSubscriptionTestQuery, L.PushSubscriptionTestQueryVariables>(
+    const response = await this._request<L.PushSubscriptionTestQuery, L.PushSubscriptionTestQueryVariables>(
       L.PushSubscriptionTestDocument,
       {}
-    ).then(response => {
-      const data = response?.pushSubscriptionTest;
-      return data ? new PushSubscriptionTestPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.pushSubscriptionTest;
+    return data ? new PushSubscriptionTestPayload(this._request, data) : undefined;
   }
 }
 
@@ -6769,12 +6775,11 @@ export class ReactionQuery extends Request {
    * @returns parsed response from ReactionQuery
    */
   public async fetch(id: string): LinearFetch<Reaction> {
-    return this._request<L.ReactionQuery, L.ReactionQueryVariables>(L.ReactionDocument, {
+    const response = await this._request<L.ReactionQuery, L.ReactionQueryVariables>(L.ReactionDocument, {
       id,
-    }).then(response => {
-      const data = response?.reaction;
-      return data ? new Reaction(this._request, data) : undefined;
     });
+    const data = response?.reaction;
+    return data ? new Reaction(this._request, data) : undefined;
   }
 }
 
@@ -6795,12 +6800,11 @@ export class ReactionsQuery extends Request {
    * @returns parsed response from ReactionsQuery
    */
   public async fetch(variables?: L.ReactionsQueryVariables): LinearFetch<ReactionConnection> {
-    return this._request<L.ReactionsQuery, L.ReactionsQueryVariables>(L.ReactionsDocument, variables).then(response => {
-      const data = response?.reactions;
-      return data
-        ? new ReactionConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.ReactionsQuery, L.ReactionsQueryVariables>(L.ReactionsDocument, variables);
+    const data = response?.reactions;
+    return data
+      ? new ReactionConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6825,13 +6829,15 @@ export class SsoUrlFromEmailQuery extends Request {
     email: string,
     variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email">
   ): LinearFetch<SsoUrlFromEmailResponse> {
-    return this._request<L.SsoUrlFromEmailQuery, L.SsoUrlFromEmailQueryVariables>(L.SsoUrlFromEmailDocument, {
-      email,
-      ...variables,
-    }).then(response => {
-      const data = response?.ssoUrlFromEmail;
-      return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
-    });
+    const response = await this._request<L.SsoUrlFromEmailQuery, L.SsoUrlFromEmailQueryVariables>(
+      L.SsoUrlFromEmailDocument,
+      {
+        email,
+        ...variables,
+      }
+    );
+    const data = response?.ssoUrlFromEmail;
+    return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
   }
 }
 
@@ -6851,12 +6857,9 @@ export class SubscriptionQuery extends Request {
    * @returns parsed response from SubscriptionQuery
    */
   public async fetch(): LinearFetch<Subscription> {
-    return this._request<L.SubscriptionQuery, L.SubscriptionQueryVariables>(L.SubscriptionDocument, {}).then(
-      response => {
-        const data = response?.subscription;
-        return data ? new Subscription(this._request, data) : undefined;
-      }
-    );
+    const response = await this._request<L.SubscriptionQuery, L.SubscriptionQueryVariables>(L.SubscriptionDocument, {});
+    const data = response?.subscription;
+    return data ? new Subscription(this._request, data) : undefined;
   }
 }
 
@@ -6877,12 +6880,11 @@ export class TeamQuery extends Request {
    * @returns parsed response from TeamQuery
    */
   public async fetch(id: string): LinearFetch<Team> {
-    return this._request<L.TeamQuery, L.TeamQueryVariables>(L.TeamDocument, {
+    const response = await this._request<L.TeamQuery, L.TeamQueryVariables>(L.TeamDocument, {
       id,
-    }).then(response => {
-      const data = response?.team;
-      return data ? new Team(this._request, data) : undefined;
     });
+    const data = response?.team;
+    return data ? new Team(this._request, data) : undefined;
   }
 }
 
@@ -6903,12 +6905,14 @@ export class TeamMembershipQuery extends Request {
    * @returns parsed response from TeamMembershipQuery
    */
   public async fetch(id: string): LinearFetch<TeamMembership> {
-    return this._request<L.TeamMembershipQuery, L.TeamMembershipQueryVariables>(L.TeamMembershipDocument, {
-      id,
-    }).then(response => {
-      const data = response?.teamMembership;
-      return data ? new TeamMembership(this._request, data) : undefined;
-    });
+    const response = await this._request<L.TeamMembershipQuery, L.TeamMembershipQueryVariables>(
+      L.TeamMembershipDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.teamMembership;
+    return data ? new TeamMembership(this._request, data) : undefined;
   }
 }
 
@@ -6929,15 +6933,14 @@ export class TeamMembershipsQuery extends Request {
    * @returns parsed response from TeamMembershipsQuery
    */
   public async fetch(variables?: L.TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
-    return this._request<L.TeamMembershipsQuery, L.TeamMembershipsQueryVariables>(
+    const response = await this._request<L.TeamMembershipsQuery, L.TeamMembershipsQueryVariables>(
       L.TeamMembershipsDocument,
       variables
-    ).then(response => {
-      const data = response?.teamMemberships;
-      return data
-        ? new TeamMembershipConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    );
+    const data = response?.teamMemberships;
+    return data
+      ? new TeamMembershipConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6958,12 +6961,11 @@ export class TeamsQuery extends Request {
    * @returns parsed response from TeamsQuery
    */
   public async fetch(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
-    return this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables).then(response => {
-      const data = response?.teams;
-      return data
-        ? new TeamConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables);
+    const data = response?.teams;
+    return data
+      ? new TeamConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -6984,12 +6986,11 @@ export class TemplateQuery extends Request {
    * @returns parsed response from TemplateQuery
    */
   public async fetch(id: string): LinearFetch<Template> {
-    return this._request<L.TemplateQuery, L.TemplateQueryVariables>(L.TemplateDocument, {
+    const response = await this._request<L.TemplateQuery, L.TemplateQueryVariables>(L.TemplateDocument, {
       id,
-    }).then(response => {
-      const data = response?.template;
-      return data ? new Template(this._request, data) : undefined;
     });
+    const data = response?.template;
+    return data ? new Template(this._request, data) : undefined;
   }
 }
 
@@ -7009,10 +7010,9 @@ export class TemplatesQuery extends Request {
    * @returns parsed response from TemplatesQuery
    */
   public async fetch(): LinearFetch<Template[]> {
-    return this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(L.TemplatesDocument, {}).then(response => {
-      const data = response?.templates;
-      return data ? data.map(node => new Template(this._request, node)) : undefined;
-    });
+    const response = await this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(L.TemplatesDocument, {});
+    const data = response?.templates;
+    return data ? data.map(node => new Template(this._request, node)) : undefined;
   }
 }
 
@@ -7033,12 +7033,11 @@ export class UserQuery extends Request {
    * @returns parsed response from UserQuery
    */
   public async fetch(id: string): LinearFetch<User> {
-    return this._request<L.UserQuery, L.UserQueryVariables>(L.UserDocument, {
+    const response = await this._request<L.UserQuery, L.UserQueryVariables>(L.UserDocument, {
       id,
-    }).then(response => {
-      const data = response?.user;
-      return data ? new User(this._request, data) : undefined;
     });
+    const data = response?.user;
+    return data ? new User(this._request, data) : undefined;
   }
 }
 
@@ -7058,12 +7057,9 @@ export class UserSettingsQuery extends Request {
    * @returns parsed response from UserSettingsQuery
    */
   public async fetch(): LinearFetch<UserSettings> {
-    return this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {}).then(
-      response => {
-        const data = response?.userSettings;
-        return data ? new UserSettings(this._request, data) : undefined;
-      }
-    );
+    const response = await this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {});
+    const data = response?.userSettings;
+    return data ? new UserSettings(this._request, data) : undefined;
   }
 }
 
@@ -7084,12 +7080,11 @@ export class UsersQuery extends Request {
    * @returns parsed response from UsersQuery
    */
   public async fetch(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
-    return this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables).then(response => {
-      const data = response?.users;
-      return data
-        ? new UserConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables);
+    const data = response?.users;
+    return data
+      ? new UserConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -7109,10 +7104,9 @@ export class ViewerQuery extends Request {
    * @returns parsed response from ViewerQuery
    */
   public async fetch(): LinearFetch<User> {
-    return this._request<L.ViewerQuery, L.ViewerQueryVariables>(L.ViewerDocument, {}).then(response => {
-      const data = response?.viewer;
-      return data ? new User(this._request, data) : undefined;
-    });
+    const response = await this._request<L.ViewerQuery, L.ViewerQueryVariables>(L.ViewerDocument, {});
+    const data = response?.viewer;
+    return data ? new User(this._request, data) : undefined;
   }
 }
 
@@ -7133,12 +7127,11 @@ export class WebhookQuery extends Request {
    * @returns parsed response from WebhookQuery
    */
   public async fetch(id: string): LinearFetch<Webhook> {
-    return this._request<L.WebhookQuery, L.WebhookQueryVariables>(L.WebhookDocument, {
+    const response = await this._request<L.WebhookQuery, L.WebhookQueryVariables>(L.WebhookDocument, {
       id,
-    }).then(response => {
-      const data = response?.webhook;
-      return data ? new Webhook(this._request, data) : undefined;
     });
+    const data = response?.webhook;
+    return data ? new Webhook(this._request, data) : undefined;
   }
 }
 
@@ -7159,12 +7152,11 @@ export class WebhooksQuery extends Request {
    * @returns parsed response from WebhooksQuery
    */
   public async fetch(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
-    return this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables).then(response => {
-      const data = response?.webhooks;
-      return data
-        ? new WebhookConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
+    const response = await this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables);
+    const data = response?.webhooks;
+    return data
+      ? new WebhookConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -7185,12 +7177,11 @@ export class WorkflowStateQuery extends Request {
    * @returns parsed response from WorkflowStateQuery
    */
   public async fetch(id: string): LinearFetch<WorkflowState> {
-    return this._request<L.WorkflowStateQuery, L.WorkflowStateQueryVariables>(L.WorkflowStateDocument, {
+    const response = await this._request<L.WorkflowStateQuery, L.WorkflowStateQueryVariables>(L.WorkflowStateDocument, {
       id,
-    }).then(response => {
-      const data = response?.workflowState;
-      return data ? new WorkflowState(this._request, data) : undefined;
     });
+    const data = response?.workflowState;
+    return data ? new WorkflowState(this._request, data) : undefined;
   }
 }
 
@@ -7211,67 +7202,14 @@ export class WorkflowStatesQuery extends Request {
    * @returns parsed response from WorkflowStatesQuery
    */
   public async fetch(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
-    return this._request<L.WorkflowStatesQuery, L.WorkflowStatesQueryVariables>(
+    const response = await this._request<L.WorkflowStatesQuery, L.WorkflowStatesQueryVariables>(
       L.WorkflowStatesDocument,
       variables
-    ).then(response => {
-      const data = response?.workflowStates;
-      return data
-        ? new WorkflowStateConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-        : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable ApiKeyCreate Mutation
- *
- * @param request - function to call the graphql client
- */
-export class ApiKeyCreateMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApiKeyCreate mutation and return a ApiKeyPayload
-   *
-   * @param input - required input to pass to apiKeyCreate
-   * @returns parsed response from ApiKeyCreateMutation
-   */
-  public async fetch(input: L.ApiKeyCreateInput): LinearFetch<ApiKeyPayload> {
-    return this._request<L.ApiKeyCreateMutation, L.ApiKeyCreateMutationVariables>(L.ApiKeyCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.apiKeyCreate;
-      return data ? new ApiKeyPayload(this._request, data) : undefined;
-    });
-  }
-}
-
-/**
- * A fetchable ApiKeyDelete Mutation
- *
- * @param request - function to call the graphql client
- */
-export class ApiKeyDeleteMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApiKeyDelete mutation and return a ArchivePayload
-   *
-   * @param id - required id to pass to apiKeyDelete
-   * @returns parsed response from ApiKeyDeleteMutation
-   */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.ApiKeyDeleteMutation, L.ApiKeyDeleteMutationVariables>(L.ApiKeyDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.apiKeyDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.workflowStates;
+    return data
+      ? new WorkflowStateConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
+      : undefined;
   }
 }
 
@@ -7292,15 +7230,14 @@ export class AttachmentArchiveMutation extends Request {
    * @returns parsed response from AttachmentArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.AttachmentArchiveMutation, L.AttachmentArchiveMutationVariables>(
+    const response = await this._request<L.AttachmentArchiveMutation, L.AttachmentArchiveMutationVariables>(
       L.AttachmentArchiveDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.attachmentArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.attachmentArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -7321,12 +7258,14 @@ export class AttachmentCreateMutation extends Request {
    * @returns parsed response from AttachmentCreateMutation
    */
   public async fetch(input: L.AttachmentCreateInput): LinearFetch<AttachmentPayload> {
-    return this._request<L.AttachmentCreateMutation, L.AttachmentCreateMutationVariables>(L.AttachmentCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.attachmentCreate;
-      return data ? new AttachmentPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.AttachmentCreateMutation, L.AttachmentCreateMutationVariables>(
+      L.AttachmentCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.attachmentCreate;
+    return data ? new AttachmentPayload(this._request, data) : undefined;
   }
 }
 
@@ -7347,12 +7286,14 @@ export class AttachmentDeleteMutation extends Request {
    * @returns parsed response from AttachmentDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.AttachmentDeleteMutation, L.AttachmentDeleteMutationVariables>(L.AttachmentDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.attachmentDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.AttachmentDeleteMutation, L.AttachmentDeleteMutationVariables>(
+      L.AttachmentDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.attachmentDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -7374,16 +7315,15 @@ export class AttachmentLinkFrontMutation extends Request {
    * @returns parsed response from AttachmentLinkFrontMutation
    */
   public async fetch(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
-    return this._request<L.AttachmentLinkFrontMutation, L.AttachmentLinkFrontMutationVariables>(
+    const response = await this._request<L.AttachmentLinkFrontMutation, L.AttachmentLinkFrontMutationVariables>(
       L.AttachmentLinkFrontDocument,
       {
         conversationId,
         issueId,
       }
-    ).then(response => {
-      const data = response?.attachmentLinkFront;
-      return data ? new AttachmentPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.attachmentLinkFront;
+    return data ? new AttachmentPayload(this._request, data) : undefined;
   }
 }
 
@@ -7405,16 +7345,15 @@ export class AttachmentLinkIntercomMutation extends Request {
    * @returns parsed response from AttachmentLinkIntercomMutation
    */
   public async fetch(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
-    return this._request<L.AttachmentLinkIntercomMutation, L.AttachmentLinkIntercomMutationVariables>(
+    const response = await this._request<L.AttachmentLinkIntercomMutation, L.AttachmentLinkIntercomMutationVariables>(
       L.AttachmentLinkIntercomDocument,
       {
         conversationId,
         issueId,
       }
-    ).then(response => {
-      const data = response?.attachmentLinkIntercom;
-      return data ? new AttachmentPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.attachmentLinkIntercom;
+    return data ? new AttachmentPayload(this._request, data) : undefined;
   }
 }
 
@@ -7436,16 +7375,15 @@ export class AttachmentLinkUrlMutation extends Request {
    * @returns parsed response from AttachmentLinkUrlMutation
    */
   public async fetch(issueId: string, url: string): LinearFetch<AttachmentPayload> {
-    return this._request<L.AttachmentLinkUrlMutation, L.AttachmentLinkUrlMutationVariables>(
+    const response = await this._request<L.AttachmentLinkUrlMutation, L.AttachmentLinkUrlMutationVariables>(
       L.AttachmentLinkUrlDocument,
       {
         issueId,
         url,
       }
-    ).then(response => {
-      const data = response?.attachmentLinkURL;
-      return data ? new AttachmentPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.attachmentLinkURL;
+    return data ? new AttachmentPayload(this._request, data) : undefined;
   }
 }
 
@@ -7467,16 +7405,15 @@ export class AttachmentLinkZendeskMutation extends Request {
    * @returns parsed response from AttachmentLinkZendeskMutation
    */
   public async fetch(issueId: string, ticketId: string): LinearFetch<AttachmentPayload> {
-    return this._request<L.AttachmentLinkZendeskMutation, L.AttachmentLinkZendeskMutationVariables>(
+    const response = await this._request<L.AttachmentLinkZendeskMutation, L.AttachmentLinkZendeskMutationVariables>(
       L.AttachmentLinkZendeskDocument,
       {
         issueId,
         ticketId,
       }
-    ).then(response => {
-      const data = response?.attachmentLinkZendesk;
-      return data ? new AttachmentPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.attachmentLinkZendesk;
+    return data ? new AttachmentPayload(this._request, data) : undefined;
   }
 }
 
@@ -7498,13 +7435,15 @@ export class AttachmentUpdateMutation extends Request {
    * @returns parsed response from AttachmentUpdateMutation
    */
   public async fetch(id: string, input: L.AttachmentUpdateInput): LinearFetch<AttachmentPayload> {
-    return this._request<L.AttachmentUpdateMutation, L.AttachmentUpdateMutationVariables>(L.AttachmentUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.attachmentUpdate;
-      return data ? new AttachmentPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.AttachmentUpdateMutation, L.AttachmentUpdateMutationVariables>(
+      L.AttachmentUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.attachmentUpdate;
+    return data ? new AttachmentPayload(this._request, data) : undefined;
   }
 }
 
@@ -7525,15 +7464,14 @@ export class BillingEmailUpdateMutation extends Request {
    * @returns parsed response from BillingEmailUpdateMutation
    */
   public async fetch(input: L.BillingEmailUpdateInput): LinearFetch<BillingEmailPayload> {
-    return this._request<L.BillingEmailUpdateMutation, L.BillingEmailUpdateMutationVariables>(
+    const response = await this._request<L.BillingEmailUpdateMutation, L.BillingEmailUpdateMutationVariables>(
       L.BillingEmailUpdateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.billingEmailUpdate;
-      return data ? new BillingEmailPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.billingEmailUpdate;
+    return data ? new BillingEmailPayload(this._request, data) : undefined;
   }
 }
 
@@ -7554,15 +7492,14 @@ export class CollaborativeDocumentUpdateMutation extends Request {
    * @returns parsed response from CollaborativeDocumentUpdateMutation
    */
   public async fetch(input: L.CollaborationDocumentUpdateInput): LinearFetch<CollaborationDocumentUpdatePayload> {
-    return this._request<L.CollaborativeDocumentUpdateMutation, L.CollaborativeDocumentUpdateMutationVariables>(
-      L.CollaborativeDocumentUpdateDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.collaborativeDocumentUpdate;
-      return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.CollaborativeDocumentUpdateMutation,
+      L.CollaborativeDocumentUpdateMutationVariables
+    >(L.CollaborativeDocumentUpdateDocument, {
+      input,
     });
+    const data = response?.collaborativeDocumentUpdate;
+    return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
   }
 }
 
@@ -7583,12 +7520,14 @@ export class CommentCreateMutation extends Request {
    * @returns parsed response from CommentCreateMutation
    */
   public async fetch(input: L.CommentCreateInput): LinearFetch<CommentPayload> {
-    return this._request<L.CommentCreateMutation, L.CommentCreateMutationVariables>(L.CommentCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.commentCreate;
-      return data ? new CommentPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.CommentCreateMutation, L.CommentCreateMutationVariables>(
+      L.CommentCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.commentCreate;
+    return data ? new CommentPayload(this._request, data) : undefined;
   }
 }
 
@@ -7609,12 +7548,14 @@ export class CommentDeleteMutation extends Request {
    * @returns parsed response from CommentDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.CommentDeleteMutation, L.CommentDeleteMutationVariables>(L.CommentDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.commentDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.CommentDeleteMutation, L.CommentDeleteMutationVariables>(
+      L.CommentDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.commentDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -7636,13 +7577,15 @@ export class CommentUpdateMutation extends Request {
    * @returns parsed response from CommentUpdateMutation
    */
   public async fetch(id: string, input: L.CommentUpdateInput): LinearFetch<CommentPayload> {
-    return this._request<L.CommentUpdateMutation, L.CommentUpdateMutationVariables>(L.CommentUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.commentUpdate;
-      return data ? new CommentPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.CommentUpdateMutation, L.CommentUpdateMutationVariables>(
+      L.CommentUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.commentUpdate;
+    return data ? new CommentPayload(this._request, data) : undefined;
   }
 }
 
@@ -7663,12 +7606,14 @@ export class ContactCreateMutation extends Request {
    * @returns parsed response from ContactCreateMutation
    */
   public async fetch(input: L.ContactCreateInput): LinearFetch<ContactPayload> {
-    return this._request<L.ContactCreateMutation, L.ContactCreateMutationVariables>(L.ContactCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.contactCreate;
-      return data ? new ContactPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.ContactCreateMutation, L.ContactCreateMutationVariables>(
+      L.ContactCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.contactCreate;
+    return data ? new ContactPayload(this._request, data) : undefined;
   }
 }
 
@@ -7689,13 +7634,12 @@ export class CreateCsvExportReportMutation extends Request {
    * @returns parsed response from CreateCsvExportReportMutation
    */
   public async fetch(variables?: L.CreateCsvExportReportMutationVariables): LinearFetch<CreateCsvExportReportPayload> {
-    return this._request<L.CreateCsvExportReportMutation, L.CreateCsvExportReportMutationVariables>(
+    const response = await this._request<L.CreateCsvExportReportMutation, L.CreateCsvExportReportMutationVariables>(
       L.CreateCsvExportReportDocument,
       variables
-    ).then(response => {
-      const data = response?.createCsvExportReport;
-      return data ? new CreateCsvExportReportPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.createCsvExportReport;
+    return data ? new CreateCsvExportReportPayload(this._request, data) : undefined;
   }
 }
 
@@ -7720,16 +7664,15 @@ export class CreateOrganizationFromOnboardingMutation extends Request {
     input: L.CreateOrganizationInput,
     variables?: Omit<L.CreateOrganizationFromOnboardingMutationVariables, "input">
   ): LinearFetch<CreateOrJoinOrganizationResponse> {
-    return this._request<
+    const response = await this._request<
       L.CreateOrganizationFromOnboardingMutation,
       L.CreateOrganizationFromOnboardingMutationVariables
     >(L.CreateOrganizationFromOnboardingDocument, {
       input,
       ...variables,
-    }).then(response => {
-      const data = response?.createOrganizationFromOnboarding;
-      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
     });
+    const data = response?.createOrganizationFromOnboarding;
+    return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
   }
 }
 
@@ -7750,12 +7693,14 @@ export class CustomViewCreateMutation extends Request {
    * @returns parsed response from CustomViewCreateMutation
    */
   public async fetch(input: L.CustomViewCreateInput): LinearFetch<CustomViewPayload> {
-    return this._request<L.CustomViewCreateMutation, L.CustomViewCreateMutationVariables>(L.CustomViewCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.customViewCreate;
-      return data ? new CustomViewPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.CustomViewCreateMutation, L.CustomViewCreateMutationVariables>(
+      L.CustomViewCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.customViewCreate;
+    return data ? new CustomViewPayload(this._request, data) : undefined;
   }
 }
 
@@ -7776,12 +7721,14 @@ export class CustomViewDeleteMutation extends Request {
    * @returns parsed response from CustomViewDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.CustomViewDeleteMutation, L.CustomViewDeleteMutationVariables>(L.CustomViewDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.customViewDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.CustomViewDeleteMutation, L.CustomViewDeleteMutationVariables>(
+      L.CustomViewDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.customViewDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -7803,13 +7750,15 @@ export class CustomViewUpdateMutation extends Request {
    * @returns parsed response from CustomViewUpdateMutation
    */
   public async fetch(id: string, input: L.CustomViewUpdateInput): LinearFetch<CustomViewPayload> {
-    return this._request<L.CustomViewUpdateMutation, L.CustomViewUpdateMutationVariables>(L.CustomViewUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.customViewUpdate;
-      return data ? new CustomViewPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.CustomViewUpdateMutation, L.CustomViewUpdateMutationVariables>(
+      L.CustomViewUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.customViewUpdate;
+    return data ? new CustomViewPayload(this._request, data) : undefined;
   }
 }
 
@@ -7830,12 +7779,14 @@ export class CycleArchiveMutation extends Request {
    * @returns parsed response from CycleArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.CycleArchiveMutation, L.CycleArchiveMutationVariables>(L.CycleArchiveDocument, {
-      id,
-    }).then(response => {
-      const data = response?.cycleArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.CycleArchiveMutation, L.CycleArchiveMutationVariables>(
+      L.CycleArchiveDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.cycleArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -7856,12 +7807,11 @@ export class CycleCreateMutation extends Request {
    * @returns parsed response from CycleCreateMutation
    */
   public async fetch(input: L.CycleCreateInput): LinearFetch<CyclePayload> {
-    return this._request<L.CycleCreateMutation, L.CycleCreateMutationVariables>(L.CycleCreateDocument, {
+    const response = await this._request<L.CycleCreateMutation, L.CycleCreateMutationVariables>(L.CycleCreateDocument, {
       input,
-    }).then(response => {
-      const data = response?.cycleCreate;
-      return data ? new CyclePayload(this._request, data) : undefined;
     });
+    const data = response?.cycleCreate;
+    return data ? new CyclePayload(this._request, data) : undefined;
   }
 }
 
@@ -7883,13 +7833,12 @@ export class CycleUpdateMutation extends Request {
    * @returns parsed response from CycleUpdateMutation
    */
   public async fetch(id: string, input: L.CycleUpdateInput): LinearFetch<CyclePayload> {
-    return this._request<L.CycleUpdateMutation, L.CycleUpdateMutationVariables>(L.CycleUpdateDocument, {
+    const response = await this._request<L.CycleUpdateMutation, L.CycleUpdateMutationVariables>(L.CycleUpdateDocument, {
       id,
       input,
-    }).then(response => {
-      const data = response?.cycleUpdate;
-      return data ? new CyclePayload(this._request, data) : undefined;
     });
+    const data = response?.cycleUpdate;
+    return data ? new CyclePayload(this._request, data) : undefined;
   }
 }
 
@@ -7909,13 +7858,12 @@ export class DebugCreateSamlOrgMutation extends Request {
    * @returns parsed response from DebugCreateSamlOrgMutation
    */
   public async fetch(): LinearFetch<DebugPayload> {
-    return this._request<L.DebugCreateSamlOrgMutation, L.DebugCreateSamlOrgMutationVariables>(
+    const response = await this._request<L.DebugCreateSamlOrgMutation, L.DebugCreateSamlOrgMutationVariables>(
       L.DebugCreateSamlOrgDocument,
       {}
-    ).then(response => {
-      const data = response?.debugCreateSAMLOrg;
-      return data ? new DebugPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.debugCreateSAMLOrg;
+    return data ? new DebugPayload(this._request, data) : undefined;
   }
 }
 
@@ -7935,13 +7883,12 @@ export class DebugFailWithInternalErrorMutation extends Request {
    * @returns parsed response from DebugFailWithInternalErrorMutation
    */
   public async fetch(): LinearFetch<DebugPayload> {
-    return this._request<L.DebugFailWithInternalErrorMutation, L.DebugFailWithInternalErrorMutationVariables>(
-      L.DebugFailWithInternalErrorDocument,
-      {}
-    ).then(response => {
-      const data = response?.debugFailWithInternalError;
-      return data ? new DebugPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<
+      L.DebugFailWithInternalErrorMutation,
+      L.DebugFailWithInternalErrorMutationVariables
+    >(L.DebugFailWithInternalErrorDocument, {});
+    const data = response?.debugFailWithInternalError;
+    return data ? new DebugPayload(this._request, data) : undefined;
   }
 }
 
@@ -7961,13 +7908,12 @@ export class DebugFailWithWarningMutation extends Request {
    * @returns parsed response from DebugFailWithWarningMutation
    */
   public async fetch(): LinearFetch<DebugPayload> {
-    return this._request<L.DebugFailWithWarningMutation, L.DebugFailWithWarningMutationVariables>(
+    const response = await this._request<L.DebugFailWithWarningMutation, L.DebugFailWithWarningMutationVariables>(
       L.DebugFailWithWarningDocument,
       {}
-    ).then(response => {
-      const data = response?.debugFailWithWarning;
-      return data ? new DebugPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.debugFailWithWarning;
+    return data ? new DebugPayload(this._request, data) : undefined;
   }
 }
 
@@ -7988,15 +7934,14 @@ export class EmailTokenUserAccountAuthMutation extends Request {
    * @returns parsed response from EmailTokenUserAccountAuthMutation
    */
   public async fetch(input: L.TokenUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
-    return this._request<L.EmailTokenUserAccountAuthMutation, L.EmailTokenUserAccountAuthMutationVariables>(
-      L.EmailTokenUserAccountAuthDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.emailTokenUserAccountAuth;
-      return data ? new AuthResolverResponse(this._request, data) : undefined;
+    const response = await this._request<
+      L.EmailTokenUserAccountAuthMutation,
+      L.EmailTokenUserAccountAuthMutationVariables
+    >(L.EmailTokenUserAccountAuthDocument, {
+      input,
     });
+    const data = response?.emailTokenUserAccountAuth;
+    return data ? new AuthResolverResponse(this._request, data) : undefined;
   }
 }
 
@@ -8017,12 +7962,14 @@ export class EmailUnsubscribeMutation extends Request {
    * @returns parsed response from EmailUnsubscribeMutation
    */
   public async fetch(input: L.EmailUnsubscribeInput): LinearFetch<EmailUnsubscribePayload> {
-    return this._request<L.EmailUnsubscribeMutation, L.EmailUnsubscribeMutationVariables>(L.EmailUnsubscribeDocument, {
-      input,
-    }).then(response => {
-      const data = response?.emailUnsubscribe;
-      return data ? new EmailUnsubscribePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.EmailUnsubscribeMutation, L.EmailUnsubscribeMutationVariables>(
+      L.EmailUnsubscribeDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.emailUnsubscribe;
+    return data ? new EmailUnsubscribePayload(this._request, data) : undefined;
   }
 }
 
@@ -8043,15 +7990,14 @@ export class EmailUserAccountAuthChallengeMutation extends Request {
    * @returns parsed response from EmailUserAccountAuthChallengeMutation
    */
   public async fetch(input: L.EmailUserAccountAuthChallengeInput): LinearFetch<EmailUserAccountAuthChallengeResponse> {
-    return this._request<L.EmailUserAccountAuthChallengeMutation, L.EmailUserAccountAuthChallengeMutationVariables>(
-      L.EmailUserAccountAuthChallengeDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.emailUserAccountAuthChallenge;
-      return data ? new EmailUserAccountAuthChallengeResponse(this._request, data) : undefined;
+    const response = await this._request<
+      L.EmailUserAccountAuthChallengeMutation,
+      L.EmailUserAccountAuthChallengeMutationVariables
+    >(L.EmailUserAccountAuthChallengeDocument, {
+      input,
     });
+    const data = response?.emailUserAccountAuthChallenge;
+    return data ? new EmailUserAccountAuthChallengeResponse(this._request, data) : undefined;
   }
 }
 
@@ -8072,12 +8018,11 @@ export class EmojiCreateMutation extends Request {
    * @returns parsed response from EmojiCreateMutation
    */
   public async fetch(input: L.EmojiCreateInput): LinearFetch<EmojiPayload> {
-    return this._request<L.EmojiCreateMutation, L.EmojiCreateMutationVariables>(L.EmojiCreateDocument, {
+    const response = await this._request<L.EmojiCreateMutation, L.EmojiCreateMutationVariables>(L.EmojiCreateDocument, {
       input,
-    }).then(response => {
-      const data = response?.emojiCreate;
-      return data ? new EmojiPayload(this._request, data) : undefined;
     });
+    const data = response?.emojiCreate;
+    return data ? new EmojiPayload(this._request, data) : undefined;
   }
 }
 
@@ -8098,12 +8043,11 @@ export class EmojiDeleteMutation extends Request {
    * @returns parsed response from EmojiDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.EmojiDeleteMutation, L.EmojiDeleteMutationVariables>(L.EmojiDeleteDocument, {
+    const response = await this._request<L.EmojiDeleteMutation, L.EmojiDeleteMutationVariables>(L.EmojiDeleteDocument, {
       id,
-    }).then(response => {
-      const data = response?.emojiDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
     });
+    const data = response?.emojiDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -8124,12 +8068,11 @@ export class EventCreateMutation extends Request {
    * @returns parsed response from EventCreateMutation
    */
   public async fetch(input: L.EventCreateInput): LinearFetch<EventPayload> {
-    return this._request<L.EventCreateMutation, L.EventCreateMutationVariables>(L.EventCreateDocument, {
+    const response = await this._request<L.EventCreateMutation, L.EventCreateMutationVariables>(L.EventCreateDocument, {
       input,
-    }).then(response => {
-      const data = response?.eventCreate;
-      return data ? new EventPayload(this._request, data) : undefined;
     });
+    const data = response?.eventCreate;
+    return data ? new EventPayload(this._request, data) : undefined;
   }
 }
 
@@ -8150,12 +8093,14 @@ export class FavoriteCreateMutation extends Request {
    * @returns parsed response from FavoriteCreateMutation
    */
   public async fetch(input: L.FavoriteCreateInput): LinearFetch<FavoritePayload> {
-    return this._request<L.FavoriteCreateMutation, L.FavoriteCreateMutationVariables>(L.FavoriteCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.favoriteCreate;
-      return data ? new FavoritePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.FavoriteCreateMutation, L.FavoriteCreateMutationVariables>(
+      L.FavoriteCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.favoriteCreate;
+    return data ? new FavoritePayload(this._request, data) : undefined;
   }
 }
 
@@ -8176,12 +8121,14 @@ export class FavoriteDeleteMutation extends Request {
    * @returns parsed response from FavoriteDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.FavoriteDeleteMutation, L.FavoriteDeleteMutationVariables>(L.FavoriteDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.favoriteDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.FavoriteDeleteMutation, L.FavoriteDeleteMutationVariables>(
+      L.FavoriteDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.favoriteDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -8203,13 +8150,15 @@ export class FavoriteUpdateMutation extends Request {
    * @returns parsed response from FavoriteUpdateMutation
    */
   public async fetch(id: string, input: L.FavoriteUpdateInput): LinearFetch<FavoritePayload> {
-    return this._request<L.FavoriteUpdateMutation, L.FavoriteUpdateMutationVariables>(L.FavoriteUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.favoriteUpdate;
-      return data ? new FavoritePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.FavoriteUpdateMutation, L.FavoriteUpdateMutationVariables>(
+      L.FavoriteUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.favoriteUpdate;
+    return data ? new FavoritePayload(this._request, data) : undefined;
   }
 }
 
@@ -8230,12 +8179,14 @@ export class FeedbackCreateMutation extends Request {
    * @returns parsed response from FeedbackCreateMutation
    */
   public async fetch(input: L.FeedbackCreateInput): LinearFetch<FeedbackPayload> {
-    return this._request<L.FeedbackCreateMutation, L.FeedbackCreateMutationVariables>(L.FeedbackCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.feedbackCreate;
-      return data ? new FeedbackPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.FeedbackCreateMutation, L.FeedbackCreateMutationVariables>(
+      L.FeedbackCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.feedbackCreate;
+    return data ? new FeedbackPayload(this._request, data) : undefined;
   }
 }
 
@@ -8264,15 +8215,14 @@ export class FileUploadMutation extends Request {
     size: number,
     variables?: Omit<L.FileUploadMutationVariables, "contentType" | "filename" | "size">
   ): LinearFetch<UploadPayload> {
-    return this._request<L.FileUploadMutation, L.FileUploadMutationVariables>(L.FileUploadDocument, {
+    const response = await this._request<L.FileUploadMutation, L.FileUploadMutationVariables>(L.FileUploadDocument, {
       contentType,
       filename,
       size,
       ...variables,
-    }).then(response => {
-      const data = response?.fileUpload;
-      return data ? new UploadPayload(this._request, data) : undefined;
     });
+    const data = response?.fileUpload;
+    return data ? new UploadPayload(this._request, data) : undefined;
   }
 }
 
@@ -8293,15 +8243,14 @@ export class GoogleUserAccountAuthMutation extends Request {
    * @returns parsed response from GoogleUserAccountAuthMutation
    */
   public async fetch(input: L.GoogleUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
-    return this._request<L.GoogleUserAccountAuthMutation, L.GoogleUserAccountAuthMutationVariables>(
+    const response = await this._request<L.GoogleUserAccountAuthMutation, L.GoogleUserAccountAuthMutationVariables>(
       L.GoogleUserAccountAuthDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.googleUserAccountAuth;
-      return data ? new AuthResolverResponse(this._request, data) : undefined;
-    });
+    );
+    const data = response?.googleUserAccountAuth;
+    return data ? new AuthResolverResponse(this._request, data) : undefined;
   }
 }
 
@@ -8322,15 +8271,14 @@ export class ImageUploadFromUrlMutation extends Request {
    * @returns parsed response from ImageUploadFromUrlMutation
    */
   public async fetch(url: string): LinearFetch<ImageUploadFromUrlPayload> {
-    return this._request<L.ImageUploadFromUrlMutation, L.ImageUploadFromUrlMutationVariables>(
+    const response = await this._request<L.ImageUploadFromUrlMutation, L.ImageUploadFromUrlMutationVariables>(
       L.ImageUploadFromUrlDocument,
       {
         url,
       }
-    ).then(response => {
-      const data = response?.imageUploadFromUrl;
-      return data ? new ImageUploadFromUrlPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.imageUploadFromUrl;
+    return data ? new ImageUploadFromUrlPayload(this._request, data) : undefined;
   }
 }
 
@@ -8351,15 +8299,14 @@ export class IntegrationDeleteMutation extends Request {
    * @returns parsed response from IntegrationDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.IntegrationDeleteMutation, L.IntegrationDeleteMutationVariables>(
+    const response = await this._request<L.IntegrationDeleteMutation, L.IntegrationDeleteMutationVariables>(
       L.IntegrationDeleteDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.integrationDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.integrationDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -8381,13 +8328,15 @@ export class IntegrationFigmaMutation extends Request {
    * @returns parsed response from IntegrationFigmaMutation
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationFigmaMutation, L.IntegrationFigmaMutationVariables>(L.IntegrationFigmaDocument, {
-      code,
-      redirectUri,
-    }).then(response => {
-      const data = response?.integrationFigma;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.IntegrationFigmaMutation, L.IntegrationFigmaMutationVariables>(
+      L.IntegrationFigmaDocument,
+      {
+        code,
+        redirectUri,
+      }
+    );
+    const data = response?.integrationFigma;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8409,13 +8358,15 @@ export class IntegrationFrontMutation extends Request {
    * @returns parsed response from IntegrationFrontMutation
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationFrontMutation, L.IntegrationFrontMutationVariables>(L.IntegrationFrontDocument, {
-      code,
-      redirectUri,
-    }).then(response => {
-      const data = response?.integrationFront;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.IntegrationFrontMutation, L.IntegrationFrontMutationVariables>(
+      L.IntegrationFrontDocument,
+      {
+        code,
+        redirectUri,
+      }
+    );
+    const data = response?.integrationFront;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8436,15 +8387,14 @@ export class IntegrationGithubConnectMutation extends Request {
    * @returns parsed response from IntegrationGithubConnectMutation
    */
   public async fetch(installationId: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationGithubConnectMutation, L.IntegrationGithubConnectMutationVariables>(
-      L.IntegrationGithubConnectDocument,
-      {
-        installationId,
-      }
-    ).then(response => {
-      const data = response?.integrationGithubConnect;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IntegrationGithubConnectMutation,
+      L.IntegrationGithubConnectMutationVariables
+    >(L.IntegrationGithubConnectDocument, {
+      installationId,
     });
+    const data = response?.integrationGithubConnect;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8466,16 +8416,15 @@ export class IntegrationGitlabConnectMutation extends Request {
    * @returns parsed response from IntegrationGitlabConnectMutation
    */
   public async fetch(accessToken: string, gitlabUrl: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationGitlabConnectMutation, L.IntegrationGitlabConnectMutationVariables>(
-      L.IntegrationGitlabConnectDocument,
-      {
-        accessToken,
-        gitlabUrl,
-      }
-    ).then(response => {
-      const data = response?.integrationGitlabConnect;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IntegrationGitlabConnectMutation,
+      L.IntegrationGitlabConnectMutationVariables
+    >(L.IntegrationGitlabConnectDocument, {
+      accessToken,
+      gitlabUrl,
     });
+    const data = response?.integrationGitlabConnect;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8496,15 +8445,14 @@ export class IntegrationGoogleSheetsMutation extends Request {
    * @returns parsed response from IntegrationGoogleSheetsMutation
    */
   public async fetch(code: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationGoogleSheetsMutation, L.IntegrationGoogleSheetsMutationVariables>(
+    const response = await this._request<L.IntegrationGoogleSheetsMutation, L.IntegrationGoogleSheetsMutationVariables>(
       L.IntegrationGoogleSheetsDocument,
       {
         code,
       }
-    ).then(response => {
-      const data = response?.integrationGoogleSheets;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.integrationGoogleSheets;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8526,16 +8474,15 @@ export class IntegrationIntercomMutation extends Request {
    * @returns parsed response from IntegrationIntercomMutation
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationIntercomMutation, L.IntegrationIntercomMutationVariables>(
+    const response = await this._request<L.IntegrationIntercomMutation, L.IntegrationIntercomMutationVariables>(
       L.IntegrationIntercomDocument,
       {
         code,
         redirectUri,
       }
-    ).then(response => {
-      const data = response?.integrationIntercom;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.integrationIntercom;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8555,13 +8502,37 @@ export class IntegrationIntercomDeleteMutation extends Request {
    * @returns parsed response from IntegrationIntercomDeleteMutation
    */
   public async fetch(): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationIntercomDeleteMutation, L.IntegrationIntercomDeleteMutationVariables>(
-      L.IntegrationIntercomDeleteDocument,
+    const response = await this._request<
+      L.IntegrationIntercomDeleteMutation,
+      L.IntegrationIntercomDeleteMutationVariables
+    >(L.IntegrationIntercomDeleteDocument, {});
+    const data = response?.integrationIntercomDelete;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable IntegrationLoom Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationLoomMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationLoom mutation and return a IntegrationPayload
+   *
+   * @returns parsed response from IntegrationLoomMutation
+   */
+  public async fetch(): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationLoomMutation, L.IntegrationLoomMutationVariables>(
+      L.IntegrationLoomDocument,
       {}
-    ).then(response => {
-      const data = response?.integrationIntercomDelete;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.integrationLoom;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8582,15 +8553,14 @@ export class IntegrationResourceArchiveMutation extends Request {
    * @returns parsed response from IntegrationResourceArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.IntegrationResourceArchiveMutation, L.IntegrationResourceArchiveMutationVariables>(
-      L.IntegrationResourceArchiveDocument,
-      {
-        id,
-      }
-    ).then(response => {
-      const data = response?.integrationResourceArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IntegrationResourceArchiveMutation,
+      L.IntegrationResourceArchiveMutationVariables
+    >(L.IntegrationResourceArchiveDocument, {
+      id,
     });
+    const data = response?.integrationResourceArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -8613,17 +8583,16 @@ export class IntegrationSentryConnectMutation extends Request {
    * @returns parsed response from IntegrationSentryConnectMutation
    */
   public async fetch(code: string, installationId: string, organizationSlug: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationSentryConnectMutation, L.IntegrationSentryConnectMutationVariables>(
-      L.IntegrationSentryConnectDocument,
-      {
-        code,
-        installationId,
-        organizationSlug,
-      }
-    ).then(response => {
-      const data = response?.integrationSentryConnect;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IntegrationSentryConnectMutation,
+      L.IntegrationSentryConnectMutationVariables
+    >(L.IntegrationSentryConnectDocument, {
+      code,
+      installationId,
+      organizationSlug,
     });
+    const data = response?.integrationSentryConnect;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8650,14 +8619,16 @@ export class IntegrationSlackMutation extends Request {
     redirectUri: string,
     variables?: Omit<L.IntegrationSlackMutationVariables, "code" | "redirectUri">
   ): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationSlackMutation, L.IntegrationSlackMutationVariables>(L.IntegrationSlackDocument, {
-      code,
-      redirectUri,
-      ...variables,
-    }).then(response => {
-      const data = response?.integrationSlack;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.IntegrationSlackMutation, L.IntegrationSlackMutationVariables>(
+      L.IntegrationSlackDocument,
+      {
+        code,
+        redirectUri,
+        ...variables,
+      }
+    );
+    const data = response?.integrationSlack;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8679,16 +8650,15 @@ export class IntegrationSlackImportEmojisMutation extends Request {
    * @returns parsed response from IntegrationSlackImportEmojisMutation
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationSlackImportEmojisMutation, L.IntegrationSlackImportEmojisMutationVariables>(
-      L.IntegrationSlackImportEmojisDocument,
-      {
-        code,
-        redirectUri,
-      }
-    ).then(response => {
-      const data = response?.integrationSlackImportEmojis;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IntegrationSlackImportEmojisMutation,
+      L.IntegrationSlackImportEmojisMutationVariables
+    >(L.IntegrationSlackImportEmojisDocument, {
+      code,
+      redirectUri,
     });
+    const data = response?.integrationSlackImportEmojis;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8710,16 +8680,15 @@ export class IntegrationSlackPersonalMutation extends Request {
    * @returns parsed response from IntegrationSlackPersonalMutation
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationSlackPersonalMutation, L.IntegrationSlackPersonalMutationVariables>(
-      L.IntegrationSlackPersonalDocument,
-      {
-        code,
-        redirectUri,
-      }
-    ).then(response => {
-      const data = response?.integrationSlackPersonal;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IntegrationSlackPersonalMutation,
+      L.IntegrationSlackPersonalMutationVariables
+    >(L.IntegrationSlackPersonalDocument, {
+      code,
+      redirectUri,
     });
+    const data = response?.integrationSlackPersonal;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8748,7 +8717,7 @@ export class IntegrationSlackPostMutation extends Request {
     teamId: string,
     variables?: Omit<L.IntegrationSlackPostMutationVariables, "code" | "redirectUri" | "teamId">
   ): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationSlackPostMutation, L.IntegrationSlackPostMutationVariables>(
+    const response = await this._request<L.IntegrationSlackPostMutation, L.IntegrationSlackPostMutationVariables>(
       L.IntegrationSlackPostDocument,
       {
         code,
@@ -8756,10 +8725,9 @@ export class IntegrationSlackPostMutation extends Request {
         teamId,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.integrationSlackPost;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.integrationSlackPost;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8782,17 +8750,16 @@ export class IntegrationSlackProjectPostMutation extends Request {
    * @returns parsed response from IntegrationSlackProjectPostMutation
    */
   public async fetch(code: string, projectId: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationSlackProjectPostMutation, L.IntegrationSlackProjectPostMutationVariables>(
-      L.IntegrationSlackProjectPostDocument,
-      {
-        code,
-        projectId,
-        redirectUri,
-      }
-    ).then(response => {
-      const data = response?.integrationSlackProjectPost;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IntegrationSlackProjectPostMutation,
+      L.IntegrationSlackProjectPostMutationVariables
+    >(L.IntegrationSlackProjectPostDocument, {
+      code,
+      projectId,
+      redirectUri,
     });
+    const data = response?.integrationSlackProjectPost;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8821,7 +8788,7 @@ export class IntegrationZendeskMutation extends Request {
     scope: string,
     subdomain: string
   ): LinearFetch<IntegrationPayload> {
-    return this._request<L.IntegrationZendeskMutation, L.IntegrationZendeskMutationVariables>(
+    const response = await this._request<L.IntegrationZendeskMutation, L.IntegrationZendeskMutationVariables>(
       L.IntegrationZendeskDocument,
       {
         code,
@@ -8829,10 +8796,9 @@ export class IntegrationZendeskMutation extends Request {
         scope,
         subdomain,
       }
-    ).then(response => {
-      const data = response?.integrationZendesk;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.integrationZendesk;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -8854,13 +8820,15 @@ export class IssueArchiveMutation extends Request {
    * @returns parsed response from IssueArchiveMutation
    */
   public async fetch(id: string, variables?: Omit<L.IssueArchiveMutationVariables, "id">): LinearFetch<ArchivePayload> {
-    return this._request<L.IssueArchiveMutation, L.IssueArchiveMutationVariables>(L.IssueArchiveDocument, {
-      id,
-      ...variables,
-    }).then(response => {
-      const data = response?.issueArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.IssueArchiveMutation, L.IssueArchiveMutationVariables>(
+      L.IssueArchiveDocument,
+      {
+        id,
+        ...variables,
+      }
+    );
+    const data = response?.issueArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -8881,12 +8849,11 @@ export class IssueCreateMutation extends Request {
    * @returns parsed response from IssueCreateMutation
    */
   public async fetch(input: L.IssueCreateInput): LinearFetch<IssuePayload> {
-    return this._request<L.IssueCreateMutation, L.IssueCreateMutationVariables>(L.IssueCreateDocument, {
+    const response = await this._request<L.IssueCreateMutation, L.IssueCreateMutationVariables>(L.IssueCreateDocument, {
       input,
-    }).then(response => {
-      const data = response?.issueCreate;
-      return data ? new IssuePayload(this._request, data) : undefined;
     });
+    const data = response?.issueCreate;
+    return data ? new IssuePayload(this._request, data) : undefined;
   }
 }
 
@@ -8907,12 +8874,11 @@ export class IssueDeleteMutation extends Request {
    * @returns parsed response from IssueDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.IssueDeleteMutation, L.IssueDeleteMutationVariables>(L.IssueDeleteDocument, {
+    const response = await this._request<L.IssueDeleteMutation, L.IssueDeleteMutationVariables>(L.IssueDeleteDocument, {
       id,
-    }).then(response => {
-      const data = response?.issueDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
     });
+    const data = response?.issueDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -8941,7 +8907,7 @@ export class IssueImportCreateAsanaMutation extends Request {
     teamId: string,
     variables?: Omit<L.IssueImportCreateAsanaMutationVariables, "asanaTeamName" | "asanaToken" | "teamId">
   ): LinearFetch<IssueImportPayload> {
-    return this._request<L.IssueImportCreateAsanaMutation, L.IssueImportCreateAsanaMutationVariables>(
+    const response = await this._request<L.IssueImportCreateAsanaMutation, L.IssueImportCreateAsanaMutationVariables>(
       L.IssueImportCreateAsanaDocument,
       {
         asanaTeamName,
@@ -8949,10 +8915,9 @@ export class IssueImportCreateAsanaMutation extends Request {
         teamId,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.issueImportCreateAsana;
-      return data ? new IssueImportPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueImportCreateAsana;
+    return data ? new IssueImportPayload(this._request, data) : undefined;
   }
 }
 
@@ -8981,18 +8946,17 @@ export class IssueImportCreateClubhouseMutation extends Request {
     teamId: string,
     variables?: Omit<L.IssueImportCreateClubhouseMutationVariables, "clubhouseTeamName" | "clubhouseToken" | "teamId">
   ): LinearFetch<IssueImportPayload> {
-    return this._request<L.IssueImportCreateClubhouseMutation, L.IssueImportCreateClubhouseMutationVariables>(
-      L.IssueImportCreateClubhouseDocument,
-      {
-        clubhouseTeamName,
-        clubhouseToken,
-        teamId,
-        ...variables,
-      }
-    ).then(response => {
-      const data = response?.issueImportCreateClubhouse;
-      return data ? new IssueImportPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.IssueImportCreateClubhouseMutation,
+      L.IssueImportCreateClubhouseMutationVariables
+    >(L.IssueImportCreateClubhouseDocument, {
+      clubhouseTeamName,
+      clubhouseToken,
+      teamId,
+      ...variables,
     });
+    const data = response?.issueImportCreateClubhouse;
+    return data ? new IssueImportPayload(this._request, data) : undefined;
   }
 }
 
@@ -9026,7 +8990,7 @@ export class IssueImportCreateGithubMutation extends Request {
       "githubRepoName" | "githubRepoOwner" | "githubToken" | "teamId"
     >
   ): LinearFetch<IssueImportPayload> {
-    return this._request<L.IssueImportCreateGithubMutation, L.IssueImportCreateGithubMutationVariables>(
+    const response = await this._request<L.IssueImportCreateGithubMutation, L.IssueImportCreateGithubMutationVariables>(
       L.IssueImportCreateGithubDocument,
       {
         githubRepoName,
@@ -9035,10 +8999,9 @@ export class IssueImportCreateGithubMutation extends Request {
         teamId,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.issueImportCreateGithub;
-      return data ? new IssueImportPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueImportCreateGithub;
+    return data ? new IssueImportPayload(this._request, data) : undefined;
   }
 }
 
@@ -9074,7 +9037,7 @@ export class IssueImportCreateJiraMutation extends Request {
       "jiraEmail" | "jiraHostname" | "jiraProject" | "jiraToken" | "teamId"
     >
   ): LinearFetch<IssueImportPayload> {
-    return this._request<L.IssueImportCreateJiraMutation, L.IssueImportCreateJiraMutationVariables>(
+    const response = await this._request<L.IssueImportCreateJiraMutation, L.IssueImportCreateJiraMutationVariables>(
       L.IssueImportCreateJiraDocument,
       {
         jiraEmail,
@@ -9084,10 +9047,9 @@ export class IssueImportCreateJiraMutation extends Request {
         teamId,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.issueImportCreateJira;
-      return data ? new IssueImportPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueImportCreateJira;
+    return data ? new IssueImportPayload(this._request, data) : undefined;
   }
 }
 
@@ -9108,15 +9070,14 @@ export class IssueImportDeleteMutation extends Request {
    * @returns parsed response from IssueImportDeleteMutation
    */
   public async fetch(issueImportId: string): LinearFetch<IssueImportDeletePayload> {
-    return this._request<L.IssueImportDeleteMutation, L.IssueImportDeleteMutationVariables>(
+    const response = await this._request<L.IssueImportDeleteMutation, L.IssueImportDeleteMutationVariables>(
       L.IssueImportDeleteDocument,
       {
         issueImportId,
       }
-    ).then(response => {
-      const data = response?.issueImportDelete;
-      return data ? new IssueImportDeletePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueImportDelete;
+    return data ? new IssueImportDeletePayload(this._request, data) : undefined;
   }
 }
 
@@ -9138,16 +9099,15 @@ export class IssueImportProcessMutation extends Request {
    * @returns parsed response from IssueImportProcessMutation
    */
   public async fetch(issueImportId: string, mapping: Record<string, unknown>): LinearFetch<IssueImportPayload> {
-    return this._request<L.IssueImportProcessMutation, L.IssueImportProcessMutationVariables>(
+    const response = await this._request<L.IssueImportProcessMutation, L.IssueImportProcessMutationVariables>(
       L.IssueImportProcessDocument,
       {
         issueImportId,
         mapping,
       }
-    ).then(response => {
-      const data = response?.issueImportProcess;
-      return data ? new IssueImportPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueImportProcess;
+    return data ? new IssueImportPayload(this._request, data) : undefined;
   }
 }
 
@@ -9168,15 +9128,14 @@ export class IssueLabelArchiveMutation extends Request {
    * @returns parsed response from IssueLabelArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.IssueLabelArchiveMutation, L.IssueLabelArchiveMutationVariables>(
+    const response = await this._request<L.IssueLabelArchiveMutation, L.IssueLabelArchiveMutationVariables>(
       L.IssueLabelArchiveDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.issueLabelArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueLabelArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9197,12 +9156,14 @@ export class IssueLabelCreateMutation extends Request {
    * @returns parsed response from IssueLabelCreateMutation
    */
   public async fetch(input: L.IssueLabelCreateInput): LinearFetch<IssueLabelPayload> {
-    return this._request<L.IssueLabelCreateMutation, L.IssueLabelCreateMutationVariables>(L.IssueLabelCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.issueLabelCreate;
-      return data ? new IssueLabelPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.IssueLabelCreateMutation, L.IssueLabelCreateMutationVariables>(
+      L.IssueLabelCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.issueLabelCreate;
+    return data ? new IssueLabelPayload(this._request, data) : undefined;
   }
 }
 
@@ -9224,13 +9185,15 @@ export class IssueLabelUpdateMutation extends Request {
    * @returns parsed response from IssueLabelUpdateMutation
    */
   public async fetch(id: string, input: L.IssueLabelUpdateInput): LinearFetch<IssueLabelPayload> {
-    return this._request<L.IssueLabelUpdateMutation, L.IssueLabelUpdateMutationVariables>(L.IssueLabelUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.issueLabelUpdate;
-      return data ? new IssueLabelPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.IssueLabelUpdateMutation, L.IssueLabelUpdateMutationVariables>(
+      L.IssueLabelUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.issueLabelUpdate;
+    return data ? new IssueLabelPayload(this._request, data) : undefined;
   }
 }
 
@@ -9251,15 +9214,14 @@ export class IssueRelationCreateMutation extends Request {
    * @returns parsed response from IssueRelationCreateMutation
    */
   public async fetch(input: L.IssueRelationCreateInput): LinearFetch<IssueRelationPayload> {
-    return this._request<L.IssueRelationCreateMutation, L.IssueRelationCreateMutationVariables>(
+    const response = await this._request<L.IssueRelationCreateMutation, L.IssueRelationCreateMutationVariables>(
       L.IssueRelationCreateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.issueRelationCreate;
-      return data ? new IssueRelationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueRelationCreate;
+    return data ? new IssueRelationPayload(this._request, data) : undefined;
   }
 }
 
@@ -9280,15 +9242,14 @@ export class IssueRelationDeleteMutation extends Request {
    * @returns parsed response from IssueRelationDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.IssueRelationDeleteMutation, L.IssueRelationDeleteMutationVariables>(
+    const response = await this._request<L.IssueRelationDeleteMutation, L.IssueRelationDeleteMutationVariables>(
       L.IssueRelationDeleteDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.issueRelationDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueRelationDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9310,16 +9271,15 @@ export class IssueRelationUpdateMutation extends Request {
    * @returns parsed response from IssueRelationUpdateMutation
    */
   public async fetch(id: string, input: L.IssueRelationUpdateInput): LinearFetch<IssueRelationPayload> {
-    return this._request<L.IssueRelationUpdateMutation, L.IssueRelationUpdateMutationVariables>(
+    const response = await this._request<L.IssueRelationUpdateMutation, L.IssueRelationUpdateMutationVariables>(
       L.IssueRelationUpdateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.issueRelationUpdate;
-      return data ? new IssueRelationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.issueRelationUpdate;
+    return data ? new IssueRelationPayload(this._request, data) : undefined;
   }
 }
 
@@ -9340,12 +9300,14 @@ export class IssueUnarchiveMutation extends Request {
    * @returns parsed response from IssueUnarchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.IssueUnarchiveMutation, L.IssueUnarchiveMutationVariables>(L.IssueUnarchiveDocument, {
-      id,
-    }).then(response => {
-      const data = response?.issueUnarchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.IssueUnarchiveMutation, L.IssueUnarchiveMutationVariables>(
+      L.IssueUnarchiveDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.issueUnarchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9367,13 +9329,12 @@ export class IssueUpdateMutation extends Request {
    * @returns parsed response from IssueUpdateMutation
    */
   public async fetch(id: string, input: L.IssueUpdateInput): LinearFetch<IssuePayload> {
-    return this._request<L.IssueUpdateMutation, L.IssueUpdateMutationVariables>(L.IssueUpdateDocument, {
+    const response = await this._request<L.IssueUpdateMutation, L.IssueUpdateMutationVariables>(L.IssueUpdateDocument, {
       id,
       input,
-    }).then(response => {
-      const data = response?.issueUpdate;
-      return data ? new IssuePayload(this._request, data) : undefined;
     });
+    const data = response?.issueUpdate;
+    return data ? new IssuePayload(this._request, data) : undefined;
   }
 }
 
@@ -9394,15 +9355,14 @@ export class JoinOrganizationFromOnboardingMutation extends Request {
    * @returns parsed response from JoinOrganizationFromOnboardingMutation
    */
   public async fetch(input: L.JoinOrganizationInput): LinearFetch<CreateOrJoinOrganizationResponse> {
-    return this._request<L.JoinOrganizationFromOnboardingMutation, L.JoinOrganizationFromOnboardingMutationVariables>(
-      L.JoinOrganizationFromOnboardingDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.joinOrganizationFromOnboarding;
-      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
+    const response = await this._request<
+      L.JoinOrganizationFromOnboardingMutation,
+      L.JoinOrganizationFromOnboardingMutationVariables
+    >(L.JoinOrganizationFromOnboardingDocument, {
+      input,
     });
+    const data = response?.joinOrganizationFromOnboarding;
+    return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
   }
 }
 
@@ -9423,15 +9383,14 @@ export class LeaveOrganizationMutation extends Request {
    * @returns parsed response from LeaveOrganizationMutation
    */
   public async fetch(organizationId: string): LinearFetch<CreateOrJoinOrganizationResponse> {
-    return this._request<L.LeaveOrganizationMutation, L.LeaveOrganizationMutationVariables>(
+    const response = await this._request<L.LeaveOrganizationMutation, L.LeaveOrganizationMutationVariables>(
       L.LeaveOrganizationDocument,
       {
         organizationId,
       }
-    ).then(response => {
-      const data = response?.leaveOrganization;
-      return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
-    });
+    );
+    const data = response?.leaveOrganization;
+    return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
   }
 }
 
@@ -9452,12 +9411,14 @@ export class MilestoneCreateMutation extends Request {
    * @returns parsed response from MilestoneCreateMutation
    */
   public async fetch(input: L.MilestoneCreateInput): LinearFetch<MilestonePayload> {
-    return this._request<L.MilestoneCreateMutation, L.MilestoneCreateMutationVariables>(L.MilestoneCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.milestoneCreate;
-      return data ? new MilestonePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.MilestoneCreateMutation, L.MilestoneCreateMutationVariables>(
+      L.MilestoneCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.milestoneCreate;
+    return data ? new MilestonePayload(this._request, data) : undefined;
   }
 }
 
@@ -9478,12 +9439,14 @@ export class MilestoneDeleteMutation extends Request {
    * @returns parsed response from MilestoneDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.MilestoneDeleteMutation, L.MilestoneDeleteMutationVariables>(L.MilestoneDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.milestoneDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.MilestoneDeleteMutation, L.MilestoneDeleteMutationVariables>(
+      L.MilestoneDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.milestoneDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9505,13 +9468,15 @@ export class MilestoneUpdateMutation extends Request {
    * @returns parsed response from MilestoneUpdateMutation
    */
   public async fetch(id: string, input: L.MilestoneUpdateInput): LinearFetch<MilestonePayload> {
-    return this._request<L.MilestoneUpdateMutation, L.MilestoneUpdateMutationVariables>(L.MilestoneUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.milestoneUpdate;
-      return data ? new MilestonePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.MilestoneUpdateMutation, L.MilestoneUpdateMutationVariables>(
+      L.MilestoneUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.milestoneUpdate;
+    return data ? new MilestonePayload(this._request, data) : undefined;
   }
 }
 
@@ -9532,15 +9497,14 @@ export class NotificationArchiveMutation extends Request {
    * @returns parsed response from NotificationArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.NotificationArchiveMutation, L.NotificationArchiveMutationVariables>(
+    const response = await this._request<L.NotificationArchiveMutation, L.NotificationArchiveMutationVariables>(
       L.NotificationArchiveDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.notificationArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.notificationArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9562,16 +9526,15 @@ export class NotificationCreateMutation extends Request {
    * @returns parsed response from NotificationCreateMutation
    */
   public async fetch(id: string, input: L.NotificationUpdateInput): LinearFetch<NotificationPayload> {
-    return this._request<L.NotificationCreateMutation, L.NotificationCreateMutationVariables>(
+    const response = await this._request<L.NotificationCreateMutation, L.NotificationCreateMutationVariables>(
       L.NotificationCreateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.notificationCreate;
-      return data ? new NotificationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.notificationCreate;
+    return data ? new NotificationPayload(this._request, data) : undefined;
   }
 }
 
@@ -9592,15 +9555,14 @@ export class NotificationSubscriptionCreateMutation extends Request {
    * @returns parsed response from NotificationSubscriptionCreateMutation
    */
   public async fetch(input: L.NotificationSubscriptionCreateInput): LinearFetch<NotificationSubscriptionPayload> {
-    return this._request<L.NotificationSubscriptionCreateMutation, L.NotificationSubscriptionCreateMutationVariables>(
-      L.NotificationSubscriptionCreateDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.notificationSubscriptionCreate;
-      return data ? new NotificationSubscriptionPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.NotificationSubscriptionCreateMutation,
+      L.NotificationSubscriptionCreateMutationVariables
+    >(L.NotificationSubscriptionCreateDocument, {
+      input,
     });
+    const data = response?.notificationSubscriptionCreate;
+    return data ? new NotificationSubscriptionPayload(this._request, data) : undefined;
   }
 }
 
@@ -9621,15 +9583,14 @@ export class NotificationSubscriptionDeleteMutation extends Request {
    * @returns parsed response from NotificationSubscriptionDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.NotificationSubscriptionDeleteMutation, L.NotificationSubscriptionDeleteMutationVariables>(
-      L.NotificationSubscriptionDeleteDocument,
-      {
-        id,
-      }
-    ).then(response => {
-      const data = response?.notificationSubscriptionDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.NotificationSubscriptionDeleteMutation,
+      L.NotificationSubscriptionDeleteMutationVariables
+    >(L.NotificationSubscriptionDeleteDocument, {
+      id,
     });
+    const data = response?.notificationSubscriptionDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9650,15 +9611,14 @@ export class NotificationUnarchiveMutation extends Request {
    * @returns parsed response from NotificationUnarchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.NotificationUnarchiveMutation, L.NotificationUnarchiveMutationVariables>(
+    const response = await this._request<L.NotificationUnarchiveMutation, L.NotificationUnarchiveMutationVariables>(
       L.NotificationUnarchiveDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.notificationUnarchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.notificationUnarchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9680,16 +9640,15 @@ export class NotificationUpdateMutation extends Request {
    * @returns parsed response from NotificationUpdateMutation
    */
   public async fetch(id: string, input: L.NotificationUpdateInput): LinearFetch<NotificationPayload> {
-    return this._request<L.NotificationUpdateMutation, L.NotificationUpdateMutationVariables>(
+    const response = await this._request<L.NotificationUpdateMutation, L.NotificationUpdateMutationVariables>(
       L.NotificationUpdateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.notificationUpdate;
-      return data ? new NotificationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.notificationUpdate;
+    return data ? new NotificationPayload(this._request, data) : undefined;
   }
 }
 
@@ -9710,15 +9669,14 @@ export class OauthClientArchiveMutation extends Request {
    * @returns parsed response from OauthClientArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.OauthClientArchiveMutation, L.OauthClientArchiveMutationVariables>(
+    const response = await this._request<L.OauthClientArchiveMutation, L.OauthClientArchiveMutationVariables>(
       L.OauthClientArchiveDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.oauthClientArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.oauthClientArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9739,15 +9697,14 @@ export class OauthClientCreateMutation extends Request {
    * @returns parsed response from OauthClientCreateMutation
    */
   public async fetch(input: L.OauthClientCreateInput): LinearFetch<OauthClientPayload> {
-    return this._request<L.OauthClientCreateMutation, L.OauthClientCreateMutationVariables>(
+    const response = await this._request<L.OauthClientCreateMutation, L.OauthClientCreateMutationVariables>(
       L.OauthClientCreateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.oauthClientCreate;
-      return data ? new OauthClientPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.oauthClientCreate;
+    return data ? new OauthClientPayload(this._request, data) : undefined;
   }
 }
 
@@ -9768,15 +9725,14 @@ export class OauthClientRotateSecretMutation extends Request {
    * @returns parsed response from OauthClientRotateSecretMutation
    */
   public async fetch(id: string): LinearFetch<RotateSecretPayload> {
-    return this._request<L.OauthClientRotateSecretMutation, L.OauthClientRotateSecretMutationVariables>(
+    const response = await this._request<L.OauthClientRotateSecretMutation, L.OauthClientRotateSecretMutationVariables>(
       L.OauthClientRotateSecretDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.oauthClientRotateSecret;
-      return data ? new RotateSecretPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.oauthClientRotateSecret;
+    return data ? new RotateSecretPayload(this._request, data) : undefined;
   }
 }
 
@@ -9798,16 +9754,15 @@ export class OauthClientUpdateMutation extends Request {
    * @returns parsed response from OauthClientUpdateMutation
    */
   public async fetch(id: string, input: L.OauthClientUpdateInput): LinearFetch<OauthClientPayload> {
-    return this._request<L.OauthClientUpdateMutation, L.OauthClientUpdateMutationVariables>(
+    const response = await this._request<L.OauthClientUpdateMutation, L.OauthClientUpdateMutationVariables>(
       L.OauthClientUpdateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.oauthClientUpdate;
-      return data ? new OauthClientPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.oauthClientUpdate;
+    return data ? new OauthClientPayload(this._request, data) : undefined;
   }
 }
 
@@ -9829,13 +9784,15 @@ export class OauthTokenRevokeMutation extends Request {
    * @returns parsed response from OauthTokenRevokeMutation
    */
   public async fetch(appId: string, scope: string[]): LinearFetch<OauthTokenRevokePayload> {
-    return this._request<L.OauthTokenRevokeMutation, L.OauthTokenRevokeMutationVariables>(L.OauthTokenRevokeDocument, {
-      appId,
-      scope,
-    }).then(response => {
-      const data = response?.oauthTokenRevoke;
-      return data ? new OauthTokenRevokePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.OauthTokenRevokeMutation, L.OauthTokenRevokeMutationVariables>(
+      L.OauthTokenRevokeDocument,
+      {
+        appId,
+        scope,
+      }
+    );
+    const data = response?.oauthTokenRevoke;
+    return data ? new OauthTokenRevokePayload(this._request, data) : undefined;
   }
 }
 
@@ -9855,13 +9812,12 @@ export class OrganizationCancelDeleteMutation extends Request {
    * @returns parsed response from OrganizationCancelDeleteMutation
    */
   public async fetch(): LinearFetch<OrganizationCancelDeletePayload> {
-    return this._request<L.OrganizationCancelDeleteMutation, L.OrganizationCancelDeleteMutationVariables>(
-      L.OrganizationCancelDeleteDocument,
-      {}
-    ).then(response => {
-      const data = response?.organizationCancelDelete;
-      return data ? new OrganizationCancelDeletePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<
+      L.OrganizationCancelDeleteMutation,
+      L.OrganizationCancelDeleteMutationVariables
+    >(L.OrganizationCancelDeleteDocument, {});
+    const data = response?.organizationCancelDelete;
+    return data ? new OrganizationCancelDeletePayload(this._request, data) : undefined;
   }
 }
 
@@ -9882,15 +9838,14 @@ export class OrganizationDeleteMutation extends Request {
    * @returns parsed response from OrganizationDeleteMutation
    */
   public async fetch(input: L.DeleteOrganizationInput): LinearFetch<OrganizationDeletePayload> {
-    return this._request<L.OrganizationDeleteMutation, L.OrganizationDeleteMutationVariables>(
+    const response = await this._request<L.OrganizationDeleteMutation, L.OrganizationDeleteMutationVariables>(
       L.OrganizationDeleteDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.organizationDelete;
-      return data ? new OrganizationDeletePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.organizationDelete;
+    return data ? new OrganizationDeletePayload(this._request, data) : undefined;
   }
 }
 
@@ -9910,13 +9865,12 @@ export class OrganizationDeleteChallengeMutation extends Request {
    * @returns parsed response from OrganizationDeleteChallengeMutation
    */
   public async fetch(): LinearFetch<OrganizationDeletePayload> {
-    return this._request<L.OrganizationDeleteChallengeMutation, L.OrganizationDeleteChallengeMutationVariables>(
-      L.OrganizationDeleteChallengeDocument,
-      {}
-    ).then(response => {
-      const data = response?.organizationDeleteChallenge;
-      return data ? new OrganizationDeletePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<
+      L.OrganizationDeleteChallengeMutation,
+      L.OrganizationDeleteChallengeMutationVariables
+    >(L.OrganizationDeleteChallengeDocument, {});
+    const data = response?.organizationDeleteChallenge;
+    return data ? new OrganizationDeletePayload(this._request, data) : undefined;
   }
 }
 
@@ -9937,15 +9891,14 @@ export class OrganizationDomainCreateMutation extends Request {
    * @returns parsed response from OrganizationDomainCreateMutation
    */
   public async fetch(input: L.OrganizationDomainCreateInput): LinearFetch<OrganizationDomainPayload> {
-    return this._request<L.OrganizationDomainCreateMutation, L.OrganizationDomainCreateMutationVariables>(
-      L.OrganizationDomainCreateDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.organizationDomainCreate;
-      return data ? new OrganizationDomainPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.OrganizationDomainCreateMutation,
+      L.OrganizationDomainCreateMutationVariables
+    >(L.OrganizationDomainCreateDocument, {
+      input,
     });
+    const data = response?.organizationDomainCreate;
+    return data ? new OrganizationDomainPayload(this._request, data) : undefined;
   }
 }
 
@@ -9966,15 +9919,14 @@ export class OrganizationDomainDeleteMutation extends Request {
    * @returns parsed response from OrganizationDomainDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.OrganizationDomainDeleteMutation, L.OrganizationDomainDeleteMutationVariables>(
-      L.OrganizationDomainDeleteDocument,
-      {
-        id,
-      }
-    ).then(response => {
-      const data = response?.organizationDomainDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.OrganizationDomainDeleteMutation,
+      L.OrganizationDomainDeleteMutationVariables
+    >(L.OrganizationDomainDeleteDocument, {
+      id,
     });
+    const data = response?.organizationDomainDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -9995,15 +9947,14 @@ export class OrganizationDomainVerifyMutation extends Request {
    * @returns parsed response from OrganizationDomainVerifyMutation
    */
   public async fetch(input: L.OrganizationDomainVerificationInput): LinearFetch<OrganizationDomainPayload> {
-    return this._request<L.OrganizationDomainVerifyMutation, L.OrganizationDomainVerifyMutationVariables>(
-      L.OrganizationDomainVerifyDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.organizationDomainVerify;
-      return data ? new OrganizationDomainPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.OrganizationDomainVerifyMutation,
+      L.OrganizationDomainVerifyMutationVariables
+    >(L.OrganizationDomainVerifyDocument, {
+      input,
     });
+    const data = response?.organizationDomainVerify;
+    return data ? new OrganizationDomainPayload(this._request, data) : undefined;
   }
 }
 
@@ -10024,15 +9975,14 @@ export class OrganizationInviteCreateMutation extends Request {
    * @returns parsed response from OrganizationInviteCreateMutation
    */
   public async fetch(input: L.OrganizationInviteCreateInput): LinearFetch<OrganizationInvitePayload> {
-    return this._request<L.OrganizationInviteCreateMutation, L.OrganizationInviteCreateMutationVariables>(
-      L.OrganizationInviteCreateDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.organizationInviteCreate;
-      return data ? new OrganizationInvitePayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.OrganizationInviteCreateMutation,
+      L.OrganizationInviteCreateMutationVariables
+    >(L.OrganizationInviteCreateDocument, {
+      input,
     });
+    const data = response?.organizationInviteCreate;
+    return data ? new OrganizationInvitePayload(this._request, data) : undefined;
   }
 }
 
@@ -10053,15 +10003,14 @@ export class OrganizationInviteDeleteMutation extends Request {
    * @returns parsed response from OrganizationInviteDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.OrganizationInviteDeleteMutation, L.OrganizationInviteDeleteMutationVariables>(
-      L.OrganizationInviteDeleteDocument,
-      {
-        id,
-      }
-    ).then(response => {
-      const data = response?.organizationInviteDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.OrganizationInviteDeleteMutation,
+      L.OrganizationInviteDeleteMutationVariables
+    >(L.OrganizationInviteDeleteDocument, {
+      id,
     });
+    const data = response?.organizationInviteDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10082,15 +10031,14 @@ export class OrganizationUpdateMutation extends Request {
    * @returns parsed response from OrganizationUpdateMutation
    */
   public async fetch(input: L.UpdateOrganizationInput): LinearFetch<OrganizationPayload> {
-    return this._request<L.OrganizationUpdateMutation, L.OrganizationUpdateMutationVariables>(
+    const response = await this._request<L.OrganizationUpdateMutation, L.OrganizationUpdateMutationVariables>(
       L.OrganizationUpdateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.organizationUpdate;
-      return data ? new OrganizationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.organizationUpdate;
+    return data ? new OrganizationPayload(this._request, data) : undefined;
   }
 }
 
@@ -10111,12 +10059,14 @@ export class ProjectArchiveMutation extends Request {
    * @returns parsed response from ProjectArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.ProjectArchiveMutation, L.ProjectArchiveMutationVariables>(L.ProjectArchiveDocument, {
-      id,
-    }).then(response => {
-      const data = response?.projectArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.ProjectArchiveMutation, L.ProjectArchiveMutationVariables>(
+      L.ProjectArchiveDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.projectArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10137,12 +10087,14 @@ export class ProjectCreateMutation extends Request {
    * @returns parsed response from ProjectCreateMutation
    */
   public async fetch(input: L.ProjectCreateInput): LinearFetch<ProjectPayload> {
-    return this._request<L.ProjectCreateMutation, L.ProjectCreateMutationVariables>(L.ProjectCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.projectCreate;
-      return data ? new ProjectPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.ProjectCreateMutation, L.ProjectCreateMutationVariables>(
+      L.ProjectCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.projectCreate;
+    return data ? new ProjectPayload(this._request, data) : undefined;
   }
 }
 
@@ -10163,15 +10115,14 @@ export class ProjectLinkCreateMutation extends Request {
    * @returns parsed response from ProjectLinkCreateMutation
    */
   public async fetch(input: L.ProjectLinkCreateInput): LinearFetch<ProjectLinkPayload> {
-    return this._request<L.ProjectLinkCreateMutation, L.ProjectLinkCreateMutationVariables>(
+    const response = await this._request<L.ProjectLinkCreateMutation, L.ProjectLinkCreateMutationVariables>(
       L.ProjectLinkCreateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.projectLinkCreate;
-      return data ? new ProjectLinkPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.projectLinkCreate;
+    return data ? new ProjectLinkPayload(this._request, data) : undefined;
   }
 }
 
@@ -10192,15 +10143,14 @@ export class ProjectLinkDeleteMutation extends Request {
    * @returns parsed response from ProjectLinkDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.ProjectLinkDeleteMutation, L.ProjectLinkDeleteMutationVariables>(
+    const response = await this._request<L.ProjectLinkDeleteMutation, L.ProjectLinkDeleteMutationVariables>(
       L.ProjectLinkDeleteDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.projectLinkDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.projectLinkDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10221,12 +10171,14 @@ export class ProjectUnarchiveMutation extends Request {
    * @returns parsed response from ProjectUnarchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.ProjectUnarchiveMutation, L.ProjectUnarchiveMutationVariables>(L.ProjectUnarchiveDocument, {
-      id,
-    }).then(response => {
-      const data = response?.projectUnarchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.ProjectUnarchiveMutation, L.ProjectUnarchiveMutationVariables>(
+      L.ProjectUnarchiveDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.projectUnarchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10248,13 +10200,15 @@ export class ProjectUpdateMutation extends Request {
    * @returns parsed response from ProjectUpdateMutation
    */
   public async fetch(id: string, input: L.ProjectUpdateInput): LinearFetch<ProjectPayload> {
-    return this._request<L.ProjectUpdateMutation, L.ProjectUpdateMutationVariables>(L.ProjectUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.projectUpdate;
-      return data ? new ProjectPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.ProjectUpdateMutation, L.ProjectUpdateMutationVariables>(
+      L.ProjectUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.projectUpdate;
+    return data ? new ProjectPayload(this._request, data) : undefined;
   }
 }
 
@@ -10275,15 +10229,14 @@ export class PushSubscriptionCreateMutation extends Request {
    * @returns parsed response from PushSubscriptionCreateMutation
    */
   public async fetch(input: L.PushSubscriptionCreateInput): LinearFetch<PushSubscriptionPayload> {
-    return this._request<L.PushSubscriptionCreateMutation, L.PushSubscriptionCreateMutationVariables>(
+    const response = await this._request<L.PushSubscriptionCreateMutation, L.PushSubscriptionCreateMutationVariables>(
       L.PushSubscriptionCreateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.pushSubscriptionCreate;
-      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.pushSubscriptionCreate;
+    return data ? new PushSubscriptionPayload(this._request, data) : undefined;
   }
 }
 
@@ -10304,15 +10257,14 @@ export class PushSubscriptionDeleteMutation extends Request {
    * @returns parsed response from PushSubscriptionDeleteMutation
    */
   public async fetch(id: string): LinearFetch<PushSubscriptionPayload> {
-    return this._request<L.PushSubscriptionDeleteMutation, L.PushSubscriptionDeleteMutationVariables>(
+    const response = await this._request<L.PushSubscriptionDeleteMutation, L.PushSubscriptionDeleteMutationVariables>(
       L.PushSubscriptionDeleteDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.pushSubscriptionDelete;
-      return data ? new PushSubscriptionPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.pushSubscriptionDelete;
+    return data ? new PushSubscriptionPayload(this._request, data) : undefined;
   }
 }
 
@@ -10333,12 +10285,14 @@ export class ReactionCreateMutation extends Request {
    * @returns parsed response from ReactionCreateMutation
    */
   public async fetch(input: L.ReactionCreateInput): LinearFetch<ReactionPayload> {
-    return this._request<L.ReactionCreateMutation, L.ReactionCreateMutationVariables>(L.ReactionCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.reactionCreate;
-      return data ? new ReactionPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.ReactionCreateMutation, L.ReactionCreateMutationVariables>(
+      L.ReactionCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.reactionCreate;
+    return data ? new ReactionPayload(this._request, data) : undefined;
   }
 }
 
@@ -10359,12 +10313,14 @@ export class ReactionDeleteMutation extends Request {
    * @returns parsed response from ReactionDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.ReactionDeleteMutation, L.ReactionDeleteMutationVariables>(L.ReactionDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.reactionDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.ReactionDeleteMutation, L.ReactionDeleteMutationVariables>(
+      L.ReactionDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.reactionDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10385,15 +10341,14 @@ export class RefreshGoogleSheetsDataMutation extends Request {
    * @returns parsed response from RefreshGoogleSheetsDataMutation
    */
   public async fetch(id: string): LinearFetch<IntegrationPayload> {
-    return this._request<L.RefreshGoogleSheetsDataMutation, L.RefreshGoogleSheetsDataMutationVariables>(
+    const response = await this._request<L.RefreshGoogleSheetsDataMutation, L.RefreshGoogleSheetsDataMutationVariables>(
       L.RefreshGoogleSheetsDataDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.refreshGoogleSheetsData;
-      return data ? new IntegrationPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.refreshGoogleSheetsData;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
 
@@ -10414,15 +10369,14 @@ export class ResentOrganizationInviteMutation extends Request {
    * @returns parsed response from ResentOrganizationInviteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.ResentOrganizationInviteMutation, L.ResentOrganizationInviteMutationVariables>(
-      L.ResentOrganizationInviteDocument,
-      {
-        id,
-      }
-    ).then(response => {
-      const data = response?.resentOrganizationInvite;
-      return data ? new ArchivePayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.ResentOrganizationInviteMutation,
+      L.ResentOrganizationInviteMutationVariables
+    >(L.ResentOrganizationInviteDocument, {
+      id,
     });
+    const data = response?.resentOrganizationInvite;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10443,15 +10397,14 @@ export class SamlTokenUserAccountAuthMutation extends Request {
    * @returns parsed response from SamlTokenUserAccountAuthMutation
    */
   public async fetch(input: L.TokenUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
-    return this._request<L.SamlTokenUserAccountAuthMutation, L.SamlTokenUserAccountAuthMutationVariables>(
-      L.SamlTokenUserAccountAuthDocument,
-      {
-        input,
-      }
-    ).then(response => {
-      const data = response?.samlTokenUserAccountAuth;
-      return data ? new AuthResolverResponse(this._request, data) : undefined;
+    const response = await this._request<
+      L.SamlTokenUserAccountAuthMutation,
+      L.SamlTokenUserAccountAuthMutationVariables
+    >(L.SamlTokenUserAccountAuthDocument, {
+      input,
     });
+    const data = response?.samlTokenUserAccountAuth;
+    return data ? new AuthResolverResponse(this._request, data) : undefined;
   }
 }
 
@@ -10472,15 +10425,14 @@ export class SubscriptionArchiveMutation extends Request {
    * @returns parsed response from SubscriptionArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.SubscriptionArchiveMutation, L.SubscriptionArchiveMutationVariables>(
+    const response = await this._request<L.SubscriptionArchiveMutation, L.SubscriptionArchiveMutationVariables>(
       L.SubscriptionArchiveDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.subscriptionArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.subscriptionArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10501,15 +10453,14 @@ export class SubscriptionSessionCreateMutation extends Request {
    * @returns parsed response from SubscriptionSessionCreateMutation
    */
   public async fetch(plan: string): LinearFetch<SubscriptionSessionPayload> {
-    return this._request<L.SubscriptionSessionCreateMutation, L.SubscriptionSessionCreateMutationVariables>(
-      L.SubscriptionSessionCreateDocument,
-      {
-        plan,
-      }
-    ).then(response => {
-      const data = response?.subscriptionSessionCreate;
-      return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.SubscriptionSessionCreateMutation,
+      L.SubscriptionSessionCreateMutationVariables
+    >(L.SubscriptionSessionCreateDocument, {
+      plan,
     });
+    const data = response?.subscriptionSessionCreate;
+    return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
   }
 }
 
@@ -10531,16 +10482,15 @@ export class SubscriptionUpdateMutation extends Request {
    * @returns parsed response from SubscriptionUpdateMutation
    */
   public async fetch(id: string, input: L.SubscriptionUpdateInput): LinearFetch<SubscriptionPayload> {
-    return this._request<L.SubscriptionUpdateMutation, L.SubscriptionUpdateMutationVariables>(
+    const response = await this._request<L.SubscriptionUpdateMutation, L.SubscriptionUpdateMutationVariables>(
       L.SubscriptionUpdateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.subscriptionUpdate;
-      return data ? new SubscriptionPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.subscriptionUpdate;
+    return data ? new SubscriptionPayload(this._request, data) : undefined;
   }
 }
 
@@ -10560,13 +10510,12 @@ export class SubscriptionUpdateSessionCreateMutation extends Request {
    * @returns parsed response from SubscriptionUpdateSessionCreateMutation
    */
   public async fetch(): LinearFetch<SubscriptionSessionPayload> {
-    return this._request<L.SubscriptionUpdateSessionCreateMutation, L.SubscriptionUpdateSessionCreateMutationVariables>(
-      L.SubscriptionUpdateSessionCreateDocument,
-      {}
-    ).then(response => {
-      const data = response?.subscriptionUpdateSessionCreate;
-      return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<
+      L.SubscriptionUpdateSessionCreateMutation,
+      L.SubscriptionUpdateSessionCreateMutationVariables
+    >(L.SubscriptionUpdateSessionCreateDocument, {});
+    const data = response?.subscriptionUpdateSessionCreate;
+    return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
   }
 }
 
@@ -10588,16 +10537,15 @@ export class SubscriptionUpgradeMutation extends Request {
    * @returns parsed response from SubscriptionUpgradeMutation
    */
   public async fetch(id: string, type: string): LinearFetch<SubscriptionPayload> {
-    return this._request<L.SubscriptionUpgradeMutation, L.SubscriptionUpgradeMutationVariables>(
+    const response = await this._request<L.SubscriptionUpgradeMutation, L.SubscriptionUpgradeMutationVariables>(
       L.SubscriptionUpgradeDocument,
       {
         id,
         type,
       }
-    ).then(response => {
-      const data = response?.subscriptionUpgrade;
-      return data ? new SubscriptionPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.subscriptionUpgrade;
+    return data ? new SubscriptionPayload(this._request, data) : undefined;
   }
 }
 
@@ -10618,12 +10566,11 @@ export class TeamArchiveMutation extends Request {
    * @returns parsed response from TeamArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.TeamArchiveMutation, L.TeamArchiveMutationVariables>(L.TeamArchiveDocument, {
+    const response = await this._request<L.TeamArchiveMutation, L.TeamArchiveMutationVariables>(L.TeamArchiveDocument, {
       id,
-    }).then(response => {
-      const data = response?.teamArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
     });
+    const data = response?.teamArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10648,13 +10595,12 @@ export class TeamCreateMutation extends Request {
     input: L.TeamCreateInput,
     variables?: Omit<L.TeamCreateMutationVariables, "input">
   ): LinearFetch<TeamPayload> {
-    return this._request<L.TeamCreateMutation, L.TeamCreateMutationVariables>(L.TeamCreateDocument, {
+    const response = await this._request<L.TeamCreateMutation, L.TeamCreateMutationVariables>(L.TeamCreateDocument, {
       input,
       ...variables,
-    }).then(response => {
-      const data = response?.teamCreate;
-      return data ? new TeamPayload(this._request, data) : undefined;
     });
+    const data = response?.teamCreate;
+    return data ? new TeamPayload(this._request, data) : undefined;
   }
 }
 
@@ -10675,12 +10621,11 @@ export class TeamDeleteMutation extends Request {
    * @returns parsed response from TeamDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.TeamDeleteMutation, L.TeamDeleteMutationVariables>(L.TeamDeleteDocument, {
+    const response = await this._request<L.TeamDeleteMutation, L.TeamDeleteMutationVariables>(L.TeamDeleteDocument, {
       id,
-    }).then(response => {
-      const data = response?.teamDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
     });
+    const data = response?.teamDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10701,12 +10646,14 @@ export class TeamKeyDeleteMutation extends Request {
    * @returns parsed response from TeamKeyDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.TeamKeyDeleteMutation, L.TeamKeyDeleteMutationVariables>(L.TeamKeyDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.teamKeyDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.TeamKeyDeleteMutation, L.TeamKeyDeleteMutationVariables>(
+      L.TeamKeyDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.teamKeyDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10727,15 +10674,14 @@ export class TeamMembershipCreateMutation extends Request {
    * @returns parsed response from TeamMembershipCreateMutation
    */
   public async fetch(input: L.TeamMembershipCreateInput): LinearFetch<TeamMembershipPayload> {
-    return this._request<L.TeamMembershipCreateMutation, L.TeamMembershipCreateMutationVariables>(
+    const response = await this._request<L.TeamMembershipCreateMutation, L.TeamMembershipCreateMutationVariables>(
       L.TeamMembershipCreateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.teamMembershipCreate;
-      return data ? new TeamMembershipPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.teamMembershipCreate;
+    return data ? new TeamMembershipPayload(this._request, data) : undefined;
   }
 }
 
@@ -10756,15 +10702,14 @@ export class TeamMembershipDeleteMutation extends Request {
    * @returns parsed response from TeamMembershipDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.TeamMembershipDeleteMutation, L.TeamMembershipDeleteMutationVariables>(
+    const response = await this._request<L.TeamMembershipDeleteMutation, L.TeamMembershipDeleteMutationVariables>(
       L.TeamMembershipDeleteDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.teamMembershipDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.teamMembershipDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10786,16 +10731,15 @@ export class TeamMembershipUpdateMutation extends Request {
    * @returns parsed response from TeamMembershipUpdateMutation
    */
   public async fetch(id: string, input: L.TeamMembershipUpdateInput): LinearFetch<TeamMembershipPayload> {
-    return this._request<L.TeamMembershipUpdateMutation, L.TeamMembershipUpdateMutationVariables>(
+    const response = await this._request<L.TeamMembershipUpdateMutation, L.TeamMembershipUpdateMutationVariables>(
       L.TeamMembershipUpdateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.teamMembershipUpdate;
-      return data ? new TeamMembershipPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.teamMembershipUpdate;
+    return data ? new TeamMembershipPayload(this._request, data) : undefined;
   }
 }
 
@@ -10817,13 +10761,12 @@ export class TeamUpdateMutation extends Request {
    * @returns parsed response from TeamUpdateMutation
    */
   public async fetch(id: string, input: L.TeamUpdateInput): LinearFetch<TeamPayload> {
-    return this._request<L.TeamUpdateMutation, L.TeamUpdateMutationVariables>(L.TeamUpdateDocument, {
+    const response = await this._request<L.TeamUpdateMutation, L.TeamUpdateMutationVariables>(L.TeamUpdateDocument, {
       id,
       input,
-    }).then(response => {
-      const data = response?.teamUpdate;
-      return data ? new TeamPayload(this._request, data) : undefined;
     });
+    const data = response?.teamUpdate;
+    return data ? new TeamPayload(this._request, data) : undefined;
   }
 }
 
@@ -10844,12 +10787,14 @@ export class TemplateCreateMutation extends Request {
    * @returns parsed response from TemplateCreateMutation
    */
   public async fetch(input: L.TemplateCreateInput): LinearFetch<TemplatePayload> {
-    return this._request<L.TemplateCreateMutation, L.TemplateCreateMutationVariables>(L.TemplateCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.templateCreate;
-      return data ? new TemplatePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.TemplateCreateMutation, L.TemplateCreateMutationVariables>(
+      L.TemplateCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.templateCreate;
+    return data ? new TemplatePayload(this._request, data) : undefined;
   }
 }
 
@@ -10870,12 +10815,14 @@ export class TemplateDeleteMutation extends Request {
    * @returns parsed response from TemplateDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.TemplateDeleteMutation, L.TemplateDeleteMutationVariables>(L.TemplateDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.templateDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.TemplateDeleteMutation, L.TemplateDeleteMutationVariables>(
+      L.TemplateDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.templateDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -10897,13 +10844,15 @@ export class TemplateUpdateMutation extends Request {
    * @returns parsed response from TemplateUpdateMutation
    */
   public async fetch(id: string, input: L.TemplateUpdateInput): LinearFetch<TemplatePayload> {
-    return this._request<L.TemplateUpdateMutation, L.TemplateUpdateMutationVariables>(L.TemplateUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.templateUpdate;
-      return data ? new TemplatePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.TemplateUpdateMutation, L.TemplateUpdateMutationVariables>(
+      L.TemplateUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.templateUpdate;
+    return data ? new TemplatePayload(this._request, data) : undefined;
   }
 }
 
@@ -10924,12 +10873,14 @@ export class UserDemoteAdminMutation extends Request {
    * @returns parsed response from UserDemoteAdminMutation
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
-    return this._request<L.UserDemoteAdminMutation, L.UserDemoteAdminMutationVariables>(L.UserDemoteAdminDocument, {
-      id,
-    }).then(response => {
-      const data = response?.userDemoteAdmin;
-      return data ? new UserAdminPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.UserDemoteAdminMutation, L.UserDemoteAdminMutationVariables>(
+      L.UserDemoteAdminDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.userDemoteAdmin;
+    return data ? new UserAdminPayload(this._request, data) : undefined;
   }
 }
 
@@ -10951,13 +10902,15 @@ export class UserFlagUpdateMutation extends Request {
    * @returns parsed response from UserFlagUpdateMutation
    */
   public async fetch(flag: L.UserFlagType, operation: L.UserFlagUpdateOperation): LinearFetch<UserSettingsFlagPayload> {
-    return this._request<L.UserFlagUpdateMutation, L.UserFlagUpdateMutationVariables>(L.UserFlagUpdateDocument, {
-      flag,
-      operation,
-    }).then(response => {
-      const data = response?.userFlagUpdate;
-      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.UserFlagUpdateMutation, L.UserFlagUpdateMutationVariables>(
+      L.UserFlagUpdateDocument,
+      {
+        flag,
+        operation,
+      }
+    );
+    const data = response?.userFlagUpdate;
+    return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
   }
 }
 
@@ -10978,12 +10931,14 @@ export class UserPromoteAdminMutation extends Request {
    * @returns parsed response from UserPromoteAdminMutation
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
-    return this._request<L.UserPromoteAdminMutation, L.UserPromoteAdminMutationVariables>(L.UserPromoteAdminDocument, {
-      id,
-    }).then(response => {
-      const data = response?.userPromoteAdmin;
-      return data ? new UserAdminPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.UserPromoteAdminMutation, L.UserPromoteAdminMutationVariables>(
+      L.UserPromoteAdminDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.userPromoteAdmin;
+    return data ? new UserAdminPayload(this._request, data) : undefined;
   }
 }
 
@@ -11004,15 +10959,14 @@ export class UserSettingsFlagIncrementMutation extends Request {
    * @returns parsed response from UserSettingsFlagIncrementMutation
    */
   public async fetch(flag: string): LinearFetch<UserSettingsFlagPayload> {
-    return this._request<L.UserSettingsFlagIncrementMutation, L.UserSettingsFlagIncrementMutationVariables>(
-      L.UserSettingsFlagIncrementDocument,
-      {
-        flag,
-      }
-    ).then(response => {
-      const data = response?.userSettingsFlagIncrement;
-      return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
+    const response = await this._request<
+      L.UserSettingsFlagIncrementMutation,
+      L.UserSettingsFlagIncrementMutationVariables
+    >(L.UserSettingsFlagIncrementDocument, {
+      flag,
     });
+    const data = response?.userSettingsFlagIncrement;
+    return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
   }
 }
 
@@ -11032,13 +10986,12 @@ export class UserSettingsFlagsResetMutation extends Request {
    * @returns parsed response from UserSettingsFlagsResetMutation
    */
   public async fetch(): LinearFetch<UserSettingsFlagsResetPayload> {
-    return this._request<L.UserSettingsFlagsResetMutation, L.UserSettingsFlagsResetMutationVariables>(
+    const response = await this._request<L.UserSettingsFlagsResetMutation, L.UserSettingsFlagsResetMutationVariables>(
       L.UserSettingsFlagsResetDocument,
       {}
-    ).then(response => {
-      const data = response?.userSettingsFlagsReset;
-      return data ? new UserSettingsFlagsResetPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.userSettingsFlagsReset;
+    return data ? new UserSettingsFlagsResetPayload(this._request, data) : undefined;
   }
 }
 
@@ -11060,16 +11013,15 @@ export class UserSettingsUpdateMutation extends Request {
    * @returns parsed response from UserSettingsUpdateMutation
    */
   public async fetch(id: string, input: L.UserSettingsUpdateInput): LinearFetch<UserSettingsPayload> {
-    return this._request<L.UserSettingsUpdateMutation, L.UserSettingsUpdateMutationVariables>(
+    const response = await this._request<L.UserSettingsUpdateMutation, L.UserSettingsUpdateMutationVariables>(
       L.UserSettingsUpdateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.userSettingsUpdate;
-      return data ? new UserSettingsPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.userSettingsUpdate;
+    return data ? new UserSettingsPayload(this._request, data) : undefined;
   }
 }
 
@@ -11089,13 +11041,12 @@ export class UserSubscribeToNewsletterMutation extends Request {
    * @returns parsed response from UserSubscribeToNewsletterMutation
    */
   public async fetch(): LinearFetch<UserSubscribeToNewsletterPayload> {
-    return this._request<L.UserSubscribeToNewsletterMutation, L.UserSubscribeToNewsletterMutationVariables>(
-      L.UserSubscribeToNewsletterDocument,
-      {}
-    ).then(response => {
-      const data = response?.userSubscribeToNewsletter;
-      return data ? new UserSubscribeToNewsletterPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<
+      L.UserSubscribeToNewsletterMutation,
+      L.UserSubscribeToNewsletterMutationVariables
+    >(L.UserSubscribeToNewsletterDocument, {});
+    const data = response?.userSubscribeToNewsletter;
+    return data ? new UserSubscribeToNewsletterPayload(this._request, data) : undefined;
   }
 }
 
@@ -11116,12 +11067,11 @@ export class UserSuspendMutation extends Request {
    * @returns parsed response from UserSuspendMutation
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
-    return this._request<L.UserSuspendMutation, L.UserSuspendMutationVariables>(L.UserSuspendDocument, {
+    const response = await this._request<L.UserSuspendMutation, L.UserSuspendMutationVariables>(L.UserSuspendDocument, {
       id,
-    }).then(response => {
-      const data = response?.userSuspend;
-      return data ? new UserAdminPayload(this._request, data) : undefined;
     });
+    const data = response?.userSuspend;
+    return data ? new UserAdminPayload(this._request, data) : undefined;
   }
 }
 
@@ -11142,12 +11092,14 @@ export class UserUnsuspendMutation extends Request {
    * @returns parsed response from UserUnsuspendMutation
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
-    return this._request<L.UserUnsuspendMutation, L.UserUnsuspendMutationVariables>(L.UserUnsuspendDocument, {
-      id,
-    }).then(response => {
-      const data = response?.userUnsuspend;
-      return data ? new UserAdminPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.UserUnsuspendMutation, L.UserUnsuspendMutationVariables>(
+      L.UserUnsuspendDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.userUnsuspend;
+    return data ? new UserAdminPayload(this._request, data) : undefined;
   }
 }
 
@@ -11169,13 +11121,12 @@ export class UserUpdateMutation extends Request {
    * @returns parsed response from UserUpdateMutation
    */
   public async fetch(id: string, input: L.UpdateUserInput): LinearFetch<UserPayload> {
-    return this._request<L.UserUpdateMutation, L.UserUpdateMutationVariables>(L.UserUpdateDocument, {
+    const response = await this._request<L.UserUpdateMutation, L.UserUpdateMutationVariables>(L.UserUpdateDocument, {
       id,
       input,
-    }).then(response => {
-      const data = response?.userUpdate;
-      return data ? new UserPayload(this._request, data) : undefined;
     });
+    const data = response?.userUpdate;
+    return data ? new UserPayload(this._request, data) : undefined;
   }
 }
 
@@ -11196,15 +11147,14 @@ export class ViewPreferencesCreateMutation extends Request {
    * @returns parsed response from ViewPreferencesCreateMutation
    */
   public async fetch(input: L.ViewPreferencesCreateInput): LinearFetch<ViewPreferencesPayload> {
-    return this._request<L.ViewPreferencesCreateMutation, L.ViewPreferencesCreateMutationVariables>(
+    const response = await this._request<L.ViewPreferencesCreateMutation, L.ViewPreferencesCreateMutationVariables>(
       L.ViewPreferencesCreateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.viewPreferencesCreate;
-      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.viewPreferencesCreate;
+    return data ? new ViewPreferencesPayload(this._request, data) : undefined;
   }
 }
 
@@ -11225,15 +11175,14 @@ export class ViewPreferencesDeleteMutation extends Request {
    * @returns parsed response from ViewPreferencesDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.ViewPreferencesDeleteMutation, L.ViewPreferencesDeleteMutationVariables>(
+    const response = await this._request<L.ViewPreferencesDeleteMutation, L.ViewPreferencesDeleteMutationVariables>(
       L.ViewPreferencesDeleteDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.viewPreferencesDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.viewPreferencesDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -11255,16 +11204,15 @@ export class ViewPreferencesUpdateMutation extends Request {
    * @returns parsed response from ViewPreferencesUpdateMutation
    */
   public async fetch(id: string, input: L.ViewPreferencesUpdateInput): LinearFetch<ViewPreferencesPayload> {
-    return this._request<L.ViewPreferencesUpdateMutation, L.ViewPreferencesUpdateMutationVariables>(
+    const response = await this._request<L.ViewPreferencesUpdateMutation, L.ViewPreferencesUpdateMutationVariables>(
       L.ViewPreferencesUpdateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.viewPreferencesUpdate;
-      return data ? new ViewPreferencesPayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.viewPreferencesUpdate;
+    return data ? new ViewPreferencesPayload(this._request, data) : undefined;
   }
 }
 
@@ -11285,12 +11233,14 @@ export class WebhookCreateMutation extends Request {
    * @returns parsed response from WebhookCreateMutation
    */
   public async fetch(input: L.WebhookCreateInput): LinearFetch<WebhookPayload> {
-    return this._request<L.WebhookCreateMutation, L.WebhookCreateMutationVariables>(L.WebhookCreateDocument, {
-      input,
-    }).then(response => {
-      const data = response?.webhookCreate;
-      return data ? new WebhookPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.WebhookCreateMutation, L.WebhookCreateMutationVariables>(
+      L.WebhookCreateDocument,
+      {
+        input,
+      }
+    );
+    const data = response?.webhookCreate;
+    return data ? new WebhookPayload(this._request, data) : undefined;
   }
 }
 
@@ -11311,12 +11261,14 @@ export class WebhookDeleteMutation extends Request {
    * @returns parsed response from WebhookDeleteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.WebhookDeleteMutation, L.WebhookDeleteMutationVariables>(L.WebhookDeleteDocument, {
-      id,
-    }).then(response => {
-      const data = response?.webhookDelete;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.WebhookDeleteMutation, L.WebhookDeleteMutationVariables>(
+      L.WebhookDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response?.webhookDelete;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -11338,13 +11290,15 @@ export class WebhookUpdateMutation extends Request {
    * @returns parsed response from WebhookUpdateMutation
    */
   public async fetch(id: string, input: L.WebhookUpdateInput): LinearFetch<WebhookPayload> {
-    return this._request<L.WebhookUpdateMutation, L.WebhookUpdateMutationVariables>(L.WebhookUpdateDocument, {
-      id,
-      input,
-    }).then(response => {
-      const data = response?.webhookUpdate;
-      return data ? new WebhookPayload(this._request, data) : undefined;
-    });
+    const response = await this._request<L.WebhookUpdateMutation, L.WebhookUpdateMutationVariables>(
+      L.WebhookUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response?.webhookUpdate;
+    return data ? new WebhookPayload(this._request, data) : undefined;
   }
 }
 
@@ -11365,15 +11319,14 @@ export class WorkflowStateArchiveMutation extends Request {
    * @returns parsed response from WorkflowStateArchiveMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
-    return this._request<L.WorkflowStateArchiveMutation, L.WorkflowStateArchiveMutationVariables>(
+    const response = await this._request<L.WorkflowStateArchiveMutation, L.WorkflowStateArchiveMutationVariables>(
       L.WorkflowStateArchiveDocument,
       {
         id,
       }
-    ).then(response => {
-      const data = response?.workflowStateArchive;
-      return data ? new ArchivePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.workflowStateArchive;
+    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -11394,15 +11347,14 @@ export class WorkflowStateCreateMutation extends Request {
    * @returns parsed response from WorkflowStateCreateMutation
    */
   public async fetch(input: L.WorkflowStateCreateInput): LinearFetch<WorkflowStatePayload> {
-    return this._request<L.WorkflowStateCreateMutation, L.WorkflowStateCreateMutationVariables>(
+    const response = await this._request<L.WorkflowStateCreateMutation, L.WorkflowStateCreateMutationVariables>(
       L.WorkflowStateCreateDocument,
       {
         input,
       }
-    ).then(response => {
-      const data = response?.workflowStateCreate;
-      return data ? new WorkflowStatePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.workflowStateCreate;
+    return data ? new WorkflowStatePayload(this._request, data) : undefined;
   }
 }
 
@@ -11424,16 +11376,15 @@ export class WorkflowStateUpdateMutation extends Request {
    * @returns parsed response from WorkflowStateUpdateMutation
    */
   public async fetch(id: string, input: L.WorkflowStateUpdateInput): LinearFetch<WorkflowStatePayload> {
-    return this._request<L.WorkflowStateUpdateMutation, L.WorkflowStateUpdateMutationVariables>(
+    const response = await this._request<L.WorkflowStateUpdateMutation, L.WorkflowStateUpdateMutationVariables>(
       L.WorkflowStateUpdateDocument,
       {
         id,
         input,
       }
-    ).then(response => {
-      const data = response?.workflowStateUpdate;
-      return data ? new WorkflowStatePayload(this._request, data) : undefined;
-    });
+    );
+    const data = response?.workflowStateUpdate;
+    return data ? new WorkflowStatePayload(this._request, data) : undefined;
   }
 }
 
@@ -11467,23 +11418,22 @@ export class AttachmentIssue_AttachmentsQuery extends Request {
   public async fetch(
     variables?: Omit<L.AttachmentIssue_AttachmentsQueryVariables, "id">
   ): LinearFetch<AttachmentConnection> {
-    return this._request<L.AttachmentIssue_AttachmentsQuery, L.AttachmentIssue_AttachmentsQueryVariables>(
-      L.AttachmentIssue_AttachmentsDocument,
-      {
-        id: this._id,
-        ...this._variables,
-        ...variables,
-      }
-    ).then(response => {
-      const data = response?.attachmentIssue?.attachments;
-      return data
-        ? new AttachmentConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
+    const response = await this._request<
+      L.AttachmentIssue_AttachmentsQuery,
+      L.AttachmentIssue_AttachmentsQueryVariables
+    >(L.AttachmentIssue_AttachmentsDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
     });
+    const data = response?.attachmentIssue?.attachments;
+    return data
+      ? new AttachmentConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11515,23 +11465,22 @@ export class AttachmentIssue_ChildrenQuery extends Request {
    * @returns parsed response from AttachmentIssue_ChildrenQuery
    */
   public async fetch(variables?: Omit<L.AttachmentIssue_ChildrenQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.AttachmentIssue_ChildrenQuery, L.AttachmentIssue_ChildrenQueryVariables>(
+    const response = await this._request<L.AttachmentIssue_ChildrenQuery, L.AttachmentIssue_ChildrenQueryVariables>(
       L.AttachmentIssue_ChildrenDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.attachmentIssue?.children;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.attachmentIssue?.children;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11563,23 +11512,22 @@ export class AttachmentIssue_CommentsQuery extends Request {
    * @returns parsed response from AttachmentIssue_CommentsQuery
    */
   public async fetch(variables?: Omit<L.AttachmentIssue_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
-    return this._request<L.AttachmentIssue_CommentsQuery, L.AttachmentIssue_CommentsQueryVariables>(
+    const response = await this._request<L.AttachmentIssue_CommentsQuery, L.AttachmentIssue_CommentsQueryVariables>(
       L.AttachmentIssue_CommentsDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.attachmentIssue?.comments;
-      return data
-        ? new CommentConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.attachmentIssue?.comments;
+    return data
+      ? new CommentConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11613,23 +11561,22 @@ export class AttachmentIssue_HistoryQuery extends Request {
   public async fetch(
     variables?: Omit<L.AttachmentIssue_HistoryQueryVariables, "id">
   ): LinearFetch<IssueHistoryConnection> {
-    return this._request<L.AttachmentIssue_HistoryQuery, L.AttachmentIssue_HistoryQueryVariables>(
+    const response = await this._request<L.AttachmentIssue_HistoryQuery, L.AttachmentIssue_HistoryQueryVariables>(
       L.AttachmentIssue_HistoryDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.attachmentIssue?.history;
-      return data
-        ? new IssueHistoryConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.attachmentIssue?.history;
+    return data
+      ? new IssueHistoryConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11663,23 +11610,22 @@ export class AttachmentIssue_InverseRelationsQuery extends Request {
   public async fetch(
     variables?: Omit<L.AttachmentIssue_InverseRelationsQueryVariables, "id">
   ): LinearFetch<IssueRelationConnection> {
-    return this._request<L.AttachmentIssue_InverseRelationsQuery, L.AttachmentIssue_InverseRelationsQueryVariables>(
-      L.AttachmentIssue_InverseRelationsDocument,
-      {
-        id: this._id,
-        ...this._variables,
-        ...variables,
-      }
-    ).then(response => {
-      const data = response?.attachmentIssue?.inverseRelations;
-      return data
-        ? new IssueRelationConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
+    const response = await this._request<
+      L.AttachmentIssue_InverseRelationsQuery,
+      L.AttachmentIssue_InverseRelationsQueryVariables
+    >(L.AttachmentIssue_InverseRelationsDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
     });
+    const data = response?.attachmentIssue?.inverseRelations;
+    return data
+      ? new IssueRelationConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11713,23 +11659,22 @@ export class AttachmentIssue_LabelsQuery extends Request {
   public async fetch(
     variables?: Omit<L.AttachmentIssue_LabelsQueryVariables, "id">
   ): LinearFetch<IssueLabelConnection> {
-    return this._request<L.AttachmentIssue_LabelsQuery, L.AttachmentIssue_LabelsQueryVariables>(
+    const response = await this._request<L.AttachmentIssue_LabelsQuery, L.AttachmentIssue_LabelsQueryVariables>(
       L.AttachmentIssue_LabelsDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.attachmentIssue?.labels;
-      return data
-        ? new IssueLabelConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.attachmentIssue?.labels;
+    return data
+      ? new IssueLabelConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11763,23 +11708,22 @@ export class AttachmentIssue_RelationsQuery extends Request {
   public async fetch(
     variables?: Omit<L.AttachmentIssue_RelationsQueryVariables, "id">
   ): LinearFetch<IssueRelationConnection> {
-    return this._request<L.AttachmentIssue_RelationsQuery, L.AttachmentIssue_RelationsQueryVariables>(
+    const response = await this._request<L.AttachmentIssue_RelationsQuery, L.AttachmentIssue_RelationsQueryVariables>(
       L.AttachmentIssue_RelationsDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.attachmentIssue?.relations;
-      return data
-        ? new IssueRelationConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.attachmentIssue?.relations;
+    return data
+      ? new IssueRelationConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11811,23 +11755,22 @@ export class AttachmentIssue_SubscribersQuery extends Request {
    * @returns parsed response from AttachmentIssue_SubscribersQuery
    */
   public async fetch(variables?: Omit<L.AttachmentIssue_SubscribersQueryVariables, "id">): LinearFetch<UserConnection> {
-    return this._request<L.AttachmentIssue_SubscribersQuery, L.AttachmentIssue_SubscribersQueryVariables>(
-      L.AttachmentIssue_SubscribersDocument,
-      {
-        id: this._id,
-        ...this._variables,
-        ...variables,
-      }
-    ).then(response => {
-      const data = response?.attachmentIssue?.subscribers;
-      return data
-        ? new UserConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
+    const response = await this._request<
+      L.AttachmentIssue_SubscribersQuery,
+      L.AttachmentIssue_SubscribersQueryVariables
+    >(L.AttachmentIssue_SubscribersDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
     });
+    const data = response?.attachmentIssue?.subscribers;
+    return data
+      ? new UserConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11847,13 +11790,12 @@ export class BillingDetails_PaymentMethodQuery extends Request {
    * @returns parsed response from BillingDetails_PaymentMethodQuery
    */
   public async fetch(): LinearFetch<Card> {
-    return this._request<L.BillingDetails_PaymentMethodQuery, L.BillingDetails_PaymentMethodQueryVariables>(
-      L.BillingDetails_PaymentMethodDocument,
-      {}
-    ).then(response => {
-      const data = response?.billingDetails?.paymentMethod;
-      return data ? new Card(this._request, data) : undefined;
-    });
+    const response = await this._request<
+      L.BillingDetails_PaymentMethodQuery,
+      L.BillingDetails_PaymentMethodQueryVariables
+    >(L.BillingDetails_PaymentMethodDocument, {});
+    const data = response?.billingDetails?.paymentMethod;
+    return data ? new Card(this._request, data) : undefined;
   }
 }
 
@@ -11883,17 +11825,16 @@ export class CollaborativeDocumentJoin_StepsQuery extends Request {
    * @returns parsed response from CollaborativeDocumentJoin_StepsQuery
    */
   public async fetch(): LinearFetch<StepsResponse> {
-    return this._request<L.CollaborativeDocumentJoin_StepsQuery, L.CollaborativeDocumentJoin_StepsQueryVariables>(
-      L.CollaborativeDocumentJoin_StepsDocument,
-      {
-        clientId: this._clientId,
-        issueId: this._issueId,
-        version: this._version,
-      }
-    ).then(response => {
-      const data = response?.collaborativeDocumentJoin?.steps;
-      return data ? new StepsResponse(this._request, data) : undefined;
+    const response = await this._request<
+      L.CollaborativeDocumentJoin_StepsQuery,
+      L.CollaborativeDocumentJoin_StepsQueryVariables
+    >(L.CollaborativeDocumentJoin_StepsDocument, {
+      clientId: this._clientId,
+      issueId: this._issueId,
+      version: this._version,
     });
+    const data = response?.collaborativeDocumentJoin?.steps;
+    return data ? new StepsResponse(this._request, data) : undefined;
   }
 }
 
@@ -11921,20 +11862,19 @@ export class Cycle_IssuesQuery extends Request {
    * @returns parsed response from Cycle_IssuesQuery
    */
   public async fetch(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.Cycle_IssuesQuery, L.Cycle_IssuesQueryVariables>(L.Cycle_IssuesDocument, {
+    const response = await this._request<L.Cycle_IssuesQuery, L.Cycle_IssuesQueryVariables>(L.Cycle_IssuesDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.cycle?.issues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.cycle?.issues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -11968,23 +11908,22 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
   public async fetch(
     variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
   ): LinearFetch<IssueConnection> {
-    return this._request<L.Cycle_UncompletedIssuesUponCloseQuery, L.Cycle_UncompletedIssuesUponCloseQueryVariables>(
-      L.Cycle_UncompletedIssuesUponCloseDocument,
-      {
-        id: this._id,
-        ...this._variables,
-        ...variables,
-      }
-    ).then(response => {
-      const data = response?.cycle?.uncompletedIssuesUponClose;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
+    const response = await this._request<
+      L.Cycle_UncompletedIssuesUponCloseQuery,
+      L.Cycle_UncompletedIssuesUponCloseQueryVariables
+    >(L.Cycle_UncompletedIssuesUponCloseDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
     });
+    const data = response?.cycle?.uncompletedIssuesUponClose;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12016,17 +11955,16 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
    * @returns parsed response from FigmaEmbedInfo_FigmaEmbedQuery
    */
   public async fetch(variables?: Omit<L.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">): LinearFetch<FigmaEmbed> {
-    return this._request<L.FigmaEmbedInfo_FigmaEmbedQuery, L.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
+    const response = await this._request<L.FigmaEmbedInfo_FigmaEmbedQuery, L.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       L.FigmaEmbedInfo_FigmaEmbedDocument,
       {
         fileId: this._fileId,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.figmaEmbedInfo?.figmaEmbed;
-      return data ? new FigmaEmbed(this._request, data) : undefined;
-    });
+    );
+    const data = response?.figmaEmbedInfo?.figmaEmbed;
+    return data ? new FigmaEmbed(this._request, data) : undefined;
   }
 }
 
@@ -12058,17 +11996,16 @@ export class InviteInfo_InviteDataQuery extends Request {
    * @returns parsed response from InviteInfo_InviteDataQuery
    */
   public async fetch(variables?: Omit<L.InviteInfo_InviteDataQueryVariables, "userHash">): LinearFetch<InviteData> {
-    return this._request<L.InviteInfo_InviteDataQuery, L.InviteInfo_InviteDataQueryVariables>(
+    const response = await this._request<L.InviteInfo_InviteDataQuery, L.InviteInfo_InviteDataQueryVariables>(
       L.InviteInfo_InviteDataDocument,
       {
         userHash: this._userHash,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.inviteInfo?.inviteData;
-      return data ? new InviteData(this._request, data) : undefined;
-    });
+    );
+    const data = response?.inviteInfo?.inviteData;
+    return data ? new InviteData(this._request, data) : undefined;
   }
 }
 
@@ -12096,20 +12033,22 @@ export class Issue_AttachmentsQuery extends Request {
    * @returns parsed response from Issue_AttachmentsQuery
    */
   public async fetch(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">): LinearFetch<AttachmentConnection> {
-    return this._request<L.Issue_AttachmentsQuery, L.Issue_AttachmentsQueryVariables>(L.Issue_AttachmentsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.issue?.attachments;
-      return data
-        ? new AttachmentConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Issue_AttachmentsQuery, L.Issue_AttachmentsQueryVariables>(
+      L.Issue_AttachmentsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.issue?.attachments;
+    return data
+      ? new AttachmentConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12137,20 +12076,22 @@ export class Issue_ChildrenQuery extends Request {
    * @returns parsed response from Issue_ChildrenQuery
    */
   public async fetch(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.Issue_ChildrenQuery, L.Issue_ChildrenQueryVariables>(L.Issue_ChildrenDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.issue?.children;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Issue_ChildrenQuery, L.Issue_ChildrenQueryVariables>(
+      L.Issue_ChildrenDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.issue?.children;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12178,20 +12119,22 @@ export class Issue_CommentsQuery extends Request {
    * @returns parsed response from Issue_CommentsQuery
    */
   public async fetch(variables?: Omit<L.Issue_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
-    return this._request<L.Issue_CommentsQuery, L.Issue_CommentsQueryVariables>(L.Issue_CommentsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.issue?.comments;
-      return data
-        ? new CommentConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Issue_CommentsQuery, L.Issue_CommentsQueryVariables>(
+      L.Issue_CommentsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.issue?.comments;
+    return data
+      ? new CommentConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12219,20 +12162,19 @@ export class Issue_HistoryQuery extends Request {
    * @returns parsed response from Issue_HistoryQuery
    */
   public async fetch(variables?: Omit<L.Issue_HistoryQueryVariables, "id">): LinearFetch<IssueHistoryConnection> {
-    return this._request<L.Issue_HistoryQuery, L.Issue_HistoryQueryVariables>(L.Issue_HistoryDocument, {
+    const response = await this._request<L.Issue_HistoryQuery, L.Issue_HistoryQueryVariables>(L.Issue_HistoryDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.issue?.history;
-      return data
-        ? new IssueHistoryConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.issue?.history;
+    return data
+      ? new IssueHistoryConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12266,23 +12208,22 @@ export class Issue_InverseRelationsQuery extends Request {
   public async fetch(
     variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">
   ): LinearFetch<IssueRelationConnection> {
-    return this._request<L.Issue_InverseRelationsQuery, L.Issue_InverseRelationsQueryVariables>(
+    const response = await this._request<L.Issue_InverseRelationsQuery, L.Issue_InverseRelationsQueryVariables>(
       L.Issue_InverseRelationsDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.issue?.inverseRelations;
-      return data
-        ? new IssueRelationConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.issue?.inverseRelations;
+    return data
+      ? new IssueRelationConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12310,20 +12251,19 @@ export class Issue_LabelsQuery extends Request {
    * @returns parsed response from Issue_LabelsQuery
    */
   public async fetch(variables?: Omit<L.Issue_LabelsQueryVariables, "id">): LinearFetch<IssueLabelConnection> {
-    return this._request<L.Issue_LabelsQuery, L.Issue_LabelsQueryVariables>(L.Issue_LabelsDocument, {
+    const response = await this._request<L.Issue_LabelsQuery, L.Issue_LabelsQueryVariables>(L.Issue_LabelsDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.issue?.labels;
-      return data
-        ? new IssueLabelConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.issue?.labels;
+    return data
+      ? new IssueLabelConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12351,20 +12291,22 @@ export class Issue_RelationsQuery extends Request {
    * @returns parsed response from Issue_RelationsQuery
    */
   public async fetch(variables?: Omit<L.Issue_RelationsQueryVariables, "id">): LinearFetch<IssueRelationConnection> {
-    return this._request<L.Issue_RelationsQuery, L.Issue_RelationsQueryVariables>(L.Issue_RelationsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.issue?.relations;
-      return data
-        ? new IssueRelationConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Issue_RelationsQuery, L.Issue_RelationsQueryVariables>(
+      L.Issue_RelationsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.issue?.relations;
+    return data
+      ? new IssueRelationConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12392,20 +12334,22 @@ export class Issue_SubscribersQuery extends Request {
    * @returns parsed response from Issue_SubscribersQuery
    */
   public async fetch(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">): LinearFetch<UserConnection> {
-    return this._request<L.Issue_SubscribersQuery, L.Issue_SubscribersQueryVariables>(L.Issue_SubscribersDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.issue?.subscribers;
-      return data
-        ? new UserConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Issue_SubscribersQuery, L.Issue_SubscribersQueryVariables>(
+      L.Issue_SubscribersDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.issue?.subscribers;
+    return data
+      ? new UserConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12433,20 +12377,22 @@ export class IssueLabel_IssuesQuery extends Request {
    * @returns parsed response from IssueLabel_IssuesQuery
    */
   public async fetch(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.IssueLabel_IssuesQuery, L.IssueLabel_IssuesQueryVariables>(L.IssueLabel_IssuesDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.issueLabel?.issues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.IssueLabel_IssuesQuery, L.IssueLabel_IssuesQueryVariables>(
+      L.IssueLabel_IssuesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.issueLabel?.issues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12474,20 +12420,22 @@ export class Milestone_ProjectsQuery extends Request {
    * @returns parsed response from Milestone_ProjectsQuery
    */
   public async fetch(variables?: Omit<L.Milestone_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
-    return this._request<L.Milestone_ProjectsQuery, L.Milestone_ProjectsQueryVariables>(L.Milestone_ProjectsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.milestone?.projects;
-      return data
-        ? new ProjectConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Milestone_ProjectsQuery, L.Milestone_ProjectsQueryVariables>(
+      L.Milestone_ProjectsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.milestone?.projects;
+    return data
+      ? new ProjectConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12513,19 +12461,18 @@ export class Organization_IntegrationsQuery extends Request {
    * @returns parsed response from Organization_IntegrationsQuery
    */
   public async fetch(variables?: L.Organization_IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
-    return this._request<L.Organization_IntegrationsQuery, L.Organization_IntegrationsQueryVariables>(
+    const response = await this._request<L.Organization_IntegrationsQuery, L.Organization_IntegrationsQueryVariables>(
       L.Organization_IntegrationsDocument,
       variables
-    ).then(response => {
-      const data = response?.organization?.integrations;
-      return data
-        ? new IntegrationConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.organization?.integrations;
+    return data
+      ? new IntegrationConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12551,19 +12498,18 @@ export class Organization_MilestonesQuery extends Request {
    * @returns parsed response from Organization_MilestonesQuery
    */
   public async fetch(variables?: L.Organization_MilestonesQueryVariables): LinearFetch<MilestoneConnection> {
-    return this._request<L.Organization_MilestonesQuery, L.Organization_MilestonesQueryVariables>(
+    const response = await this._request<L.Organization_MilestonesQuery, L.Organization_MilestonesQueryVariables>(
       L.Organization_MilestonesDocument,
       variables
-    ).then(response => {
-      const data = response?.organization?.milestones;
-      return data
-        ? new MilestoneConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.organization?.milestones;
+    return data
+      ? new MilestoneConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12589,19 +12535,18 @@ export class Organization_TeamsQuery extends Request {
    * @returns parsed response from Organization_TeamsQuery
    */
   public async fetch(variables?: L.Organization_TeamsQueryVariables): LinearFetch<TeamConnection> {
-    return this._request<L.Organization_TeamsQuery, L.Organization_TeamsQueryVariables>(
+    const response = await this._request<L.Organization_TeamsQuery, L.Organization_TeamsQueryVariables>(
       L.Organization_TeamsDocument,
       variables
-    ).then(response => {
-      const data = response?.organization?.teams;
-      return data
-        ? new TeamConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.organization?.teams;
+    return data
+      ? new TeamConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12627,19 +12572,18 @@ export class Organization_UsersQuery extends Request {
    * @returns parsed response from Organization_UsersQuery
    */
   public async fetch(variables?: L.Organization_UsersQueryVariables): LinearFetch<UserConnection> {
-    return this._request<L.Organization_UsersQuery, L.Organization_UsersQueryVariables>(
+    const response = await this._request<L.Organization_UsersQuery, L.Organization_UsersQueryVariables>(
       L.Organization_UsersDocument,
       variables
-    ).then(response => {
-      const data = response?.organization?.users;
-      return data
-        ? new UserConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.organization?.users;
+    return data
+      ? new UserConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12671,23 +12615,22 @@ export class OrganizationInvite_IssuesQuery extends Request {
    * @returns parsed response from OrganizationInvite_IssuesQuery
    */
   public async fetch(variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.OrganizationInvite_IssuesQuery, L.OrganizationInvite_IssuesQueryVariables>(
+    const response = await this._request<L.OrganizationInvite_IssuesQuery, L.OrganizationInvite_IssuesQueryVariables>(
       L.OrganizationInvite_IssuesDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.organizationInvite?.issues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.organizationInvite?.issues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12715,20 +12658,22 @@ export class Project_IssuesQuery extends Request {
    * @returns parsed response from Project_IssuesQuery
    */
   public async fetch(variables?: Omit<L.Project_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.Project_IssuesQuery, L.Project_IssuesQueryVariables>(L.Project_IssuesDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.project?.issues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Project_IssuesQuery, L.Project_IssuesQueryVariables>(
+      L.Project_IssuesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.project?.issues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12756,20 +12701,19 @@ export class Project_LinksQuery extends Request {
    * @returns parsed response from Project_LinksQuery
    */
   public async fetch(variables?: Omit<L.Project_LinksQueryVariables, "id">): LinearFetch<ProjectLinkConnection> {
-    return this._request<L.Project_LinksQuery, L.Project_LinksQueryVariables>(L.Project_LinksDocument, {
+    const response = await this._request<L.Project_LinksQuery, L.Project_LinksQueryVariables>(L.Project_LinksDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.project?.links;
-      return data
-        ? new ProjectLinkConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.project?.links;
+    return data
+      ? new ProjectLinkConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12797,20 +12741,22 @@ export class Project_MembersQuery extends Request {
    * @returns parsed response from Project_MembersQuery
    */
   public async fetch(variables?: Omit<L.Project_MembersQueryVariables, "id">): LinearFetch<UserConnection> {
-    return this._request<L.Project_MembersQuery, L.Project_MembersQueryVariables>(L.Project_MembersDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.project?.members;
-      return data
-        ? new UserConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Project_MembersQuery, L.Project_MembersQueryVariables>(
+      L.Project_MembersDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.project?.members;
+    return data
+      ? new UserConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12838,20 +12784,19 @@ export class Project_TeamsQuery extends Request {
    * @returns parsed response from Project_TeamsQuery
    */
   public async fetch(variables?: Omit<L.Project_TeamsQueryVariables, "id">): LinearFetch<TeamConnection> {
-    return this._request<L.Project_TeamsQuery, L.Project_TeamsQueryVariables>(L.Project_TeamsDocument, {
+    const response = await this._request<L.Project_TeamsQuery, L.Project_TeamsQueryVariables>(L.Project_TeamsDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.project?.teams;
-      return data
-        ? new TeamConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.project?.teams;
+    return data
+      ? new TeamConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12879,20 +12824,19 @@ export class Team_CyclesQuery extends Request {
    * @returns parsed response from Team_CyclesQuery
    */
   public async fetch(variables?: Omit<L.Team_CyclesQueryVariables, "id">): LinearFetch<CycleConnection> {
-    return this._request<L.Team_CyclesQuery, L.Team_CyclesQueryVariables>(L.Team_CyclesDocument, {
+    const response = await this._request<L.Team_CyclesQuery, L.Team_CyclesQueryVariables>(L.Team_CyclesDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.team?.cycles;
-      return data
-        ? new CycleConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.team?.cycles;
+    return data
+      ? new CycleConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12920,20 +12864,19 @@ export class Team_IssuesQuery extends Request {
    * @returns parsed response from Team_IssuesQuery
    */
   public async fetch(variables?: Omit<L.Team_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.Team_IssuesQuery, L.Team_IssuesQueryVariables>(L.Team_IssuesDocument, {
+    const response = await this._request<L.Team_IssuesQuery, L.Team_IssuesQueryVariables>(L.Team_IssuesDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.team?.issues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.team?.issues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -12961,20 +12904,19 @@ export class Team_LabelsQuery extends Request {
    * @returns parsed response from Team_LabelsQuery
    */
   public async fetch(variables?: Omit<L.Team_LabelsQueryVariables, "id">): LinearFetch<IssueLabelConnection> {
-    return this._request<L.Team_LabelsQuery, L.Team_LabelsQueryVariables>(L.Team_LabelsDocument, {
+    const response = await this._request<L.Team_LabelsQuery, L.Team_LabelsQueryVariables>(L.Team_LabelsDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.team?.labels;
-      return data
-        ? new IssueLabelConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.team?.labels;
+    return data
+      ? new IssueLabelConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13002,20 +12944,19 @@ export class Team_MembersQuery extends Request {
    * @returns parsed response from Team_MembersQuery
    */
   public async fetch(variables?: Omit<L.Team_MembersQueryVariables, "id">): LinearFetch<UserConnection> {
-    return this._request<L.Team_MembersQuery, L.Team_MembersQueryVariables>(L.Team_MembersDocument, {
+    const response = await this._request<L.Team_MembersQuery, L.Team_MembersQueryVariables>(L.Team_MembersDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.team?.members;
-      return data
-        ? new UserConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.team?.members;
+    return data
+      ? new UserConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13043,20 +12984,22 @@ export class Team_MembershipsQuery extends Request {
    * @returns parsed response from Team_MembershipsQuery
    */
   public async fetch(variables?: Omit<L.Team_MembershipsQueryVariables, "id">): LinearFetch<TeamMembershipConnection> {
-    return this._request<L.Team_MembershipsQuery, L.Team_MembershipsQueryVariables>(L.Team_MembershipsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.team?.memberships;
-      return data
-        ? new TeamMembershipConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.Team_MembershipsQuery, L.Team_MembershipsQueryVariables>(
+      L.Team_MembershipsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.team?.memberships;
+    return data
+      ? new TeamMembershipConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13084,20 +13027,19 @@ export class Team_ProjectsQuery extends Request {
    * @returns parsed response from Team_ProjectsQuery
    */
   public async fetch(variables?: Omit<L.Team_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
-    return this._request<L.Team_ProjectsQuery, L.Team_ProjectsQueryVariables>(L.Team_ProjectsDocument, {
+    const response = await this._request<L.Team_ProjectsQuery, L.Team_ProjectsQueryVariables>(L.Team_ProjectsDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.team?.projects;
-      return data
-        ? new ProjectConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.team?.projects;
+    return data
+      ? new ProjectConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13125,20 +13067,19 @@ export class Team_StatesQuery extends Request {
    * @returns parsed response from Team_StatesQuery
    */
   public async fetch(variables?: Omit<L.Team_StatesQueryVariables, "id">): LinearFetch<WorkflowStateConnection> {
-    return this._request<L.Team_StatesQuery, L.Team_StatesQueryVariables>(L.Team_StatesDocument, {
+    const response = await this._request<L.Team_StatesQuery, L.Team_StatesQueryVariables>(L.Team_StatesDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.team?.states;
-      return data
-        ? new WorkflowStateConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.team?.states;
+    return data
+      ? new WorkflowStateConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13166,14 +13107,16 @@ export class Team_TemplatesQuery extends Request {
    * @returns parsed response from Team_TemplatesQuery
    */
   public async fetch(variables?: Omit<L.Team_TemplatesQueryVariables, "id">): LinearFetch<TemplateConnection> {
-    return this._request<L.Team_TemplatesQuery, L.Team_TemplatesQueryVariables>(L.Team_TemplatesDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.team?.templates;
-      return data ? new TemplateConnection(this._request, data) : undefined;
-    });
+    const response = await this._request<L.Team_TemplatesQuery, L.Team_TemplatesQueryVariables>(
+      L.Team_TemplatesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.team?.templates;
+    return data ? new TemplateConnection(this._request, data) : undefined;
   }
 }
 
@@ -13201,20 +13144,19 @@ export class Team_WebhooksQuery extends Request {
    * @returns parsed response from Team_WebhooksQuery
    */
   public async fetch(variables?: Omit<L.Team_WebhooksQueryVariables, "id">): LinearFetch<WebhookConnection> {
-    return this._request<L.Team_WebhooksQuery, L.Team_WebhooksQueryVariables>(L.Team_WebhooksDocument, {
+    const response = await this._request<L.Team_WebhooksQuery, L.Team_WebhooksQueryVariables>(L.Team_WebhooksDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.team?.webhooks;
-      return data
-        ? new WebhookConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.team?.webhooks;
+    return data
+      ? new WebhookConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13242,23 +13184,22 @@ export class User_AssignedIssuesQuery extends Request {
    * @returns parsed response from User_AssignedIssuesQuery
    */
   public async fetch(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.User_AssignedIssuesQuery, L.User_AssignedIssuesQueryVariables>(
+    const response = await this._request<L.User_AssignedIssuesQuery, L.User_AssignedIssuesQueryVariables>(
       L.User_AssignedIssuesDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.user?.assignedIssues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.user?.assignedIssues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13286,20 +13227,22 @@ export class User_CreatedIssuesQuery extends Request {
    * @returns parsed response from User_CreatedIssuesQuery
    */
   public async fetch(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.User_CreatedIssuesQuery, L.User_CreatedIssuesQueryVariables>(L.User_CreatedIssuesDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    }).then(response => {
-      const data = response?.user?.createdIssues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    const response = await this._request<L.User_CreatedIssuesQuery, L.User_CreatedIssuesQueryVariables>(
+      L.User_CreatedIssuesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response?.user?.createdIssues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13329,23 +13272,22 @@ export class User_TeamMembershipsQuery extends Request {
   public async fetch(
     variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">
   ): LinearFetch<TeamMembershipConnection> {
-    return this._request<L.User_TeamMembershipsQuery, L.User_TeamMembershipsQueryVariables>(
+    const response = await this._request<L.User_TeamMembershipsQuery, L.User_TeamMembershipsQueryVariables>(
       L.User_TeamMembershipsDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.user?.teamMemberships;
-      return data
-        ? new TeamMembershipConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.user?.teamMemberships;
+    return data
+      ? new TeamMembershipConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13373,20 +13315,19 @@ export class User_TeamsQuery extends Request {
    * @returns parsed response from User_TeamsQuery
    */
   public async fetch(variables?: Omit<L.User_TeamsQueryVariables, "id">): LinearFetch<TeamConnection> {
-    return this._request<L.User_TeamsQuery, L.User_TeamsQueryVariables>(L.User_TeamsDocument, {
+    const response = await this._request<L.User_TeamsQuery, L.User_TeamsQueryVariables>(L.User_TeamsDocument, {
       id: this._id,
       ...this._variables,
       ...variables,
-    }).then(response => {
-      const data = response?.user?.teams;
-      return data
-        ? new TeamConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
     });
+    const data = response?.user?.teams;
+    return data
+      ? new TeamConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13412,19 +13353,18 @@ export class Viewer_AssignedIssuesQuery extends Request {
    * @returns parsed response from Viewer_AssignedIssuesQuery
    */
   public async fetch(variables?: L.Viewer_AssignedIssuesQueryVariables): LinearFetch<IssueConnection> {
-    return this._request<L.Viewer_AssignedIssuesQuery, L.Viewer_AssignedIssuesQueryVariables>(
+    const response = await this._request<L.Viewer_AssignedIssuesQuery, L.Viewer_AssignedIssuesQueryVariables>(
       L.Viewer_AssignedIssuesDocument,
       variables
-    ).then(response => {
-      const data = response?.viewer?.assignedIssues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.viewer?.assignedIssues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13450,19 +13390,18 @@ export class Viewer_CreatedIssuesQuery extends Request {
    * @returns parsed response from Viewer_CreatedIssuesQuery
    */
   public async fetch(variables?: L.Viewer_CreatedIssuesQueryVariables): LinearFetch<IssueConnection> {
-    return this._request<L.Viewer_CreatedIssuesQuery, L.Viewer_CreatedIssuesQueryVariables>(
+    const response = await this._request<L.Viewer_CreatedIssuesQuery, L.Viewer_CreatedIssuesQueryVariables>(
       L.Viewer_CreatedIssuesDocument,
       variables
-    ).then(response => {
-      const data = response?.viewer?.createdIssues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.viewer?.createdIssues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13488,19 +13427,18 @@ export class Viewer_TeamMembershipsQuery extends Request {
    * @returns parsed response from Viewer_TeamMembershipsQuery
    */
   public async fetch(variables?: L.Viewer_TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
-    return this._request<L.Viewer_TeamMembershipsQuery, L.Viewer_TeamMembershipsQueryVariables>(
+    const response = await this._request<L.Viewer_TeamMembershipsQuery, L.Viewer_TeamMembershipsQueryVariables>(
       L.Viewer_TeamMembershipsDocument,
       variables
-    ).then(response => {
-      const data = response?.viewer?.teamMemberships;
-      return data
-        ? new TeamMembershipConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.viewer?.teamMemberships;
+    return data
+      ? new TeamMembershipConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13526,18 +13464,18 @@ export class Viewer_TeamsQuery extends Request {
    * @returns parsed response from Viewer_TeamsQuery
    */
   public async fetch(variables?: L.Viewer_TeamsQueryVariables): LinearFetch<TeamConnection> {
-    return this._request<L.Viewer_TeamsQuery, L.Viewer_TeamsQueryVariables>(L.Viewer_TeamsDocument, variables).then(
-      response => {
-        const data = response?.viewer?.teams;
-        return data
-          ? new TeamConnection(
-              this._request,
-              connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-              data
-            )
-          : undefined;
-      }
+    const response = await this._request<L.Viewer_TeamsQuery, L.Viewer_TeamsQueryVariables>(
+      L.Viewer_TeamsDocument,
+      variables
     );
+    const data = response?.viewer?.teams;
+    return data
+      ? new TeamConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13565,23 +13503,22 @@ export class WorkflowState_IssuesQuery extends Request {
    * @returns parsed response from WorkflowState_IssuesQuery
    */
   public async fetch(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    return this._request<L.WorkflowState_IssuesQuery, L.WorkflowState_IssuesQueryVariables>(
+    const response = await this._request<L.WorkflowState_IssuesQuery, L.WorkflowState_IssuesQueryVariables>(
       L.WorkflowState_IssuesDocument,
       {
         id: this._id,
         ...this._variables,
         ...variables,
       }
-    ).then(response => {
-      const data = response?.workflowState?.issues;
-      return data
-        ? new IssueConnection(
-            this._request,
-            connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-            data
-          )
-        : undefined;
-    });
+    );
+    const data = response?.workflowState?.issues;
+    return data
+      ? new IssueConnection(
+          this._request,
+          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+          data
+        )
+      : undefined;
   }
 }
 
@@ -13595,15 +13532,6 @@ export class LinearSdk extends Request {
     super(request);
   }
 
-  /**
-   * All API keys for the user.
-   *
-   * @param variables - variables to pass into the ApiKeysQuery
-   * @returns ApiKeyConnection
-   */
-  public apiKeys(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
-    return new ApiKeysQuery(this._request).fetch(variables);
-  }
   /**
    * Get information for an application and whether a user has approved it for the given scopes.
    *
@@ -14219,24 +14147,6 @@ export class LinearSdk extends Request {
     return new WorkflowStatesQuery(this._request).fetch(variables);
   }
   /**
-   * Creates a new API key.
-   *
-   * @param input - required input to pass to apiKeyCreate
-   * @returns ApiKeyPayload
-   */
-  public apiKeyCreate(input: L.ApiKeyCreateInput): LinearFetch<ApiKeyPayload> {
-    return new ApiKeyCreateMutation(this._request).fetch(input);
-  }
-  /**
-   * Deletes an API key.
-   *
-   * @param id - required id to pass to apiKeyDelete
-   * @returns ArchivePayload
-   */
-  public apiKeyDelete(id: string): LinearFetch<ArchivePayload> {
-    return new ApiKeyDeleteMutation(this._request).fetch(id);
-  }
-  /**
    * [DEPRECATED] Archives an issue attachment.
    *
    * @param id - required id to pass to attachmentArchive
@@ -14676,6 +14586,14 @@ export class LinearSdk extends Request {
    */
   public get integrationIntercomDelete(): LinearFetch<IntegrationPayload> {
     return new IntegrationIntercomDeleteMutation(this._request).fetch();
+  }
+  /**
+   * Enables Loom integration for the organization.
+   *
+   * @returns IntegrationPayload
+   */
+  public get integrationLoom(): LinearFetch<IntegrationPayload> {
+    return new IntegrationLoomMutation(this._request).fetch();
   }
   /**
    * Archives an integration resource.
