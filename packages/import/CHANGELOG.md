@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.5.13
+
+### Patch Changes
+
+- 1be7221: Fix doc comment and rename variable in JiraCsvImporter.ts
+- Updated dependencies [1b61c0a]
+- Updated dependencies [1b61c0a]
+- Updated dependencies [1b61c0a]
+- Updated dependencies [1b61c0a]
+- Updated dependencies [1b61c0a]
+- Updated dependencies [1b61c0a]
+- Updated dependencies [aa42eec]
+  - @linear/sdk@1.16.0
+
 ## 1.5.12
 
 ### Patch Changes
