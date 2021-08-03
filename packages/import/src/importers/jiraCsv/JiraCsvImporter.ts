@@ -22,12 +22,14 @@ interface JiraIssueType {
 /**
  * Import issues from a Jira CSV export.
  *
- * @param apiKey GitHub api key for authentication
+ * @param filePath Path to CSV file
+ * @param orgSlug Jira site name
+ * @param customUrl Non-cloud Jira instance base URL
  */
 export class JiraCsvImporter implements Importer {
   public constructor(filePath: string, orgSlug: string, customUrl: string) {
     this.filePath = filePath;
-    this.organizationName = orgSlug;
+    this.jiraSiteName = orgSlug;
     this.customJiraUrl = customUrl;
   }
 
@@ -66,8 +68,8 @@ export class JiraCsvImporter implements Importer {
     }
 
     for (const row of data) {
-      const url = this.organizationName
-        ? `https://${this.organizationName}.atlassian.net/browse/${row["Issue key"]}`
+      const url = this.jiraSiteName
+        ? `https://${this.jiraSiteName}.atlassian.net/browse/${row["Issue key"]}`
         : `${this.customJiraUrl}/browse/${row["Issue key"]}`;
       const mdDesc = row.Description ? j2m.to_markdown(row.Description) : undefined;
       const description =
@@ -113,7 +115,7 @@ export class JiraCsvImporter implements Importer {
 
   private filePath: string;
   private customJiraUrl: string;
-  private organizationName?: string;
+  private jiraSiteName?: string;
 }
 
 const mapPriority = (input: JiraPriority): number => {
