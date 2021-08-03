@@ -856,6 +856,7 @@ export class Cycle extends Request {
     this.issueCountHistory = data.issueCountHistory ?? undefined;
     this.name = data.name ?? undefined;
     this.number = data.number ?? undefined;
+    this.progress = data.progress ?? undefined;
     this.scopeHistory = data.scopeHistory ?? undefined;
     this.startsAt = parseDate(data.startsAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
@@ -884,6 +885,8 @@ export class Cycle extends Request {
   public name?: string;
   /** The number of the cycle. */
   public number?: number;
+  /** The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
+  public progress?: number;
   /** The total number of estimation points after each day. */
   public scopeHistory?: number[];
   /** The start time of the cycle. */
@@ -1675,6 +1678,7 @@ export class IntegrationSettings extends Request {
   public constructor(request: LinearRequest, data: L.IntegrationSettingsFragment) {
     super(request);
     this.googleSheets = data.googleSheets ? new GoogleSheetsSettings(request, data.googleSheets) : undefined;
+    this.intercom = data.intercom ? new IntercomSettings(request, data.intercom) : undefined;
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
     this.slackPost = data.slackPost ? new SlackPostSettings(request, data.slackPost) : undefined;
     this.slackProjectPost = data.slackProjectPost ? new SlackPostSettings(request, data.slackProjectPost) : undefined;
@@ -1682,10 +1686,29 @@ export class IntegrationSettings extends Request {
   }
 
   public googleSheets?: GoogleSheetsSettings;
+  public intercom?: IntercomSettings;
   public sentry?: SentrySettings;
   public slackPost?: SlackPostSettings;
   public slackProjectPost?: SlackPostSettings;
   public zendesk?: ZendeskSettings;
+}
+/**
+ * Intercom specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IntercomSettingsFragment response data
+ */
+export class IntercomSettings extends Request {
+  public constructor(request: LinearRequest, data: L.IntercomSettingsFragment) {
+    super(request);
+    this.sendNoteOnComment = data.sendNoteOnComment ?? undefined;
+    this.sendNoteOnStatusChange = data.sendNoteOnStatusChange ?? undefined;
+  }
+
+  /** Whether an internal message should be added when someone comments on an issue. */
+  public sendNoteOnComment?: boolean;
+  /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
+  public sendNoteOnStatusChange?: boolean;
 }
 /**
  * InviteData model
@@ -2062,6 +2085,7 @@ export class IssueHistory extends Request {
     this.toEstimate = data.toEstimate ?? undefined;
     this.toPriority = data.toPriority ?? undefined;
     this.toTitle = data.toTitle ?? undefined;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? undefined;
     this.updatedDescription = data.updatedDescription ?? undefined;
     this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
@@ -2116,6 +2140,8 @@ export class IssueHistory extends Request {
   public toPriority?: number;
   /** What the title was changed to. */
   public toTitle?: string;
+  /** Whether the issue was trashed or un-trashed. */
+  public trashed?: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -3448,6 +3474,7 @@ export class Project extends Request {
     this.id = data.id ?? undefined;
     this.issueCountHistory = data.issueCountHistory ?? undefined;
     this.name = data.name ?? undefined;
+    this.progress = data.progress ?? undefined;
     this.scopeHistory = data.scopeHistory ?? undefined;
     this.slackIssueComments = data.slackIssueComments ?? undefined;
     this.slackIssueStatuses = data.slackIssueStatuses ?? undefined;
@@ -3490,6 +3517,8 @@ export class Project extends Request {
   public issueCountHistory?: number[];
   /** The project's name. */
   public name?: string;
+  /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
+  public progress?: number;
   /** The total number of estimation points after each week. */
   public scopeHistory?: number[];
   /** Whether to send new issue comment notifications to Slack. */
@@ -4496,10 +4525,6 @@ export class Team extends Request {
   /** Webhooks associated with the team. */
   public webhooks(variables?: Omit<L.Team_WebhooksQueryVariables, "id">) {
     return this.id ? new Team_WebhooksQuery(this._request, this.id, variables).fetch(variables) : undefined;
-  }
-  /** Archives a team. */
-  public archive() {
-    return this.id ? new TeamArchiveMutation(this._request).fetch(this.id) : undefined;
   }
   /** Deletes a team. */
   public delete() {
@@ -7372,14 +7397,20 @@ export class AttachmentLinkUrlMutation extends Request {
    *
    * @param issueId - required issueId to pass to attachmentLinkURL
    * @param url - required url to pass to attachmentLinkURL
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkUrlMutation
    * @returns parsed response from AttachmentLinkUrlMutation
    */
-  public async fetch(issueId: string, url: string): LinearFetch<AttachmentPayload> {
+  public async fetch(
+    issueId: string,
+    url: string,
+    variables?: Omit<L.AttachmentLinkUrlMutationVariables, "issueId" | "url">
+  ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkUrlMutation, L.AttachmentLinkUrlMutationVariables>(
       L.AttachmentLinkUrlDocument,
       {
         issueId,
         url,
+        ...variables,
       }
     );
     const data = response?.attachmentLinkURL;
@@ -8507,6 +8538,34 @@ export class IntegrationIntercomDeleteMutation extends Request {
       L.IntegrationIntercomDeleteMutationVariables
     >(L.IntegrationIntercomDeleteDocument, {});
     const data = response?.integrationIntercomDelete;
+    return data ? new IntegrationPayload(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable IntegrationIntercomSettingsUpdate Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationIntercomSettingsUpdateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationIntercomSettingsUpdate mutation and return a IntegrationPayload
+   *
+   * @param input - required input to pass to integrationIntercomSettingsUpdate
+   * @returns parsed response from IntegrationIntercomSettingsUpdateMutation
+   */
+  public async fetch(input: L.IntercomSettingsInput): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationIntercomSettingsUpdateMutation,
+      L.IntegrationIntercomSettingsUpdateMutationVariables
+    >(L.IntegrationIntercomSettingsUpdateDocument, {
+      input,
+    });
+    const data = response?.integrationIntercomSettingsUpdate;
     return data ? new IntegrationPayload(this._request, data) : undefined;
   }
 }
@@ -10546,31 +10605,6 @@ export class SubscriptionUpgradeMutation extends Request {
     );
     const data = response?.subscriptionUpgrade;
     return data ? new SubscriptionPayload(this._request, data) : undefined;
-  }
-}
-
-/**
- * A fetchable TeamArchive Mutation
- *
- * @param request - function to call the graphql client
- */
-export class TeamArchiveMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the TeamArchive mutation and return a ArchivePayload
-   *
-   * @param id - required id to pass to teamArchive
-   * @returns parsed response from TeamArchiveMutation
-   */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
-    const response = await this._request<L.TeamArchiveMutation, L.TeamArchiveMutationVariables>(L.TeamArchiveDocument, {
-      id,
-    });
-    const data = response?.teamArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
   }
 }
 
@@ -14198,10 +14232,15 @@ export class LinearSdk extends Request {
    *
    * @param issueId - required issueId to pass to attachmentLinkURL
    * @param url - required url to pass to attachmentLinkURL
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkUrlMutation
    * @returns AttachmentPayload
    */
-  public attachmentLinkURL(issueId: string, url: string): LinearFetch<AttachmentPayload> {
-    return new AttachmentLinkUrlMutation(this._request).fetch(issueId, url);
+  public attachmentLinkURL(
+    issueId: string,
+    url: string,
+    variables?: Omit<L.AttachmentLinkUrlMutationVariables, "issueId" | "url">
+  ): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkUrlMutation(this._request).fetch(issueId, url, variables);
   }
   /**
    * Link an existing Zendesk ticket to an issue.
@@ -14586,6 +14625,15 @@ export class LinearSdk extends Request {
    */
   public get integrationIntercomDelete(): LinearFetch<IntegrationPayload> {
     return new IntegrationIntercomDeleteMutation(this._request).fetch();
+  }
+  /**
+   * Updates settings on the Intercom integration.
+   *
+   * @param input - required input to pass to integrationIntercomSettingsUpdate
+   * @returns IntegrationPayload
+   */
+  public integrationIntercomSettingsUpdate(input: L.IntercomSettingsInput): LinearFetch<IntegrationPayload> {
+    return new IntegrationIntercomSettingsUpdateMutation(this._request).fetch(input);
   }
   /**
    * Enables Loom integration for the organization.
@@ -15321,15 +15369,6 @@ export class LinearSdk extends Request {
    */
   public subscriptionUpgrade(id: string, type: string): LinearFetch<SubscriptionPayload> {
     return new SubscriptionUpgradeMutation(this._request).fetch(id, type);
-  }
-  /**
-   * Archives a team.
-   *
-   * @param id - required id to pass to teamArchive
-   * @returns ArchivePayload
-   */
-  public teamArchive(id: string): LinearFetch<ArchivePayload> {
-    return new TeamArchiveMutation(this._request).fetch(id);
   }
   /**
    * Creates a new team. The user who creates the team will automatically be added as a member to the newly created team.

@@ -831,6 +831,10 @@ type Cycle implements Node {
   """
   number: Float!
   """
+  The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
+  """
+  progress: Float!
+  """
   The total number of estimation points after each day.
   """
   scopeHistory: [Float!]!
@@ -1617,10 +1621,36 @@ The integration resource's settings
 """
 type IntegrationSettings {
   googleSheets: GoogleSheetsSettings
+  intercom: IntercomSettings
   sentry: SentrySettings
   slackPost: SlackPostSettings
   slackProjectPost: SlackPostSettings
   zendesk: ZendeskSettings
+}
+
+"""
+Intercom specific settings.
+"""
+type IntercomSettings {
+  """
+  Whether an internal message should be added when someone comments on an issue.
+  """
+  sendNoteOnComment: Boolean
+  """
+  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
+  """
+  sendNoteOnStatusChange: Boolean
+}
+
+input IntercomSettingsInput {
+  """
+  Whether an internal message should be added when someone comments on an issue.
+  """
+  sendNoteOnComment: Boolean
+  """
+  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
+  """
+  sendNoteOnStatusChange: Boolean
 }
 
 type InviteData {
@@ -2346,6 +2376,10 @@ type IssueHistory implements Node {
   """
   toTitle: String
   """
+  Whether the issue was trashed or un-trashed.
+  """
+  trashed: Boolean
+  """
   The last time at which the entity was updated. This is the same as the creation time if the
       entity hasn't been update after creation.
   """
@@ -3047,7 +3081,11 @@ type Mutation {
     """
     issueId: String!
     """
-    The Zendesk ticket ID to link.
+    The title to use for the attachment.
+    """
+    title: String
+    """
+    The url to link.
     """
     url: String!
   ): AttachmentPayload!
@@ -3437,6 +3475,15 @@ type Mutation {
   Disconnects the organization from Intercom.
   """
   integrationIntercomDelete: IntegrationPayload!
+  """
+  Updates settings on the Intercom integration.
+  """
+  integrationIntercomSettingsUpdate(
+    """
+    A partial Intercom integration settings object to update the integration settings with.
+    """
+    input: IntercomSettingsInput!
+  ): IntegrationPayload!
   """
   Enables Loom integration for the organization.
   """
@@ -4265,15 +4312,6 @@ type Mutation {
     """
     type: String!
   ): SubscriptionPayload!
-  """
-  Archives a team.
-  """
-  teamArchive(
-    """
-    The identifier of the team to archive.
-    """
-    id: String!
-  ): ArchivePayload!
   """
   Creates a new team. The user who creates the team will automatically be added as a member to the newly created team.
   """
@@ -5553,6 +5591,10 @@ type Project implements Node {
   The project's name.
   """
   name: String!
+  """
+  The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
+  """
+  progress: Float!
   """
   The total number of estimation points after each week.
   """
@@ -6872,6 +6914,10 @@ type Query {
   [Internal] Fetch data to catch up the client to the state of the world.
   """
   syncBootstrap(
+    """
+    [Deprecated] If set, we'll use a new internal way of bootstrapping.
+    """
+    newVersion: Boolean
     """
     If defined, only models of the given type will be loaded.
     """

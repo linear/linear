@@ -157,6 +157,8 @@ fragment Project on Project {
   completedScopeHistory
   # The number of completed issues in the project after each week.
   completedIssueCountHistory
+  # The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
+  progress
   # The project lead.
   lead {
     id
@@ -325,6 +327,8 @@ fragment IssueHistory on IssueHistory {
   toTitle
   # Whether the issue was archived or un-archived.
   archived
+  # Whether the issue was trashed or un-trashed.
+  trashed
   # Whether the issue's description was updated.
   updatedDescription
   autoArchived
@@ -371,6 +375,8 @@ fragment Cycle on Cycle {
   completedIssueCountHistory
   # The number of the cycle.
   number
+  # The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
+  progress
   # The start time of the cycle.
   startsAt
   # The team that the cycle is associated with.
@@ -1084,6 +1090,14 @@ fragment IntegrationResourceData on IntegrationResourceData {
   }
 }
 
+# Intercom specific settings.
+fragment IntercomSettings on IntercomSettings {
+  # Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
+  sendNoteOnStatusChange
+  # Whether an internal message should be added when someone comments on an issue.
+  sendNoteOnComment
+}
+
 # Issue relation history's payload
 fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
   # The identifier of the related issue.
@@ -1348,6 +1362,9 @@ fragment SlackPostSettings on SlackPostSettings {
 fragment IntegrationSettings on IntegrationSettings {
   googleSheets {
     ...GoogleSheetsSettings
+  }
+  intercom {
+    ...IntercomSettings
   }
   sentry {
     ...SentrySettings
@@ -4877,10 +4894,12 @@ mutation attachmentLinkIntercom(
 mutation attachmentLinkURL(
   # The issue for which to link the url.
   $issueId: String!
-  # The Zendesk ticket ID to link.
+  # The title to use for the attachment.
+  $title: String
+  # The url to link.
   $url: String!
 ) {
-  attachmentLinkURL(issueId: $issueId, url: $url) {
+  attachmentLinkURL(issueId: $issueId, title: $title, url: $url) {
     ...AttachmentPayload
   }
 }
@@ -5252,6 +5271,15 @@ mutation integrationIntercom(
 # Disconnects the organization from Intercom.
 mutation integrationIntercomDelete {
   integrationIntercomDelete {
+    ...IntegrationPayload
+  }
+}
+# Updates settings on the Intercom integration.
+mutation integrationIntercomSettingsUpdate(
+  # A partial Intercom integration settings object to update the integration settings with.
+  $input: IntercomSettingsInput!
+) {
+  integrationIntercomSettingsUpdate(input: $input) {
     ...IntegrationPayload
   }
 }
@@ -5984,15 +6012,6 @@ mutation subscriptionUpgrade(
 ) {
   subscriptionUpgrade(id: $id, type: $type) {
     ...SubscriptionPayload
-  }
-}
-# Archives a team.
-mutation teamArchive(
-  # The identifier of the team to archive.
-  $id: String!
-) {
-  teamArchive(id: $id) {
-    ...ArchivePayload
   }
 }
 # Creates a new team. The user who creates the team will automatically be added as a member to the
