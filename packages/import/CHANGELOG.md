@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.5.14
+
+### Patch Changes
+
+- 6026ee9: Fix attachmentIssue query used for parent fields
+- 4611ee8: feat(import): adding checklists and comments to Trello import
+- Updated dependencies [6026ee9]
+  - @linear/sdk@1.16.1
+
 ## 1.5.13
 
 ### Patch Changes

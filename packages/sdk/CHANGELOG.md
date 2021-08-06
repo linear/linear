@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.16.1
+
+### Patch Changes
+
+- 6026ee9: Fix attachmentIssue query used for parent fields
+
 ## 1.16.0
 
 ### Minor Changes
