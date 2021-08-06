@@ -37,6 +37,8 @@ export function findQuery(
 
   /** Prefer matching query names */
   return (
-    matchingQueries.find(query => query.name.value.toLowerCase() === fieldName.toLowerCase()) ?? matchingQueries[0]
+    matchingQueries.find(query =>
+      [fieldName.toLowerCase(), type.toLowerCase(), listType?.toLowerCase()].includes(query.name.value.toLowerCase())
+    ) ?? matchingQueries[0]
   );
 }

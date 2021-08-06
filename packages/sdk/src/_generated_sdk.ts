@@ -1911,7 +1911,7 @@ export class Issue extends Request {
   }
   /** The parent of the issue. */
   public get parent(): LinearFetch<Issue> | undefined {
-    return this._parent?.id ? new AttachmentIssueQuery(this._request).fetch(this._parent?.id) : undefined;
+    return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
@@ -2167,7 +2167,7 @@ export class IssueHistory extends Request {
   }
   /** The previous parent of the issue. */
   public get fromParent(): LinearFetch<Issue> | undefined {
-    return this._fromParent?.id ? new AttachmentIssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
+    return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
   /** The previous project of the issue. */
   public get fromProject(): LinearFetch<Project> | undefined {
@@ -2195,7 +2195,7 @@ export class IssueHistory extends Request {
   }
   /** The new parent of the issue. */
   public get toParent(): LinearFetch<Issue> | undefined {
-    return this._toParent?.id ? new AttachmentIssueQuery(this._request).fetch(this._toParent?.id) : undefined;
+    return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
   /** The new project of the issue. */
   public get toProject(): LinearFetch<Project> | undefined {
@@ -2510,7 +2510,7 @@ export class IssueRelation extends Request {
   }
   /** The related issue. */
   public get relatedIssue(): LinearFetch<Issue> | undefined {
-    return this._relatedIssue?.id ? new AttachmentIssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
+    return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
   }
 
   /** Deletes an issue relation. */
