@@ -5282,6 +5282,7 @@ export class Webhook extends Request {
 
   public constructor(request: LinearRequest, data: L.WebhookFragment) {
     super(request);
+    this.allPublicTeams = data.allPublicTeams;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.enabled = data.enabled;
@@ -5289,12 +5290,15 @@ export class Webhook extends Request {
     this.label = data.label;
     this.resourceTypes = data.resourceTypes;
     this.secret = data.secret ?? undefined;
+    this.teamIds = data.teamIds;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._creator = data.creator ?? undefined;
     this._team = data.team;
   }
 
+  /** Whether the Webhook is enabled for all public teams, including teams created after the webhook was created. */
+  public allPublicTeams: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -5309,6 +5313,8 @@ export class Webhook extends Request {
   public resourceTypes: string[];
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
+  /** The ids of teams that the webhook is associated with. */
+  public teamIds: string[];
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
