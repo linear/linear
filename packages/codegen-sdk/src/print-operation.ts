@@ -30,7 +30,6 @@ export function printOperations(context: SdkPluginContext): string {
 function printOperation(context: SdkPluginContext, operation: SdkOperation): string {
   const optionalArgs = operation.sdkPath.length > 0 ? operation.optionalArgs.args : [];
   const constructorArgs = getArgList([getRequestArg(), ...(operation.parentArgs.args ?? []), ...optionalArgs]);
-  const parentArgNames = operation.parentArgs.args.map(arg => arg.name);
 
   return printLines([
     printComment([`A fetchable ${operation.name} ${operation.print.type}`, ...constructorArgs.jsdoc]),
@@ -52,37 +51,43 @@ function printOperation(context: SdkPluginContext, operation: SdkOperation): str
           ...operation.fetchArgs.jsdoc,
           `@returns parsed response from ${operation.print.response}`,
         ])}
-        public async ${Sdk.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
-          const ${Sdk.RESPONSE_NAME} = await this._${Sdk.REQUEST_NAME}<${printNamespaced(
-      context,
-      operation.print.response
-    )}, ${operation.print.variables}>(${printList([operation.print.document, printOperationArgs(operation)])})
-          ${printSet(`const ${Sdk.DATA_NAME}`, `${printList([Sdk.RESPONSE_NAME, ...operation.path], "?.")}`)}
-          return ${printTernary(
-            Sdk.DATA_NAME,
-            operation.print.list
-              ? `${Sdk.DATA_NAME}.map(node => new ${operation.print.list}(${printList([
-                  `this._${Sdk.REQUEST_NAME}`,
-                  "node",
-                ])}))`
-              : isConnectionModel(operation.model)
-              ? `new ${operation.print.model}(${printList([
-                  `this._${Sdk.REQUEST_NAME}`,
-                  `${Sdk.CONNECTION_NAME} => this.${Sdk.FETCH_NAME}(${printList([
-                    ...operation.requiredArgs.args
-                      .filter(arg => !parentArgNames.includes(arg.name))
-                      .map(arg => arg.name),
-                    `{ ${printList([
-                      ...optionalArgs.map(arg => `...this._${arg.name}`),
-                      `...${Sdk.VARIABLE_NAME}`,
-                      `...${Sdk.CONNECTION_NAME}`,
-                    ])} }`,
-                  ])})`,
-                  Sdk.DATA_NAME,
-                ])})`
-              : `new ${operation.print.model}(${printList([`this._${Sdk.REQUEST_NAME}`, Sdk.DATA_NAME])})`
-          )}
-        }
+        ${printOperationCall(context, operation)}
+      }
+    `,
+  ]);
+}
+
+/**
+ * Print the fetch function for calling the api
+ */
+function printOperationCall(context: SdkPluginContext, operation: SdkOperation): string {
+  const optionalArgs = operation.sdkPath.length > 0 ? operation.optionalArgs.args : [];
+  const parentArgNames = operation.parentArgs.args.map(arg => arg.name);
+  const responseType = printNamespaced(context, operation.print.response);
+  const operationCall = operation.print.list
+    ? `${Sdk.DATA_NAME}.map(node => new ${operation.print.list}(${printList([`this._${Sdk.REQUEST_NAME}`, "node"])}))`
+    : isConnectionModel(operation.model)
+    ? `new ${operation.print.model}(${printList([
+        `this._${Sdk.REQUEST_NAME}`,
+        `${Sdk.CONNECTION_NAME} => this.${Sdk.FETCH_NAME}(${printList([
+          ...operation.requiredArgs.args.filter(arg => !parentArgNames.includes(arg.name)).map(arg => arg.name),
+          `{ ${printList([
+            ...optionalArgs.map(arg => `...this._${arg.name}`),
+            `...${Sdk.VARIABLE_NAME}`,
+            `...${Sdk.CONNECTION_NAME}`,
+          ])} }`,
+        ])})`,
+        Sdk.DATA_NAME,
+      ])})`
+    : `new ${operation.print.model}(${printList([`this._${Sdk.REQUEST_NAME}`, Sdk.DATA_NAME])})`;
+
+  return printLines([
+    `public async ${Sdk.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
+      const ${Sdk.RESPONSE_NAME} = await this._${Sdk.REQUEST_NAME}<${responseType}, ${
+      operation.print.variables
+    }>(${printList([operation.print.document, printOperationArgs(operation)])})
+        ${printSet(`const ${Sdk.DATA_NAME}`, `${operation.print.responsePath}`)}
+        return ${operation.nonNull ? operationCall : printTernary(Sdk.DATA_NAME, operationCall)}
       }
     `,
   ]);

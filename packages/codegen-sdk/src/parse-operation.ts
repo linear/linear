@@ -9,6 +9,7 @@ import {
   printList,
   printPascal,
   printTypescriptType,
+  reduceNonNullType,
   upperFirst,
 } from "@linear/codegen-doc";
 import { DocumentNode, FieldNode, FragmentSpreadNode, Kind, OperationDefinitionNode } from "graphql";
@@ -84,6 +85,22 @@ export function parseOperations(
     const model = models.find(b => b.name === fragment?.name.value);
     const modelName = model?.name ?? "UNKNOWN_MODEL";
 
+    /** Find a parent operation */
+    const parentSdkKey = sdkPath.slice(0, -1).join("_");
+    const parent = acc[parentSdkKey]?.operations.find(operation => operation.path.join("_") === sdkKey);
+
+    /** Build the path through the response to the data */
+    const responsePath = parent
+      ? printList([parent?.print.responsePath, returnedField?.name?.value], parent?.nonNull ? `.` : "?.")
+      : printList([Sdk.RESPONSE_NAME, returnedField?.name?.value], ".");
+
+    /** Identify whether the operation response data is non-nullable */
+    const nonNullField = reduceNonNullType(
+      parent?.model?.fields.all.find(f => f.name === returnedField?.name?.value)?.node.type ?? ""
+    );
+    const nonNullQuery = query?.type && reduceNonNullType(query?.type);
+    const nonNull = Boolean(nonNullQuery || ((parent ? parent?.nonNull : true) && nonNullField));
+
     /** Store printable type names */
     const print: SdkOperationPrint = {
       /** The name of the operation */
@@ -105,12 +122,10 @@ export function parseOperations(
       /** The name of the model in a list, if a list */
       list: listType?.replace("[]", ""),
       /** The returned promise result from fetch  */
-      promise: `${Sdk.FETCH_TYPE}<${listType ?? modelName}>`,
+      promise: `${Sdk.FETCH_TYPE}<${listType ?? modelName}${nonNull ? "" : " | undefined"}>`,
+      /** The typescript safe path through the response to the data */
+      responsePath,
     };
-
-    /** Find a parent operation */
-    const parentSdkKey = sdkPath.slice(0, -1).join("_");
-    const parent = acc[parentSdkKey]?.operations.find(operation => operation.path.join("_") === sdkKey);
 
     /** Argument definition for each required variable */
     const requiredVariables: ArgDefinition[] = getRequiredVariables(node).map(variable => ({
@@ -151,7 +166,7 @@ export function parseOperations(
     /** Create the operation */
     const sdkOperation: SdkOperation = {
       name: operationName,
-      path: path,
+      path,
       key: path.join("_"),
       sdkKey,
       sdkPath,
@@ -166,6 +181,7 @@ export function parseOperations(
       fetchArgs,
       parent,
       print,
+      nonNull,
     };
 
     /** Return merged operations */

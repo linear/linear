@@ -39,6 +39,25 @@ export function reduceListType(
 }
 
 /**
+ * Get the non null type name from any type node
+ */
+export function reduceNonNullType(
+  type: string | NameNode | NonNullTypeNode | NamedTypeNode | ListTypeNode
+): string | undefined {
+  return typeof type === "string"
+    ? undefined
+    : type.kind === Kind.NON_NULL_TYPE
+    ? reduceTypeName(type.type)
+    : type.kind === Kind.NAMED_TYPE
+    ? undefined
+    : type.kind === Kind.NAME
+    ? undefined
+    : type.kind === Kind.LIST_TYPE
+    ? undefined
+    : undefined;
+}
+
+/**
  * Throw an error if the file extension is not expected
  *
  * @param packageName the name of the plugin package for use in the error message

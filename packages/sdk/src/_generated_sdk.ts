@@ -21,7 +21,7 @@ export class Request {
 }
 
 /** Fetch return type wrapped in a promise */
-export type LinearFetch<Response> = Promise<Response | undefined>;
+export type LinearFetch<Response> = Promise<Response>;
 
 /**
  * Variables required for pagination
@@ -30,12 +30,18 @@ export type LinearFetch<Response> = Promise<Response | undefined>;
 export type LinearConnectionVariables = { after?: string; before?: string };
 
 /**
- * Abstract class for connection models containing a list of nodes and pagination information
+ * Connection models containing a list of nodes and pagination information
  * Follows the Relay spec
  */
-export abstract class LinearConnection<Node> extends Request {
-  public pageInfo?: PageInfo;
-  public nodes?: Node[];
+export class LinearConnection<Node> extends Request {
+  public pageInfo: PageInfo;
+  public nodes: Node[];
+
+  public constructor(request: LinearRequest) {
+    super(request);
+    this.pageInfo = new PageInfo(request, { hasNextPage: false, hasPreviousPage: false });
+    this.nodes = [];
+  }
 }
 
 /**
@@ -48,13 +54,13 @@ export abstract class LinearConnection<Node> extends Request {
  * @param pageInfo - The pagination information to initialize the connection
  */
 export class Connection<Node> extends LinearConnection<Node> {
-  private _fetch: (variables?: LinearConnectionVariables) => LinearFetch<LinearConnection<Node>>;
+  private _fetch: (variables?: LinearConnectionVariables) => LinearFetch<LinearConnection<Node> | undefined>;
 
   public constructor(
     request: LinearRequest,
-    fetch: (variables?: LinearConnectionVariables) => LinearFetch<LinearConnection<Node>>,
-    nodes?: Node[],
-    pageInfo?: PageInfo
+    fetch: (variables?: LinearConnectionVariables) => LinearFetch<LinearConnection<Node> | undefined>,
+    nodes: Node[],
+    pageInfo: PageInfo
   ) {
     super(request);
     this._fetch = fetch;
@@ -145,25 +151,25 @@ export class ApiKey extends Request {
   public constructor(request: LinearRequest, data: L.ApiKeyFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.label = data.label ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.label = data.label;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The label of the API key. */
-  public label?: string;
+  public label: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
 }
 /**
  * ApiKeyConnection model
@@ -175,14 +181,14 @@ export class ApiKey extends Request {
 export class ApiKeyConnection extends Connection<ApiKey> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ApiKey>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ApiKey> | undefined>,
     data: L.ApiKeyConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new ApiKey(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new ApiKey(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -195,17 +201,17 @@ export class ApiKeyConnection extends Connection<ApiKey> {
 export class ApiKeyPayload extends Request {
   public constructor(request: LinearRequest, data: L.ApiKeyPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this.apiKey = data.apiKey ? new ApiKey(request, data.apiKey) : undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.apiKey = new ApiKey(request, data.apiKey);
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The API key that was created. */
-  public apiKey?: ApiKey;
+  public apiKey: ApiKey;
 }
 /**
  * Public information of the OAuth application.
@@ -216,26 +222,26 @@ export class ApiKeyPayload extends Request {
 export class Application extends Request {
   public constructor(request: LinearRequest, data: L.ApplicationFragment) {
     super(request);
-    this.clientId = data.clientId ?? undefined;
+    this.clientId = data.clientId;
     this.description = data.description ?? undefined;
-    this.developer = data.developer ?? undefined;
-    this.developerUrl = data.developerUrl ?? undefined;
+    this.developer = data.developer;
+    this.developerUrl = data.developerUrl;
     this.imageUrl = data.imageUrl ?? undefined;
-    this.name = data.name ?? undefined;
+    this.name = data.name;
   }
 
   /** OAuth application's client ID. */
-  public clientId?: string;
+  public clientId: string;
   /** Information about the application. */
   public description?: string;
   /** Name of the developer. */
-  public developer?: string;
+  public developer: string;
   /** Url of the developer (homepage or docs). */
-  public developerUrl?: string;
+  public developerUrl: string;
   /** Image of the application. */
   public imageUrl?: string;
   /** Application name. */
-  public name?: string;
+  public name: string;
 }
 /**
  * ArchivePayload model
@@ -246,14 +252,14 @@ export class Application extends Request {
 export class ArchivePayload extends Request {
   public constructor(request: LinearRequest, data: L.ArchivePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * Contains requested archived model objects.
@@ -264,17 +270,17 @@ export class ArchivePayload extends Request {
 export class ArchiveResponse extends Request {
   public constructor(request: LinearRequest, data: L.ArchiveResponseFragment) {
     super(request);
-    this.archive = data.archive ?? undefined;
-    this.databaseVersion = data.databaseVersion ?? undefined;
-    this.totalCount = data.totalCount ?? undefined;
+    this.archive = data.archive;
+    this.databaseVersion = data.databaseVersion;
+    this.totalCount = data.totalCount;
   }
 
   /** A JSON serialized collection of model objects loaded from the archive */
-  public archive?: string;
+  public archive: string;
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
-  public databaseVersion?: number;
+  public databaseVersion: number;
   /** The total number of entities in the archive. */
-  public totalCount?: number;
+  public totalCount: number;
 }
 /**
  * [Alpha] Issue attachment (e.g. support ticket, pull request).
@@ -283,62 +289,62 @@ export class ArchiveResponse extends Request {
  * @param data - L.AttachmentFragment response data
  */
 export class Attachment extends Request {
-  private _issue?: L.AttachmentFragment["issue"];
+  private _issue: L.AttachmentFragment["issue"];
 
   public constructor(request: LinearRequest, data: L.AttachmentFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.groupBySource = data.groupBySource ?? undefined;
-    this.id = data.id ?? undefined;
-    this.metadata = parseJson(data.metadata) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.groupBySource = data.groupBySource;
+    this.id = data.id;
+    this.metadata = parseJson(data.metadata) ?? {};
     this.source = parseJson(data.source) ?? undefined;
     this.subtitle = data.subtitle ?? undefined;
-    this.title = data.title ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.url = data.url ?? undefined;
-    this._issue = data.issue ?? undefined;
+    this.title = data.title;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this._issue = data.issue;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
-  public groupBySource?: boolean;
+  public groupBySource: boolean;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Custom metadata related to the attachment. */
-  public metadata?: Record<string, unknown>;
+  public metadata: Record<string, unknown>;
   /** Information about the source which created the attachment. */
   public source?: Record<string, unknown>;
   /** Content for the subtitle line in the Linear attachment widget. */
   public subtitle?: string;
   /** Content for the title line in the Linear attachment widget. */
-  public title?: string;
+  public title: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Location of the attachment which is also used as an identifier. */
-  public url?: string;
+  public url: string;
   /** The issue this attachment belongs to. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return new IssueQuery(this._request).fetch(this._issue.id);
   }
 
   /** [DEPRECATED] Archives an issue attachment. */
   public archive() {
-    return this.id ? new AttachmentArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new AttachmentArchiveMutation(this._request).fetch(this.id);
   }
   /** [Alpha] Deletes an issue attachment. */
   public delete() {
-    return this.id ? new AttachmentDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new AttachmentDeleteMutation(this._request).fetch(this.id);
   }
   /** [Alpha] Updates an existing issue attachment. */
   public update(input: L.AttachmentUpdateInput) {
-    return this.id ? new AttachmentUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new AttachmentUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -351,14 +357,14 @@ export class Attachment extends Request {
 export class AttachmentConnection extends Connection<Attachment> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Attachment>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Attachment> | undefined>,
     data: L.AttachmentConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Attachment(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Attachment(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -369,22 +375,22 @@ export class AttachmentConnection extends Connection<Attachment> {
  * @param data - L.AttachmentPayloadFragment response data
  */
 export class AttachmentPayload extends Request {
-  private _attachment?: L.AttachmentPayloadFragment["attachment"];
+  private _attachment: L.AttachmentPayloadFragment["attachment"];
 
   public constructor(request: LinearRequest, data: L.AttachmentPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._attachment = data.attachment ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._attachment = data.attachment;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The issue attachment that was created. */
   public get attachment(): LinearFetch<Attachment> | undefined {
-    return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
+    return new AttachmentQuery(this._request).fetch(this._attachment.id);
   }
 }
 /**
@@ -398,13 +404,13 @@ export class AuthResolverResponse extends Request {
     super(request);
     this.allowDomainAccess = data.allowDomainAccess ?? undefined;
     this.email = data.email ?? undefined;
-    this.id = data.id ?? undefined;
+    this.id = data.id;
     this.lastUsedOrganizationId = data.lastUsedOrganizationId ?? undefined;
     this.token = data.token ?? undefined;
     this.availableOrganizations = data.availableOrganizations
       ? data.availableOrganizations.map(node => new Organization(request, node))
       : undefined;
-    this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
+    this.users = data.users.map(node => new User(request, node));
   }
 
   /** Should the signup flow allow access for the domain. */
@@ -412,7 +418,7 @@ export class AuthResolverResponse extends Request {
   /** Email for the authenticated account. */
   public email?: string;
   /** User account ID. */
-  public id?: string;
+  public id: string;
   /** ID of the organization last accessed by the user. */
   public lastUsedOrganizationId?: string;
   /** JWT token for authentication of the account. */
@@ -420,7 +426,7 @@ export class AuthResolverResponse extends Request {
   /** Organizations this account has access to, but is not yet a member. */
   public availableOrganizations?: Organization[];
   /** Users belonging to this account. */
-  public users?: User[];
+  public users: User[];
 }
 /**
  * Public information of the OAuth application, plus the authorized scopes for a given user.
@@ -431,32 +437,32 @@ export class AuthResolverResponse extends Request {
 export class AuthorizedApplication extends Request {
   public constructor(request: LinearRequest, data: L.AuthorizedApplicationFragment) {
     super(request);
-    this.appId = data.appId ?? undefined;
-    this.clientId = data.clientId ?? undefined;
+    this.appId = data.appId;
+    this.clientId = data.clientId;
     this.description = data.description ?? undefined;
-    this.developer = data.developer ?? undefined;
-    this.developerUrl = data.developerUrl ?? undefined;
+    this.developer = data.developer;
+    this.developerUrl = data.developerUrl;
     this.imageUrl = data.imageUrl ?? undefined;
-    this.name = data.name ?? undefined;
-    this.scope = data.scope ?? undefined;
+    this.name = data.name;
+    this.scope = data.scope;
   }
 
   /** OAuth application's ID. */
-  public appId?: string;
+  public appId: string;
   /** OAuth application's client ID. */
-  public clientId?: string;
+  public clientId: string;
   /** Information about the application. */
   public description?: string;
   /** Name of the developer. */
-  public developer?: string;
+  public developer: string;
   /** Url of the developer (homepage or docs). */
-  public developerUrl?: string;
+  public developerUrl: string;
   /** Image of the application. */
   public imageUrl?: string;
   /** Application name. */
-  public name?: string;
+  public name: string;
   /** Scopes that are authorized for this application for a given user. */
-  public scope?: string[];
+  public scope: string[];
 }
 /**
  * BillingDetailsPayload model
@@ -468,17 +474,17 @@ export class BillingDetailsPayload extends Request {
   public constructor(request: LinearRequest, data: L.BillingDetailsPayloadFragment) {
     super(request);
     this.email = data.email ?? undefined;
-    this.success = data.success ?? undefined;
+    this.success = data.success;
     this.paymentMethod = data.paymentMethod ? new Card(request, data.paymentMethod) : undefined;
-    this.invoices = data.invoices ? data.invoices.map(node => new Invoice(request, node)) : undefined;
+    this.invoices = data.invoices.map(node => new Invoice(request, node));
   }
 
   /** The customer's email address the invoices are sent to. */
   public email?: string;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** List of invoices, if any. */
-  public invoices?: Invoice[];
+  public invoices: Invoice[];
   /** The payment method. */
   public paymentMethod?: Card;
 }
@@ -492,13 +498,13 @@ export class BillingEmailPayload extends Request {
   public constructor(request: LinearRequest, data: L.BillingEmailPayloadFragment) {
     super(request);
     this.email = data.email ?? undefined;
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** The customer's email address the invoices are sent to. */
   public email?: string;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * Card model
@@ -509,14 +515,14 @@ export class BillingEmailPayload extends Request {
 export class Card extends Request {
   public constructor(request: LinearRequest, data: L.CardFragment) {
     super(request);
-    this.brand = data.brand ?? undefined;
-    this.last4 = data.last4 ?? undefined;
+    this.brand = data.brand;
+    this.last4 = data.last4;
   }
 
   /** The brand of the card, e.g. Visa. */
-  public brand?: string;
+  public brand: string;
   /** The last four digits used to identify the card. */
-  public last4?: string;
+  public last4: string;
 }
 /**
  * CollaborationDocumentUpdatePayload model
@@ -527,12 +533,12 @@ export class Card extends Request {
 export class CollaborationDocumentUpdatePayload extends Request {
   public constructor(request: LinearRequest, data: L.CollaborationDocumentUpdatePayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
     this.steps = data.steps ? new StepsResponse(request, data.steps) : undefined;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** Document steps the client has not seen yet and need to rebase it's local steps on. */
   public steps?: StepsResponse;
 }
@@ -543,55 +549,55 @@ export class CollaborationDocumentUpdatePayload extends Request {
  * @param data - L.CommentFragment response data
  */
 export class Comment extends Request {
-  private _issue?: L.CommentFragment["issue"];
-  private _user?: L.CommentFragment["user"];
+  private _issue: L.CommentFragment["issue"];
+  private _user: L.CommentFragment["user"];
 
   public constructor(request: LinearRequest, data: L.CommentFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.body = data.body ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.body = data.body;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.editedAt = parseDate(data.editedAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.url = data.url ?? undefined;
-    this._issue = data.issue ?? undefined;
-    this._user = data.user ?? undefined;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this._issue = data.issue;
+    this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The comment content in markdown format. */
-  public body?: string;
+  public body: string;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The time user edited the comment. */
   public editedAt?: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Comment's URL. */
-  public url?: string;
+  public url: string;
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return new IssueQuery(this._request).fetch(this._issue.id);
   }
   /** The user who wrote the comment. */
   public get user(): LinearFetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 
   /** Deletes a comment. */
   public delete() {
-    return this.id ? new CommentDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new CommentDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates a comment. */
   public update(input: L.CommentUpdateInput) {
-    return this.id ? new CommentUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new CommentUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -604,14 +610,14 @@ export class Comment extends Request {
 export class CommentConnection extends Connection<Comment> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Comment>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Comment> | undefined>,
     data: L.CommentConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Comment(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Comment(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -622,22 +628,22 @@ export class CommentConnection extends Connection<Comment> {
  * @param data - L.CommentPayloadFragment response data
  */
 export class CommentPayload extends Request {
-  private _comment?: L.CommentPayloadFragment["comment"];
+  private _comment: L.CommentPayloadFragment["comment"];
 
   public constructor(request: LinearRequest, data: L.CommentPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._comment = data.comment ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._comment = data.comment;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The comment that was created or updated. */
   public get comment(): LinearFetch<Comment> | undefined {
-    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
+    return new CommentQuery(this._request).fetch(this._comment.id);
   }
 }
 /**
@@ -649,22 +655,22 @@ export class CommentPayload extends Request {
 export class CommitPayload extends Request {
   public constructor(request: LinearRequest, data: L.CommitPayloadFragment) {
     super(request);
-    this.added = data.added ?? undefined;
-    this.id = data.id ?? undefined;
-    this.message = data.message ?? undefined;
-    this.modified = data.modified ?? undefined;
-    this.removed = data.removed ?? undefined;
-    this.timestamp = data.timestamp ?? undefined;
-    this.url = data.url ?? undefined;
+    this.added = data.added;
+    this.id = data.id;
+    this.message = data.message;
+    this.modified = data.modified;
+    this.removed = data.removed;
+    this.timestamp = data.timestamp;
+    this.url = data.url;
   }
 
-  public added?: string[];
-  public id?: string;
-  public message?: string;
-  public modified?: string[];
-  public removed?: string[];
-  public timestamp?: string;
-  public url?: string;
+  public added: string[];
+  public id: string;
+  public message: string;
+  public modified: string[];
+  public removed: string[];
+  public timestamp: string;
+  public url: string;
 }
 /**
  * ContactPayload model
@@ -675,11 +681,11 @@ export class CommitPayload extends Request {
 export class ContactPayload extends Request {
   public constructor(request: LinearRequest, data: L.ContactPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * CreateCsvExportReportPayload model
@@ -690,11 +696,11 @@ export class ContactPayload extends Request {
 export class CreateCsvExportReportPayload extends Request {
   public constructor(request: LinearRequest, data: L.CreateCsvExportReportPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * CreateOrJoinOrganizationResponse model
@@ -703,18 +709,18 @@ export class CreateCsvExportReportPayload extends Request {
  * @param data - L.CreateOrJoinOrganizationResponseFragment response data
  */
 export class CreateOrJoinOrganizationResponse extends Request {
-  private _user?: L.CreateOrJoinOrganizationResponseFragment["user"];
+  private _user: L.CreateOrJoinOrganizationResponseFragment["user"];
 
   public constructor(request: LinearRequest, data: L.CreateOrJoinOrganizationResponseFragment) {
     super(request);
-    this._user = data.user ?? undefined;
+    this._user = data.user;
   }
 
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   public get user(): LinearFetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 }
 /**
@@ -724,22 +730,22 @@ export class CreateOrJoinOrganizationResponse extends Request {
  * @param data - L.CustomViewFragment response data
  */
 export class CustomView extends Request {
-  private _creator?: L.CustomViewFragment["creator"];
+  private _creator: L.CustomViewFragment["creator"];
   private _team?: L.CustomViewFragment["team"];
 
   public constructor(request: LinearRequest, data: L.CustomViewFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.color = data.color ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
-    this.filters = parseJson(data.filters) ?? undefined;
+    this.filters = parseJson(data.filters) ?? {};
     this.icon = data.icon ?? undefined;
-    this.id = data.id ?? undefined;
-    this.name = data.name ?? undefined;
-    this.shared = data.shared ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this._creator = data.creator ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
+    this.shared = data.shared;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._creator = data.creator;
     this._team = data.team ?? undefined;
   }
 
@@ -748,27 +754,27 @@ export class CustomView extends Request {
   /** The color of the icon of the custom view. */
   public color?: string;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The description of the custom view. */
   public description?: string;
   /** The filters applied to issues in the custom view. */
-  public filters?: Record<string, unknown>;
+  public filters: Record<string, unknown>;
   /** The icon of the custom view. */
   public icon?: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The name of the custom view. */
-  public name?: string;
+  public name: string;
   /** Whether the custom view is shared with everyone in the organization. */
-  public shared?: boolean;
+  public shared: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The user who created the custom view. */
   public get creator(): LinearFetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization of the custom view. */
   public get organization(): LinearFetch<Organization> {
@@ -781,11 +787,11 @@ export class CustomView extends Request {
 
   /** Deletes a custom view. */
   public delete() {
-    return this.id ? new CustomViewDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new CustomViewDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates a custom view. */
   public update(input: L.CustomViewUpdateInput) {
-    return this.id ? new CustomViewUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new CustomViewUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -798,14 +804,14 @@ export class CustomView extends Request {
 export class CustomViewConnection extends Connection<CustomView> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<CustomView>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<CustomView> | undefined>,
     data: L.CustomViewConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new CustomView(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new CustomView(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -816,22 +822,22 @@ export class CustomViewConnection extends Connection<CustomView> {
  * @param data - L.CustomViewPayloadFragment response data
  */
 export class CustomViewPayload extends Request {
-  private _customView?: L.CustomViewPayloadFragment["customView"];
+  private _customView: L.CustomViewPayloadFragment["customView"];
 
   public constructor(request: LinearRequest, data: L.CustomViewPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._customView = data.customView ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._customView = data.customView;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The custom view that was created or updated. */
   public get customView(): LinearFetch<CustomView> | undefined {
-    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+    return new CustomViewQuery(this._request).fetch(this._customView.id);
   }
 }
 /**
@@ -841,26 +847,26 @@ export class CustomViewPayload extends Request {
  * @param data - L.CycleFragment response data
  */
 export class Cycle extends Request {
-  private _team?: L.CycleFragment["team"];
+  private _team: L.CycleFragment["team"];
 
   public constructor(request: LinearRequest, data: L.CycleFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.autoArchivedAt = parseDate(data.autoArchivedAt) ?? undefined;
     this.completedAt = parseDate(data.completedAt) ?? undefined;
-    this.completedIssueCountHistory = data.completedIssueCountHistory ?? undefined;
-    this.completedScopeHistory = data.completedScopeHistory ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.endsAt = parseDate(data.endsAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.issueCountHistory = data.issueCountHistory ?? undefined;
+    this.completedIssueCountHistory = data.completedIssueCountHistory;
+    this.completedScopeHistory = data.completedScopeHistory;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.endsAt = parseDate(data.endsAt) ?? new Date();
+    this.id = data.id;
+    this.issueCountHistory = data.issueCountHistory;
     this.name = data.name ?? undefined;
-    this.number = data.number ?? undefined;
-    this.progress = data.progress ?? undefined;
-    this.scopeHistory = data.scopeHistory ?? undefined;
-    this.startsAt = parseDate(data.startsAt) ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this._team = data.team ?? undefined;
+    this.number = data.number;
+    this.progress = data.progress;
+    this.scopeHistory = data.scopeHistory;
+    this.startsAt = parseDate(data.startsAt) ?? new Date();
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._team = data.team;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -870,53 +876,51 @@ export class Cycle extends Request {
   /** The completion time of the cycle. If null, the cycle hasn't been completed. */
   public completedAt?: Date;
   /** The number of completed issues in the cycle after each day. */
-  public completedIssueCountHistory?: number[];
+  public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each day. */
-  public completedScopeHistory?: number[];
+  public completedScopeHistory: number[];
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The end time of the cycle. */
-  public endsAt?: Date;
+  public endsAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The total number of issues in the cycle after each day. */
-  public issueCountHistory?: number[];
+  public issueCountHistory: number[];
   /** The custom name of the cycle. */
   public name?: string;
   /** The number of the cycle. */
-  public number?: number;
+  public number: number;
   /** The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
-  public progress?: number;
+  public progress: number;
   /** The total number of estimation points after each day. */
-  public scopeHistory?: number[];
+  public scopeHistory: number[];
   /** The start time of the cycle. */
-  public startsAt?: Date;
+  public startsAt: Date;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The team that the cycle is associated with. */
   public get team(): LinearFetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** Issues associated with the cycle. */
   public issues(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">) {
-    return this.id ? new Cycle_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Cycle_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Issues that weren't completed when the cycle was closed. */
   public uncompletedIssuesUponClose(variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
-    return this.id
-      ? new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id, variables).fetch(variables)
-      : undefined;
+    return new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Archives a cycle. */
   public archive() {
-    return this.id ? new CycleArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new CycleArchiveMutation(this._request).fetch(this.id);
   }
   /** Updates a cycle. */
   public update(input: L.CycleUpdateInput) {
-    return this.id ? new CycleUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new CycleUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -929,14 +933,14 @@ export class Cycle extends Request {
 export class CycleConnection extends Connection<Cycle> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Cycle>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Cycle> | undefined>,
     data: L.CycleConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Cycle(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Cycle(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -951,15 +955,15 @@ export class CyclePayload extends Request {
 
   public constructor(request: LinearRequest, data: L.CyclePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this._cycle = data.cycle ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The Cycle that was created or updated. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
@@ -974,11 +978,11 @@ export class CyclePayload extends Request {
 export class DebugPayload extends Request {
   public constructor(request: LinearRequest, data: L.DebugPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * Contains the requested dependencies.
@@ -989,11 +993,11 @@ export class DebugPayload extends Request {
 export class DependencyResponse extends Request {
   public constructor(request: LinearRequest, data: L.DependencyResponseFragment) {
     super(request);
-    this.dependencies = data.dependencies ?? undefined;
+    this.dependencies = data.dependencies;
   }
 
   /** A JSON serialized collection of model objects loaded from the archive */
-  public dependencies?: string;
+  public dependencies: string;
 }
 /**
  * Collaborative editing steps for documents.
@@ -1005,31 +1009,31 @@ export class DocumentStep extends Request {
   public constructor(request: LinearRequest, data: L.DocumentStepFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.clientId = data.clientId ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.step = parseJson(data.step) ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.version = data.version ?? undefined;
+    this.clientId = data.clientId;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.step = parseJson(data.step) ?? {};
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.version = data.version;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** Connected client ID. */
-  public clientId?: string;
+  public clientId: string;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Step data. */
-  public step?: Record<string, unknown>;
+  public step: Record<string, unknown>;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Step version. */
-  public version?: number;
+  public version: number;
 }
 /**
  * EmailUnsubscribePayload model
@@ -1040,11 +1044,11 @@ export class DocumentStep extends Request {
 export class EmailUnsubscribePayload extends Request {
   public constructor(request: LinearRequest, data: L.EmailUnsubscribePayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * EmailUserAccountAuthChallengeResponse model
@@ -1055,14 +1059,14 @@ export class EmailUnsubscribePayload extends Request {
 export class EmailUserAccountAuthChallengeResponse extends Request {
   public constructor(request: LinearRequest, data: L.EmailUserAccountAuthChallengeResponseFragment) {
     super(request);
-    this.authType = data.authType ?? undefined;
-    this.success = data.success ?? undefined;
+    this.authType = data.authType;
+    this.success = data.success;
   }
 
   /** Supported challenge for this user account. Can be either verificationCode or password. */
-  public authType?: string;
+  public authType: string;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * A custom emoji.
@@ -1071,40 +1075,40 @@ export class EmailUserAccountAuthChallengeResponse extends Request {
  * @param data - L.EmojiFragment response data
  */
 export class Emoji extends Request {
-  private _creator?: L.EmojiFragment["creator"];
+  private _creator: L.EmojiFragment["creator"];
 
   public constructor(request: LinearRequest, data: L.EmojiFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.name = data.name ?? undefined;
-    this.source = data.source ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.url = data.url ?? undefined;
-    this._creator = data.creator ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.name = data.name;
+    this.source = data.source;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this._creator = data.creator;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The emoji's name. */
-  public name?: string;
+  public name: string;
   /** The source of the emoji. */
-  public source?: string;
+  public source: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The emoji image URL. */
-  public url?: string;
+  public url: string;
   /** The user who created the emoji. */
   public get creator(): LinearFetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization that the emoji belongs to. */
   public get organization(): LinearFetch<Organization> {
@@ -1113,7 +1117,7 @@ export class Emoji extends Request {
 
   /** Deletes an emoji. */
   public delete() {
-    return this.id ? new EmojiDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new EmojiDeleteMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -1126,14 +1130,14 @@ export class Emoji extends Request {
 export class EmojiConnection extends Connection<Emoji> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Emoji>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Emoji> | undefined>,
     data: L.EmojiConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Emoji(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Emoji(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -1144,22 +1148,22 @@ export class EmojiConnection extends Connection<Emoji> {
  * @param data - L.EmojiPayloadFragment response data
  */
 export class EmojiPayload extends Request {
-  private _emoji?: L.EmojiPayloadFragment["emoji"];
+  private _emoji: L.EmojiPayloadFragment["emoji"];
 
   public constructor(request: LinearRequest, data: L.EmojiPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._emoji = data.emoji ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._emoji = data.emoji;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The emoji that was created. */
   public get emoji(): LinearFetch<Emoji> | undefined {
-    return this._emoji?.id ? new EmojiQuery(this._request).fetch(this._emoji?.id) : undefined;
+    return new EmojiQuery(this._request).fetch(this._emoji.id);
   }
 }
 /**
@@ -1171,11 +1175,11 @@ export class EmojiPayload extends Request {
 export class EventPayload extends Request {
   public constructor(request: LinearRequest, data: L.EventPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * User favorites presented in the sidebar.
@@ -1189,39 +1193,39 @@ export class Favorite extends Request {
   private _label?: L.FavoriteFragment["label"];
   private _project?: L.FavoriteFragment["project"];
   private _projectTeam?: L.FavoriteFragment["projectTeam"];
-  private _user?: L.FavoriteFragment["user"];
+  private _user: L.FavoriteFragment["user"];
 
   public constructor(request: LinearRequest, data: L.FavoriteFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.sortOrder = data.sortOrder ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.sortOrder = data.sortOrder;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._cycle = data.cycle ?? undefined;
     this._issue = data.issue ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._projectTeam = data.projectTeam ?? undefined;
-    this._user = data.user ?? undefined;
+    this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The order of the item in the favorites list. */
-  public sortOrder?: number;
+  public sortOrder: number;
   /** The type of the favorite. */
-  public type?: string;
+  public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Favorited cycle. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
@@ -1244,16 +1248,16 @@ export class Favorite extends Request {
   }
   /** The owner of the favorite. */
   public get user(): LinearFetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 
   /** Deletes a favorite reference. */
   public delete() {
-    return this.id ? new FavoriteDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new FavoriteDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates a favorite. */
   public update(input: L.FavoriteUpdateInput) {
-    return this.id ? new FavoriteUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new FavoriteUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -1266,14 +1270,14 @@ export class Favorite extends Request {
 export class FavoriteConnection extends Connection<Favorite> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Favorite>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Favorite> | undefined>,
     data: L.FavoriteConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Favorite(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Favorite(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -1284,22 +1288,22 @@ export class FavoriteConnection extends Connection<Favorite> {
  * @param data - L.FavoritePayloadFragment response data
  */
 export class FavoritePayload extends Request {
-  private _favorite?: L.FavoritePayloadFragment["favorite"];
+  private _favorite: L.FavoritePayloadFragment["favorite"];
 
   public constructor(request: LinearRequest, data: L.FavoritePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._favorite = data.favorite ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._favorite = data.favorite;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The object that was added as a favorite. */
   public get favorite(): LinearFetch<Favorite> | undefined {
-    return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
+    return new FavoriteQuery(this._request).fetch(this._favorite.id);
   }
 }
 /**
@@ -1311,11 +1315,11 @@ export class FavoritePayload extends Request {
 export class FeedbackPayload extends Request {
   public constructor(request: LinearRequest, data: L.FeedbackPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * Object representing Figma preview information.
@@ -1326,16 +1330,16 @@ export class FeedbackPayload extends Request {
 export class FigmaEmbed extends Request {
   public constructor(request: LinearRequest, data: L.FigmaEmbedFragment) {
     super(request);
-    this.lastModified = parseDate(data.lastModified) ?? undefined;
-    this.name = data.name ?? undefined;
+    this.lastModified = parseDate(data.lastModified) ?? new Date();
+    this.name = data.name;
     this.nodeName = data.nodeName ?? undefined;
     this.url = data.url ?? undefined;
   }
 
   /** Date when the file was updated at the time of embedding. */
-  public lastModified?: Date;
+  public lastModified: Date;
   /** Figma file name. */
-  public name?: string;
+  public name: string;
   /** Node name. */
   public nodeName?: string;
   /** Figma screenshot URL. */
@@ -1350,12 +1354,12 @@ export class FigmaEmbed extends Request {
 export class FigmaEmbedPayload extends Request {
   public constructor(request: LinearRequest, data: L.FigmaEmbedPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
     this.figmaEmbed = data.figmaEmbed ? new FigmaEmbed(request, data.figmaEmbed) : undefined;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** Figma embed information. */
   public figmaEmbed?: FigmaEmbed;
 }
@@ -1386,20 +1390,20 @@ export class GithubOAuthTokenPayload extends Request {
 export class GithubOrg extends Request {
   public constructor(request: LinearRequest, data: L.GithubOrgFragment) {
     super(request);
-    this.id = data.id ?? undefined;
-    this.login = data.login ?? undefined;
-    this.name = data.name ?? undefined;
-    this.repositories = data.repositories ? data.repositories.map(node => new GithubRepo(request, node)) : undefined;
+    this.id = data.id;
+    this.login = data.login;
+    this.name = data.name;
+    this.repositories = data.repositories.map(node => new GithubRepo(request, node));
   }
 
   /** GitHub organization id. */
-  public id?: string;
+  public id: string;
   /** The login for the GitHub organization. */
-  public login?: string;
+  public login: string;
   /** The name of the GitHub organization. */
-  public name?: string;
+  public name: string;
   /** Repositories that the organization owns. */
-  public repositories?: GithubRepo[];
+  public repositories: GithubRepo[];
 }
 /**
  * Relevant information for the GitHub repository.
@@ -1410,14 +1414,14 @@ export class GithubOrg extends Request {
 export class GithubRepo extends Request {
   public constructor(request: LinearRequest, data: L.GithubRepoFragment) {
     super(request);
-    this.id = data.id ?? undefined;
-    this.name = data.name ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
   }
 
   /** The id of the GitHub repository. */
-  public id?: string;
+  public id: string;
   /** The name of the GitHub repository. */
-  public name?: string;
+  public name: string;
 }
 /**
  * Google Sheets specific settings.
@@ -1428,16 +1432,16 @@ export class GithubRepo extends Request {
 export class GoogleSheetsSettings extends Request {
   public constructor(request: LinearRequest, data: L.GoogleSheetsSettingsFragment) {
     super(request);
-    this.sheetId = data.sheetId ?? undefined;
-    this.spreadsheetId = data.spreadsheetId ?? undefined;
-    this.spreadsheetUrl = data.spreadsheetUrl ?? undefined;
-    this.updatedIssuesAt = parseDate(data.updatedIssuesAt) ?? undefined;
+    this.sheetId = data.sheetId;
+    this.spreadsheetId = data.spreadsheetId;
+    this.spreadsheetUrl = data.spreadsheetUrl;
+    this.updatedIssuesAt = parseDate(data.updatedIssuesAt) ?? new Date();
   }
 
-  public sheetId?: number;
-  public spreadsheetId?: string;
-  public spreadsheetUrl?: string;
-  public updatedIssuesAt?: Date;
+  public sheetId: number;
+  public spreadsheetId: string;
+  public spreadsheetUrl: string;
+  public updatedIssuesAt: Date;
 }
 /**
  * ImageUploadFromUrlPayload model
@@ -1448,15 +1452,15 @@ export class GoogleSheetsSettings extends Request {
 export class ImageUploadFromUrlPayload extends Request {
   public constructor(request: LinearRequest, data: L.ImageUploadFromUrlPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this.url = data.url ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The URL containing the image. */
   public url?: string;
 }
@@ -1467,36 +1471,36 @@ export class ImageUploadFromUrlPayload extends Request {
  * @param data - L.IntegrationFragment response data
  */
 export class Integration extends Request {
-  private _creator?: L.IntegrationFragment["creator"];
+  private _creator: L.IntegrationFragment["creator"];
   private _team?: L.IntegrationFragment["team"];
 
   public constructor(request: LinearRequest, data: L.IntegrationFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.service = data.service ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this._creator = data.creator ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.service = data.service;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._creator = data.creator;
     this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The integration's type. */
-  public service?: string;
+  public service: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The user that added the integration. */
   public get creator(): LinearFetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization that the integration is associated with. */
   public get organization(): LinearFetch<Organization> {
@@ -1509,11 +1513,11 @@ export class Integration extends Request {
 
   /** Deletes an integration. */
   public delete() {
-    return this.id ? new IntegrationDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new IntegrationDeleteMutation(this._request).fetch(this.id);
   }
   /** Archives an integration resource. */
   public resourceArchive() {
-    return this.id ? new IntegrationResourceArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new IntegrationResourceArchiveMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -1526,14 +1530,14 @@ export class Integration extends Request {
 export class IntegrationConnection extends Connection<Integration> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Integration>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Integration> | undefined>,
     data: L.IntegrationConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Integration(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Integration(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -1548,15 +1552,15 @@ export class IntegrationPayload extends Request {
 
   public constructor(request: LinearRequest, data: L.IntegrationPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this._integration = data.integration ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -1569,54 +1573,54 @@ export class IntegrationPayload extends Request {
  * @param data - L.IntegrationResourceFragment response data
  */
 export class IntegrationResource extends Request {
-  private _integration?: L.IntegrationResourceFragment["integration"];
-  private _issue?: L.IntegrationResourceFragment["issue"];
+  private _integration: L.IntegrationResourceFragment["integration"];
+  private _issue: L.IntegrationResourceFragment["issue"];
 
   public constructor(request: LinearRequest, data: L.IntegrationResourceFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.resourceId = data.resourceId ?? undefined;
-    this.resourceType = data.resourceType ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.data = data.data ? new IntegrationResourceData(request, data.data) : undefined;
-    this.pullRequest = data.pullRequest ? new PullRequestPayload(request, data.pullRequest) : undefined;
-    this._integration = data.integration ?? undefined;
-    this._issue = data.issue ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.resourceId = data.resourceId;
+    this.resourceType = data.resourceType;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.data = new IntegrationResourceData(request, data.data);
+    this.pullRequest = new PullRequestPayload(request, data.pullRequest);
+    this._integration = data.integration;
+    this._issue = data.issue;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The external service resource ID. */
-  public resourceId?: string;
+  public resourceId: string;
   /** The integration's type. */
-  public resourceType?: string;
+  public resourceType: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Detailed information about the external resource. */
-  public data?: IntegrationResourceData;
+  public data: IntegrationResourceData;
   /** Pull request information for GitHub pull requests and GitLab merge requests. */
-  public pullRequest?: PullRequestPayload;
+  public pullRequest: PullRequestPayload;
   /** The integration that the resource is associated with. */
   public get integration(): LinearFetch<Integration> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+    return new IntegrationQuery(this._request).fetch(this._integration.id);
   }
   /** The issue that the resource is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return new IssueQuery(this._request).fetch(this._issue.id);
   }
 
   /** Archives an integration resource. */
   public archive() {
-    return this.id ? new IntegrationResourceArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new IntegrationResourceArchiveMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -1629,14 +1633,14 @@ export class IntegrationResource extends Request {
 export class IntegrationResourceConnection extends Connection<IntegrationResource> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IntegrationResource>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IntegrationResource> | undefined>,
     data: L.IntegrationResourceConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new IntegrationResource(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new IntegrationResource(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -1719,32 +1723,32 @@ export class IntercomSettings extends Request {
 export class InviteData extends Request {
   public constructor(request: LinearRequest, data: L.InviteDataFragment) {
     super(request);
-    this.avatarURLs = data.avatarURLs ?? undefined;
-    this.inviterName = data.inviterName ?? undefined;
-    this.organizationDomain = data.organizationDomain ?? undefined;
+    this.avatarURLs = data.avatarURLs;
+    this.inviterName = data.inviterName;
+    this.organizationDomain = data.organizationDomain;
     this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
-    this.organizationName = data.organizationName ?? undefined;
-    this.teamIds = data.teamIds ?? undefined;
-    this.teamNames = data.teamNames ?? undefined;
-    this.userCount = data.userCount ?? undefined;
+    this.organizationName = data.organizationName;
+    this.teamIds = data.teamIds;
+    this.teamNames = data.teamNames;
+    this.userCount = data.userCount;
   }
 
   /** Avatar URLs for the invitees. */
-  public avatarURLs?: string[];
+  public avatarURLs: string[];
   /** The name of the inviter. */
-  public inviterName?: string;
+  public inviterName: string;
   /** The domain of the organization the users were invited to. */
-  public organizationDomain?: string;
+  public organizationDomain: string;
   /** The logo of the organization the users were invited to. */
   public organizationLogoUrl?: string;
   /** The name of the organization the users were invited to. */
-  public organizationName?: string;
+  public organizationName: string;
   /** Team identifiers for the invitees. */
-  public teamIds?: string[];
+  public teamIds: string[];
   /** Team names for the invitees. */
-  public teamNames?: string[];
+  public teamNames: string[];
   /** The user count of the organization. */
-  public userCount?: number;
+  public userCount: number;
 }
 /**
  * InvitePagePayload model
@@ -1755,12 +1759,12 @@ export class InviteData extends Request {
 export class InvitePagePayload extends Request {
   public constructor(request: LinearRequest, data: L.InvitePagePayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
     this.inviteData = data.inviteData ? new InviteData(request, data.inviteData) : undefined;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** Invite data. */
   public inviteData?: InviteData;
 }
@@ -1773,21 +1777,21 @@ export class InvitePagePayload extends Request {
 export class Invoice extends Request {
   public constructor(request: LinearRequest, data: L.InvoiceFragment) {
     super(request);
-    this.created = parseDate(data.created) ?? undefined;
+    this.created = parseDate(data.created) ?? new Date();
     this.dueDate = data.dueDate ?? undefined;
-    this.status = data.status ?? undefined;
-    this.total = data.total ?? undefined;
+    this.status = data.status;
+    this.total = data.total;
     this.url = data.url ?? undefined;
   }
 
   /** The creation date of the invoice. */
-  public created?: Date;
+  public created: Date;
   /** The due date of the invoice. */
   public dueDate?: string;
   /** The status of the invoice. */
-  public status?: string;
+  public status: string;
   /** The invoice total, in cents. */
-  public total?: number;
+  public total: number;
   /** The URL at which the invoice can be viewed or paid. */
   public url?: string;
 }
@@ -1804,44 +1808,44 @@ export class Issue extends Request {
   private _parent?: L.IssueFragment["parent"];
   private _project?: L.IssueFragment["project"];
   private _snoozedBy?: L.IssueFragment["snoozedBy"];
-  private _state?: L.IssueFragment["state"];
-  private _team?: L.IssueFragment["team"];
+  private _state: L.IssueFragment["state"];
+  private _team: L.IssueFragment["team"];
 
   public constructor(request: LinearRequest, data: L.IssueFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.autoArchivedAt = parseDate(data.autoArchivedAt) ?? undefined;
     this.autoClosedAt = parseDate(data.autoClosedAt) ?? undefined;
-    this.boardOrder = data.boardOrder ?? undefined;
-    this.branchName = data.branchName ?? undefined;
+    this.boardOrder = data.boardOrder;
+    this.branchName = data.branchName;
     this.canceledAt = parseDate(data.canceledAt) ?? undefined;
     this.completedAt = parseDate(data.completedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.customerTicketCount = data.customerTicketCount ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.customerTicketCount = data.customerTicketCount;
     this.description = data.description ?? undefined;
     this.dueDate = data.dueDate ?? undefined;
     this.estimate = data.estimate ?? undefined;
-    this.id = data.id ?? undefined;
-    this.identifier = data.identifier ?? undefined;
-    this.number = data.number ?? undefined;
-    this.previousIdentifiers = data.previousIdentifiers ?? undefined;
-    this.priority = data.priority ?? undefined;
-    this.priorityLabel = data.priorityLabel ?? undefined;
+    this.id = data.id;
+    this.identifier = data.identifier;
+    this.number = data.number;
+    this.previousIdentifiers = data.previousIdentifiers;
+    this.priority = data.priority;
+    this.priorityLabel = data.priorityLabel;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.subIssueSortOrder = data.subIssueSortOrder ?? undefined;
-    this.title = data.title ?? undefined;
+    this.title = data.title;
     this.trashed = data.trashed ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.url = data.url ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._parent = data.parent ?? undefined;
     this._project = data.project ?? undefined;
     this._snoozedBy = data.snoozedBy ?? undefined;
-    this._state = data.state ?? undefined;
-    this._team = data.team ?? undefined;
+    this._state = data.state;
+    this._team = data.team;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -1851,17 +1855,17 @@ export class Issue extends Request {
   /** The time at which the issue was automatically closed by the auto pruning process. */
   public autoClosedAt?: Date;
   /** The order of the item in its column on the board. */
-  public boardOrder?: number;
+  public boardOrder: number;
   /** Suggested branch name for the issue. */
-  public branchName?: string;
+  public branchName: string;
   /** The time at which the issue was moved into canceled state. */
   public canceledAt?: Date;
   /** The time at which the issue was moved into completed state. */
   public completedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk). */
-  public customerTicketCount?: number;
+  public customerTicketCount: number;
   /** The issue's description in markdown format. */
   public description?: string;
   /** The date at which the issue is due. */
@@ -1869,17 +1873,17 @@ export class Issue extends Request {
   /** The estimate of the complexity of the issue.. */
   public estimate?: number;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Issue's human readable identifier (e.g. ENG-123). */
-  public identifier?: string;
+  public identifier: string;
   /** The issue's unique number. */
-  public number?: number;
+  public number: number;
   /** Previous identifiers of the issue if it has been moved between teams. */
-  public previousIdentifiers?: string[];
+  public previousIdentifiers: string[];
   /** The priority of the issue. */
-  public priority?: number;
+  public priority: number;
   /** Label for the priority. */
-  public priorityLabel?: string;
+  public priorityLabel: string;
   /** The time until an issue will be snoozed in Triage view. */
   public snoozedUntilAt?: Date;
   /** The time at which the issue was moved into started state. */
@@ -1887,16 +1891,16 @@ export class Issue extends Request {
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   public subIssueSortOrder?: number;
   /** The issue's title. */
-  public title?: string;
+  public title: string;
   /** A flag that indicates whether the issue is in the trash bin. */
   public trashed?: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Issue URL. */
-  public url?: string;
+  public url: string;
   /** The user to whom the issue is assigned to. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
@@ -1923,59 +1927,59 @@ export class Issue extends Request {
   }
   /** The workflow state that the issue is associated with. */
   public get state(): LinearFetch<WorkflowState> | undefined {
-    return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
+    return new WorkflowStateQuery(this._request).fetch(this._state.id);
   }
   /** The team that the issue is associated with. */
   public get team(): LinearFetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** Attachments associated with the issue. */
   public attachments(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">) {
-    return this.id ? new Issue_AttachmentsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Issue_AttachmentsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Children of the issue. */
   public children(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">) {
-    return this.id ? new Issue_ChildrenQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Issue_ChildrenQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Comments associated with the issue. */
   public comments(variables?: Omit<L.Issue_CommentsQueryVariables, "id">) {
-    return this.id ? new Issue_CommentsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Issue_CommentsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** History entries associated with the issue. */
   public history(variables?: Omit<L.Issue_HistoryQueryVariables, "id">) {
-    return this.id ? new Issue_HistoryQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Issue_HistoryQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Inverse relations associated with this issue. */
   public inverseRelations(variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">) {
-    return this.id ? new Issue_InverseRelationsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Issue_InverseRelationsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Labels associated with this issue. */
   public labels(variables?: Omit<L.Issue_LabelsQueryVariables, "id">) {
-    return this.id ? new Issue_LabelsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Issue_LabelsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Relations associated with this issue. */
   public relations(variables?: Omit<L.Issue_RelationsQueryVariables, "id">) {
-    return this.id ? new Issue_RelationsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Issue_RelationsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Users who are subscribed to the issue. */
   public subscribers(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">) {
-    return this.id ? new Issue_SubscribersQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Issue_SubscribersQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Archives an issue. */
   public archive(variables?: Omit<L.IssueArchiveMutationVariables, "id">) {
-    return this.id ? new IssueArchiveMutation(this._request).fetch(this.id, variables) : undefined;
+    return new IssueArchiveMutation(this._request).fetch(this.id, variables);
   }
   /** Deletes (trashes) an issue. */
   public delete() {
-    return this.id ? new IssueDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new IssueDeleteMutation(this._request).fetch(this.id);
   }
   /** Unarchives an issue. */
   public unarchive() {
-    return this.id ? new IssueUnarchiveMutation(this._request).fetch(this.id) : undefined;
+    return new IssueUnarchiveMutation(this._request).fetch(this.id);
   }
   /** Updates an issue. */
   public update(input: L.IssueUpdateInput) {
-    return this.id ? new IssueUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new IssueUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -1988,14 +1992,14 @@ export class Issue extends Request {
 export class IssueConnection extends Connection<Issue> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Issue>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Issue> | undefined>,
     data: L.IssueConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Issue(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Issue(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -2009,22 +2013,22 @@ export class IssueDescriptionHistory extends Request {
   public constructor(request: LinearRequest, data: L.IssueDescriptionHistoryFragment) {
     super(request);
     this.actorId = data.actorId ?? undefined;
-    this.descriptionData = data.descriptionData ?? undefined;
-    this.id = data.id ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.descriptionData = data.descriptionData;
+    this.id = data.id;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
   /** The ID of the author of the change. */
   public actorId?: string;
   /** The description data of the issue as a JSON serialized string. */
-  public descriptionData?: string;
+  public descriptionData: string;
   /** The UUID of the change. */
-  public id?: string;
+  public id: string;
   /** The type of the revision, whether it was the creation or update of the issue. */
-  public type?: string;
+  public type: string;
   /** The date when the description was updated. */
-  public updatedAt?: Date;
+  public updatedAt: Date;
 }
 /**
  * IssueDescriptionHistoryPayload model
@@ -2035,12 +2039,12 @@ export class IssueDescriptionHistory extends Request {
 export class IssueDescriptionHistoryPayload extends Request {
   public constructor(request: LinearRequest, data: L.IssueDescriptionHistoryPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
     this.history = data.history ? data.history.map(node => new IssueDescriptionHistory(request, node)) : undefined;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The issue that was created or updated. */
   public history?: IssueDescriptionHistory[];
 }
@@ -2058,7 +2062,7 @@ export class IssueHistory extends Request {
   private _fromProject?: L.IssueHistoryFragment["fromProject"];
   private _fromState?: L.IssueHistoryFragment["fromState"];
   private _fromTeam?: L.IssueHistoryFragment["fromTeam"];
-  private _issue?: L.IssueHistoryFragment["issue"];
+  private _issue: L.IssueHistoryFragment["issue"];
   private _toAssignee?: L.IssueHistoryFragment["toAssignee"];
   private _toCycle?: L.IssueHistoryFragment["toCycle"];
   private _toParent?: L.IssueHistoryFragment["toParent"];
@@ -2073,12 +2077,12 @@ export class IssueHistory extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.autoArchived = data.autoArchived ?? undefined;
     this.autoClosed = data.autoClosed ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.fromDueDate = data.fromDueDate ?? undefined;
     this.fromEstimate = data.fromEstimate ?? undefined;
     this.fromPriority = data.fromPriority ?? undefined;
     this.fromTitle = data.fromTitle ?? undefined;
-    this.id = data.id ?? undefined;
+    this.id = data.id;
     this.removedLabelIds = data.removedLabelIds ?? undefined;
     this.source = parseJson(data.source) ?? undefined;
     this.toDueDate = data.toDueDate ?? undefined;
@@ -2086,7 +2090,7 @@ export class IssueHistory extends Request {
     this.toPriority = data.toPriority ?? undefined;
     this.toTitle = data.toTitle ?? undefined;
     this.trashed = data.trashed ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.updatedDescription = data.updatedDescription ?? undefined;
     this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
     this.relationChanges = data.relationChanges
@@ -2099,7 +2103,7 @@ export class IssueHistory extends Request {
     this._fromProject = data.fromProject ?? undefined;
     this._fromState = data.fromState ?? undefined;
     this._fromTeam = data.fromTeam ?? undefined;
-    this._issue = data.issue ?? undefined;
+    this._issue = data.issue;
     this._toAssignee = data.toAssignee ?? undefined;
     this._toCycle = data.toCycle ?? undefined;
     this._toParent = data.toParent ?? undefined;
@@ -2117,7 +2121,7 @@ export class IssueHistory extends Request {
   public autoArchived?: boolean;
   public autoClosed?: boolean;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** What the due date was changed from */
   public fromDueDate?: string;
   /** What the estimate was changed from. */
@@ -2127,7 +2131,7 @@ export class IssueHistory extends Request {
   /** What the title was changed from. */
   public fromTitle?: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** ID's of labels that were removed. */
   public removedLabelIds?: string[];
   /** Information about the integration or application which created this history entry. */
@@ -2146,7 +2150,7 @@ export class IssueHistory extends Request {
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Whether the issue's description was updated. */
   public updatedDescription?: boolean;
   /** Changed issue relationships. */
@@ -2183,7 +2187,7 @@ export class IssueHistory extends Request {
   }
   /** The issue that was changed. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return new IssueQuery(this._request).fetch(this._issue.id);
   }
   /** The user to whom the issue was assigned to. */
   public get toAssignee(): LinearFetch<User> | undefined {
@@ -2220,14 +2224,14 @@ export class IssueHistory extends Request {
 export class IssueHistoryConnection extends Connection<IssueHistory> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueHistory>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueHistory> | undefined>,
     data: L.IssueHistoryConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new IssueHistory(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new IssueHistory(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -2241,37 +2245,37 @@ export class IssueImport extends Request {
   public constructor(request: LinearRequest, data: L.IssueImportFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.creatorId = data.creatorId ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.creatorId = data.creatorId;
     this.error = data.error ?? undefined;
-    this.id = data.id ?? undefined;
+    this.id = data.id;
     this.mapping = parseJson(data.mapping) ?? undefined;
-    this.service = data.service ?? undefined;
-    this.status = data.status ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.service = data.service;
+    this.status = data.status;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The id for the user that started the job. */
-  public creatorId?: string;
+  public creatorId: string;
   /** User readable error message, if one has occurred during the import. */
   public error?: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The data mapping configuration for the import job. */
   public mapping?: Record<string, unknown>;
   /** The service from which data will be imported. */
-  public service?: string;
+  public service: string;
   /** The status for the import job. */
-  public status?: string;
+  public status: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
 
   /** Deletes an import job. */
   public delete(issueImportId: string) {
@@ -2287,15 +2291,15 @@ export class IssueImport extends Request {
 export class IssueImportDeletePayload extends Request {
   public constructor(request: LinearRequest, data: L.IssueImportDeletePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The import job that was deleted. */
   public issueImport?: IssueImport;
 }
@@ -2308,15 +2312,15 @@ export class IssueImportDeletePayload extends Request {
 export class IssueImportPayload extends Request {
   public constructor(request: LinearRequest, data: L.IssueImportPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The import job that was created or updated. */
   public issueImport?: IssueImport;
 }
@@ -2328,57 +2332,57 @@ export class IssueImportPayload extends Request {
  */
 export class IssueLabel extends Request {
   private _creator?: L.IssueLabelFragment["creator"];
-  private _team?: L.IssueLabelFragment["team"];
+  private _team: L.IssueLabelFragment["team"];
 
   public constructor(request: LinearRequest, data: L.IssueLabelFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.color = data.color ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.color = data.color;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
-    this.id = data.id ?? undefined;
-    this.name = data.name ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator ?? undefined;
-    this._team = data.team ?? undefined;
+    this._team = data.team;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The label's color as a HEX string. */
-  public color?: string;
+  public color: string;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The label's description. */
   public description?: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The label's name. */
-  public name?: string;
+  public name: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The user who created the label. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The team to which the label belongs to. */
   public get team(): LinearFetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** Issues associated with the label. */
   public issues(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">) {
-    return this.id ? new IssueLabel_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new IssueLabel_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Archives an issue label. */
   public archive() {
-    return this.id ? new IssueLabelArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new IssueLabelArchiveMutation(this._request).fetch(this.id);
   }
   /** Updates an label. */
   public update(input: L.IssueLabelUpdateInput) {
-    return this.id ? new IssueLabelUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new IssueLabelUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -2391,14 +2395,14 @@ export class IssueLabel extends Request {
 export class IssueLabelConnection extends Connection<IssueLabel> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueLabel>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueLabel> | undefined>,
     data: L.IssueLabelConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new IssueLabel(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new IssueLabel(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -2409,22 +2413,22 @@ export class IssueLabelConnection extends Connection<IssueLabel> {
  * @param data - L.IssueLabelPayloadFragment response data
  */
 export class IssueLabelPayload extends Request {
-  private _issueLabel?: L.IssueLabelPayloadFragment["issueLabel"];
+  private _issueLabel: L.IssueLabelPayloadFragment["issueLabel"];
 
   public constructor(request: LinearRequest, data: L.IssueLabelPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._issueLabel = data.issueLabel ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._issueLabel = data.issueLabel;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The label that was created or updated. */
   public get issueLabel(): LinearFetch<IssueLabel> | undefined {
-    return this._issueLabel?.id ? new IssueLabelQuery(this._request).fetch(this._issueLabel?.id) : undefined;
+    return new IssueLabelQuery(this._request).fetch(this._issueLabel.id);
   }
 }
 /**
@@ -2438,15 +2442,15 @@ export class IssuePayload extends Request {
 
   public constructor(request: LinearRequest, data: L.IssuePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this._issue = data.issue ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The issue that was created or updated. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
@@ -2461,14 +2465,14 @@ export class IssuePayload extends Request {
 export class IssuePriorityValue extends Request {
   public constructor(request: LinearRequest, data: L.IssuePriorityValueFragment) {
     super(request);
-    this.label = data.label ?? undefined;
-    this.priority = data.priority ?? undefined;
+    this.label = data.label;
+    this.priority = data.priority;
   }
 
   /** Priority's label. */
-  public label?: string;
+  public label: string;
   /** Priority's number value. */
-  public priority?: number;
+  public priority: number;
 }
 /**
  * A relation between two issues.
@@ -2477,49 +2481,49 @@ export class IssuePriorityValue extends Request {
  * @param data - L.IssueRelationFragment response data
  */
 export class IssueRelation extends Request {
-  private _issue?: L.IssueRelationFragment["issue"];
-  private _relatedIssue?: L.IssueRelationFragment["relatedIssue"];
+  private _issue: L.IssueRelationFragment["issue"];
+  private _relatedIssue: L.IssueRelationFragment["relatedIssue"];
 
   public constructor(request: LinearRequest, data: L.IssueRelationFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this._issue = data.issue ?? undefined;
-    this._relatedIssue = data.relatedIssue ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._issue = data.issue;
+    this._relatedIssue = data.relatedIssue;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The relationship of the issue with the related issue. */
-  public type?: string;
+  public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The issue whose relationship is being described. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return new IssueQuery(this._request).fetch(this._issue.id);
   }
   /** The related issue. */
   public get relatedIssue(): LinearFetch<Issue> | undefined {
-    return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
+    return new IssueQuery(this._request).fetch(this._relatedIssue.id);
   }
 
   /** Deletes an issue relation. */
   public delete() {
-    return this.id ? new IssueRelationDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new IssueRelationDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates an issue relation. */
   public update(input: L.IssueRelationUpdateInput) {
-    return this.id ? new IssueRelationUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new IssueRelationUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -2532,14 +2536,14 @@ export class IssueRelation extends Request {
 export class IssueRelationConnection extends Connection<IssueRelation> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueRelation>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueRelation> | undefined>,
     data: L.IssueRelationConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new IssueRelation(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new IssueRelation(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -2552,14 +2556,14 @@ export class IssueRelationConnection extends Connection<IssueRelation> {
 export class IssueRelationHistoryPayload extends Request {
   public constructor(request: LinearRequest, data: L.IssueRelationHistoryPayloadFragment) {
     super(request);
-    this.identifier = data.identifier ?? undefined;
-    this.type = data.type ?? undefined;
+    this.identifier = data.identifier;
+    this.type = data.type;
   }
 
   /** The identifier of the related issue. */
-  public identifier?: string;
+  public identifier: string;
   /** The type of the change. */
-  public type?: string;
+  public type: string;
 }
 /**
  * IssueRelationPayload model
@@ -2568,22 +2572,22 @@ export class IssueRelationHistoryPayload extends Request {
  * @param data - L.IssueRelationPayloadFragment response data
  */
 export class IssueRelationPayload extends Request {
-  private _issueRelation?: L.IssueRelationPayloadFragment["issueRelation"];
+  private _issueRelation: L.IssueRelationPayloadFragment["issueRelation"];
 
   public constructor(request: LinearRequest, data: L.IssueRelationPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._issueRelation = data.issueRelation ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._issueRelation = data.issueRelation;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The issue relation that was created or updated. */
   public get issueRelation(): LinearFetch<IssueRelation> | undefined {
-    return this._issueRelation?.id ? new IssueRelationQuery(this._request).fetch(this._issueRelation?.id) : undefined;
+    return new IssueRelationQuery(this._request).fetch(this._issueRelation.id);
   }
 }
 /**
@@ -2596,43 +2600,43 @@ export class Milestone extends Request {
   public constructor(request: LinearRequest, data: L.MilestoneFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.name = data.name ?? undefined;
-    this.sortOrder = data.sortOrder ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.name = data.name;
+    this.sortOrder = data.sortOrder;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The name of the milestone. */
-  public name?: string;
+  public name: string;
   /** The sort order for the milestone. */
-  public sortOrder?: number;
+  public sortOrder: number;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The organization that the milestone belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** Projects associated with the milestone. */
   public projects(variables?: Omit<L.Milestone_ProjectsQueryVariables, "id">) {
-    return this.id ? new Milestone_ProjectsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Milestone_ProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Deletes a milestone. */
   public delete() {
-    return this.id ? new MilestoneDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new MilestoneDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates a milestone. */
   public update(input: L.MilestoneUpdateInput) {
-    return this.id ? new MilestoneUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new MilestoneUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -2645,14 +2649,14 @@ export class Milestone extends Request {
 export class MilestoneConnection extends Connection<Milestone> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Milestone>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Milestone> | undefined>,
     data: L.MilestoneConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Milestone(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Milestone(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -2667,15 +2671,15 @@ export class MilestonePayload extends Request {
 
   public constructor(request: LinearRequest, data: L.MilestonePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this._milestone = data.milestone ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The milesteone that was created or updated. */
   public get milestone(): LinearFetch<Milestone> | undefined {
     return this._milestone?.id ? new MilestoneQuery(this._request).fetch(this._milestone?.id) : undefined;
@@ -2689,38 +2693,38 @@ export class MilestonePayload extends Request {
  */
 export class Notification extends Request {
   private _comment?: L.NotificationFragment["comment"];
-  private _issue?: L.NotificationFragment["issue"];
-  private _team?: L.NotificationFragment["team"];
-  private _user?: L.NotificationFragment["user"];
+  private _issue: L.NotificationFragment["issue"];
+  private _team: L.NotificationFragment["team"];
+  private _user: L.NotificationFragment["user"];
 
   public constructor(request: LinearRequest, data: L.NotificationFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
-    this.id = data.id ?? undefined;
+    this.id = data.id;
     this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._comment = data.comment ?? undefined;
-    this._issue = data.issue ?? undefined;
-    this._team = data.team ?? undefined;
-    this._user = data.user ?? undefined;
+    this._issue = data.issue;
+    this._team = data.team;
+    this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Name of the reaction emoji associated with the notification. */
   public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
@@ -2728,40 +2732,40 @@ export class Notification extends Request {
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
   public snoozedUntilAt?: Date;
   /** Notification type */
-  public type?: string;
+  public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The comment which the notification is associated with. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
   /** The issue that the notification is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+    return new IssueQuery(this._request).fetch(this._issue.id);
   }
   /** The team which the notification is associated with. */
   public get team(): LinearFetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** The recipient of the notification. */
   public get user(): LinearFetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 
   /** Archives a notification. */
   public archive() {
-    return this.id ? new NotificationArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new NotificationArchiveMutation(this._request).fetch(this.id);
   }
   /** Unarchives a notification. */
   public unarchive() {
-    return this.id ? new NotificationUnarchiveMutation(this._request).fetch(this.id) : undefined;
+    return new NotificationUnarchiveMutation(this._request).fetch(this.id);
   }
   /** Updates a notification. */
   public update(input: L.NotificationUpdateInput) {
-    return this.id ? new NotificationUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new NotificationUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -2774,14 +2778,14 @@ export class Notification extends Request {
 export class NotificationConnection extends Connection<Notification> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Notification>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Notification> | undefined>,
     data: L.NotificationConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Notification(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Notification(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -2792,22 +2796,22 @@ export class NotificationConnection extends Connection<Notification> {
  * @param data - L.NotificationPayloadFragment response data
  */
 export class NotificationPayload extends Request {
-  private _notification?: L.NotificationPayloadFragment["notification"];
+  private _notification: L.NotificationPayloadFragment["notification"];
 
   public constructor(request: LinearRequest, data: L.NotificationPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._notification = data.notification ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._notification = data.notification;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The notification that was created or updated. */
   public get notification(): LinearFetch<Notification> | undefined {
-    return this._notification?.id ? new NotificationQuery(this._request).fetch(this._notification?.id) : undefined;
+    return new NotificationQuery(this._request).fetch(this._notification.id);
   }
 }
 /**
@@ -2819,33 +2823,33 @@ export class NotificationPayload extends Request {
 export class NotificationSubscription extends Request {
   private _project?: L.NotificationSubscriptionFragment["project"];
   private _team?: L.NotificationSubscriptionFragment["team"];
-  private _user?: L.NotificationSubscriptionFragment["user"];
+  private _user: L.NotificationSubscriptionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.NotificationSubscriptionFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._project = data.project ?? undefined;
     this._team = data.team ?? undefined;
-    this._user = data.user ?? undefined;
+    this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The type of the subscription. */
-  public type?: string;
+  public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Subscribed project. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
@@ -2856,12 +2860,12 @@ export class NotificationSubscription extends Request {
   }
   /** The user associated with notification subscriptions. */
   public get user(): LinearFetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 
   /** Deletes a notification subscription reference. */
   public delete() {
-    return this.id ? new NotificationSubscriptionDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new NotificationSubscriptionDeleteMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -2874,14 +2878,16 @@ export class NotificationSubscription extends Request {
 export class NotificationSubscriptionConnection extends Connection<NotificationSubscription> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<NotificationSubscription>>,
+    fetch: (
+      connection?: LinearConnectionVariables
+    ) => LinearFetch<LinearConnection<NotificationSubscription> | undefined>,
     data: L.NotificationSubscriptionConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new NotificationSubscription(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new NotificationSubscription(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -2892,24 +2898,22 @@ export class NotificationSubscriptionConnection extends Connection<NotificationS
  * @param data - L.NotificationSubscriptionPayloadFragment response data
  */
 export class NotificationSubscriptionPayload extends Request {
-  private _notificationSubscription?: L.NotificationSubscriptionPayloadFragment["notificationSubscription"];
+  private _notificationSubscription: L.NotificationSubscriptionPayloadFragment["notificationSubscription"];
 
   public constructor(request: LinearRequest, data: L.NotificationSubscriptionPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._notificationSubscription = data.notificationSubscription ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._notificationSubscription = data.notificationSubscription;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The notification subscription that was created or updated. */
   public get notificationSubscription(): LinearFetch<NotificationSubscription> | undefined {
-    return this._notificationSubscription?.id
-      ? new NotificationSubscriptionQuery(this._request).fetch(this._notificationSubscription?.id)
-      : undefined;
+    return new NotificationSubscriptionQuery(this._request).fetch(this._notificationSubscription.id);
   }
 }
 /**
@@ -2921,11 +2925,11 @@ export class NotificationSubscriptionPayload extends Request {
 export class OauthAuthStringAuthorizePayload extends Request {
   public constructor(request: LinearRequest, data: L.OauthAuthStringAuthorizePayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * OauthAuthStringChallengePayload model
@@ -2936,14 +2940,14 @@ export class OauthAuthStringAuthorizePayload extends Request {
 export class OauthAuthStringChallengePayload extends Request {
   public constructor(request: LinearRequest, data: L.OauthAuthStringChallengePayloadFragment) {
     super(request);
-    this.authString = data.authString ?? undefined;
-    this.success = data.success ?? undefined;
+    this.authString = data.authString;
+    this.success = data.success;
   }
 
   /** The created authentication string. */
-  public authString?: string;
+  public authString: string;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * OauthAuthStringCheckPayload model
@@ -2954,12 +2958,12 @@ export class OauthAuthStringChallengePayload extends Request {
 export class OauthAuthStringCheckPayload extends Request {
   public constructor(request: LinearRequest, data: L.OauthAuthStringCheckPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
     this.token = data.token ?? undefined;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** Access token for use. */
   public token?: string;
 }
@@ -2973,61 +2977,61 @@ export class OauthClient extends Request {
   public constructor(request: LinearRequest, data: L.OauthClientFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.clientId = data.clientId ?? undefined;
-    this.clientSecret = data.clientSecret ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.description = data.description ?? undefined;
-    this.developer = data.developer ?? undefined;
-    this.developerUrl = data.developerUrl ?? undefined;
-    this.id = data.id ?? undefined;
-    this.imageUrl = data.imageUrl ?? undefined;
-    this.name = data.name ?? undefined;
-    this.publicEnabled = data.publicEnabled ?? undefined;
-    this.redirectUris = data.redirectUris ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.clientId = data.clientId;
+    this.clientSecret = data.clientSecret;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description;
+    this.developer = data.developer;
+    this.developerUrl = data.developerUrl;
+    this.id = data.id;
+    this.imageUrl = data.imageUrl;
+    this.name = data.name;
+    this.publicEnabled = data.publicEnabled;
+    this.redirectUris = data.redirectUris;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** OAuth application's client ID. */
-  public clientId?: string;
+  public clientId: string;
   /** OAuth application's client secret. */
-  public clientSecret?: string;
+  public clientSecret: string;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Information about the application. */
-  public description?: string;
+  public description: string;
   /** Name of the developer. */
-  public developer?: string;
+  public developer: string;
   /** Url of the developer. */
-  public developerUrl?: string;
+  public developerUrl: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Image of the application. */
-  public imageUrl?: string;
+  public imageUrl: string;
   /** OAuth application's client name. */
-  public name?: string;
+  public name: string;
   /** Whether the OAuth application is publicly visible, or only visible to the creating workspace. */
-  public publicEnabled?: boolean;
+  public publicEnabled: boolean;
   /** List of allowed redirect URIs for the application. */
-  public redirectUris?: string[];
+  public redirectUris: string[];
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
 
   /** Archives an OAuth client. */
   public archive() {
-    return this.id ? new OauthClientArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new OauthClientArchiveMutation(this._request).fetch(this.id);
   }
   /** Updates an OAuth client. */
   public rotateSecret() {
-    return this.id ? new OauthClientRotateSecretMutation(this._request).fetch(this.id) : undefined;
+    return new OauthClientRotateSecretMutation(this._request).fetch(this.id);
   }
   /** Updates an OAuth client. */
   public update(input: L.OauthClientUpdateInput) {
-    return this.id ? new OauthClientUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new OauthClientUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -3039,17 +3043,17 @@ export class OauthClient extends Request {
 export class OauthClientPayload extends Request {
   public constructor(request: LinearRequest, data: L.OauthClientPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this.oauthClient = data.oauthClient ? new OauthClient(request, data.oauthClient) : undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.oauthClient = new OauthClient(request, data.oauthClient);
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The OAuth client application that was created or updated. */
-  public oauthClient?: OauthClient;
+  public oauthClient: OauthClient;
 }
 /**
  * OauthTokenRevokePayload model
@@ -3060,11 +3064,11 @@ export class OauthClientPayload extends Request {
 export class OauthTokenRevokePayload extends Request {
   public constructor(request: LinearRequest, data: L.OauthTokenRevokePayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * An organization. Organizations are root-level objects that contain user accounts and teams.
@@ -3075,64 +3079,64 @@ export class OauthTokenRevokePayload extends Request {
 export class Organization extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationFragment) {
     super(request);
-    this.allowedAuthServices = data.allowedAuthServices ?? undefined;
+    this.allowedAuthServices = data.allowedAuthServices;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.createdIssueCount = data.createdIssueCount ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.createdIssueCount = data.createdIssueCount;
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.gitBranchFormat = data.gitBranchFormat ?? undefined;
-    this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled ?? undefined;
-    this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled ?? undefined;
-    this.id = data.id ?? undefined;
+    this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled;
+    this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled;
+    this.id = data.id;
     this.logoUrl = data.logoUrl ?? undefined;
-    this.name = data.name ?? undefined;
-    this.periodUploadVolume = data.periodUploadVolume ?? undefined;
-    this.roadmapEnabled = data.roadmapEnabled ?? undefined;
-    this.samlEnabled = data.samlEnabled ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.urlKey = data.urlKey ?? undefined;
-    this.userCount = data.userCount ?? undefined;
+    this.name = data.name;
+    this.periodUploadVolume = data.periodUploadVolume;
+    this.roadmapEnabled = data.roadmapEnabled;
+    this.samlEnabled = data.samlEnabled;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.urlKey = data.urlKey;
+    this.userCount = data.userCount;
   }
 
   /** Allowed authentication providers, empty array means all are allowed */
-  public allowedAuthServices?: string[];
+  public allowedAuthServices: string[];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Number of issues in the organization. */
-  public createdIssueCount?: number;
+  public createdIssueCount: number;
   /** The time at which deletion of the organization was requested. */
   public deletionRequestedAt?: Date;
   /** How git branches are formatted. If null, default formatting will be used. */
   public gitBranchFormat?: string;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
-  public gitLinkbackMessagesEnabled?: boolean;
+  public gitLinkbackMessagesEnabled: boolean;
   /** Whether the Git integration linkback messages should be sent to public repositories. */
-  public gitPublicLinkbackMessagesEnabled?: boolean;
+  public gitPublicLinkbackMessagesEnabled: boolean;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The organization's logo URL. */
   public logoUrl?: string;
   /** The organization's name. */
-  public name?: string;
+  public name: string;
   /** Rolling 30-day total upload volume for the organization, in megabytes. */
-  public periodUploadVolume?: number;
+  public periodUploadVolume: number;
   /** Whether the organization is using a roadmap. */
-  public roadmapEnabled?: boolean;
+  public roadmapEnabled: boolean;
   /** Whether SAML authentication is enabled for organization. */
-  public samlEnabled?: boolean;
+  public samlEnabled: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The organization's unique URL key. */
-  public urlKey?: string;
+  public urlKey: string;
   /** Number of active users in the organization. */
-  public userCount?: number;
+  public userCount: number;
   /** The organization's subscription to a paid plan. */
-  public get subscription(): LinearFetch<Subscription> {
+  public get subscription(): LinearFetch<Subscription | undefined> {
     return new SubscriptionQuery(this._request).fetch();
   }
   /** Integrations associated with the organization. */
@@ -3169,11 +3173,11 @@ export class Organization extends Request {
 export class OrganizationCancelDeletePayload extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationCancelDeletePayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * OrganizationDeletePayload model
@@ -3184,11 +3188,11 @@ export class OrganizationCancelDeletePayload extends Request {
 export class OrganizationDeletePayload extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationDeletePayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * Defines the use of a domain by an organization.
@@ -3202,32 +3206,32 @@ export class OrganizationDomain extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationDomainFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.name = data.name ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.name = data.name;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.verificationEmail = data.verificationEmail ?? undefined;
-    this.verified = data.verified ?? undefined;
+    this.verified = data.verified;
     this._creator = data.creator ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Domain name */
-  public name?: string;
+  public name: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** E-mail used to verify this domain */
   public verificationEmail?: string;
   /** Is this domain verified */
-  public verified?: boolean;
+  public verified: boolean;
   /** The user who added the domain. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -3235,7 +3239,7 @@ export class OrganizationDomain extends Request {
 
   /** Deletes a domain. */
   public delete() {
-    return this.id ? new OrganizationDomainDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new OrganizationDomainDeleteMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -3247,19 +3251,17 @@ export class OrganizationDomain extends Request {
 export class OrganizationDomainPayload extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationDomainPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this.organizationDomain = data.organizationDomain
-      ? new OrganizationDomain(request, data.organizationDomain)
-      : undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.organizationDomain = new OrganizationDomain(request, data.organizationDomain);
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The organization domain that was created or updated. */
-  public organizationDomain?: OrganizationDomain;
+  public organizationDomain: OrganizationDomain;
 }
 /**
  * OrganizationDomainSimplePayload model
@@ -3270,11 +3272,11 @@ export class OrganizationDomainPayload extends Request {
 export class OrganizationDomainSimplePayload extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationDomainSimplePayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * OrganizationExistsPayload model
@@ -3285,14 +3287,14 @@ export class OrganizationDomainSimplePayload extends Request {
 export class OrganizationExistsPayload extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationExistsPayloadFragment) {
     super(request);
-    this.exists = data.exists ?? undefined;
-    this.success = data.success ?? undefined;
+    this.exists = data.exists;
+    this.success = data.success;
   }
 
   /** Whether the organization exists. */
-  public exists?: boolean;
+  public exists: boolean;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * An invitation to the organization that has been sent via email.
@@ -3302,20 +3304,20 @@ export class OrganizationExistsPayload extends Request {
  */
 export class OrganizationInvite extends Request {
   private _invitee?: L.OrganizationInviteFragment["invitee"];
-  private _inviter?: L.OrganizationInviteFragment["inviter"];
+  private _inviter: L.OrganizationInviteFragment["inviter"];
 
   public constructor(request: LinearRequest, data: L.OrganizationInviteFragment) {
     super(request);
     this.acceptedAt = parseDate(data.acceptedAt) ?? undefined;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.email = data.email ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.email = data.email;
     this.expiresAt = parseDate(data.expiresAt) ?? undefined;
-    this.external = data.external ?? undefined;
-    this.id = data.id ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.external = data.external;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._invitee = data.invitee ?? undefined;
-    this._inviter = data.inviter ?? undefined;
+    this._inviter = data.inviter;
   }
 
   /** The time at which the invite was accepted. Null, if the invite hasn't been accepted */
@@ -3323,27 +3325,27 @@ export class OrganizationInvite extends Request {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The invitees email address. */
-  public email?: string;
+  public email: string;
   /** The time at which the invite will be expiring. Null, if the invite shouldn't expire */
   public expiresAt?: Date;
   /** The invite was sent to external address. */
-  public external?: boolean;
+  public external: boolean;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
   public get invitee(): LinearFetch<User> | undefined {
     return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
   }
   /** The user who created the invitation. */
   public get inviter(): LinearFetch<User> | undefined {
-    return this._inviter?.id ? new UserQuery(this._request).fetch(this._inviter?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._inviter.id);
   }
   /** The organization that the invite is associated with. */
   public get organization(): LinearFetch<Organization> {
@@ -3355,7 +3357,7 @@ export class OrganizationInvite extends Request {
   }
   /** Deletes an organization invite. */
   public delete() {
-    return this.id ? new OrganizationInviteDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new OrganizationInviteDeleteMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -3368,14 +3370,14 @@ export class OrganizationInvite extends Request {
 export class OrganizationInviteConnection extends Connection<OrganizationInvite> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<OrganizationInvite>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<OrganizationInvite> | undefined>,
     data: L.OrganizationInviteConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new OrganizationInvite(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new OrganizationInvite(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -3388,19 +3390,17 @@ export class OrganizationInviteConnection extends Connection<OrganizationInvite>
 export class OrganizationInvitePayload extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationInvitePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this.organizationInvite = data.organizationInvite
-      ? new OrganizationInvite(request, data.organizationInvite)
-      : undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.organizationInvite = new OrganizationInvite(request, data.organizationInvite);
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The organization invite that was created or updated. */
-  public organizationInvite?: OrganizationInvite;
+  public organizationInvite: OrganizationInvite;
 }
 /**
  * OrganizationPayload model
@@ -3411,14 +3411,14 @@ export class OrganizationInvitePayload extends Request {
 export class OrganizationPayload extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The organization that was created or updated. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -3434,17 +3434,17 @@ export class PageInfo extends Request {
   public constructor(request: LinearRequest, data: L.PageInfoFragment) {
     super(request);
     this.endCursor = data.endCursor ?? undefined;
-    this.hasNextPage = data.hasNextPage ?? undefined;
-    this.hasPreviousPage = data.hasPreviousPage ?? undefined;
+    this.hasNextPage = data.hasNextPage;
+    this.hasPreviousPage = data.hasPreviousPage;
     this.startCursor = data.startCursor ?? undefined;
   }
 
   /** Cursor representing the last result in the paginated results. */
   public endCursor?: string;
   /** Indicates if there are more results when paginating forward. */
-  public hasNextPage?: boolean;
+  public hasNextPage: boolean;
   /** Indicates if there are more results when paginating backward. */
-  public hasPreviousPage?: boolean;
+  public hasPreviousPage: boolean;
   /** Cursor representing the first result in the paginated results. */
   public startCursor?: string;
 }
@@ -3455,7 +3455,7 @@ export class PageInfo extends Request {
  * @param data - L.ProjectFragment response data
  */
 export class Project extends Request {
-  private _creator?: L.ProjectFragment["creator"];
+  private _creator: L.ProjectFragment["creator"];
   private _lead?: L.ProjectFragment["lead"];
   private _milestone?: L.ProjectFragment["milestone"];
 
@@ -3464,29 +3464,29 @@ export class Project extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.autoArchivedAt = parseDate(data.autoArchivedAt) ?? undefined;
     this.canceledAt = parseDate(data.canceledAt) ?? undefined;
-    this.color = data.color ?? undefined;
+    this.color = data.color;
     this.completedAt = parseDate(data.completedAt) ?? undefined;
-    this.completedIssueCountHistory = data.completedIssueCountHistory ?? undefined;
-    this.completedScopeHistory = data.completedScopeHistory ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.description = data.description ?? undefined;
+    this.completedIssueCountHistory = data.completedIssueCountHistory;
+    this.completedScopeHistory = data.completedScopeHistory;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description;
     this.icon = data.icon ?? undefined;
-    this.id = data.id ?? undefined;
-    this.issueCountHistory = data.issueCountHistory ?? undefined;
-    this.name = data.name ?? undefined;
-    this.progress = data.progress ?? undefined;
-    this.scopeHistory = data.scopeHistory ?? undefined;
-    this.slackIssueComments = data.slackIssueComments ?? undefined;
-    this.slackIssueStatuses = data.slackIssueStatuses ?? undefined;
-    this.slackNewIssue = data.slackNewIssue ?? undefined;
-    this.slugId = data.slugId ?? undefined;
-    this.sortOrder = data.sortOrder ?? undefined;
+    this.id = data.id;
+    this.issueCountHistory = data.issueCountHistory;
+    this.name = data.name;
+    this.progress = data.progress;
+    this.scopeHistory = data.scopeHistory;
+    this.slackIssueComments = data.slackIssueComments;
+    this.slackIssueStatuses = data.slackIssueStatuses;
+    this.slackNewIssue = data.slackNewIssue;
+    this.slugId = data.slugId;
+    this.sortOrder = data.sortOrder;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
-    this.state = data.state ?? undefined;
+    this.state = data.state;
     this.targetDate = data.targetDate ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.url = data.url ?? undefined;
-    this._creator = data.creator ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this._creator = data.creator;
     this._lead = data.lead ?? undefined;
     this._milestone = data.milestone ?? undefined;
   }
@@ -3498,55 +3498,55 @@ export class Project extends Request {
   /** The time at which the project was moved into canceled state. */
   public canceledAt?: Date;
   /** The project's color. */
-  public color?: string;
+  public color: string;
   /** The time at which the project was moved into completed state. */
   public completedAt?: Date;
   /** The number of completed issues in the project after each week. */
-  public completedIssueCountHistory?: number[];
+  public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each week. */
-  public completedScopeHistory?: number[];
+  public completedScopeHistory: number[];
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The project's description. */
-  public description?: string;
+  public description: string;
   /** The icon of the project. */
   public icon?: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The total number of issues in the project after each week. */
-  public issueCountHistory?: number[];
+  public issueCountHistory: number[];
   /** The project's name. */
-  public name?: string;
+  public name: string;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
-  public progress?: number;
+  public progress: number;
   /** The total number of estimation points after each week. */
-  public scopeHistory?: number[];
+  public scopeHistory: number[];
   /** Whether to send new issue comment notifications to Slack. */
-  public slackIssueComments?: boolean;
+  public slackIssueComments: boolean;
   /** Whether to send new issue status updates to Slack. */
-  public slackIssueStatuses?: boolean;
+  public slackIssueStatuses: boolean;
   /** Whether to send new issue notifications to Slack. */
-  public slackNewIssue?: boolean;
+  public slackNewIssue: boolean;
   /** The project's unique URL slug. */
-  public slugId?: string;
+  public slugId: string;
   /** The sort order for the project within its milestone. */
-  public sortOrder?: number;
+  public sortOrder: number;
   /** The time at which the project was moved into started state. */
   public startedAt?: Date;
   /** The type of the state. */
-  public state?: string;
+  public state: string;
   /** The estimated completion date of the project. */
   public targetDate?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Project URL. */
-  public url?: string;
+  public url: string;
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The project lead. */
   public get lead(): LinearFetch<User> | undefined {
@@ -3558,31 +3558,31 @@ export class Project extends Request {
   }
   /** Issues associated with the project. */
   public issues(variables?: Omit<L.Project_IssuesQueryVariables, "id">) {
-    return this.id ? new Project_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Project_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Links associated with the project. */
   public links(variables?: Omit<L.Project_LinksQueryVariables, "id">) {
-    return this.id ? new Project_LinksQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Project_LinksQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Users that are members of the project. */
   public members(variables?: Omit<L.Project_MembersQueryVariables, "id">) {
-    return this.id ? new Project_MembersQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Project_MembersQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Teams associated with this project. */
   public teams(variables?: Omit<L.Project_TeamsQueryVariables, "id">) {
-    return this.id ? new Project_TeamsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Project_TeamsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Archives a project. */
   public archive() {
-    return this.id ? new ProjectArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new ProjectArchiveMutation(this._request).fetch(this.id);
   }
   /** Unarchives a project. */
   public unarchive() {
-    return this.id ? new ProjectUnarchiveMutation(this._request).fetch(this.id) : undefined;
+    return new ProjectUnarchiveMutation(this._request).fetch(this.id);
   }
   /** Updates a project. */
   public update(input: L.ProjectUpdateInput) {
-    return this.id ? new ProjectUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new ProjectUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -3595,14 +3595,14 @@ export class Project extends Request {
 export class ProjectConnection extends Connection<Project> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Project>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Project> | undefined>,
     data: L.ProjectConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Project(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Project(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -3613,48 +3613,48 @@ export class ProjectConnection extends Connection<Project> {
  * @param data - L.ProjectLinkFragment response data
  */
 export class ProjectLink extends Request {
-  private _creator?: L.ProjectLinkFragment["creator"];
-  private _project?: L.ProjectLinkFragment["project"];
+  private _creator: L.ProjectLinkFragment["creator"];
+  private _project: L.ProjectLinkFragment["project"];
 
   public constructor(request: LinearRequest, data: L.ProjectLinkFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.label = data.label ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.url = data.url ?? undefined;
-    this._creator = data.creator ?? undefined;
-    this._project = data.project ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.label = data.label;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this._creator = data.creator;
+    this._project = data.project;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The link's label. */
-  public label?: string;
+  public label: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The link's URL. */
-  public url?: string;
+  public url: string;
   /** The user who created the link. */
   public get creator(): LinearFetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The project that the link is associated with. */
   public get project(): LinearFetch<Project> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+    return new ProjectQuery(this._request).fetch(this._project.id);
   }
 
   /** Deletes a project link. */
   public delete() {
-    return this.id ? new ProjectLinkDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new ProjectLinkDeleteMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -3667,14 +3667,14 @@ export class ProjectLink extends Request {
 export class ProjectLinkConnection extends Connection<ProjectLink> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectLink>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectLink> | undefined>,
     data: L.ProjectLinkConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new ProjectLink(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new ProjectLink(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -3685,22 +3685,22 @@ export class ProjectLinkConnection extends Connection<ProjectLink> {
  * @param data - L.ProjectLinkPayloadFragment response data
  */
 export class ProjectLinkPayload extends Request {
-  private _projectLink?: L.ProjectLinkPayloadFragment["projectLink"];
+  private _projectLink: L.ProjectLinkPayloadFragment["projectLink"];
 
   public constructor(request: LinearRequest, data: L.ProjectLinkPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._projectLink = data.projectLink ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._projectLink = data.projectLink;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The project that was created or updated. */
   public get projectLink(): LinearFetch<ProjectLink> | undefined {
-    return this._projectLink?.id ? new ProjectLinkQuery(this._request).fetch(this._projectLink?.id) : undefined;
+    return new ProjectLinkQuery(this._request).fetch(this._projectLink.id);
   }
 }
 /**
@@ -3714,15 +3714,15 @@ export class ProjectPayload extends Request {
 
   public constructor(request: LinearRequest, data: L.ProjectPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this._project = data.project ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The project that was created or updated. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
@@ -3737,38 +3737,38 @@ export class ProjectPayload extends Request {
 export class PullRequestPayload extends Request {
   public constructor(request: LinearRequest, data: L.PullRequestPayloadFragment) {
     super(request);
-    this.branch = data.branch ?? undefined;
-    this.closedAt = data.closedAt ?? undefined;
-    this.createdAt = data.createdAt ?? undefined;
-    this.draft = data.draft ?? undefined;
-    this.id = data.id ?? undefined;
-    this.mergedAt = data.mergedAt ?? undefined;
-    this.number = data.number ?? undefined;
-    this.repoLogin = data.repoLogin ?? undefined;
-    this.repoName = data.repoName ?? undefined;
-    this.status = data.status ?? undefined;
-    this.title = data.title ?? undefined;
-    this.updatedAt = data.updatedAt ?? undefined;
-    this.url = data.url ?? undefined;
-    this.userId = data.userId ?? undefined;
-    this.userLogin = data.userLogin ?? undefined;
+    this.branch = data.branch;
+    this.closedAt = data.closedAt;
+    this.createdAt = data.createdAt;
+    this.draft = data.draft;
+    this.id = data.id;
+    this.mergedAt = data.mergedAt;
+    this.number = data.number;
+    this.repoLogin = data.repoLogin;
+    this.repoName = data.repoName;
+    this.status = data.status;
+    this.title = data.title;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url;
+    this.userId = data.userId;
+    this.userLogin = data.userLogin;
   }
 
-  public branch?: string;
-  public closedAt?: string;
-  public createdAt?: string;
-  public draft?: boolean;
-  public id?: string;
-  public mergedAt?: string;
-  public number?: number;
-  public repoLogin?: string;
-  public repoName?: string;
-  public status?: string;
-  public title?: string;
-  public updatedAt?: string;
-  public url?: string;
-  public userId?: string;
-  public userLogin?: string;
+  public branch: string;
+  public closedAt: string;
+  public createdAt: string;
+  public draft: boolean;
+  public id: string;
+  public mergedAt: string;
+  public number: number;
+  public repoLogin: string;
+  public repoName: string;
+  public status: string;
+  public title: string;
+  public updatedAt: string;
+  public url: string;
+  public userId: string;
+  public userLogin: string;
 }
 /**
  * A user's web browser push notification subscription.
@@ -3780,26 +3780,26 @@ export class PushSubscription extends Request {
   public constructor(request: LinearRequest, data: L.PushSubscriptionFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
 
   /** Deletes a push subscription. */
   public delete() {
-    return this.id ? new PushSubscriptionDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new PushSubscriptionDeleteMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -3812,14 +3812,14 @@ export class PushSubscription extends Request {
 export class PushSubscriptionConnection extends Connection<PushSubscription> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<PushSubscription>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<PushSubscription> | undefined>,
     data: L.PushSubscriptionConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new PushSubscription(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new PushSubscription(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -3832,14 +3832,14 @@ export class PushSubscriptionConnection extends Connection<PushSubscription> {
 export class PushSubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: L.PushSubscriptionPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * PushSubscriptionTestPayload model
@@ -3850,11 +3850,11 @@ export class PushSubscriptionPayload extends Request {
 export class PushSubscriptionTestPayload extends Request {
   public constructor(request: LinearRequest, data: L.PushSubscriptionTestPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * A reaction associated with a comment.
@@ -3863,45 +3863,45 @@ export class PushSubscriptionTestPayload extends Request {
  * @param data - L.ReactionFragment response data
  */
 export class Reaction extends Request {
-  private _comment?: L.ReactionFragment["comment"];
-  private _user?: L.ReactionFragment["user"];
+  private _comment: L.ReactionFragment["comment"];
+  private _user: L.ReactionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.ReactionFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.emoji = data.emoji ?? undefined;
-    this.id = data.id ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this._comment = data.comment ?? undefined;
-    this._user = data.user ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emoji = data.emoji;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._comment = data.comment;
+    this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Name of the reaction's emoji. */
-  public emoji?: string;
+  public emoji: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The comment that the reaction is associated with. */
   public get comment(): LinearFetch<Comment> | undefined {
-    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
+    return new CommentQuery(this._request).fetch(this._comment.id);
   }
   /** The user who reacted. */
   public get user(): LinearFetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 
   /** Deletes a reaction. */
   public delete() {
-    return this.id ? new ReactionDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new ReactionDeleteMutation(this._request).fetch(this.id);
   }
 }
 /**
@@ -3914,14 +3914,14 @@ export class Reaction extends Request {
 export class ReactionConnection extends Connection<Reaction> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Reaction>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Reaction> | undefined>,
     data: L.ReactionConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Reaction(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Reaction(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -3932,20 +3932,20 @@ export class ReactionConnection extends Connection<Reaction> {
  * @param data - L.ReactionPayloadFragment response data
  */
 export class ReactionPayload extends Request {
-  private _reaction?: L.ReactionPayloadFragment["reaction"];
+  private _reaction: L.ReactionPayloadFragment["reaction"];
 
   public constructor(request: LinearRequest, data: L.ReactionPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._reaction = data.reaction ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._reaction = data.reaction;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
-  public success?: boolean;
+  public lastSyncId: number;
+  public success: boolean;
   public get reaction(): LinearFetch<Reaction> | undefined {
-    return this._reaction?.id ? new ReactionQuery(this._request).fetch(this._reaction?.id) : undefined;
+    return new ReactionQuery(this._request).fetch(this._reaction.id);
   }
 }
 /**
@@ -3957,14 +3957,14 @@ export class ReactionPayload extends Request {
 export class RotateSecretPayload extends Request {
   public constructor(request: LinearRequest, data: L.RotateSecretPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * The integration resource's settings
@@ -4002,17 +4002,17 @@ export class SamlConfiguration extends Request {
 export class SearchResultPayload extends Request {
   public constructor(request: LinearRequest, data: L.SearchResultPayloadFragment) {
     super(request);
-    this.issueIds = data.issueIds ?? undefined;
-    this.totalCount = data.totalCount ?? undefined;
-    this.archivePayload = data.archivePayload ? new ArchiveResponse(request, data.archivePayload) : undefined;
+    this.issueIds = data.issueIds;
+    this.totalCount = data.totalCount;
+    this.archivePayload = new ArchiveResponse(request, data.archivePayload);
   }
 
   /** Active issue IDs returned matching the search term. */
-  public issueIds?: string[];
+  public issueIds: string[];
   /** Total number of search results. */
-  public totalCount?: number;
+  public totalCount: number;
   /** Archived issues matching the search term along with all their dependencies. */
-  public archivePayload?: ArchiveResponse;
+  public archivePayload: ArchiveResponse;
 }
 /**
  * Sentry issue data
@@ -4023,41 +4023,41 @@ export class SearchResultPayload extends Request {
 export class SentryIssuePayload extends Request {
   public constructor(request: LinearRequest, data: L.SentryIssuePayloadFragment) {
     super(request);
-    this.actorId = data.actorId ?? undefined;
-    this.actorName = data.actorName ?? undefined;
-    this.actorType = data.actorType ?? undefined;
-    this.firstSeen = data.firstSeen ?? undefined;
+    this.actorId = data.actorId;
+    this.actorName = data.actorName;
+    this.actorType = data.actorType;
+    this.firstSeen = data.firstSeen;
     this.firstVersion = data.firstVersion ?? undefined;
-    this.issueId = data.issueId ?? undefined;
-    this.issueTitle = data.issueTitle ?? undefined;
-    this.projectId = data.projectId ?? undefined;
-    this.projectSlug = data.projectSlug ?? undefined;
-    this.shortId = data.shortId ?? undefined;
-    this.webUrl = data.webUrl ?? undefined;
+    this.issueId = data.issueId;
+    this.issueTitle = data.issueTitle;
+    this.projectId = data.projectId;
+    this.projectSlug = data.projectSlug;
+    this.shortId = data.shortId;
+    this.webUrl = data.webUrl;
   }
 
   /** The Sentry identifier of the actor who created the issue. */
-  public actorId?: number;
+  public actorId: number;
   /** The name of the Sentry actor who created this issue. */
-  public actorName?: string;
+  public actorName: string;
   /** The type of the actor who created the issue. */
-  public actorType?: string;
+  public actorType: string;
   /** The date this issue was first seen. */
-  public firstSeen?: string;
+  public firstSeen: string;
   /** The name of the first release version this issue appeared on, if available. */
   public firstVersion?: string;
   /** The Sentry identifier for the issue. */
-  public issueId?: string;
+  public issueId: string;
   /** The title of the issue. */
-  public issueTitle?: string;
+  public issueTitle: string;
   /** The Sentry identifier of the project this issue belongs to. */
-  public projectId?: number;
+  public projectId: number;
   /** The slug of the project this issue belongs to. */
-  public projectSlug?: string;
+  public projectSlug: string;
   /** The shortId of the issue. */
-  public shortId?: string;
+  public shortId: string;
   /** The description of the issue. */
-  public webUrl?: string;
+  public webUrl: string;
 }
 /**
  * Sentry specific settings.
@@ -4068,11 +4068,11 @@ export class SentryIssuePayload extends Request {
 export class SentrySettings extends Request {
   public constructor(request: LinearRequest, data: L.SentrySettingsFragment) {
     super(request);
-    this.organizationSlug = data.organizationSlug ?? undefined;
+    this.organizationSlug = data.organizationSlug;
   }
 
   /** The slug of the Sentry organization being connected. */
-  public organizationSlug?: string;
+  public organizationSlug: string;
 }
 /**
  * Slack notification specific settings.
@@ -4083,14 +4083,14 @@ export class SentrySettings extends Request {
 export class SlackPostSettings extends Request {
   public constructor(request: LinearRequest, data: L.SlackPostSettingsFragment) {
     super(request);
-    this.channel = data.channel ?? undefined;
-    this.channelId = data.channelId ?? undefined;
-    this.configurationUrl = data.configurationUrl ?? undefined;
+    this.channel = data.channel;
+    this.channelId = data.channelId;
+    this.configurationUrl = data.configurationUrl;
   }
 
-  public channel?: string;
-  public channelId?: string;
-  public configurationUrl?: string;
+  public channel: string;
+  public channelId: string;
+  public configurationUrl: string;
 }
 /**
  * SsoUrlFromEmailResponse model
@@ -4101,14 +4101,14 @@ export class SlackPostSettings extends Request {
 export class SsoUrlFromEmailResponse extends Request {
   public constructor(request: LinearRequest, data: L.SsoUrlFromEmailResponseFragment) {
     super(request);
-    this.samlSsoUrl = data.samlSsoUrl ?? undefined;
-    this.success = data.success ?? undefined;
+    this.samlSsoUrl = data.samlSsoUrl;
+    this.success = data.success;
   }
 
   /** SAML SSO sign-in URL. */
-  public samlSsoUrl?: string;
+  public samlSsoUrl: string;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * StepsResponse model
@@ -4119,17 +4119,17 @@ export class SsoUrlFromEmailResponse extends Request {
 export class StepsResponse extends Request {
   public constructor(request: LinearRequest, data: L.StepsResponseFragment) {
     super(request);
-    this.clientIds = data.clientIds ?? undefined;
+    this.clientIds = data.clientIds;
     this.steps = data.steps ?? undefined;
-    this.version = data.version ?? undefined;
+    this.version = data.version;
   }
 
   /** List of client IDs for the document steps. */
-  public clientIds?: string[];
+  public clientIds: string[];
   /** New document steps from the client. */
   public steps?: Record<string, unknown>[];
   /** Client's document version. */
-  public version?: number;
+  public version: number;
 }
 /**
  * The subscription of an organization.
@@ -4144,13 +4144,13 @@ export class Subscription extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.canceledAt = parseDate(data.canceledAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
     this.nextBillingAt = parseDate(data.nextBillingAt) ?? undefined;
     this.pendingChangeType = data.pendingChangeType ?? undefined;
-    this.seats = data.seats ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.seats = data.seats;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator ?? undefined;
   }
 
@@ -4159,22 +4159,22 @@ export class Subscription extends Request {
   /** The date the subscription was canceled, if any. */
   public canceledAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The date the subscription will be billed next. */
   public nextBillingAt?: Date;
   /** The subscription type of a pending change. Null if no change pending. */
   public pendingChangeType?: string;
   /** The number of seats in the subscription. */
-  public seats?: number;
+  public seats: number;
   /** The subscription type. */
-  public type?: string;
+  public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The creator of the subscription. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -4186,15 +4186,15 @@ export class Subscription extends Request {
 
   /** Archives a subscription. */
   public archive() {
-    return this.id ? new SubscriptionArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new SubscriptionArchiveMutation(this._request).fetch(this.id);
   }
   /** Updates a subscription. */
   public update(input: L.SubscriptionUpdateInput) {
-    return this.id ? new SubscriptionUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new SubscriptionUpdateMutation(this._request).fetch(this.id, input);
   }
   /** Upgrades a subscription plan. */
   public upgrade() {
-    return this.id && this.type ? new SubscriptionUpgradeMutation(this._request).fetch(this.id, this.type) : undefined;
+    return new SubscriptionUpgradeMutation(this._request).fetch(this.id, this.type);
   }
 }
 /**
@@ -4207,18 +4207,18 @@ export class SubscriptionPayload extends Request {
   public constructor(request: LinearRequest, data: L.SubscriptionPayloadFragment) {
     super(request);
     this.canceledAt = parseDate(data.canceledAt) ?? undefined;
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
   }
 
   /** The date the subscription was set to cancel at the end of the billing period, if any. */
   public canceledAt?: Date;
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The subscription entity being mutated. */
-  public get subscription(): LinearFetch<Subscription> {
+  public get subscription(): LinearFetch<Subscription | undefined> {
     return new SubscriptionQuery(this._request).fetch();
   }
 }
@@ -4246,15 +4246,15 @@ export class SubscriptionSessionPayload extends Request {
 export class SyncDeltaResponse extends Request {
   public constructor(request: LinearRequest, data: L.SyncDeltaResponseFragment) {
     super(request);
-    this.loadMore = data.loadMore ?? undefined;
-    this.success = data.success ?? undefined;
+    this.loadMore = data.loadMore;
+    this.success = data.success;
     this.updates = data.updates ?? undefined;
   }
 
   /** Whether the client should try loading more. */
-  public loadMore?: boolean;
+  public loadMore: boolean;
   /** Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap. */
-  public success?: boolean;
+  public success: boolean;
   /** A JSON serialized collection of delta packets. */
   public updates?: string;
 }
@@ -4268,29 +4268,29 @@ export class SyncDeltaResponse extends Request {
 export class SyncResponse extends Request {
   public constructor(request: LinearRequest, data: L.SyncResponseFragment) {
     super(request);
-    this.databaseVersion = data.databaseVersion ?? undefined;
+    this.databaseVersion = data.databaseVersion;
     this.delta = data.delta ?? undefined;
-    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.lastSyncId = data.lastSyncId;
     this.state = data.state ?? undefined;
-    this.subscribedSyncGroups = data.subscribedSyncGroups ?? undefined;
+    this.subscribedSyncGroups = data.subscribedSyncGroups;
   }
 
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
-  public databaseVersion?: number;
+  public databaseVersion: number;
   /**
    * JSON serialized delta changes that the client can apply to its local state
    *     in order to catch up with the state of the world.
    */
   public delta?: string;
   /** The last sync id covered by the response. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /**
    * The full state of the organization as a serialized JSON object.
    *     Mutually exclusive with the delta property
    */
   public state?: string;
   /** The sync groups that the user is subscribed to. */
-  public subscribedSyncGroups?: string[];
+  public subscribedSyncGroups: string[];
 }
 /**
  * SynchronizedPayload model
@@ -4301,11 +4301,11 @@ export class SyncResponse extends Request {
 export class SynchronizedPayload extends Request {
   public constructor(request: LinearRequest, data: L.SynchronizedPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
+    this.lastSyncId = data.lastSyncId;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
 }
 /**
  * An organizational unit that contains issues.
@@ -4329,36 +4329,36 @@ export class Team extends Request {
     this.autoArchivePeriod = data.autoArchivePeriod ?? undefined;
     this.autoClosePeriod = data.autoClosePeriod ?? undefined;
     this.autoCloseStateId = data.autoCloseStateId ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.cycleCalenderUrl = data.cycleCalenderUrl ?? undefined;
-    this.cycleCooldownTime = data.cycleCooldownTime ?? undefined;
-    this.cycleDuration = data.cycleDuration ?? undefined;
-    this.cycleIssueAutoAssignCompleted = data.cycleIssueAutoAssignCompleted ?? undefined;
-    this.cycleIssueAutoAssignStarted = data.cycleIssueAutoAssignStarted ?? undefined;
-    this.cycleLockToActive = data.cycleLockToActive ?? undefined;
-    this.cycleStartDay = data.cycleStartDay ?? undefined;
-    this.cyclesEnabled = data.cyclesEnabled ?? undefined;
-    this.defaultIssueEstimate = data.defaultIssueEstimate ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.cycleCalenderUrl = data.cycleCalenderUrl;
+    this.cycleCooldownTime = data.cycleCooldownTime;
+    this.cycleDuration = data.cycleDuration;
+    this.cycleIssueAutoAssignCompleted = data.cycleIssueAutoAssignCompleted;
+    this.cycleIssueAutoAssignStarted = data.cycleIssueAutoAssignStarted;
+    this.cycleLockToActive = data.cycleLockToActive;
+    this.cycleStartDay = data.cycleStartDay;
+    this.cyclesEnabled = data.cyclesEnabled;
+    this.defaultIssueEstimate = data.defaultIssueEstimate;
     this.defaultTemplateForMembersId = data.defaultTemplateForMembersId ?? undefined;
     this.defaultTemplateForNonMembersId = data.defaultTemplateForNonMembersId ?? undefined;
     this.description = data.description ?? undefined;
-    this.groupIssueHistory = data.groupIssueHistory ?? undefined;
-    this.id = data.id ?? undefined;
-    this.inviteHash = data.inviteHash ?? undefined;
-    this.issueEstimationAllowZero = data.issueEstimationAllowZero ?? undefined;
-    this.issueEstimationExtended = data.issueEstimationExtended ?? undefined;
-    this.issueEstimationType = data.issueEstimationType ?? undefined;
-    this.issueOrderingNoPriorityFirst = data.issueOrderingNoPriorityFirst ?? undefined;
-    this.key = data.key ?? undefined;
-    this.name = data.name ?? undefined;
-    this.private = data.private ?? undefined;
-    this.slackIssueComments = data.slackIssueComments ?? undefined;
-    this.slackIssueStatuses = data.slackIssueStatuses ?? undefined;
-    this.slackNewIssue = data.slackNewIssue ?? undefined;
-    this.timezone = data.timezone ?? undefined;
-    this.triageEnabled = data.triageEnabled ?? undefined;
-    this.upcomingCycleCount = data.upcomingCycleCount ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.groupIssueHistory = data.groupIssueHistory;
+    this.id = data.id;
+    this.inviteHash = data.inviteHash;
+    this.issueEstimationAllowZero = data.issueEstimationAllowZero;
+    this.issueEstimationExtended = data.issueEstimationExtended;
+    this.issueEstimationType = data.issueEstimationType;
+    this.issueOrderingNoPriorityFirst = data.issueOrderingNoPriorityFirst;
+    this.key = data.key;
+    this.name = data.name;
+    this.private = data.private;
+    this.slackIssueComments = data.slackIssueComments;
+    this.slackIssueStatuses = data.slackIssueStatuses;
+    this.slackNewIssue = data.slackNewIssue;
+    this.timezone = data.timezone;
+    this.triageEnabled = data.triageEnabled;
+    this.upcomingCycleCount = data.upcomingCycleCount;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._activeCycle = data.activeCycle ?? undefined;
     this._defaultIssueState = data.defaultIssueState ?? undefined;
     this._draftWorkflowState = data.draftWorkflowState ?? undefined;
@@ -4378,25 +4378,25 @@ export class Team extends Request {
   /** The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state. */
   public autoCloseStateId?: string;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Calender feed (iCal) for cycles. */
-  public cycleCalenderUrl?: string;
+  public cycleCalenderUrl: string;
   /** The cooldown time after each cycle in weeks. */
-  public cycleCooldownTime?: number;
+  public cycleCooldownTime: number;
   /** The duration of a cycle in weeks. */
-  public cycleDuration?: number;
+  public cycleDuration: number;
   /** Auto assign completed issues to current cycle. */
-  public cycleIssueAutoAssignCompleted?: boolean;
+  public cycleIssueAutoAssignCompleted: boolean;
   /** Auto assign started issues to current cycle. */
-  public cycleIssueAutoAssignStarted?: boolean;
+  public cycleIssueAutoAssignStarted: boolean;
   /** Only allow issues issues with cycles in Active Issues. */
-  public cycleLockToActive?: boolean;
+  public cycleLockToActive: boolean;
   /** The day of the week that a new cycle starts. */
-  public cycleStartDay?: number;
+  public cycleStartDay: number;
   /** Whether the team uses cycles. */
-  public cyclesEnabled?: boolean;
+  public cyclesEnabled: boolean;
   /** What to use as an default estimate for unestimated issues. */
-  public defaultIssueEstimate?: number;
+  public defaultIssueEstimate: number;
   /** The default template to use for new issues created by members of the team. */
   public defaultTemplateForMembersId?: string;
   /** The default template to use for new issues created by non-members of the team. */
@@ -4404,42 +4404,42 @@ export class Team extends Request {
   /** The team's description. */
   public description?: string;
   /** Whether to group recent issue history entries. */
-  public groupIssueHistory?: boolean;
+  public groupIssueHistory: boolean;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Unique hash for the team to be used in invite URLs. */
-  public inviteHash?: string;
+  public inviteHash: string;
   /** Whether to allow zeros in issues estimates. */
-  public issueEstimationAllowZero?: boolean;
+  public issueEstimationAllowZero: boolean;
   /** Whether to add additional points to the estimate scale. */
-  public issueEstimationExtended?: boolean;
+  public issueEstimationExtended: boolean;
   /** The issue estimation type to use. */
-  public issueEstimationType?: string;
+  public issueEstimationType: string;
   /** Whether issues without priority should be sorted first. */
-  public issueOrderingNoPriorityFirst?: boolean;
+  public issueOrderingNoPriorityFirst: boolean;
   /** The team's unique key. The key is used in URLs. */
-  public key?: string;
+  public key: string;
   /** The team's name. */
-  public name?: string;
+  public name: string;
   /** Whether the team is private or not. */
-  public private?: boolean;
+  public private: boolean;
   /** Whether to send new issue comment notifications to Slack. */
-  public slackIssueComments?: boolean;
+  public slackIssueComments: boolean;
   /** Whether to send new issue status updates to Slack. */
-  public slackIssueStatuses?: boolean;
+  public slackIssueStatuses: boolean;
   /** Whether to send new issue notifications to Slack. */
-  public slackNewIssue?: boolean;
+  public slackNewIssue: boolean;
   /** The timezone of the team. Defaults to "America/Los_Angeles" */
-  public timezone?: string;
+  public timezone: string;
   /** Whether triage mode is enabled for the team or not. */
-  public triageEnabled?: boolean;
+  public triageEnabled: boolean;
   /** How many upcoming cycles to create. */
-  public upcomingCycleCount?: number;
+  public upcomingCycleCount: number;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Team's currently active cycle. */
   public get activeCycle(): LinearFetch<Cycle> | undefined {
     return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
@@ -4492,47 +4492,47 @@ export class Team extends Request {
   }
   /** Cycles associated with the team. */
   public cycles(variables?: Omit<L.Team_CyclesQueryVariables, "id">) {
-    return this.id ? new Team_CyclesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_CyclesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Issues associated with the team. */
   public issues(variables?: Omit<L.Team_IssuesQueryVariables, "id">) {
-    return this.id ? new Team_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Labels associated with the team. */
   public labels(variables?: Omit<L.Team_LabelsQueryVariables, "id">) {
-    return this.id ? new Team_LabelsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_LabelsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Users who are members of this team. */
   public members(variables?: Omit<L.Team_MembersQueryVariables, "id">) {
-    return this.id ? new Team_MembersQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_MembersQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Memberships associated with the team. For easier access of the same data, use `members` query. */
   public memberships(variables?: Omit<L.Team_MembershipsQueryVariables, "id">) {
-    return this.id ? new Team_MembershipsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_MembershipsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Projects associated with the team. */
   public projects(variables?: Omit<L.Team_ProjectsQueryVariables, "id">) {
-    return this.id ? new Team_ProjectsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_ProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** The states that define the workflow associated with the team. */
   public states(variables?: Omit<L.Team_StatesQueryVariables, "id">) {
-    return this.id ? new Team_StatesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_StatesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Templates associated with the team. */
   public templates(variables?: Omit<L.Team_TemplatesQueryVariables, "id">) {
-    return this.id ? new Team_TemplatesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_TemplatesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Webhooks associated with the team. */
   public webhooks(variables?: Omit<L.Team_WebhooksQueryVariables, "id">) {
-    return this.id ? new Team_WebhooksQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new Team_WebhooksQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Deletes a team. */
   public delete() {
-    return this.id ? new TeamDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new TeamDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates a team. */
   public update(input: L.TeamUpdateInput) {
-    return this.id ? new TeamUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new TeamUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -4545,14 +4545,14 @@ export class Team extends Request {
 export class TeamConnection extends Connection<Team> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Team>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Team> | undefined>,
     data: L.TeamConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Team(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Team(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -4563,49 +4563,49 @@ export class TeamConnection extends Connection<Team> {
  * @param data - L.TeamMembershipFragment response data
  */
 export class TeamMembership extends Request {
-  private _team?: L.TeamMembershipFragment["team"];
-  private _user?: L.TeamMembershipFragment["user"];
+  private _team: L.TeamMembershipFragment["team"];
+  private _user: L.TeamMembershipFragment["user"];
 
   public constructor(request: LinearRequest, data: L.TeamMembershipFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
     this.owner = data.owner ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this._team = data.team ?? undefined;
-    this._user = data.user ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._team = data.team;
+    this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Whether the user is the owner of the team */
   public owner?: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The team that the membership is associated with. */
   public get team(): LinearFetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** The user that the membership is associated with. */
   public get user(): LinearFetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 
   /** Deletes a team membership. */
   public delete() {
-    return this.id ? new TeamMembershipDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new TeamMembershipDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates a team membership. */
   public update(input: L.TeamMembershipUpdateInput) {
-    return this.id ? new TeamMembershipUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new TeamMembershipUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -4618,14 +4618,14 @@ export class TeamMembership extends Request {
 export class TeamMembershipConnection extends Connection<TeamMembership> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<TeamMembership>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<TeamMembership> | undefined>,
     data: L.TeamMembershipConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new TeamMembership(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new TeamMembership(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -4640,15 +4640,15 @@ export class TeamMembershipPayload extends Request {
 
   public constructor(request: LinearRequest, data: L.TeamMembershipPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this._teamMembership = data.teamMembership ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The team membership that was created or updated. */
   public get teamMembership(): LinearFetch<TeamMembership> | undefined {
     return this._teamMembership?.id
@@ -4667,15 +4667,15 @@ export class TeamPayload extends Request {
 
   public constructor(request: LinearRequest, data: L.TeamPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this._team = data.team ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The team that was created or updated. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
@@ -4689,57 +4689,57 @@ export class TeamPayload extends Request {
  */
 export class Template extends Request {
   private _creator?: L.TemplateFragment["creator"];
-  private _team?: L.TemplateFragment["team"];
+  private _team: L.TemplateFragment["team"];
 
   public constructor(request: LinearRequest, data: L.TemplateFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
-    this.id = data.id ?? undefined;
-    this.name = data.name ?? undefined;
-    this.templateData = parseJson(data.templateData) ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
+    this.templateData = parseJson(data.templateData) ?? {};
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator ?? undefined;
-    this._team = data.team ?? undefined;
+    this._team = data.team;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Template description. */
   public description?: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The name of the template. */
-  public name?: string;
+  public name: string;
   /** Template data. */
-  public templateData?: Record<string, unknown>;
+  public templateData: Record<string, unknown>;
   /** The entity type this template is for. */
-  public type?: string;
+  public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The user who created the template. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The team that the template is associated with. */
   public get team(): LinearFetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
 
   /** Deletes a template. */
   public delete() {
-    return this.id ? new TemplateDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new TemplateDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates an existing template. */
   public update(input: L.TemplateUpdateInput) {
-    return this.id ? new TemplateUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new TemplateUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -4751,10 +4751,10 @@ export class Template extends Request {
 export class TemplateConnection extends Request {
   public constructor(request: LinearRequest, data: L.TemplateConnectionFragment) {
     super(request);
-    this.pageInfo = data.pageInfo ? new PageInfo(request, data.pageInfo) : undefined;
+    this.pageInfo = new PageInfo(request, data.pageInfo);
   }
 
-  public pageInfo?: PageInfo;
+  public pageInfo: PageInfo;
   public get nodes(): LinearFetch<Template[]> {
     return new TemplatesQuery(this._request).fetch();
   }
@@ -4766,22 +4766,22 @@ export class TemplateConnection extends Request {
  * @param data - L.TemplatePayloadFragment response data
  */
 export class TemplatePayload extends Request {
-  private _template?: L.TemplatePayloadFragment["template"];
+  private _template: L.TemplatePayloadFragment["template"];
 
   public constructor(request: LinearRequest, data: L.TemplatePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._template = data.template ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._template = data.template;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The template that was created or updated. */
   public get template(): LinearFetch<Template> | undefined {
-    return this._template?.id ? new TemplateQuery(this._request).fetch(this._template?.id) : undefined;
+    return new TemplateQuery(this._request).fetch(this._template.id);
   }
 }
 /**
@@ -4793,27 +4793,27 @@ export class TemplatePayload extends Request {
 export class UploadFile extends Request {
   public constructor(request: LinearRequest, data: L.UploadFileFragment) {
     super(request);
-    this.assetUrl = data.assetUrl ?? undefined;
-    this.contentType = data.contentType ?? undefined;
-    this.filename = data.filename ?? undefined;
+    this.assetUrl = data.assetUrl;
+    this.contentType = data.contentType;
+    this.filename = data.filename;
     this.metaData = parseJson(data.metaData) ?? undefined;
-    this.size = data.size ?? undefined;
-    this.uploadUrl = data.uploadUrl ?? undefined;
-    this.headers = data.headers ? data.headers.map(node => new UploadFileHeader(request, node)) : undefined;
+    this.size = data.size;
+    this.uploadUrl = data.uploadUrl;
+    this.headers = data.headers.map(node => new UploadFileHeader(request, node));
   }
 
   /** The asset URL for the uploaded file. (assigned automatically) */
-  public assetUrl?: string;
+  public assetUrl: string;
   /** The content type. */
-  public contentType?: string;
+  public contentType: string;
   /** The filename. */
-  public filename?: string;
+  public filename: string;
   public metaData?: Record<string, unknown>;
   /** The size of the uploaded file. */
-  public size?: number;
+  public size: number;
   /** The signed URL the for the uploaded file. (assigned automatically) */
-  public uploadUrl?: string;
-  public headers?: UploadFileHeader[];
+  public uploadUrl: string;
+  public headers: UploadFileHeader[];
 }
 /**
  * UploadFileHeader model
@@ -4824,14 +4824,14 @@ export class UploadFile extends Request {
 export class UploadFileHeader extends Request {
   public constructor(request: LinearRequest, data: L.UploadFileHeaderFragment) {
     super(request);
-    this.key = data.key ?? undefined;
-    this.value = data.value ?? undefined;
+    this.key = data.key;
+    this.value = data.value;
   }
 
   /** Upload file header key. */
-  public key?: string;
+  public key: string;
   /** Upload file header value. */
-  public value?: string;
+  public value: string;
 }
 /**
  * UploadPayload model
@@ -4842,15 +4842,15 @@ export class UploadFileHeader extends Request {
 export class UploadPayload extends Request {
   public constructor(request: LinearRequest, data: L.UploadPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this.uploadFile = data.uploadFile ? new UploadFile(request, data.uploadFile) : undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** Object describing the file to be uploaded. */
   public uploadFile?: UploadFile;
 }
@@ -4863,91 +4863,91 @@ export class UploadPayload extends Request {
 export class User extends Request {
   public constructor(request: LinearRequest, data: L.UserFragment) {
     super(request);
-    this.active = data.active ?? undefined;
-    this.admin = data.admin ?? undefined;
+    this.active = data.active;
+    this.admin = data.admin;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.avatarUrl = data.avatarUrl ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.createdIssueCount = data.createdIssueCount ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.createdIssueCount = data.createdIssueCount;
     this.disableReason = data.disableReason ?? undefined;
-    this.displayName = data.displayName ?? undefined;
-    this.email = data.email ?? undefined;
-    this.id = data.id ?? undefined;
-    this.inviteHash = data.inviteHash ?? undefined;
+    this.displayName = data.displayName;
+    this.email = data.email;
+    this.id = data.id;
+    this.inviteHash = data.inviteHash;
     this.lastSeen = parseDate(data.lastSeen) ?? undefined;
-    this.name = data.name ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.url = data.url ?? undefined;
+    this.name = data.name;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
   }
 
   /** Whether the user account is active or disabled (suspended). */
-  public active?: boolean;
+  public active: boolean;
   /** Whether the user is an organization administrator. */
-  public admin?: boolean;
+  public admin: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Number of issues created. */
-  public createdIssueCount?: number;
+  public createdIssueCount: number;
   /** Reason why is the account disabled. */
   public disableReason?: string;
   /** The user's display (nick) name. Unique within each organization. */
-  public displayName?: string;
+  public displayName: string;
   /** The user's email address. */
-  public email?: string;
+  public email: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Unique hash for the user to be used in invite URLs. */
-  public inviteHash?: string;
+  public inviteHash: string;
   /** The last time the user was seen online. If null, the user is currently online. */
   public lastSeen?: Date;
   /** The user's full name. */
-  public name?: string;
+  public name: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** User's profile URL. */
-  public url?: string;
+  public url: string;
   /** Organization in which the user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** Issues assigned to the user. */
   public assignedIssues(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">) {
-    return this.id ? new User_AssignedIssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new User_AssignedIssuesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Issues created by the user. */
   public createdIssues(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">) {
-    return this.id ? new User_CreatedIssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new User_CreatedIssuesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   public teamMemberships(variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
-    return this.id ? new User_TeamMembershipsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new User_TeamMembershipsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Teams the user is part of. */
   public teams(variables?: Omit<L.User_TeamsQueryVariables, "id">) {
-    return this.id ? new User_TeamsQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new User_TeamsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Updates the user's settings. */
   public settingsUpdate(input: L.UserSettingsUpdateInput) {
-    return this.id ? new UserSettingsUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new UserSettingsUpdateMutation(this._request).fetch(this.id, input);
   }
   /** Suspends a user. Can only be called by an admin. */
   public suspend() {
-    return this.id ? new UserSuspendMutation(this._request).fetch(this.id) : undefined;
+    return new UserSuspendMutation(this._request).fetch(this.id);
   }
   /** Un-suspends a user. Can only be called by an admin. */
   public unsuspend() {
-    return this.id ? new UserUnsuspendMutation(this._request).fetch(this.id) : undefined;
+    return new UserUnsuspendMutation(this._request).fetch(this.id);
   }
   /** Updates a user. Only available to organization admins and the user themselves. */
   public update(input: L.UpdateUserInput) {
-    return this.id ? new UserUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new UserUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -4960,31 +4960,31 @@ export class UserAccount extends Request {
   public constructor(request: LinearRequest, data: L.UserAccountFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.email = data.email ?? undefined;
-    this.id = data.id ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.email = data.email;
+    this.id = data.id;
     this.name = data.name ?? undefined;
-    this.service = data.service ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.users = data.users ? data.users.map(node => new User(request, node)) : undefined;
+    this.service = data.service;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.users = data.users.map(node => new User(request, node));
   }
 
   /** The time at which the model was archived. */
   public archivedAt?: Date;
   /** The time at which the model was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The user's email address. */
-  public email?: string;
+  public email: string;
   /** The models identifier. */
-  public id?: string;
+  public id: string;
   /** The user's name. */
   public name?: string;
   /** The authentication service used to create the account. */
-  public service?: string;
+  public service: string;
   /** The time at which the model was updated. */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Users belonging to the account. */
-  public users?: User[];
+  public users: User[];
 }
 /**
  * UserAdminPayload model
@@ -4995,11 +4995,11 @@ export class UserAccount extends Request {
 export class UserAdminPayload extends Request {
   public constructor(request: LinearRequest, data: L.UserAdminPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
@@ -5010,32 +5010,32 @@ export class UserAdminPayload extends Request {
 export class UserAuthorizedApplication extends Request {
   public constructor(request: LinearRequest, data: L.UserAuthorizedApplicationFragment) {
     super(request);
-    this.clientId = data.clientId ?? undefined;
-    this.createdByLinear = data.createdByLinear ?? undefined;
+    this.clientId = data.clientId;
+    this.createdByLinear = data.createdByLinear;
     this.description = data.description ?? undefined;
-    this.developer = data.developer ?? undefined;
-    this.developerUrl = data.developerUrl ?? undefined;
+    this.developer = data.developer;
+    this.developerUrl = data.developerUrl;
     this.imageUrl = data.imageUrl ?? undefined;
-    this.isAuthorized = data.isAuthorized ?? undefined;
-    this.name = data.name ?? undefined;
+    this.isAuthorized = data.isAuthorized;
+    this.name = data.name;
   }
 
   /** OAuth application's client ID. */
-  public clientId?: string;
+  public clientId: string;
   /** Whether the application was created by Linear */
-  public createdByLinear?: boolean;
+  public createdByLinear: boolean;
   /** Information about the application. */
   public description?: string;
   /** Name of the developer. */
-  public developer?: string;
+  public developer: string;
   /** Url of the developer (homepage or docs). */
-  public developerUrl?: string;
+  public developerUrl: string;
   /** Image of the application. */
   public imageUrl?: string;
   /** Whether the user has authorized the application for the given scopes. */
-  public isAuthorized?: boolean;
+  public isAuthorized: boolean;
   /** Application name. */
-  public name?: string;
+  public name: string;
 }
 /**
  * UserConnection model
@@ -5047,14 +5047,14 @@ export class UserAuthorizedApplication extends Request {
 export class UserConnection extends Connection<User> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<User>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<User> | undefined>,
     data: L.UserConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new User(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new User(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -5069,15 +5069,15 @@ export class UserPayload extends Request {
 
   public constructor(request: LinearRequest, data: L.UserPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
     this._user = data.user ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The user that was created or updated. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
@@ -5090,42 +5090,42 @@ export class UserPayload extends Request {
  * @param data - L.UserSettingsFragment response data
  */
 export class UserSettings extends Request {
-  private _user?: L.UserSettingsFragment["user"];
+  private _user: L.UserSettingsFragment["user"];
 
   public constructor(request: LinearRequest, data: L.UserSettingsFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.notificationPreferences = parseJson(data.notificationPreferences) ?? undefined;
-    this.unsubscribedFrom = data.unsubscribedFrom ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this._user = data.user ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.notificationPreferences = parseJson(data.notificationPreferences) ?? {};
+    this.unsubscribedFrom = data.unsubscribedFrom;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The notification channel settings the user has selected. */
-  public notificationPreferences?: Record<string, unknown>;
+  public notificationPreferences: Record<string, unknown>;
   /** The email types the user has unsubscribed from. */
-  public unsubscribedFrom?: string[];
+  public unsubscribedFrom: string[];
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The user associated with these settings. */
   public get user(): LinearFetch<User> | undefined {
-    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 
   /** Updates the user's settings. */
   public update(input: L.UserSettingsUpdateInput) {
-    return this.id ? new UserSettingsUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new UserSettingsUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -5137,20 +5137,20 @@ export class UserSettings extends Request {
 export class UserSettingsFlagPayload extends Request {
   public constructor(request: LinearRequest, data: L.UserSettingsFlagPayloadFragment) {
     super(request);
-    this.flag = data.flag ?? undefined;
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this.value = data.value ?? undefined;
+    this.flag = data.flag;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.value = data.value;
   }
 
   /** The flag key which was updated. */
-  public flag?: string;
+  public flag: string;
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The flag value after update. */
-  public value?: number;
+  public value: number;
 }
 /**
  * UserSettingsFlagsResetPayload model
@@ -5161,14 +5161,14 @@ export class UserSettingsFlagPayload extends Request {
 export class UserSettingsFlagsResetPayload extends Request {
   public constructor(request: LinearRequest, data: L.UserSettingsFlagsResetPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * UserSettingsPayload model
@@ -5179,14 +5179,14 @@ export class UserSettingsFlagsResetPayload extends Request {
 export class UserSettingsPayload extends Request {
   public constructor(request: LinearRequest, data: L.UserSettingsPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The user's settings. */
   public get userSettings(): LinearFetch<UserSettings> {
     return new UserSettingsQuery(this._request).fetch();
@@ -5201,11 +5201,11 @@ export class UserSettingsPayload extends Request {
 export class UserSubscribeToNewsletterPayload extends Request {
   public constructor(request: LinearRequest, data: L.UserSubscribeToNewsletterPayloadFragment) {
     super(request);
-    this.success = data.success ?? undefined;
+    this.success = data.success;
   }
 
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
 }
 /**
  * View preferences.
@@ -5217,36 +5217,36 @@ export class ViewPreferences extends Request {
   public constructor(request: LinearRequest, data: L.ViewPreferencesFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.id = data.id ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.viewType = data.viewType ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.viewType = data.viewType;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The view preference type. */
-  public type?: string;
+  public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The view type. */
-  public viewType?: string;
+  public viewType: string;
 
   /** Deletes a ViewPreferences. */
   public delete() {
-    return this.id ? new ViewPreferencesDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new ViewPreferencesDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates an existing ViewPreferences object. */
   public update(input: L.ViewPreferencesUpdateInput) {
-    return this.id ? new ViewPreferencesUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new ViewPreferencesUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -5258,17 +5258,17 @@ export class ViewPreferences extends Request {
 export class ViewPreferencesPayload extends Request {
   public constructor(request: LinearRequest, data: L.ViewPreferencesPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this.viewPreferences = data.viewPreferences ? new ViewPreferences(request, data.viewPreferences) : undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.viewPreferences = new ViewPreferences(request, data.viewPreferences);
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The view preferences entity being mutated. */
-  public viewPreferences?: ViewPreferences;
+  public viewPreferences: ViewPreferences;
 }
 /**
  * A webhook used to send HTTP notifications over data updates
@@ -5278,60 +5278,60 @@ export class ViewPreferencesPayload extends Request {
  */
 export class Webhook extends Request {
   private _creator?: L.WebhookFragment["creator"];
-  private _team?: L.WebhookFragment["team"];
+  private _team: L.WebhookFragment["team"];
 
   public constructor(request: LinearRequest, data: L.WebhookFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
-    this.enabled = data.enabled ?? undefined;
-    this.id = data.id ?? undefined;
-    this.label = data.label ?? undefined;
-    this.resourceTypes = data.resourceTypes ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.enabled = data.enabled;
+    this.id = data.id;
+    this.label = data.label;
+    this.resourceTypes = data.resourceTypes;
     this.secret = data.secret ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this.url = data.url ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
     this._creator = data.creator ?? undefined;
-    this._team = data.team ?? undefined;
+    this._team = data.team;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Whether the Webhook is enabled. */
-  public enabled?: boolean;
+  public enabled: boolean;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** Webhook label */
-  public label?: string;
+  public label: string;
   /** The resource types this webhook is subscribed to. */
-  public resourceTypes?: string[];
+  public resourceTypes: string[];
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** Webhook URL */
-  public url?: string;
+  public url: string;
   /** The user who created the webhook. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The team that the webhook is associated with. */
   public get team(): LinearFetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
 
   /** Deletes a Webhook. */
   public delete() {
-    return this.id ? new WebhookDeleteMutation(this._request).fetch(this.id) : undefined;
+    return new WebhookDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates an existing Webhook. */
   public update(input: L.WebhookUpdateInput) {
-    return this.id ? new WebhookUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new WebhookUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -5344,14 +5344,14 @@ export class Webhook extends Request {
 export class WebhookConnection extends Connection<Webhook> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Webhook>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Webhook> | undefined>,
     data: L.WebhookConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new Webhook(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new Webhook(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -5362,22 +5362,22 @@ export class WebhookConnection extends Connection<Webhook> {
  * @param data - L.WebhookPayloadFragment response data
  */
 export class WebhookPayload extends Request {
-  private _webhook?: L.WebhookPayloadFragment["webhook"];
+  private _webhook: L.WebhookPayloadFragment["webhook"];
 
   public constructor(request: LinearRequest, data: L.WebhookPayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._webhook = data.webhook ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._webhook = data.webhook;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The webhook entity being mutated. */
   public get webhook(): LinearFetch<Webhook> | undefined {
-    return this._webhook?.id ? new WebhookQuery(this._request).fetch(this._webhook?.id) : undefined;
+    return new WebhookQuery(this._request).fetch(this._webhook.id);
   }
 }
 /**
@@ -5387,58 +5387,58 @@ export class WebhookPayload extends Request {
  * @param data - L.WorkflowStateFragment response data
  */
 export class WorkflowState extends Request {
-  private _team?: L.WorkflowStateFragment["team"];
+  private _team: L.WorkflowStateFragment["team"];
 
   public constructor(request: LinearRequest, data: L.WorkflowStateFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.color = data.color ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? undefined;
+    this.color = data.color;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
-    this.id = data.id ?? undefined;
-    this.name = data.name ?? undefined;
-    this.position = data.position ?? undefined;
-    this.type = data.type ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? undefined;
-    this._team = data.team ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
+    this.position = data.position;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._team = data.team;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The state's UI color as a HEX string. */
-  public color?: string;
+  public color: string;
   /** The time at which the entity was created. */
-  public createdAt?: Date;
+  public createdAt: Date;
   /** Description of the state. */
   public description?: string;
   /** The unique identifier of the entity. */
-  public id?: string;
+  public id: string;
   /** The state's name. */
-  public name?: string;
+  public name: string;
   /** The position of the state in the team flow. */
-  public position?: number;
+  public position: number;
   /** The type of the state. */
-  public type?: string;
+  public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
    */
-  public updatedAt?: Date;
+  public updatedAt: Date;
   /** The team to which this state belongs to. */
   public get team(): LinearFetch<Team> | undefined {
-    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** Issues belonging in this state. */
   public issues(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">) {
-    return this.id ? new WorkflowState_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
+    return new WorkflowState_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Archives a state. Only states with issues that have all been archived can be archived. */
   public archive() {
-    return this.id ? new WorkflowStateArchiveMutation(this._request).fetch(this.id) : undefined;
+    return new WorkflowStateArchiveMutation(this._request).fetch(this.id);
   }
   /** Updates a state. */
   public update(input: L.WorkflowStateUpdateInput) {
-    return this.id ? new WorkflowStateUpdateMutation(this._request).fetch(this.id, input) : undefined;
+    return new WorkflowStateUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -5451,14 +5451,14 @@ export class WorkflowState extends Request {
 export class WorkflowStateConnection extends Connection<WorkflowState> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<WorkflowState>>,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<WorkflowState> | undefined>,
     data: L.WorkflowStateConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data?.nodes ? data.nodes.map(node => new WorkflowState(request, node)) : undefined,
-      data?.pageInfo ? new PageInfo(request, data.pageInfo) : undefined
+      data.nodes.map(node => new WorkflowState(request, node)),
+      new PageInfo(request, data.pageInfo)
     );
   }
 }
@@ -5469,22 +5469,22 @@ export class WorkflowStateConnection extends Connection<WorkflowState> {
  * @param data - L.WorkflowStatePayloadFragment response data
  */
 export class WorkflowStatePayload extends Request {
-  private _workflowState?: L.WorkflowStatePayloadFragment["workflowState"];
+  private _workflowState: L.WorkflowStatePayloadFragment["workflowState"];
 
   public constructor(request: LinearRequest, data: L.WorkflowStatePayloadFragment) {
     super(request);
-    this.lastSyncId = data.lastSyncId ?? undefined;
-    this.success = data.success ?? undefined;
-    this._workflowState = data.workflowState ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._workflowState = data.workflowState;
   }
 
   /** The identifier of the last sync operation. */
-  public lastSyncId?: number;
+  public lastSyncId: number;
   /** Whether the operation was successful. */
-  public success?: boolean;
+  public success: boolean;
   /** The state that was created or updated. */
   public get workflowState(): LinearFetch<WorkflowState> | undefined {
-    return this._workflowState?.id ? new WorkflowStateQuery(this._request).fetch(this._workflowState?.id) : undefined;
+    return new WorkflowStateQuery(this._request).fetch(this._workflowState.id);
   }
 }
 /**
@@ -5496,17 +5496,17 @@ export class WorkflowStatePayload extends Request {
 export class ZendeskSettings extends Request {
   public constructor(request: LinearRequest, data: L.ZendeskSettingsFragment) {
     super(request);
-    this.botUserId = data.botUserId ?? undefined;
-    this.subdomain = data.subdomain ?? undefined;
-    this.url = data.url ?? undefined;
+    this.botUserId = data.botUserId;
+    this.subdomain = data.subdomain;
+    this.url = data.url;
   }
 
   /** The ID of the Linear bot user. */
-  public botUserId?: string;
+  public botUserId: string;
   /** The subdomain of the Zendesk organization being connected. */
-  public subdomain?: string;
+  public subdomain: string;
   /** The URL of the connected Zendesk organization. */
-  public url?: string;
+  public url: string;
 }
 /**
  * A fetchable ApplicationWithAuthorization Query
@@ -5539,8 +5539,8 @@ export class ApplicationWithAuthorizationQuery extends Request {
       scope,
       ...variables,
     });
-    const data = response?.applicationWithAuthorization;
-    return data ? new UserAuthorizedApplication(this._request, data) : undefined;
+    const data = response.applicationWithAuthorization;
+    return new UserAuthorizedApplication(this._request, data);
   }
 }
 
@@ -5564,8 +5564,8 @@ export class AttachmentQuery extends Request {
     const response = await this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(L.AttachmentDocument, {
       id,
     });
-    const data = response?.attachment;
-    return data ? new Attachment(this._request, data) : undefined;
+    const data = response.attachment;
+    return new Attachment(this._request, data);
   }
 }
 
@@ -5592,8 +5592,8 @@ export class AttachmentIssueQuery extends Request {
         id,
       }
     );
-    const data = response?.attachmentIssue;
-    return data ? new Issue(this._request, data) : undefined;
+    const data = response.attachmentIssue;
+    return new Issue(this._request, data);
   }
 }
 
@@ -5618,10 +5618,8 @@ export class AttachmentsQuery extends Request {
       L.AttachmentsDocument,
       variables
     );
-    const data = response?.attachments;
-    return data
-      ? new AttachmentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.attachments;
+    return new AttachmentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -5653,10 +5651,12 @@ export class AttachmentsForUrlQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.attachmentsForURL;
-    return data
-      ? new AttachmentConnection(this._request, connection => this.fetch(url, { ...variables, ...connection }), data)
-      : undefined;
+    const data = response.attachmentsForURL;
+    return new AttachmentConnection(
+      this._request,
+      connection => this.fetch(url, { ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -5680,8 +5680,8 @@ export class AuthorizedApplicationsQuery extends Request {
       L.AuthorizedApplicationsDocument,
       {}
     );
-    const data = response?.authorizedApplications;
-    return data ? data.map(node => new AuthorizedApplication(this._request, node)) : undefined;
+    const data = response.authorizedApplications;
+    return data.map(node => new AuthorizedApplication(this._request, node));
   }
 }
 
@@ -5705,8 +5705,8 @@ export class AvailableUsersQuery extends Request {
       L.AvailableUsersDocument,
       {}
     );
-    const data = response?.availableUsers;
-    return data ? new AuthResolverResponse(this._request, data) : undefined;
+    const data = response.availableUsers;
+    return new AuthResolverResponse(this._request, data);
   }
 }
 
@@ -5730,8 +5730,8 @@ export class BillingDetailsQuery extends Request {
       L.BillingDetailsDocument,
       {}
     );
-    const data = response?.billingDetails;
-    return data ? new BillingDetailsPayload(this._request, data) : undefined;
+    const data = response.billingDetails;
+    return new BillingDetailsPayload(this._request, data);
   }
 }
 
@@ -5766,8 +5766,8 @@ export class CollaborativeDocumentJoinQuery extends Request {
         version,
       }
     );
-    const data = response?.collaborativeDocumentJoin;
-    return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
+    const data = response.collaborativeDocumentJoin;
+    return new CollaborationDocumentUpdatePayload(this._request, data);
   }
 }
 
@@ -5791,8 +5791,8 @@ export class CommentQuery extends Request {
     const response = await this._request<L.CommentQuery, L.CommentQueryVariables>(L.CommentDocument, {
       id,
     });
-    const data = response?.comment;
-    return data ? new Comment(this._request, data) : undefined;
+    const data = response.comment;
+    return new Comment(this._request, data);
   }
 }
 
@@ -5814,10 +5814,8 @@ export class CommentsQuery extends Request {
    */
   public async fetch(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
     const response = await this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables);
-    const data = response?.comments;
-    return data
-      ? new CommentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.comments;
+    return new CommentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -5841,8 +5839,8 @@ export class CustomViewQuery extends Request {
     const response = await this._request<L.CustomViewQuery, L.CustomViewQueryVariables>(L.CustomViewDocument, {
       id,
     });
-    const data = response?.customView;
-    return data ? new CustomView(this._request, data) : undefined;
+    const data = response.customView;
+    return new CustomView(this._request, data);
   }
 }
 
@@ -5867,10 +5865,8 @@ export class CustomViewsQuery extends Request {
       L.CustomViewsDocument,
       variables
     );
-    const data = response?.customViews;
-    return data
-      ? new CustomViewConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.customViews;
+    return new CustomViewConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -5894,8 +5890,8 @@ export class CycleQuery extends Request {
     const response = await this._request<L.CycleQuery, L.CycleQueryVariables>(L.CycleDocument, {
       id,
     });
-    const data = response?.cycle;
-    return data ? new Cycle(this._request, data) : undefined;
+    const data = response.cycle;
+    return new Cycle(this._request, data);
   }
 }
 
@@ -5917,10 +5913,8 @@ export class CyclesQuery extends Request {
    */
   public async fetch(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
     const response = await this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables);
-    const data = response?.cycles;
-    return data
-      ? new CycleConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.cycles;
+    return new CycleConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -5944,8 +5938,8 @@ export class EmojiQuery extends Request {
     const response = await this._request<L.EmojiQuery, L.EmojiQueryVariables>(L.EmojiDocument, {
       id,
     });
-    const data = response?.emoji;
-    return data ? new Emoji(this._request, data) : undefined;
+    const data = response.emoji;
+    return new Emoji(this._request, data);
   }
 }
 
@@ -5967,10 +5961,8 @@ export class EmojisQuery extends Request {
    */
   public async fetch(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
     const response = await this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables);
-    const data = response?.emojis;
-    return data
-      ? new EmojiConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.emojis;
+    return new EmojiConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -5994,8 +5986,8 @@ export class FavoriteQuery extends Request {
     const response = await this._request<L.FavoriteQuery, L.FavoriteQueryVariables>(L.FavoriteDocument, {
       id,
     });
-    const data = response?.favorite;
-    return data ? new Favorite(this._request, data) : undefined;
+    const data = response.favorite;
+    return new Favorite(this._request, data);
   }
 }
 
@@ -6017,10 +6009,8 @@ export class FavoritesQuery extends Request {
    */
   public async fetch(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
     const response = await this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables);
-    const data = response?.favorites;
-    return data
-      ? new FavoriteConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.favorites;
+    return new FavoriteConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6052,8 +6042,8 @@ export class FigmaEmbedInfoQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.figmaEmbedInfo;
-    return data ? new FigmaEmbedPayload(this._request, data) : undefined;
+    const data = response.figmaEmbedInfo;
+    return new FigmaEmbedPayload(this._request, data);
   }
 }
 
@@ -6077,8 +6067,8 @@ export class IntegrationQuery extends Request {
     const response = await this._request<L.IntegrationQuery, L.IntegrationQueryVariables>(L.IntegrationDocument, {
       id,
     });
-    const data = response?.integration;
-    return data ? new Integration(this._request, data) : undefined;
+    const data = response.integration;
+    return new Integration(this._request, data);
   }
 }
 
@@ -6103,10 +6093,8 @@ export class IntegrationsQuery extends Request {
       L.IntegrationsDocument,
       variables
     );
-    const data = response?.integrations;
-    return data
-      ? new IntegrationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.integrations;
+    return new IntegrationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6135,8 +6123,8 @@ export class InviteInfoQuery extends Request {
       userHash,
       ...variables,
     });
-    const data = response?.inviteInfo;
-    return data ? new InvitePagePayload(this._request, data) : undefined;
+    const data = response.inviteInfo;
+    return new InvitePagePayload(this._request, data);
   }
 }
 
@@ -6160,8 +6148,8 @@ export class IssueQuery extends Request {
     const response = await this._request<L.IssueQuery, L.IssueQueryVariables>(L.IssueDocument, {
       id,
     });
-    const data = response?.issue;
-    return data ? new Issue(this._request, data) : undefined;
+    const data = response.issue;
+    return new Issue(this._request, data);
   }
 }
 
@@ -6188,8 +6176,8 @@ export class IssueImportFinishGithubOAuthQuery extends Request {
     >(L.IssueImportFinishGithubOAuthDocument, {
       code,
     });
-    const data = response?.issueImportFinishGithubOAuth;
-    return data ? new GithubOAuthTokenPayload(this._request, data) : undefined;
+    const data = response.issueImportFinishGithubOAuth;
+    return new GithubOAuthTokenPayload(this._request, data);
   }
 }
 
@@ -6213,8 +6201,8 @@ export class IssueLabelQuery extends Request {
     const response = await this._request<L.IssueLabelQuery, L.IssueLabelQueryVariables>(L.IssueLabelDocument, {
       id,
     });
-    const data = response?.issueLabel;
-    return data ? new IssueLabel(this._request, data) : undefined;
+    const data = response.issueLabel;
+    return new IssueLabel(this._request, data);
   }
 }
 
@@ -6239,10 +6227,8 @@ export class IssueLabelsQuery extends Request {
       L.IssueLabelsDocument,
       variables
     );
-    const data = response?.issueLabels;
-    return data
-      ? new IssueLabelConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.issueLabels;
+    return new IssueLabelConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6266,8 +6252,8 @@ export class IssuePriorityValuesQuery extends Request {
       L.IssuePriorityValuesDocument,
       {}
     );
-    const data = response?.issuePriorityValues;
-    return data ? data.map(node => new IssuePriorityValue(this._request, node)) : undefined;
+    const data = response.issuePriorityValues;
+    return data.map(node => new IssuePriorityValue(this._request, node));
   }
 }
 
@@ -6291,8 +6277,8 @@ export class IssueRelationQuery extends Request {
     const response = await this._request<L.IssueRelationQuery, L.IssueRelationQueryVariables>(L.IssueRelationDocument, {
       id,
     });
-    const data = response?.issueRelation;
-    return data ? new IssueRelation(this._request, data) : undefined;
+    const data = response.issueRelation;
+    return new IssueRelation(this._request, data);
   }
 }
 
@@ -6317,10 +6303,8 @@ export class IssueRelationsQuery extends Request {
       L.IssueRelationsDocument,
       variables
     );
-    const data = response?.issueRelations;
-    return data
-      ? new IssueRelationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.issueRelations;
+    return new IssueRelationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6349,10 +6333,8 @@ export class IssueSearchQuery extends Request {
       query,
       ...variables,
     });
-    const data = response?.issueSearch;
-    return data
-      ? new IssueConnection(this._request, connection => this.fetch(query, { ...variables, ...connection }), data)
-      : undefined;
+    const data = response.issueSearch;
+    return new IssueConnection(this._request, connection => this.fetch(query, { ...variables, ...connection }), data);
   }
 }
 
@@ -6374,10 +6356,8 @@ export class IssuesQuery extends Request {
    */
   public async fetch(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
     const response = await this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables);
-    const data = response?.issues;
-    return data
-      ? new IssueConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.issues;
+    return new IssueConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6401,8 +6381,8 @@ export class MilestoneQuery extends Request {
     const response = await this._request<L.MilestoneQuery, L.MilestoneQueryVariables>(L.MilestoneDocument, {
       id,
     });
-    const data = response?.milestone;
-    return data ? new Milestone(this._request, data) : undefined;
+    const data = response.milestone;
+    return new Milestone(this._request, data);
   }
 }
 
@@ -6427,10 +6407,8 @@ export class MilestonesQuery extends Request {
       L.MilestonesDocument,
       variables
     );
-    const data = response?.milestones;
-    return data
-      ? new MilestoneConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.milestones;
+    return new MilestoneConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6454,8 +6432,8 @@ export class NotificationQuery extends Request {
     const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
       id,
     });
-    const data = response?.notification;
-    return data ? new Notification(this._request, data) : undefined;
+    const data = response.notification;
+    return new Notification(this._request, data);
   }
 }
 
@@ -6482,8 +6460,8 @@ export class NotificationSubscriptionQuery extends Request {
         id,
       }
     );
-    const data = response?.notificationSubscription;
-    return data ? new NotificationSubscription(this._request, data) : undefined;
+    const data = response.notificationSubscription;
+    return new NotificationSubscription(this._request, data);
   }
 }
 
@@ -6510,14 +6488,12 @@ export class NotificationSubscriptionsQuery extends Request {
       L.NotificationSubscriptionsDocument,
       variables
     );
-    const data = response?.notificationSubscriptions;
-    return data
-      ? new NotificationSubscriptionConnection(
-          this._request,
-          connection => this.fetch({ ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.notificationSubscriptions;
+    return new NotificationSubscriptionConnection(
+      this._request,
+      connection => this.fetch({ ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -6542,10 +6518,8 @@ export class NotificationsQuery extends Request {
       L.NotificationsDocument,
       variables
     );
-    const data = response?.notifications;
-    return data
-      ? new NotificationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.notifications;
+    return new NotificationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6566,8 +6540,8 @@ export class OrganizationQuery extends Request {
    */
   public async fetch(): LinearFetch<Organization> {
     const response = await this._request<L.OrganizationQuery, L.OrganizationQueryVariables>(L.OrganizationDocument, {});
-    const data = response?.organization;
-    return data ? new Organization(this._request, data) : undefined;
+    const data = response.organization;
+    return new Organization(this._request, data);
   }
 }
 
@@ -6594,8 +6568,8 @@ export class OrganizationExistsQuery extends Request {
         urlKey,
       }
     );
-    const data = response?.organizationExists;
-    return data ? new OrganizationExistsPayload(this._request, data) : undefined;
+    const data = response.organizationExists;
+    return new OrganizationExistsPayload(this._request, data);
   }
 }
 
@@ -6622,8 +6596,8 @@ export class OrganizationInviteQuery extends Request {
         id,
       }
     );
-    const data = response?.organizationInvite;
-    return data ? new IssueLabel(this._request, data) : undefined;
+    const data = response.organizationInvite;
+    return new IssueLabel(this._request, data);
   }
 }
 
@@ -6648,10 +6622,12 @@ export class OrganizationInvitesQuery extends Request {
       L.OrganizationInvitesDocument,
       variables
     );
-    const data = response?.organizationInvites;
-    return data
-      ? new OrganizationInviteConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.organizationInvites;
+    return new OrganizationInviteConnection(
+      this._request,
+      connection => this.fetch({ ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -6675,8 +6651,8 @@ export class ProjectQuery extends Request {
     const response = await this._request<L.ProjectQuery, L.ProjectQueryVariables>(L.ProjectDocument, {
       id,
     });
-    const data = response?.project;
-    return data ? new Project(this._request, data) : undefined;
+    const data = response.project;
+    return new Project(this._request, data);
   }
 }
 
@@ -6700,8 +6676,8 @@ export class ProjectLinkQuery extends Request {
     const response = await this._request<L.ProjectLinkQuery, L.ProjectLinkQueryVariables>(L.ProjectLinkDocument, {
       id,
     });
-    const data = response?.projectLink;
-    return data ? new ProjectLink(this._request, data) : undefined;
+    const data = response.projectLink;
+    return new ProjectLink(this._request, data);
   }
 }
 
@@ -6726,10 +6702,8 @@ export class ProjectLinksQuery extends Request {
       L.ProjectLinksDocument,
       variables
     );
-    const data = response?.projectLinks;
-    return data
-      ? new ProjectLinkConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.projectLinks;
+    return new ProjectLinkConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6751,10 +6725,8 @@ export class ProjectsQuery extends Request {
    */
   public async fetch(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
     const response = await this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables);
-    const data = response?.projects;
-    return data
-      ? new ProjectConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.projects;
+    return new ProjectConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6778,8 +6750,8 @@ export class PushSubscriptionTestQuery extends Request {
       L.PushSubscriptionTestDocument,
       {}
     );
-    const data = response?.pushSubscriptionTest;
-    return data ? new PushSubscriptionTestPayload(this._request, data) : undefined;
+    const data = response.pushSubscriptionTest;
+    return new PushSubscriptionTestPayload(this._request, data);
   }
 }
 
@@ -6803,8 +6775,8 @@ export class ReactionQuery extends Request {
     const response = await this._request<L.ReactionQuery, L.ReactionQueryVariables>(L.ReactionDocument, {
       id,
     });
-    const data = response?.reaction;
-    return data ? new Reaction(this._request, data) : undefined;
+    const data = response.reaction;
+    return new Reaction(this._request, data);
   }
 }
 
@@ -6826,10 +6798,8 @@ export class ReactionsQuery extends Request {
    */
   public async fetch(variables?: L.ReactionsQueryVariables): LinearFetch<ReactionConnection> {
     const response = await this._request<L.ReactionsQuery, L.ReactionsQueryVariables>(L.ReactionsDocument, variables);
-    const data = response?.reactions;
-    return data
-      ? new ReactionConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.reactions;
+    return new ReactionConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6861,8 +6831,8 @@ export class SsoUrlFromEmailQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.ssoUrlFromEmail;
-    return data ? new SsoUrlFromEmailResponse(this._request, data) : undefined;
+    const data = response.ssoUrlFromEmail;
+    return new SsoUrlFromEmailResponse(this._request, data);
   }
 }
 
@@ -6881,9 +6851,9 @@ export class SubscriptionQuery extends Request {
    *
    * @returns parsed response from SubscriptionQuery
    */
-  public async fetch(): LinearFetch<Subscription> {
+  public async fetch(): LinearFetch<Subscription | undefined> {
     const response = await this._request<L.SubscriptionQuery, L.SubscriptionQueryVariables>(L.SubscriptionDocument, {});
-    const data = response?.subscription;
+    const data = response.subscription;
     return data ? new Subscription(this._request, data) : undefined;
   }
 }
@@ -6908,8 +6878,8 @@ export class TeamQuery extends Request {
     const response = await this._request<L.TeamQuery, L.TeamQueryVariables>(L.TeamDocument, {
       id,
     });
-    const data = response?.team;
-    return data ? new Team(this._request, data) : undefined;
+    const data = response.team;
+    return new Team(this._request, data);
   }
 }
 
@@ -6936,8 +6906,8 @@ export class TeamMembershipQuery extends Request {
         id,
       }
     );
-    const data = response?.teamMembership;
-    return data ? new TeamMembership(this._request, data) : undefined;
+    const data = response.teamMembership;
+    return new TeamMembership(this._request, data);
   }
 }
 
@@ -6962,10 +6932,8 @@ export class TeamMembershipsQuery extends Request {
       L.TeamMembershipsDocument,
       variables
     );
-    const data = response?.teamMemberships;
-    return data
-      ? new TeamMembershipConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.teamMemberships;
+    return new TeamMembershipConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -6987,10 +6955,8 @@ export class TeamsQuery extends Request {
    */
   public async fetch(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
     const response = await this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables);
-    const data = response?.teams;
-    return data
-      ? new TeamConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.teams;
+    return new TeamConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -7014,8 +6980,8 @@ export class TemplateQuery extends Request {
     const response = await this._request<L.TemplateQuery, L.TemplateQueryVariables>(L.TemplateDocument, {
       id,
     });
-    const data = response?.template;
-    return data ? new Template(this._request, data) : undefined;
+    const data = response.template;
+    return new Template(this._request, data);
   }
 }
 
@@ -7036,8 +7002,8 @@ export class TemplatesQuery extends Request {
    */
   public async fetch(): LinearFetch<Template[]> {
     const response = await this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(L.TemplatesDocument, {});
-    const data = response?.templates;
-    return data ? data.map(node => new Template(this._request, node)) : undefined;
+    const data = response.templates;
+    return data.map(node => new Template(this._request, node));
   }
 }
 
@@ -7061,8 +7027,8 @@ export class UserQuery extends Request {
     const response = await this._request<L.UserQuery, L.UserQueryVariables>(L.UserDocument, {
       id,
     });
-    const data = response?.user;
-    return data ? new User(this._request, data) : undefined;
+    const data = response.user;
+    return new User(this._request, data);
   }
 }
 
@@ -7083,8 +7049,8 @@ export class UserSettingsQuery extends Request {
    */
   public async fetch(): LinearFetch<UserSettings> {
     const response = await this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {});
-    const data = response?.userSettings;
-    return data ? new UserSettings(this._request, data) : undefined;
+    const data = response.userSettings;
+    return new UserSettings(this._request, data);
   }
 }
 
@@ -7106,10 +7072,8 @@ export class UsersQuery extends Request {
    */
   public async fetch(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
     const response = await this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables);
-    const data = response?.users;
-    return data
-      ? new UserConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.users;
+    return new UserConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -7130,8 +7094,8 @@ export class ViewerQuery extends Request {
    */
   public async fetch(): LinearFetch<User> {
     const response = await this._request<L.ViewerQuery, L.ViewerQueryVariables>(L.ViewerDocument, {});
-    const data = response?.viewer;
-    return data ? new User(this._request, data) : undefined;
+    const data = response.viewer;
+    return new User(this._request, data);
   }
 }
 
@@ -7155,8 +7119,8 @@ export class WebhookQuery extends Request {
     const response = await this._request<L.WebhookQuery, L.WebhookQueryVariables>(L.WebhookDocument, {
       id,
     });
-    const data = response?.webhook;
-    return data ? new Webhook(this._request, data) : undefined;
+    const data = response.webhook;
+    return new Webhook(this._request, data);
   }
 }
 
@@ -7178,10 +7142,8 @@ export class WebhooksQuery extends Request {
    */
   public async fetch(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
     const response = await this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables);
-    const data = response?.webhooks;
-    return data
-      ? new WebhookConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.webhooks;
+    return new WebhookConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -7205,8 +7167,8 @@ export class WorkflowStateQuery extends Request {
     const response = await this._request<L.WorkflowStateQuery, L.WorkflowStateQueryVariables>(L.WorkflowStateDocument, {
       id,
     });
-    const data = response?.workflowState;
-    return data ? new WorkflowState(this._request, data) : undefined;
+    const data = response.workflowState;
+    return new WorkflowState(this._request, data);
   }
 }
 
@@ -7231,10 +7193,8 @@ export class WorkflowStatesQuery extends Request {
       L.WorkflowStatesDocument,
       variables
     );
-    const data = response?.workflowStates;
-    return data
-      ? new WorkflowStateConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data)
-      : undefined;
+    const data = response.workflowStates;
+    return new WorkflowStateConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
   }
 }
 
@@ -7261,8 +7221,8 @@ export class AttachmentArchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.attachmentArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.attachmentArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -7289,8 +7249,8 @@ export class AttachmentCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.attachmentCreate;
-    return data ? new AttachmentPayload(this._request, data) : undefined;
+    const data = response.attachmentCreate;
+    return new AttachmentPayload(this._request, data);
   }
 }
 
@@ -7317,8 +7277,8 @@ export class AttachmentDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.attachmentDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.attachmentDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -7347,8 +7307,8 @@ export class AttachmentLinkFrontMutation extends Request {
         issueId,
       }
     );
-    const data = response?.attachmentLinkFront;
-    return data ? new AttachmentPayload(this._request, data) : undefined;
+    const data = response.attachmentLinkFront;
+    return new AttachmentPayload(this._request, data);
   }
 }
 
@@ -7377,8 +7337,8 @@ export class AttachmentLinkIntercomMutation extends Request {
         issueId,
       }
     );
-    const data = response?.attachmentLinkIntercom;
-    return data ? new AttachmentPayload(this._request, data) : undefined;
+    const data = response.attachmentLinkIntercom;
+    return new AttachmentPayload(this._request, data);
   }
 }
 
@@ -7413,8 +7373,8 @@ export class AttachmentLinkUrlMutation extends Request {
         ...variables,
       }
     );
-    const data = response?.attachmentLinkURL;
-    return data ? new AttachmentPayload(this._request, data) : undefined;
+    const data = response.attachmentLinkURL;
+    return new AttachmentPayload(this._request, data);
   }
 }
 
@@ -7443,8 +7403,8 @@ export class AttachmentLinkZendeskMutation extends Request {
         ticketId,
       }
     );
-    const data = response?.attachmentLinkZendesk;
-    return data ? new AttachmentPayload(this._request, data) : undefined;
+    const data = response.attachmentLinkZendesk;
+    return new AttachmentPayload(this._request, data);
   }
 }
 
@@ -7473,8 +7433,8 @@ export class AttachmentUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.attachmentUpdate;
-    return data ? new AttachmentPayload(this._request, data) : undefined;
+    const data = response.attachmentUpdate;
+    return new AttachmentPayload(this._request, data);
   }
 }
 
@@ -7501,8 +7461,8 @@ export class BillingEmailUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.billingEmailUpdate;
-    return data ? new BillingEmailPayload(this._request, data) : undefined;
+    const data = response.billingEmailUpdate;
+    return new BillingEmailPayload(this._request, data);
   }
 }
 
@@ -7529,8 +7489,8 @@ export class CollaborativeDocumentUpdateMutation extends Request {
     >(L.CollaborativeDocumentUpdateDocument, {
       input,
     });
-    const data = response?.collaborativeDocumentUpdate;
-    return data ? new CollaborationDocumentUpdatePayload(this._request, data) : undefined;
+    const data = response.collaborativeDocumentUpdate;
+    return new CollaborationDocumentUpdatePayload(this._request, data);
   }
 }
 
@@ -7557,8 +7517,8 @@ export class CommentCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.commentCreate;
-    return data ? new CommentPayload(this._request, data) : undefined;
+    const data = response.commentCreate;
+    return new CommentPayload(this._request, data);
   }
 }
 
@@ -7585,8 +7545,8 @@ export class CommentDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.commentDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.commentDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -7615,8 +7575,8 @@ export class CommentUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.commentUpdate;
-    return data ? new CommentPayload(this._request, data) : undefined;
+    const data = response.commentUpdate;
+    return new CommentPayload(this._request, data);
   }
 }
 
@@ -7643,8 +7603,8 @@ export class ContactCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.contactCreate;
-    return data ? new ContactPayload(this._request, data) : undefined;
+    const data = response.contactCreate;
+    return new ContactPayload(this._request, data);
   }
 }
 
@@ -7669,8 +7629,8 @@ export class CreateCsvExportReportMutation extends Request {
       L.CreateCsvExportReportDocument,
       variables
     );
-    const data = response?.createCsvExportReport;
-    return data ? new CreateCsvExportReportPayload(this._request, data) : undefined;
+    const data = response.createCsvExportReport;
+    return new CreateCsvExportReportPayload(this._request, data);
   }
 }
 
@@ -7702,8 +7662,8 @@ export class CreateOrganizationFromOnboardingMutation extends Request {
       input,
       ...variables,
     });
-    const data = response?.createOrganizationFromOnboarding;
-    return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
+    const data = response.createOrganizationFromOnboarding;
+    return new CreateOrJoinOrganizationResponse(this._request, data);
   }
 }
 
@@ -7730,8 +7690,8 @@ export class CustomViewCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.customViewCreate;
-    return data ? new CustomViewPayload(this._request, data) : undefined;
+    const data = response.customViewCreate;
+    return new CustomViewPayload(this._request, data);
   }
 }
 
@@ -7758,8 +7718,8 @@ export class CustomViewDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.customViewDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.customViewDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -7788,8 +7748,8 @@ export class CustomViewUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.customViewUpdate;
-    return data ? new CustomViewPayload(this._request, data) : undefined;
+    const data = response.customViewUpdate;
+    return new CustomViewPayload(this._request, data);
   }
 }
 
@@ -7816,8 +7776,8 @@ export class CycleArchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.cycleArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.cycleArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -7841,8 +7801,8 @@ export class CycleCreateMutation extends Request {
     const response = await this._request<L.CycleCreateMutation, L.CycleCreateMutationVariables>(L.CycleCreateDocument, {
       input,
     });
-    const data = response?.cycleCreate;
-    return data ? new CyclePayload(this._request, data) : undefined;
+    const data = response.cycleCreate;
+    return new CyclePayload(this._request, data);
   }
 }
 
@@ -7868,8 +7828,8 @@ export class CycleUpdateMutation extends Request {
       id,
       input,
     });
-    const data = response?.cycleUpdate;
-    return data ? new CyclePayload(this._request, data) : undefined;
+    const data = response.cycleUpdate;
+    return new CyclePayload(this._request, data);
   }
 }
 
@@ -7893,8 +7853,8 @@ export class DebugCreateSamlOrgMutation extends Request {
       L.DebugCreateSamlOrgDocument,
       {}
     );
-    const data = response?.debugCreateSAMLOrg;
-    return data ? new DebugPayload(this._request, data) : undefined;
+    const data = response.debugCreateSAMLOrg;
+    return new DebugPayload(this._request, data);
   }
 }
 
@@ -7918,8 +7878,8 @@ export class DebugFailWithInternalErrorMutation extends Request {
       L.DebugFailWithInternalErrorMutation,
       L.DebugFailWithInternalErrorMutationVariables
     >(L.DebugFailWithInternalErrorDocument, {});
-    const data = response?.debugFailWithInternalError;
-    return data ? new DebugPayload(this._request, data) : undefined;
+    const data = response.debugFailWithInternalError;
+    return new DebugPayload(this._request, data);
   }
 }
 
@@ -7943,8 +7903,8 @@ export class DebugFailWithWarningMutation extends Request {
       L.DebugFailWithWarningDocument,
       {}
     );
-    const data = response?.debugFailWithWarning;
-    return data ? new DebugPayload(this._request, data) : undefined;
+    const data = response.debugFailWithWarning;
+    return new DebugPayload(this._request, data);
   }
 }
 
@@ -7971,8 +7931,8 @@ export class EmailTokenUserAccountAuthMutation extends Request {
     >(L.EmailTokenUserAccountAuthDocument, {
       input,
     });
-    const data = response?.emailTokenUserAccountAuth;
-    return data ? new AuthResolverResponse(this._request, data) : undefined;
+    const data = response.emailTokenUserAccountAuth;
+    return new AuthResolverResponse(this._request, data);
   }
 }
 
@@ -7999,8 +7959,8 @@ export class EmailUnsubscribeMutation extends Request {
         input,
       }
     );
-    const data = response?.emailUnsubscribe;
-    return data ? new EmailUnsubscribePayload(this._request, data) : undefined;
+    const data = response.emailUnsubscribe;
+    return new EmailUnsubscribePayload(this._request, data);
   }
 }
 
@@ -8027,8 +7987,8 @@ export class EmailUserAccountAuthChallengeMutation extends Request {
     >(L.EmailUserAccountAuthChallengeDocument, {
       input,
     });
-    const data = response?.emailUserAccountAuthChallenge;
-    return data ? new EmailUserAccountAuthChallengeResponse(this._request, data) : undefined;
+    const data = response.emailUserAccountAuthChallenge;
+    return new EmailUserAccountAuthChallengeResponse(this._request, data);
   }
 }
 
@@ -8052,8 +8012,8 @@ export class EmojiCreateMutation extends Request {
     const response = await this._request<L.EmojiCreateMutation, L.EmojiCreateMutationVariables>(L.EmojiCreateDocument, {
       input,
     });
-    const data = response?.emojiCreate;
-    return data ? new EmojiPayload(this._request, data) : undefined;
+    const data = response.emojiCreate;
+    return new EmojiPayload(this._request, data);
   }
 }
 
@@ -8077,8 +8037,8 @@ export class EmojiDeleteMutation extends Request {
     const response = await this._request<L.EmojiDeleteMutation, L.EmojiDeleteMutationVariables>(L.EmojiDeleteDocument, {
       id,
     });
-    const data = response?.emojiDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.emojiDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -8102,8 +8062,8 @@ export class EventCreateMutation extends Request {
     const response = await this._request<L.EventCreateMutation, L.EventCreateMutationVariables>(L.EventCreateDocument, {
       input,
     });
-    const data = response?.eventCreate;
-    return data ? new EventPayload(this._request, data) : undefined;
+    const data = response.eventCreate;
+    return new EventPayload(this._request, data);
   }
 }
 
@@ -8130,8 +8090,8 @@ export class FavoriteCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.favoriteCreate;
-    return data ? new FavoritePayload(this._request, data) : undefined;
+    const data = response.favoriteCreate;
+    return new FavoritePayload(this._request, data);
   }
 }
 
@@ -8158,8 +8118,8 @@ export class FavoriteDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.favoriteDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.favoriteDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -8188,8 +8148,8 @@ export class FavoriteUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.favoriteUpdate;
-    return data ? new FavoritePayload(this._request, data) : undefined;
+    const data = response.favoriteUpdate;
+    return new FavoritePayload(this._request, data);
   }
 }
 
@@ -8216,8 +8176,8 @@ export class FeedbackCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.feedbackCreate;
-    return data ? new FeedbackPayload(this._request, data) : undefined;
+    const data = response.feedbackCreate;
+    return new FeedbackPayload(this._request, data);
   }
 }
 
@@ -8252,8 +8212,8 @@ export class FileUploadMutation extends Request {
       size,
       ...variables,
     });
-    const data = response?.fileUpload;
-    return data ? new UploadPayload(this._request, data) : undefined;
+    const data = response.fileUpload;
+    return new UploadPayload(this._request, data);
   }
 }
 
@@ -8280,8 +8240,8 @@ export class GoogleUserAccountAuthMutation extends Request {
         input,
       }
     );
-    const data = response?.googleUserAccountAuth;
-    return data ? new AuthResolverResponse(this._request, data) : undefined;
+    const data = response.googleUserAccountAuth;
+    return new AuthResolverResponse(this._request, data);
   }
 }
 
@@ -8308,8 +8268,8 @@ export class ImageUploadFromUrlMutation extends Request {
         url,
       }
     );
-    const data = response?.imageUploadFromUrl;
-    return data ? new ImageUploadFromUrlPayload(this._request, data) : undefined;
+    const data = response.imageUploadFromUrl;
+    return new ImageUploadFromUrlPayload(this._request, data);
   }
 }
 
@@ -8336,8 +8296,8 @@ export class IntegrationDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.integrationDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.integrationDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -8366,8 +8326,8 @@ export class IntegrationFigmaMutation extends Request {
         redirectUri,
       }
     );
-    const data = response?.integrationFigma;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationFigma;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8396,8 +8356,8 @@ export class IntegrationFrontMutation extends Request {
         redirectUri,
       }
     );
-    const data = response?.integrationFront;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationFront;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8424,8 +8384,8 @@ export class IntegrationGithubConnectMutation extends Request {
     >(L.IntegrationGithubConnectDocument, {
       installationId,
     });
-    const data = response?.integrationGithubConnect;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationGithubConnect;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8454,8 +8414,8 @@ export class IntegrationGitlabConnectMutation extends Request {
       accessToken,
       gitlabUrl,
     });
-    const data = response?.integrationGitlabConnect;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationGitlabConnect;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8482,8 +8442,8 @@ export class IntegrationGoogleSheetsMutation extends Request {
         code,
       }
     );
-    const data = response?.integrationGoogleSheets;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationGoogleSheets;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8512,8 +8472,8 @@ export class IntegrationIntercomMutation extends Request {
         redirectUri,
       }
     );
-    const data = response?.integrationIntercom;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationIntercom;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8537,8 +8497,8 @@ export class IntegrationIntercomDeleteMutation extends Request {
       L.IntegrationIntercomDeleteMutation,
       L.IntegrationIntercomDeleteMutationVariables
     >(L.IntegrationIntercomDeleteDocument, {});
-    const data = response?.integrationIntercomDelete;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationIntercomDelete;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8565,8 +8525,8 @@ export class IntegrationIntercomSettingsUpdateMutation extends Request {
     >(L.IntegrationIntercomSettingsUpdateDocument, {
       input,
     });
-    const data = response?.integrationIntercomSettingsUpdate;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationIntercomSettingsUpdate;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8590,8 +8550,8 @@ export class IntegrationLoomMutation extends Request {
       L.IntegrationLoomDocument,
       {}
     );
-    const data = response?.integrationLoom;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationLoom;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8618,8 +8578,8 @@ export class IntegrationResourceArchiveMutation extends Request {
     >(L.IntegrationResourceArchiveDocument, {
       id,
     });
-    const data = response?.integrationResourceArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.integrationResourceArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -8650,8 +8610,8 @@ export class IntegrationSentryConnectMutation extends Request {
       installationId,
       organizationSlug,
     });
-    const data = response?.integrationSentryConnect;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationSentryConnect;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8686,8 +8646,8 @@ export class IntegrationSlackMutation extends Request {
         ...variables,
       }
     );
-    const data = response?.integrationSlack;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationSlack;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8716,8 +8676,8 @@ export class IntegrationSlackImportEmojisMutation extends Request {
       code,
       redirectUri,
     });
-    const data = response?.integrationSlackImportEmojis;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationSlackImportEmojis;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8746,8 +8706,8 @@ export class IntegrationSlackPersonalMutation extends Request {
       code,
       redirectUri,
     });
-    const data = response?.integrationSlackPersonal;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationSlackPersonal;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8785,8 +8745,8 @@ export class IntegrationSlackPostMutation extends Request {
         ...variables,
       }
     );
-    const data = response?.integrationSlackPost;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationSlackPost;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8817,8 +8777,8 @@ export class IntegrationSlackProjectPostMutation extends Request {
       projectId,
       redirectUri,
     });
-    const data = response?.integrationSlackProjectPost;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationSlackProjectPost;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8856,8 +8816,8 @@ export class IntegrationZendeskMutation extends Request {
         subdomain,
       }
     );
-    const data = response?.integrationZendesk;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.integrationZendesk;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -8886,8 +8846,8 @@ export class IssueArchiveMutation extends Request {
         ...variables,
       }
     );
-    const data = response?.issueArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.issueArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -8911,8 +8871,8 @@ export class IssueCreateMutation extends Request {
     const response = await this._request<L.IssueCreateMutation, L.IssueCreateMutationVariables>(L.IssueCreateDocument, {
       input,
     });
-    const data = response?.issueCreate;
-    return data ? new IssuePayload(this._request, data) : undefined;
+    const data = response.issueCreate;
+    return new IssuePayload(this._request, data);
   }
 }
 
@@ -8936,8 +8896,8 @@ export class IssueDeleteMutation extends Request {
     const response = await this._request<L.IssueDeleteMutation, L.IssueDeleteMutationVariables>(L.IssueDeleteDocument, {
       id,
     });
-    const data = response?.issueDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.issueDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -8975,8 +8935,8 @@ export class IssueImportCreateAsanaMutation extends Request {
         ...variables,
       }
     );
-    const data = response?.issueImportCreateAsana;
-    return data ? new IssueImportPayload(this._request, data) : undefined;
+    const data = response.issueImportCreateAsana;
+    return new IssueImportPayload(this._request, data);
   }
 }
 
@@ -9014,8 +8974,8 @@ export class IssueImportCreateClubhouseMutation extends Request {
       teamId,
       ...variables,
     });
-    const data = response?.issueImportCreateClubhouse;
-    return data ? new IssueImportPayload(this._request, data) : undefined;
+    const data = response.issueImportCreateClubhouse;
+    return new IssueImportPayload(this._request, data);
   }
 }
 
@@ -9059,8 +9019,8 @@ export class IssueImportCreateGithubMutation extends Request {
         ...variables,
       }
     );
-    const data = response?.issueImportCreateGithub;
-    return data ? new IssueImportPayload(this._request, data) : undefined;
+    const data = response.issueImportCreateGithub;
+    return new IssueImportPayload(this._request, data);
   }
 }
 
@@ -9107,8 +9067,8 @@ export class IssueImportCreateJiraMutation extends Request {
         ...variables,
       }
     );
-    const data = response?.issueImportCreateJira;
-    return data ? new IssueImportPayload(this._request, data) : undefined;
+    const data = response.issueImportCreateJira;
+    return new IssueImportPayload(this._request, data);
   }
 }
 
@@ -9135,8 +9095,8 @@ export class IssueImportDeleteMutation extends Request {
         issueImportId,
       }
     );
-    const data = response?.issueImportDelete;
-    return data ? new IssueImportDeletePayload(this._request, data) : undefined;
+    const data = response.issueImportDelete;
+    return new IssueImportDeletePayload(this._request, data);
   }
 }
 
@@ -9165,8 +9125,8 @@ export class IssueImportProcessMutation extends Request {
         mapping,
       }
     );
-    const data = response?.issueImportProcess;
-    return data ? new IssueImportPayload(this._request, data) : undefined;
+    const data = response.issueImportProcess;
+    return new IssueImportPayload(this._request, data);
   }
 }
 
@@ -9193,8 +9153,8 @@ export class IssueLabelArchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.issueLabelArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.issueLabelArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -9221,8 +9181,8 @@ export class IssueLabelCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.issueLabelCreate;
-    return data ? new IssueLabelPayload(this._request, data) : undefined;
+    const data = response.issueLabelCreate;
+    return new IssueLabelPayload(this._request, data);
   }
 }
 
@@ -9251,8 +9211,8 @@ export class IssueLabelUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.issueLabelUpdate;
-    return data ? new IssueLabelPayload(this._request, data) : undefined;
+    const data = response.issueLabelUpdate;
+    return new IssueLabelPayload(this._request, data);
   }
 }
 
@@ -9279,8 +9239,8 @@ export class IssueRelationCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.issueRelationCreate;
-    return data ? new IssueRelationPayload(this._request, data) : undefined;
+    const data = response.issueRelationCreate;
+    return new IssueRelationPayload(this._request, data);
   }
 }
 
@@ -9307,8 +9267,8 @@ export class IssueRelationDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.issueRelationDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.issueRelationDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -9337,8 +9297,8 @@ export class IssueRelationUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.issueRelationUpdate;
-    return data ? new IssueRelationPayload(this._request, data) : undefined;
+    const data = response.issueRelationUpdate;
+    return new IssueRelationPayload(this._request, data);
   }
 }
 
@@ -9365,8 +9325,8 @@ export class IssueUnarchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.issueUnarchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.issueUnarchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -9392,8 +9352,8 @@ export class IssueUpdateMutation extends Request {
       id,
       input,
     });
-    const data = response?.issueUpdate;
-    return data ? new IssuePayload(this._request, data) : undefined;
+    const data = response.issueUpdate;
+    return new IssuePayload(this._request, data);
   }
 }
 
@@ -9420,8 +9380,8 @@ export class JoinOrganizationFromOnboardingMutation extends Request {
     >(L.JoinOrganizationFromOnboardingDocument, {
       input,
     });
-    const data = response?.joinOrganizationFromOnboarding;
-    return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
+    const data = response.joinOrganizationFromOnboarding;
+    return new CreateOrJoinOrganizationResponse(this._request, data);
   }
 }
 
@@ -9448,8 +9408,8 @@ export class LeaveOrganizationMutation extends Request {
         organizationId,
       }
     );
-    const data = response?.leaveOrganization;
-    return data ? new CreateOrJoinOrganizationResponse(this._request, data) : undefined;
+    const data = response.leaveOrganization;
+    return new CreateOrJoinOrganizationResponse(this._request, data);
   }
 }
 
@@ -9476,8 +9436,8 @@ export class MilestoneCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.milestoneCreate;
-    return data ? new MilestonePayload(this._request, data) : undefined;
+    const data = response.milestoneCreate;
+    return new MilestonePayload(this._request, data);
   }
 }
 
@@ -9504,8 +9464,8 @@ export class MilestoneDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.milestoneDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.milestoneDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -9534,8 +9494,8 @@ export class MilestoneUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.milestoneUpdate;
-    return data ? new MilestonePayload(this._request, data) : undefined;
+    const data = response.milestoneUpdate;
+    return new MilestonePayload(this._request, data);
   }
 }
 
@@ -9562,8 +9522,8 @@ export class NotificationArchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.notificationArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.notificationArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -9592,8 +9552,8 @@ export class NotificationCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.notificationCreate;
-    return data ? new NotificationPayload(this._request, data) : undefined;
+    const data = response.notificationCreate;
+    return new NotificationPayload(this._request, data);
   }
 }
 
@@ -9620,8 +9580,8 @@ export class NotificationSubscriptionCreateMutation extends Request {
     >(L.NotificationSubscriptionCreateDocument, {
       input,
     });
-    const data = response?.notificationSubscriptionCreate;
-    return data ? new NotificationSubscriptionPayload(this._request, data) : undefined;
+    const data = response.notificationSubscriptionCreate;
+    return new NotificationSubscriptionPayload(this._request, data);
   }
 }
 
@@ -9648,8 +9608,8 @@ export class NotificationSubscriptionDeleteMutation extends Request {
     >(L.NotificationSubscriptionDeleteDocument, {
       id,
     });
-    const data = response?.notificationSubscriptionDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.notificationSubscriptionDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -9676,8 +9636,8 @@ export class NotificationUnarchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.notificationUnarchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.notificationUnarchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -9706,8 +9666,8 @@ export class NotificationUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.notificationUpdate;
-    return data ? new NotificationPayload(this._request, data) : undefined;
+    const data = response.notificationUpdate;
+    return new NotificationPayload(this._request, data);
   }
 }
 
@@ -9734,8 +9694,8 @@ export class OauthClientArchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.oauthClientArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.oauthClientArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -9762,8 +9722,8 @@ export class OauthClientCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.oauthClientCreate;
-    return data ? new OauthClientPayload(this._request, data) : undefined;
+    const data = response.oauthClientCreate;
+    return new OauthClientPayload(this._request, data);
   }
 }
 
@@ -9790,8 +9750,8 @@ export class OauthClientRotateSecretMutation extends Request {
         id,
       }
     );
-    const data = response?.oauthClientRotateSecret;
-    return data ? new RotateSecretPayload(this._request, data) : undefined;
+    const data = response.oauthClientRotateSecret;
+    return new RotateSecretPayload(this._request, data);
   }
 }
 
@@ -9820,8 +9780,8 @@ export class OauthClientUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.oauthClientUpdate;
-    return data ? new OauthClientPayload(this._request, data) : undefined;
+    const data = response.oauthClientUpdate;
+    return new OauthClientPayload(this._request, data);
   }
 }
 
@@ -9850,8 +9810,8 @@ export class OauthTokenRevokeMutation extends Request {
         scope,
       }
     );
-    const data = response?.oauthTokenRevoke;
-    return data ? new OauthTokenRevokePayload(this._request, data) : undefined;
+    const data = response.oauthTokenRevoke;
+    return new OauthTokenRevokePayload(this._request, data);
   }
 }
 
@@ -9875,8 +9835,8 @@ export class OrganizationCancelDeleteMutation extends Request {
       L.OrganizationCancelDeleteMutation,
       L.OrganizationCancelDeleteMutationVariables
     >(L.OrganizationCancelDeleteDocument, {});
-    const data = response?.organizationCancelDelete;
-    return data ? new OrganizationCancelDeletePayload(this._request, data) : undefined;
+    const data = response.organizationCancelDelete;
+    return new OrganizationCancelDeletePayload(this._request, data);
   }
 }
 
@@ -9903,8 +9863,8 @@ export class OrganizationDeleteMutation extends Request {
         input,
       }
     );
-    const data = response?.organizationDelete;
-    return data ? new OrganizationDeletePayload(this._request, data) : undefined;
+    const data = response.organizationDelete;
+    return new OrganizationDeletePayload(this._request, data);
   }
 }
 
@@ -9928,8 +9888,8 @@ export class OrganizationDeleteChallengeMutation extends Request {
       L.OrganizationDeleteChallengeMutation,
       L.OrganizationDeleteChallengeMutationVariables
     >(L.OrganizationDeleteChallengeDocument, {});
-    const data = response?.organizationDeleteChallenge;
-    return data ? new OrganizationDeletePayload(this._request, data) : undefined;
+    const data = response.organizationDeleteChallenge;
+    return new OrganizationDeletePayload(this._request, data);
   }
 }
 
@@ -9956,8 +9916,8 @@ export class OrganizationDomainCreateMutation extends Request {
     >(L.OrganizationDomainCreateDocument, {
       input,
     });
-    const data = response?.organizationDomainCreate;
-    return data ? new OrganizationDomainPayload(this._request, data) : undefined;
+    const data = response.organizationDomainCreate;
+    return new OrganizationDomainPayload(this._request, data);
   }
 }
 
@@ -9984,8 +9944,8 @@ export class OrganizationDomainDeleteMutation extends Request {
     >(L.OrganizationDomainDeleteDocument, {
       id,
     });
-    const data = response?.organizationDomainDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.organizationDomainDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10012,8 +9972,8 @@ export class OrganizationDomainVerifyMutation extends Request {
     >(L.OrganizationDomainVerifyDocument, {
       input,
     });
-    const data = response?.organizationDomainVerify;
-    return data ? new OrganizationDomainPayload(this._request, data) : undefined;
+    const data = response.organizationDomainVerify;
+    return new OrganizationDomainPayload(this._request, data);
   }
 }
 
@@ -10040,8 +10000,8 @@ export class OrganizationInviteCreateMutation extends Request {
     >(L.OrganizationInviteCreateDocument, {
       input,
     });
-    const data = response?.organizationInviteCreate;
-    return data ? new OrganizationInvitePayload(this._request, data) : undefined;
+    const data = response.organizationInviteCreate;
+    return new OrganizationInvitePayload(this._request, data);
   }
 }
 
@@ -10068,8 +10028,8 @@ export class OrganizationInviteDeleteMutation extends Request {
     >(L.OrganizationInviteDeleteDocument, {
       id,
     });
-    const data = response?.organizationInviteDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.organizationInviteDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10096,8 +10056,8 @@ export class OrganizationUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.organizationUpdate;
-    return data ? new OrganizationPayload(this._request, data) : undefined;
+    const data = response.organizationUpdate;
+    return new OrganizationPayload(this._request, data);
   }
 }
 
@@ -10124,8 +10084,8 @@ export class ProjectArchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.projectArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.projectArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10152,8 +10112,8 @@ export class ProjectCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.projectCreate;
-    return data ? new ProjectPayload(this._request, data) : undefined;
+    const data = response.projectCreate;
+    return new ProjectPayload(this._request, data);
   }
 }
 
@@ -10180,8 +10140,8 @@ export class ProjectLinkCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.projectLinkCreate;
-    return data ? new ProjectLinkPayload(this._request, data) : undefined;
+    const data = response.projectLinkCreate;
+    return new ProjectLinkPayload(this._request, data);
   }
 }
 
@@ -10208,8 +10168,8 @@ export class ProjectLinkDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.projectLinkDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.projectLinkDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10236,8 +10196,8 @@ export class ProjectUnarchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.projectUnarchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.projectUnarchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10266,8 +10226,8 @@ export class ProjectUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.projectUpdate;
-    return data ? new ProjectPayload(this._request, data) : undefined;
+    const data = response.projectUpdate;
+    return new ProjectPayload(this._request, data);
   }
 }
 
@@ -10294,8 +10254,8 @@ export class PushSubscriptionCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.pushSubscriptionCreate;
-    return data ? new PushSubscriptionPayload(this._request, data) : undefined;
+    const data = response.pushSubscriptionCreate;
+    return new PushSubscriptionPayload(this._request, data);
   }
 }
 
@@ -10322,8 +10282,8 @@ export class PushSubscriptionDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.pushSubscriptionDelete;
-    return data ? new PushSubscriptionPayload(this._request, data) : undefined;
+    const data = response.pushSubscriptionDelete;
+    return new PushSubscriptionPayload(this._request, data);
   }
 }
 
@@ -10350,8 +10310,8 @@ export class ReactionCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.reactionCreate;
-    return data ? new ReactionPayload(this._request, data) : undefined;
+    const data = response.reactionCreate;
+    return new ReactionPayload(this._request, data);
   }
 }
 
@@ -10378,8 +10338,8 @@ export class ReactionDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.reactionDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.reactionDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10406,8 +10366,8 @@ export class RefreshGoogleSheetsDataMutation extends Request {
         id,
       }
     );
-    const data = response?.refreshGoogleSheetsData;
-    return data ? new IntegrationPayload(this._request, data) : undefined;
+    const data = response.refreshGoogleSheetsData;
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -10434,8 +10394,8 @@ export class ResentOrganizationInviteMutation extends Request {
     >(L.ResentOrganizationInviteDocument, {
       id,
     });
-    const data = response?.resentOrganizationInvite;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.resentOrganizationInvite;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10462,8 +10422,8 @@ export class SamlTokenUserAccountAuthMutation extends Request {
     >(L.SamlTokenUserAccountAuthDocument, {
       input,
     });
-    const data = response?.samlTokenUserAccountAuth;
-    return data ? new AuthResolverResponse(this._request, data) : undefined;
+    const data = response.samlTokenUserAccountAuth;
+    return new AuthResolverResponse(this._request, data);
   }
 }
 
@@ -10490,8 +10450,8 @@ export class SubscriptionArchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.subscriptionArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.subscriptionArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10518,8 +10478,8 @@ export class SubscriptionSessionCreateMutation extends Request {
     >(L.SubscriptionSessionCreateDocument, {
       plan,
     });
-    const data = response?.subscriptionSessionCreate;
-    return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
+    const data = response.subscriptionSessionCreate;
+    return new SubscriptionSessionPayload(this._request, data);
   }
 }
 
@@ -10548,8 +10508,8 @@ export class SubscriptionUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.subscriptionUpdate;
-    return data ? new SubscriptionPayload(this._request, data) : undefined;
+    const data = response.subscriptionUpdate;
+    return new SubscriptionPayload(this._request, data);
   }
 }
 
@@ -10573,8 +10533,8 @@ export class SubscriptionUpdateSessionCreateMutation extends Request {
       L.SubscriptionUpdateSessionCreateMutation,
       L.SubscriptionUpdateSessionCreateMutationVariables
     >(L.SubscriptionUpdateSessionCreateDocument, {});
-    const data = response?.subscriptionUpdateSessionCreate;
-    return data ? new SubscriptionSessionPayload(this._request, data) : undefined;
+    const data = response.subscriptionUpdateSessionCreate;
+    return new SubscriptionSessionPayload(this._request, data);
   }
 }
 
@@ -10603,8 +10563,8 @@ export class SubscriptionUpgradeMutation extends Request {
         type,
       }
     );
-    const data = response?.subscriptionUpgrade;
-    return data ? new SubscriptionPayload(this._request, data) : undefined;
+    const data = response.subscriptionUpgrade;
+    return new SubscriptionPayload(this._request, data);
   }
 }
 
@@ -10633,8 +10593,8 @@ export class TeamCreateMutation extends Request {
       input,
       ...variables,
     });
-    const data = response?.teamCreate;
-    return data ? new TeamPayload(this._request, data) : undefined;
+    const data = response.teamCreate;
+    return new TeamPayload(this._request, data);
   }
 }
 
@@ -10658,8 +10618,8 @@ export class TeamDeleteMutation extends Request {
     const response = await this._request<L.TeamDeleteMutation, L.TeamDeleteMutationVariables>(L.TeamDeleteDocument, {
       id,
     });
-    const data = response?.teamDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.teamDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10686,8 +10646,8 @@ export class TeamKeyDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.teamKeyDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.teamKeyDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10714,8 +10674,8 @@ export class TeamMembershipCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.teamMembershipCreate;
-    return data ? new TeamMembershipPayload(this._request, data) : undefined;
+    const data = response.teamMembershipCreate;
+    return new TeamMembershipPayload(this._request, data);
   }
 }
 
@@ -10742,8 +10702,8 @@ export class TeamMembershipDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.teamMembershipDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.teamMembershipDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10772,8 +10732,8 @@ export class TeamMembershipUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.teamMembershipUpdate;
-    return data ? new TeamMembershipPayload(this._request, data) : undefined;
+    const data = response.teamMembershipUpdate;
+    return new TeamMembershipPayload(this._request, data);
   }
 }
 
@@ -10799,8 +10759,8 @@ export class TeamUpdateMutation extends Request {
       id,
       input,
     });
-    const data = response?.teamUpdate;
-    return data ? new TeamPayload(this._request, data) : undefined;
+    const data = response.teamUpdate;
+    return new TeamPayload(this._request, data);
   }
 }
 
@@ -10827,8 +10787,8 @@ export class TemplateCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.templateCreate;
-    return data ? new TemplatePayload(this._request, data) : undefined;
+    const data = response.templateCreate;
+    return new TemplatePayload(this._request, data);
   }
 }
 
@@ -10855,8 +10815,8 @@ export class TemplateDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.templateDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.templateDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -10885,8 +10845,8 @@ export class TemplateUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.templateUpdate;
-    return data ? new TemplatePayload(this._request, data) : undefined;
+    const data = response.templateUpdate;
+    return new TemplatePayload(this._request, data);
   }
 }
 
@@ -10913,8 +10873,8 @@ export class UserDemoteAdminMutation extends Request {
         id,
       }
     );
-    const data = response?.userDemoteAdmin;
-    return data ? new UserAdminPayload(this._request, data) : undefined;
+    const data = response.userDemoteAdmin;
+    return new UserAdminPayload(this._request, data);
   }
 }
 
@@ -10943,8 +10903,8 @@ export class UserFlagUpdateMutation extends Request {
         operation,
       }
     );
-    const data = response?.userFlagUpdate;
-    return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
+    const data = response.userFlagUpdate;
+    return new UserSettingsFlagPayload(this._request, data);
   }
 }
 
@@ -10971,8 +10931,8 @@ export class UserPromoteAdminMutation extends Request {
         id,
       }
     );
-    const data = response?.userPromoteAdmin;
-    return data ? new UserAdminPayload(this._request, data) : undefined;
+    const data = response.userPromoteAdmin;
+    return new UserAdminPayload(this._request, data);
   }
 }
 
@@ -10999,8 +10959,8 @@ export class UserSettingsFlagIncrementMutation extends Request {
     >(L.UserSettingsFlagIncrementDocument, {
       flag,
     });
-    const data = response?.userSettingsFlagIncrement;
-    return data ? new UserSettingsFlagPayload(this._request, data) : undefined;
+    const data = response.userSettingsFlagIncrement;
+    return new UserSettingsFlagPayload(this._request, data);
   }
 }
 
@@ -11024,8 +10984,8 @@ export class UserSettingsFlagsResetMutation extends Request {
       L.UserSettingsFlagsResetDocument,
       {}
     );
-    const data = response?.userSettingsFlagsReset;
-    return data ? new UserSettingsFlagsResetPayload(this._request, data) : undefined;
+    const data = response.userSettingsFlagsReset;
+    return new UserSettingsFlagsResetPayload(this._request, data);
   }
 }
 
@@ -11054,8 +11014,8 @@ export class UserSettingsUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.userSettingsUpdate;
-    return data ? new UserSettingsPayload(this._request, data) : undefined;
+    const data = response.userSettingsUpdate;
+    return new UserSettingsPayload(this._request, data);
   }
 }
 
@@ -11079,8 +11039,8 @@ export class UserSubscribeToNewsletterMutation extends Request {
       L.UserSubscribeToNewsletterMutation,
       L.UserSubscribeToNewsletterMutationVariables
     >(L.UserSubscribeToNewsletterDocument, {});
-    const data = response?.userSubscribeToNewsletter;
-    return data ? new UserSubscribeToNewsletterPayload(this._request, data) : undefined;
+    const data = response.userSubscribeToNewsletter;
+    return new UserSubscribeToNewsletterPayload(this._request, data);
   }
 }
 
@@ -11104,8 +11064,8 @@ export class UserSuspendMutation extends Request {
     const response = await this._request<L.UserSuspendMutation, L.UserSuspendMutationVariables>(L.UserSuspendDocument, {
       id,
     });
-    const data = response?.userSuspend;
-    return data ? new UserAdminPayload(this._request, data) : undefined;
+    const data = response.userSuspend;
+    return new UserAdminPayload(this._request, data);
   }
 }
 
@@ -11132,8 +11092,8 @@ export class UserUnsuspendMutation extends Request {
         id,
       }
     );
-    const data = response?.userUnsuspend;
-    return data ? new UserAdminPayload(this._request, data) : undefined;
+    const data = response.userUnsuspend;
+    return new UserAdminPayload(this._request, data);
   }
 }
 
@@ -11159,8 +11119,8 @@ export class UserUpdateMutation extends Request {
       id,
       input,
     });
-    const data = response?.userUpdate;
-    return data ? new UserPayload(this._request, data) : undefined;
+    const data = response.userUpdate;
+    return new UserPayload(this._request, data);
   }
 }
 
@@ -11187,8 +11147,8 @@ export class ViewPreferencesCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.viewPreferencesCreate;
-    return data ? new ViewPreferencesPayload(this._request, data) : undefined;
+    const data = response.viewPreferencesCreate;
+    return new ViewPreferencesPayload(this._request, data);
   }
 }
 
@@ -11215,8 +11175,8 @@ export class ViewPreferencesDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.viewPreferencesDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.viewPreferencesDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -11245,8 +11205,8 @@ export class ViewPreferencesUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.viewPreferencesUpdate;
-    return data ? new ViewPreferencesPayload(this._request, data) : undefined;
+    const data = response.viewPreferencesUpdate;
+    return new ViewPreferencesPayload(this._request, data);
   }
 }
 
@@ -11273,8 +11233,8 @@ export class WebhookCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.webhookCreate;
-    return data ? new WebhookPayload(this._request, data) : undefined;
+    const data = response.webhookCreate;
+    return new WebhookPayload(this._request, data);
   }
 }
 
@@ -11301,8 +11261,8 @@ export class WebhookDeleteMutation extends Request {
         id,
       }
     );
-    const data = response?.webhookDelete;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.webhookDelete;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -11331,8 +11291,8 @@ export class WebhookUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.webhookUpdate;
-    return data ? new WebhookPayload(this._request, data) : undefined;
+    const data = response.webhookUpdate;
+    return new WebhookPayload(this._request, data);
   }
 }
 
@@ -11359,8 +11319,8 @@ export class WorkflowStateArchiveMutation extends Request {
         id,
       }
     );
-    const data = response?.workflowStateArchive;
-    return data ? new ArchivePayload(this._request, data) : undefined;
+    const data = response.workflowStateArchive;
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -11387,8 +11347,8 @@ export class WorkflowStateCreateMutation extends Request {
         input,
       }
     );
-    const data = response?.workflowStateCreate;
-    return data ? new WorkflowStatePayload(this._request, data) : undefined;
+    const data = response.workflowStateCreate;
+    return new WorkflowStatePayload(this._request, data);
   }
 }
 
@@ -11417,8 +11377,8 @@ export class WorkflowStateUpdateMutation extends Request {
         input,
       }
     );
-    const data = response?.workflowStateUpdate;
-    return data ? new WorkflowStatePayload(this._request, data) : undefined;
+    const data = response.workflowStateUpdate;
+    return new WorkflowStatePayload(this._request, data);
   }
 }
 
@@ -11460,14 +11420,12 @@ export class AttachmentIssue_AttachmentsQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.attachmentIssue?.attachments;
-    return data
-      ? new AttachmentConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.attachmentIssue.attachments;
+    return new AttachmentConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11507,14 +11465,12 @@ export class AttachmentIssue_ChildrenQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.attachmentIssue?.children;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.attachmentIssue.children;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11554,14 +11510,12 @@ export class AttachmentIssue_CommentsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.attachmentIssue?.comments;
-    return data
-      ? new CommentConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.attachmentIssue.comments;
+    return new CommentConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11603,14 +11557,12 @@ export class AttachmentIssue_HistoryQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.attachmentIssue?.history;
-    return data
-      ? new IssueHistoryConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.attachmentIssue.history;
+    return new IssueHistoryConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11652,14 +11604,12 @@ export class AttachmentIssue_InverseRelationsQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.attachmentIssue?.inverseRelations;
-    return data
-      ? new IssueRelationConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.attachmentIssue.inverseRelations;
+    return new IssueRelationConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11701,14 +11651,12 @@ export class AttachmentIssue_LabelsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.attachmentIssue?.labels;
-    return data
-      ? new IssueLabelConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.attachmentIssue.labels;
+    return new IssueLabelConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11750,14 +11698,12 @@ export class AttachmentIssue_RelationsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.attachmentIssue?.relations;
-    return data
-      ? new IssueRelationConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.attachmentIssue.relations;
+    return new IssueRelationConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11797,14 +11743,12 @@ export class AttachmentIssue_SubscribersQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.attachmentIssue?.subscribers;
-    return data
-      ? new UserConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.attachmentIssue.subscribers;
+    return new UserConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11823,12 +11767,12 @@ export class BillingDetails_PaymentMethodQuery extends Request {
    *
    * @returns parsed response from BillingDetails_PaymentMethodQuery
    */
-  public async fetch(): LinearFetch<Card> {
+  public async fetch(): LinearFetch<Card | undefined> {
     const response = await this._request<
       L.BillingDetails_PaymentMethodQuery,
       L.BillingDetails_PaymentMethodQueryVariables
     >(L.BillingDetails_PaymentMethodDocument, {});
-    const data = response?.billingDetails?.paymentMethod;
+    const data = response.billingDetails.paymentMethod;
     return data ? new Card(this._request, data) : undefined;
   }
 }
@@ -11858,7 +11802,7 @@ export class CollaborativeDocumentJoin_StepsQuery extends Request {
    *
    * @returns parsed response from CollaborativeDocumentJoin_StepsQuery
    */
-  public async fetch(): LinearFetch<StepsResponse> {
+  public async fetch(): LinearFetch<StepsResponse | undefined> {
     const response = await this._request<
       L.CollaborativeDocumentJoin_StepsQuery,
       L.CollaborativeDocumentJoin_StepsQueryVariables
@@ -11867,7 +11811,7 @@ export class CollaborativeDocumentJoin_StepsQuery extends Request {
       issueId: this._issueId,
       version: this._version,
     });
-    const data = response?.collaborativeDocumentJoin?.steps;
+    const data = response.collaborativeDocumentJoin.steps;
     return data ? new StepsResponse(this._request, data) : undefined;
   }
 }
@@ -11901,14 +11845,12 @@ export class Cycle_IssuesQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.cycle?.issues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.cycle.issues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11950,14 +11892,12 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.cycle?.uncompletedIssuesUponClose;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.cycle.uncompletedIssuesUponClose;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -11988,7 +11928,9 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
    * @param variables - variables without 'fileId' to pass into the FigmaEmbedInfo_FigmaEmbedQuery
    * @returns parsed response from FigmaEmbedInfo_FigmaEmbedQuery
    */
-  public async fetch(variables?: Omit<L.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">): LinearFetch<FigmaEmbed> {
+  public async fetch(
+    variables?: Omit<L.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
+  ): LinearFetch<FigmaEmbed | undefined> {
     const response = await this._request<L.FigmaEmbedInfo_FigmaEmbedQuery, L.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       L.FigmaEmbedInfo_FigmaEmbedDocument,
       {
@@ -11997,7 +11939,7 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.figmaEmbedInfo?.figmaEmbed;
+    const data = response.figmaEmbedInfo.figmaEmbed;
     return data ? new FigmaEmbed(this._request, data) : undefined;
   }
 }
@@ -12029,7 +11971,9 @@ export class InviteInfo_InviteDataQuery extends Request {
    * @param variables - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
    * @returns parsed response from InviteInfo_InviteDataQuery
    */
-  public async fetch(variables?: Omit<L.InviteInfo_InviteDataQueryVariables, "userHash">): LinearFetch<InviteData> {
+  public async fetch(
+    variables?: Omit<L.InviteInfo_InviteDataQueryVariables, "userHash">
+  ): LinearFetch<InviteData | undefined> {
     const response = await this._request<L.InviteInfo_InviteDataQuery, L.InviteInfo_InviteDataQueryVariables>(
       L.InviteInfo_InviteDataDocument,
       {
@@ -12038,7 +11982,7 @@ export class InviteInfo_InviteDataQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.inviteInfo?.inviteData;
+    const data = response.inviteInfo.inviteData;
     return data ? new InviteData(this._request, data) : undefined;
   }
 }
@@ -12075,14 +12019,12 @@ export class Issue_AttachmentsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.issue?.attachments;
-    return data
-      ? new AttachmentConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issue.attachments;
+    return new AttachmentConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12118,14 +12060,12 @@ export class Issue_ChildrenQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.issue?.children;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issue.children;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12161,14 +12101,12 @@ export class Issue_CommentsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.issue?.comments;
-    return data
-      ? new CommentConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issue.comments;
+    return new CommentConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12201,14 +12139,12 @@ export class Issue_HistoryQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.issue?.history;
-    return data
-      ? new IssueHistoryConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issue.history;
+    return new IssueHistoryConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12250,14 +12186,12 @@ export class Issue_InverseRelationsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.issue?.inverseRelations;
-    return data
-      ? new IssueRelationConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issue.inverseRelations;
+    return new IssueRelationConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12290,14 +12224,12 @@ export class Issue_LabelsQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.issue?.labels;
-    return data
-      ? new IssueLabelConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issue.labels;
+    return new IssueLabelConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12333,14 +12265,12 @@ export class Issue_RelationsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.issue?.relations;
-    return data
-      ? new IssueRelationConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issue.relations;
+    return new IssueRelationConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12376,14 +12306,12 @@ export class Issue_SubscribersQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.issue?.subscribers;
-    return data
-      ? new UserConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issue.subscribers;
+    return new UserConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12419,14 +12347,12 @@ export class IssueLabel_IssuesQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.issueLabel?.issues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.issueLabel.issues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12462,14 +12388,12 @@ export class Milestone_ProjectsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.milestone?.projects;
-    return data
-      ? new ProjectConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.milestone.projects;
+    return new ProjectConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12499,14 +12423,12 @@ export class Organization_IntegrationsQuery extends Request {
       L.Organization_IntegrationsDocument,
       variables
     );
-    const data = response?.organization?.integrations;
-    return data
-      ? new IntegrationConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.organization.integrations;
+    return new IntegrationConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12536,14 +12458,12 @@ export class Organization_MilestonesQuery extends Request {
       L.Organization_MilestonesDocument,
       variables
     );
-    const data = response?.organization?.milestones;
-    return data
-      ? new MilestoneConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.organization.milestones;
+    return new MilestoneConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12573,14 +12493,12 @@ export class Organization_TeamsQuery extends Request {
       L.Organization_TeamsDocument,
       variables
     );
-    const data = response?.organization?.teams;
-    return data
-      ? new TeamConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.organization.teams;
+    return new TeamConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12610,14 +12528,12 @@ export class Organization_UsersQuery extends Request {
       L.Organization_UsersDocument,
       variables
     );
-    const data = response?.organization?.users;
-    return data
-      ? new UserConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.organization.users;
+    return new UserConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12657,14 +12573,12 @@ export class OrganizationInvite_IssuesQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.organizationInvite?.issues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.organizationInvite.issues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12700,14 +12614,12 @@ export class Project_IssuesQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.project?.issues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.project.issues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12740,14 +12652,12 @@ export class Project_LinksQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.project?.links;
-    return data
-      ? new ProjectLinkConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.project.links;
+    return new ProjectLinkConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12783,14 +12693,12 @@ export class Project_MembersQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.project?.members;
-    return data
-      ? new UserConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.project.members;
+    return new UserConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12823,14 +12731,12 @@ export class Project_TeamsQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.project?.teams;
-    return data
-      ? new TeamConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.project.teams;
+    return new TeamConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12863,14 +12769,12 @@ export class Team_CyclesQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.team?.cycles;
-    return data
-      ? new CycleConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.team.cycles;
+    return new CycleConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12903,14 +12807,12 @@ export class Team_IssuesQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.team?.issues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.team.issues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12943,14 +12845,12 @@ export class Team_LabelsQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.team?.labels;
-    return data
-      ? new IssueLabelConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.team.labels;
+    return new IssueLabelConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -12983,14 +12883,12 @@ export class Team_MembersQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.team?.members;
-    return data
-      ? new UserConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.team.members;
+    return new UserConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13026,14 +12924,12 @@ export class Team_MembershipsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.team?.memberships;
-    return data
-      ? new TeamMembershipConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.team.memberships;
+    return new TeamMembershipConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13066,14 +12962,12 @@ export class Team_ProjectsQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.team?.projects;
-    return data
-      ? new ProjectConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.team.projects;
+    return new ProjectConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13106,14 +13000,12 @@ export class Team_StatesQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.team?.states;
-    return data
-      ? new WorkflowStateConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.team.states;
+    return new WorkflowStateConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13149,8 +13041,8 @@ export class Team_TemplatesQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.team?.templates;
-    return data ? new TemplateConnection(this._request, data) : undefined;
+    const data = response.team.templates;
+    return new TemplateConnection(this._request, data);
   }
 }
 
@@ -13183,14 +13075,12 @@ export class Team_WebhooksQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.team?.webhooks;
-    return data
-      ? new WebhookConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.team.webhooks;
+    return new WebhookConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13226,14 +13116,12 @@ export class User_AssignedIssuesQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.user?.assignedIssues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.user.assignedIssues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13269,14 +13157,12 @@ export class User_CreatedIssuesQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.user?.createdIssues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.user.createdIssues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13314,14 +13200,12 @@ export class User_TeamMembershipsQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.user?.teamMemberships;
-    return data
-      ? new TeamMembershipConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.user.teamMemberships;
+    return new TeamMembershipConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13354,14 +13238,12 @@ export class User_TeamsQuery extends Request {
       ...this._variables,
       ...variables,
     });
-    const data = response?.user?.teams;
-    return data
-      ? new TeamConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.user.teams;
+    return new TeamConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13391,14 +13273,12 @@ export class Viewer_AssignedIssuesQuery extends Request {
       L.Viewer_AssignedIssuesDocument,
       variables
     );
-    const data = response?.viewer?.assignedIssues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.viewer.assignedIssues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13428,14 +13308,12 @@ export class Viewer_CreatedIssuesQuery extends Request {
       L.Viewer_CreatedIssuesDocument,
       variables
     );
-    const data = response?.viewer?.createdIssues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.viewer.createdIssues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13465,14 +13343,12 @@ export class Viewer_TeamMembershipsQuery extends Request {
       L.Viewer_TeamMembershipsDocument,
       variables
     );
-    const data = response?.viewer?.teamMemberships;
-    return data
-      ? new TeamMembershipConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.viewer.teamMemberships;
+    return new TeamMembershipConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13502,14 +13378,12 @@ export class Viewer_TeamsQuery extends Request {
       L.Viewer_TeamsDocument,
       variables
     );
-    const data = response?.viewer?.teams;
-    return data
-      ? new TeamConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.viewer.teams;
+    return new TeamConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -13545,14 +13419,12 @@ export class WorkflowState_IssuesQuery extends Request {
         ...variables,
       }
     );
-    const data = response?.workflowState?.issues;
-    return data
-      ? new IssueConnection(
-          this._request,
-          connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-          data
-        )
-      : undefined;
+    const data = response.workflowState.issues;
+    return new IssueConnection(
+      this._request,
+      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      data
+    );
   }
 }
 
@@ -14054,7 +13926,7 @@ export class LinearSdk extends Request {
    *
    * @returns Subscription
    */
-  public get subscription(): LinearFetch<Subscription> {
+  public get subscription(): LinearFetch<Subscription | undefined> {
     return new SubscriptionQuery(this._request).fetch();
   }
   /**

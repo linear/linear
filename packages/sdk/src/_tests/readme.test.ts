@@ -57,12 +57,12 @@ describe("readme.md", () => {
         /** CODE_SECTION:1_1:START */
         async function getMyIssues() {
           const me = await linearClient.viewer;
-          const myIssues = await me?.assignedIssues();
+          const myIssues = await me.assignedIssues();
 
-          if (myIssues?.nodes?.length) {
-            myIssues?.nodes?.map(issue => console.log(`${me?.displayName} has issue: ${issue?.title}`));
+          if (myIssues.nodes.length) {
+            myIssues.nodes.map(issue => console.log(`${me.displayName} has issue: ${issue.title}`));
           } else {
-            console.log(`${me?.displayName} has no issues`);
+            console.log(`${me.displayName} has no issues`);
           }
         }
 
@@ -73,11 +73,11 @@ describe("readme.md", () => {
       it("Or promises", async () => {
         /** CODE_SECTION:1_2:START */
         linearClient.viewer.then(me => {
-          return me?.assignedIssues()?.then(myIssues => {
-            if (myIssues?.nodes?.length) {
-              myIssues?.nodes?.map(issue => console.log(`${me?.displayName} has issue: ${issue?.title}`));
+          return me.assignedIssues().then(myIssues => {
+            if (myIssues.nodes.length) {
+              myIssues.nodes.map(issue => console.log(`${me.displayName} has issue: ${issue.title}`));
             } else {
-              console.log(`${me?.displayName} has no issues`);
+              console.log(`${me.displayName} has no issues`);
             }
           });
         });
@@ -111,7 +111,7 @@ describe("readme.md", () => {
     it("Other models are exposed as connections, and return a list of nodes", async () => {
       /** CODE_SECTION:3_2:START */
       const issues = await linearClient.issues();
-      const firstIssue = issues?.nodes?.[0];
+      const firstIssue = issues.nodes[0];
       /** CODE_SECTION:3_2:END */
     });
 
@@ -132,11 +132,11 @@ describe("readme.md", () => {
     it("Most models expose operations to fetch other models", async () => {
       /** CODE_SECTION:3_5:START */
       const me = await linearClient.viewer;
-      const myIssues = await me?.assignedIssues();
-      const myFirstIssue = myIssues?.nodes?.[0];
-      const myFirstIssueComments = await myFirstIssue?.comments();
-      const myFirstIssueFirstComment = myFirstIssueComments?.nodes?.[0];
-      const myFirstIssueFirstCommentUser = await myFirstIssueFirstComment?.user;
+      const myIssues = await me.assignedIssues();
+      const myFirstIssue = myIssues.nodes[0];
+      const myFirstIssueComments = await myFirstIssue.comments();
+      const myFirstIssueFirstComment = myFirstIssueComments.nodes[0];
+      const myFirstIssueFirstCommentUser = await myFirstIssueFirstComment.user;
       /** CODE_SECTION:3_5:END */
     });
   });
@@ -145,8 +145,8 @@ describe("readme.md", () => {
     it("To create a model, call the Linear Client mutation and pass in the input object", async () => {
       /** CODE_SECTION:4_1:START */
       const teams = await linearClient.teams();
-      const team = teams?.nodes?.[0];
-      if (team?.id) {
+      const team = teams.nodes[0];
+      if (team.id) {
         await linearClient.issueCreate({ teamId: team.id, title: "My Created Issue" });
       }
       /** CODE_SECTION:4_1:END */
@@ -155,7 +155,7 @@ describe("readme.md", () => {
     it("To update a model, call the Linear Client mutation and pass in the required variables and input object", async () => {
       /** CODE_SECTION:4_2:START */
       const me = await linearClient.viewer;
-      if (me?.id) {
+      if (me.id) {
         await linearClient.userUpdate(me.id, { displayName: "Alice" });
       }
       /** CODE_SECTION:4_2:END */
@@ -164,17 +164,17 @@ describe("readme.md", () => {
     it("Or call the mutation from the model", async () => {
       /** CODE_SECTION:4_3:START */
       const me = await linearClient.viewer;
-      await me?.update({ displayName: "Alice" });
+      await me.update({ displayName: "Alice" });
       /** CODE_SECTION:4_3:END */
     });
 
     it("All mutations are exposed in the same way", async () => {
       /** CODE_SECTION:4_4:START */
       const projects = await linearClient.projects();
-      const project = projects?.nodes?.[0];
-      if (project?.id) {
+      const project = projects.nodes[0];
+      if (project.id) {
         await linearClient.projectArchive(project.id);
-        await project?.archive();
+        await project.archive();
       }
       /** CODE_SECTION:4_4:END */
     });
@@ -182,7 +182,7 @@ describe("readme.md", () => {
     it("Mutations will often return a success boolean and the mutated entity", async () => {
       /** CODE_SECTION:4_5:START */
       const commentPayload = await linearClient.commentCreate({ issueId: "some-issue-id" });
-      if (commentPayload?.success) {
+      if (commentPayload.success) {
         return commentPayload.comment;
       } else {
         return new Error("Failed to create comment");
@@ -195,16 +195,16 @@ describe("readme.md", () => {
     it("Connection models have helpers to fetch the next and previous pages of results", async () => {
       /** CODE_SECTION:5_1:START */
       const issues = await linearClient.issues({ after: "some-issue-cursor", first: 10 });
-      const nextIssues = await issues?.fetchNext();
-      const prevIssues = await issues?.fetchPrevious();
+      const nextIssues = await issues.fetchNext();
+      const prevIssues = await issues.fetchPrevious();
       /** CODE_SECTION:5_1:END */
     });
 
     it("Pagination info is exposed and can be passed to the query operations. This uses the [Relay Connection spec](https://relay.dev/graphql/connections.htm)", async () => {
       /** CODE_SECTION:5_2:START */
       const issues = await linearClient.issues();
-      const hasMoreIssues = issues?.pageInfo?.hasNextPage;
-      const issuesEndCursor = issues?.pageInfo?.endCursor;
+      const hasMoreIssues = issues.pageInfo.hasNextPage;
+      const issuesEndCursor = issues.pageInfo.endCursor;
       const moreIssues = await linearClient.issues({ after: issuesEndCursor, first: 10 });
       /** CODE_SECTION:5_2:END */
     });
@@ -223,25 +223,29 @@ describe("readme.md", () => {
       /** CODE_SECTION:6_1:START */
       // CODE_SECTION:INCLUDE import { Issue, LinearFetch } from "@linear/sdk";
 
-      async function createIssueWithFile(title: string, file: File, uploadData: RequestInit): LinearFetch<Issue> {
+      async function createIssueWithFile(
+        title: string,
+        file: File,
+        uploadData: RequestInit
+      ): LinearFetch<Issue | undefined> {
         /** Fetch a storage URL to upload the file to */
         const uploadPayload = await linearClient.fileUpload(file.type, file.name, file.size);
 
         /** Upload the file to the storage URL using the authentication header */
-        const authHeader = uploadPayload?.uploadFile?.headers?.[0];
-        const uploadUrl = uploadPayload?.uploadFile?.uploadUrl;
+        const authHeader = uploadPayload.uploadFile?.headers[0];
+        const uploadUrl = uploadPayload.uploadFile?.uploadUrl;
         if (uploadUrl && authHeader?.key && authHeader?.value) {
           await fetch(uploadUrl, {
             method: "PUT",
             headers: {
-              [authHeader.key]: authHeader.value,
+              [authHeader?.key]: authHeader?.value,
               "cache-control": "max-age=31536000",
             },
             ...uploadData,
           });
 
           /** Use the asset URL to attach the stored file */
-          const assetUrl = uploadPayload?.uploadFile?.assetUrl;
+          const assetUrl = uploadPayload.uploadFile?.assetUrl;
           if (assetUrl) {
             const issuePayload = await linearClient.issueCreate({
               title,
@@ -250,7 +254,7 @@ describe("readme.md", () => {
               teamId: "team-id",
             });
 
-            return issuePayload?.issue;
+            return issuePayload.issue;
           }
         }
         return undefined;
@@ -262,12 +266,14 @@ describe("readme.md", () => {
   describe("Error", () => {
     it("Errors can be caught and interrogated by wrapping the operation in a try catch block", async () => {
       /** CODE_SECTION:7_1:START */
-      async function createComment(input: LinearDocument.CommentCreateInput): LinearFetch<Comment | UserError> {
+      async function createComment(
+        input: LinearDocument.CommentCreateInput
+      ): LinearFetch<Comment | undefined | UserError> {
         try {
           /** Try to create a comment */
           const commentPayload = await linearClient.commentCreate(input);
           /** Return it if available */
-          return commentPayload?.comment;
+          return commentPayload.comment;
         } catch (error) {
           /** The error has been parsed by Linear Client */
           throw error;
@@ -278,12 +284,12 @@ describe("readme.md", () => {
 
     it("Or by catching the error thrown from a calling function", async () => {
       /** CODE_SECTION:7_2:START */
-      async function archiveFirstIssue(): LinearFetch<ArchivePayload> {
+      async function archiveFirstIssue(): LinearFetch<ArchivePayload | undefined> {
         const me = await linearClient.viewer;
-        const issues = await me?.assignedIssues();
-        const firstIssue = issues?.nodes?.[0];
+        const issues = await me.assignedIssues();
+        const firstIssue = issues.nodes[0];
 
-        if (firstIssue?.id) {
+        if (firstIssue.id) {
           const payload = await linearClient.issueArchive(firstIssue.id);
           return payload;
         } else {
