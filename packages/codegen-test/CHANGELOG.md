@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.8.8
+
+### Patch Changes
+
+- d3badec: chore(deps): update dependency patch versions
+
 ## 1.8.7
 
 ### Patch Changes

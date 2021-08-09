@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.5.15
+
+### Patch Changes
+
+- d3badec: chore(deps): update dependency patch versions
+- Updated dependencies [d3badec]
+- Updated dependencies [90de5e9]
+  - @linear/sdk@1.18.0
+
 ## 1.5.14
 
 ### Patch Changes
