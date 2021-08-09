@@ -1332,6 +1332,8 @@ export type IssueCreateInput = {
   priority?: Maybe<Scalars["Int"]>;
   /** The project associated with the issue. */
   projectId?: Maybe<Scalars["String"]>;
+  /** The comment the issue is referencing. */
+  referenceCommentId?: Maybe<Scalars["String"]>;
   /** The team state of the issue. */
   stateId?: Maybe<Scalars["String"]>;
   /** The position of the issue in parent's sub-issue list. */

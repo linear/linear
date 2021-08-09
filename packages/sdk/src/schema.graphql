@@ -2182,6 +2182,10 @@ input IssueCreateInput {
   """
   projectId: String
   """
+  The comment the issue is referencing.
+  """
+  referenceCommentId: String
+  """
   The team state of the issue.
   """
   stateId: String

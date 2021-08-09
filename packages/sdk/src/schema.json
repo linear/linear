@@ -8533,6 +8533,18 @@
             "deprecationReason": null
           },
           {
+            "name": "referenceCommentId",
+            "description": "The comment the issue is referencing.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "boardOrder",
             "description": "The position of the issue in its column on the board view.",
             "type": {
