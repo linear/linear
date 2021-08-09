@@ -527,6 +527,8 @@ fragment PushSubscription on PushSubscription {
 fragment Webhook on Webhook {
   # Secret token for verifying the origin on the recipient side.
   secret
+  # The ids of teams that the webhook is associated with.
+  teamIds
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
@@ -550,6 +552,8 @@ fragment Webhook on Webhook {
   url
   # Webhook label
   label
+  # Whether the Webhook is enabled for all public teams, including teams created after the webhook was created.
+  allPublicTeams
   # Whether the Webhook is enabled.
   enabled
 }
