@@ -10,6 +10,7 @@ import {
   printSet,
   printTernary,
   printTypescriptType,
+  reduceNonNullType,
 } from "@linear/codegen-doc";
 import { Sdk } from "./constants";
 import { findMutations, getMutationName } from "./mutation";
@@ -65,7 +66,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
         printLines(
           model.fields.query.map(field =>
             field.args.some(arg => !arg.optional)
-              ? `private _${field.name}?: ${model.fragment}['${field.name}']`
+              ? `private _${field.name}${field.nonNull ? "" : "?"}: ${model.fragment}['${field.name}']`
               : undefined
           )
         ),
@@ -76,37 +77,42 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           `super(${Sdk.REQUEST_NAME})`,
           printDebug("fields.scalar"),
           printLines(
-            model.fields.scalar.map(field => printSet(`this.${field.name}`, `${printModelScalar(field)} ?? undefined`))
+            model.fields.scalar.map(field =>
+              printSet(`this.${field.name}`, `${printModelScalar(field)}${field.nonNull ? "" : " ?? undefined"}`)
+            )
           ),
           printDebug("fields.scalarList"),
           printLines(
             model.fields.scalarList.map(field =>
-              printSet(`this.${field.name}`, `${printModelScalar(field)} ?? undefined`)
+              printSet(`this.${field.name}`, `${printModelScalar(field)}${field.nonNull ? "" : " ?? undefined"}`)
             )
           ),
           printDebug("fields.object"),
           printLines(
-            model.fields.object.map(field =>
-              printTernary(
-                printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`),
-                `new ${field.object.name.value}(${Sdk.REQUEST_NAME}, ${Sdk.DATA_NAME}.${field.name}) `
-              )
-            )
+            model.fields.object.map(field => {
+              const operationCall = `new ${field.object.name.value}(${Sdk.REQUEST_NAME}, ${Sdk.DATA_NAME}.${field.name})`;
+              return field.nonNull
+                ? printSet(`this.${field.name}`, operationCall)
+                : printTernary(printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`), operationCall);
+            })
           ),
           printDebug("fields.list"),
           printLines(
-            model.fields.list.map(field =>
-              printTernary(
-                printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`),
-                `${Sdk.DATA_NAME}.${field.name}.map(node => new ${field.listType}(${Sdk.REQUEST_NAME}, node))`
-              )
-            )
+            model.fields.list.map(field => {
+              const operationCall = `${Sdk.DATA_NAME}.${field.name}.map(node => new ${field.listType}(${Sdk.REQUEST_NAME}, node))`;
+              return field.nonNull
+                ? printSet(`this.${field.name}`, operationCall)
+                : printTernary(printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`), operationCall);
+            })
           ),
           printDebug("fields.query"),
           printLines(
             model.fields.query.map(field =>
               field.args.some(arg => !arg.optional)
-                ? printSet(`this._${field.name}`, `${Sdk.DATA_NAME}.${field.name} ?? undefined`)
+                ? printSet(
+                    `this._${field.name}`,
+                    `${Sdk.DATA_NAME}.${field.name}${field.nonNull ? "" : " ?? undefined"}`
+                  )
                 : undefined
             )
           ),
@@ -115,19 +121,27 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
 
       ${printLines([
         printDebug("fields.scalar"),
-        printLines(model.fields.scalar.map(field => printModelField(field, `public ${field.name}?: ${field.type}`))),
+        printLines(
+          model.fields.scalar.map(field =>
+            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
+          )
+        ),
         printDebug("fields.scalarList"),
         printLines(
-          model.fields.scalarList.map(field => printModelField(field, `public ${field.name}?: ${field.type}`))
+          model.fields.scalarList.map(field =>
+            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
+          )
         ),
         printDebug("fields.list"),
         printLines(
-          model.fields.list.map(field => printModelField(field, `public ${field.name}?: ${field.listType}[]`))
+          model.fields.list.map(field =>
+            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.listType}[]`)
+          )
         ),
         printDebug("fields.object"),
         printLines(
           model.fields.object.map((field /** Ignore objects returned by an operation */) =>
-            printModelField(field, `public ${field.name}?: ${field.object.name.value}`)
+            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.object.name.value}`)
           )
         ),
       ])}
@@ -137,25 +151,29 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           model.fields.query.map(field => {
             const typeName = printTypescriptType(context, field.node.type);
             const fieldQueryName = `${printPascal(field.query.name.value)}Query`;
-            const fieldQueryArgs = field.args?.map(arg => `this._${field.name}?.${arg.name}`);
+            const fieldQueryArgs = field.args?.map(arg => `this._${field.name}${field.nonNull ? "" : "?"}.${arg.name}`);
 
             if (fieldQueryArgs.length) {
+              const operationCall = `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${printList(
+                fieldQueryArgs
+              )})`;
               return printModelField(
                 field,
-                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}> | undefined {
-                  return ${printTernary(
-                    printList(fieldQueryArgs, " && "),
-                    `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${printList(fieldQueryArgs)})`
-                  )}
+                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
+                  reduceNonNullType(field.query.type) ? "" : " | undefined"
+                }> | undefined {
+                  return ${
+                    field.nonNull ? operationCall : printTernary(printList(fieldQueryArgs, " && "), operationCall)
+                  }
                 }`
               );
             } else {
               return printModelField(
                 field,
-                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}> {
-                  return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${printList(
-                  fieldQueryArgs
-                )})
+                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
+                  reduceNonNullType(field.query.type) ? "" : " | undefined"
+                }> {
+                  return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}()
                 }`
               );
             }
@@ -190,7 +208,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                 `public ${operation.optionalArgs.args.length ? "" : "get"} ${fieldName}(${
                   operation.optionalArgs?.printInput ?? ""
                 }) {
-                return ${printTernary(variableCheck, operationCall)}
+                return ${field?.nonNull ? operationCall : printTernary(variableCheck, operationCall)}
               }`,
               ]);
             })
@@ -232,7 +250,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               printComment([field.description?.value]),
               printDebug(operation),
               `public ${getMutationName(model, operation.name)}(${printList([mutationArgs.printInput]) ?? ""}) {
-                return ${printTernary(variableCheck, operationCall)}
+                return ${reduceNonNullType(field.type) ? operationCall : printTernary(variableCheck, operationCall)}
               }`,
             ]);
           })

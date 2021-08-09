@@ -9,6 +9,7 @@ import {
   PluginContext,
   printTypescriptType,
   reduceListType,
+  reduceNonNullType,
 } from "@linear/codegen-doc";
 import autoBind from "auto-bind";
 import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
@@ -95,6 +96,7 @@ export class ModelVisitor {
         const name = node.name.value;
         const type = printTypescriptType(this._context, node.type, Sdk.NAMESPACE);
         const query = findQuery(this._context, node);
+        const nonNull = Boolean(reduceNonNullType(node.type));
 
         /** Identify query fields */
         if (query) {
@@ -113,6 +115,7 @@ export class ModelVisitor {
             type,
             query,
             args,
+            nonNull,
           };
         }
 
@@ -123,6 +126,7 @@ export class ModelVisitor {
             node,
             name,
             type,
+            nonNull,
           };
         }
 
@@ -136,6 +140,7 @@ export class ModelVisitor {
               name,
               type,
               listType: this._context.scalars[listType],
+              nonNull,
             };
           } else {
             return {
@@ -144,6 +149,7 @@ export class ModelVisitor {
               name,
               type,
               listType,
+              nonNull,
             };
           }
         }
@@ -158,6 +164,7 @@ export class ModelVisitor {
               name,
               type,
               object,
+              nonNull,
             };
           } else {
             return {
@@ -166,6 +173,7 @@ export class ModelVisitor {
               name,
               type,
               object,
+              nonNull,
             };
           }
         }

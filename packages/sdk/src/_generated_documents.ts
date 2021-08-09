@@ -5372,6 +5372,8 @@ export enum ViewType {
 /** A webhook used to send HTTP notifications over data updates */
 export type Webhook = Node & {
   __typename?: "Webhook";
+  /** Whether the Webhook is enabled for all public teams, including teams created after the webhook was created. */
+  allPublicTeams: Scalars["Boolean"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
@@ -5390,6 +5392,8 @@ export type Webhook = Node & {
   secret?: Maybe<Scalars["String"]>;
   /** The team that the webhook is associated with. */
   team: Team;
+  /** The ids of teams that the webhook is associated with. */
+  teamIds: Array<Scalars["String"]>;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -5732,7 +5736,17 @@ export type PushSubscriptionFragment = { __typename?: "PushSubscription" } & Pic
 
 export type WebhookFragment = { __typename?: "Webhook" } & Pick<
   Webhook,
-  "secret" | "updatedAt" | "resourceTypes" | "archivedAt" | "createdAt" | "id" | "url" | "label" | "enabled"
+  | "secret"
+  | "teamIds"
+  | "updatedAt"
+  | "resourceTypes"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "url"
+  | "label"
+  | "allPublicTeams"
+  | "enabled"
 > & { team: { __typename?: "Team" } & Pick<Team, "id">; creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type ApiKeyFragment = { __typename?: "ApiKey" } & Pick<
@@ -13600,6 +13614,7 @@ export const WebhookFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "secret" } },
+          { kind: "Field", name: { kind: "Name", value: "teamIds" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "resourceTypes" } },
           {
@@ -13623,6 +13638,7 @@ export const WebhookFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "label" } },
+          { kind: "Field", name: { kind: "Name", value: "allPublicTeams" } },
           { kind: "Field", name: { kind: "Name", value: "enabled" } },
         ],
       },

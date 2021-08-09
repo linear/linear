@@ -42,9 +42,9 @@ export function printModelScalar(field: SdkModelField): string {
 
   switch (field.type) {
     case Sdk.SCALAR_DATE_TYPE:
-      return `${parseDateFunction}(${fieldName})`;
+      return field.nonNull ? `${parseDateFunction}(${fieldName}) ?? new Date()` : `${parseDateFunction}(${fieldName})`;
     case Sdk.SCALAR_JSON_TYPE:
-      return `${parseJsonFunction}(${fieldName})`;
+      return field.nonNull ? `${parseJsonFunction}(${fieldName}) ?? {}` : `${parseJsonFunction}(${fieldName})`;
     default:
       return `${fieldName}`;
   }

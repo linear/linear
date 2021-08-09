@@ -32,6 +32,8 @@ export interface SdkOperationPrint {
   type: string;
   /** The type of the result from the graphql operation */
   response: string;
+  /** The typescript safe path through the response to the data */
+  responsePath: string;
   /** The type of the variables for the graphql operation */
   variables: string;
   /** The type returned from this operation */
@@ -80,6 +82,8 @@ export interface SdkOperation {
   parent?: SdkOperation;
   /** THe parsed and printed type names required for generation */
   print: SdkOperationPrint;
+  /** Whether the response data is non-nullable */
+  nonNull: boolean;
 }
 
 /**
@@ -132,6 +136,8 @@ export interface SdkScalarField {
   name: string;
   /** Printed typescript type */
   type: string;
+  /** Whether the field is non-nullable */
+  nonNull: boolean;
 }
 
 /**

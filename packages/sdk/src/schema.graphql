@@ -9183,6 +9183,10 @@ A webhook used to send HTTP notifications over data updates
 """
 type Webhook implements Node {
   """
+  Whether the Webhook is enabled for all public teams, including teams created after the webhook was created.
+  """
+  allPublicTeams: Boolean!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -9218,6 +9222,10 @@ type Webhook implements Node {
   The team that the webhook is associated with.
   """
   team: Team!
+  """
+  The ids of teams that the webhook is associated with.
+  """
+  teamIds: [String!]!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
       entity hasn't been update after creation.

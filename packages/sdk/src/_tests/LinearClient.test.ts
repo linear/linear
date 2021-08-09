@@ -12,8 +12,8 @@ describe("LinearClient", () => {
           viewer: { id: "viewerId" },
           team: {
             id: "teamId",
-            labels: { nodes: [{ id: "labelId" }] },
-            states: { nodes: [{ id: "stateId" }] },
+            labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+            states: { nodes: [{ id: "stateId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
           },
         },
       },
@@ -37,12 +37,12 @@ describe("LinearClient", () => {
   it("has chained api", async () => {
     const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url });
     const team = await client.team("someTeamId");
-    const labels = await team?.labels();
-    const states = await team?.states();
+    const labels = await team.labels();
+    const states = await team.states();
 
     expect(team).toEqual(expect.objectContaining({ id: "teamId" }));
-    expect(labels?.nodes).toEqual(expect.arrayContaining([expect.objectContaining({ id: "labelId" })]));
-    expect(states?.nodes).toEqual(expect.arrayContaining([expect.objectContaining({ id: "stateId" })]));
+    expect(labels.nodes).toEqual(expect.arrayContaining([expect.objectContaining({ id: "labelId" })]));
+    expect(states.nodes).toEqual(expect.arrayContaining([expect.objectContaining({ id: "stateId" })]));
   });
 
   it("fails auth with incorrect api key", async () => {
