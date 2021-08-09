@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.17.0
+
+### Minor Changes
+
+- bc39d23: feat(schema): [non_breaking] Field 'allPublicTeams' was added to object type 'Webhook' (Webhook.allPublicTeams)
+
+  feat(schema): [non_breaking] Field 'teamIds' was added to object type 'Webhook' (Webhook.teamIds)
+
+- bc39d23: feat(sdk): output non nullable types
+
 ## 1.16.1
 
 ### Patch Changes
