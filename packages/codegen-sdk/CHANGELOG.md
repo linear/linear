@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.9.0
+
+### Minor Changes
+
+- bc39d23: feat(sdk): output non nullable types
+
 ## 1.8.7
 
 ### Patch Changes
