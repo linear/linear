@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.18.0
+
+### Minor Changes
+
+- 90de5e9: feat(schema): [dangerous] Input field 'referenceCommentId' was added to input object type 'IssueCreateInput' (IssueCreateInput.referenceCommentId)
+
+### Patch Changes
+
+- d3badec: chore(deps): update dependency patch versions
+
 ## 1.17.0
 
 ### Minor Changes

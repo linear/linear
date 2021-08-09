@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.10.1
+
+### Patch Changes
+
+- d3badec: chore(deps): update dependency patch versions
+
 ## 1.10.0
 
 ### Minor Changes
