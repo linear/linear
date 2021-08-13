@@ -7119,6 +7119,22 @@
             "deprecationReason": null
           },
           {
+            "name": "sortOrder",
+            "description": "The order of the item in relation to other items in the organization.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "startedAt",
             "description": "The time at which the issue was moved into started state.",
             "args": [],
@@ -8547,6 +8563,18 @@
           {
             "name": "boardOrder",
             "description": "The position of the issue in its column on the board view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "The position of the issue related to other issues.",
             "type": {
               "kind": "SCALAR",
               "name": "Float",
@@ -10987,6 +11015,18 @@
           {
             "name": "boardOrder",
             "description": "The position of the issue in its column on the board view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "The position of the issue related to other issues.",
             "type": {
               "kind": "SCALAR",
               "name": "Float",
@@ -30590,6 +30630,18 @@
             "deprecationReason": null
           },
           {
+            "name": "triageEnabled",
+            "description": "Whether triage mode is enabled for the team.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "timezone",
             "description": "The timezone of the team.",
             "type": {
@@ -30700,18 +30752,6 @@
           {
             "name": "private",
             "description": "Internal. Whether the team is private or not.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "triageEnabled",
-            "description": "Whether triage mode is enabled for the team.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",

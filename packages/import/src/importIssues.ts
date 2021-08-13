@@ -275,6 +275,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       projectId: projectId as unknown as string,
       title: issue.title,
       description,
+      estimate: issue.estimate,
       priority: issue.priority,
       labelIds,
       stateId,
