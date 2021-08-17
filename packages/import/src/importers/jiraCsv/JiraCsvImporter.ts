@@ -4,14 +4,14 @@ import { Importer, ImportResult } from "../../types";
 const j2m = require("jira2md");
 
 type JiraPriority = "Highest" | "High" | "Medium" | "Low" | "Lowest";
-type JiraStoryPoints = 0 | 1 | 2 | 3 | 5 | 8;
+type FibonacciStoryPointEstimates = 0 | 1 | 2 | 3 | 5 | 8;
 
 interface JiraIssueType {
   Description: string;
   Status: string;
   "Issue key": string;
   "Issue Type": string;
-  "Story Points": JiraStoryPoints;
+  "Story point estimate": FibonacciStoryPointEstimates;
   Priority: JiraPriority;
   "Project key": string;
   Summary: string;
@@ -80,12 +80,12 @@ export class JiraCsvImporter implements Importer {
           : url
           ? `[View original issue in Jira](${url})`
           : undefined;
+      const estimate = row["Story point estimate"];
       const priority = mapPriority(row.Priority);
       const type = `Type: ${row["Issue Type"]}`;
       const release = row.Release && row.Release.length > 0 ? `Release: ${row.Release}` : undefined;
       const assigneeId = row.Assignee && row.Assignee.length > 0 ? row.Assignee : undefined;
       const status = row.Status;
-      const estimate = row["Story Points"];
 
       const labels = [type];
       if (release) {
