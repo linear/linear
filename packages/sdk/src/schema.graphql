@@ -2059,10 +2059,6 @@ type Issue implements Node {
   """
   snoozedUntilAt: DateTime
   """
-  The order of the item in relation to other items in the organization.
-  """
-  sortOrder: Float!
-  """
   The time at which the issue was moved into started state.
   """
   startedAt: DateTime
@@ -2189,10 +2185,6 @@ input IssueCreateInput {
   The comment the issue is referencing.
   """
   referenceCommentId: String
-  """
-  The position of the issue related to other issues.
-  """
-  sortOrder: Float
   """
   The team state of the issue.
   """
@@ -2850,10 +2842,6 @@ input IssueUpdateInput {
   The time until an issue will be snoozed in Triage view.
   """
   snoozedUntilAt: DateTime
-  """
-  The position of the issue related to other issues.
-  """
-  sortOrder: Float
   """
   The team state of the issue.
   """
