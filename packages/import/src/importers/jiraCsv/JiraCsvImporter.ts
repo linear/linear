@@ -11,7 +11,7 @@ interface JiraIssueType {
   Status: string;
   "Issue key": string;
   "Issue Type": string;
-  "Story point estimate": FibonacciStoryPointEstimates;
+  "Custom field (Story point estimate)": FibonacciStoryPointEstimates;
   Priority: JiraPriority;
   "Project key": string;
   Summary: string;
@@ -80,7 +80,9 @@ export class JiraCsvImporter implements Importer {
           : url
           ? `[View original issue in Jira](${url})`
           : undefined;
-      const estimate = row["Story point estimate"];
+      const estimate = row["Custom field (Story point estimate)"]
+        ? Math.round(row["Custom field (Story point estimate)"])
+        : undefined;
       const priority = mapPriority(row.Priority);
       const type = `Type: ${row["Issue Type"]}`;
       const release = row.Release && row.Release.length > 0 ? `Release: ${row.Release}` : undefined;
