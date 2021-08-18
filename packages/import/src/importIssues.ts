@@ -220,8 +220,6 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     }
   }
 
-  const fibonacciEstimationType = teamInfo.issueEstimationType === "fibonacci";
-
   // Create issues
   for (const issue of importData.issues) {
     const issueDescription = issue.description
@@ -277,7 +275,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       projectId: projectId as unknown as string,
       title: issue.title,
       description,
-      estimate: fibonacciEstimationType ? issue.estimate : undefined,
+      estimate: issue.estimate,
       priority: issue.priority,
       labelIds,
       stateId,

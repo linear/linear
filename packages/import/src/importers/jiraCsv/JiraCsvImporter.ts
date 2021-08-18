@@ -4,21 +4,19 @@ import { Importer, ImportResult } from "../../types";
 const j2m = require("jira2md");
 
 type JiraPriority = "Highest" | "High" | "Medium" | "Low" | "Lowest";
-type FibonacciStoryPointEstimates = 0 | 1 | 2 | 3 | 5 | 8;
 
 interface JiraIssueType {
   Description: string;
   Status: string;
   "Issue key": string;
   "Issue Type": string;
-  "Custom field (Story point estimate)": FibonacciStoryPointEstimates;
   Priority: JiraPriority;
   "Project key": string;
   Summary: string;
   Assignee: string;
   Created: string;
   Release: string;
-  "Custom field (Story Points)"?: string;
+  "Custom field (Story point estimate)": number;
 }
 
 /**

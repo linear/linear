@@ -8,7 +8,7 @@ export interface Issue {
   status?: string;
   /** Assigned user */
   assigneeId?: string;
-  /** Story Point Estimate, in Fibonacci sequence */
+  /** Story Point Estimate */
   estimate?: number;
   /** Issue's priority from 0-4, with 0 being the most important. Undefined for non-prioritized. */
   priority?: number;
