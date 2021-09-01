@@ -13015,61 +13015,6 @@ export class Organization_UsersQuery extends Request {
 }
 
 /**
-<<<<<<< HEAD
-=======
- * A fetchable OrganizationInvite_Issues Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to organizationInvite
- * @param variables - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
- */
-export class OrganizationInvite_IssuesQuery extends Request {
-  private _id: string;
-  private _variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">;
-
-  public constructor(
-    request: LinearRequest,
-    id: string,
-    variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">
-  ) {
-    super(request);
-    this._id = id;
-    this._variables = variables;
-  }
-
-  /**
-   * Call the OrganizationInvite_Issues query and return a IssueConnection
-   *
-   * @param variables - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
-   * @returns parsed response from OrganizationInvite_IssuesQuery
-   */
-  public async fetch(variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    const response = await this._request<L.OrganizationInvite_IssuesQuery, L.OrganizationInvite_IssuesQueryVariables>(
-      L.OrganizationInvite_IssuesDocument,
-      {
-        id: this._id,
-        ...this._variables,
-        ...variables,
-      }
-    );
-    const data = response.organizationInvite.issues;
-    return new IssueConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...this._variables,
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
->>>>>>> ed93173 (fix(pagination): default first and last if required)
  * A fetchable Project_Issues Query
  *
  * @param request - function to call the graphql client
