@@ -114,7 +114,9 @@ export class Connection<Node> extends LinearConnection<Node> {
   /** Fetch the next page of results and append to nodes */
   public async fetchNext(): Promise<this> {
     if (this.pageInfo?.hasNextPage) {
-      const response = await this._fetch({ after: this.pageInfo?.endCursor });
+      const response = await this._fetch({
+        after: this.pageInfo?.endCursor,
+      });
       this._appendNodes(response?.nodes);
       this._appendPageInfo(response?.pageInfo);
     }
@@ -124,7 +126,9 @@ export class Connection<Node> extends LinearConnection<Node> {
   /** Fetch the previous page of results and prepend to nodes */
   public async fetchPrevious(): Promise<this> {
     if (this.pageInfo?.hasPreviousPage) {
-      const response = await this._fetch({ before: this.pageInfo?.startCursor });
+      const response = await this._fetch({
+        before: this.pageInfo?.startCursor,
+      });
       this._prependNodes(response?.nodes);
       this._prependPageInfo(response?.pageInfo);
     }
