@@ -1036,6 +1036,21 @@ export class DocumentStep extends Request {
   public version: number;
 }
 /**
+ * EmailSubscribePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.EmailSubscribePayloadFragment response data
+ */
+export class EmailSubscribePayload extends Request {
+  public constructor(request: LinearRequest, data: L.EmailSubscribePayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * EmailUnsubscribePayload model
  *
  * @param request - function to call the graphql client
@@ -1715,60 +1730,6 @@ export class IntercomSettings extends Request {
   public sendNoteOnStatusChange?: boolean;
 }
 /**
- * InviteData model
- *
- * @param request - function to call the graphql client
- * @param data - L.InviteDataFragment response data
- */
-export class InviteData extends Request {
-  public constructor(request: LinearRequest, data: L.InviteDataFragment) {
-    super(request);
-    this.avatarURLs = data.avatarURLs;
-    this.inviterName = data.inviterName;
-    this.organizationDomain = data.organizationDomain;
-    this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
-    this.organizationName = data.organizationName;
-    this.teamIds = data.teamIds;
-    this.teamNames = data.teamNames;
-    this.userCount = data.userCount;
-  }
-
-  /** Avatar URLs for the invitees. */
-  public avatarURLs: string[];
-  /** The name of the inviter. */
-  public inviterName: string;
-  /** The domain of the organization the users were invited to. */
-  public organizationDomain: string;
-  /** The logo of the organization the users were invited to. */
-  public organizationLogoUrl?: string;
-  /** The name of the organization the users were invited to. */
-  public organizationName: string;
-  /** Team identifiers for the invitees. */
-  public teamIds: string[];
-  /** Team names for the invitees. */
-  public teamNames: string[];
-  /** The user count of the organization. */
-  public userCount: number;
-}
-/**
- * InvitePagePayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.InvitePagePayloadFragment response data
- */
-export class InvitePagePayload extends Request {
-  public constructor(request: LinearRequest, data: L.InvitePagePayloadFragment) {
-    super(request);
-    this.success = data.success;
-    this.inviteData = data.inviteData ? new InviteData(request, data.inviteData) : undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success: boolean;
-  /** Invite data. */
-  public inviteData?: InviteData;
-}
-/**
  * Invoice model
  *
  * @param request - function to call the graphql client
@@ -1832,6 +1793,7 @@ export class Issue extends Request {
     this.priority = data.priority;
     this.priorityLabel = data.priorityLabel;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.sortOrder = data.sortOrder;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.subIssueSortOrder = data.subIssueSortOrder ?? undefined;
     this.title = data.title;
@@ -1886,6 +1848,8 @@ export class Issue extends Request {
   public priorityLabel: string;
   /** The time until an issue will be snoozed in Triage view. */
   public snoozedUntilAt?: Date;
+  /** The order of the item in relation to other items in the organization. */
+  public sortOrder: number;
   /** The time at which the issue was moved into started state. */
   public startedAt?: Date;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
@@ -2280,6 +2244,10 @@ export class IssueImport extends Request {
   /** Deletes an import job. */
   public delete(issueImportId: string) {
     return new IssueImportDeleteMutation(this._request).fetch(issueImportId);
+  }
+  /** Updates the mapping for the issue import. */
+  public update(input: L.IssueImportUpdateInput) {
+    return new IssueImportUpdateMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -2989,6 +2957,8 @@ export class OauthClient extends Request {
     this.publicEnabled = data.publicEnabled;
     this.redirectUris = data.redirectUris;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.webhookResourceTypes = data.webhookResourceTypes;
+    this.webhookUrl = data.webhookUrl ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -3020,6 +2990,10 @@ export class OauthClient extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt: Date;
+  /** The resource types to request when creating new webhooks. */
+  public webhookResourceTypes: string[];
+  /** Webhook URL */
+  public webhookUrl?: string;
 
   /** Archives an OAuth client. */
   public archive() {
@@ -3351,10 +3325,7 @@ export class OrganizationInvite extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** undefined */
-  public issues(variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">) {
-    return this.id ? new OrganizationInvite_IssuesQuery(this._request, this.id, variables).fetch(variables) : undefined;
-  }
+
   /** Deletes an organization invite. */
   public delete() {
     return new OrganizationInviteDeleteMutation(this._request).fetch(this.id);
@@ -3382,17 +3353,55 @@ export class OrganizationInviteConnection extends Connection<OrganizationInvite>
   }
 }
 /**
+ * OrganizationInviteDetailsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationInviteDetailsPayloadFragment response data
+ */
+export class OrganizationInviteDetailsPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationInviteDetailsPayloadFragment) {
+    super(request);
+    this.accepted = data.accepted;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.email = data.email;
+    this.expired = data.expired;
+    this.inviter = data.inviter;
+    this.organizationId = data.organizationId;
+    this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
+    this.organizationName = data.organizationName;
+  }
+
+  /** Whether the invite has already been accepted. */
+  public accepted: boolean;
+  /** When the invite was created. */
+  public createdAt: Date;
+  /** The email of the invitee */
+  public email: string;
+  /** Whether the invite has expired. */
+  public expired: boolean;
+  /** The name of the inviter */
+  public inviter: string;
+  /** ID of the workspace the invite is for. */
+  public organizationId: string;
+  /** URL of the workspace logo the invite is for. */
+  public organizationLogoUrl?: string;
+  /** Name of the workspace the invite is for. */
+  public organizationName: string;
+}
+/**
  * OrganizationInvitePayload model
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationInvitePayloadFragment response data
  */
 export class OrganizationInvitePayload extends Request {
+  private _organizationInvite: L.OrganizationInvitePayloadFragment["organizationInvite"];
+
   public constructor(request: LinearRequest, data: L.OrganizationInvitePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
-    this.organizationInvite = new OrganizationInvite(request, data.organizationInvite);
+    this._organizationInvite = data.organizationInvite;
   }
 
   /** The identifier of the last sync operation. */
@@ -3400,7 +3409,9 @@ export class OrganizationInvitePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The organization invite that was created or updated. */
-  public organizationInvite: OrganizationInvite;
+  public get organizationInvite(): LinearFetch<OrganizationInvite> | undefined {
+    return new OrganizationInviteQuery(this._request).fetch(this._organizationInvite.id);
+  }
 }
 /**
  * OrganizationPayload model
@@ -4326,7 +4337,7 @@ export class Team extends Request {
   public constructor(request: LinearRequest, data: L.TeamFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.autoArchivePeriod = data.autoArchivePeriod ?? undefined;
+    this.autoArchivePeriod = data.autoArchivePeriod;
     this.autoClosePeriod = data.autoClosePeriod ?? undefined;
     this.autoCloseStateId = data.autoCloseStateId ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
@@ -4371,8 +4382,8 @@ export class Team extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
-  /** Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled. */
-  public autoArchivePeriod?: number;
+  /** Period after which automatically closed and completed issues are automatically archived in months. */
+  public autoArchivePeriod: number;
   /** Period after which issues are automatically closed in months. Null/undefined means disabled. */
   public autoClosePeriod?: number;
   /** The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state. */
@@ -5018,11 +5029,12 @@ export class UserAuthorizedApplication extends Request {
     this.imageUrl = data.imageUrl ?? undefined;
     this.isAuthorized = data.isAuthorized;
     this.name = data.name;
+    this.webhooksEnabled = data.webhooksEnabled;
   }
 
   /** OAuth application's client ID. */
   public clientId: string;
-  /** Whether the application was created by Linear */
+  /** Whether the application was created by Linear. */
   public createdByLinear: boolean;
   /** Information about the application. */
   public description?: string;
@@ -5036,6 +5048,8 @@ export class UserAuthorizedApplication extends Request {
   public isAuthorized: boolean;
   /** Application name. */
   public name: string;
+  /** Whether or not webhooks are enabled for the application. */
+  public webhooksEnabled: boolean;
 }
 /**
  * UserConnection model
@@ -6105,36 +6119,6 @@ export class IntegrationsQuery extends Request {
 }
 
 /**
- * A fetchable InviteInfo Query
- *
- * @param request - function to call the graphql client
- */
-export class InviteInfoQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the InviteInfo query and return a InvitePagePayload
-   *
-   * @param userHash - required userHash to pass to inviteInfo
-   * @param variables - variables without 'userHash' to pass into the InviteInfoQuery
-   * @returns parsed response from InviteInfoQuery
-   */
-  public async fetch(
-    userHash: string,
-    variables?: Omit<L.InviteInfoQueryVariables, "userHash">
-  ): LinearFetch<InvitePagePayload> {
-    const response = await this._request<L.InviteInfoQuery, L.InviteInfoQueryVariables>(L.InviteInfoDocument, {
-      userHash,
-      ...variables,
-    });
-    const data = response.inviteInfo;
-    return new InvitePagePayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable Issue Query
  *
  * @param request - function to call the graphql client
@@ -6590,12 +6574,12 @@ export class OrganizationInviteQuery extends Request {
   }
 
   /**
-   * Call the OrganizationInvite query and return a IssueLabel
+   * Call the OrganizationInvite query and return a OrganizationInvite
    *
    * @param id - required id to pass to organizationInvite
    * @returns parsed response from OrganizationInviteQuery
    */
-  public async fetch(id: string): LinearFetch<IssueLabel> {
+  public async fetch(id: string): LinearFetch<OrganizationInvite> {
     const response = await this._request<L.OrganizationInviteQuery, L.OrganizationInviteQueryVariables>(
       L.OrganizationInviteDocument,
       {
@@ -6603,7 +6587,35 @@ export class OrganizationInviteQuery extends Request {
       }
     );
     const data = response.organizationInvite;
-    return new IssueLabel(this._request, data);
+    return new OrganizationInvite(this._request, data);
+  }
+}
+
+/**
+ * A fetchable OrganizationInviteDetails Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationInviteDetailsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OrganizationInviteDetails query and return a OrganizationInviteDetailsPayload
+   *
+   * @param id - required id to pass to organizationInviteDetails
+   * @returns parsed response from OrganizationInviteDetailsQuery
+   */
+  public async fetch(id: string): LinearFetch<OrganizationInviteDetailsPayload> {
+    const response = await this._request<L.OrganizationInviteDetailsQuery, L.OrganizationInviteDetailsQueryVariables>(
+      L.OrganizationInviteDetailsDocument,
+      {
+        id,
+      }
+    );
+    const data = response.organizationInviteDetails;
+    return new OrganizationInviteDetailsPayload(this._request, data);
   }
 }
 
@@ -7840,6 +7852,31 @@ export class CycleUpdateMutation extends Request {
 }
 
 /**
+ * A fetchable DebugCreateOAuthApps Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DebugCreateOAuthAppsMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DebugCreateOAuthApps mutation and return a DebugPayload
+   *
+   * @returns parsed response from DebugCreateOAuthAppsMutation
+   */
+  public async fetch(): LinearFetch<DebugPayload> {
+    const response = await this._request<L.DebugCreateOAuthAppsMutation, L.DebugCreateOAuthAppsMutationVariables>(
+      L.DebugCreateOAuthAppsDocument,
+      {}
+    );
+    const data = response.debugCreateOAuthApps;
+    return new DebugPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable DebugCreateSamlOrg Mutation
  *
  * @param request - function to call the graphql client
@@ -7911,6 +7948,34 @@ export class DebugFailWithWarningMutation extends Request {
     );
     const data = response.debugFailWithWarning;
     return new DebugPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable EmailSubscribe Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class EmailSubscribeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the EmailSubscribe mutation and return a EmailSubscribePayload
+   *
+   * @param input - required input to pass to emailSubscribe
+   * @returns parsed response from EmailSubscribeMutation
+   */
+  public async fetch(input: L.EmailSubscribeInput): LinearFetch<EmailSubscribePayload> {
+    const response = await this._request<L.EmailSubscribeMutation, L.EmailSubscribeMutationVariables>(
+      L.EmailSubscribeDocument,
+      {
+        input,
+      }
+    );
+    const data = response.emailSubscribe;
+    return new EmailSubscribePayload(this._request, data);
   }
 }
 
@@ -9132,6 +9197,36 @@ export class IssueImportProcessMutation extends Request {
       }
     );
     const data = response.issueImportProcess;
+    return new IssueImportPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueImportUpdate Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportUpdateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportUpdate mutation and return a IssueImportPayload
+   *
+   * @param id - required id to pass to issueImportUpdate
+   * @param input - required input to pass to issueImportUpdate
+   * @returns parsed response from IssueImportUpdateMutation
+   */
+  public async fetch(id: string, input: L.IssueImportUpdateInput): LinearFetch<IssueImportPayload> {
+    const response = await this._request<L.IssueImportUpdateMutation, L.IssueImportUpdateMutationVariables>(
+      L.IssueImportUpdateDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.issueImportUpdate;
     return new IssueImportPayload(this._request, data);
   }
 }
@@ -10378,29 +10473,29 @@ export class RefreshGoogleSheetsDataMutation extends Request {
 }
 
 /**
- * A fetchable ResentOrganizationInvite Mutation
+ * A fetchable ResendOrganizationInvite Mutation
  *
  * @param request - function to call the graphql client
  */
-export class ResentOrganizationInviteMutation extends Request {
+export class ResendOrganizationInviteMutation extends Request {
   public constructor(request: LinearRequest) {
     super(request);
   }
 
   /**
-   * Call the ResentOrganizationInvite mutation and return a ArchivePayload
+   * Call the ResendOrganizationInvite mutation and return a ArchivePayload
    *
-   * @param id - required id to pass to resentOrganizationInvite
-   * @returns parsed response from ResentOrganizationInviteMutation
+   * @param id - required id to pass to resendOrganizationInvite
+   * @returns parsed response from ResendOrganizationInviteMutation
    */
   public async fetch(id: string): LinearFetch<ArchivePayload> {
     const response = await this._request<
-      L.ResentOrganizationInviteMutation,
-      L.ResentOrganizationInviteMutationVariables
-    >(L.ResentOrganizationInviteDocument, {
+      L.ResendOrganizationInviteMutation,
+      L.ResendOrganizationInviteMutationVariables
+    >(L.ResendOrganizationInviteDocument, {
       id,
     });
-    const data = response.resentOrganizationInvite;
+    const data = response.resendOrganizationInvite;
     return new ArchivePayload(this._request, data);
   }
 }
@@ -11951,49 +12046,6 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
 }
 
 /**
- * A fetchable InviteInfo_InviteData Query
- *
- * @param request - function to call the graphql client
- * @param userHash - required userHash to pass to inviteInfo
- * @param variables - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
- */
-export class InviteInfo_InviteDataQuery extends Request {
-  private _userHash: string;
-  private _variables?: Omit<L.InviteInfo_InviteDataQueryVariables, "userHash">;
-
-  public constructor(
-    request: LinearRequest,
-    userHash: string,
-    variables?: Omit<L.InviteInfo_InviteDataQueryVariables, "userHash">
-  ) {
-    super(request);
-    this._userHash = userHash;
-    this._variables = variables;
-  }
-
-  /**
-   * Call the InviteInfo_InviteData query and return a InviteData
-   *
-   * @param variables - variables without 'userHash' to pass into the InviteInfo_InviteDataQuery
-   * @returns parsed response from InviteInfo_InviteDataQuery
-   */
-  public async fetch(
-    variables?: Omit<L.InviteInfo_InviteDataQueryVariables, "userHash">
-  ): LinearFetch<InviteData | undefined> {
-    const response = await this._request<L.InviteInfo_InviteDataQuery, L.InviteInfo_InviteDataQueryVariables>(
-      L.InviteInfo_InviteDataDocument,
-      {
-        userHash: this._userHash,
-        ...this._variables,
-        ...variables,
-      }
-    );
-    const data = response.inviteInfo.inviteData;
-    return data ? new InviteData(this._request, data) : undefined;
-  }
-}
-
-/**
  * A fetchable Issue_Attachments Query
  *
  * @param request - function to call the graphql client
@@ -12536,51 +12588,6 @@ export class Organization_UsersQuery extends Request {
     );
     const data = response.organization.users;
     return new UserConnection(
-      this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable OrganizationInvite_Issues Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to organizationInvite
- * @param variables - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
- */
-export class OrganizationInvite_IssuesQuery extends Request {
-  private _id: string;
-  private _variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">;
-
-  public constructor(
-    request: LinearRequest,
-    id: string,
-    variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">
-  ) {
-    super(request);
-    this._id = id;
-    this._variables = variables;
-  }
-
-  /**
-   * Call the OrganizationInvite_Issues query and return a IssueConnection
-   *
-   * @param variables - variables without 'id' to pass into the OrganizationInvite_IssuesQuery
-   * @returns parsed response from OrganizationInvite_IssuesQuery
-   */
-  public async fetch(variables?: Omit<L.OrganizationInvite_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    const response = await this._request<L.OrganizationInvite_IssuesQuery, L.OrganizationInvite_IssuesQueryVariables>(
-      L.OrganizationInvite_IssuesDocument,
-      {
-        id: this._id,
-        ...this._variables,
-        ...variables,
-      }
-    );
-    const data = response.organizationInvite.issues;
-    return new IssueConnection(
       this._request,
       connection => this.fetch({ ...this._variables, ...variables, ...connection }),
       data
@@ -13663,19 +13670,6 @@ export class LinearSdk extends Request {
     return new IntegrationsQuery(this._request).fetch(variables);
   }
   /**
-   * Retrieves information for the public invite page.
-   *
-   * @param userHash - required userHash to pass to inviteInfo
-   * @param variables - variables without 'userHash' to pass into the InviteInfoQuery
-   * @returns InvitePagePayload
-   */
-  public inviteInfo(
-    userHash: string,
-    variables?: Omit<L.InviteInfoQueryVariables, "userHash">
-  ): LinearFetch<InvitePagePayload> {
-    return new InviteInfoQuery(this._request).fetch(userHash, variables);
-  }
-  /**
    * One specific issue.
    *
    * @param id - required id to pass to issue
@@ -13836,10 +13830,19 @@ export class LinearSdk extends Request {
    * One specific organization invite.
    *
    * @param id - required id to pass to organizationInvite
-   * @returns IssueLabel
+   * @returns OrganizationInvite
    */
-  public organizationInvite(id: string): LinearFetch<IssueLabel> {
+  public organizationInvite(id: string): LinearFetch<OrganizationInvite> {
     return new OrganizationInviteQuery(this._request).fetch(id);
+  }
+  /**
+   * One specific organization invite.
+   *
+   * @param id - required id to pass to organizationInviteDetails
+   * @returns OrganizationInviteDetailsPayload
+   */
+  public organizationInviteDetails(id: string): LinearFetch<OrganizationInviteDetailsPayload> {
+    return new OrganizationInviteDetailsQuery(this._request).fetch(id);
   }
   /**
    * All invites for the organization.
@@ -14278,6 +14281,14 @@ export class LinearSdk extends Request {
     return new CycleUpdateMutation(this._request).fetch(id, input);
   }
   /**
+   * Create the OAuth test applications in development.
+   *
+   * @returns DebugPayload
+   */
+  public get debugCreateOAuthApps(): LinearFetch<DebugPayload> {
+    return new DebugCreateOAuthAppsMutation(this._request).fetch();
+  }
+  /**
    * Create the SAML test organization in development.
    *
    * @returns DebugPayload
@@ -14300,6 +14311,15 @@ export class LinearSdk extends Request {
    */
   public get debugFailWithWarning(): LinearFetch<DebugPayload> {
     return new DebugFailWithWarningMutation(this._request).fetch();
+  }
+  /**
+   * Subscribes the email to the newsletter.
+   *
+   * @param input - required input to pass to emailSubscribe
+   * @returns EmailSubscribePayload
+   */
+  public emailSubscribe(input: L.EmailSubscribeInput): LinearFetch<EmailSubscribePayload> {
+    return new EmailSubscribeMutation(this._request).fetch(input);
   }
   /**
    * Authenticates a user account via email and authentication token.
@@ -14778,6 +14798,16 @@ export class LinearSdk extends Request {
     return new IssueImportProcessMutation(this._request).fetch(issueImportId, mapping);
   }
   /**
+   * Updates the mapping for the issue import.
+   *
+   * @param id - required id to pass to issueImportUpdate
+   * @param input - required input to pass to issueImportUpdate
+   * @returns IssueImportPayload
+   */
+  public issueImportUpdate(id: string, input: L.IssueImportUpdateInput): LinearFetch<IssueImportPayload> {
+    return new IssueImportUpdateMutation(this._request).fetch(id, input);
+  }
+  /**
    * Archives an issue label.
    *
    * @param id - required id to pass to issueLabelArchive
@@ -15187,11 +15217,11 @@ export class LinearSdk extends Request {
   /**
    * Re-send an organization invite.
    *
-   * @param id - required id to pass to resentOrganizationInvite
+   * @param id - required id to pass to resendOrganizationInvite
    * @returns ArchivePayload
    */
-  public resentOrganizationInvite(id: string): LinearFetch<ArchivePayload> {
-    return new ResentOrganizationInviteMutation(this._request).fetch(id);
+  public resendOrganizationInvite(id: string): LinearFetch<ArchivePayload> {
+    return new ResendOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
    * Authenticates a user account via email and authentication token for SAML.

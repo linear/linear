@@ -1021,6 +1021,20 @@ type DocumentStep implements Node {
   version: Float!
 }
 
+input EmailSubscribeInput {
+  """
+  Email to subscribe.
+  """
+  email: String!
+}
+
+type EmailSubscribePayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 input EmailUnsubscribeInput {
   """
   The user's email validation token.
@@ -1653,52 +1667,6 @@ input IntercomSettingsInput {
   sendNoteOnStatusChange: Boolean
 }
 
-type InviteData {
-  """
-  Avatar URLs for the invitees.
-  """
-  avatarURLs: [String!]!
-  """
-  The name of the inviter.
-  """
-  inviterName: String!
-  """
-  The domain of the organization the users were invited to.
-  """
-  organizationDomain: String!
-  """
-  The logo of the organization the users were invited to.
-  """
-  organizationLogoUrl: String
-  """
-  The name of the organization the users were invited to.
-  """
-  organizationName: String!
-  """
-  Team identifiers for the invitees.
-  """
-  teamIds: [String!]!
-  """
-  Team names for the invitees.
-  """
-  teamNames: [String!]!
-  """
-  The user count of the organization.
-  """
-  userCount: Float!
-}
-
-type InvitePagePayload {
-  """
-  Invite data.
-  """
-  inviteData: InviteData
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
 type Invoice {
   """
   The creation date of the invoice.
@@ -1774,7 +1742,7 @@ type Issue implements Node {
   """
   The order of the item in its column on the board.
   """
-  boardOrder: Float!
+  boardOrder: Float! @deprecated(reason: "Will be removed in near future, please use `sortOrder` instead")
   """
   Suggested branch name for the issue.
   """
@@ -2059,6 +2027,10 @@ type Issue implements Node {
   """
   snoozedUntilAt: DateTime
   """
+  The order of the item in relation to other items in the organization.
+  """
+  sortOrder: Float!
+  """
   The time at which the issue was moved into started state.
   """
   startedAt: DateTime
@@ -2185,6 +2157,10 @@ input IssueCreateInput {
   The comment the issue is referencing.
   """
   referenceCommentId: String
+  """
+  The position of the issue related to other issues.
+  """
+  sortOrder: Float
   """
   The team state of the issue.
   """
@@ -2497,6 +2473,13 @@ type IssueImportPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+input IssueImportUpdateInput {
+  """
+  The mapping configuration for the import.
+  """
+  mapping: JSONObject!
 }
 
 """
@@ -2842,6 +2825,10 @@ input IssueUpdateInput {
   The time until an issue will be snoozed in Triage view.
   """
   snoozedUntilAt: DateTime
+  """
+  The position of the issue related to other issues.
+  """
+  sortOrder: Float
   """
   The team state of the issue.
   """
@@ -3252,6 +3239,10 @@ type Mutation {
     input: CycleUpdateInput!
   ): CyclePayload!
   """
+  Create the OAuth test applications in development.
+  """
+  debugCreateOAuthApps: DebugPayload!
+  """
   Create the SAML test organization in development.
   """
   debugCreateSAMLOrg: DebugPayload!
@@ -3263,6 +3254,15 @@ type Mutation {
   Always logs an error to Sentry as warning. Used to debug logging.
   """
   debugFailWithWarning: DebugPayload!
+  """
+  Subscribes the email to the newsletter.
+  """
+  emailSubscribe(
+    """
+    Subscription details.
+    """
+    input: EmailSubscribeInput!
+  ): EmailSubscribePayload!
   """
   Authenticates a user account via email and authentication token.
   """
@@ -3790,6 +3790,19 @@ type Mutation {
     mapping: JSONObject!
   ): IssueImportPayload!
   """
+  Updates the mapping for the issue import.
+  """
+  issueImportUpdate(
+    """
+    The identifier of the issue import.
+    """
+    id: String!
+    """
+    The properties of the issue import to update.
+    """
+    input: IssueImportUpdateInput!
+  ): IssueImportPayload!
+  """
   Archives an issue label.
   """
   issueLabelArchive(
@@ -4253,7 +4266,7 @@ type Mutation {
   """
   Re-send an organization invite.
   """
-  resentOrganizationInvite(
+  resendOrganizationInvite(
     """
     The identifier of the organization invite to be re-send.
     """
@@ -4885,6 +4898,14 @@ type OauthClient implements Node {
       entity hasn't been update after creation.
   """
   updatedAt: DateTime!
+  """
+  The resource types to request when creating new webhooks.
+  """
+  webhookResourceTypes: [String!]!
+  """
+  Webhook URL
+  """
+  webhookUrl: String
 }
 
 input OauthClientCreateInput {
@@ -4920,6 +4941,14 @@ input OauthClientCreateInput {
   List of allowed redirect URIs for the application.
   """
   redirectUris: [String!]!
+  """
+  List of resources the webhooks should subscribe to.
+  """
+  webhookResourceTypes: [String!]!
+  """
+  The URL that will be called on data changes.
+  """
+  webhookUrl: String
 }
 
 type OauthClientPayload {
@@ -4966,6 +4995,14 @@ input OauthClientUpdateInput {
   List of allowed redirect URIs for the application.
   """
   redirectUris: [String!]
+  """
+  List of resources the webhooks should subscribe to.
+  """
+  webhookResourceTypes: [String!]
+  """
+  The URL that will be called on data changes.
+  """
+  webhookUrl: String
 }
 
 type OauthTokenRevokePayload {
@@ -5369,6 +5406,41 @@ input OrganizationInviteCreateInput {
   The teams that the user has been invited to.
   """
   teamIds: [String!]
+}
+
+type OrganizationInviteDetailsPayload {
+  """
+  Whether the invite has already been accepted.
+  """
+  accepted: Boolean!
+  """
+  When the invite was created.
+  """
+  createdAt: DateTime!
+  """
+  The email of the invitee
+  """
+  email: String!
+  """
+  Whether the invite has expired.
+  """
+  expired: Boolean!
+  """
+  The name of the inviter
+  """
+  inviter: String!
+  """
+  ID of the workspace the invite is for.
+  """
+  organizationId: String!
+  """
+  URL of the workspace logo the invite is for.
+  """
+  organizationLogoUrl: String
+  """
+  Name of the workspace the invite is for.
+  """
+  organizationName: String!
 }
 
 type OrganizationInviteEdge {
@@ -6475,19 +6547,6 @@ type Query {
     orderBy: PaginationOrderBy
   ): IntegrationConnection!
   """
-  Retrieves information for the public invite page.
-  """
-  inviteInfo(
-    """
-    Team hash.
-    """
-    teamHash: String
-    """
-    User hash.
-    """
-    userHash: String!
-  ): InvitePagePayload!
-  """
   One specific issue.
   """
   issue(id: String!): Issue!
@@ -6746,7 +6805,11 @@ type Query {
   """
   One specific organization invite.
   """
-  organizationInvite(id: String!): IssueLabel!
+  organizationInvite(id: String!): OrganizationInvite!
+  """
+  One specific organization invite.
+  """
+  organizationInviteDetails(id: String!): OrganizationInviteDetailsPayload!
   """
   All invites for the organization.
   """
@@ -7548,9 +7611,9 @@ type Team implements Node {
   """
   archivedAt: DateTime
   """
-  Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.
+  Period after which automatically closed and completed issues are automatically archived in months.
   """
-  autoArchivePeriod: Float
+  autoArchivePeriod: Float!
   """
   Period after which issues are automatically closed in months. Null/undefined means disabled.
   """
@@ -8864,7 +8927,7 @@ type UserAuthorizedApplication {
   """
   clientId: String!
   """
-  Whether the application was created by Linear
+  Whether the application was created by Linear.
   """
   createdByLinear: Boolean!
   """
@@ -8891,6 +8954,10 @@ type UserAuthorizedApplication {
   Application name.
   """
   name: String!
+  """
+  Whether or not webhooks are enabled for the application.
+  """
+  webhooksEnabled: Boolean!
 }
 
 type UserConnection {
@@ -8924,6 +8991,7 @@ enum UserFlagType {
   emptyMyIssuesDismissed
   figmaPromptDismissed
   importBannerDismissed
+  issueMovePromptCompleted
   listSelectionTip
   migrateThemePreference
   projectWelcomeDismissed
@@ -9229,7 +9297,7 @@ type Webhook implements Node {
   """
   The ids of teams that the webhook is associated with.
   """
-  teamIds: [String!]!
+  teamIds: [String!]! @deprecated(reason: "This field will no longer be used, and will return an empty array.")
   """
   The last time at which the entity was updated. This is the same as the creation time if the
       entity hasn't been update after creation.
@@ -9248,6 +9316,10 @@ type WebhookConnection {
 }
 
 input WebhookCreateInput {
+  """
+  Whether this webhook is enabled for all public teams.
+  """
+  allPublicTeams: Boolean
   """
   Whether this webhook is enabled.
   """
@@ -9271,7 +9343,7 @@ input WebhookCreateInput {
   """
   The identifier or key of the team associated with the Webhook.
   """
-  teamId: String!
+  teamId: String
   """
   The URL that will be called on data changes.
   """
