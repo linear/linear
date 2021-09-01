@@ -27,7 +27,24 @@ export type LinearFetch<Response> = Promise<Response>;
  * Variables required for pagination
  * Follows the Relay spec
  */
-export type LinearConnectionVariables = { after?: string; before?: string };
+export type LinearConnectionVariables = {
+  after?: string | null;
+  before?: string | null;
+  first?: number | null;
+  last?: number | null;
+};
+
+/**
+ * Default connection variables required for pagination
+ * Defaults to 50 as per the Linear API
+ */
+function defaultConnection<Variables extends LinearConnectionVariables>(variables: Variables): Variables {
+  return {
+    ...variables,
+    first: variables.first ?? (variables.after ? 50 : undefined),
+    last: variables.last ?? (variables.before ? 50 : undefined),
+  };
+}
 
 /**
  * Connection models containing a list of nodes and pagination information
@@ -97,7 +114,9 @@ export class Connection<Node> extends LinearConnection<Node> {
   /** Fetch the next page of results and append to nodes */
   public async fetchNext(): Promise<this> {
     if (this.pageInfo?.hasNextPage) {
-      const response = await this._fetch({ after: this.pageInfo?.endCursor });
+      const response = await this._fetch({
+        after: this.pageInfo?.endCursor,
+      });
       this._appendNodes(response?.nodes);
       this._appendPageInfo(response?.pageInfo);
     }
@@ -107,7 +126,9 @@ export class Connection<Node> extends LinearConnection<Node> {
   /** Fetch the previous page of results and prepend to nodes */
   public async fetchPrevious(): Promise<this> {
     if (this.pageInfo?.hasPreviousPage) {
-      const response = await this._fetch({ before: this.pageInfo?.startCursor });
+      const response = await this._fetch({
+        before: this.pageInfo?.startCursor,
+      });
       this._prependNodes(response?.nodes);
       this._prependPageInfo(response?.pageInfo);
     }
@@ -5639,7 +5660,17 @@ export class AttachmentsQuery extends Request {
       variables
     );
     const data = response.attachments;
-    return new AttachmentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new AttachmentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -5674,7 +5705,14 @@ export class AttachmentsForUrlQuery extends Request {
     const data = response.attachmentsForURL;
     return new AttachmentConnection(
       this._request,
-      connection => this.fetch(url, { ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          url,
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -5835,7 +5873,17 @@ export class CommentsQuery extends Request {
   public async fetch(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
     const response = await this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables);
     const data = response.comments;
-    return new CommentConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new CommentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -5886,7 +5934,17 @@ export class CustomViewsQuery extends Request {
       variables
     );
     const data = response.customViews;
-    return new CustomViewConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new CustomViewConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -5934,7 +5992,17 @@ export class CyclesQuery extends Request {
   public async fetch(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
     const response = await this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables);
     const data = response.cycles;
-    return new CycleConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new CycleConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -5982,7 +6050,17 @@ export class EmojisQuery extends Request {
   public async fetch(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
     const response = await this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables);
     const data = response.emojis;
-    return new EmojiConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new EmojiConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6030,7 +6108,17 @@ export class FavoritesQuery extends Request {
   public async fetch(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
     const response = await this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables);
     const data = response.favorites;
-    return new FavoriteConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new FavoriteConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6114,7 +6202,17 @@ export class IntegrationsQuery extends Request {
       variables
     );
     const data = response.integrations;
-    return new IntegrationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new IntegrationConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6218,7 +6316,17 @@ export class IssueLabelsQuery extends Request {
       variables
     );
     const data = response.issueLabels;
-    return new IssueLabelConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new IssueLabelConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6294,7 +6402,17 @@ export class IssueRelationsQuery extends Request {
       variables
     );
     const data = response.issueRelations;
-    return new IssueRelationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new IssueRelationConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6324,7 +6442,18 @@ export class IssueSearchQuery extends Request {
       ...variables,
     });
     const data = response.issueSearch;
-    return new IssueConnection(this._request, connection => this.fetch(query, { ...variables, ...connection }), data);
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          query,
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6347,7 +6476,17 @@ export class IssuesQuery extends Request {
   public async fetch(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
     const response = await this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables);
     const data = response.issues;
-    return new IssueConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6398,7 +6537,17 @@ export class MilestonesQuery extends Request {
       variables
     );
     const data = response.milestones;
-    return new MilestoneConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new MilestoneConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6481,7 +6630,13 @@ export class NotificationSubscriptionsQuery extends Request {
     const data = response.notificationSubscriptions;
     return new NotificationSubscriptionConnection(
       this._request,
-      connection => this.fetch({ ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -6509,7 +6664,17 @@ export class NotificationsQuery extends Request {
       variables
     );
     const data = response.notifications;
-    return new NotificationConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new NotificationConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6643,7 +6808,13 @@ export class OrganizationInvitesQuery extends Request {
     const data = response.organizationInvites;
     return new OrganizationInviteConnection(
       this._request,
-      connection => this.fetch({ ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -6721,7 +6892,17 @@ export class ProjectLinksQuery extends Request {
       variables
     );
     const data = response.projectLinks;
-    return new ProjectLinkConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new ProjectLinkConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6744,7 +6925,17 @@ export class ProjectsQuery extends Request {
   public async fetch(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
     const response = await this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables);
     const data = response.projects;
-    return new ProjectConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new ProjectConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6817,7 +7008,17 @@ export class ReactionsQuery extends Request {
   public async fetch(variables?: L.ReactionsQueryVariables): LinearFetch<ReactionConnection> {
     const response = await this._request<L.ReactionsQuery, L.ReactionsQueryVariables>(L.ReactionsDocument, variables);
     const data = response.reactions;
-    return new ReactionConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new ReactionConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6951,7 +7152,17 @@ export class TeamMembershipsQuery extends Request {
       variables
     );
     const data = response.teamMemberships;
-    return new TeamMembershipConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new TeamMembershipConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -6974,7 +7185,17 @@ export class TeamsQuery extends Request {
   public async fetch(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
     const response = await this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables);
     const data = response.teams;
-    return new TeamConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new TeamConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -7091,7 +7312,17 @@ export class UsersQuery extends Request {
   public async fetch(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
     const response = await this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables);
     const data = response.users;
-    return new UserConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new UserConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -7161,7 +7392,17 @@ export class WebhooksQuery extends Request {
   public async fetch(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
     const response = await this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables);
     const data = response.webhooks;
-    return new WebhookConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new WebhookConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -7212,7 +7453,17 @@ export class WorkflowStatesQuery extends Request {
       variables
     );
     const data = response.workflowStates;
-    return new WorkflowStateConnection(this._request, connection => this.fetch({ ...variables, ...connection }), data);
+    return new WorkflowStateConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -11524,7 +11775,14 @@ export class AttachmentIssue_AttachmentsQuery extends Request {
     const data = response.attachmentIssue.attachments;
     return new AttachmentConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11569,7 +11827,14 @@ export class AttachmentIssue_ChildrenQuery extends Request {
     const data = response.attachmentIssue.children;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11614,7 +11879,14 @@ export class AttachmentIssue_CommentsQuery extends Request {
     const data = response.attachmentIssue.comments;
     return new CommentConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11661,7 +11933,14 @@ export class AttachmentIssue_HistoryQuery extends Request {
     const data = response.attachmentIssue.history;
     return new IssueHistoryConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11708,7 +11987,14 @@ export class AttachmentIssue_InverseRelationsQuery extends Request {
     const data = response.attachmentIssue.inverseRelations;
     return new IssueRelationConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11755,7 +12041,14 @@ export class AttachmentIssue_LabelsQuery extends Request {
     const data = response.attachmentIssue.labels;
     return new IssueLabelConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11802,7 +12095,14 @@ export class AttachmentIssue_RelationsQuery extends Request {
     const data = response.attachmentIssue.relations;
     return new IssueRelationConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11847,7 +12147,14 @@ export class AttachmentIssue_SubscribersQuery extends Request {
     const data = response.attachmentIssue.subscribers;
     return new UserConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11949,7 +12256,14 @@ export class Cycle_IssuesQuery extends Request {
     const data = response.cycle.issues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -11996,7 +12310,14 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
     const data = response.cycle.uncompletedIssuesUponClose;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12080,7 +12401,14 @@ export class Issue_AttachmentsQuery extends Request {
     const data = response.issue.attachments;
     return new AttachmentConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12121,7 +12449,14 @@ export class Issue_ChildrenQuery extends Request {
     const data = response.issue.children;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12162,7 +12497,14 @@ export class Issue_CommentsQuery extends Request {
     const data = response.issue.comments;
     return new CommentConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12200,7 +12542,14 @@ export class Issue_HistoryQuery extends Request {
     const data = response.issue.history;
     return new IssueHistoryConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12247,7 +12596,14 @@ export class Issue_InverseRelationsQuery extends Request {
     const data = response.issue.inverseRelations;
     return new IssueRelationConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12285,7 +12641,14 @@ export class Issue_LabelsQuery extends Request {
     const data = response.issue.labels;
     return new IssueLabelConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12326,7 +12689,14 @@ export class Issue_RelationsQuery extends Request {
     const data = response.issue.relations;
     return new IssueRelationConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12367,7 +12737,14 @@ export class Issue_SubscribersQuery extends Request {
     const data = response.issue.subscribers;
     return new UserConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12408,7 +12785,14 @@ export class IssueLabel_IssuesQuery extends Request {
     const data = response.issueLabel.issues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12449,7 +12833,14 @@ export class Milestone_ProjectsQuery extends Request {
     const data = response.milestone.projects;
     return new ProjectConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12484,7 +12875,14 @@ export class Organization_IntegrationsQuery extends Request {
     const data = response.organization.integrations;
     return new IntegrationConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12519,7 +12917,14 @@ export class Organization_MilestonesQuery extends Request {
     const data = response.organization.milestones;
     return new MilestoneConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12554,7 +12959,14 @@ export class Organization_TeamsQuery extends Request {
     const data = response.organization.teams;
     return new TeamConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12589,7 +13001,14 @@ export class Organization_UsersQuery extends Request {
     const data = response.organization.users;
     return new UserConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12630,7 +13049,14 @@ export class Project_IssuesQuery extends Request {
     const data = response.project.issues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12668,7 +13094,14 @@ export class Project_LinksQuery extends Request {
     const data = response.project.links;
     return new ProjectLinkConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12709,7 +13142,14 @@ export class Project_MembersQuery extends Request {
     const data = response.project.members;
     return new UserConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12747,7 +13187,14 @@ export class Project_TeamsQuery extends Request {
     const data = response.project.teams;
     return new TeamConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12785,7 +13232,14 @@ export class Team_CyclesQuery extends Request {
     const data = response.team.cycles;
     return new CycleConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12823,7 +13277,14 @@ export class Team_IssuesQuery extends Request {
     const data = response.team.issues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12861,7 +13322,14 @@ export class Team_LabelsQuery extends Request {
     const data = response.team.labels;
     return new IssueLabelConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12899,7 +13367,14 @@ export class Team_MembersQuery extends Request {
     const data = response.team.members;
     return new UserConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12940,7 +13415,14 @@ export class Team_MembershipsQuery extends Request {
     const data = response.team.memberships;
     return new TeamMembershipConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -12978,7 +13460,14 @@ export class Team_ProjectsQuery extends Request {
     const data = response.team.projects;
     return new ProjectConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13016,7 +13505,14 @@ export class Team_StatesQuery extends Request {
     const data = response.team.states;
     return new WorkflowStateConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13091,7 +13587,14 @@ export class Team_WebhooksQuery extends Request {
     const data = response.team.webhooks;
     return new WebhookConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13132,7 +13635,14 @@ export class User_AssignedIssuesQuery extends Request {
     const data = response.user.assignedIssues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13173,7 +13683,14 @@ export class User_CreatedIssuesQuery extends Request {
     const data = response.user.createdIssues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13216,7 +13733,14 @@ export class User_TeamMembershipsQuery extends Request {
     const data = response.user.teamMemberships;
     return new TeamMembershipConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13254,7 +13778,14 @@ export class User_TeamsQuery extends Request {
     const data = response.user.teams;
     return new TeamConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13289,7 +13820,14 @@ export class Viewer_AssignedIssuesQuery extends Request {
     const data = response.viewer.assignedIssues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13324,7 +13862,14 @@ export class Viewer_CreatedIssuesQuery extends Request {
     const data = response.viewer.createdIssues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13359,7 +13904,14 @@ export class Viewer_TeamMembershipsQuery extends Request {
     const data = response.viewer.teamMemberships;
     return new TeamMembershipConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13394,7 +13946,14 @@ export class Viewer_TeamsQuery extends Request {
     const data = response.viewer.teams;
     return new TeamConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }
@@ -13435,7 +13994,14 @@ export class WorkflowState_IssuesQuery extends Request {
     const data = response.workflowState.issues;
     return new IssueConnection(
       this._request,
-      connection => this.fetch({ ...this._variables, ...variables, ...connection }),
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
       data
     );
   }

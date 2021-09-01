@@ -71,11 +71,13 @@ function printOperationCall(context: SdkPluginContext, operation: SdkOperation):
         `this._${Sdk.REQUEST_NAME}`,
         `${Sdk.CONNECTION_NAME} => this.${Sdk.FETCH_NAME}(${printList([
           ...operation.requiredArgs.args.filter(arg => !parentArgNames.includes(arg.name)).map(arg => arg.name),
-          `{ ${printList([
-            ...optionalArgs.map(arg => `...this._${arg.name}`),
-            `...${Sdk.VARIABLE_NAME}`,
-            `...${Sdk.CONNECTION_NAME}`,
-          ])} }`,
+          `${Sdk.CONNECTION_DEFAULT}({
+            ${printList([
+              ...optionalArgs.map(arg => `...this._${arg.name}`),
+              `...${Sdk.VARIABLE_NAME}`,
+              `...${Sdk.CONNECTION_NAME}`,
+            ])}
+          })`,
         ])})`,
         Sdk.DATA_NAME,
       ])})`
