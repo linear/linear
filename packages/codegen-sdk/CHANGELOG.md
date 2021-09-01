@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.10.0
+
+### Minor Changes
+
+- a5b9970: fix(pagination): default first and last variables if required
+
 ## 1.9.1
 
 ### Patch Changes
