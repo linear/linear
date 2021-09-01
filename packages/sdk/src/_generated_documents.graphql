@@ -741,6 +741,8 @@ fragment Issue on Issue {
   updatedAt
   # The order of the item in its column on the board.
   boardOrder
+  # The order of the item in relation to other items in the organization.
+  sortOrder
   # The order of the item in the sub-issue list. Only set if the issue has a parent.
   subIssueSortOrder
   # The parent of the issue.
@@ -844,7 +846,7 @@ fragment Team on Team {
   upcomingCycleCount
   # Only allow issues issues with cycles in Active Issues.
   cycleLockToActive
-  # Period after which automatically closed and completed issues are automatically archived in months. Null/undefined means disabled.
+  # Period after which automatically closed and completed issues are automatically archived in months.
   autoArchivePeriod
   # Period after which issues are automatically closed in months. Null/undefined means disabled.
   autoClosePeriod
@@ -1183,6 +1185,8 @@ fragment OauthClient on OauthClient {
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
+  # The resource types to request when creating new webhooks.
+  webhookResourceTypes
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -1191,6 +1195,8 @@ fragment OauthClient on OauthClient {
   id
   # Url of the developer.
   developerUrl
+  # Webhook URL
+  webhookUrl
   # Whether the OAuth application is publicly visible, or only visible to the creating workspace.
   publicEnabled
 }
@@ -1260,7 +1266,9 @@ fragment UserAuthorizedApplication on UserAuthorizedApplication {
   clientId
   # Url of the developer (homepage or docs).
   developerUrl
-  # Whether the application was created by Linear
+  # Whether or not webhooks are enabled for the application.
+  webhooksEnabled
+  # Whether the application was created by Linear.
   createdByLinear
   # Whether the user has authorized the application for the given scopes.
   isAuthorized
@@ -1730,6 +1738,11 @@ fragment DebugPayload on DebugPayload {
   success
 }
 
+fragment EmailSubscribePayload on EmailSubscribePayload {
+  # Whether the operation was successful.
+  success
+}
+
 fragment EmailUnsubscribePayload on EmailUnsubscribePayload {
   # Whether the operation was successful.
   success
@@ -1837,34 +1850,6 @@ fragment IntegrationResourceConnection on IntegrationResourceConnection {
   pageInfo {
     ...PageInfo
   }
-}
-
-fragment InviteData on InviteData {
-  # Avatar URLs for the invitees.
-  avatarURLs
-  # Team identifiers for the invitees.
-  teamIds
-  # Team names for the invitees.
-  teamNames
-  # The domain of the organization the users were invited to.
-  organizationDomain
-  # The logo of the organization the users were invited to.
-  organizationLogoUrl
-  # The name of the inviter.
-  inviterName
-  # The name of the organization the users were invited to.
-  organizationName
-  # The user count of the organization.
-  userCount
-}
-
-fragment InvitePagePayload on InvitePagePayload {
-  # Invite data.
-  inviteData {
-    ...InviteData
-  }
-  # Whether the operation was successful.
-  success
 }
 
 fragment Invoice on Invoice {
@@ -2137,12 +2122,31 @@ fragment OrganizationInviteConnection on OrganizationInviteConnection {
   }
 }
 
+fragment OrganizationInviteDetailsPayload on OrganizationInviteDetailsPayload {
+  # ID of the workspace the invite is for.
+  organizationId
+  # Name of the workspace the invite is for.
+  organizationName
+  # The email of the invitee
+  email
+  # The name of the inviter
+  inviter
+  # URL of the workspace logo the invite is for.
+  organizationLogoUrl
+  # When the invite was created.
+  createdAt
+  # Whether the invite has already been accepted.
+  accepted
+  # Whether the invite has expired.
+  expired
+}
+
 fragment OrganizationInvitePayload on OrganizationInvitePayload {
   # The identifier of the last sync operation.
   lastSyncId
   # The organization invite that was created or updated.
   organizationInvite {
-    ...OrganizationInvite
+    id
   }
   # Whether the operation was successful.
   success
@@ -3142,30 +3146,6 @@ query integrations(
     ...IntegrationConnection
   }
 }
-# Retrieves information for the public invite page.
-query inviteInfo(
-  # Team hash.
-  $teamHash: String
-  # User hash.
-  $userHash: String!
-) {
-  inviteInfo(teamHash: $teamHash, userHash: $userHash) {
-    ...InvitePagePayload
-  }
-}
-# Invite data.
-query inviteInfo_inviteData(
-  # Team hash.
-  $teamHash: String
-  # User hash.
-  $userHash: String!
-) {
-  inviteInfo(teamHash: $teamHash, userHash: $userHash) {
-    inviteData {
-      ...InviteData
-    }
-  }
-}
 # One specific issue.
 query issue($id: String!) {
   issue(id: $id) {
@@ -3825,36 +3805,13 @@ query organizationExists($urlKey: String!) {
 # One specific organization invite.
 query organizationInvite($id: String!) {
   organizationInvite(id: $id) {
-    ...IssueLabel
+    ...OrganizationInvite
   }
 }
-# Issues associated with the label.
-query organizationInvite_issues(
-  $id: String!
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organizationInvite(id: $id) {
-    issues(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
+# One specific organization invite.
+query organizationInviteDetails($id: String!) {
+  organizationInviteDetails(id: $id) {
+    ...OrganizationInviteDetailsPayload
   }
 }
 # All invites for the organization.
@@ -5057,6 +5014,12 @@ mutation cycleUpdate(
     ...CyclePayload
   }
 }
+# Create the OAuth test applications in development.
+mutation debugCreateOAuthApps {
+  debugCreateOAuthApps {
+    ...DebugPayload
+  }
+}
 # Create the SAML test organization in development.
 mutation debugCreateSAMLOrg {
   debugCreateSAMLOrg {
@@ -5073,6 +5036,15 @@ mutation debugFailWithInternalError {
 mutation debugFailWithWarning {
   debugFailWithWarning {
     ...DebugPayload
+  }
+}
+# Subscribes the email to the newsletter.
+mutation emailSubscribe(
+  # Subscription details.
+  $input: EmailSubscribeInput!
+) {
+  emailSubscribe(input: $input) {
+    ...EmailSubscribePayload
   }
 }
 # Authenticates a user account via email and authentication token.
@@ -5546,6 +5518,17 @@ mutation issueImportProcess(
     ...IssueImportPayload
   }
 }
+# Updates the mapping for the issue import.
+mutation issueImportUpdate(
+  # The identifier of the issue import.
+  $id: String!
+  # The properties of the issue import to update.
+  $input: IssueImportUpdateInput!
+) {
+  issueImportUpdate(id: $id, input: $input) {
+    ...IssueImportPayload
+  }
+}
 # Archives an issue label.
 mutation issueLabelArchive(
   # The identifier of the label to archive.
@@ -5955,11 +5938,11 @@ mutation refreshGoogleSheetsData(
   }
 }
 # Re-send an organization invite.
-mutation resentOrganizationInvite(
+mutation resendOrganizationInvite(
   # The identifier of the organization invite to be re-send.
   $id: String!
 ) {
-  resentOrganizationInvite(id: $id) {
+  resendOrganizationInvite(id: $id) {
     ...ArchivePayload
   }
 }

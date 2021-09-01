@@ -620,28 +620,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test InviteInfo query */
-  describe("InviteInfo", () => {
-    let _inviteInfo: L.InvitePagePayload | undefined;
-
-    /** Test the root model query for InviteInfo */
-    it("inviteInfo", async () => {
-      const inviteInfo: L.InvitePagePayload | undefined = await client.inviteInfo("mock-userHash");
-      _inviteInfo = inviteInfo;
-      expect(inviteInfo instanceof L.InvitePagePayload);
-    });
-
-    /** Test the inviteInfo model query for InviteInfo_InviteData */
-    it("inviteInfo.inviteData", async () => {
-      if (_inviteInfo) {
-        const inviteData: L.InviteData | undefined = _inviteInfo.inviteData;
-        expect(inviteData instanceof L.InviteData);
-      } else {
-        console.warn("codegen-doc:print: No inviteInfo found - cannot test _inviteInfo.inviteData query");
-      }
-    });
-  });
-
   /** Test IssueImportFinishGithubOAuth query */
   describe("IssueImportFinishGithubOAuth", () => {
     /** Test the root model query for IssueImportFinishGithubOAuth */
@@ -1370,12 +1348,74 @@ describe("generated", () => {
     });
   });
 
+  /** Test OrganizationInviteDetails query */
+  describe("OrganizationInviteDetails", () => {
+    /** Test the root model query for OrganizationInviteDetails */
+    it("organizationInviteDetails", async () => {
+      const organizationInviteDetails: L.OrganizationInviteDetailsPayload | undefined =
+        await client.organizationInviteDetails("mock-id");
+      expect(organizationInviteDetails instanceof L.OrganizationInviteDetailsPayload);
+    });
+  });
+
   /** Test all OrganizationInvite queries */
   describe("OrganizationInvites", () => {
+    let _organizationInvite: L.OrganizationInvite | undefined;
+    let _organizationInvite_id: string | undefined;
+
     /** Test the root connection query for the OrganizationInvite */
     it("organizationInvites", async () => {
       const organizationInvites: L.OrganizationInviteConnection | undefined = await client.organizationInvites();
+      const organizationInvite = organizationInvites?.nodes?.[0];
+      _organizationInvite_id = organizationInvite?.id;
       expect(organizationInvites instanceof L.OrganizationInviteConnection);
+    });
+
+    /** Test the root query for a single OrganizationInvite */
+    it("organizationInvite", async () => {
+      if (_organizationInvite_id) {
+        const organizationInvite: L.OrganizationInvite | undefined = await client.organizationInvite(
+          _organizationInvite_id
+        );
+        _organizationInvite = organizationInvite;
+        expect(organizationInvite instanceof L.OrganizationInvite);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first OrganizationInvite found in connection - cannot test organizationInvite query"
+        );
+      }
+    });
+
+    /** Test the organizationInvite.invitee query for L.User */
+    it("organizationInvite.invitee", async () => {
+      if (_organizationInvite) {
+        const organizationInvite_invitee: L.User | undefined = await _organizationInvite.invitee;
+        expect(organizationInvite_invitee instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No OrganizationInvite found - cannot test organizationInvite.invitee query");
+      }
+    });
+
+    /** Test the organizationInvite.inviter query for L.User */
+    it("organizationInvite.inviter", async () => {
+      if (_organizationInvite) {
+        const organizationInvite_inviter: L.User | undefined = await _organizationInvite.inviter;
+        expect(organizationInvite_inviter instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No OrganizationInvite found - cannot test organizationInvite.inviter query");
+      }
+    });
+
+    /** Test the organizationInvite.organization query for L.Organization */
+    it("organizationInvite.organization", async () => {
+      if (_organizationInvite) {
+        const organizationInvite_organization: L.Organization | undefined = await _organizationInvite.organization;
+        expect(organizationInvite_organization instanceof L.Organization);
+      } else {
+        console.warn(
+          "codegen-doc:print: No OrganizationInvite found - cannot test organizationInvite.organization query"
+        );
+      }
     });
   });
 
