@@ -2520,6 +2520,8 @@ query attachmentIssue_attachments(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned attachments.
+  $filter: AttachmentFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2533,6 +2535,7 @@ query attachmentIssue_attachments(
     attachments(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -2550,6 +2553,8 @@ query attachmentIssue_children(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2563,6 +2568,7 @@ query attachmentIssue_children(
     children(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -2580,6 +2586,8 @@ query attachmentIssue_comments(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned comments.
+  $filter: CommentFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2593,6 +2601,7 @@ query attachmentIssue_comments(
     comments(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -2670,6 +2679,8 @@ query attachmentIssue_labels(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issue labels.
+  $filter: IssueLabelFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2683,6 +2694,7 @@ query attachmentIssue_labels(
     labels(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -2730,6 +2742,8 @@ query attachmentIssue_subscribers(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned subscribers.
+  $filter: UserFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2745,6 +2759,7 @@ query attachmentIssue_subscribers(
     subscribers(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       includeDisabled: $includeDisabled
@@ -2763,6 +2778,8 @@ query attachments(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned attachments.
+  $filter: AttachmentFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2775,6 +2792,7 @@ query attachments(
   attachments(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -2881,6 +2899,8 @@ query comments(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned comments.
+  $filter: CommentFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2893,6 +2913,7 @@ query comments(
   comments(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -2946,6 +2967,8 @@ query cycle_issues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2959,6 +2982,7 @@ query cycle_issues(
     issues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -2975,6 +2999,8 @@ query cycle_uncompletedIssuesUponClose(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -2988,6 +3014,7 @@ query cycle_uncompletedIssuesUponClose(
     uncompletedIssuesUponClose(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3003,6 +3030,8 @@ query cycles(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned users.
+  $filter: CycleFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3015,6 +3044,7 @@ query cycles(
   cycles(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -3159,6 +3189,8 @@ query issue_attachments(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned attachments.
+  $filter: AttachmentFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3172,6 +3204,7 @@ query issue_attachments(
     attachments(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3188,6 +3221,8 @@ query issue_children(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3201,6 +3236,7 @@ query issue_children(
     children(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3217,6 +3253,8 @@ query issue_comments(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned comments.
+  $filter: CommentFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3230,6 +3268,7 @@ query issue_comments(
     comments(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3304,6 +3343,8 @@ query issue_labels(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issue labels.
+  $filter: IssueLabelFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3317,6 +3358,7 @@ query issue_labels(
     labels(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3362,6 +3404,8 @@ query issue_subscribers(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned subscribers.
+  $filter: UserFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3377,6 +3421,7 @@ query issue_subscribers(
     subscribers(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       includeDisabled: $includeDisabled
@@ -3409,6 +3454,8 @@ query issueLabel_issues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3422,6 +3469,7 @@ query issueLabel_issues(
     issues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3437,6 +3485,8 @@ query issueLabels(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issue labels.
+  $filter: IssueLabelFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3449,6 +3499,7 @@ query issueLabels(
   issueLabels(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -3530,6 +3581,8 @@ query issues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3542,6 +3595,7 @@ query issues(
   issues(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -3563,6 +3617,8 @@ query milestone_projects(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned projects.
+  $filter: ProjectFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3576,6 +3632,7 @@ query milestone_projects(
     projects(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3591,6 +3648,8 @@ query milestones(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned projects.
+  $filter: MilestoneFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3603,6 +3662,7 @@ query milestones(
   milestones(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -3715,6 +3775,8 @@ query organization_milestones(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned projects.
+  $filter: MilestoneFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3728,6 +3790,7 @@ query organization_milestones(
     milestones(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3743,6 +3806,8 @@ query organization_teams(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned teams.
+  $filter: TeamFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3756,6 +3821,7 @@ query organization_teams(
     teams(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3853,6 +3919,8 @@ query project_issues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3866,6 +3934,7 @@ query project_issues(
     issues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -3911,6 +3980,8 @@ query project_members(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned users.
+  $filter: UserFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3926,6 +3997,7 @@ query project_members(
     members(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       includeDisabled: $includeDisabled
@@ -3943,6 +4015,8 @@ query project_teams(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned teams.
+  $filter: TeamFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3956,6 +4030,7 @@ query project_teams(
     teams(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4003,6 +4078,8 @@ query projects(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned projects.
+  $filter: ProjectFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4015,6 +4092,7 @@ query projects(
   projects(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -4094,6 +4172,8 @@ query team_cycles(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned cycles.
+  $filter: CycleFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4107,6 +4187,7 @@ query team_cycles(
     cycles(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4123,6 +4204,8 @@ query team_issues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4136,6 +4219,7 @@ query team_issues(
     issues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4152,6 +4236,8 @@ query team_labels(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issue labels.
+  $filter: IssueLabelFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4165,6 +4251,7 @@ query team_labels(
     labels(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4181,6 +4268,8 @@ query team_members(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned users.
+  $filter: UserFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4196,6 +4285,7 @@ query team_members(
     members(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       includeDisabled: $includeDisabled
@@ -4242,6 +4332,8 @@ query team_projects(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned projects.
+  $filter: ProjectFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4255,6 +4347,7 @@ query team_projects(
     projects(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4271,6 +4364,8 @@ query team_states(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned workflow states.
+  $filter: WorkflowStateFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4284,6 +4379,7 @@ query team_states(
     states(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4389,6 +4485,8 @@ query teams(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned teams.
+  $filter: TeamFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4401,6 +4499,7 @@ query teams(
   teams(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -4441,6 +4540,8 @@ query user_assignedIssues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4454,6 +4555,7 @@ query user_assignedIssues(
     assignedIssues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4471,6 +4573,8 @@ query user_createdIssues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4484,6 +4588,7 @@ query user_createdIssues(
     createdIssues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4531,6 +4636,8 @@ query user_teams(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned teams.
+  $filter: TeamFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4544,6 +4651,7 @@ query user_teams(
     teams(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4565,6 +4673,8 @@ query users(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned users.
+  $filter: UserFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4579,6 +4689,7 @@ query users(
   users(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     includeDisabled: $includeDisabled
@@ -4600,6 +4711,8 @@ query viewer_assignedIssues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4613,6 +4726,7 @@ query viewer_assignedIssues(
     assignedIssues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4628,6 +4742,8 @@ query viewer_createdIssues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4641,6 +4757,7 @@ query viewer_createdIssues(
     createdIssues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4684,6 +4801,8 @@ query viewer_teams(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned teams.
+  $filter: TeamFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4697,6 +4816,7 @@ query viewer_teams(
     teams(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4754,6 +4874,8 @@ query workflowState_issues(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4767,6 +4889,7 @@ query workflowState_issues(
     issues(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -4782,6 +4905,8 @@ query workflowStates(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned workflow states.
+  $filter: WorkflowStateFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -4794,6 +4919,7 @@ query workflowStates(
   workflowStates(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
