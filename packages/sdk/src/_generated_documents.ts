@@ -170,6 +170,18 @@ export type AttachmentEdge = {
   node: Attachment;
 };
 
+/** [Alpha] Project filtering options. */
+export type AttachmentFilter = {
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the filter match value. */
+  filterMatchValue?: Maybe<StringComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 export type AttachmentPayload = {
   __typename?: "AttachmentPayload";
   /** The issue attachment that was created. */
@@ -331,6 +343,24 @@ export type CommentEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Comment;
+};
+
+/** [Alpha] Comment filtering options. */
+export type CommentFilter = {
+  /** Compound filters, all of which need to be matched by the comment. */
+  and?: Maybe<Array<CommentFilter>>;
+  /** Comparator for the comments body. */
+  body?: Maybe<StringComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the comment. */
+  or?: Maybe<Array<CommentFilter>>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+  /** Filters that the comments creator must satisfy. */
+  user?: Maybe<UserFilter>;
 };
 
 export type CommentPayload = {
@@ -550,6 +580,7 @@ export type Cycle = Node & {
 export type CycleIssuesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -560,6 +591,7 @@ export type CycleIssuesArgs = {
 export type CycleUncompletedIssuesUponCloseArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -595,6 +627,32 @@ export type CycleEdge = {
   node: Cycle;
 };
 
+/** [Alpha] Project filtering options. */
+export type CycleFilter = {
+  /** Compound filters, all of which need to be matched by the cycle. */
+  and?: Maybe<Array<CycleFilter>>;
+  /** Comparator for the cycle completed at date. */
+  completedAt?: Maybe<DateComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the cycle ends at date. */
+  endsAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the cycle name. */
+  name?: Maybe<StringComparator>;
+  /** Comparator for the cycle number. */
+  number?: Maybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the cycle. */
+  or?: Maybe<Array<CycleFilter>>;
+  /** Comparator for the cycle start date. */
+  startsAt?: Maybe<DateComparator>;
+  /** Filters that the cycles team must satisfy. */
+  team?: Maybe<TeamFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 export type CyclePayload = {
   __typename?: "CyclePayload";
   /** The Cycle that was created or updated. */
@@ -614,6 +672,25 @@ export type CycleUpdateInput = {
   name?: Maybe<Scalars["String"]>;
   /** The start date of the cycle. */
   startsAt?: Maybe<Scalars["DateTime"]>;
+};
+
+export type DateComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["DateTime"]>;
+  /** Greater-than constraint. Matches any values that are greater than the given value. */
+  gt?: Maybe<Scalars["DateTime"]>;
+  /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
+  gte?: Maybe<Scalars["DateTime"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["DateTime"]>>;
+  /** Less-than constraint. Matches any values that are less than the given value. */
+  lt?: Maybe<Scalars["DateTime"]>;
+  /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
+  lte?: Maybe<Scalars["DateTime"]>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["DateTime"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["DateTime"]>>;
 };
 
 export type DebugPayload = {
@@ -946,6 +1023,17 @@ export type GoogleUserAccountAuthInput = {
   timezone: Scalars["String"];
 };
 
+export type IdComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["ID"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["ID"]>>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["ID"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["ID"]>>;
+};
+
 export type ImageUploadFromUrlPayload = {
   __typename?: "ImageUploadFromUrlPayload";
   /** The identifier of the last sync operation. */
@@ -1201,6 +1289,7 @@ export type Issue = Node & {
 export type IssueAttachmentsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AttachmentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -1211,6 +1300,7 @@ export type IssueAttachmentsArgs = {
 export type IssueChildrenArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -1221,6 +1311,7 @@ export type IssueChildrenArgs = {
 export type IssueCommentsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -1261,6 +1352,7 @@ export type IssueInverseRelationsArgs = {
 export type IssueLabelsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueLabelFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -1281,6 +1373,7 @@ export type IssueRelationsArgs = {
 export type IssueSubscribersArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -1363,6 +1456,64 @@ export type IssueEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Issue;
+};
+
+/** [Alpha] Issue filtering options. */
+export type IssueFilter = {
+  /** Compound filters, all of which need to be matched by the issue. */
+  and?: Maybe<Array<IssueFilter>>;
+  /** Filters that the issues assignee must satisfy. */
+  assignee?: Maybe<NullableUserFilter>;
+  /** Filters that the issues attachments must satisfy. */
+  attachments?: Maybe<AttachmentFilter>;
+  /** Comparator for the issues auto archived at date. */
+  autoArchivedAt?: Maybe<DateComparator>;
+  /** Comparator for the issues auto closed at date. */
+  autoClosedAt?: Maybe<DateComparator>;
+  /** Comparator for the issues canceled at date. */
+  canceledAt?: Maybe<DateComparator>;
+  /** Filters that the child issues must satisfy. */
+  children?: Maybe<IssueFilter>;
+  /** Filters that the issues comment must satisfy. */
+  comment?: Maybe<CommentFilter>;
+  /** Comparator for the issues completed at date. */
+  completedAt?: Maybe<DateComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the issues creator must satisfy. */
+  creator?: Maybe<UserFilter>;
+  /** Filters that the issues cycle must satisfy. */
+  cycle?: Maybe<NullableCycleFilter>;
+  /** Comparator for the issues due date. */
+  dueDate?: Maybe<TimelessDateComparator>;
+  /** Comparator for the issues estimate. */
+  estimate?: Maybe<NumberComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that at least one label on the issue must satisfy. */
+  labels?: Maybe<IssueLabelFilter>;
+  /** Comparator for the issues number. */
+  number?: Maybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the issue. */
+  or?: Maybe<Array<IssueFilter>>;
+  /** Comparator for the issues priority. */
+  priority?: Maybe<NumberComparator>;
+  /** Filters that the issues project must satisfy. */
+  project?: Maybe<NullableProjectFilter>;
+  /** Filters that the issues snoozer must satisfy. */
+  snoozedBy?: Maybe<NullableUserFilter>;
+  /** Comparator for the issues snoozed until date. */
+  snoozedUntilAt?: Maybe<DateComparator>;
+  /** Comparator for the issues started at date. */
+  startedAt?: Maybe<DateComparator>;
+  /** Filters that the issues state must satisfy. */
+  state?: Maybe<WorkflowStateFilter>;
+  /** Filters that the issues team must satisfy. */
+  team?: Maybe<TeamFilter>;
+  /** Comparator for the issues title. */
+  title?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 /** A record of changes to an issue. */
@@ -1550,6 +1701,7 @@ export type IssueLabel = Node & {
 export type IssueLabelIssuesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -1581,6 +1733,26 @@ export type IssueLabelEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: IssueLabel;
+};
+
+/** [Alpha] Issue label filtering options. */
+export type IssueLabelFilter = {
+  /** Compound filters, all of which need to be matched by the label. */
+  and?: Maybe<Array<IssueLabelFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the issue labels creator must satisfy. */
+  creator?: Maybe<NullableUserFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the label. */
+  or?: Maybe<Array<IssueLabelFilter>>;
+  /** Filters that the issue labels team must satisfy. */
+  team?: Maybe<TeamFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 export type IssueLabelPayload = {
@@ -1780,6 +1952,7 @@ export type Milestone = Node & {
 export type MilestoneProjectsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -1807,6 +1980,26 @@ export type MilestoneEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Milestone;
+};
+
+/** [Alpha] Milestone filtering options. */
+export type MilestoneFilter = {
+  /** Compound filters, all of which need to be matched by the milestone. */
+  and?: Maybe<Array<MilestoneFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the milestone name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the milestone. */
+  or?: Maybe<Array<MilestoneFilter>>;
+  /** Filters that the milestones projects must satisfy. */
+  projects?: Maybe<UserFilter>;
+  /** Comparator for the milestone sort order. */
+  sortOrder?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 export type MilestonePayload = {
@@ -2916,6 +3109,129 @@ export type NotificationUpdateInput = {
   snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
 };
 
+/** [Alpha] Cycle filtering options. */
+export type NullableCycleFilter = {
+  /** Compound filters, all of which need to be matched by the cycle. */
+  and?: Maybe<Array<CycleFilter>>;
+  /** Comparator for the cycle completed at date. */
+  completedAt?: Maybe<DateComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the cycle ends at date. */
+  endsAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the cycle name. */
+  name?: Maybe<StringComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: Maybe<Scalars["Boolean"]>;
+  /** Comparator for the cycle number. */
+  number?: Maybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the cycle. */
+  or?: Maybe<Array<CycleFilter>>;
+  /** Comparator for the cycle start date. */
+  startsAt?: Maybe<DateComparator>;
+  /** Filters that the cycles team must satisfy. */
+  team?: Maybe<TeamFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+/** [Alpha] User filtering options. */
+export type NullableMilestoneFilter = {
+  /** Compound filters, all of which need to be matched by the milestone. */
+  and?: Maybe<Array<MilestoneFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the milestone name. */
+  name?: Maybe<StringComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: Maybe<Scalars["Boolean"]>;
+  /** Compound filters, one of which need to be matched by the milestone. */
+  or?: Maybe<Array<MilestoneFilter>>;
+  /** Filters that the milestones projects must satisfy. */
+  projects?: Maybe<UserFilter>;
+  /** Comparator for the milestone sort order. */
+  sortOrder?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+/** [Alpha] Project filtering options. */
+export type NullableProjectFilter = {
+  /** Compound filters, all of which need to be matched by the project. */
+  and?: Maybe<Array<ProjectFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the projects creator must satisfy. */
+  creator?: Maybe<UserFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that the projects lead must satisfy. */
+  lead?: Maybe<NullableUserFilter>;
+  /** Filters that the projects members must satisfy. */
+  members?: Maybe<UserFilter>;
+  /** Filters that the projects milestones must satisfy. */
+  milestone?: Maybe<NullableMilestoneFilter>;
+  /** Comparator for the project name. */
+  name?: Maybe<StringComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: Maybe<Scalars["Boolean"]>;
+  /** Compound filters, one of which need to be matched by the project. */
+  or?: Maybe<Array<ProjectFilter>>;
+  /** Comparator for the project start date. */
+  startDate?: Maybe<DateComparator>;
+  /** Comparator for the project state. */
+  state?: Maybe<StringComparator>;
+  /** Comparator for the project target date. */
+  targetDate?: Maybe<DateComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+/** [Alpha] User filtering options. */
+export type NullableUserFilter = {
+  /** Compound filters, all of which need to be matched by the user. */
+  and?: Maybe<Array<UserFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the users display name. */
+  displayName?: Maybe<StringComparator>;
+  /** Comparator for the users email. */
+  email?: Maybe<StringComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the users name. */
+  name?: Maybe<StringComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: Maybe<Scalars["Boolean"]>;
+  /** Compound filters, one of which need to be matched by the user. */
+  or?: Maybe<Array<UserFilter>>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+export type NumberComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["Float"]>;
+  /** Greater-than constraint. Matches any values that are greater than the given value. */
+  gt?: Maybe<Scalars["Float"]>;
+  /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
+  gte?: Maybe<Scalars["Float"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["Float"]>>;
+  /** Less-than constraint. Matches any values that are less than the given value. */
+  lt?: Maybe<Scalars["Float"]>;
+  /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
+  lte?: Maybe<Scalars["Float"]>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["Float"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["Float"]>>;
+};
+
 export type OauthAuthStringAuthorizePayload = {
   __typename?: "OauthAuthStringAuthorizePayload";
   /** Whether the operation was successful. */
@@ -3107,6 +3423,7 @@ export type OrganizationIntegrationsArgs = {
 export type OrganizationMilestonesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<MilestoneFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -3117,6 +3434,7 @@ export type OrganizationMilestonesArgs = {
 export type OrganizationTeamsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -3403,6 +3721,7 @@ export type Project = Node & {
 export type ProjectIssuesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -3423,6 +3742,7 @@ export type ProjectLinksArgs = {
 export type ProjectMembersArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -3434,6 +3754,7 @@ export type ProjectMembersArgs = {
 export type ProjectTeamsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -3481,6 +3802,36 @@ export type ProjectEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Project;
+};
+
+/** [Alpha] Project filtering options. */
+export type ProjectFilter = {
+  /** Compound filters, all of which need to be matched by the project. */
+  and?: Maybe<Array<ProjectFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the projects creator must satisfy. */
+  creator?: Maybe<UserFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that the projects lead must satisfy. */
+  lead?: Maybe<NullableUserFilter>;
+  /** Filters that the projects members must satisfy. */
+  members?: Maybe<UserFilter>;
+  /** Filters that the projects milestones must satisfy. */
+  milestone?: Maybe<NullableMilestoneFilter>;
+  /** Comparator for the project name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the project. */
+  or?: Maybe<Array<ProjectFilter>>;
+  /** Comparator for the project start date. */
+  startDate?: Maybe<DateComparator>;
+  /** Comparator for the project state. */
+  state?: Maybe<StringComparator>;
+  /** Comparator for the project target date. */
+  targetDate?: Maybe<DateComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 /** An external link for a project. */
@@ -3865,6 +4216,7 @@ export type QueryAttachmentIssueArgs = {
 export type QueryAttachmentsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AttachmentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -3894,6 +4246,7 @@ export type QueryCommentArgs = {
 export type QueryCommentsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -3920,6 +4273,7 @@ export type QueryCycleArgs = {
 export type QueryCyclesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CycleFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4007,6 +4361,7 @@ export type QueryIssueLabelArgs = {
 export type QueryIssueLabelsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueLabelFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4039,6 +4394,7 @@ export type QueryIssueSearchArgs = {
 export type QueryIssuesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4052,6 +4408,7 @@ export type QueryMilestoneArgs = {
 export type QueryMilestonesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<MilestoneFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4125,6 +4482,7 @@ export type QueryProjectLinksArgs = {
 export type QueryProjectsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4186,6 +4544,7 @@ export type QueryTeamMembershipsArgs = {
 export type QueryTeamsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4203,6 +4562,7 @@ export type QueryUserArgs = {
 export type QueryUsersArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -4230,6 +4590,7 @@ export type QueryWorkflowStateArgs = {
 export type QueryWorkflowStatesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<WorkflowStateFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4393,6 +4754,23 @@ export type StepsResponse = {
   steps?: Maybe<Array<Scalars["JSON"]>>;
   /** Client's document version. */
   version: Scalars["Int"];
+};
+
+export type StringComparator = {
+  /** Has constraint. Matches any value that contains the given string. */
+  contains?: Maybe<Scalars["String"]>;
+  /** Ends with constraint. Matches any value that ends with the given string. */
+  endsWith?: Maybe<Scalars["String"]>;
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["String"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["String"]>>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["String"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["String"]>>;
+  /** Starts with constraint. Matches any value that starts with the given string. */
+  startsWith?: Maybe<Scalars["String"]>;
 };
 
 /** The subscription of an organization. */
@@ -4607,6 +4985,7 @@ export type Team = Node & {
 export type TeamCyclesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CycleFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4617,6 +4996,7 @@ export type TeamCyclesArgs = {
 export type TeamIssuesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4627,6 +5007,7 @@ export type TeamIssuesArgs = {
 export type TeamLabelsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueLabelFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4637,6 +5018,7 @@ export type TeamLabelsArgs = {
 export type TeamMembersArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -4658,6 +5040,7 @@ export type TeamMembershipsArgs = {
 export type TeamProjectsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4668,6 +5051,7 @@ export type TeamProjectsArgs = {
 export type TeamStatesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<WorkflowStateFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4765,6 +5149,26 @@ export type TeamEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Team;
+};
+
+/** [Alpha] Project filtering options. */
+export type TeamFilter = {
+  /** Compound filters, all of which need to be matched by the team. */
+  and?: Maybe<Array<TeamFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the team description. */
+  description?: Maybe<StringComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the team key. */
+  key?: Maybe<StringComparator>;
+  /** Comparator for the team name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the team. */
+  or?: Maybe<Array<TeamFilter>>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 /** Defines the membership of a user to a team. */
@@ -4986,6 +5390,25 @@ export type TemplateUpdateInput = {
   templateData?: Maybe<Scalars["JSON"]>;
 };
 
+export type TimelessDateComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["TimelessDateScalar"]>;
+  /** Greater-than constraint. Matches any values that are greater than the given value. */
+  gt?: Maybe<Scalars["TimelessDateScalar"]>;
+  /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
+  gte?: Maybe<Scalars["TimelessDateScalar"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["TimelessDateScalar"]>>;
+  /** Less-than constraint. Matches any values that are less than the given value. */
+  lt?: Maybe<Scalars["TimelessDateScalar"]>;
+  /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
+  lte?: Maybe<Scalars["TimelessDateScalar"]>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["TimelessDateScalar"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["TimelessDateScalar"]>>;
+};
+
 export type TokenUserAccountAuthInput = {
   /** The email which to login via the magic login code. */
   email: Scalars["String"];
@@ -5127,6 +5550,7 @@ export type User = Node & {
 export type UserAssignedIssuesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -5137,6 +5561,7 @@ export type UserAssignedIssuesArgs = {
 export type UserCreatedIssuesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -5157,6 +5582,7 @@ export type UserTeamMembershipsArgs = {
 export type UserTeamsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -5225,6 +5651,26 @@ export type UserEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: User;
+};
+
+/** [Alpha] User filtering options. */
+export type UserFilter = {
+  /** Compound filters, all of which need to be matched by the user. */
+  and?: Maybe<Array<UserFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the users display name. */
+  displayName?: Maybe<StringComparator>;
+  /** Comparator for the users email. */
+  email?: Maybe<StringComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the users name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the user. */
+  or?: Maybe<Array<UserFilter>>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 /** The types of flags that the user can have. */
@@ -5544,6 +5990,7 @@ export type WorkflowState = Node & {
 export type WorkflowStateIssuesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -5579,6 +6026,30 @@ export type WorkflowStateEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: WorkflowState;
+};
+
+/** [Alpha] Workflow state filtering options. */
+export type WorkflowStateFilter = {
+  /** Compound filters, all of which need to be matched by the workflow state. */
+  and?: Maybe<Array<WorkflowStateFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the workflow state description. */
+  description?: Maybe<StringComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the workflow state name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the workflow state. */
+  or?: Maybe<Array<WorkflowStateFilter>>;
+  /** Comparator for the workflow state position. */
+  position?: Maybe<NumberComparator>;
+  /** Filters that the workflow states team must satisfy. */
+  team?: Maybe<TeamFilter>;
+  /** Comparator for the workflow state type. */
+  type?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 export type WorkflowStatePayload = {
@@ -6723,6 +7194,7 @@ export type AttachmentIssue_AttachmentsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AttachmentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -6739,6 +7211,7 @@ export type AttachmentIssue_ChildrenQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -6755,6 +7228,7 @@ export type AttachmentIssue_CommentsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -6803,6 +7277,7 @@ export type AttachmentIssue_LabelsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueLabelFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -6835,6 +7310,7 @@ export type AttachmentIssue_SubscribersQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -6851,6 +7327,7 @@ export type AttachmentIssue_SubscribersQuery = { __typename?: "Query" } & {
 export type AttachmentsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AttachmentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -6934,6 +7411,7 @@ export type CommentQuery = { __typename?: "Query" } & { comment: { __typename?: 
 export type CommentsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -6975,6 +7453,7 @@ export type Cycle_IssuesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -6989,6 +7468,7 @@ export type Cycle_UncompletedIssuesUponCloseQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7004,6 +7484,7 @@ export type Cycle_UncompletedIssuesUponCloseQuery = { __typename?: "Query" } & {
 export type CyclesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CycleFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7103,6 +7584,7 @@ export type Issue_AttachmentsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AttachmentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7119,6 +7601,7 @@ export type Issue_ChildrenQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7133,6 +7616,7 @@ export type Issue_CommentsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7179,6 +7663,7 @@ export type Issue_LabelsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueLabelFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7209,6 +7694,7 @@ export type Issue_SubscribersQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -7240,6 +7726,7 @@ export type IssueLabel_IssuesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7253,6 +7740,7 @@ export type IssueLabel_IssuesQuery = { __typename?: "Query" } & {
 export type IssueLabelsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueLabelFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7307,6 +7795,7 @@ export type IssueSearchQuery = { __typename?: "Query" } & {
 export type IssuesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7327,6 +7816,7 @@ export type Milestone_ProjectsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7342,6 +7832,7 @@ export type Milestone_ProjectsQuery = { __typename?: "Query" } & {
 export type MilestonesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<MilestoneFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7420,6 +7911,7 @@ export type Organization_IntegrationsQuery = { __typename?: "Query" } & {
 export type Organization_MilestonesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<MilestoneFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7435,6 +7927,7 @@ export type Organization_MilestonesQuery = { __typename?: "Query" } & {
 export type Organization_TeamsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7508,6 +8001,7 @@ export type Project_IssuesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7538,6 +8032,7 @@ export type Project_MembersQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -7553,6 +8048,7 @@ export type Project_TeamsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7587,6 +8083,7 @@ export type ProjectLinksQuery = { __typename?: "Query" } & {
 export type ProjectsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7647,6 +8144,7 @@ export type Team_CyclesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CycleFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7661,6 +8159,7 @@ export type Team_IssuesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7675,6 +8174,7 @@ export type Team_LabelsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueLabelFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7689,6 +8189,7 @@ export type Team_MembersQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -7720,6 +8221,7 @@ export type Team_ProjectsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7734,6 +8236,7 @@ export type Team_StatesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<WorkflowStateFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7798,6 +8301,7 @@ export type TeamMembershipsQuery = { __typename?: "Query" } & {
 export type TeamsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7830,6 +8334,7 @@ export type User_AssignedIssuesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7844,6 +8349,7 @@ export type User_CreatedIssuesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7874,6 +8380,7 @@ export type User_TeamsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7893,6 +8400,7 @@ export type UserSettingsQuery = { __typename?: "Query" } & {
 export type UsersQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<UserFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
@@ -7911,6 +8419,7 @@ export type ViewerQuery = { __typename?: "Query" } & { viewer: { __typename?: "U
 export type Viewer_AssignedIssuesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7924,6 +8433,7 @@ export type Viewer_AssignedIssuesQuery = { __typename?: "Query" } & {
 export type Viewer_CreatedIssuesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7952,6 +8462,7 @@ export type Viewer_TeamMembershipsQuery = { __typename?: "Query" } & {
 export type Viewer_TeamsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<TeamFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7993,6 +8504,7 @@ export type WorkflowState_IssuesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -8008,6 +8520,7 @@ export type WorkflowState_IssuesQuery = { __typename?: "Query" } & {
 export type WorkflowStatesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<WorkflowStateFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -14009,6 +14522,11 @@ export const AttachmentIssue_AttachmentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -14057,6 +14575,11 @@ export const AttachmentIssue_AttachmentsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -14118,6 +14641,11 @@ export const AttachmentIssue_ChildrenDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -14166,6 +14694,11 @@ export const AttachmentIssue_ChildrenDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -14227,6 +14760,11 @@ export const AttachmentIssue_CommentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "CommentFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -14275,6 +14813,11 @@ export const AttachmentIssue_CommentsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -14554,6 +15097,11 @@ export const AttachmentIssue_LabelsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -14602,6 +15150,11 @@ export const AttachmentIssue_LabelsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -14772,6 +15325,11 @@ export const AttachmentIssue_SubscribersDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "UserFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -14825,6 +15383,11 @@ export const AttachmentIssue_SubscribersDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -14886,6 +15449,11 @@ export const AttachmentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -14921,6 +15489,11 @@ export const AttachmentsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -15342,6 +15915,11 @@ export const CommentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "CommentFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -15377,6 +15955,11 @@ export const CommentsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -15599,6 +16182,11 @@ export const Cycle_IssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -15647,6 +16235,11 @@ export const Cycle_IssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -15708,6 +16301,11 @@ export const Cycle_UncompletedIssuesUponCloseDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -15756,6 +16354,11 @@ export const Cycle_UncompletedIssuesUponCloseDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -15812,6 +16415,11 @@ export const CyclesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "CycleFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -15847,6 +16455,11 @@ export const CyclesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -16426,6 +17039,11 @@ export const Issue_AttachmentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -16474,6 +17092,11 @@ export const Issue_AttachmentsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -16535,6 +17158,11 @@ export const Issue_ChildrenDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -16583,6 +17211,11 @@ export const Issue_ChildrenDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -16644,6 +17277,11 @@ export const Issue_CommentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "CommentFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -16692,6 +17330,11 @@ export const Issue_CommentsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -16971,6 +17614,11 @@ export const Issue_LabelsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -17019,6 +17667,11 @@ export const Issue_LabelsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -17189,6 +17842,11 @@ export const Issue_SubscribersDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "UserFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -17242,6 +17900,11 @@ export const Issue_SubscribersDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -17384,6 +18047,11 @@ export const IssueLabel_IssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -17432,6 +18100,11 @@ export const IssueLabel_IssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -17488,6 +18161,11 @@ export const IssueLabelsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -17523,6 +18201,11 @@ export const IssueLabelsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -17824,6 +18507,11 @@ export const IssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -17859,6 +18547,11 @@ export const IssuesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -17955,6 +18648,11 @@ export const Milestone_ProjectsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "ProjectFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -18003,6 +18701,11 @@ export const Milestone_ProjectsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -18059,6 +18762,11 @@ export const MilestonesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "MilestoneFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -18094,6 +18802,11 @@ export const MilestonesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -18522,6 +19235,11 @@ export const Organization_MilestonesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "MilestoneFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -18563,6 +19281,11 @@ export const Organization_MilestonesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -18619,6 +19342,11 @@ export const Organization_TeamsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "TeamFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -18660,6 +19388,11 @@ export const Organization_TeamsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -19070,6 +19803,11 @@ export const Project_IssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -19118,6 +19856,11 @@ export const Project_IssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -19288,6 +20031,11 @@ export const Project_MembersDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "UserFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -19341,6 +20089,11 @@ export const Project_MembersDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -19407,6 +20160,11 @@ export const Project_TeamsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "TeamFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -19455,6 +20213,11 @@ export const Project_TeamsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -19637,6 +20400,11 @@ export const ProjectsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "ProjectFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -19672,6 +20440,11 @@ export const ProjectsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -19990,6 +20763,11 @@ export const Team_CyclesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "CycleFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -20038,6 +20816,11 @@ export const Team_CyclesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -20099,6 +20882,11 @@ export const Team_IssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -20147,6 +20935,11 @@ export const Team_IssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -20208,6 +21001,11 @@ export const Team_LabelsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -20256,6 +21054,11 @@ export const Team_LabelsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -20317,6 +21120,11 @@ export const Team_MembersDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "UserFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -20370,6 +21178,11 @@ export const Team_MembersDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -20545,6 +21358,11 @@ export const Team_ProjectsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "ProjectFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -20593,6 +21411,11 @@ export const Team_ProjectsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -20654,6 +21477,11 @@ export const Team_StatesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -20702,6 +21530,11 @@ export const Team_StatesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -21102,6 +21935,11 @@ export const TeamsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "TeamFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -21137,6 +21975,11 @@ export const TeamsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -21295,6 +22138,11 @@ export const User_AssignedIssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -21343,6 +22191,11 @@ export const User_AssignedIssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -21404,6 +22257,11 @@ export const User_CreatedIssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -21452,6 +22310,11 @@ export const User_CreatedIssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -21622,6 +22485,11 @@ export const User_TeamsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "TeamFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -21670,6 +22538,11 @@ export const User_TeamsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -21750,6 +22623,11 @@ export const UsersDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "UserFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -21790,6 +22668,11 @@ export const UsersDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -21872,6 +22755,11 @@ export const Viewer_AssignedIssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -21913,6 +22801,11 @@ export const Viewer_AssignedIssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -21969,6 +22862,11 @@ export const Viewer_CreatedIssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -22010,6 +22908,11 @@ export const Viewer_CreatedIssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -22163,6 +23066,11 @@ export const Viewer_TeamsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "TeamFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -22204,6 +23112,11 @@ export const Viewer_TeamsDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -22429,6 +23342,11 @@ export const WorkflowState_IssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -22477,6 +23395,11 @@ export const WorkflowState_IssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
@@ -22533,6 +23456,11 @@ export const WorkflowStatesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -22568,6 +23496,11 @@ export const WorkflowStatesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",

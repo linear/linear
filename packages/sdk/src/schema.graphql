@@ -234,6 +234,28 @@ type AttachmentEdge {
   node: Attachment!
 }
 
+"""
+[Alpha] Project filtering options.
+"""
+input AttachmentFilter {
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the filter match value.
+  """
+  filterMatchValue: StringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type AttachmentPayload {
   """
   The issue attachment that was created.
@@ -489,6 +511,40 @@ type CommentEdge {
   """
   cursor: String!
   node: Comment!
+}
+
+"""
+[Alpha] Comment filtering options.
+"""
+input CommentFilter {
+  """
+  Compound filters, all of which need to be matched by the comment.
+  """
+  and: [CommentFilter!]
+  """
+  Comparator for the comments body.
+  """
+  body: StringComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the comment.
+  """
+  or: [CommentFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the comments creator must satisfy.
+  """
+  user: UserFilter
 }
 
 type CommentPayload {
@@ -806,6 +862,10 @@ type Cycle implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -858,6 +918,10 @@ type Cycle implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -923,6 +987,56 @@ type CycleEdge {
   node: Cycle!
 }
 
+"""
+[Alpha] Project filtering options.
+"""
+input CycleFilter {
+  """
+  Compound filters, all of which need to be matched by the cycle.
+  """
+  and: [CycleFilter!]
+  """
+  Comparator for the cycle completed at date.
+  """
+  completedAt: DateComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the cycle ends at date.
+  """
+  endsAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the cycle name.
+  """
+  name: StringComparator
+  """
+  Comparator for the cycle number.
+  """
+  number: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the cycle.
+  """
+  or: [CycleFilter!]
+  """
+  Comparator for the cycle start date.
+  """
+  startsAt: DateComparator
+  """
+  Filters that the cycles team must satisfy.
+  """
+  team: TeamFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type CyclePayload {
   """
   The Cycle that was created or updated.
@@ -955,6 +1069,41 @@ input CycleUpdateInput {
   The start date of the cycle.
   """
   startsAt: DateTime
+}
+
+input DateComparator {
+  """
+  Equals constraint.
+  """
+  eq: DateTime
+  """
+  Greater-than constraint. Matches any values that are greater than the given value.
+  """
+  gt: DateTime
+  """
+  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
+  """
+  gte: DateTime
+  """
+  In-array constraint.
+  """
+  in: [DateTime!]
+  """
+  Less-than constraint. Matches any values that are less than the given value.
+  """
+  lt: DateTime
+  """
+  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
+  """
+  lte: DateTime
+  """
+  Not-equals constraint.
+  """
+  neq: DateTime
+  """
+  Not-in-array constraint.
+  """
+  nin: [DateTime!]
 }
 
 """
@@ -1464,6 +1613,25 @@ input GoogleUserAccountAuthInput {
   timezone: String!
 }
 
+input IDComparator {
+  """
+  Equals constraint.
+  """
+  eq: ID
+  """
+  In-array constraint.
+  """
+  in: [ID!]
+  """
+  Not-equals constraint.
+  """
+  neq: ID
+  """
+  Not-in-array constraint.
+  """
+  nin: [ID!]
+}
+
 type ImageUploadFromUrlPayload {
   """
   The identifier of the last sync operation.
@@ -1715,6 +1883,10 @@ type Issue implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned attachments.
+    """
+    filter: AttachmentFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -1764,6 +1936,10 @@ type Issue implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -1792,6 +1968,10 @@ type Issue implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned comments.
+    """
+    filter: CommentFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -1949,6 +2129,10 @@ type Issue implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issue labels.
+    """
+    filter: IssueLabelFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -2054,6 +2238,10 @@ type Issue implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned subscribers.
+    """
+    filter: UserFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -2223,6 +2411,120 @@ type IssueEdge {
   """
   cursor: String!
   node: Issue!
+}
+
+"""
+[Alpha] Issue filtering options.
+"""
+input IssueFilter {
+  """
+  Compound filters, all of which need to be matched by the issue.
+  """
+  and: [IssueFilter!]
+  """
+  Filters that the issues assignee must satisfy.
+  """
+  assignee: NullableUserFilter
+  """
+  Filters that the issues attachments must satisfy.
+  """
+  attachments: AttachmentFilter
+  """
+  Comparator for the issues auto archived at date.
+  """
+  autoArchivedAt: DateComparator
+  """
+  Comparator for the issues auto closed at date.
+  """
+  autoClosedAt: DateComparator
+  """
+  Comparator for the issues canceled at date.
+  """
+  canceledAt: DateComparator
+  """
+  Filters that the child issues must satisfy.
+  """
+  children: IssueFilter
+  """
+  Filters that the issues comment must satisfy.
+  """
+  comment: CommentFilter
+  """
+  Comparator for the issues completed at date.
+  """
+  completedAt: DateComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the issues creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Filters that the issues cycle must satisfy.
+  """
+  cycle: NullableCycleFilter
+  """
+  Comparator for the issues due date.
+  """
+  dueDate: TimelessDateComparator
+  """
+  Comparator for the issues estimate.
+  """
+  estimate: NumberComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that at least one label on the issue must satisfy.
+  """
+  labels: IssueLabelFilter
+  """
+  Comparator for the issues number.
+  """
+  number: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the issue.
+  """
+  or: [IssueFilter!]
+  """
+  Comparator for the issues priority.
+  """
+  priority: NumberComparator
+  """
+  Filters that the issues project must satisfy.
+  """
+  project: NullableProjectFilter
+  """
+  Filters that the issues snoozer must satisfy.
+  """
+  snoozedBy: NullableUserFilter
+  """
+  Comparator for the issues snoozed until date.
+  """
+  snoozedUntilAt: DateComparator
+  """
+  Comparator for the issues started at date.
+  """
+  startedAt: DateComparator
+  """
+  Filters that the issues state must satisfy.
+  """
+  state: WorkflowStateFilter
+  """
+  Filters that the issues team must satisfy.
+  """
+  team: TeamFilter
+  """
+  Comparator for the issues title.
+  """
+  title: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -2523,6 +2825,10 @@ type IssueLabel implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -2589,6 +2895,44 @@ type IssueLabelEdge {
   """
   cursor: String!
   node: IssueLabel!
+}
+
+"""
+[Alpha] Issue label filtering options.
+"""
+input IssueLabelFilter {
+  """
+  Compound filters, all of which need to be matched by the label.
+  """
+  and: [IssueLabelFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the issue labels creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the label.
+  """
+  or: [IssueLabelFilter!]
+  """
+  Filters that the issue labels team must satisfy.
+  """
+  team: TeamFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type IssueLabelPayload {
@@ -2909,6 +3253,10 @@ type Milestone implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned projects.
+    """
+    filter: ProjectFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -2963,6 +3311,44 @@ type MilestoneEdge {
   """
   cursor: String!
   node: Milestone!
+}
+
+"""
+[Alpha] Milestone filtering options.
+"""
+input MilestoneFilter {
+  """
+  Compound filters, all of which need to be matched by the milestone.
+  """
+  and: [MilestoneFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the milestone name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the milestone.
+  """
+  or: [MilestoneFilter!]
+  """
+  Filters that the milestones projects must satisfy.
+  """
+  projects: UserFilter
+  """
+  Comparator for the milestone sort order.
+  """
+  sortOrder: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type MilestonePayload {
@@ -4812,6 +5198,241 @@ input NotificationUpdateInput {
   snoozedUntilAt: DateTime
 }
 
+"""
+[Alpha] Cycle filtering options.
+"""
+input NullableCycleFilter {
+  """
+  Compound filters, all of which need to be matched by the cycle.
+  """
+  and: [CycleFilter!]
+  """
+  Comparator for the cycle completed at date.
+  """
+  completedAt: DateComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the cycle ends at date.
+  """
+  endsAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the cycle name.
+  """
+  name: StringComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Comparator for the cycle number.
+  """
+  number: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the cycle.
+  """
+  or: [CycleFilter!]
+  """
+  Comparator for the cycle start date.
+  """
+  startsAt: DateComparator
+  """
+  Filters that the cycles team must satisfy.
+  """
+  team: TeamFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+[Alpha] User filtering options.
+"""
+input NullableMilestoneFilter {
+  """
+  Compound filters, all of which need to be matched by the milestone.
+  """
+  and: [MilestoneFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the milestone name.
+  """
+  name: StringComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the milestone.
+  """
+  or: [MilestoneFilter!]
+  """
+  Filters that the milestones projects must satisfy.
+  """
+  projects: UserFilter
+  """
+  Comparator for the milestone sort order.
+  """
+  sortOrder: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+[Alpha] Project filtering options.
+"""
+input NullableProjectFilter {
+  """
+  Compound filters, all of which need to be matched by the project.
+  """
+  and: [ProjectFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the projects creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the projects lead must satisfy.
+  """
+  lead: NullableUserFilter
+  """
+  Filters that the projects members must satisfy.
+  """
+  members: UserFilter
+  """
+  Filters that the projects milestones must satisfy.
+  """
+  milestone: NullableMilestoneFilter
+  """
+  Comparator for the project name.
+  """
+  name: StringComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the project.
+  """
+  or: [ProjectFilter!]
+  """
+  Comparator for the project start date.
+  """
+  startDate: DateComparator
+  """
+  Comparator for the project state.
+  """
+  state: StringComparator
+  """
+  Comparator for the project target date.
+  """
+  targetDate: DateComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+[Alpha] User filtering options.
+"""
+input NullableUserFilter {
+  """
+  Compound filters, all of which need to be matched by the user.
+  """
+  and: [UserFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the users display name.
+  """
+  displayName: StringComparator
+  """
+  Comparator for the users email.
+  """
+  email: StringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the users name.
+  """
+  name: StringComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the user.
+  """
+  or: [UserFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+input NumberComparator {
+  """
+  Equals constraint.
+  """
+  eq: Float
+  """
+  Greater-than constraint. Matches any values that are greater than the given value.
+  """
+  gt: Float
+  """
+  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
+  """
+  gte: Float
+  """
+  In-array constraint.
+  """
+  in: [Float!]
+  """
+  Less-than constraint. Matches any values that are less than the given value.
+  """
+  lt: Float
+  """
+  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
+  """
+  lte: Float
+  """
+  Not-equals constraint.
+  """
+  neq: Float
+  """
+  Not-in-array constraint.
+  """
+  nin: [Float!]
+}
+
 type OauthAuthStringAuthorizePayload {
   """
   Whether the operation was successful.
@@ -5103,6 +5724,10 @@ type Organization implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned projects.
+    """
+    filter: MilestoneFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -5151,6 +5776,10 @@ type Organization implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned teams.
+    """
+    filter: TeamFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -5577,6 +6206,10 @@ type Project implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -5638,6 +6271,10 @@ type Project implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned users.
+    """
+    filter: UserFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -5723,6 +6360,10 @@ type Project implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned teams.
+    """
+    filter: TeamFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -5818,6 +6459,64 @@ type ProjectEdge {
   """
   cursor: String!
   node: Project!
+}
+
+"""
+[Alpha] Project filtering options.
+"""
+input ProjectFilter {
+  """
+  Compound filters, all of which need to be matched by the project.
+  """
+  and: [ProjectFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the projects creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the projects lead must satisfy.
+  """
+  lead: NullableUserFilter
+  """
+  Filters that the projects members must satisfy.
+  """
+  members: UserFilter
+  """
+  Filters that the projects milestones must satisfy.
+  """
+  milestone: NullableMilestoneFilter
+  """
+  Comparator for the project name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the project.
+  """
+  or: [ProjectFilter!]
+  """
+  Comparator for the project start date.
+  """
+  startDate: DateComparator
+  """
+  Comparator for the project state.
+  """
+  state: StringComparator
+  """
+  Comparator for the project target date.
+  """
+  targetDate: DateComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -6201,6 +6900,10 @@ type Query {
     """
     before: String
     """
+    [Alpha] Filter returned attachments.
+    """
+    filter: AttachmentFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -6301,6 +7004,10 @@ type Query {
     """
     before: String
     """
+    [Alpha] Filter returned comments.
+    """
+    filter: CommentFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -6366,6 +7073,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned users.
+    """
+    filter: CycleFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -6580,6 +7291,10 @@ type Query {
     """
     before: String
     """
+    [Alpha] Filter returned issue labels.
+    """
+    filter: IssueLabelFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -6679,6 +7394,10 @@ type Query {
     """
     before: String
     """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -6711,6 +7430,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned projects.
+    """
+    filter: MilestoneFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -6889,6 +7612,10 @@ type Query {
     """
     before: String
     """
+    [Alpha] Filter returned projects.
+    """
+    filter: ProjectFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -7061,6 +7788,10 @@ type Query {
     """
     before: String
     """
+    [Alpha] Filter returned teams.
+    """
+    filter: TeamFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -7115,6 +7846,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned users.
+    """
+    filter: UserFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -7194,6 +7929,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned workflow states.
+    """
+    filter: WorkflowStateFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -7456,6 +8195,37 @@ type StepsResponse {
   version: Int!
 }
 
+input StringComparator {
+  """
+  Has constraint. Matches any value that contains the given string.
+  """
+  contains: String
+  """
+  Ends with constraint. Matches any value that ends with the given string.
+  """
+  endsWith: String
+  """
+  Equals constraint.
+  """
+  eq: String
+  """
+  In-array constraint.
+  """
+  in: [String!]
+  """
+  Not-equals constraint.
+  """
+  neq: String
+  """
+  Not-in-array constraint.
+  """
+  nin: [String!]
+  """
+  Starts with constraint. Matches any value that starts with the given string.
+  """
+  startsWith: String
+}
+
 """
 The subscription of an organization.
 """
@@ -7667,6 +8437,10 @@ type Team implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned cycles.
+    """
+    filter: CycleFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -7752,6 +8526,10 @@ type Team implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -7785,6 +8563,10 @@ type Team implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issue labels.
+    """
+    filter: IssueLabelFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -7817,6 +8599,10 @@ type Team implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned users.
+    """
+    filter: UserFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -7896,6 +8682,10 @@ type Team implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned projects.
+    """
+    filter: ProjectFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -7944,6 +8734,10 @@ type Team implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned workflow states.
+    """
+    filter: WorkflowStateFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -8169,6 +8963,44 @@ type TeamEdge {
   """
   cursor: String!
   node: Team!
+}
+
+"""
+[Alpha] Project filtering options.
+"""
+input TeamFilter {
+  """
+  Compound filters, all of which need to be matched by the team.
+  """
+  and: [TeamFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the team description.
+  """
+  description: StringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the team key.
+  """
+  key: StringComparator
+  """
+  Comparator for the team name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the team.
+  """
+  or: [TeamFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -8533,6 +9365,41 @@ input TemplateUpdateInput {
   templateData: JSON
 }
 
+input TimelessDateComparator {
+  """
+  Equals constraint.
+  """
+  eq: TimelessDateScalar
+  """
+  Greater-than constraint. Matches any values that are greater than the given value.
+  """
+  gt: TimelessDateScalar
+  """
+  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
+  """
+  gte: TimelessDateScalar
+  """
+  In-array constraint.
+  """
+  in: [TimelessDateScalar!]
+  """
+  Less-than constraint. Matches any values that are less than the given value.
+  """
+  lt: TimelessDateScalar
+  """
+  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
+  """
+  lte: TimelessDateScalar
+  """
+  Not-equals constraint.
+  """
+  neq: TimelessDateScalar
+  """
+  Not-in-array constraint.
+  """
+  nin: [TimelessDateScalar!]
+}
+
 """
 The `TimelessDateScalar` scalar type represents Date values without a timestamp. It expects strings in the format YYYY-MM-DD
 """
@@ -8715,6 +9582,10 @@ type User implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -8755,6 +9626,10 @@ type User implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -8845,6 +9720,10 @@ type User implements Node {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned teams.
+    """
+    filter: TeamFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -8972,6 +9851,44 @@ type UserEdge {
   """
   cursor: String!
   node: User!
+}
+
+"""
+[Alpha] User filtering options.
+"""
+input UserFilter {
+  """
+  Compound filters, all of which need to be matched by the user.
+  """
+  and: [UserFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the users display name.
+  """
+  displayName: StringComparator
+  """
+  Comparator for the users email.
+  """
+  email: StringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the users name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the user.
+  """
+  or: [UserFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -9433,6 +10350,10 @@ type WorkflowState implements Node {
     """
     before: String
     """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -9515,6 +10436,52 @@ type WorkflowStateEdge {
   """
   cursor: String!
   node: WorkflowState!
+}
+
+"""
+[Alpha] Workflow state filtering options.
+"""
+input WorkflowStateFilter {
+  """
+  Compound filters, all of which need to be matched by the workflow state.
+  """
+  and: [WorkflowStateFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the workflow state description.
+  """
+  description: StringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the workflow state name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the workflow state.
+  """
+  or: [WorkflowStateFilter!]
+  """
+  Comparator for the workflow state position.
+  """
+  position: NumberComparator
+  """
+  Filters that the workflow states team must satisfy.
+  """
+  team: TeamFilter
+  """
+  Comparator for the workflow state type.
+  """
+  type: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type WorkflowStatePayload {
