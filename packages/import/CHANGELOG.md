@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.5.16
+
+### Patch Changes
+
+- e789ac8: feat(import): add attachments to issue description for Trello imports
+- Updated dependencies [9476c32]
+  - @linear/sdk@1.20.0
+
 ## 1.5.15
 
 ### Patch Changes
