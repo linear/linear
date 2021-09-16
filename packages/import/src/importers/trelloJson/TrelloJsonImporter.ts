@@ -14,6 +14,10 @@ interface TrelloCard {
     name: string;
     color: TrelloLabelColor;
   }[];
+  attachments: {
+    name: string;
+    url: string;
+  }[];
   id: string;
   idList: string;
 }
@@ -62,7 +66,7 @@ export class TrelloJsonImporter implements Importer {
 
   public import = async (): Promise<ImportResult> => {
     const bytes = fs.readFileSync(this.filePath);
-    const data = JSON.parse(bytes as unknown as string);
+    const data = JSON.parse((bytes as unknown) as string);
 
     const importData: ImportResult = {
       issues: [],
@@ -108,9 +112,12 @@ export class TrelloJsonImporter implements Importer {
           .map(item => `- [${item.state === "complete" ? "x" : " "}] ${item.name}`)
           .join("\n");
       }
+      const formattedAttachments = card.attachments
+        .map(attachment => `[${attachment.name}](${attachment.url})`)
+        .join("\n");
 
-      const description = `${mdDesc}${
-        formattedChecklist && `\n${formattedChecklist}`
+      const description = `${mdDesc}${formattedChecklist && `\n${formattedChecklist}`}${
+        formattedAttachments && `\n\nAttachments:\n${formattedAttachments}`
       }\n\n[View original card in Trello](${url})`;
       const labels = card.labels.map(l => l.id);
 

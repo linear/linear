@@ -272,7 +272,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     await client.issueCreate({
       teamId,
-      projectId: projectId as unknown as string,
+      projectId: (projectId as unknown) as string,
       title: issue.title,
       description,
       priority: issue.priority,
