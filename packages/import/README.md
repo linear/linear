@@ -20,7 +20,7 @@ linear-import
 
 ## Importers
 
-It's recommended to only import open issues to keep your Linear account more manageable.
+It's recommended to only import open issues to keep your Linear account more manageable. Note that creation and modification dates on issues will not carry over.
 
 ### GitHub
 
@@ -99,6 +99,8 @@ Following fields are supported:
 - `Description` - Trello markdown formatted description
 - `URL` - URL of Trello card
 - `Labels` - Added as a label
+- `Attachments` - Added as links in the description
+- (Optional) `Comments` - Added in the description
 
 ### Linear CSV
 
