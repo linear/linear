@@ -1402,6 +1402,8 @@ fragment SamlConfiguration on SamlConfiguration {
   ssoEndpoint
   # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
   ssoSignAlgo
+  # The issuer's custom entity ID.
+  issuerEntityId
   # X.509 Signing Certificate in string form.
   ssoSigningCert
 }
@@ -1456,33 +1458,43 @@ fragment Subscription on Subscription {
 
 # User favorites presented in the sidebar.
 fragment Favorite on Favorite {
-  # Favorited cycle.
+  # The favorited custom view.
+  customView {
+    id
+  }
+  # The favorited cycle.
   cycle {
     id
   }
-  # Favorited issue label.
-  label {
-    id
-  }
-  # Favorited issue.
+  # The favorited issue.
   issue {
     id
   }
-  # Favorited project team.
-  projectTeam {
+  # The favorited label.
+  label {
     id
   }
-  # Favorited project.
+  # The favorited project.
   project {
+    id
+  }
+  # The favorited team of the project.
+  projectTeam {
     id
   }
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
+  # The name of the folder. Only applies to favorites of type folder.
+  folderName
   # The order of the item in the favorites list.
   sortOrder
   # The owner of the favorite.
   user {
+    id
+  }
+  # The parent folder of the favorite.
+  parent {
     id
   }
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -1524,6 +1536,8 @@ fragment ZendeskSettings on ZendeskSettings {
 
 # [Alpha] Issue attachment (e.g. support ticket, pull request).
 fragment Attachment on Attachment {
+  # An accessor helper to source.type, defines the source type of the attachment.
+  sourceType
   # Content for the subtitle line in the Linear attachment widget.
   subtitle
   # Content for the title line in the Linear attachment widget.
@@ -1536,6 +1550,10 @@ fragment Attachment on Attachment {
   source
   # Location of the attachment which is also used as an identifier.
   url
+  # The creator of the attachment.
+  creator {
+    id
+  }
   # The issue this attachment belongs to.
   issue {
     id
@@ -3094,6 +3112,35 @@ query favorite($id: String!) {
     ...Favorite
   }
 }
+# Children of the favorite. Only applies to favorites of type folder.
+query favorite_children(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  favorite(id: $id) {
+    children(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...FavoriteConnection
+    }
+  }
+}
 # The user's favorites.
 query favorites(
   # A cursor to be used with first for forward pagination
@@ -3552,6 +3599,8 @@ query issueSearch(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # [Alpha] Filter returned issues.
+  $filter: IssueFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -3566,6 +3615,7 @@ query issueSearch(
   issueSearch(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -6092,10 +6142,12 @@ mutation subscriptionArchive(
 }
 # Creates a subscription session. Used internally to integrate with Stripe.
 mutation subscriptionSessionCreate(
+  # The id of an optional coupon to apply.
+  $coupon: String
   # The name of the plan.
   $plan: String!
 ) {
-  subscriptionSessionCreate(plan: $plan) {
+  subscriptionSessionCreate(coupon: $coupon, plan: $plan) {
     ...SubscriptionSessionPayload
   }
 }
