@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.5.17
+
+### Patch Changes
+
+- 7ed6900: feat(import): Updating import README
+- Updated dependencies [91374ca]
+  - @linear/sdk@1.21.0
+
 ## 1.5.16
 
 ### Patch Changes
