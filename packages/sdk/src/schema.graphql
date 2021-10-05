@@ -147,6 +147,10 @@ type Attachment implements Node {
   """
   createdAt: DateTime!
   """
+  The creator of the attachment.
+  """
+  creator: User
+  """
   Indicates if attachments for the same source application should be grouped in the Linear UI.
   """
   groupBySource: Boolean!
@@ -166,6 +170,10 @@ type Attachment implements Node {
   Information about the source which created the attachment.
   """
   source: JSONObject
+  """
+  An accessor helper to source.type, defines the source type of the attachment.
+  """
+  sourceType: JSONObject
   """
   Content for the subtitle line in the Linear attachment widget.
   """
@@ -235,7 +243,7 @@ type AttachmentEdge {
 }
 
 """
-[Alpha] Project filtering options.
+[Alpha] Attachment filtering options.
 """
 input AttachmentFilter {
   """
@@ -243,17 +251,33 @@ input AttachmentFilter {
   """
   createdAt: DateComparator
   """
-  Comparator for the filter match value.
+  Filters that the attachments creator must satisfy.
   """
-  filterMatchValue: StringComparator
+  creator: NullableUserFilter
   """
   Comparator for the identifier.
   """
   id: IDComparator
   """
+  Comparator for the source type.
+  """
+  sourceType: NestedStringComparator
+  """
+  Comparator for the subtitle.
+  """
+  subtitle: NullableStringComparator
+  """
+  Comparator for the title.
+  """
+  title: StringComparator
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+  """
+  Comparator for the url.
+  """
+  url: StringComparator
 }
 
 type AttachmentPayload {
@@ -396,6 +420,16 @@ input BillingEmailUpdateInput {
   email: String!
 }
 
+"""
+Comparator for booleans.
+"""
+input BooleanComparator {
+  """
+  Equals constraint.
+  """
+  eq: Boolean
+}
+
 type Card {
   """
   The brand of the card, e.g. Visa.
@@ -480,6 +514,52 @@ type Comment implements Node {
   user: User!
 }
 
+"""
+[Alpha] Comment filtering options.
+"""
+input CommentCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the comment.
+  """
+  and: [CommentFilter!]
+  """
+  Comparator for the comments body.
+  """
+  body: StringComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that needs to be matched by all comments.
+  """
+  every: CommentFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the comments issue must satisfy.
+  """
+  issue: IssueFilter
+  """
+  Compound filters, one of which need to be matched by the comment.
+  """
+  or: [CommentFilter!]
+  """
+  Filters that needs to be matched by some comments.
+  """
+  some: CommentFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the comments creator must satisfy.
+  """
+  user: UserFilter
+}
+
 type CommentConnection {
   edges: [CommentEdge!]!
   nodes: [Comment!]!
@@ -533,6 +613,10 @@ input CommentFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filters that the comments issue must satisfy.
+  """
+  issue: IssueFilter
   """
   Compound filters, one of which need to be matched by the comment.
   """
@@ -1012,6 +1096,10 @@ input CycleFilter {
   """
   id: IDComparator
   """
+  Filters that the cycles issues must satisfy.
+  """
+  issues: IssueCollectionFilter
+  """
   Comparator for the cycle name.
   """
   name: StringComparator
@@ -1071,6 +1159,9 @@ input CycleUpdateInput {
   startsAt: DateTime
 }
 
+"""
+Comparator for dates.
+"""
 input DateComparator {
   """
   Equals constraint.
@@ -1107,7 +1198,7 @@ input DateComparator {
 }
 
 """
-The javascript `Date` as string. Type represents date and time as the ISO Date string.
+Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago)
 """
 scalar DateTime
 
@@ -1362,33 +1453,74 @@ type Favorite implements Node {
   """
   archivedAt: DateTime
   """
+  Children of the favorite. Only applies to favorites of type folder.
+  """
+  children(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): FavoriteConnection!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
   """
-  Favorited cycle.
+  The favorited custom view.
+  """
+  customView: CustomView
+  """
+  The favorited cycle.
   """
   cycle: Cycle
+  """
+  The name of the folder. Only applies to favorites of type folder.
+  """
+  folderName: String
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
-  Favorited issue.
+  The favorited issue.
   """
   issue: Issue
   """
-  Favorited issue label.
+  The favorited label.
   """
   label: IssueLabel
   """
-  Favorited project.
+  The parent folder of the favorite.
+  """
+  parent: Favorite
+  """
+  The favorited project.
   """
   project: Project
   """
-  Favorited project team.
+  The favorited team of the project.
   """
-  projectTeam: Project
+  projectTeam: Team
   """
   The order of the item in the favorites list.
   """
@@ -1424,6 +1556,10 @@ input FavoriteCreateInput {
   """
   cycleId: String
   """
+  The name of the favorite folder.
+  """
+  folderName: String
+  """
   The identifier. If none is provided, the backend will generate one.
   """
   id: String
@@ -1435,6 +1571,10 @@ input FavoriteCreateInput {
   The identifier of the label to favorite.
   """
   labelId: String
+  """
+  The parent folder of the favorite.
+  """
+  parentId: String
   """
   The identifier of the project to favorite.
   """
@@ -1473,6 +1613,10 @@ type FavoritePayload {
 }
 
 input FavoriteUpdateInput {
+  """
+  The id of the folder to move the favorite under.
+  """
+  parentId: String
   """
   The position of the item in the favorites list.
   """
@@ -1613,6 +1757,9 @@ input GoogleUserAccountAuthInput {
   timezone: String!
 }
 
+"""
+Comparator for identifiers.
+"""
 input IDComparator {
   """
   Equals constraint.
@@ -1843,7 +1990,7 @@ type Invoice {
   """
   The due date of the invoice.
   """
-  dueDate: TimelessDateScalar
+  dueDate: TimelessDate
   """
   The status of the invoice.
   """
@@ -2016,7 +2163,7 @@ type Issue implements Node {
   """
   The date at which the issue is due.
   """
-  dueDate: TimelessDateScalar
+  dueDate: TimelessDate
   """
   The estimate of the complexity of the issue..
   """
@@ -2286,6 +2433,132 @@ type Issue implements Node {
   url: String!
 }
 
+"""
+[Alpha] Issue filtering options.
+"""
+input IssueCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the issue.
+  """
+  and: [IssueFilter!]
+  """
+  Filters that the issues assignee must satisfy.
+  """
+  assignee: NullableUserFilter
+  """
+  Filters that the issues attachments must satisfy.
+  """
+  attachments: AttachmentFilter
+  """
+  Comparator for the issues auto archived at date.
+  """
+  autoArchivedAt: NullableDateComparator
+  """
+  Comparator for the issues auto closed at date.
+  """
+  autoClosedAt: NullableDateComparator
+  """
+  Comparator for the issues canceled at date.
+  """
+  canceledAt: NullableDateComparator
+  """
+  Filters that the child issues must satisfy.
+  """
+  children: IssueCollectionFilter
+  """
+  Filters that the issues comments must satisfy.
+  """
+  comments: CommentCollectionFilter
+  """
+  Comparator for the issues completed at date.
+  """
+  completedAt: NullableDateComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the issues creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Filters that the issues cycle must satisfy.
+  """
+  cycle: NullableCycleFilter
+  """
+  Comparator for the issues description.
+  """
+  description: NullableStringComparator
+  """
+  Comparator for the issues due date.
+  """
+  dueDate: NullableTimelessDateComparator
+  """
+  Comparator for the issues estimate.
+  """
+  estimate: NumberComparator
+  """
+  Filters that needs to be matched by all issues.
+  """
+  every: IssueFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that issue labels must satisfy.
+  """
+  labels: IssueLabelCollectionFilter
+  """
+  Comparator for the issues number.
+  """
+  number: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the issue.
+  """
+  or: [IssueFilter!]
+  """
+  Comparator for the issues priority.
+  """
+  priority: NullableNumberComparator
+  """
+  Filters that the issues project must satisfy.
+  """
+  project: NullableProjectFilter
+  """
+  Filters that the issues snoozer must satisfy.
+  """
+  snoozedBy: NullableUserFilter
+  """
+  Comparator for the issues snoozed until date.
+  """
+  snoozedUntilAt: NullableDateComparator
+  """
+  Filters that needs to be matched by some issues.
+  """
+  some: IssueFilter
+  """
+  Comparator for the issues started at date.
+  """
+  startedAt: NullableDateComparator
+  """
+  Filters that the issues state must satisfy.
+  """
+  state: WorkflowStateFilter
+  """
+  Filters that the issues team must satisfy.
+  """
+  team: TeamFilter
+  """
+  Comparator for the issues title.
+  """
+  title: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type IssueConnection {
   edges: [IssueEdge!]!
   nodes: [Issue!]!
@@ -2316,7 +2589,7 @@ input IssueCreateInput {
   """
   The date at which the issue is due.
   """
-  dueDate: TimelessDateScalar
+  dueDate: TimelessDate
   """
   The estimated complexity of the issue.
   """
@@ -2432,27 +2705,27 @@ input IssueFilter {
   """
   Comparator for the issues auto archived at date.
   """
-  autoArchivedAt: DateComparator
+  autoArchivedAt: NullableDateComparator
   """
   Comparator for the issues auto closed at date.
   """
-  autoClosedAt: DateComparator
+  autoClosedAt: NullableDateComparator
   """
   Comparator for the issues canceled at date.
   """
-  canceledAt: DateComparator
+  canceledAt: NullableDateComparator
   """
   Filters that the child issues must satisfy.
   """
-  children: IssueFilter
+  children: IssueCollectionFilter
   """
-  Filters that the issues comment must satisfy.
+  Filters that the issues comments must satisfy.
   """
-  comment: CommentFilter
+  comments: CommentCollectionFilter
   """
   Comparator for the issues completed at date.
   """
-  completedAt: DateComparator
+  completedAt: NullableDateComparator
   """
   Comparator for the created at date.
   """
@@ -2466,9 +2739,13 @@ input IssueFilter {
   """
   cycle: NullableCycleFilter
   """
+  Comparator for the issues description.
+  """
+  description: NullableStringComparator
+  """
   Comparator for the issues due date.
   """
-  dueDate: TimelessDateComparator
+  dueDate: NullableTimelessDateComparator
   """
   Comparator for the issues estimate.
   """
@@ -2478,9 +2755,9 @@ input IssueFilter {
   """
   id: IDComparator
   """
-  Filters that at least one label on the issue must satisfy.
+  Filters that issue labels must satisfy.
   """
-  labels: IssueLabelFilter
+  labels: IssueLabelCollectionFilter
   """
   Comparator for the issues number.
   """
@@ -2492,7 +2769,7 @@ input IssueFilter {
   """
   Comparator for the issues priority.
   """
-  priority: NumberComparator
+  priority: NullableNumberComparator
   """
   Filters that the issues project must satisfy.
   """
@@ -2504,11 +2781,11 @@ input IssueFilter {
   """
   Comparator for the issues snoozed until date.
   """
-  snoozedUntilAt: DateComparator
+  snoozedUntilAt: NullableDateComparator
   """
   Comparator for the issues started at date.
   """
-  startedAt: DateComparator
+  startedAt: NullableDateComparator
   """
   Filters that the issues state must satisfy.
   """
@@ -2564,7 +2841,7 @@ type IssueHistory implements Node {
   """
   What the due date was changed from
   """
-  fromDueDate: TimelessDateScalar
+  fromDueDate: TimelessDate
   """
   What the estimate was changed from.
   """
@@ -2628,7 +2905,7 @@ type IssueHistory implements Node {
   """
   What the due date was changed to
   """
-  toDueDate: TimelessDateScalar
+  toDueDate: TimelessDate
   """
   What the estimate was changed to.
   """
@@ -2858,6 +3135,52 @@ type IssueLabel implements Node {
       entity hasn't been update after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+[Alpha] Issue label filtering options.
+"""
+input IssueLabelCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the label.
+  """
+  and: [IssueLabelFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the issue labels creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Filters that needs to be matched by all issue labels.
+  """
+  every: IssueLabelFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the label.
+  """
+  or: [IssueLabelFilter!]
+  """
+  Filters that needs to be matched by some issue labels.
+  """
+  some: IssueLabelFilter
+  """
+  Filters that the issue labels team must satisfy.
+  """
+  team: TeamFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type IssueLabelConnection {
@@ -3140,7 +3463,7 @@ input IssueUpdateInput {
   """
   The date at which the issue is due.
   """
-  dueDate: TimelessDateScalar
+  dueDate: TimelessDate
   """
   The estimated complexity of the issue.
   """
@@ -3340,11 +3663,11 @@ input MilestoneFilter {
   """
   Filters that the milestones projects must satisfy.
   """
-  projects: UserFilter
+  projects: ProjectCollectionFilter
   """
   Comparator for the milestone sort order.
   """
-  sortOrder: StringComparator
+  sortOrder: NumberComparator
   """
   Comparator for the updated at date.
   """
@@ -4681,6 +5004,10 @@ type Mutation {
   """
   subscriptionSessionCreate(
     """
+    The id of an optional coupon to apply.
+    """
+    coupon: String
+    """
     The name of the plan.
     """
     plan: String!
@@ -5008,6 +5335,52 @@ type Mutation {
   ): WorkflowStatePayload!
 }
 
+"""
+Comparator for strings.
+"""
+input NestedStringComparator {
+  """
+  Contains constraint. Matches any values that contain the given string.
+  """
+  contains: String
+  """
+  Ends with constraint. Matches any values that end with the given string.
+  """
+  endsWith: String
+  """
+  Equals constraint.
+  """
+  eq: String
+  """
+  In-array constraint.
+  """
+  in: [String!]
+  """
+  Not-equals constraint.
+  """
+  neq: String
+  """
+  Not-in-array constraint.
+  """
+  nin: [String!]
+  """
+  Doesn't contain constraint. Matches any values that don't contain the given string.
+  """
+  notContains: String
+  """
+  Doesn't end with constraint. Matches any values that don't end with the given string.
+  """
+  notEndsWith: String
+  """
+  Doesn't start with constraint. Matches any values that don't start with the given string.
+  """
+  notStartsWith: String
+  """
+  Starts with constraint. Matches any values that start with the given string.
+  """
+  startsWith: String
+}
+
 interface Node {
   """
   The unique identifier of the entity.
@@ -5223,6 +5596,10 @@ input NullableCycleFilter {
   """
   id: IDComparator
   """
+  Filters that the cycles issues must satisfy.
+  """
+  issues: IssueCollectionFilter
+  """
   Comparator for the cycle name.
   """
   name: StringComparator
@@ -5250,6 +5627,48 @@ input NullableCycleFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+"""
+Comparator for optional dates.
+"""
+input NullableDateComparator {
+  """
+  Equals constraint.
+  """
+  eq: DateTime
+  """
+  Greater-than constraint. Matches any values that are greater than the given value.
+  """
+  gt: DateTime
+  """
+  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
+  """
+  gte: DateTime
+  """
+  In-array constraint.
+  """
+  in: [DateTime!]
+  """
+  Less-than constraint. Matches any values that are less than the given value.
+  """
+  lt: DateTime
+  """
+  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
+  """
+  lte: DateTime
+  """
+  Not-equals constraint.
+  """
+  neq: DateTime
+  """
+  Not-in-array constraint.
+  """
+  nin: [DateTime!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
 }
 
 """
@@ -5283,15 +5702,57 @@ input NullableMilestoneFilter {
   """
   Filters that the milestones projects must satisfy.
   """
-  projects: UserFilter
+  projects: ProjectCollectionFilter
   """
   Comparator for the milestone sort order.
   """
-  sortOrder: StringComparator
+  sortOrder: NumberComparator
   """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+"""
+Comparator for optional numbers.
+"""
+input NullableNumberComparator {
+  """
+  Equals constraint.
+  """
+  eq: Float
+  """
+  Greater-than constraint. Matches any values that are greater than the given value.
+  """
+  gt: Float
+  """
+  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
+  """
+  gte: Float
+  """
+  In-array constraint.
+  """
+  in: [Float!]
+  """
+  Less-than constraint. Matches any values that are less than the given value.
+  """
+  lt: Float
+  """
+  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
+  """
+  lte: Float
+  """
+  Not-equals constraint.
+  """
+  neq: Float
+  """
+  Not-in-array constraint.
+  """
+  nin: [Float!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
 }
 
 """
@@ -5314,6 +5775,10 @@ input NullableProjectFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filters that the projects issues must satisfy.
+  """
+  issues: IssueCollectionFilter
   """
   Filters that the projects lead must satisfy.
   """
@@ -5341,7 +5806,7 @@ input NullableProjectFilter {
   """
   Comparator for the project start date.
   """
-  startDate: DateComparator
+  startDate: NullableDateComparator
   """
   Comparator for the project state.
   """
@@ -5349,11 +5814,100 @@ input NullableProjectFilter {
   """
   Comparator for the project target date.
   """
-  targetDate: DateComparator
+  targetDate: NullableDateComparator
   """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+"""
+Comparator for optional strings.
+"""
+input NullableStringComparator {
+  """
+  Contains constraint. Matches any values that contain the given string.
+  """
+  contains: String
+  """
+  Ends with constraint. Matches any values that end with the given string.
+  """
+  endsWith: String
+  """
+  Equals constraint.
+  """
+  eq: String
+  """
+  In-array constraint.
+  """
+  in: [String!]
+  """
+  Not-equals constraint.
+  """
+  neq: String
+  """
+  Not-in-array constraint.
+  """
+  nin: [String!]
+  """
+  Doesn't contain constraint. Matches any values that don't contain the given string.
+  """
+  notContains: String
+  """
+  Doesn't end with constraint. Matches any values that don't end with the given string.
+  """
+  notEndsWith: String
+  """
+  Doesn't start with constraint. Matches any values that don't start with the given string.
+  """
+  notStartsWith: String
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
+  """
+  Starts with constraint. Matches any values that start with the given string.
+  """
+  startsWith: String
+}
+
+input NullableTimelessDateComparator {
+  """
+  Equals constraint.
+  """
+  eq: TimelessDate
+  """
+  Greater-than constraint. Matches any values that are greater than the given value.
+  """
+  gt: TimelessDate
+  """
+  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
+  """
+  gte: TimelessDate
+  """
+  In-array constraint.
+  """
+  in: [TimelessDate!]
+  """
+  Less-than constraint. Matches any values that are less than the given value.
+  """
+  lt: TimelessDate
+  """
+  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
+  """
+  lte: TimelessDate
+  """
+  Not-equals constraint.
+  """
+  neq: TimelessDate
+  """
+  Not-in-array constraint.
+  """
+  nin: [TimelessDate!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
 }
 
 """
@@ -5364,6 +5918,10 @@ input NullableUserFilter {
   Compound filters, all of which need to be matched by the user.
   """
   and: [UserFilter!]
+  """
+  Filters that the users assigned issues must satisfy.
+  """
+  assignedIssues: IssueCollectionFilter
   """
   Comparator for the created at date.
   """
@@ -5398,6 +5956,9 @@ input NullableUserFilter {
   updatedAt: DateComparator
 }
 
+"""
+Comparator for numbers.
+"""
 input NumberComparator {
   """
   Equals constraint.
@@ -5911,10 +6472,6 @@ input OrganizationDomainCreateInput {
   The email address to which to send the verification code.
   """
   verificationEmail: String!
-  """
-  Is the domain verified.
-  """
-  verified: Boolean!
 }
 
 type OrganizationDomainPayload {
@@ -6335,7 +6892,7 @@ type Project implements Node {
   """
   [Internal] The estimated start date of the project.
   """
-  startDate: TimelessDateScalar
+  startDate: TimelessDate
   """
   The time at which the project was moved into started state.
   """
@@ -6347,7 +6904,7 @@ type Project implements Node {
   """
   The estimated completion date of the project.
   """
-  targetDate: TimelessDateScalar
+  targetDate: TimelessDate
   """
   Teams associated with this project.
   """
@@ -6390,6 +6947,76 @@ type Project implements Node {
   Project URL.
   """
   url: String!
+}
+
+"""
+[Alpha] Project filtering options.
+"""
+input ProjectCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the project.
+  """
+  and: [ProjectFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the projects creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Filters that needs to be matched by all projects.
+  """
+  every: ProjectFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the projects issues must satisfy.
+  """
+  issues: IssueCollectionFilter
+  """
+  Filters that the projects lead must satisfy.
+  """
+  lead: NullableUserFilter
+  """
+  Filters that the projects members must satisfy.
+  """
+  members: UserFilter
+  """
+  Filters that the projects milestones must satisfy.
+  """
+  milestone: NullableMilestoneFilter
+  """
+  Comparator for the project name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the project.
+  """
+  or: [ProjectFilter!]
+  """
+  Filters that needs to be matched by some projects.
+  """
+  some: ProjectFilter
+  """
+  Comparator for the project start date.
+  """
+  startDate: NullableDateComparator
+  """
+  Comparator for the project state.
+  """
+  state: StringComparator
+  """
+  Comparator for the project target date.
+  """
+  targetDate: NullableDateComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type ProjectConnection {
@@ -6438,7 +7065,7 @@ input ProjectCreateInput {
   """
   [Internal] The planned start date of the project.
   """
-  startDate: TimelessDateScalar
+  startDate: TimelessDate
   """
   The state of the project.
   """
@@ -6446,7 +7073,7 @@ input ProjectCreateInput {
   """
   The planned target date of the project.
   """
-  targetDate: TimelessDateScalar
+  targetDate: TimelessDate
   """
   The identifiers of the teams this project is associated with.
   """
@@ -6482,6 +7109,10 @@ input ProjectFilter {
   """
   id: IDComparator
   """
+  Filters that the projects issues must satisfy.
+  """
+  issues: IssueCollectionFilter
+  """
   Filters that the projects lead must satisfy.
   """
   lead: NullableUserFilter
@@ -6504,7 +7135,7 @@ input ProjectFilter {
   """
   Comparator for the project start date.
   """
-  startDate: DateComparator
+  startDate: NullableDateComparator
   """
   Comparator for the project state.
   """
@@ -6512,7 +7143,7 @@ input ProjectFilter {
   """
   Comparator for the project target date.
   """
-  targetDate: DateComparator
+  targetDate: NullableDateComparator
   """
   Comparator for the updated at date.
   """
@@ -6677,7 +7308,7 @@ input ProjectUpdateInput {
   """
   [Internal] The planned start date of the project.
   """
-  startDate: TimelessDateScalar
+  startDate: TimelessDate
   """
   The state of the project.
   """
@@ -6685,7 +7316,7 @@ input ProjectUpdateInput {
   """
   The planned target date of the project.
   """
-  targetDate: TimelessDateScalar
+  targetDate: TimelessDate
   """
   The identifiers of the teams this project is associated with.
   """
@@ -7360,6 +7991,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    [Alpha] Filter returned issues.
+    """
+    filter: IssueFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -8045,6 +8680,10 @@ type SamlConfiguration {
   """
   allowedDomains: [String!]
   """
+  The issuer's custom entity ID.
+  """
+  issuerEntityId: String
+  """
   Binding method for authentication call. Can be either `post` (default) or `redirect`.
   """
   ssoBinding: String
@@ -8067,6 +8706,10 @@ input SamlConfigurationInput {
   List of allowed email domains for SAML authentication.
   """
   allowedDomains: [String!]
+  """
+  The issuer's custom entity ID.
+  """
+  issuerEntityId: String
   """
   Binding method for authentication call. Can be either `post` (default) or `redirect`.
   """
@@ -8195,13 +8838,16 @@ type StepsResponse {
   version: Int!
 }
 
+"""
+Comparator for strings.
+"""
 input StringComparator {
   """
-  Has constraint. Matches any value that contains the given string.
+  Contains constraint. Matches any values that contain the given string.
   """
   contains: String
   """
-  Ends with constraint. Matches any value that ends with the given string.
+  Ends with constraint. Matches any values that end with the given string.
   """
   endsWith: String
   """
@@ -8221,7 +8867,19 @@ input StringComparator {
   """
   nin: [String!]
   """
-  Starts with constraint. Matches any value that starts with the given string.
+  Doesn't contain constraint. Matches any values that don't contain the given string.
+  """
+  notContains: String
+  """
+  Doesn't end with constraint. Matches any values that don't end with the given string.
+  """
+  notEndsWith: String
+  """
+  Doesn't start with constraint. Matches any values that don't start with the given string.
+  """
+  notStartsWith: String
+  """
+  Starts with constraint. Matches any values that start with the given string.
   """
   startsWith: String
 }
@@ -8980,11 +9638,15 @@ input TeamFilter {
   """
   Comparator for the team description.
   """
-  description: StringComparator
+  description: NullableStringComparator
   """
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filters that the teams issues must satisfy.
+  """
+  issues: IssueCollectionFilter
   """
   Comparator for the team key.
   """
@@ -9365,45 +10027,48 @@ input TemplateUpdateInput {
   templateData: JSON
 }
 
+"""
+Represents a date in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago)
+"""
+scalar TimelessDate
+
+"""
+Comparator for timeless dates.
+"""
 input TimelessDateComparator {
   """
   Equals constraint.
   """
-  eq: TimelessDateScalar
+  eq: TimelessDate
   """
   Greater-than constraint. Matches any values that are greater than the given value.
   """
-  gt: TimelessDateScalar
+  gt: TimelessDate
   """
   Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
   """
-  gte: TimelessDateScalar
+  gte: TimelessDate
   """
   In-array constraint.
   """
-  in: [TimelessDateScalar!]
+  in: [TimelessDate!]
   """
   Less-than constraint. Matches any values that are less than the given value.
   """
-  lt: TimelessDateScalar
+  lt: TimelessDate
   """
   Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
   """
-  lte: TimelessDateScalar
+  lte: TimelessDate
   """
   Not-equals constraint.
   """
-  neq: TimelessDateScalar
+  neq: TimelessDate
   """
   Not-in-array constraint.
   """
-  nin: [TimelessDateScalar!]
+  nin: [TimelessDate!]
 }
-
-"""
-The `TimelessDateScalar` scalar type represents Date values without a timestamp. It expects strings in the format YYYY-MM-DD
-"""
-scalar TimelessDateScalar
 
 input TokenUserAccountAuthInput {
   """
@@ -9861,6 +10526,10 @@ input UserFilter {
   Compound filters, all of which need to be matched by the user.
   """
   and: [UserFilter!]
+  """
+  Filters that the users assigned issues must satisfy.
+  """
+  assignedIssues: IssueCollectionFilter
   """
   Comparator for the created at date.
   """
@@ -10458,6 +11127,10 @@ input WorkflowStateFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filters that the workflow states issues must satisfy.
+  """
+  issues: IssueCollectionFilter
   """
   Comparator for the workflow state name.
   """

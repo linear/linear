@@ -10,14 +10,14 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
+  /** Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
   DateTime: Date;
   /** The `JSON` scalar type represents JSON values */
   JSON: Record<string, unknown>;
   /** The `JSONObject` scalar type represents JSON values as a string */
   JSONObject: Record<string, unknown>;
-  /** The `TimelessDateScalar` scalar type represents Date values without a timestamp. It expects strings in the format YYYY-MM-DD */
-  TimelessDateScalar: string;
+  /** Represents a date in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
+  TimelessDate: any;
 };
 
 /** An API key. Grants access to the user's resources. */
@@ -114,6 +114,8 @@ export type Attachment = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** The creator of the attachment. */
+  creator?: Maybe<User>;
   /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
   groupBySource: Scalars["Boolean"];
   /** The unique identifier of the entity. */
@@ -124,6 +126,8 @@ export type Attachment = Node & {
   metadata: Scalars["JSONObject"];
   /** Information about the source which created the attachment. */
   source?: Maybe<Scalars["JSONObject"]>;
+  /** An accessor helper to source.type, defines the source type of the attachment. */
+  sourceType?: Maybe<Scalars["JSONObject"]>;
   /** Content for the subtitle line in the Linear attachment widget. */
   subtitle?: Maybe<Scalars["String"]>;
   /** Content for the title line in the Linear attachment widget. */
@@ -170,16 +174,24 @@ export type AttachmentEdge = {
   node: Attachment;
 };
 
-/** [Alpha] Project filtering options. */
+/** [Alpha] Attachment filtering options. */
 export type AttachmentFilter = {
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
-  /** Comparator for the filter match value. */
-  filterMatchValue?: Maybe<StringComparator>;
+  /** Filters that the attachments creator must satisfy. */
+  creator?: Maybe<NullableUserFilter>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Comparator for the source type. */
+  sourceType?: Maybe<NestedStringComparator>;
+  /** Comparator for the subtitle. */
+  subtitle?: Maybe<NullableStringComparator>;
+  /** Comparator for the title. */
+  title?: Maybe<StringComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
+  /** Comparator for the url. */
+  url?: Maybe<StringComparator>;
 };
 
 export type AttachmentPayload = {
@@ -267,6 +279,12 @@ export type BillingEmailUpdateInput = {
   email: Scalars["String"];
 };
 
+/** Comparator for booleans. */
+export type BooleanComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["Boolean"]>;
+};
+
 export type Card = {
   __typename?: "Card";
   /** The brand of the card, e.g. Visa. */
@@ -320,6 +338,30 @@ export type Comment = Node & {
   user: User;
 };
 
+/** [Alpha] Comment filtering options. */
+export type CommentCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the comment. */
+  and?: Maybe<Array<CommentFilter>>;
+  /** Comparator for the comments body. */
+  body?: Maybe<StringComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that needs to be matched by all comments. */
+  every?: Maybe<CommentFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that the comments issue must satisfy. */
+  issue?: Maybe<IssueFilter>;
+  /** Compound filters, one of which need to be matched by the comment. */
+  or?: Maybe<Array<CommentFilter>>;
+  /** Filters that needs to be matched by some comments. */
+  some?: Maybe<CommentFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+  /** Filters that the comments creator must satisfy. */
+  user?: Maybe<UserFilter>;
+};
+
 export type CommentConnection = {
   __typename?: "CommentConnection";
   edges: Array<CommentEdge>;
@@ -355,6 +397,8 @@ export type CommentFilter = {
   createdAt?: Maybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the comments issue must satisfy. */
+  issue?: Maybe<IssueFilter>;
   /** Compound filters, one of which need to be matched by the comment. */
   or?: Maybe<Array<CommentFilter>>;
   /** Comparator for the updated at date. */
@@ -639,6 +683,8 @@ export type CycleFilter = {
   endsAt?: Maybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the cycles issues must satisfy. */
+  issues?: Maybe<IssueCollectionFilter>;
   /** Comparator for the cycle name. */
   name?: Maybe<StringComparator>;
   /** Comparator for the cycle number. */
@@ -674,6 +720,7 @@ export type CycleUpdateInput = {
   startsAt?: Maybe<Scalars["DateTime"]>;
 };
 
+/** Comparator for dates. */
 export type DateComparator = {
   /** Equals constraint. */
   eq?: Maybe<Scalars["DateTime"]>;
@@ -861,20 +908,28 @@ export type Favorite = Node & {
   __typename?: "Favorite";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** Children of the favorite. Only applies to favorites of type folder. */
+  children: FavoriteConnection;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
-  /** Favorited cycle. */
+  /** The favorited custom view. */
+  customView?: Maybe<CustomView>;
+  /** The favorited cycle. */
   cycle?: Maybe<Cycle>;
+  /** The name of the folder. Only applies to favorites of type folder. */
+  folderName?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** Favorited issue. */
+  /** The favorited issue. */
   issue?: Maybe<Issue>;
-  /** Favorited issue label. */
+  /** The favorited label. */
   label?: Maybe<IssueLabel>;
-  /** Favorited project. */
+  /** The parent folder of the favorite. */
+  parent?: Maybe<Favorite>;
+  /** The favorited project. */
   project?: Maybe<Project>;
-  /** Favorited project team. */
-  projectTeam?: Maybe<Project>;
+  /** The favorited team of the project. */
+  projectTeam?: Maybe<Team>;
   /** The order of the item in the favorites list. */
   sortOrder: Scalars["Float"];
   /** The type of the favorite. */
@@ -886,6 +941,16 @@ export type Favorite = Node & {
   updatedAt: Scalars["DateTime"];
   /** The owner of the favorite. */
   user: User;
+};
+
+/** User favorites presented in the sidebar. */
+export type FavoriteChildrenArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type FavoriteConnection = {
@@ -900,12 +965,16 @@ export type FavoriteCreateInput = {
   customViewId?: Maybe<Scalars["String"]>;
   /** The identifier of the cycle to favorite. */
   cycleId?: Maybe<Scalars["String"]>;
+  /** The name of the favorite folder. */
+  folderName?: Maybe<Scalars["String"]>;
   /** The identifier. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
   /** The identifier of the issue to favorite. */
   issueId?: Maybe<Scalars["String"]>;
   /** The identifier of the label to favorite. */
   labelId?: Maybe<Scalars["String"]>;
+  /** The parent folder of the favorite. */
+  parentId?: Maybe<Scalars["String"]>;
   /** The identifier of the project to favorite. */
   projectId?: Maybe<Scalars["String"]>;
   /** The identifier of the project team to favorite. */
@@ -932,6 +1001,8 @@ export type FavoritePayload = {
 };
 
 export type FavoriteUpdateInput = {
+  /** The id of the folder to move the favorite under. */
+  parentId?: Maybe<Scalars["String"]>;
   /** The position of the item in the favorites list. */
   sortOrder?: Maybe<Scalars["Float"]>;
 };
@@ -1023,6 +1094,7 @@ export type GoogleUserAccountAuthInput = {
   timezone: Scalars["String"];
 };
 
+/** Comparator for identifiers. */
 export type IdComparator = {
   /** Equals constraint. */
   eq?: Maybe<Scalars["ID"]>;
@@ -1179,7 +1251,7 @@ export type Invoice = {
   /** The creation date of the invoice. */
   created: Scalars["DateTime"];
   /** The due date of the invoice. */
-  dueDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  dueDate?: Maybe<Scalars["TimelessDate"]>;
   /** The status of the invoice. */
   status: Scalars["String"];
   /** The invoice total, in cents. */
@@ -1227,7 +1299,7 @@ export type Issue = Node & {
   /** The issue's description in markdown format. */
   description?: Maybe<Scalars["String"]>;
   /** The date at which the issue is due. */
-  dueDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  dueDate?: Maybe<Scalars["TimelessDate"]>;
   /** The estimate of the complexity of the issue.. */
   estimate?: Maybe<Scalars["Float"]>;
   /** History entries associated with the issue. */
@@ -1381,6 +1453,70 @@ export type IssueSubscribersArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+/** [Alpha] Issue filtering options. */
+export type IssueCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the issue. */
+  and?: Maybe<Array<IssueFilter>>;
+  /** Filters that the issues assignee must satisfy. */
+  assignee?: Maybe<NullableUserFilter>;
+  /** Filters that the issues attachments must satisfy. */
+  attachments?: Maybe<AttachmentFilter>;
+  /** Comparator for the issues auto archived at date. */
+  autoArchivedAt?: Maybe<NullableDateComparator>;
+  /** Comparator for the issues auto closed at date. */
+  autoClosedAt?: Maybe<NullableDateComparator>;
+  /** Comparator for the issues canceled at date. */
+  canceledAt?: Maybe<NullableDateComparator>;
+  /** Filters that the child issues must satisfy. */
+  children?: Maybe<IssueCollectionFilter>;
+  /** Filters that the issues comments must satisfy. */
+  comments?: Maybe<CommentCollectionFilter>;
+  /** Comparator for the issues completed at date. */
+  completedAt?: Maybe<NullableDateComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the issues creator must satisfy. */
+  creator?: Maybe<UserFilter>;
+  /** Filters that the issues cycle must satisfy. */
+  cycle?: Maybe<NullableCycleFilter>;
+  /** Comparator for the issues description. */
+  description?: Maybe<NullableStringComparator>;
+  /** Comparator for the issues due date. */
+  dueDate?: Maybe<NullableTimelessDateComparator>;
+  /** Comparator for the issues estimate. */
+  estimate?: Maybe<NumberComparator>;
+  /** Filters that needs to be matched by all issues. */
+  every?: Maybe<IssueFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that issue labels must satisfy. */
+  labels?: Maybe<IssueLabelCollectionFilter>;
+  /** Comparator for the issues number. */
+  number?: Maybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the issue. */
+  or?: Maybe<Array<IssueFilter>>;
+  /** Comparator for the issues priority. */
+  priority?: Maybe<NullableNumberComparator>;
+  /** Filters that the issues project must satisfy. */
+  project?: Maybe<NullableProjectFilter>;
+  /** Filters that the issues snoozer must satisfy. */
+  snoozedBy?: Maybe<NullableUserFilter>;
+  /** Comparator for the issues snoozed until date. */
+  snoozedUntilAt?: Maybe<NullableDateComparator>;
+  /** Filters that needs to be matched by some issues. */
+  some?: Maybe<IssueFilter>;
+  /** Comparator for the issues started at date. */
+  startedAt?: Maybe<NullableDateComparator>;
+  /** Filters that the issues state must satisfy. */
+  state?: Maybe<WorkflowStateFilter>;
+  /** Filters that the issues team must satisfy. */
+  team?: Maybe<TeamFilter>;
+  /** Comparator for the issues title. */
+  title?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 export type IssueConnection = {
   __typename?: "IssueConnection";
   edges: Array<IssueEdge>;
@@ -1400,7 +1536,7 @@ export type IssueCreateInput = {
   /** The issue description as a Prosemirror document. */
   descriptionData?: Maybe<Scalars["JSON"]>;
   /** The date at which the issue is due. */
-  dueDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  dueDate?: Maybe<Scalars["TimelessDate"]>;
   /** The estimated complexity of the issue. */
   estimate?: Maybe<Scalars["Int"]>;
   /** The identifier. If none is provided, the backend will generate one. */
@@ -1467,45 +1603,47 @@ export type IssueFilter = {
   /** Filters that the issues attachments must satisfy. */
   attachments?: Maybe<AttachmentFilter>;
   /** Comparator for the issues auto archived at date. */
-  autoArchivedAt?: Maybe<DateComparator>;
+  autoArchivedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the issues auto closed at date. */
-  autoClosedAt?: Maybe<DateComparator>;
+  autoClosedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the issues canceled at date. */
-  canceledAt?: Maybe<DateComparator>;
+  canceledAt?: Maybe<NullableDateComparator>;
   /** Filters that the child issues must satisfy. */
-  children?: Maybe<IssueFilter>;
-  /** Filters that the issues comment must satisfy. */
-  comment?: Maybe<CommentFilter>;
+  children?: Maybe<IssueCollectionFilter>;
+  /** Filters that the issues comments must satisfy. */
+  comments?: Maybe<CommentCollectionFilter>;
   /** Comparator for the issues completed at date. */
-  completedAt?: Maybe<DateComparator>;
+  completedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Filters that the issues creator must satisfy. */
   creator?: Maybe<UserFilter>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: Maybe<NullableCycleFilter>;
+  /** Comparator for the issues description. */
+  description?: Maybe<NullableStringComparator>;
   /** Comparator for the issues due date. */
-  dueDate?: Maybe<TimelessDateComparator>;
+  dueDate?: Maybe<NullableTimelessDateComparator>;
   /** Comparator for the issues estimate. */
   estimate?: Maybe<NumberComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
-  /** Filters that at least one label on the issue must satisfy. */
-  labels?: Maybe<IssueLabelFilter>;
+  /** Filters that issue labels must satisfy. */
+  labels?: Maybe<IssueLabelCollectionFilter>;
   /** Comparator for the issues number. */
   number?: Maybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the issue. */
   or?: Maybe<Array<IssueFilter>>;
   /** Comparator for the issues priority. */
-  priority?: Maybe<NumberComparator>;
+  priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
   /** Filters that the issues snoozer must satisfy. */
   snoozedBy?: Maybe<NullableUserFilter>;
   /** Comparator for the issues snoozed until date. */
-  snoozedUntilAt?: Maybe<DateComparator>;
+  snoozedUntilAt?: Maybe<NullableDateComparator>;
   /** Comparator for the issues started at date. */
-  startedAt?: Maybe<DateComparator>;
+  startedAt?: Maybe<NullableDateComparator>;
   /** Filters that the issues state must satisfy. */
   state?: Maybe<WorkflowStateFilter>;
   /** Filters that the issues team must satisfy. */
@@ -1536,7 +1674,7 @@ export type IssueHistory = Node & {
   /** The previous cycle of the issue. */
   fromCycle?: Maybe<Cycle>;
   /** What the due date was changed from */
-  fromDueDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  fromDueDate?: Maybe<Scalars["TimelessDate"]>;
   /** What the estimate was changed from. */
   fromEstimate?: Maybe<Scalars["Float"]>;
   /** The previous parent of the issue. */
@@ -1568,7 +1706,7 @@ export type IssueHistory = Node & {
   /** The new cycle of the issue. */
   toCycle?: Maybe<Cycle>;
   /** What the due date was changed to */
-  toDueDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  toDueDate?: Maybe<Scalars["TimelessDate"]>;
   /** What the estimate was changed to. */
   toEstimate?: Maybe<Scalars["Float"]>;
   /** The new parent of the issue. */
@@ -1706,6 +1844,30 @@ export type IssueLabelIssuesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** [Alpha] Issue label filtering options. */
+export type IssueLabelCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the label. */
+  and?: Maybe<Array<IssueLabelFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the issue labels creator must satisfy. */
+  creator?: Maybe<NullableUserFilter>;
+  /** Filters that needs to be matched by all issue labels. */
+  every?: Maybe<IssueLabelFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the label. */
+  or?: Maybe<Array<IssueLabelFilter>>;
+  /** Filters that needs to be matched by some issue labels. */
+  some?: Maybe<IssueLabelFilter>;
+  /** Filters that the issue labels team must satisfy. */
+  team?: Maybe<TeamFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 export type IssueLabelConnection = {
@@ -1888,7 +2050,7 @@ export type IssueUpdateInput = {
   /** [DEPRECATED] Document version for backwards compatibility. */
   documentVersion?: Maybe<Scalars["Int"]>;
   /** The date at which the issue is due. */
-  dueDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  dueDate?: Maybe<Scalars["TimelessDate"]>;
   /** The estimated complexity of the issue. */
   estimate?: Maybe<Scalars["Int"]>;
   /** The identifiers of the issue labels associated with this ticket. */
@@ -1995,9 +2157,9 @@ export type MilestoneFilter = {
   /** Compound filters, one of which need to be matched by the milestone. */
   or?: Maybe<Array<MilestoneFilter>>;
   /** Filters that the milestones projects must satisfy. */
-  projects?: Maybe<UserFilter>;
+  projects?: Maybe<ProjectCollectionFilter>;
   /** Comparator for the milestone sort order. */
-  sortOrder?: Maybe<StringComparator>;
+  sortOrder?: Maybe<NumberComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -2848,6 +3010,7 @@ export type MutationSubscriptionArchiveArgs = {
 };
 
 export type MutationSubscriptionSessionCreateArgs = {
+  coupon?: Maybe<Scalars["String"]>;
   plan: Scalars["String"];
 };
 
@@ -2977,6 +3140,30 @@ export type MutationWorkflowStateCreateArgs = {
 export type MutationWorkflowStateUpdateArgs = {
   id: Scalars["String"];
   input: WorkflowStateUpdateInput;
+};
+
+/** Comparator for strings. */
+export type NestedStringComparator = {
+  /** Contains constraint. Matches any values that contain the given string. */
+  contains?: Maybe<Scalars["String"]>;
+  /** Ends with constraint. Matches any values that end with the given string. */
+  endsWith?: Maybe<Scalars["String"]>;
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["String"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["String"]>>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["String"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["String"]>>;
+  /** Doesn't contain constraint. Matches any values that don't contain the given string. */
+  notContains?: Maybe<Scalars["String"]>;
+  /** Doesn't end with constraint. Matches any values that don't end with the given string. */
+  notEndsWith?: Maybe<Scalars["String"]>;
+  /** Doesn't start with constraint. Matches any values that don't start with the given string. */
+  notStartsWith?: Maybe<Scalars["String"]>;
+  /** Starts with constraint. Matches any values that start with the given string. */
+  startsWith?: Maybe<Scalars["String"]>;
 };
 
 export type Node = {
@@ -3121,6 +3308,8 @@ export type NullableCycleFilter = {
   endsAt?: Maybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the cycles issues must satisfy. */
+  issues?: Maybe<IssueCollectionFilter>;
   /** Comparator for the cycle name. */
   name?: Maybe<StringComparator>;
   /** Filter based on the existence of the relation. */
@@ -3135,6 +3324,28 @@ export type NullableCycleFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
+};
+
+/** Comparator for optional dates. */
+export type NullableDateComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["DateTime"]>;
+  /** Greater-than constraint. Matches any values that are greater than the given value. */
+  gt?: Maybe<Scalars["DateTime"]>;
+  /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
+  gte?: Maybe<Scalars["DateTime"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["DateTime"]>>;
+  /** Less-than constraint. Matches any values that are less than the given value. */
+  lt?: Maybe<Scalars["DateTime"]>;
+  /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
+  lte?: Maybe<Scalars["DateTime"]>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["DateTime"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["DateTime"]>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: Maybe<Scalars["Boolean"]>;
 };
 
 /** [Alpha] User filtering options. */
@@ -3152,11 +3363,33 @@ export type NullableMilestoneFilter = {
   /** Compound filters, one of which need to be matched by the milestone. */
   or?: Maybe<Array<MilestoneFilter>>;
   /** Filters that the milestones projects must satisfy. */
-  projects?: Maybe<UserFilter>;
+  projects?: Maybe<ProjectCollectionFilter>;
   /** Comparator for the milestone sort order. */
-  sortOrder?: Maybe<StringComparator>;
+  sortOrder?: Maybe<NumberComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
+};
+
+/** Comparator for optional numbers. */
+export type NullableNumberComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["Float"]>;
+  /** Greater-than constraint. Matches any values that are greater than the given value. */
+  gt?: Maybe<Scalars["Float"]>;
+  /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
+  gte?: Maybe<Scalars["Float"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["Float"]>>;
+  /** Less-than constraint. Matches any values that are less than the given value. */
+  lt?: Maybe<Scalars["Float"]>;
+  /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
+  lte?: Maybe<Scalars["Float"]>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["Float"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["Float"]>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: Maybe<Scalars["Boolean"]>;
 };
 
 /** [Alpha] Project filtering options. */
@@ -3169,6 +3402,8 @@ export type NullableProjectFilter = {
   creator?: Maybe<UserFilter>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the projects issues must satisfy. */
+  issues?: Maybe<IssueCollectionFilter>;
   /** Filters that the projects lead must satisfy. */
   lead?: Maybe<NullableUserFilter>;
   /** Filters that the projects members must satisfy. */
@@ -3182,19 +3417,68 @@ export type NullableProjectFilter = {
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectFilter>>;
   /** Comparator for the project start date. */
-  startDate?: Maybe<DateComparator>;
+  startDate?: Maybe<NullableDateComparator>;
   /** Comparator for the project state. */
   state?: Maybe<StringComparator>;
   /** Comparator for the project target date. */
-  targetDate?: Maybe<DateComparator>;
+  targetDate?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
+};
+
+/** Comparator for optional strings. */
+export type NullableStringComparator = {
+  /** Contains constraint. Matches any values that contain the given string. */
+  contains?: Maybe<Scalars["String"]>;
+  /** Ends with constraint. Matches any values that end with the given string. */
+  endsWith?: Maybe<Scalars["String"]>;
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["String"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["String"]>>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["String"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["String"]>>;
+  /** Doesn't contain constraint. Matches any values that don't contain the given string. */
+  notContains?: Maybe<Scalars["String"]>;
+  /** Doesn't end with constraint. Matches any values that don't end with the given string. */
+  notEndsWith?: Maybe<Scalars["String"]>;
+  /** Doesn't start with constraint. Matches any values that don't start with the given string. */
+  notStartsWith?: Maybe<Scalars["String"]>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: Maybe<Scalars["Boolean"]>;
+  /** Starts with constraint. Matches any values that start with the given string. */
+  startsWith?: Maybe<Scalars["String"]>;
+};
+
+export type NullableTimelessDateComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["TimelessDate"]>;
+  /** Greater-than constraint. Matches any values that are greater than the given value. */
+  gt?: Maybe<Scalars["TimelessDate"]>;
+  /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
+  gte?: Maybe<Scalars["TimelessDate"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["TimelessDate"]>>;
+  /** Less-than constraint. Matches any values that are less than the given value. */
+  lt?: Maybe<Scalars["TimelessDate"]>;
+  /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
+  lte?: Maybe<Scalars["TimelessDate"]>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["TimelessDate"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["TimelessDate"]>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: Maybe<Scalars["Boolean"]>;
 };
 
 /** [Alpha] User filtering options. */
 export type NullableUserFilter = {
   /** Compound filters, all of which need to be matched by the user. */
   and?: Maybe<Array<UserFilter>>;
+  /** Filters that the users assigned issues must satisfy. */
+  assignedIssues?: Maybe<IssueCollectionFilter>;
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Comparator for the users display name. */
@@ -3213,6 +3497,7 @@ export type NullableUserFilter = {
   updatedAt?: Maybe<DateComparator>;
 };
 
+/** Comparator for numbers. */
 export type NumberComparator = {
   /** Equals constraint. */
   eq?: Maybe<Scalars["Float"]>;
@@ -3495,8 +3780,6 @@ export type OrganizationDomainCreateInput = {
   name: Scalars["String"];
   /** The email address to which to send the verification code. */
   verificationEmail: Scalars["String"];
-  /** Is the domain verified. */
-  verified: Scalars["Boolean"];
 };
 
 export type OrganizationDomainPayload = {
@@ -3699,13 +3982,13 @@ export type Project = Node & {
   /** The sort order for the project within its milestone. */
   sortOrder: Scalars["Float"];
   /** [Internal] The estimated start date of the project. */
-  startDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  startDate?: Maybe<Scalars["TimelessDate"]>;
   /** The time at which the project was moved into started state. */
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The type of the state. */
   state: Scalars["String"];
   /** The estimated completion date of the project. */
-  targetDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** Teams associated with this project. */
   teams: TeamConnection;
   /**
@@ -3761,6 +4044,42 @@ export type ProjectTeamsArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+/** [Alpha] Project filtering options. */
+export type ProjectCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the project. */
+  and?: Maybe<Array<ProjectFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the projects creator must satisfy. */
+  creator?: Maybe<UserFilter>;
+  /** Filters that needs to be matched by all projects. */
+  every?: Maybe<ProjectFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that the projects issues must satisfy. */
+  issues?: Maybe<IssueCollectionFilter>;
+  /** Filters that the projects lead must satisfy. */
+  lead?: Maybe<NullableUserFilter>;
+  /** Filters that the projects members must satisfy. */
+  members?: Maybe<UserFilter>;
+  /** Filters that the projects milestones must satisfy. */
+  milestone?: Maybe<NullableMilestoneFilter>;
+  /** Comparator for the project name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the project. */
+  or?: Maybe<Array<ProjectFilter>>;
+  /** Filters that needs to be matched by some projects. */
+  some?: Maybe<ProjectFilter>;
+  /** Comparator for the project start date. */
+  startDate?: Maybe<NullableDateComparator>;
+  /** Comparator for the project state. */
+  state?: Maybe<StringComparator>;
+  /** Comparator for the project target date. */
+  targetDate?: Maybe<NullableDateComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 export type ProjectConnection = {
   __typename?: "ProjectConnection";
   edges: Array<ProjectEdge>;
@@ -3788,11 +4107,11 @@ export type ProjectCreateInput = {
   /** The sort order for the project within its milestone. */
   sortOrder?: Maybe<Scalars["Float"]>;
   /** [Internal] The planned start date of the project. */
-  startDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  startDate?: Maybe<Scalars["TimelessDate"]>;
   /** The state of the project. */
   state?: Maybe<Scalars["String"]>;
   /** The planned target date of the project. */
-  targetDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** The identifiers of the teams this project is associated with. */
   teamIds: Array<Scalars["String"]>;
 };
@@ -3814,6 +4133,8 @@ export type ProjectFilter = {
   creator?: Maybe<UserFilter>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the projects issues must satisfy. */
+  issues?: Maybe<IssueCollectionFilter>;
   /** Filters that the projects lead must satisfy. */
   lead?: Maybe<NullableUserFilter>;
   /** Filters that the projects members must satisfy. */
@@ -3825,11 +4146,11 @@ export type ProjectFilter = {
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectFilter>>;
   /** Comparator for the project start date. */
-  startDate?: Maybe<DateComparator>;
+  startDate?: Maybe<NullableDateComparator>;
   /** Comparator for the project state. */
   state?: Maybe<StringComparator>;
   /** Comparator for the project target date. */
-  targetDate?: Maybe<DateComparator>;
+  targetDate?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -3931,11 +4252,11 @@ export type ProjectUpdateInput = {
   /** The sort order for the project within its milestone. */
   sortOrder?: Maybe<Scalars["Float"]>;
   /** [Internal] The planned start date of the project. */
-  startDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  startDate?: Maybe<Scalars["TimelessDate"]>;
   /** The state of the project. */
   state?: Maybe<Scalars["String"]>;
   /** The planned target date of the project. */
-  targetDate?: Maybe<Scalars["TimelessDateScalar"]>;
+  targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** The identifiers of the teams this project is associated with. */
   teamIds?: Maybe<Array<Scalars["String"]>>;
 };
@@ -4384,6 +4705,7 @@ export type QueryIssueRelationsArgs = {
 export type QueryIssueSearchArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -4663,6 +4985,8 @@ export type SamlConfiguration = {
   __typename?: "SamlConfiguration";
   /** List of allowed email domains for SAML authentication. */
   allowedDomains?: Maybe<Array<Scalars["String"]>>;
+  /** The issuer's custom entity ID. */
+  issuerEntityId?: Maybe<Scalars["String"]>;
   /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
   ssoBinding?: Maybe<Scalars["String"]>;
   /** Sign in endpoint URL for the identity provider. */
@@ -4676,6 +5000,8 @@ export type SamlConfiguration = {
 export type SamlConfigurationInput = {
   /** List of allowed email domains for SAML authentication. */
   allowedDomains?: Maybe<Array<Scalars["String"]>>;
+  /** The issuer's custom entity ID. */
+  issuerEntityId?: Maybe<Scalars["String"]>;
   /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
   ssoBinding?: Maybe<Scalars["String"]>;
   /** Sign in endpoint URL for the identity provider. */
@@ -4756,10 +5082,11 @@ export type StepsResponse = {
   version: Scalars["Int"];
 };
 
+/** Comparator for strings. */
 export type StringComparator = {
-  /** Has constraint. Matches any value that contains the given string. */
+  /** Contains constraint. Matches any values that contain the given string. */
   contains?: Maybe<Scalars["String"]>;
-  /** Ends with constraint. Matches any value that ends with the given string. */
+  /** Ends with constraint. Matches any values that end with the given string. */
   endsWith?: Maybe<Scalars["String"]>;
   /** Equals constraint. */
   eq?: Maybe<Scalars["String"]>;
@@ -4769,7 +5096,13 @@ export type StringComparator = {
   neq?: Maybe<Scalars["String"]>;
   /** Not-in-array constraint. */
   nin?: Maybe<Array<Scalars["String"]>>;
-  /** Starts with constraint. Matches any value that starts with the given string. */
+  /** Doesn't contain constraint. Matches any values that don't contain the given string. */
+  notContains?: Maybe<Scalars["String"]>;
+  /** Doesn't end with constraint. Matches any values that don't end with the given string. */
+  notEndsWith?: Maybe<Scalars["String"]>;
+  /** Doesn't start with constraint. Matches any values that don't start with the given string. */
+  notStartsWith?: Maybe<Scalars["String"]>;
+  /** Starts with constraint. Matches any values that start with the given string. */
   startsWith?: Maybe<Scalars["String"]>;
 };
 
@@ -5158,9 +5491,11 @@ export type TeamFilter = {
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Comparator for the team description. */
-  description?: Maybe<StringComparator>;
+  description?: Maybe<NullableStringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the teams issues must satisfy. */
+  issues?: Maybe<IssueCollectionFilter>;
   /** Comparator for the team key. */
   key?: Maybe<StringComparator>;
   /** Comparator for the team name. */
@@ -5390,23 +5725,24 @@ export type TemplateUpdateInput = {
   templateData?: Maybe<Scalars["JSON"]>;
 };
 
+/** Comparator for timeless dates. */
 export type TimelessDateComparator = {
   /** Equals constraint. */
-  eq?: Maybe<Scalars["TimelessDateScalar"]>;
+  eq?: Maybe<Scalars["TimelessDate"]>;
   /** Greater-than constraint. Matches any values that are greater than the given value. */
-  gt?: Maybe<Scalars["TimelessDateScalar"]>;
+  gt?: Maybe<Scalars["TimelessDate"]>;
   /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
-  gte?: Maybe<Scalars["TimelessDateScalar"]>;
+  gte?: Maybe<Scalars["TimelessDate"]>;
   /** In-array constraint. */
-  in?: Maybe<Array<Scalars["TimelessDateScalar"]>>;
+  in?: Maybe<Array<Scalars["TimelessDate"]>>;
   /** Less-than constraint. Matches any values that are less than the given value. */
-  lt?: Maybe<Scalars["TimelessDateScalar"]>;
+  lt?: Maybe<Scalars["TimelessDate"]>;
   /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
-  lte?: Maybe<Scalars["TimelessDateScalar"]>;
+  lte?: Maybe<Scalars["TimelessDate"]>;
   /** Not-equals constraint. */
-  neq?: Maybe<Scalars["TimelessDateScalar"]>;
+  neq?: Maybe<Scalars["TimelessDate"]>;
   /** Not-in-array constraint. */
-  nin?: Maybe<Array<Scalars["TimelessDateScalar"]>>;
+  nin?: Maybe<Array<Scalars["TimelessDate"]>>;
 };
 
 export type TokenUserAccountAuthInput = {
@@ -5657,6 +5993,8 @@ export type UserEdge = {
 export type UserFilter = {
   /** Compound filters, all of which need to be matched by the user. */
   and?: Maybe<Array<UserFilter>>;
+  /** Filters that the users assigned issues must satisfy. */
+  assignedIssues?: Maybe<IssueCollectionFilter>;
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Comparator for the users display name. */
@@ -6038,6 +6376,8 @@ export type WorkflowStateFilter = {
   description?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the workflow states issues must satisfy. */
+  issues?: Maybe<IssueCollectionFilter>;
   /** Comparator for the workflow state name. */
   name?: Maybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the workflow state. */
@@ -6609,7 +6949,7 @@ export type IntegrationSettingsFragment = { __typename?: "IntegrationSettings" }
 
 export type SamlConfigurationFragment = { __typename?: "SamlConfiguration" } & Pick<
   SamlConfiguration,
-  "ssoBinding" | "allowedDomains" | "ssoEndpoint" | "ssoSignAlgo" | "ssoSigningCert"
+  "ssoBinding" | "allowedDomains" | "ssoEndpoint" | "ssoSignAlgo" | "issuerEntityId" | "ssoSigningCert"
 >;
 
 export type UserSettingsFragment = { __typename?: "UserSettings" } & Pick<
@@ -6632,14 +6972,16 @@ export type SubscriptionFragment = { __typename?: "Subscription" } & Pick<
 
 export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
   Favorite,
-  "updatedAt" | "sortOrder" | "archivedAt" | "createdAt" | "type" | "id"
+  "updatedAt" | "folderName" | "sortOrder" | "archivedAt" | "createdAt" | "type" | "id"
 > & {
+    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-    projectTeam?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    projectTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     user: { __typename?: "User" } & Pick<User, "id">;
+    parent?: Maybe<{ __typename?: "Favorite" } & Pick<Favorite, "id">>;
   };
 
 export type ViewPreferencesFragment = { __typename?: "ViewPreferences" } & Pick<
@@ -6654,6 +6996,7 @@ export type ZendeskSettingsFragment = { __typename?: "ZendeskSettings" } & Pick<
 
 export type AttachmentFragment = { __typename?: "Attachment" } & Pick<
   Attachment,
+  | "sourceType"
   | "subtitle"
   | "title"
   | "metadata"
@@ -6664,7 +7007,10 @@ export type AttachmentFragment = { __typename?: "Attachment" } & Pick<
   | "archivedAt"
   | "createdAt"
   | "id"
-> & { issue: { __typename?: "Issue" } & Pick<Issue, "id"> };
+> & {
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+  };
 
 export type ApiKeyConnectionFragment = { __typename?: "ApiKeyConnection" } & {
   nodes: Array<{ __typename?: "ApiKey" } & ApiKeyFragment>;
@@ -7520,6 +7866,22 @@ export type FavoriteQueryVariables = Exact<{
 
 export type FavoriteQuery = { __typename?: "Query" } & { favorite: { __typename?: "Favorite" } & FavoriteFragment };
 
+export type Favorite_ChildrenQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Favorite_ChildrenQuery = { __typename?: "Query" } & {
+  favorite: { __typename?: "Favorite" } & {
+    children: { __typename?: "FavoriteConnection" } & FavoriteConnectionFragment;
+  };
+};
+
 export type FavoritesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -7781,6 +8143,7 @@ export type IssueRelationsQuery = { __typename?: "Query" } & {
 export type IssueSearchQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -9512,6 +9875,7 @@ export type SubscriptionArchiveMutation = { __typename?: "Mutation" } & {
 };
 
 export type SubscriptionSessionCreateMutationVariables = Exact<{
+  coupon?: Maybe<Scalars["String"]>;
   plan: Scalars["String"];
 }>;
 
@@ -10262,6 +10626,7 @@ export const SamlConfigurationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "allowedDomains" } },
           { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" } },
           { kind: "Field", name: { kind: "Name", value: "ssoSignAlgo" } },
+          { kind: "Field", name: { kind: "Name", value: "issuerEntityId" } },
           { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" } },
         ],
       },
@@ -10454,12 +10819,21 @@ export const AttachmentFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "sourceType" } },
           { kind: "Field", name: { kind: "Name", value: "subtitle" } },
           { kind: "Field", name: { kind: "Name", value: "title" } },
           { kind: "Field", name: { kind: "Name", value: "metadata" } },
           { kind: "Field", name: { kind: "Name", value: "groupBySource" } },
           { kind: "Field", name: { kind: "Name", value: "source" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
@@ -11234,7 +11608,7 @@ export const FavoriteFragmentDoc = {
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "cycle" },
+            name: { kind: "Name", value: "customView" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -11242,7 +11616,7 @@ export const FavoriteFragmentDoc = {
           },
           {
             kind: "Field",
-            name: { kind: "Name", value: "label" },
+            name: { kind: "Name", value: "cycle" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -11258,7 +11632,7 @@ export const FavoriteFragmentDoc = {
           },
           {
             kind: "Field",
-            name: { kind: "Name", value: "projectTeam" },
+            name: { kind: "Name", value: "label" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -11272,11 +11646,28 @@ export const FavoriteFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectTeam" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "folderName" } },
           { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "parent" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -16657,6 +17048,115 @@ export const FavoriteDocument = {
     ...FavoriteFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<FavoriteQuery, FavoriteQueryVariables>;
+export const Favorite_ChildrenDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "favorite_children" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "favorite" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "children" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FavoriteConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...FavoriteConnectionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Favorite_ChildrenQuery, Favorite_ChildrenQueryVariables>;
 export const FavoritesDocument = {
   kind: "Document",
   definitions: [
@@ -18409,6 +18909,11 @@ export const IssueSearchDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -18449,6 +18954,11 @@ export const IssueSearchDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -28600,6 +29110,11 @@ export const SubscriptionSessionCreateDocument = {
       variableDefinitions: [
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "coupon" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "plan" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -28611,6 +29126,11 @@ export const SubscriptionSessionCreateDocument = {
             kind: "Field",
             name: { kind: "Name", value: "subscriptionSessionCreate" },
             arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "coupon" },
+                value: { kind: "Variable", name: { kind: "Name", value: "coupon" } },
+              },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "plan" },

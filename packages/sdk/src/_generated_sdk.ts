@@ -310,6 +310,7 @@ export class ArchiveResponse extends Request {
  * @param data - L.AttachmentFragment response data
  */
 export class Attachment extends Request {
+  private _creator?: L.AttachmentFragment["creator"];
   private _issue: L.AttachmentFragment["issue"];
 
   public constructor(request: LinearRequest, data: L.AttachmentFragment) {
@@ -320,10 +321,12 @@ export class Attachment extends Request {
     this.id = data.id;
     this.metadata = parseJson(data.metadata) ?? {};
     this.source = parseJson(data.source) ?? undefined;
+    this.sourceType = parseJson(data.sourceType) ?? undefined;
     this.subtitle = data.subtitle ?? undefined;
     this.title = data.title;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this._creator = data.creator ?? undefined;
     this._issue = data.issue;
   }
 
@@ -339,6 +342,8 @@ export class Attachment extends Request {
   public metadata: Record<string, unknown>;
   /** Information about the source which created the attachment. */
   public source?: Record<string, unknown>;
+  /** An accessor helper to source.type, defines the source type of the attachment. */
+  public sourceType?: Record<string, unknown>;
   /** Content for the subtitle line in the Linear attachment widget. */
   public subtitle?: string;
   /** Content for the title line in the Linear attachment widget. */
@@ -350,6 +355,10 @@ export class Attachment extends Request {
   public updatedAt: Date;
   /** Location of the attachment which is also used as an identifier. */
   public url: string;
+  /** The creator of the attachment. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
   /** The issue this attachment belongs to. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
@@ -1224,9 +1233,11 @@ export class EventPayload extends Request {
  * @param data - L.FavoriteFragment response data
  */
 export class Favorite extends Request {
+  private _customView?: L.FavoriteFragment["customView"];
   private _cycle?: L.FavoriteFragment["cycle"];
   private _issue?: L.FavoriteFragment["issue"];
   private _label?: L.FavoriteFragment["label"];
+  private _parent?: L.FavoriteFragment["parent"];
   private _project?: L.FavoriteFragment["project"];
   private _projectTeam?: L.FavoriteFragment["projectTeam"];
   private _user: L.FavoriteFragment["user"];
@@ -1235,13 +1246,16 @@ export class Favorite extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.folderName = data.folderName ?? undefined;
     this.id = data.id;
     this.sortOrder = data.sortOrder;
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._issue = data.issue ?? undefined;
     this._label = data.label ?? undefined;
+    this._parent = data.parent ?? undefined;
     this._project = data.project ?? undefined;
     this._projectTeam = data.projectTeam ?? undefined;
     this._user = data.user;
@@ -1251,6 +1265,8 @@ export class Favorite extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The name of the folder. Only applies to favorites of type folder. */
+  public folderName?: string;
   /** The unique identifier of the entity. */
   public id: string;
   /** The order of the item in the favorites list. */
@@ -1262,31 +1278,42 @@ export class Favorite extends Request {
    *     entity hasn't been update after creation.
    */
   public updatedAt: Date;
-  /** Favorited cycle. */
+  /** The favorited custom view. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The favorited cycle. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** Favorited issue. */
+  /** The favorited issue. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** Favorited issue label. */
+  /** The favorited label. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** Favorited project. */
+  /** The parent folder of the favorite. */
+  public get parent(): LinearFetch<Favorite> | undefined {
+    return this._parent?.id ? new FavoriteQuery(this._request).fetch(this._parent?.id) : undefined;
+  }
+  /** The favorited project. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** Favorited project team. */
-  public get projectTeam(): LinearFetch<Project> | undefined {
-    return this._projectTeam?.id ? new ProjectQuery(this._request).fetch(this._projectTeam?.id) : undefined;
+  /** The favorited team of the project. */
+  public get projectTeam(): LinearFetch<Team> | undefined {
+    return this._projectTeam?.id ? new TeamQuery(this._request).fetch(this._projectTeam?.id) : undefined;
   }
   /** The owner of the favorite. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-
+  /** Children of the favorite. Only applies to favorites of type folder. */
+  public children(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">) {
+    return new Favorite_ChildrenQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Deletes a favorite reference. */
   public delete() {
     return new FavoriteDeleteMutation(this._request).fetch(this.id);
@@ -1769,7 +1796,7 @@ export class Invoice extends Request {
   /** The creation date of the invoice. */
   public created: Date;
   /** The due date of the invoice. */
-  public dueDate?: string;
+  public dueDate?: L.Scalars["TimelessDate"];
   /** The status of the invoice. */
   public status: string;
   /** The invoice total, in cents. */
@@ -1852,7 +1879,7 @@ export class Issue extends Request {
   /** The issue's description in markdown format. */
   public description?: string;
   /** The date at which the issue is due. */
-  public dueDate?: string;
+  public dueDate?: L.Scalars["TimelessDate"];
   /** The estimate of the complexity of the issue.. */
   public estimate?: number;
   /** The unique identifier of the entity. */
@@ -2108,7 +2135,7 @@ export class IssueHistory extends Request {
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** What the due date was changed from */
-  public fromDueDate?: string;
+  public fromDueDate?: L.Scalars["TimelessDate"];
   /** What the estimate was changed from. */
   public fromEstimate?: number;
   /** What the priority was changed from. */
@@ -2122,7 +2149,7 @@ export class IssueHistory extends Request {
   /** Information about the integration or application which created this history entry. */
   public source?: Record<string, unknown>;
   /** What the due date was changed to */
-  public toDueDate?: string;
+  public toDueDate?: L.Scalars["TimelessDate"];
   /** What the estimate was changed to. */
   public toEstimate?: number;
   /** What the priority was changed to. */
@@ -3568,7 +3595,7 @@ export class Project extends Request {
   /** The type of the state. */
   public state: string;
   /** The estimated completion date of the project. */
-  public targetDate?: string;
+  public targetDate?: L.Scalars["TimelessDate"];
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been update after creation.
@@ -4008,6 +4035,7 @@ export class SamlConfiguration extends Request {
   public constructor(request: LinearRequest, data: L.SamlConfigurationFragment) {
     super(request);
     this.allowedDomains = data.allowedDomains ?? undefined;
+    this.issuerEntityId = data.issuerEntityId ?? undefined;
     this.ssoBinding = data.ssoBinding ?? undefined;
     this.ssoEndpoint = data.ssoEndpoint ?? undefined;
     this.ssoSignAlgo = data.ssoSignAlgo ?? undefined;
@@ -4016,6 +4044,8 @@ export class SamlConfiguration extends Request {
 
   /** List of allowed email domains for SAML authentication. */
   public allowedDomains?: string[];
+  /** The issuer's custom entity ID. */
+  public issuerEntityId?: string;
   /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
   public ssoBinding?: string;
   /** Sign in endpoint URL for the identity provider. */
@@ -10821,14 +10851,19 @@ export class SubscriptionSessionCreateMutation extends Request {
    * Call the SubscriptionSessionCreate mutation and return a SubscriptionSessionPayload
    *
    * @param plan - required plan to pass to subscriptionSessionCreate
+   * @param variables - variables without 'plan' to pass into the SubscriptionSessionCreateMutation
    * @returns parsed response from SubscriptionSessionCreateMutation
    */
-  public async fetch(plan: string): LinearFetch<SubscriptionSessionPayload> {
+  public async fetch(
+    plan: string,
+    variables?: Omit<L.SubscriptionSessionCreateMutationVariables, "plan">
+  ): LinearFetch<SubscriptionSessionPayload> {
     const response = await this._request<
       L.SubscriptionSessionCreateMutation,
       L.SubscriptionSessionCreateMutationVariables
     >(L.SubscriptionSessionCreateDocument, {
       plan,
+      ...variables,
     });
     const data = response.subscriptionSessionCreate;
     return new SubscriptionSessionPayload(this._request, data);
@@ -12309,6 +12344,54 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
     });
     const data = response.cycle.uncompletedIssuesUponClose;
     return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Favorite_Children Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to favorite
+ * @param variables - variables without 'id' to pass into the Favorite_ChildrenQuery
+ */
+export class Favorite_ChildrenQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Favorite_Children query and return a FavoriteConnection
+   *
+   * @param variables - variables without 'id' to pass into the Favorite_ChildrenQuery
+   * @returns parsed response from Favorite_ChildrenQuery
+   */
+  public async fetch(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">): LinearFetch<FavoriteConnection> {
+    const response = await this._request<L.Favorite_ChildrenQuery, L.Favorite_ChildrenQueryVariables>(
+      L.Favorite_ChildrenDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.favorite.children;
+    return new FavoriteConnection(
       this._request,
       connection =>
         this.fetch(
@@ -15811,10 +15894,14 @@ export class LinearSdk extends Request {
    * Creates a subscription session. Used internally to integrate with Stripe.
    *
    * @param plan - required plan to pass to subscriptionSessionCreate
+   * @param variables - variables without 'plan' to pass into the SubscriptionSessionCreateMutation
    * @returns SubscriptionSessionPayload
    */
-  public subscriptionSessionCreate(plan: string): LinearFetch<SubscriptionSessionPayload> {
-    return new SubscriptionSessionCreateMutation(this._request).fetch(plan);
+  public subscriptionSessionCreate(
+    plan: string,
+    variables?: Omit<L.SubscriptionSessionCreateMutationVariables, "plan">
+  ): LinearFetch<SubscriptionSessionPayload> {
+    return new SubscriptionSessionCreateMutation(this._request).fetch(plan, variables);
   }
   /**
    * Updates a subscription.

@@ -686,6 +686,18 @@
             "deprecationReason": null
           },
           {
+            "name": "creator",
+            "description": "The creator of the attachment.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "metadata",
             "description": "Custom metadata related to the attachment.",
             "args": [],
@@ -704,6 +716,18 @@
           {
             "name": "source",
             "description": "Information about the source which created the attachment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceType",
+            "description": "An accessor helper to source.type, defines the source type of the attachment.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -997,7 +1021,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "AttachmentFilter",
-        "description": "[Alpha] Project filtering options.",
+        "description": "[Alpha] Attachment filtering options.",
         "fields": null,
         "inputFields": [
           {
@@ -1037,11 +1061,59 @@
             "deprecationReason": null
           },
           {
-            "name": "filterMatchValue",
-            "description": "Comparator for the filter match value.",
+            "name": "title",
+            "description": "Comparator for the title.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subtitle",
+            "description": "Comparator for the subtitle.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "Comparator for the url.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "creator",
+            "description": "Filters that the attachments creator must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceType",
+            "description": "Comparator for the source type.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NestedStringComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -1575,6 +1647,29 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "BooleanComparator",
+        "description": "Comparator for booleans.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "Card",
         "description": null,
@@ -1903,6 +1998,153 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "CommentCollectionFilter",
+        "description": "[Alpha] Comment filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "body",
+            "description": "Comparator for the comments body.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "Filters that the comments creator must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "UserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issue",
+            "description": "Filters that the comments issue must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the comment.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "CommentFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the comment.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "CommentFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "some",
+            "description": "Filters that needs to be matched by some comments.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "CommentFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "every",
+            "description": "Filters that needs to be matched by all comments.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "CommentFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "CommentConnection",
         "description": null,
@@ -2143,6 +2385,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "UserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issue",
+            "description": "Filters that the comments issue must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -4109,6 +4363,18 @@
             "deprecationReason": null
           },
           {
+            "name": "issues",
+            "description": "Filters that the cycles issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "Compound filters, all of which need to be matched by the cycle.",
             "type": {
@@ -4270,7 +4536,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "DateComparator",
-        "description": null,
+        "description": "Comparator for dates.",
         "fields": null,
         "inputFields": [
           {
@@ -4393,7 +4659,7 @@
       {
         "kind": "SCALAR",
         "name": "DateTime",
-        "description": "The javascript `Date` as string. Type represents date and time as the ISO Date string.",
+        "description": "Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) ",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
@@ -5429,17 +5695,97 @@
             "deprecationReason": null
           },
           {
-            "name": "sortOrder",
-            "description": "The order of the item in the favorites list.",
+            "name": "parent",
+            "description": "The parent folder of the favorite.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Favorite",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "folderName",
+            "description": "The name of the folder. Only applies to favorites of type folder.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issue",
+            "description": "The favorited issue.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Issue",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "project",
+            "description": "The favorited project.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Project",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectTeam",
+            "description": "The favorited team of the project.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Team",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cycle",
+            "description": "The favorited cycle.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Cycle",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "customView",
+            "description": "The favorited custom view.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CustomView",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "label",
+            "description": "The favorited label.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "IssueLabel",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -5461,61 +5807,106 @@
             "deprecationReason": null
           },
           {
-            "name": "issue",
-            "description": "Favorited issue.",
+            "name": "sortOrder",
+            "description": "The order of the item in the favorites list.",
             "args": [],
             "type": {
-              "kind": "OBJECT",
-              "name": "Issue",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "project",
-            "description": "Favorited project.",
-            "args": [],
+            "name": "children",
+            "description": "Children of the favorite. Only applies to favorites of type folder.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
             "type": {
-              "kind": "OBJECT",
-              "name": "Project",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "projectTeam",
-            "description": "Favorited project team.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Project",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "cycle",
-            "description": "Favorited cycle.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Cycle",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "label",
-            "description": "Favorited issue label.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "IssueLabel",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FavoriteConnection",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -5616,6 +6007,30 @@
           {
             "name": "id",
             "description": "The identifier. If none is provided, the backend will generate one.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "folderName",
+            "description": "The name of the favorite folder.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentId",
+            "description": "The parent folder of the favorite.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -5828,6 +6243,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentId",
+            "description": "The id of the folder to move the favorite under.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -6349,7 +6776,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "IDComparator",
-        "description": null,
+        "description": "Comparator for identifiers.",
         "fields": null,
         "inputFields": [
           {
@@ -7328,7 +7755,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "isDeprecated": false,
@@ -7607,7 +8034,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "isDeprecated": false,
@@ -8743,6 +9170,393 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "IssueCollectionFilter",
+        "description": "[Alpha] Issue filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "number",
+            "description": "Comparator for the issues number.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "Comparator for the issues title.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "Comparator for the issues description.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "priority",
+            "description": "Comparator for the issues priority.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableNumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "estimate",
+            "description": "Comparator for the issues estimate.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startedAt",
+            "description": "Comparator for the issues started at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "completedAt",
+            "description": "Comparator for the issues completed at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "canceledAt",
+            "description": "Comparator for the issues canceled at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "autoClosedAt",
+            "description": "Comparator for the issues auto closed at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "autoArchivedAt",
+            "description": "Comparator for the issues auto archived at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "dueDate",
+            "description": "Comparator for the issues due date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTimelessDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedUntilAt",
+            "description": "Comparator for the issues snoozed until date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "assignee",
+            "description": "Filters that the issues assignee must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "creator",
+            "description": "Filters that the issues creator must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "UserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedBy",
+            "description": "Filters that the issues snoozer must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "labels",
+            "description": "Filters that issue labels must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueLabelCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "team",
+            "description": "Filters that the issues team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "TeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "comments",
+            "description": "Filters that the issues comments must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "CommentCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cycle",
+            "description": "Filters that the issues cycle must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableCycleFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "project",
+            "description": "Filters that the issues project must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableProjectFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "state",
+            "description": "Filters that the issues state must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "WorkflowStateFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "children",
+            "description": "Filters that the child issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "attachments",
+            "description": "Filters that the issues attachments must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "AttachmentFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the issue.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the issue.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "some",
+            "description": "Filters that needs to be matched by some issues.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "every",
+            "description": "Filters that needs to be matched by all issues.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "IssueConnection",
         "description": null,
@@ -9068,7 +9882,7 @@
             "description": "The date at which the issue is due.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -9324,11 +10138,23 @@
             "deprecationReason": null
           },
           {
+            "name": "description",
+            "description": "Comparator for the issues description.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "priority",
             "description": "Comparator for the issues priority.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "NumberComparator",
+              "name": "NullableNumberComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -9352,7 +10178,7 @@
             "description": "Comparator for the issues started at date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -9364,7 +10190,7 @@
             "description": "Comparator for the issues completed at date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -9376,7 +10202,7 @@
             "description": "Comparator for the issues canceled at date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -9388,7 +10214,7 @@
             "description": "Comparator for the issues auto closed at date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -9400,7 +10226,7 @@
             "description": "Comparator for the issues auto archived at date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -9412,7 +10238,7 @@
             "description": "Comparator for the issues due date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "TimelessDateComparator",
+              "name": "NullableTimelessDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -9424,7 +10250,7 @@
             "description": "Comparator for the issues snoozed until date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -9469,10 +10295,10 @@
           },
           {
             "name": "labels",
-            "description": "Filters that at least one label on the issue must satisfy.",
+            "description": "Filters that issue labels must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "IssueLabelFilter",
+              "name": "IssueLabelCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -9492,11 +10318,11 @@
             "deprecationReason": null
           },
           {
-            "name": "comment",
-            "description": "Filters that the issues comment must satisfy.",
+            "name": "comments",
+            "description": "Filters that the issues comments must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "CommentFilter",
+              "name": "CommentCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -9544,7 +10370,7 @@
             "description": "Filters that the child issues must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "IssueFilter",
+              "name": "IssueCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -10067,7 +10893,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "isDeprecated": false,
@@ -10079,7 +10905,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "isDeprecated": false,
@@ -10795,6 +11621,153 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "IssueLabelCollectionFilter",
+        "description": "[Alpha] Issue label filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Comparator for the name.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "creator",
+            "description": "Filters that the issue labels creator must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "team",
+            "description": "Filters that the issue labels team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "TeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the label.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueLabelFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the label.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueLabelFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "some",
+            "description": "Filters that needs to be matched by some issue labels.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueLabelFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "every",
+            "description": "Filters that needs to be matched by all issue labels.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueLabelFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -12045,7 +13018,7 @@
             "description": "The date at which the issue is due.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -12594,7 +13567,7 @@
             "description": "Comparator for the milestone sort order.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "StringComparator",
+              "name": "NumberComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -12606,7 +13579,7 @@
             "description": "Filters that the milestones projects must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "ProjectCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -17581,6 +18554,18 @@
             "description": "Creates a subscription session. Used internally to integrate with Stripe.",
             "args": [
               {
+                "name": "coupon",
+                "description": "The id of an optional coupon to apply.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "plan",
                 "description": "The name of the plan.",
                 "type": {
@@ -18842,6 +19827,153 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "NestedStringComparator",
+        "description": "Comparator for strings.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startsWith",
+            "description": "Starts with constraint. Matches any values that start with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notStartsWith",
+            "description": "Doesn't start with constraint. Matches any values that don't start with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "endsWith",
+            "description": "Ends with constraint. Matches any values that end with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notEndsWith",
+            "description": "Doesn't end with constraint. Matches any values that don't end with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contains",
+            "description": "Contains constraint. Matches any values that contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notContains",
+            "description": "Doesn't contain constraint. Matches any values that don't contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INTERFACE",
         "name": "Node",
         "description": null,
@@ -19929,6 +21061,18 @@
             "deprecationReason": null
           },
           {
+            "name": "issues",
+            "description": "Filters that the cycles issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "Compound filters, all of which need to be matched by the cycle.",
             "type": {
@@ -19974,6 +21118,141 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "NullableDateComparator",
+        "description": "Comparator for optional dates.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "null",
+            "description": "Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lt",
+            "description": "Less-than constraint. Matches any values that are less than the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lte",
+            "description": "Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gt",
+            "description": "Greater-than constraint. Matches any values that are greater than the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gte",
+            "description": "Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
               "ofType": null
             },
             "defaultValue": null,
@@ -20044,7 +21323,7 @@
             "description": "Comparator for the milestone sort order.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "StringComparator",
+              "name": "NumberComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -20056,7 +21335,7 @@
             "description": "Filters that the milestones projects must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "ProjectCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -20109,6 +21388,141 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "NullableNumberComparator",
+        "description": "Comparator for optional numbers.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Float",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Float",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "null",
+            "description": "Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lt",
+            "description": "Less-than constraint. Matches any values that are less than the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lte",
+            "description": "Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gt",
+            "description": "Greater-than constraint. Matches any values that are greater than the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gte",
+            "description": "Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
               "ofType": null
             },
             "defaultValue": null,
@@ -20191,7 +21605,7 @@
             "description": "Comparator for the project start date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -20203,7 +21617,7 @@
             "description": "Comparator for the project target date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -20259,6 +21673,18 @@
             "deprecationReason": null
           },
           {
+            "name": "issues",
+            "description": "Filters that the projects issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "Compound filters, all of which need to be matched by the project.",
             "type": {
@@ -20304,6 +21730,300 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "NullableStringComparator",
+        "description": "Comparator for optional strings.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "null",
+            "description": "Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startsWith",
+            "description": "Starts with constraint. Matches any values that start with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notStartsWith",
+            "description": "Doesn't start with constraint. Matches any values that don't start with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "endsWith",
+            "description": "Ends with constraint. Matches any values that end with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notEndsWith",
+            "description": "Doesn't end with constraint. Matches any values that don't end with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contains",
+            "description": "Contains constraint. Matches any values that contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notContains",
+            "description": "Doesn't contain constraint. Matches any values that don't contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "NullableTimelessDateComparator",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "TimelessDate",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "TimelessDate",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "null",
+            "description": "Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lt",
+            "description": "Less-than constraint. Matches any values that are less than the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lte",
+            "description": "Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gt",
+            "description": "Greater-than constraint. Matches any values that are greater than the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gte",
+            "description": "Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -20394,6 +22114,18 @@
             "deprecationReason": null
           },
           {
+            "name": "assignedIssues",
+            "description": "Filters that the users assigned issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "Compound filters, all of which need to be matched by the user.",
             "type": {
@@ -20453,7 +22185,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "NumberComparator",
-        "description": null,
+        "description": "Comparator for numbers.",
         "fields": null,
         "inputFields": [
           {
@@ -22291,22 +24023,6 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
-          },
-          {
-            "name": "verified",
-            "description": "Is the domain verified.",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -23393,7 +25109,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "isDeprecated": false,
@@ -23405,7 +25121,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "isDeprecated": false,
@@ -24068,6 +25784,225 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "ProjectCollectionFilter",
+        "description": "[Alpha] Project filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Comparator for the project name.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "state",
+            "description": "Comparator for the project state.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startDate",
+            "description": "Comparator for the project start date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "Comparator for the project target date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "creator",
+            "description": "Filters that the projects creator must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "UserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lead",
+            "description": "Filters that the projects lead must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "members",
+            "description": "Filters that the projects members must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "UserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "milestone",
+            "description": "Filters that the projects milestones must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableMilestoneFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issues",
+            "description": "Filters that the projects issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the project.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "ProjectFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the project.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "ProjectFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "some",
+            "description": "Filters that needs to be matched by some projects.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "every",
+            "description": "Filters that needs to be matched by all projects.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "ProjectConnection",
         "description": null,
@@ -24297,7 +26232,7 @@
             "description": "[Internal] The planned start date of the project.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -24309,7 +26244,7 @@
             "description": "The planned target date of the project.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -24447,7 +26382,7 @@
             "description": "Comparator for the project start date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -24459,7 +26394,7 @@
             "description": "Comparator for the project target date.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "DateComparator",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -24508,6 +26443,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableMilestoneFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issues",
+            "description": "Filters that the projects issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -25138,7 +27085,7 @@
             "description": "[Internal] The planned start date of the project.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -25150,7 +27097,7 @@
             "description": "The planned target date of the project.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -28103,6 +30050,18 @@
             "description": "[ALPHA] Search issues. This query is experimental and is subject to change without notice.",
             "args": [
               {
+                "name": "filter",
+                "description": "[Alpha] Filter returned issues.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "before",
                 "description": "A cursor to be used with last for backward pagination.",
                 "type": {
@@ -30481,6 +32440,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "issuerEntityId",
+            "description": "The issuer's custom entity ID.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -30557,6 +32528,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issuerEntityId",
+            "description": "The issuer's custom entity ID.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -31020,7 +33003,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "StringComparator",
-        "description": null,
+        "description": "Comparator for strings.",
         "fields": null,
         "inputFields": [
           {
@@ -31089,7 +33072,19 @@
           },
           {
             "name": "startsWith",
-            "description": "Starts with constraint. Matches any value that starts with the given string.",
+            "description": "Starts with constraint. Matches any values that start with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notStartsWith",
+            "description": "Doesn't start with constraint. Matches any values that don't start with the given string.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -31101,7 +33096,19 @@
           },
           {
             "name": "endsWith",
-            "description": "Ends with constraint. Matches any value that ends with the given string.",
+            "description": "Ends with constraint. Matches any values that end with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notEndsWith",
+            "description": "Doesn't end with constraint. Matches any values that don't end with the given string.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -31113,7 +33120,19 @@
           },
           {
             "name": "contains",
-            "description": "Has constraint. Matches any value that contains the given string.",
+            "description": "Contains constraint. Matches any values that contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notContains",
+            "description": "Doesn't contain constraint. Matches any values that don't contain the given string.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -33677,7 +35696,19 @@
             "description": "Comparator for the team description.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "StringComparator",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issues",
+            "description": "Filters that the teams issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -35080,9 +37111,19 @@
         "possibleTypes": null
       },
       {
+        "kind": "SCALAR",
+        "name": "TimelessDate",
+        "description": "Represents a date in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) ",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "TimelessDateComparator",
-        "description": null,
+        "description": "Comparator for timeless dates.",
         "fields": null,
         "inputFields": [
           {
@@ -35090,7 +37131,7 @@
             "description": "Equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -35102,7 +37143,7 @@
             "description": "Not-equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -35120,7 +37161,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "TimelessDateScalar",
+                  "name": "TimelessDate",
                   "ofType": null
                 }
               }
@@ -35140,7 +37181,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "TimelessDateScalar",
+                  "name": "TimelessDate",
                   "ofType": null
                 }
               }
@@ -35154,7 +37195,7 @@
             "description": "Less-than constraint. Matches any values that are less than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -35166,7 +37207,7 @@
             "description": "Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -35178,7 +37219,7 @@
             "description": "Greater-than constraint. Matches any values that are greater than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -35190,7 +37231,7 @@
             "description": "Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDateScalar",
+              "name": "TimelessDate",
               "ofType": null
             },
             "defaultValue": null,
@@ -35198,16 +37239,6 @@
             "deprecationReason": null
           }
         ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
-        "name": "TimelessDateScalar",
-        "description": "The `TimelessDateScalar` scalar type represents Date values without a timestamp. It expects strings in the format YYYY-MM-DD",
-        "fields": null,
-        "inputFields": null,
         "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
@@ -36907,6 +38938,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "assignedIssues",
+            "description": "Filters that the users assigned issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -39224,6 +41267,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "TeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issues",
+            "description": "Filters that the workflow states issues must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,

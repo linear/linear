@@ -147,6 +147,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the attachment.creator query for L.User */
+    it("attachment.creator", async () => {
+      if (_attachment) {
+        const attachment_creator: L.User | undefined = await _attachment.creator;
+        expect(attachment_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Attachment found - cannot test attachment.creator query");
+      }
+    });
+
     /** Test the attachment.issue query for L.Issue */
     it("attachment.issue", async () => {
       if (_attachment) {
@@ -179,6 +189,16 @@ describe("generated", () => {
         expect(attachment instanceof L.Attachment);
       } else {
         console.warn("codegen-doc:print: No first Attachment found in connection - cannot test attachment query");
+      }
+    });
+
+    /** Test the attachment.creator query for L.User */
+    it("attachment.creator", async () => {
+      if (_attachment) {
+        const attachment_creator: L.User | undefined = await _attachment.creator;
+        expect(attachment_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Attachment found - cannot test attachment.creator query");
       }
     });
 
@@ -482,6 +502,26 @@ describe("generated", () => {
       }
     });
 
+    /** Test the favorite connection query for the Favorite */
+    it("favorite.children", async () => {
+      if (_favorite) {
+        const children: L.FavoriteConnection | undefined = await _favorite.children();
+        expect(children instanceof L.FavoriteConnection);
+      } else {
+        console.warn("codegen-doc:print: No favorite found - cannot test _favorite.children query");
+      }
+    });
+
+    /** Test the favorite.customView query for L.CustomView */
+    it("favorite.customView", async () => {
+      if (_favorite) {
+        const favorite_customView: L.CustomView | undefined = await _favorite.customView;
+        expect(favorite_customView instanceof L.CustomView);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.customView query");
+      }
+    });
+
     /** Test the favorite.cycle query for L.Cycle */
     it("favorite.cycle", async () => {
       if (_favorite) {
@@ -512,6 +552,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the favorite.parent query for L.Favorite */
+    it("favorite.parent", async () => {
+      if (_favorite) {
+        const favorite_parent: L.Favorite | undefined = await _favorite.parent;
+        expect(favorite_parent instanceof L.Favorite);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.parent query");
+      }
+    });
+
     /** Test the favorite.project query for L.Project */
     it("favorite.project", async () => {
       if (_favorite) {
@@ -522,11 +572,11 @@ describe("generated", () => {
       }
     });
 
-    /** Test the favorite.projectTeam query for L.Project */
+    /** Test the favorite.projectTeam query for L.Team */
     it("favorite.projectTeam", async () => {
       if (_favorite) {
-        const favorite_projectTeam: L.Project | undefined = await _favorite.projectTeam;
-        expect(favorite_projectTeam instanceof L.Project);
+        const favorite_projectTeam: L.Team | undefined = await _favorite.projectTeam;
+        expect(favorite_projectTeam instanceof L.Team);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.projectTeam query");
       }
