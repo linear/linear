@@ -9,7 +9,8 @@ export const trelloJsonImport = async (): Promise<Importer> => {
   const trelloImporter = new TrelloJsonImporter(
     answers.trelloFilePath,
     answers.discardArchivedCards,
-    answers.discardArchivedLists
+    answers.discardArchivedLists,
+    answers.listToStatusMap
   );
   return trelloImporter;
 };
@@ -18,6 +19,7 @@ interface TrelloImportAnswers {
   trelloFilePath: string;
   discardArchivedCards: boolean;
   discardArchivedLists: boolean;
+  listToStatusMap: string;
 }
 
 const questions = [
@@ -38,5 +40,12 @@ const questions = [
     name: "discardArchivedLists",
     message: "Would you like to discard the (possibly unarchived) cards within archived lists?",
     default: true,
+  },
+  {
+    type: "input",
+    name: "listToStatusMap",
+    message: "Enter a mapping for list name to linear status, e.g. ListName1=Status1,Listname2=Status2",
+    default:
+      "Backlog=Backlog,Todo=Todo,In Progress=In Progress,In Review=In Review,Done=Done,Canceled=Canceled,Triage=Triage",
   },
 ];

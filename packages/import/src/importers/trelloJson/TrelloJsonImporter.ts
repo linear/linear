@@ -50,10 +50,21 @@ interface TrelloCommentAction {
 }
 
 export class TrelloJsonImporter implements Importer {
-  public constructor(filePath: string, discardArchivedCards: boolean, discardArchivedLists: boolean) {
+  public constructor(filePath: string, discardArchivedCards: boolean, discardArchivedLists: boolean, listToStatusMap: string) {
     this.filePath = filePath;
     this.discardArchivedCards = discardArchivedCards;
     this.discardArchivedLists = discardArchivedLists;
+
+    // convert string of form a=b,c=d to a map
+    this.listToStatusMap = listToStatusMap
+      .split(',')
+      .map(v => v.trim().split('=').map(v => v.trim()))
+      .reduce((acc, [listName, status]) => {
+        if (listName && status) {
+          acc[listName] = status
+        }
+        return acc
+      }, {});
   }
 
   public get name(): string {
@@ -101,6 +112,12 @@ export class TrelloJsonImporter implements Importer {
       }
     }
 
+    // create a mapping of list ids to names from the trello data
+    const listNameMap: Record<string, string> = (data.lists as {id: string, name: string}[]).reduce((acc, list) => {
+      acc[list.id] = list.name
+      return acc
+    }, {})
+
     for (const card of data.cards as TrelloCard[]) {
       const url = card.shortUrl;
       const mdDesc = card.desc;
@@ -132,12 +149,15 @@ export class TrelloJsonImporter implements Importer {
         continue;
       }
 
+      const status = this.listToStatusMap[listNameMap[card.idList]] || 'Triage'
+
       importData.issues.push({
         title: card.name,
         description,
         url,
         labels,
         comments: comments[card.id],
+        status
       });
 
       const allLabels = card.labels.map(label => ({
@@ -160,6 +180,7 @@ export class TrelloJsonImporter implements Importer {
   private filePath: string;
   private discardArchivedCards: boolean;
   private discardArchivedLists: boolean;
+  private listToStatusMap: Record<string, string>;
 }
 
 // Maps Trello colors to Linear branded colors
