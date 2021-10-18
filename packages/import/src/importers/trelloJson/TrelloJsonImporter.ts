@@ -173,6 +173,10 @@ export class TrelloJsonImporter implements Importer {
       }
     }
 
+    // reverse order, so that the order of cards in Trello is maintained in
+    // Linear, since linear's UI orders by recency
+    importData.issues.reverse();
+
     return importData;
   };
 
