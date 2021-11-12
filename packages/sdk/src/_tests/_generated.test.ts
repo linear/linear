@@ -19,6 +19,232 @@ describe("generated", () => {
     stopClient();
   });
 
+  /** Test all Team queries */
+  describe("AdministrableTeams", () => {
+    let _team: L.Team | undefined;
+    let _team_id: string | undefined;
+
+    /** Test the root connection query for the Team */
+    it("administrableTeams", async () => {
+      const administrableTeams: L.TeamConnection | undefined = await client.administrableTeams();
+      const team = administrableTeams?.nodes?.[0];
+      _team_id = team?.id;
+      expect(administrableTeams instanceof L.TeamConnection);
+    });
+
+    /** Test the root query for a single Team */
+    it("team", async () => {
+      if (_team_id) {
+        const team: L.Team | undefined = await client.team(_team_id);
+        _team = team;
+        expect(team instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No first Team found in connection - cannot test team query");
+      }
+    });
+
+    /** Test the team connection query for the Cycle */
+    it("team.cycles", async () => {
+      if (_team) {
+        const cycles: L.CycleConnection | undefined = await _team.cycles();
+        expect(cycles instanceof L.CycleConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.cycles query");
+      }
+    });
+
+    /** Test the team connection query for the Issue */
+    it("team.issues", async () => {
+      if (_team) {
+        const issues: L.IssueConnection | undefined = await _team.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.issues query");
+      }
+    });
+
+    /** Test the team connection query for the IssueLabel */
+    it("team.labels", async () => {
+      if (_team) {
+        const labels: L.IssueLabelConnection | undefined = await _team.labels();
+        expect(labels instanceof L.IssueLabelConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.labels query");
+      }
+    });
+
+    /** Test the team connection query for the User */
+    it("team.members", async () => {
+      if (_team) {
+        const members: L.UserConnection | undefined = await _team.members();
+        expect(members instanceof L.UserConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.members query");
+      }
+    });
+
+    /** Test the team connection query for the TeamMembership */
+    it("team.memberships", async () => {
+      if (_team) {
+        const memberships: L.TeamMembershipConnection | undefined = await _team.memberships();
+        expect(memberships instanceof L.TeamMembershipConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.memberships query");
+      }
+    });
+
+    /** Test the team connection query for the Project */
+    it("team.projects", async () => {
+      if (_team) {
+        const projects: L.ProjectConnection | undefined = await _team.projects();
+        expect(projects instanceof L.ProjectConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.projects query");
+      }
+    });
+
+    /** Test the team connection query for the WorkflowState */
+    it("team.states", async () => {
+      if (_team) {
+        const states: L.WorkflowStateConnection | undefined = await _team.states();
+        expect(states instanceof L.WorkflowStateConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.states query");
+      }
+    });
+
+    /** Test the team model query for Team_Templates */
+    it("team.templates", async () => {
+      if (_team) {
+        const templates: L.TemplateConnection | undefined = await _team.templates();
+        expect(templates instanceof L.TemplateConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.templates query");
+      }
+    });
+
+    /** Test the team connection query for the Webhook */
+    it("team.webhooks", async () => {
+      if (_team) {
+        const webhooks: L.WebhookConnection | undefined = await _team.webhooks();
+        expect(webhooks instanceof L.WebhookConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.webhooks query");
+      }
+    });
+
+    /** Test the team.activeCycle query for L.Cycle */
+    it("team.activeCycle", async () => {
+      if (_team) {
+        const team_activeCycle: L.Cycle | undefined = await _team.activeCycle;
+        expect(team_activeCycle instanceof L.Cycle);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.activeCycle query");
+      }
+    });
+
+    /** Test the team.defaultIssueState query for L.WorkflowState */
+    it("team.defaultIssueState", async () => {
+      if (_team) {
+        const team_defaultIssueState: L.WorkflowState | undefined = await _team.defaultIssueState;
+        expect(team_defaultIssueState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultIssueState query");
+      }
+    });
+
+    /** Test the team.defaultTemplateForMembers query for L.Template */
+    it("team.defaultTemplateForMembers", async () => {
+      if (_team) {
+        const team_defaultTemplateForMembers: L.Template | undefined = await _team.defaultTemplateForMembers;
+        expect(team_defaultTemplateForMembers instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultTemplateForMembers query");
+      }
+    });
+
+    /** Test the team.defaultTemplateForNonMembers query for L.Template */
+    it("team.defaultTemplateForNonMembers", async () => {
+      if (_team) {
+        const team_defaultTemplateForNonMembers: L.Template | undefined = await _team.defaultTemplateForNonMembers;
+        expect(team_defaultTemplateForNonMembers instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultTemplateForNonMembers query");
+      }
+    });
+
+    /** Test the team.draftWorkflowState query for L.WorkflowState */
+    it("team.draftWorkflowState", async () => {
+      if (_team) {
+        const team_draftWorkflowState: L.WorkflowState | undefined = await _team.draftWorkflowState;
+        expect(team_draftWorkflowState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.draftWorkflowState query");
+      }
+    });
+
+    /** Test the team.markedAsDuplicateWorkflowState query for L.WorkflowState */
+    it("team.markedAsDuplicateWorkflowState", async () => {
+      if (_team) {
+        const team_markedAsDuplicateWorkflowState: L.WorkflowState | undefined =
+          await _team.markedAsDuplicateWorkflowState;
+        expect(team_markedAsDuplicateWorkflowState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.markedAsDuplicateWorkflowState query");
+      }
+    });
+
+    /** Test the team.mergeWorkflowState query for L.WorkflowState */
+    it("team.mergeWorkflowState", async () => {
+      if (_team) {
+        const team_mergeWorkflowState: L.WorkflowState | undefined = await _team.mergeWorkflowState;
+        expect(team_mergeWorkflowState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.mergeWorkflowState query");
+      }
+    });
+
+    /** Test the team.organization query for L.Organization */
+    it("team.organization", async () => {
+      if (_team) {
+        const team_organization: L.Organization | undefined = await _team.organization;
+        expect(team_organization instanceof L.Organization);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.organization query");
+      }
+    });
+
+    /** Test the team.reviewWorkflowState query for L.WorkflowState */
+    it("team.reviewWorkflowState", async () => {
+      if (_team) {
+        const team_reviewWorkflowState: L.WorkflowState | undefined = await _team.reviewWorkflowState;
+        expect(team_reviewWorkflowState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.reviewWorkflowState query");
+      }
+    });
+
+    /** Test the team.startWorkflowState query for L.WorkflowState */
+    it("team.startWorkflowState", async () => {
+      if (_team) {
+        const team_startWorkflowState: L.WorkflowState | undefined = await _team.startWorkflowState;
+        expect(team_startWorkflowState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.startWorkflowState query");
+      }
+    });
+
+    /** Test the team.triageIssueState query for L.WorkflowState */
+    it("team.triageIssueState", async () => {
+      if (_team) {
+        const team_triageIssueState: L.WorkflowState | undefined = await _team.triageIssueState;
+        expect(team_triageIssueState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.triageIssueState query");
+      }
+    });
+  });
+
   /** Test ApplicationWithAuthorization query */
   describe("ApplicationWithAuthorization", () => {
     /** Test the root model query for ApplicationWithAuthorization */
@@ -210,6 +436,24 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No Attachment found - cannot test attachment.issue query");
       }
+    });
+  });
+
+  /** Test all AuditEntry queries */
+  describe("AuditEntries", () => {
+    /** Test the root connection query for the AuditEntry */
+    it("auditEntries", async () => {
+      const auditEntries: L.AuditEntryConnection | undefined = await client.auditEntries();
+      expect(auditEntries instanceof L.AuditEntryConnection);
+    });
+  });
+
+  /** Test AuditEntryTypes query */
+  describe("AuditEntryTypes", () => {
+    /** Test the root model query for AuditEntryTypes */
+    it("auditEntryTypes", async () => {
+      const auditEntryTypes: L.AuditEntryType[] | undefined = await client.auditEntryTypes;
+      auditEntryTypes?.map(node => expect(node instanceof L.AuditEntryType));
     });
   });
 
@@ -433,6 +677,51 @@ describe("generated", () => {
     });
   });
 
+  /** Test all Document queries */
+  describe("Documents", () => {
+    let _document: L.Document | undefined;
+    let _document_id: string | undefined;
+
+    /** Test the root connection query for the Document */
+    it("documents", async () => {
+      const documents: L.DocumentConnection | undefined = await client.documents();
+      const document = documents?.nodes?.[0];
+      _document_id = document?.id;
+      expect(documents instanceof L.DocumentConnection);
+    });
+
+    /** Test the root query for a single Document */
+    it("document", async () => {
+      if (_document_id) {
+        const document: L.Document | undefined = await client.document(_document_id);
+        _document = document;
+        expect(document instanceof L.Document);
+      } else {
+        console.warn("codegen-doc:print: No first Document found in connection - cannot test document query");
+      }
+    });
+
+    /** Test the document.creator query for L.User */
+    it("document.creator", async () => {
+      if (_document) {
+        const document_creator: L.User | undefined = await _document.creator;
+        expect(document_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.creator query");
+      }
+    });
+
+    /** Test the document.project query for L.Project */
+    it("document.project", async () => {
+      if (_document) {
+        const document_project: L.Project | undefined = await _document.project;
+        expect(document_project instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.project query");
+      }
+    });
+  });
+
   /** Test all Emoji queries */
   describe("Emojis", () => {
     let _emoji: L.Emoji | undefined;
@@ -529,6 +818,16 @@ describe("generated", () => {
         expect(favorite_cycle instanceof L.Cycle);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.cycle query");
+      }
+    });
+
+    /** Test the favorite.document query for L.Document */
+    it("favorite.document", async () => {
+      if (_favorite) {
+        const favorite_document: L.Document | undefined = await _favorite.document;
+        expect(favorite_document instanceof L.Document);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.document query");
       }
     });
 
@@ -1538,6 +1837,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project connection query for the Document */
+    it("project.documents", async () => {
+      if (_project) {
+        const documents: L.DocumentConnection | undefined = await _project.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.documents query");
+      }
+    });
+
     /** Test the project connection query for the Issue */
     it("project.issues", async () => {
       if (_project) {
@@ -1859,6 +2168,26 @@ describe("generated", () => {
         expect(team_defaultIssueState instanceof L.WorkflowState);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.defaultIssueState query");
+      }
+    });
+
+    /** Test the team.defaultTemplateForMembers query for L.Template */
+    it("team.defaultTemplateForMembers", async () => {
+      if (_team) {
+        const team_defaultTemplateForMembers: L.Template | undefined = await _team.defaultTemplateForMembers;
+        expect(team_defaultTemplateForMembers instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultTemplateForMembers query");
+      }
+    });
+
+    /** Test the team.defaultTemplateForNonMembers query for L.Template */
+    it("team.defaultTemplateForNonMembers", async () => {
+      if (_team) {
+        const team_defaultTemplateForNonMembers: L.Template | undefined = await _team.defaultTemplateForNonMembers;
+        expect(team_defaultTemplateForNonMembers instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultTemplateForNonMembers query");
       }
     });
 

@@ -201,6 +201,14 @@ type AttachmentConnection {
 
 input AttachmentCreateInput {
   """
+  Create a linked comment with markdown body.
+  """
+  commentBody: String
+  """
+  [Internal] Create a linked comment with Prosemirror body. Please use `commentBody` instead
+  """
+  commentBodyData: JSONObject
+  """
   Indicates if attachments for the same source application should be grouped in the Linear UI.
   """
   groupBySource: Boolean
@@ -314,6 +322,109 @@ input AttachmentUpdateInput {
   title: String!
 }
 
+"""
+Workspace audit log entry object.
+"""
+type AuditEntry implements Node {
+  """
+  The user that caused the audit entry to be created.
+  """
+  actor: User
+  """
+  The ID of the user that caused the audit entry to be created.
+  """
+  actorId: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  Country code of request resulting to audit entry.
+  """
+  countryCode: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  IP from actor when entry was recorded.
+  """
+  ip: String
+  """
+  Additional metadata related to the audit entry.
+  """
+  metadata: JSONObject
+  type: String!
+  """
+  The last time at which the entity was updated. This is the same as the creation time if the
+      entity hasn't been update after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type AuditEntryConnection {
+  edges: [AuditEntryEdge!]!
+  nodes: [AuditEntry!]!
+  pageInfo: PageInfo!
+}
+
+type AuditEntryEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AuditEntry!
+}
+
+"""
+[Alpha] Audit entry filtering options.
+"""
+input AuditEntryFilter {
+  """
+  Filters that the audit entry actor must satisfy.
+  """
+  actor: NullableUserFilter
+  """
+  Comparator for the country code.
+  """
+  countryCode: StringComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the IP address.
+  """
+  ip: StringComparator
+  """
+  Comparator for the type.
+  """
+  type: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+type AuditEntryType {
+  """
+  Description of the audit entry type.
+  """
+  description: String!
+  """
+  The audit entry type.
+  """
+  type: String!
+}
+
 type AuthResolverResponse {
   """
   Should the signup flow allow access for the domain.
@@ -381,6 +492,28 @@ type AuthorizedApplication {
   Scopes that are authorized for this application for a given user.
   """
   scope: [String!]!
+  """
+  Whether or not webhooks are enabled for the application.
+  """
+  webhooksEnabled: Boolean!
+}
+
+"""
+Relation load request.
+"""
+input BatchRequest {
+  """
+  The indexed key to load models for.
+  """
+  indexedKey: String!
+  """
+  The value of the indexed key to load models for.
+  """
+  keyValue: String!
+  """
+  The class name of the model to load.
+  """
+  modelClass: String!
 }
 
 type BillingDetailsPayload {
@@ -764,9 +897,13 @@ type CustomView implements Node {
   """
   description: String
   """
+  [Alpha] The filter applied to issues in the custom view.
+  """
+  filterData: JSONObject!
+  """
   The filters applied to issues in the custom view.
   """
-  filters: JSONObject!
+  filters: JSONObject! @deprecated(reason: "Will be replaced by `filterData` in a future update")
   """
   The icon of the custom view.
   """
@@ -813,6 +950,10 @@ input CustomViewCreateInput {
   The description of the custom view.
   """
   description: String
+  """
+  The filter applied to issues in the custom view.
+  """
+  filterData: JSONObject
   """
   The filters applied to issues in the custom view.
   """
@@ -871,6 +1012,10 @@ input CustomViewUpdateInput {
   The description of the custom view.
   """
   description: String
+  """
+  The filter applied to issues in the custom view.
+  """
+  filterData: JSONObject
   """
   The filters applied to issues in the custom view.
   """
@@ -1221,9 +1366,120 @@ Contains the requested dependencies.
 """
 type DependencyResponse {
   """
-  A JSON serialized collection of model objects loaded from the archive
+  A JSON serialized collection of dependencies.
   """
   dependencies: String!
+}
+
+"""
+A document for a project.
+"""
+type Document implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The color of the icon.
+  """
+  color: String
+  """
+  The document content in markdown format.
+  """
+  content: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the document.
+  """
+  creator: User!
+  """
+  The icon of the document.
+  """
+  icon: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project that the document is associated with.
+  """
+  project: Project!
+  """
+  The document's unique URL slug.
+  """
+  slugId: String!
+  """
+  The document title.
+  """
+  title: String!
+  """
+  The last time at which the entity was updated. This is the same as the creation time if the
+      entity hasn't been update after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type DocumentConnection {
+  edges: [DocumentEdge!]!
+  nodes: [Document!]!
+  pageInfo: PageInfo!
+}
+
+input DocumentCreateInput {
+  """
+  The color of the icon.
+  """
+  color: String
+  """
+  The document content as markdown.
+  """
+  content: String
+  """
+  The document content as a Prosemirror document.
+  """
+  contentData: JSONObject
+  """
+  The icon of the document.
+  """
+  icon: String
+  """
+  The identifier. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Related project for the document.
+  """
+  projectId: String!
+  """
+  The title of the document.
+  """
+  title: String!
+}
+
+type DocumentEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Document!
+}
+
+type DocumentPayload {
+  """
+  The document that was created or updated.
+  """
+  document: Document!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -1259,6 +1515,113 @@ type DocumentStep implements Node {
   Step version.
   """
   version: Float!
+}
+
+input DocumentUpdateInput {
+  """
+  The color of the icon.
+  """
+  color: String
+  """
+  The document content as markdown.
+  """
+  content: String
+  """
+  The document content as a Prosemirror document.
+  """
+  contentData: JSONObject
+  """
+  The icon of the document.
+  """
+  icon: String
+  """
+  Related project for the document.
+  """
+  projectId: String
+  """
+  The title of the document.
+  """
+  title: String
+}
+
+"""
+A version of a document.
+"""
+type DocumentVersion implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The document's content in markdown format.
+  """
+  content: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the version.
+  """
+  creator: User!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project that the document is associated with.
+  """
+  project: Project!
+  """
+  The version revision number.
+  """
+  revision: Float!
+  """
+  The document's title.
+  """
+  title: String!
+  """
+  The last time at which the entity was updated. This is the same as the creation time if the
+      entity hasn't been update after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type DocumentVersionConnection {
+  edges: [DocumentVersionEdge!]!
+  nodes: [DocumentVersion!]!
+  pageInfo: PageInfo!
+}
+
+type DocumentVersionEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: DocumentVersion!
+}
+
+type DocumentationSearchPayload {
+  """
+  The content of the documentation.
+  """
+  content: String!
+  """
+  The time the documentation was published.
+  """
+  publishedAt: DateTime!
+  """
+  The title of the found documentation.
+  """
+  title: String!
+  """
+  The type of documentation that was found.
+  """
+  type: String
+  """
+  The url to the documentation.
+  """
+  url: String!
 }
 
 input EmailSubscribeInput {
@@ -1494,6 +1857,10 @@ type Favorite implements Node {
   """
   cycle: Cycle
   """
+  The favorited document.
+  """
+  document: Document
+  """
   The name of the folder. Only applies to favorites of type folder.
   """
   folderName: String
@@ -1555,6 +1922,10 @@ input FavoriteCreateInput {
   The identifier of the cycle to favorite.
   """
   cycleId: String
+  """
+  The identifier of the document to favorite.
+  """
+  documentId: String
   """
   The name of the favorite folder.
   """
@@ -1668,6 +2039,17 @@ type FigmaEmbedPayload {
   Figma embed information.
   """
   figmaEmbed: FigmaEmbed
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type FrontAttachmentPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
   """
   Whether the operation was successful.
   """
@@ -2431,6 +2813,21 @@ type Issue implements Node {
   Issue URL.
   """
   url: String!
+}
+
+type IssueBatchPayload {
+  """
+  The issues that were updated.
+  """
+  issues: [Issue!]!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -3532,6 +3929,25 @@ The `JSONObject` scalar type represents JSON values as a string
 """
 scalar JSONObject
 
+input JiraConfigurationInput {
+  """
+  The Jira personal access token.
+  """
+  accessToken: String!
+  """
+  The Jira user's email address.
+  """
+  email: String!
+  """
+  The Jira installation hostname.
+  """
+  hostname: String!
+  """
+  The Jira project keys to scope the integration to.
+  """
+  project: String
+}
+
 input JoinOrganizationInput {
   """
   The identifier of the organization.
@@ -3758,7 +4174,7 @@ type Mutation {
     The issue for which to link the Front conversation.
     """
     issueId: String!
-  ): AttachmentPayload!
+  ): FrontAttachmentPayload!
   """
   Link an existing Intercom conversation to an issue.
   """
@@ -3963,6 +4379,37 @@ type Mutation {
   Always logs an error to Sentry as warning. Used to debug logging.
   """
   debugFailWithWarning: DebugPayload!
+  """
+  Creates a new document.
+  """
+  documentCreate(
+    """
+    The document to create.
+    """
+    input: DocumentCreateInput!
+  ): DocumentPayload!
+  """
+  Deletes a document.
+  """
+  documentDelete(
+    """
+    The identifier of the document to delete.
+    """
+    id: String!
+  ): ArchivePayload!
+  """
+  Updates a document.
+  """
+  documentUpdate(
+    """
+    The identifier of the document to update. Also the identifier from the URL is accepted.
+    """
+    id: String!
+    """
+    A partial document object to update the document with.
+    """
+    input: DocumentUpdateInput!
+  ): DocumentPayload!
   """
   Subscribes the email to the newsletter.
   """
@@ -4343,6 +4790,19 @@ type Mutation {
     trash: Boolean
   ): ArchivePayload!
   """
+  Updates multiple issues at once.
+  """
+  issueBatchUpdate(
+    """
+    The id's of the issues to update. Can't be more than 50 at a time.
+    """
+    ids: [UUID!]!
+    """
+    A partial issue object to update the issues with.
+    """
+    input: IssueUpdateInput!
+  ): IssueBatchPayload!
+  """
   Creates a new issue.
   """
   issueCreate(
@@ -4377,6 +4837,10 @@ type Mutation {
     """
     id: String
     """
+    Whether or not we should collect the data for closed issues.
+    """
+    includeClosedIssues: Boolean
+    """
     Whether to instantly process the import with the default configuration mapping.
     """
     instantProcess: Boolean
@@ -4401,6 +4865,10 @@ type Mutation {
     ID of issue import. If not provided it will be generated.
     """
     id: String
+    """
+    Whether or not we should collect the data for closed issues.
+    """
+    includeClosedIssues: Boolean
     """
     Whether to instantly process the import with the default configuration mapping.
     """
@@ -4435,6 +4903,10 @@ type Mutation {
     """
     id: String
     """
+    Whether or not we should collect the data for closed issues.
+    """
+    includeClosedIssues: Boolean
+    """
     Whether to instantly process the import with the default configuration mapping.
     """
     instantProcess: Boolean
@@ -4451,6 +4923,10 @@ type Mutation {
     ID of issue import. If not provided it will be generated.
     """
     id: String
+    """
+    Whether or not we should collect the data for closed issues.
+    """
+    includeClosedIssues: Boolean
     """
     Whether to instantly process the import with the default configuration mapping.
     """
@@ -4595,6 +5071,15 @@ type Mutation {
     """
     input: IssueUpdateInput!
   ): IssuePayload!
+  """
+  [INTERNAL] Connects the organization with a Jira Personal Access Token.
+  """
+  jiraIntegrationConnect(
+    """
+    Jira integration settings.
+    """
+    input: JiraConfigurationInput!
+  ): IntegrationPayload!
   """
   Join an organization from onboarding.
   """
@@ -4991,7 +5476,7 @@ type Mutation {
     input: TokenUserAccountAuthInput!
   ): AuthResolverResponse!
   """
-  Archives a subscription.
+  [Internal] Archives a subscription.
   """
   subscriptionArchive(
     """
@@ -5000,7 +5485,7 @@ type Mutation {
     id: String!
   ): ArchivePayload!
   """
-  Creates a subscription session. Used internally to integrate with Stripe.
+  [Internal] Creates a subscription session. Used internally to integrate with Stripe.
   """
   subscriptionSessionCreate(
     """
@@ -5013,7 +5498,7 @@ type Mutation {
     plan: String!
   ): SubscriptionSessionPayload!
   """
-  Updates a subscription.
+  [Internal] Updates a subscription.
   """
   subscriptionUpdate(
     """
@@ -5026,11 +5511,11 @@ type Mutation {
     input: SubscriptionUpdateInput!
   ): SubscriptionPayload!
   """
-  Creates a subscription update session. Used internally to integrate with Stripe.
+  [Internal] Creates a subscription update session. Used internally to integrate with Stripe.
   """
   subscriptionUpdateSessionCreate: SubscriptionSessionPayload!
   """
-  Upgrades a subscription plan.
+  [Internal] Upgrades a subscription plan.
   """
   subscriptionUpgrade(
     """
@@ -6739,6 +7224,35 @@ type Project implements Node {
   """
   description: String!
   """
+  Documents associated with the project.
+  """
+  documents(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): DocumentConnection!
+  """
   The icon of the project.
   """
   icon: String
@@ -7416,6 +7930,39 @@ type PushSubscriptionTestPayload {
 
 type Query {
   """
+  All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to.
+  """
+  administrableTeams(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    [Alpha] Filter returned teams.
+    """
+    filter: TeamFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): TeamConnection!
+  """
   [Internal] All API keys for the user.
   """
   apiKeys(
@@ -7585,6 +8132,43 @@ type Query {
     url: String!
   ): AttachmentConnection!
   """
+  All audit log entries.
+  """
+  auditEntries(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    [Alpha] Filter returned audit entries.
+    """
+    filter: AuditEntryFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AuditEntryConnection!
+  """
+  List of audit entry types.
+  """
+  auditEntryTypes: [AuditEntryType!]!
+  """
   Get all authorized applications for a user
   """
   authorizedApplications: [AuthorizedApplication!]!
@@ -7738,6 +8322,52 @@ type Query {
     """
     modelClass: String!
   ): DependencyResponse!
+  """
+  One specific document.
+  """
+  document(id: String!): Document!
+  """
+  [Internal] Searches documentation.
+  """
+  documentationSearch(
+    """
+    The query to search the documentation with.
+    """
+    query: String!
+    """
+    The type of documentation to search for.
+    """
+    type: String
+  ): [DocumentationSearchPayload!]!
+  """
+  All documents for the project.
+  """
+  documents(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): DocumentConnection!
   """
   A specific emoji.
   """
@@ -8340,6 +8970,15 @@ type Query {
   """
   subscription: Subscription
   """
+  [Internal] Syncs a batch of models.
+  """
+  syncBatch(
+    """
+    The requests to load.
+    """
+    requests: [BatchRequest!]!
+  ): SyncBatchResponse!
+  """
   [Internal] Fetch data to catch up the client to the state of the world.
   """
   syncBootstrap(
@@ -8411,7 +9050,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): TeamMembershipConnection!
   """
-  All teams.
+  All teams whose issues can be accessed by the user. This might be different from `administrableTeams`, which also includes teams whose settings can be changed by the user.
   """
   teams(
     """
@@ -8973,6 +9612,16 @@ input SubscriptionUpdateInput {
 }
 
 """
+Contains the requested relations.
+"""
+type SyncBatchResponse {
+  """
+  A JSON serialized collection of relations model object.
+  """
+  models: String!
+}
+
+"""
 Contains a delta sync.
 """
 type SyncDeltaResponse {
@@ -9055,7 +9704,7 @@ type Team implements Node {
   """
   createdAt: DateTime!
   """
-  Calender feed (iCal) for cycles.
+  Calendar feed URL (iCal) for cycles.
   """
   cycleCalenderUrl: String!
   """
@@ -9130,11 +9779,19 @@ type Team implements Node {
   """
   The default template to use for new issues created by members of the team.
   """
-  defaultTemplateForMembersId: String
+  defaultTemplateForMembers: Template
+  """
+  The id of the default template to use for new issues created by members of the team.
+  """
+  defaultTemplateForMembersId: String @deprecated(reason: "Use defaultTemplateForMembers instead")
   """
   The default template to use for new issues created by non-members of the team.
   """
-  defaultTemplateForNonMembersId: String
+  defaultTemplateForNonMembers: Template
+  """
+  The id of the default template to use for new issues created by non-members of the team.
+  """
+  defaultTemplateForNonMembersId: String @deprecated(reason: "Use defaultTemplateForNonMembers instead")
   """
   The team's description.
   """
@@ -9792,6 +10449,10 @@ input TeamUpdateInput {
   """
   cycleDuration: Int
   """
+  Whether the first cycle should start in the current or the next week.
+  """
+  cycleEnabledStartWeek: String
+  """
   Auto assign completed issues to current active cycle setting.
   """
   cycleIssueAutoAssignCompleted: Boolean
@@ -10098,6 +10759,11 @@ enum TrashOptionType {
   trashOnly
 }
 
+"""
+A universally unique identifier as specified by RFC 4122.
+"""
+scalar UUID
+
 input UpdateOrganizationInput {
   """
   List of services that are allowed to be used for login.
@@ -10341,7 +11007,7 @@ type User implements Node {
   """
   name: String!
   """
-  Organization in which the user belongs to.
+  Organization the user belongs to.
   """
   organization: Organization!
   """
@@ -10581,6 +11247,7 @@ enum UserFlagType {
   listSelectionTip
   migrateThemePreference
   projectWelcomeDismissed
+  slackCommentReactionTipShown
   triageWelcomeDismissed
 }
 
