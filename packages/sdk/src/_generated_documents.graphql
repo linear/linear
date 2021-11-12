@@ -79,6 +79,39 @@ fragment CustomView on CustomView {
   }
   # Whether the custom view is shared with everyone in the organization.
   shared
+  # [Alpha] The filter applied to issues in the custom view.
+  filterData
+}
+
+# A document for a project.
+fragment Document on Document {
+  # The color of the icon.
+  color
+  # The document content in markdown format.
+  content
+  # The document title.
+  title
+  # The document's unique URL slug.
+  slugId
+  # The icon of the document.
+  icon
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The project that the document is associated with.
+  project {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the document.
+  creator {
+    id
+  }
 }
 
 # A milestone that contains projects.
@@ -523,6 +556,33 @@ fragment PushSubscription on PushSubscription {
   id
 }
 
+# A version of a document.
+fragment DocumentVersion on DocumentVersion {
+  # The document's content in markdown format.
+  content
+  # The document's title.
+  title
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The project that the document is associated with.
+  project {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the version.
+  creator {
+    id
+  }
+  # The version revision number.
+  revision
+}
+
 # A webhook used to send HTTP notifications over data updates
 fragment Webhook on Webhook {
   # Secret token for verifying the origin on the recipient side.
@@ -840,7 +900,7 @@ fragment Team on Team {
   cycleIssueAutoAssignCompleted
   # Auto assign started issues to current cycle.
   cycleIssueAutoAssignStarted
-  # Calender feed (iCal) for cycles.
+  # Calendar feed URL (iCal) for cycles.
   cycleCalenderUrl
   # How many upcoming cycles to create.
   upcomingCycleCount
@@ -861,15 +921,23 @@ fragment Team on Team {
   # The day of the week that a new cycle starts.
   cycleStartDay
   # The default template to use for new issues created by members of the team.
-  defaultTemplateForMembersId
+  defaultTemplateForMembers {
+    id
+  }
   # The default template to use for new issues created by non-members of the team.
-  defaultTemplateForNonMembersId
+  defaultTemplateForNonMembers {
+    id
+  }
   # The default workflow state into which issues are set when they are opened by team members.
   defaultIssueState {
     id
   }
   # The duration of a cycle in weeks.
   cycleDuration
+  # The id of the default template to use for new issues created by members of the team.
+  defaultTemplateForMembersId
+  # The id of the default template to use for new issues created by non-members of the team.
+  defaultTemplateForNonMembersId
   # The issue estimation type to use.
   issueEstimationType
   # The last time at which the entity was updated. This is the same as the creation time if the
@@ -997,8 +1065,14 @@ fragment ArchiveResponse on ArchiveResponse {
 
 # Contains the requested dependencies.
 fragment DependencyResponse on DependencyResponse {
-  # A JSON serialized collection of model objects loaded from the archive
+  # A JSON serialized collection of dependencies.
   dependencies
+}
+
+# Contains the requested relations.
+fragment SyncBatchResponse on SyncBatchResponse {
+  # A JSON serialized collection of relations model object.
+  models
 }
 
 # Defines the membership of a user to a team.
@@ -1249,6 +1323,8 @@ fragment AuthorizedApplication on AuthorizedApplication {
   scope
   # Url of the developer (homepage or docs).
   developerUrl
+  # Whether or not webhooks are enabled for the application.
+  webhooksEnabled
 }
 
 # Public information of the OAuth application, plus whether the application has been authorized for
@@ -1466,6 +1542,10 @@ fragment Favorite on Favorite {
   cycle {
     id
   }
+  # The favorited document.
+  document {
+    id
+  }
   # The favorited issue.
   issue {
     id
@@ -1522,6 +1602,32 @@ fragment ViewPreferences on ViewPreferences {
   type
   # The view type.
   viewType
+}
+
+# Workspace audit log entry object.
+fragment AuditEntry on AuditEntry {
+  # Additional metadata related to the audit entry.
+  metadata
+  # Country code of request resulting to audit entry.
+  countryCode
+  # IP from actor when entry was recorded.
+  ip
+  # The ID of the user that caused the audit entry to be created.
+  actorId
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been update after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the audit entry to be created.
+  actor {
+    id
+  }
+  type
 }
 
 # Zendesk specific settings.
@@ -1614,6 +1720,22 @@ fragment AttachmentPayload on AttachmentPayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment AuditEntryConnection on AuditEntryConnection {
+  nodes {
+    ...AuditEntry
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment AuditEntryType on AuditEntryType {
+  # Description of the audit entry type.
+  description
+  # The audit entry type.
+  type
 }
 
 fragment AuthResolverResponse on AuthResolverResponse {
@@ -1756,6 +1878,48 @@ fragment DebugPayload on DebugPayload {
   success
 }
 
+fragment DocumentConnection on DocumentConnection {
+  nodes {
+    ...Document
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment DocumentPayload on DocumentPayload {
+  # The document that was created or updated.
+  document {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment DocumentVersionConnection on DocumentVersionConnection {
+  nodes {
+    ...DocumentVersion
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment DocumentationSearchPayload on DocumentationSearchPayload {
+  # The content of the documentation.
+  content
+  # The time the documentation was published.
+  publishedAt
+  # The title of the found documentation.
+  title
+  # The type of documentation that was found.
+  type
+  # The url to the documentation.
+  url
+}
+
 fragment EmailSubscribePayload on EmailSubscribePayload {
   # Whether the operation was successful.
   success
@@ -1832,6 +1996,13 @@ fragment FigmaEmbedPayload on FigmaEmbedPayload {
   success
 }
 
+fragment FrontAttachmentPayload on FrontAttachmentPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
 fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
   # The URL containing the image.
   url
@@ -1881,6 +2052,17 @@ fragment Invoice on Invoice {
   total
   # The status of the invoice.
   status
+}
+
+fragment IssueBatchPayload on IssueBatchPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The issues that were updated.
+  issues {
+    ...Issue
+  }
+  # Whether the operation was successful.
+  success
 }
 
 fragment IssueConnection on IssueConnection {
@@ -2501,6 +2683,36 @@ fragment WorkflowStatePayload on WorkflowStatePayload {
   success
 }
 
+# All teams you the user can administrate. Administrable teams are teams whose settings the user can
+# change, but to whose issues the user doesn't necessarily have access to.
+query administrableTeams(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # [Alpha] Filter returned teams.
+  $filter: TeamFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  administrableTeams(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...TeamConnection
+  }
+}
 # Get information for an application and whether a user has approved it for the given scopes.
 query applicationWithAuthorization(
   # The client ID of the application.
@@ -2848,6 +3060,41 @@ query attachmentsForURL(
     ...AttachmentConnection
   }
 }
+# All audit log entries.
+query auditEntries(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # [Alpha] Filter returned audit entries.
+  $filter: AuditEntryFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  auditEntries(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AuditEntryConnection
+  }
+}
+# List of audit entry types.
+query auditEntryTypes {
+  auditEntryTypes {
+    ...AuditEntryType
+  }
+}
 # Get all authorized applications for a user
 query authorizedApplications {
   authorizedApplications {
@@ -3069,6 +3316,38 @@ query cycles(
     orderBy: $orderBy
   ) {
     ...CycleConnection
+  }
+}
+# One specific document.
+query document($id: String!) {
+  document(id: $id) {
+    ...Document
+  }
+}
+# All documents for the project.
+query documents(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  documents(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...DocumentConnection
   }
 }
 # A specific emoji.
@@ -3962,6 +4241,35 @@ query project($id: String!) {
     ...Project
   }
 }
+# Documents associated with the project.
+query project_documents(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    documents(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DocumentConnection
+    }
+  }
+}
 # Issues associated with the project.
 query project_issues(
   $id: String!
@@ -4529,7 +4837,8 @@ query teamMemberships(
     ...TeamMembershipConnection
   }
 }
-# All teams.
+# All teams whose issues can be accessed by the user. This might be different from
+# `administrableTeams`, which also includes teams whose settings can be changed by the user.
 query teams(
   # A cursor to be used with first for forward pagination
   $after: String
@@ -5013,7 +5322,7 @@ mutation attachmentLinkFront(
   $issueId: String!
 ) {
   attachmentLinkFront(conversationId: $conversationId, issueId: $issueId) {
-    ...AttachmentPayload
+    ...FrontAttachmentPayload
   }
 }
 # Link an existing Intercom conversation to an issue.
@@ -5212,6 +5521,35 @@ mutation debugFailWithInternalError {
 mutation debugFailWithWarning {
   debugFailWithWarning {
     ...DebugPayload
+  }
+}
+# Creates a new document.
+mutation documentCreate(
+  # The document to create.
+  $input: DocumentCreateInput!
+) {
+  documentCreate(input: $input) {
+    ...DocumentPayload
+  }
+}
+# Deletes a document.
+mutation documentDelete(
+  # The identifier of the document to delete.
+  $id: String!
+) {
+  documentDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a document.
+mutation documentUpdate(
+  # The identifier of the document to update. Also the identifier from the URL is accepted.
+  $id: String!
+  # A partial document object to update the document with.
+  $input: DocumentUpdateInput!
+) {
+  documentUpdate(id: $id, input: $input) {
+    ...DocumentPayload
   }
 }
 # Subscribes the email to the newsletter.
@@ -5552,6 +5890,17 @@ mutation issueArchive(
     ...ArchivePayload
   }
 }
+# Updates multiple issues at once.
+mutation issueBatchUpdate(
+  # The id's of the issues to update. Can't be more than 50 at a time.
+  $ids: [UUID!]!
+  # A partial issue object to update the issues with.
+  $input: IssueUpdateInput!
+) {
+  issueBatchUpdate(ids: $ids, input: $input) {
+    ...IssueBatchPayload
+  }
+}
 # Creates a new issue.
 mutation issueCreate(
   # The issue object to create.
@@ -5578,6 +5927,8 @@ mutation issueImportCreateAsana(
   $asanaToken: String!
   # ID of issue import. If not provided it will be generated.
   $id: String
+  # Whether or not we should collect the data for closed issues.
+  $includeClosedIssues: Boolean
   # Whether to instantly process the import with the default configuration mapping.
   $instantProcess: Boolean
   # ID of the team into which to import data.
@@ -5587,6 +5938,7 @@ mutation issueImportCreateAsana(
     asanaTeamName: $asanaTeamName
     asanaToken: $asanaToken
     id: $id
+    includeClosedIssues: $includeClosedIssues
     instantProcess: $instantProcess
     teamId: $teamId
   ) {
@@ -5601,6 +5953,8 @@ mutation issueImportCreateClubhouse(
   $clubhouseToken: String!
   # ID of issue import. If not provided it will be generated.
   $id: String
+  # Whether or not we should collect the data for closed issues.
+  $includeClosedIssues: Boolean
   # Whether to instantly process the import with the default configuration mapping.
   $instantProcess: Boolean
   # ID of the team into which to import data.
@@ -5610,6 +5964,7 @@ mutation issueImportCreateClubhouse(
     clubhouseTeamName: $clubhouseTeamName
     clubhouseToken: $clubhouseToken
     id: $id
+    includeClosedIssues: $includeClosedIssues
     instantProcess: $instantProcess
     teamId: $teamId
   ) {
@@ -5628,6 +5983,8 @@ mutation issueImportCreateGithub(
   $githubToken: String!
   # ID of issue import. If not provided it will be generated.
   $id: String
+  # Whether or not we should collect the data for closed issues.
+  $includeClosedIssues: Boolean
   # Whether to instantly process the import with the default configuration mapping.
   $instantProcess: Boolean
   # ID of the team into which to import data.
@@ -5639,6 +5996,7 @@ mutation issueImportCreateGithub(
     githubShouldImportOrgProjects: $githubShouldImportOrgProjects
     githubToken: $githubToken
     id: $id
+    includeClosedIssues: $includeClosedIssues
     instantProcess: $instantProcess
     teamId: $teamId
   ) {
@@ -5649,6 +6007,8 @@ mutation issueImportCreateGithub(
 mutation issueImportCreateJira(
   # ID of issue import. If not provided it will be generated.
   $id: String
+  # Whether or not we should collect the data for closed issues.
+  $includeClosedIssues: Boolean
   # Whether to instantly process the import with the default configuration mapping.
   $instantProcess: Boolean
   # Jira user account email.
@@ -5664,6 +6024,7 @@ mutation issueImportCreateJira(
 ) {
   issueImportCreateJira(
     id: $id
+    includeClosedIssues: $includeClosedIssues
     instantProcess: $instantProcess
     jiraEmail: $jiraEmail
     jiraHostname: $jiraHostname
@@ -5781,6 +6142,15 @@ mutation issueUpdate(
 ) {
   issueUpdate(id: $id, input: $input) {
     ...IssuePayload
+  }
+}
+# [INTERNAL] Connects the organization with a Jira Personal Access Token.
+mutation jiraIntegrationConnect(
+  # Jira integration settings.
+  $input: JiraConfigurationInput!
+) {
+  jiraIntegrationConnect(input: $input) {
+    ...IntegrationPayload
   }
 }
 # Join an organization from onboarding.
@@ -6129,54 +6499,6 @@ mutation samlTokenUserAccountAuth(
 ) {
   samlTokenUserAccountAuth(input: $input) {
     ...AuthResolverResponse
-  }
-}
-# Archives a subscription.
-mutation subscriptionArchive(
-  # The identifier of the subscription to archive.
-  $id: String!
-) {
-  subscriptionArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a subscription session. Used internally to integrate with Stripe.
-mutation subscriptionSessionCreate(
-  # The id of an optional coupon to apply.
-  $coupon: String
-  # The name of the plan.
-  $plan: String!
-) {
-  subscriptionSessionCreate(coupon: $coupon, plan: $plan) {
-    ...SubscriptionSessionPayload
-  }
-}
-# Updates a subscription.
-mutation subscriptionUpdate(
-  # The identifier of the subscription.
-  $id: String!
-  # The properties of the subscription.
-  $input: SubscriptionUpdateInput!
-) {
-  subscriptionUpdate(id: $id, input: $input) {
-    ...SubscriptionPayload
-  }
-}
-# Creates a subscription update session. Used internally to integrate with Stripe.
-mutation subscriptionUpdateSessionCreate {
-  subscriptionUpdateSessionCreate {
-    ...SubscriptionSessionPayload
-  }
-}
-# Upgrades a subscription plan.
-mutation subscriptionUpgrade(
-  # The identifier of the subscription.
-  $id: String!
-  # The subscription type to upgrade to.
-  $type: String!
-) {
-  subscriptionUpgrade(id: $id, type: $type) {
-    ...SubscriptionPayload
   }
 }
 # Creates a new team. The user who creates the team will automatically be added as a member to the
