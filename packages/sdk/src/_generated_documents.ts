@@ -880,6 +880,8 @@ export type Document = Node & {
    *     entity hasn't been update after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** The user who last updated the document. */
+  updatedBy: User;
 };
 
 export type DocumentConnection = {
@@ -1470,6 +1472,7 @@ export type IntegrationSettings = {
   __typename?: "IntegrationSettings";
   googleSheets?: Maybe<GoogleSheetsSettings>;
   intercom?: Maybe<IntercomSettings>;
+  jira?: Maybe<JiraSettings>;
   sentry?: Maybe<SentrySettings>;
   slackPost?: Maybe<SlackPostSettings>;
   slackProjectPost?: Maybe<SlackPostSettings>;
@@ -2348,6 +2351,58 @@ export type JiraConfigurationInput = {
   project?: Maybe<Scalars["String"]>;
 };
 
+/** Tuple for mapping Jira projects to Linear teams. */
+export type JiraLinearMapping = {
+  __typename?: "JiraLinearMapping";
+  /** The Jira id for this project. */
+  jiraProjectId: Scalars["String"];
+  /** The Linear team id to map to the given project. */
+  linearTeamId: Scalars["String"];
+};
+
+export type JiraLinearMappingInput = {
+  /** The Jira id for this project. */
+  jiraProjectId: Scalars["String"];
+  /** The Linear team id to map to the given project. */
+  linearTeamId: Scalars["String"];
+};
+
+/** Metadata about a Jira project. */
+export type JiraProjectData = {
+  __typename?: "JiraProjectData";
+  /** The Jira id for this project. */
+  id: Scalars["String"];
+  /** The Jira key for this project, such as ENG. */
+  key: Scalars["String"];
+  /** The Jira name for this project, such as Engineering. */
+  name: Scalars["String"];
+};
+
+export type JiraProjectDataInput = {
+  /** The Jira id for this project. */
+  id: Scalars["String"];
+  /** The Jira key for this project, such as ENG. */
+  key: Scalars["String"];
+  /** The Jira name for this project, such as Engineering. */
+  name: Scalars["String"];
+};
+
+/** Jira specific settings. */
+export type JiraSettings = {
+  __typename?: "JiraSettings";
+  /** The mapping of Jira project id => Linear team id. */
+  projectMapping?: Maybe<Array<JiraLinearMapping>>;
+  /** The Jira projects for the organization. */
+  projects: Array<JiraProjectData>;
+};
+
+export type JiraSettingsInput = {
+  /** The mapping of Jira project id => Linear team id. */
+  projectMapping?: Maybe<Array<JiraLinearMappingInput>>;
+  /** The Jira projects for the organization. */
+  projects: Array<JiraProjectDataInput>;
+};
+
 export type JoinOrganizationInput = {
   /** The identifier of the organization. */
   organizationId: Scalars["String"];
@@ -2561,6 +2616,8 @@ export type Mutation = {
   integrationIntercomDelete: IntegrationPayload;
   /** Updates settings on the Intercom integration. */
   integrationIntercomSettingsUpdate: IntegrationPayload;
+  /** Updates settings on the Jira integration. */
+  integrationJiraSettingsUpdate: IntegrationPayload;
   /** Enables Loom integration for the organization. */
   integrationLoom: IntegrationPayload;
   /** Archives an integration resource. */
@@ -2984,6 +3041,10 @@ export type MutationIntegrationIntercomArgs = {
 
 export type MutationIntegrationIntercomSettingsUpdateArgs = {
   input: IntercomSettingsInput;
+};
+
+export type MutationIntegrationJiraSettingsUpdateArgs = {
+  input: JiraSettingsInput;
 };
 
 export type MutationIntegrationResourceArchiveArgs = {
@@ -6054,7 +6115,9 @@ export type Template = Node & {
   id: Scalars["ID"];
   /** The name of the template. */
   name: Scalars["String"];
-  /** The team that the template is associated with. */
+  /** The organization that the template is associated with. If null, the template is associated with a particular team. */
+  organization: Organization;
+  /** The team that the template is associated with. If null, the template is global to the workspace. */
   team: Team;
   /** Template data. */
   templateData: Scalars["JSON"];
@@ -6626,7 +6689,7 @@ export type Webhook = Node & {
    */
   updatedAt: Scalars["DateTime"];
   /** Webhook URL */
-  url: Scalars["String"];
+  url?: Maybe<Scalars["String"]>;
 };
 
 export type WebhookConnection = {
@@ -6843,7 +6906,11 @@ export type CustomViewFragment = { __typename?: "CustomView" } & Pick<
 export type DocumentFragment = { __typename?: "Document" } & Pick<
   Document,
   "color" | "content" | "title" | "slugId" | "icon" | "updatedAt" | "archivedAt" | "createdAt" | "id"
-> & { project: { __typename?: "Project" } & Pick<Project, "id">; creator: { __typename?: "User" } & Pick<User, "id"> };
+> & {
+    project: { __typename?: "Project" } & Pick<Project, "id">;
+    creator: { __typename?: "User" } & Pick<User, "id">;
+    updatedBy: { __typename?: "User" } & Pick<User, "id">;
+  };
 
 export type MilestoneFragment = { __typename?: "Milestone" } & Pick<
   Milestone,
@@ -7240,10 +7307,17 @@ export type IssueRelationHistoryPayloadFragment = { __typename?: "IssueRelationH
   "identifier" | "type"
 >;
 
+export type JiraSettingsFragment = { __typename?: "JiraSettings" } & {
+  projects: Array<{ __typename?: "JiraProjectData" } & JiraProjectDataFragment>;
+  projectMapping?: Maybe<Array<{ __typename?: "JiraLinearMapping" } & JiraLinearMappingFragment>>;
+};
+
 export type IssueLabelFragment = { __typename?: "IssueLabel" } & Pick<
   IssueLabel,
   "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { team: { __typename?: "Team" } & Pick<Team, "id">; creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
+export type JiraProjectDataFragment = { __typename?: "JiraProjectData" } & Pick<JiraProjectData, "id" | "key" | "name">;
 
 export type NotificationSubscriptionFragment = { __typename?: "NotificationSubscription" } & Pick<
   NotificationSubscription,
@@ -7364,6 +7438,7 @@ export type SlackPostSettingsFragment = { __typename?: "SlackPostSettings" } & P
 export type IntegrationSettingsFragment = { __typename?: "IntegrationSettings" } & {
   googleSheets?: Maybe<{ __typename?: "GoogleSheetsSettings" } & GoogleSheetsSettingsFragment>;
   intercom?: Maybe<{ __typename?: "IntercomSettings" } & IntercomSettingsFragment>;
+  jira?: Maybe<{ __typename?: "JiraSettings" } & JiraSettingsFragment>;
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
   slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackProjectPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
@@ -7392,6 +7467,11 @@ export type SubscriptionFragment = { __typename?: "Subscription" } & Pick<
   | "createdAt"
   | "id"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
+export type JiraLinearMappingFragment = { __typename?: "JiraLinearMapping" } & Pick<
+  JiraLinearMapping,
+  "jiraProjectId" | "linearTeamId"
+>;
 
 export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
   Favorite,
@@ -9860,6 +9940,14 @@ export type IntegrationIntercomSettingsUpdateMutation = { __typename?: "Mutation
   integrationIntercomSettingsUpdate: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
+export type IntegrationJiraSettingsUpdateMutationVariables = Exact<{
+  input: JiraSettingsInput;
+}>;
+
+export type IntegrationJiraSettingsUpdateMutation = { __typename?: "Mutation" } & {
+  integrationJiraSettingsUpdate: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
 export type IntegrationLoomMutationVariables = Exact<{ [key: string]: never }>;
 
 export type IntegrationLoomMutation = { __typename?: "Mutation" } & {
@@ -11046,6 +11134,74 @@ export const IntercomSettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IntercomSettingsFragment, unknown>;
+export const JiraProjectDataFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "JiraProjectData" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "JiraProjectData" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "key" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<JiraProjectDataFragment, unknown>;
+export const JiraLinearMappingFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "JiraLinearMapping" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "JiraLinearMapping" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "jiraProjectId" } },
+          { kind: "Field", name: { kind: "Name", value: "linearTeamId" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<JiraLinearMappingFragment, unknown>;
+export const JiraSettingsFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "JiraSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "JiraSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projects" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "JiraProjectData" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMapping" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "JiraLinearMapping" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...JiraProjectDataFragmentDoc.definitions,
+    ...JiraLinearMappingFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<JiraSettingsFragment, unknown>;
 export const SentrySettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -11124,6 +11280,14 @@ export const IntegrationSettingsFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "jira" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "JiraSettings" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "sentry" },
             selectionSet: {
               kind: "SelectionSet",
@@ -11159,6 +11323,7 @@ export const IntegrationSettingsFragmentDoc = {
     },
     ...GoogleSheetsSettingsFragmentDoc.definitions,
     ...IntercomSettingsFragmentDoc.definitions,
+    ...JiraSettingsFragmentDoc.definitions,
     ...SentrySettingsFragmentDoc.definitions,
     ...SlackPostSettingsFragmentDoc.definitions,
     ...ZendeskSettingsFragmentDoc.definitions,
@@ -12123,6 +12288,14 @@ export const DocumentFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "updatedBy" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -27564,6 +27737,47 @@ export const IntegrationIntercomSettingsUpdateDocument = {
   IntegrationIntercomSettingsUpdateMutation,
   IntegrationIntercomSettingsUpdateMutationVariables
 >;
+export const IntegrationJiraSettingsUpdateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationJiraSettingsUpdate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "JiraSettingsInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationJiraSettingsUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationJiraSettingsUpdateMutation, IntegrationJiraSettingsUpdateMutationVariables>;
 export const IntegrationLoomDocument = {
   kind: "Document",
   definitions: [

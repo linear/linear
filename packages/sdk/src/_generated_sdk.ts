@@ -1131,6 +1131,7 @@ export class DependencyResponse extends Request {
 export class Document extends Request {
   private _creator: L.DocumentFragment["creator"];
   private _project: L.DocumentFragment["project"];
+  private _updatedBy: L.DocumentFragment["updatedBy"];
 
   public constructor(request: LinearRequest, data: L.DocumentFragment) {
     super(request);
@@ -1145,6 +1146,7 @@ export class Document extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
     this._project = data.project;
+    this._updatedBy = data.updatedBy;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -1175,6 +1177,10 @@ export class Document extends Request {
   /** The project that the document is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
+  }
+  /** The user who last updated the document. */
+  public get updatedBy(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._updatedBy.id);
   }
 
   /** Deletes a document. */
@@ -2070,6 +2076,7 @@ export class IntegrationSettings extends Request {
     super(request);
     this.googleSheets = data.googleSheets ? new GoogleSheetsSettings(request, data.googleSheets) : undefined;
     this.intercom = data.intercom ? new IntercomSettings(request, data.intercom) : undefined;
+    this.jira = data.jira ? new JiraSettings(request, data.jira) : undefined;
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
     this.slackPost = data.slackPost ? new SlackPostSettings(request, data.slackPost) : undefined;
     this.slackProjectPost = data.slackProjectPost ? new SlackPostSettings(request, data.slackProjectPost) : undefined;
@@ -2078,6 +2085,7 @@ export class IntegrationSettings extends Request {
 
   public googleSheets?: GoogleSheetsSettings;
   public intercom?: IntercomSettings;
+  public jira?: JiraSettings;
   public sentry?: SentrySettings;
   public slackPost?: SlackPostSettings;
   public slackProjectPost?: SlackPostSettings;
@@ -2950,6 +2958,65 @@ export class IssueRelationPayload extends Request {
   public get issueRelation(): LinearFetch<IssueRelation> | undefined {
     return new IssueRelationQuery(this._request).fetch(this._issueRelation.id);
   }
+}
+/**
+ * Tuple for mapping Jira projects to Linear teams.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.JiraLinearMappingFragment response data
+ */
+export class JiraLinearMapping extends Request {
+  public constructor(request: LinearRequest, data: L.JiraLinearMappingFragment) {
+    super(request);
+    this.jiraProjectId = data.jiraProjectId;
+    this.linearTeamId = data.linearTeamId;
+  }
+
+  /** The Jira id for this project. */
+  public jiraProjectId: string;
+  /** The Linear team id to map to the given project. */
+  public linearTeamId: string;
+}
+/**
+ * Metadata about a Jira project.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.JiraProjectDataFragment response data
+ */
+export class JiraProjectData extends Request {
+  public constructor(request: LinearRequest, data: L.JiraProjectDataFragment) {
+    super(request);
+    this.id = data.id;
+    this.key = data.key;
+    this.name = data.name;
+  }
+
+  /** The Jira id for this project. */
+  public id: string;
+  /** The Jira key for this project, such as ENG. */
+  public key: string;
+  /** The Jira name for this project, such as Engineering. */
+  public name: string;
+}
+/**
+ * Jira specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.JiraSettingsFragment response data
+ */
+export class JiraSettings extends Request {
+  public constructor(request: LinearRequest, data: L.JiraSettingsFragment) {
+    super(request);
+    this.projectMapping = data.projectMapping
+      ? data.projectMapping.map(node => new JiraLinearMapping(request, node))
+      : undefined;
+    this.projects = data.projects.map(node => new JiraProjectData(request, node));
+  }
+
+  /** The mapping of Jira project id => Linear team id. */
+  public projectMapping?: JiraLinearMapping[];
+  /** The Jira projects for the organization. */
+  public projects: JiraProjectData[];
 }
 /**
  * A milestone that contains projects.
@@ -5157,7 +5224,11 @@ export class Template extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The team that the template is associated with. */
+  /** The organization that the template is associated with. If null, the template is associated with a particular team. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+  /** The team that the template is associated with. If null, the template is global to the workspace. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
@@ -5724,7 +5795,7 @@ export class Webhook extends Request {
     this.secret = data.secret ?? undefined;
     this.teamIds = data.teamIds;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.url = data.url;
+    this.url = data.url ?? undefined;
     this._creator = data.creator ?? undefined;
     this._team = data.team;
   }
@@ -5753,7 +5824,7 @@ export class Webhook extends Request {
    */
   public updatedAt: Date;
   /** Webhook URL */
-  public url: string;
+  public url?: string;
   /** The user who created the webhook. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -9486,6 +9557,34 @@ export class IntegrationIntercomSettingsUpdateMutation extends Request {
       input,
     });
     const data = response.integrationIntercomSettingsUpdate;
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationJiraSettingsUpdate Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationJiraSettingsUpdateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationJiraSettingsUpdate mutation and return a IntegrationPayload
+   *
+   * @param input - required input to pass to integrationJiraSettingsUpdate
+   * @returns parsed response from IntegrationJiraSettingsUpdateMutation
+   */
+  public async fetch(input: L.JiraSettingsInput): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationJiraSettingsUpdateMutation,
+      L.IntegrationJiraSettingsUpdateMutationVariables
+    >(L.IntegrationJiraSettingsUpdateDocument, {
+      input,
+    });
+    const data = response.integrationJiraSettingsUpdate;
     return new IntegrationPayload(this._request, data);
   }
 }
@@ -15821,6 +15920,15 @@ export class LinearSdk extends Request {
    */
   public integrationIntercomSettingsUpdate(input: L.IntercomSettingsInput): LinearFetch<IntegrationPayload> {
     return new IntegrationIntercomSettingsUpdateMutation(this._request).fetch(input);
+  }
+  /**
+   * Updates settings on the Jira integration.
+   *
+   * @param input - required input to pass to integrationJiraSettingsUpdate
+   * @returns IntegrationPayload
+   */
+  public integrationJiraSettingsUpdate(input: L.JiraSettingsInput): LinearFetch<IntegrationPayload> {
+    return new IntegrationJiraSettingsUpdateMutation(this._request).fetch(input);
   }
   /**
    * Enables Loom integration for the organization.

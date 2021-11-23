@@ -112,6 +112,10 @@ fragment Document on Document {
   creator {
     id
   }
+  # The user who last updated the document.
+  updatedBy {
+    id
+  }
 }
 
 # A milestone that contains projects.
@@ -470,7 +474,7 @@ fragment Template on Template {
   updatedAt
   # The name of the template.
   name
-  # The team that the template is associated with.
+  # The team that the template is associated with. If null, the template is global to the workspace.
   team {
     id
   }
@@ -1186,6 +1190,18 @@ fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
   type
 }
 
+# Jira specific settings.
+fragment JiraSettings on JiraSettings {
+  # The Jira projects for the organization.
+  projects {
+    ...JiraProjectData
+  }
+  # The mapping of Jira project id => Linear team id.
+  projectMapping {
+    ...JiraLinearMapping
+  }
+}
+
 # Labels that can be associated with issues.
 fragment IssueLabel on IssueLabel {
   # The label's color as a HEX string.
@@ -1211,6 +1227,16 @@ fragment IssueLabel on IssueLabel {
   creator {
     id
   }
+}
+
+# Metadata about a Jira project.
+fragment JiraProjectData on JiraProjectData {
+  # The Jira id for this project.
+  id
+  # The Jira key for this project, such as ENG.
+  key
+  # The Jira name for this project, such as Engineering.
+  name
 }
 
 # Notification subscriptions for models.
@@ -1454,6 +1480,9 @@ fragment IntegrationSettings on IntegrationSettings {
   intercom {
     ...IntercomSettings
   }
+  jira {
+    ...JiraSettings
+  }
   sentry {
     ...SentrySettings
   }
@@ -1530,6 +1559,14 @@ fragment Subscription on Subscription {
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# Tuple for mapping Jira projects to Linear teams.
+fragment JiraLinearMapping on JiraLinearMapping {
+  # The Jira id for this project.
+  jiraProjectId
+  # The Linear team id to map to the given project.
+  linearTeamId
 }
 
 # User favorites presented in the sidebar.
@@ -5770,6 +5807,15 @@ mutation integrationIntercomSettingsUpdate(
   $input: IntercomSettingsInput!
 ) {
   integrationIntercomSettingsUpdate(input: $input) {
+    ...IntegrationPayload
+  }
+}
+# Updates settings on the Jira integration.
+mutation integrationJiraSettingsUpdate(
+  # A partial Jira integration settings object to update the integration settings with.
+  $input: JiraSettingsInput!
+) {
+  integrationJiraSettingsUpdate(input: $input) {
     ...IntegrationPayload
   }
 }

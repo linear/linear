@@ -1420,6 +1420,10 @@ type Document implements Node {
       entity hasn't been update after creation.
   """
   updatedAt: DateTime!
+  """
+  The user who last updated the document.
+  """
+  updatedBy: User!
 }
 
 type DocumentConnection {
@@ -2333,6 +2337,7 @@ The integration resource's settings
 type IntegrationSettings {
   googleSheets: GoogleSheetsSettings
   intercom: IntercomSettings
+  jira: JiraSettings
   sentry: SentrySettings
   slackPost: SlackPostSettings
   slackProjectPost: SlackPostSettings
@@ -3948,6 +3953,89 @@ input JiraConfigurationInput {
   project: String
 }
 
+"""
+Tuple for mapping Jira projects to Linear teams.
+"""
+type JiraLinearMapping {
+  """
+  The Jira id for this project.
+  """
+  jiraProjectId: String!
+  """
+  The Linear team id to map to the given project.
+  """
+  linearTeamId: String!
+}
+
+input JiraLinearMappingInput {
+  """
+  The Jira id for this project.
+  """
+  jiraProjectId: String!
+  """
+  The Linear team id to map to the given project.
+  """
+  linearTeamId: String!
+}
+
+"""
+Metadata about a Jira project.
+"""
+type JiraProjectData {
+  """
+  The Jira id for this project.
+  """
+  id: String!
+  """
+  The Jira key for this project, such as ENG.
+  """
+  key: String!
+  """
+  The Jira name for this project, such as Engineering.
+  """
+  name: String!
+}
+
+input JiraProjectDataInput {
+  """
+  The Jira id for this project.
+  """
+  id: String!
+  """
+  The Jira key for this project, such as ENG.
+  """
+  key: String!
+  """
+  The Jira name for this project, such as Engineering.
+  """
+  name: String!
+}
+
+"""
+Jira specific settings.
+"""
+type JiraSettings {
+  """
+  The mapping of Jira project id => Linear team id.
+  """
+  projectMapping: [JiraLinearMapping!]
+  """
+  The Jira projects for the organization.
+  """
+  projects: [JiraProjectData!]!
+}
+
+input JiraSettingsInput {
+  """
+  The mapping of Jira project id => Linear team id.
+  """
+  projectMapping: [JiraLinearMappingInput!]
+  """
+  The Jira projects for the organization.
+  """
+  projects: [JiraProjectDataInput!]!
+}
+
 input JoinOrganizationInput {
   """
   The identifier of the organization.
@@ -4643,6 +4731,15 @@ type Mutation {
     A partial Intercom integration settings object to update the integration settings with.
     """
     input: IntercomSettingsInput!
+  ): IntegrationPayload!
+  """
+  Updates settings on the Jira integration.
+  """
+  integrationJiraSettingsUpdate(
+    """
+    A partial Jira integration settings object to update the integration settings with.
+    """
+    input: JiraSettingsInput!
   ): IntegrationPayload!
   """
   Enables Loom integration for the organization.
@@ -10599,7 +10696,11 @@ type Template implements Node {
   """
   name: String!
   """
-  The team that the template is associated with.
+  The organization that the template is associated with. If null, the template is associated with a particular team.
+  """
+  organization: Organization!
+  """
+  The team that the template is associated with. If null, the template is global to the workspace.
   """
   team: Team!
   """
@@ -11559,7 +11660,7 @@ type Webhook implements Node {
   """
   Webhook URL
   """
-  url: String!
+  url: String
 }
 
 type WebhookConnection {

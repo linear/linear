@@ -720,6 +720,16 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No Document found - cannot test document.project query");
       }
     });
+
+    /** Test the document.updatedBy query for L.User */
+    it("document.updatedBy", async () => {
+      if (_document) {
+        const document_updatedBy: L.User | undefined = await _document.updatedBy;
+        expect(document_updatedBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.updatedBy query");
+      }
+    });
   });
 
   /** Test all Emoji queries */
