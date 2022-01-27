@@ -87,6 +87,8 @@ fragment CustomView on CustomView {
 fragment Document on Document {
   # The color of the icon.
   color
+  # The document content as JSON.
+  contentData
   # The document content in markdown format.
   content
   # The document title.
@@ -461,7 +463,7 @@ fragment WorkflowState on WorkflowState {
   id
 }
 
-# A template object used for creating new issues faster.
+# A template object used for creating entities faster.
 fragment Template on Template {
   # Template data.
   templateData
@@ -514,17 +516,27 @@ fragment UserAccount on UserAccount {
 
 # A user that has access to the the resources of an organization.
 fragment User on User {
+  # A date at which the user current status should be cleared.
+  statusUntilAt
+  # A short description of the user, either its title or bio.
+  description
   # An URL to the user's avatar image.
   avatarUrl
   # Number of issues created.
   createdIssueCount
   # Reason why is the account disabled.
   disableReason
+  # The emoji to represent the user current status.
+  statusEmoji
+  # The label of the user current status.
+  statusLabel
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
   # The last time the user was seen online. If null, the user is currently online.
   lastSeen
+  # The local timezone of the user.
+  timezone
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -545,6 +557,8 @@ fragment User on User {
   active
   # Whether the user is an organization administrator.
   admin
+  # Whether the user is the currently authenticated user.
+  isMe
 }
 
 # A user's web browser push notification subscription.
@@ -938,6 +952,8 @@ fragment Team on Team {
   }
   # The duration of a cycle in weeks.
   cycleDuration
+  # The icon of the team.
+  icon
   # The id of the default template to use for new issues created by members of the team.
   defaultTemplateForMembersId
   # The id of the default template to use for new issues created by non-members of the team.
@@ -947,6 +963,8 @@ fragment Team on Team {
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
+  # The team's color.
+  color
   # The team's description.
   description
   # The team's name.
@@ -1213,7 +1231,7 @@ fragment IssueLabel on IssueLabel {
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been update after creation.
   updatedAt
-  # The team to which the label belongs to.
+  # The team that the label is associated with. If null, the label is associated with the global workspace..
   team {
     id
   }
@@ -1944,19 +1962,6 @@ fragment DocumentVersionConnection on DocumentVersionConnection {
   }
 }
 
-fragment DocumentationSearchPayload on DocumentationSearchPayload {
-  # The content of the documentation.
-  content
-  # The time the documentation was published.
-  publishedAt
-  # The title of the found documentation.
-  title
-  # The type of documentation that was found.
-  type
-  # The url to the documentation.
-  url
-}
-
 fragment EmailSubscribePayload on EmailSubscribePayload {
   # Whether the operation was successful.
   success
@@ -2036,6 +2041,19 @@ fragment FigmaEmbedPayload on FigmaEmbedPayload {
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
   # The identifier of the last sync operation.
   lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment GitHubCommitIntegrationPayload on GitHubCommitIntegrationPayload {
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The integration that was created or updated.
+  integration {
+    id
+  }
+  # The webhook secret to provide to GitHub.
+  webhookSecret
   # Whether the operation was successful.
   success
 }
@@ -2491,17 +2509,6 @@ fragment RotateSecretPayload on RotateSecretPayload {
   lastSyncId
   # Whether the operation was successful.
   success
-}
-
-fragment SearchResultPayload on SearchResultPayload {
-  # Active issue IDs returned matching the search term.
-  issueIds
-  # Archived issues matching the search term along with all their dependencies.
-  archivePayload {
-    ...ArchiveResponse
-  }
-  # Total number of search results.
-  totalCount
 }
 
 fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
@@ -4135,6 +4142,37 @@ query organization_integrations(
     }
   }
 }
+# Labels associated with the organization.
+query organization_labels(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # [Alpha] Filter returned issue labels.
+  $filter: IssueLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    labels(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueLabelConnection
+    }
+  }
+}
 # Milestones associated with the organization.
 query organization_milestones(
   # A cursor to be used with first for forward pagination
@@ -4194,6 +4232,34 @@ query organization_teams(
       orderBy: $orderBy
     ) {
       ...TeamConnection
+    }
+  }
+}
+# Templates associated with the organization.
+query organization_templates(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    templates(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...TemplateConnection
     }
   }
 }
@@ -5373,6 +5439,17 @@ mutation attachmentLinkIntercom(
     ...AttachmentPayload
   }
 }
+# Link an existing Jira issue to an issue.
+mutation attachmentLinkJiraIssue(
+  # The issue for which to link the Jira issue.
+  $issueId: String!
+  # The Jira issue key or ID to link.
+  $jiraIssueId: String!
+) {
+  attachmentLinkJiraIssue(issueId: $issueId, jiraIssueId: $jiraIssueId) {
+    ...AttachmentPayload
+  }
+}
 # Link any url to an issue.
 mutation attachmentLinkURL(
   # The issue for which to link the url.
@@ -5536,27 +5613,9 @@ mutation cycleUpdate(
     ...CyclePayload
   }
 }
-# Create the OAuth test applications in development.
-mutation debugCreateOAuthApps {
-  debugCreateOAuthApps {
-    ...DebugPayload
-  }
-}
-# Create the SAML test organization in development.
-mutation debugCreateSAMLOrg {
-  debugCreateSAMLOrg {
-    ...DebugPayload
-  }
-}
 # Always fails with internal error. Used to debug logging.
 mutation debugFailWithInternalError {
   debugFailWithInternalError {
-    ...DebugPayload
-  }
-}
-# Always logs an error to Sentry as warning. Used to debug logging.
-mutation debugFailWithWarning {
-  debugFailWithWarning {
     ...DebugPayload
   }
 }
@@ -5755,6 +5814,12 @@ mutation integrationFront(
     ...IntegrationPayload
   }
 }
+# Generates a webhook for the GitHub commit integration.
+mutation integrationGithubCommitCreate {
+  integrationGithubCommitCreate {
+    ...GitHubCommitIntegrationPayload
+  }
+}
 # Connects the organization with the GitHub App.
 mutation integrationGithubConnect(
   # The GitHub data to connect with.
@@ -5801,21 +5866,12 @@ mutation integrationIntercomDelete {
     ...IntegrationPayload
   }
 }
-# Updates settings on the Intercom integration.
+# [DEPRECATED] Updates settings on the Intercom integration.
 mutation integrationIntercomSettingsUpdate(
   # A partial Intercom integration settings object to update the integration settings with.
   $input: IntercomSettingsInput!
 ) {
   integrationIntercomSettingsUpdate(input: $input) {
-    ...IntegrationPayload
-  }
-}
-# Updates settings on the Jira integration.
-mutation integrationJiraSettingsUpdate(
-  # A partial Jira integration settings object to update the integration settings with.
-  $input: JiraSettingsInput!
-) {
-  integrationJiraSettingsUpdate(input: $input) {
     ...IntegrationPayload
   }
 }
@@ -5844,6 +5900,17 @@ mutation integrationSentryConnect(
   $organizationSlug: String!
 ) {
   integrationSentryConnect(code: $code, installationId: $installationId, organizationSlug: $organizationSlug) {
+    ...IntegrationPayload
+  }
+}
+# [INTERNAL] Updates the integration.
+mutation integrationSettingsUpdate(
+  # The identifier of the integration to update.
+  $id: String!
+  # An integration settings object.
+  $input: IntegrationSettingsInput!
+) {
+  integrationSettingsUpdate(id: $id, input: $input) {
     ...IntegrationPayload
   }
 }
@@ -6125,8 +6192,10 @@ mutation issueLabelArchive(
 mutation issueLabelCreate(
   # The issue label to create.
   $input: IssueLabelCreateInput!
+  # Whether to replace all team-specific labels with the same name with this newly created workspace label.
+  $replaceTeamLabels: Boolean
 ) {
-  issueLabelCreate(input: $input) {
+  issueLabelCreate(input: $input, replaceTeamLabels: $replaceTeamLabels) {
     ...IssueLabelPayload
   }
 }
@@ -6462,6 +6531,17 @@ mutation projectLinkDelete(
 ) {
   projectLinkDelete(id: $id) {
     ...ArchivePayload
+  }
+}
+# Updates a project link.
+mutation projectLinkUpdate(
+  # The identifier of the project link to update.
+  $id: String!
+  # The project link object to update.
+  $input: ProjectLinkUpdateInput!
+) {
+  projectLinkUpdate(id: $id, input: $input) {
+    ...ProjectLinkPayload
   }
 }
 # Unarchives a project.

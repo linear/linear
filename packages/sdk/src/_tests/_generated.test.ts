@@ -1033,6 +1033,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issueLabel.organization query for L.Organization */
+    it("issueLabel.organization", async () => {
+      if (_issueLabel) {
+        const issueLabel_organization: L.Organization | undefined = await _issueLabel.organization;
+        expect(issueLabel_organization instanceof L.Organization);
+      } else {
+        console.warn("codegen-doc:print: No IssueLabel found - cannot test issueLabel.organization query");
+      }
+    });
+
     /** Test the issueLabel.team query for L.Team */
     it("issueLabel.team", async () => {
       if (_issueLabel) {
@@ -1665,6 +1675,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the organization connection query for the IssueLabel */
+    it("organization.labels", async () => {
+      if (_organization) {
+        const labels: L.IssueLabelConnection | undefined = await _organization.labels();
+        expect(labels instanceof L.IssueLabelConnection);
+      } else {
+        console.warn("codegen-doc:print: No organization found - cannot test _organization.labels query");
+      }
+    });
+
     /** Test the organization connection query for the Milestone */
     it("organization.milestones", async () => {
       if (_organization) {
@@ -1682,6 +1702,16 @@ describe("generated", () => {
         expect(teams instanceof L.TeamConnection);
       } else {
         console.warn("codegen-doc:print: No organization found - cannot test _organization.teams query");
+      }
+    });
+
+    /** Test the organization model query for Organization_Templates */
+    it("organization.templates", async () => {
+      if (_organization) {
+        const templates: L.TemplateConnection | undefined = await _organization.templates();
+        expect(templates instanceof L.TemplateConnection);
+      } else {
+        console.warn("codegen-doc:print: No organization found - cannot test _organization.templates query");
       }
     });
 
