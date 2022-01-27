@@ -5389,6 +5389,18 @@
             "deprecationReason": null
           },
           {
+            "name": "contentData",
+            "description": "The document content as JSON.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "icon",
             "description": "The icon of the document.",
             "args": [],
@@ -5623,7 +5635,7 @@
           },
           {
             "name": "contentData",
-            "description": "The document content as a Prosemirror document.",
+            "description": "[Internal] The document content as a Prosemirror document.",
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
@@ -5937,7 +5949,7 @@
           },
           {
             "name": "contentData",
-            "description": "The document content as a Prosemirror document.",
+            "description": "[Internal] The document content as a Prosemirror document.",
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
@@ -6228,93 +6240,6 @@
           {
             "name": "cursor",
             "description": "Used in `before` and `after` args",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "DocumentationSearchPayload",
-        "description": null,
-        "fields": [
-          {
-            "name": "type",
-            "description": "The type of documentation that was found.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "publishedAt",
-            "description": "The time the documentation was published.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "title",
-            "description": "The title of the found documentation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "url",
-            "description": "The url to the documentation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "content",
-            "description": "The content of the documentation.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -7973,6 +7898,77 @@
       },
       {
         "kind": "OBJECT",
+        "name": "GitHubCommitIntegrationPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "lastSyncId",
+            "description": "The identifier of the last sync operation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integration",
+            "description": "The integration that was created or updated.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Integration",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "webhookSecret",
+            "description": "The webhook secret to provide to GitHub.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "GithubOAuthTokenPayload",
         "description": "GitHub OAuth token, plus information about the organizations the user is a member of.",
         "fields": [
@@ -8212,6 +8208,81 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "GoogleSheetsSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "spreadsheetId",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "spreadsheetUrl",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sheetId",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedIssuesAt",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -9184,6 +9255,101 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "IntegrationSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "slackPost",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SlackPostSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackProjectPost",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SlackPostSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "googleSheets",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "GoogleSheetsSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sentry",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SentrySettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "zendesk",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ZendeskSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "intercom",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IntercomSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "jira",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "JiraSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -13092,17 +13258,25 @@
             "deprecationReason": null
           },
           {
-            "name": "team",
-            "description": "The team to which the label belongs to.",
+            "name": "organization",
+            "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Team",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Organization",
+              "ofType": null
+            },
+            "isDeprecated": true,
+            "deprecationReason": "Workspace labels are identified by their team being null."
+          },
+          {
+            "name": "team",
+            "description": "The team that the label is associated with. If null, the label is associated with the global workspace..",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Team",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -13514,15 +13688,11 @@
           },
           {
             "name": "teamId",
-            "description": "The team associated with the label.",
+            "description": "The team associated with the label. If not given, the label will be associated with the entire workspace.",
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -16224,6 +16394,55 @@
             "deprecationReason": null
           },
           {
+            "name": "attachmentLinkJiraIssue",
+            "description": "Link an existing Jira issue to an issue.",
+            "args": [
+              {
+                "name": "issueId",
+                "description": "The issue for which to link the Jira issue.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "jiraIssueId",
+                "description": "The Jira issue key or ID to link.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AttachmentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "attachmentArchive",
             "description": "[DEPRECATED] Archives an issue attachment.",
             "args": [
@@ -16879,7 +17098,7 @@
           },
           {
             "name": "debugFailWithWarning",
-            "description": "Always logs an error to Sentry as warning. Used to debug logging.",
+            "description": "[Internal] Always logs an error to Sentry as warning. Used to debug logging.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -16895,7 +17114,7 @@
           },
           {
             "name": "debugCreateSAMLOrg",
-            "description": "Create the SAML test organization in development.",
+            "description": "[Internal] Create the SAML test organization in development.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -16911,8 +17130,41 @@
           },
           {
             "name": "debugCreateOAuthApps",
-            "description": "Create the OAuth test applications in development.",
+            "description": "[Internal] Create the OAuth test applications in development.",
             "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DebugPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "debugCreateSubscription",
+            "description": "[Internal] Create test subscription in development.",
+            "args": [
+              {
+                "name": "subscriptionType",
+                "description": "Subscription type.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -17431,6 +17683,71 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationSettingsUpdate",
+            "description": "[INTERNAL] Updates the integration.",
+            "args": [
+              {
+                "name": "input",
+                "description": "An integration settings object.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "IntegrationSettingsInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the integration to update.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationGithubCommitCreate",
+            "description": "Generates a webhook for the GitHub commit integration.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "GitHubCommitIntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationGithubConnect",
             "description": "Connects the organization with the GitHub App.",
             "args": [
@@ -17546,39 +17863,6 @@
             "deprecationReason": null
           },
           {
-            "name": "integrationJiraSettingsUpdate",
-            "description": "Updates settings on the Jira integration.",
-            "args": [
-              {
-                "name": "input",
-                "description": "A partial Jira integration settings object to update the integration settings with.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "JiraSettingsInput",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "IntegrationPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "integrationIntercom",
             "description": "Integrates the organization with Intercom.",
             "args": [
@@ -17645,7 +17929,7 @@
           },
           {
             "name": "integrationIntercomSettingsUpdate",
-            "description": "Updates settings on the Intercom integration.",
+            "description": "[DEPRECATED] Updates settings on the Intercom integration.",
             "args": [
               {
                 "name": "input",
@@ -17673,8 +17957,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "This mutation is deprecated, please use `integrationSettingsUpdate` instead"
           },
           {
             "name": "integrationSlack",
@@ -18968,6 +19252,18 @@
             "name": "issueLabelCreate",
             "description": "Creates a new label.",
             "args": [
+              {
+                "name": "replaceTeamLabels",
+                "description": "Whether to replace all team-specific labels with the same name with this newly created workspace label.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "input",
                 "description": "The issue label to create.",
@@ -20458,6 +20754,55 @@
                   "ofType": {
                     "kind": "INPUT_OBJECT",
                     "name": "ProjectLinkCreateInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectLinkPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectLinkUpdate",
+            "description": "Updates a project link.",
+            "args": [
+              {
+                "name": "input",
+                "description": "The project link object to update.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ProjectLinkUpdateInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the project link to update.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   }
                 },
@@ -22176,6 +22521,30 @@
             "deprecationReason": null
           },
           {
+            "name": "eqIgnoreCase",
+            "description": "Equals case insensitive. Matches any values that matches the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neqIgnoreCase",
+            "description": "Not-equals case insensitive. Matches any values that don't match the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "startsWith",
             "description": "Starts with constraint. Matches any values that start with the given string.",
             "type": {
@@ -22236,8 +22605,32 @@
             "deprecationReason": null
           },
           {
+            "name": "containsIgnoreCase",
+            "description": "Contains case insensitive constraint. Matches any values that contain the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "notContains",
             "description": "Doesn't contain constraint. Matches any values that don't contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notContainsIgnoreCase",
+            "description": "Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -24118,6 +24511,30 @@
             "deprecationReason": null
           },
           {
+            "name": "eqIgnoreCase",
+            "description": "Equals case insensitive. Matches any values that matches the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neqIgnoreCase",
+            "description": "Not-equals case insensitive. Matches any values that don't match the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "startsWith",
             "description": "Starts with constraint. Matches any values that start with the given string.",
             "type": {
@@ -24178,8 +24595,32 @@
             "deprecationReason": null
           },
           {
+            "name": "containsIgnoreCase",
+            "description": "Contains case insensitive constraint. Matches any values that contain the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "notContains",
             "description": "Doesn't contain constraint. Matches any values that don't contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notContainsIgnoreCase",
+            "description": "Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -24454,6 +24895,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isMe",
+            "description": "Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -26063,6 +26516,196 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "templates",
+            "description": "Templates associated with the organization.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TemplateConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "labels",
+            "description": "Labels associated with the organization.",
+            "args": [
+              {
+                "name": "filter",
+                "description": "[Alpha] Filter returned issue labels.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueLabelFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IssueLabelConnection",
                 "ofType": null
               }
             },
@@ -29279,6 +29922,41 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "ProjectLinkUpdateInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "url",
+            "description": "The URL of the link.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "label",
+            "description": "The label for the link.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "ProjectPayload",
         "description": null,
@@ -31606,59 +32284,6 @@
             "deprecationReason": null
           },
           {
-            "name": "documentationSearch",
-            "description": "[Internal] Searches documentation.",
-            "args": [
-              {
-                "name": "query",
-                "description": "The query to search the documentation with.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "type",
-                "description": "The type of documentation to search for.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "DocumentationSearchPayload",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "documents",
             "description": "All documents for the project.",
             "args": [
@@ -33887,51 +34512,6 @@
             "deprecationReason": null
           },
           {
-            "name": "search",
-            "description": "[Internal] Search in Linear. This query is for internal purposes only and is subject to change without notice.",
-            "args": [
-              {
-                "name": "from",
-                "description": "From which result index number to load results.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "term",
-                "description": "Search string to look for.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SearchResultPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "subscription",
             "description": "The organization's subscription.",
             "args": [],
@@ -35377,73 +35957,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "SearchResultPayload",
-        "description": null,
-        "fields": [
-          {
-            "name": "issueIds",
-            "description": "Active issue IDs returned matching the search term.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "archivePayload",
-            "description": "Archived issues matching the search term along with all their dependencies.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ArchiveResponse",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "totalCount",
-            "description": "Total number of search results.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "SentryIssuePayload",
         "description": "Sentry issue data",
         "fields": [
@@ -35653,6 +36166,33 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "SentrySettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "organizationSlug",
+            "description": "The slug of the Sentry organization being connected.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "SlackPostSettings",
         "description": "Slack notification specific settings.",
@@ -35708,6 +36248,65 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SlackPostSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "channel",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "channelId",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "configurationUrl",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -35896,6 +36495,30 @@
             "deprecationReason": null
           },
           {
+            "name": "eqIgnoreCase",
+            "description": "Equals case insensitive. Matches any values that matches the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neqIgnoreCase",
+            "description": "Not-equals case insensitive. Matches any values that don't match the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "startsWith",
             "description": "Starts with constraint. Matches any values that start with the given string.",
             "type": {
@@ -35956,8 +36579,32 @@
             "deprecationReason": null
           },
           {
+            "name": "containsIgnoreCase",
+            "description": "Contains case insensitive constraint. Matches any values that contain the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "notContains",
             "description": "Doesn't contain constraint. Matches any values that don't contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notContainsIgnoreCase",
+            "description": "Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -36584,6 +37231,30 @@
             "deprecationReason": null
           },
           {
+            "name": "icon",
+            "description": "The icon of the team.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "color",
+            "description": "The team's color.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "organization",
             "description": "The organization that the team is associated with.",
             "args": [],
@@ -36892,18 +37563,6 @@
             "deprecationReason": "Use defaultTemplateForMembers instead"
           },
           {
-            "name": "triageIssueState",
-            "description": "The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "WorkflowState",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "defaultTemplateForNonMembers",
             "description": "The default template to use for new issues created by non-members of the team.",
             "args": [],
@@ -36926,6 +37585,18 @@
             },
             "isDeprecated": true,
             "deprecationReason": "Use defaultTemplateForNonMembers instead"
+          },
+          {
+            "name": "triageIssueState",
+            "description": "The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "WorkflowState",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           },
           {
             "name": "private",
@@ -38166,6 +38837,30 @@
             "deprecationReason": null
           },
           {
+            "name": "icon",
+            "description": "The icon of the team.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "color",
+            "description": "The color of the team.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "organizationId",
             "description": "The organization associated with the team.",
             "type": {
@@ -39122,6 +39817,30 @@
             "deprecationReason": null
           },
           {
+            "name": "icon",
+            "description": "The icon of the team.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "color",
+            "description": "The color of the team.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "cyclesEnabled",
             "description": "Whether the team uses cycles.",
             "type": {
@@ -39513,7 +40232,7 @@
       {
         "kind": "OBJECT",
         "name": "Template",
-        "description": "A template object used for creating new issues faster.",
+        "description": "A template object used for creating entities faster.",
         "fields": [
           {
             "name": "id",
@@ -39640,13 +40359,9 @@
             "description": "The organization that the template is associated with. If null, the template is associated with a particular team.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Organization",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Organization",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -39656,13 +40371,9 @@
             "description": "The team that the template is associated with. If null, the template is global to the workspace.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Team",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Team",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -39802,15 +40513,11 @@
           },
           {
             "name": "teamId",
-            "description": "The identifier or key of the team associated with the template.",
+            "description": "The identifier or key of the team associated with the template. If not given, the template will be shared across all teams.",
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -39988,6 +40695,18 @@
           {
             "name": "description",
             "description": "The template description.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "The identifier or key of the team associated with the template. If set to null, the template will be shared across all teams.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -40356,6 +41075,18 @@
             "deprecationReason": null
           },
           {
+            "name": "reducedPersonalInformation",
+            "description": "Whether the organization is using project milestones.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "linearPreviewFlags",
             "description": "Linear Preview feature flags",
             "type": {
@@ -40464,6 +41195,66 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "The user description or a short bio.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "statusEmoji",
+            "description": "The emoji part of the user status.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "statusLabel",
+            "description": "The label part of the user status.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "statusUntilAt",
+            "description": "When the user status should be cleared.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timezone",
+            "description": "The local timezone of the user.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -40849,6 +41640,66 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "A short description of the user, either its title or bio.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "statusEmoji",
+            "description": "The emoji to represent the user current status.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "statusLabel",
+            "description": "The label of the user current status.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "statusUntilAt",
+            "description": "A date at which the user current status should be cleared.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timezone",
+            "description": "The local timezone of the user.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -41331,6 +42182,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TeamMembershipConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isMe",
+            "description": "Whether the user is the currently authenticated user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -41909,6 +42776,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "isMe",
+            "description": "Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -42015,6 +42894,12 @@
           },
           {
             "name": "canPlaySnake",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "canPlayTetris",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -44420,6 +45305,65 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "ZendeskSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "subdomain",
+            "description": "The subdomain of the Zendesk organization being connected.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "The URL of the connected Zendesk organization.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "botUserId",
+            "description": "The ID of the Linear bot user.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
