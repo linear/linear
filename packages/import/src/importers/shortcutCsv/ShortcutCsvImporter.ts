@@ -3,12 +3,12 @@
 import csv from "csvtojson";
 import { Importer, ImportResult } from "../../types";
 
-type ClubhouseStoryType = "feature" | "bug" | "chore";
+type ShortcutStoryType = "feature" | "bug" | "chore";
 
-interface ClubhouseIssueType {
+interface ShortcutIssueType {
   id: string;
   name: string;
-  type: ClubhouseStoryType;
+  type: ShortcutStoryType;
   requestor: string;
   owners: string[];
   description: string;
@@ -72,27 +72,27 @@ const colParser = {
 };
 
 /**
- * Import issues from an Clubhouse CSV export.
+ * Import issues from an Shortcut CSV export.
  *
  * @param filePath  path to csv file
- * @param workspaceSlug   Clubhouse workspace slug (https://app.clubhouse.io/[THIS])
- * @param apiToken  A Clubhouse API token (https://app.clubhouse.io/settings/account/api-tokens)
+ * @param workspaceSlug   Shortcut workspace slug (https://app.shortcut.com/[THIS])
+ * @param apiToken  A Shortcut API token (https://app.shortcut.com/settings/account/api-tokens)
  */
-export class ClubhouseCsvImporter implements Importer {
+export class ShortcutCsvImporter implements Importer {
   public constructor(private filePath: string, workspaceSlug: string, private apiToken: string) {
-    this.clubhouseBaseURL = "https://app.clubhouse.io/" + workspaceSlug;
+    this.shortcutBaseURL = "https://app.shortcut.com/" + workspaceSlug;
   }
 
   public get name(): string {
-    return "Clubhouse (CSV)";
+    return "Shortcut (CSV)";
   }
 
   public get defaultTeamName(): string {
-    return "Clubhouse";
+    return "Shortcut";
   }
 
   public import = async (): Promise<ImportResult> => {
-    const data = (await csv({ colParser, checkType: true }).fromFile(this.filePath)) as ClubhouseIssueType[];
+    const data = (await csv({ colParser, checkType: true }).fromFile(this.filePath)) as ShortcutIssueType[];
 
     const importData: ImportResult = {
       issues: [],
@@ -117,12 +117,12 @@ export class ClubhouseCsvImporter implements Importer {
         continue;
       }
 
-      const url = this.clubhouseBaseURL + "/story/" + row.id;
+      const url = this.shortcutBaseURL + "/story/" + row.id;
       const descriptionParts = [
         row.description,
         row.tasks.map(t => `- ${t}`).join("\n"),
         row.external_tickets.map(externalUrl => `* **External Link:** ${externalUrl}`).join("\n"),
-        `[View original issue in Clubhouse](${url})`,
+        `[View original issue in Shortcut](${url})`,
       ];
       const description = descriptionParts.filter(s => s.length > 0).join("\n\n");
 
@@ -161,7 +161,7 @@ export class ClubhouseCsvImporter implements Importer {
 
   // -- Private interface
 
-  private clubhouseBaseURL: string;
+  private shortcutBaseURL: string;
 }
 
 const mapStatus = (input: string): string => {
