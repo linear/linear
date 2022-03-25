@@ -33,6 +33,22 @@ Supported fields:
 - Labels
 - (Optional) Comments
 
+### GitLab for Personal
+
+Open GitLab issues can be imported with your personal access token from GitLab's API.
+
+Supported fields:
+
+- `title` - Issue Title
+- `description` - Issue Description
+- `url` - Issue URL
+- `labels` - Issue Labels
+- `assignees` - Issue Assignees
+- `createdAt` - Issue Creation Date
+- `dueDate` - Issue Due Date
+- `priority` - Issue Priority
+- `status` - Issue Status
+
 ### Jira CSV
 
 Jira project can be imported into a Linear team from the CSV export file.
