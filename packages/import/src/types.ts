@@ -24,6 +24,8 @@ export interface Issue {
   completedAt?: Date;
   /** When the issue was started. */
   startedAt?: Date;
+  /** The id of the folder to move the issue under. */
+  parentId?: string;
 }
 
 /** Issue comment */

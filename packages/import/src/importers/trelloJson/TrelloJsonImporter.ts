@@ -66,7 +66,7 @@ export class TrelloJsonImporter implements Importer {
 
   public import = async (): Promise<ImportResult> => {
     const bytes = fs.readFileSync(this.filePath);
-    const data = JSON.parse((bytes as unknown) as string);
+    const data = JSON.parse(bytes as unknown as string);
 
     const importData: ImportResult = {
       issues: [],

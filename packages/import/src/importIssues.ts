@@ -8,6 +8,8 @@ import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
 
 interface ImportAnswers {
+  parentIdConfirmation: boolean;
+  parentId?: string;
   newTeam: boolean;
   includeComments?: boolean;
   includeProject?: string;
@@ -41,6 +43,37 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   // Prompt the user to either get or create a team
   const importAnswers = await inquirer.prompt<ImportAnswers>([
+    {
+      type: "confirm",
+      name: "parentIdConfirmation",
+      message: "Do you want to have a parent issue?",
+      default: false,
+    },
+    {
+      type: "input",
+      name: "parentId",
+      message: "The Parent Issue Id:",
+      default: undefined,
+      when: (answers: ImportAnswers) => {
+        return answers.parentIdConfirmation;
+      },
+    },
+    {
+      type: "list",
+      name: "targetAssignee",
+      message: "Assign to user:",
+      choices: () => {
+        const map = users.map(user => ({
+          name: user.name,
+          value: user.id,
+        }));
+        map.push({ name: "[Unassigned]", value: "" });
+        return map;
+      },
+      when: (answers: ImportAnswers) => {
+        return answers.parentIdConfirmation;
+      },
+    },
     {
       type: "confirm",
       name: "newTeam",
@@ -272,7 +305,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     await client.issueCreate({
       teamId,
-      projectId: (projectId as unknown) as string,
+      projectId: projectId as unknown as string,
       title: issue.title,
       description,
       priority: issue.priority,
@@ -280,6 +313,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       stateId,
       assigneeId,
       dueDate: formattedDueDate,
+      parentId: issue.parentId ?? importAnswers.parentId,
     });
   }
 

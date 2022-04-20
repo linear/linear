@@ -25,6 +25,7 @@ interface LinearIssueType {
   Completed: string;
   Canceled: string;
   Archived: string;
+  ParentId: string;
 }
 
 /**
@@ -80,6 +81,7 @@ export class LinearCsvImporter implements Importer {
         completedAt: !!row.Completed ? new Date(row.Completed) : undefined,
         startedAt: !!row.Started ? new Date(row.Started) : undefined,
         labels,
+        parentId: row.ParentId,
       });
 
       for (const lab of labels) {
