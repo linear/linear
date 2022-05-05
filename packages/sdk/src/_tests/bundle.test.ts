@@ -87,7 +87,7 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
       expectError(
         () => client.viewer,
         LinearErrorType.AuthenticationError,
-        "Authentication failed - Authentication is required in order to run this query or mutation"
+        "Authentication required - You need to authenticate to access this operation."
       );
     });
 
