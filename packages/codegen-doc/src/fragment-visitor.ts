@@ -2,6 +2,7 @@ import autoBind from "auto-bind";
 import {
   DocumentNode,
   FieldDefinitionNode,
+  InterfaceTypeDefinitionNode,
   ListTypeNode,
   NamedTypeNode,
   NameNode,
@@ -10,8 +11,8 @@ import {
 } from "graphql";
 import { getRequiredArgs } from "./args";
 import { isValidField } from "./field";
-import { isValidFragment } from "./fragment";
-import { findObject, isConnection } from "./object";
+import { isValidObject } from "./fragment";
+import { findInterface, findObject, isConnection } from "./object";
 import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printLines } from "./print";
 import { findQuery } from "./query";
 import { Fragment, Named, NamedFields, PluginContext } from "./types";
@@ -56,7 +57,7 @@ export class FragmentVisitor {
       const node = _node as unknown as NamedFields<ObjectTypeDefinitionNode>;
 
       /** Process non empty object definitions */
-      if (isValidFragment(this._context, node)) {
+      if (isValidObject(this._context, node)) {
         /** Record fragment on context */
         this._fragments = [...this._fragments, node];
 
@@ -76,6 +77,23 @@ export class FragmentVisitor {
     },
   };
 
+  public InterfaceTypeDefinition = {
+    /** Print a fragment if there are fields */
+    leave: (_node: InterfaceTypeDefinitionNode): string | null => {
+      const node = _node as unknown as NamedFields<InterfaceTypeDefinitionNode>;
+
+      this._fragments = [...this._fragments, node];
+
+      return printLines([
+        printGraphqlDescription(node.description?.value),
+        printGraphqlDebug(node),
+        `fragment ${node.name} on ${node.name} {
+          ${printLines(node.fields.sort())}
+        }`,
+      ]);
+    },
+  };
+
   public FieldDefinition = {
     leave: (_node: FieldDefinitionNode): string | null => {
       const type = reduceTypeName(_node.type);
@@ -92,6 +110,7 @@ export class FragmentVisitor {
 
         /** Print all fields required for matching query */
         const query = findQuery(this._context, node);
+
         if (query) {
           const queryRequiredArgs = getRequiredArgs(query.arguments)
             .map(arg => arg.name.value)
@@ -111,16 +130,26 @@ export class FragmentVisitor {
           }
         } else {
           /** Print a matching fragment if no query */
-          const fragment = findObject(this._context, node);
+          const objectFragment = findObject(this._context, node);
+          const interfaceFragment = findInterface(this._context, node);
 
-          if (fragment && !isConnection(fragment)) {
+          if (objectFragment && !isConnection(objectFragment)) {
             return printLines([
               description,
               printGraphqlDebug(_node),
-              printGraphqlDebug(fragment),
+              printGraphqlDebug(objectFragment),
               `${node.name} {
-                  ...${fragment.name.value}
-                }`,
+                ...${objectFragment.name.value}
+              }`,
+            ]);
+          } else if (interfaceFragment) {
+            return printLines([
+              description,
+              printGraphqlDebug(_node),
+              printGraphqlDebug(interfaceFragment),
+              `${node.name} {
+                ...${interfaceFragment.name.value}
+              }`,
             ]);
           }
         }

@@ -1,5 +1,11 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
-import { ASTNode, FieldDefinitionNode, GraphQLSchema, ObjectTypeDefinitionNode } from "graphql";
+import {
+  ASTNode,
+  FieldDefinitionNode,
+  GraphQLSchema,
+  InterfaceTypeDefinitionNode,
+  ObjectTypeDefinitionNode,
+} from "graphql";
 
 /**
  * Changes name and type properties to string
@@ -25,9 +31,9 @@ export enum OperationType {
 }
 
 /**
- * The processed fragment object definition
+ * The processed fragment object or interface definition
  */
-export type Fragment = NamedFields<ObjectTypeDefinitionNode>;
+export type Fragment = NamedFields<ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode>;
 
 export interface PluginConfig {
   /**
@@ -96,6 +102,8 @@ export interface PluginContext<C extends PluginConfig = PluginConfig> {
   fragments: Fragment[];
   /** All object definitions */
   objects: ObjectTypeDefinitionNode[];
+  /** All interface definitions */
+  interfaces: InterfaceTypeDefinitionNode[];
   /** All query field definitions */
   queries: readonly FieldDefinitionNode[];
   /** All mutation field definitions */
