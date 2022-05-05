@@ -2254,6 +2254,10 @@ fragment MilestonePayload on MilestonePayload {
   success
 }
 
+fragment Node on Node {
+  # The unique identifier of the entity.
+  id
+}
 fragment NotificationConnection on NotificationConnection {
   nodes {
     ...Notification

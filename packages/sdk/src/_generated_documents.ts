@@ -8080,6 +8080,125 @@ export type MilestonePayloadFragment = { __typename?: "MilestonePayload" } & Pic
   "lastSyncId" | "success"
 > & { milestone?: Maybe<{ __typename?: "Milestone" } & Pick<Milestone, "id">> };
 
+type Node_ApiKey_Fragment = { __typename?: "ApiKey" } & Pick<ApiKey, "id">;
+
+type Node_Attachment_Fragment = { __typename?: "Attachment" } & Pick<Attachment, "id">;
+
+type Node_AuditEntry_Fragment = { __typename?: "AuditEntry" } & Pick<AuditEntry, "id">;
+
+type Node_Comment_Fragment = { __typename?: "Comment" } & Pick<Comment, "id">;
+
+type Node_CustomView_Fragment = { __typename?: "CustomView" } & Pick<CustomView, "id">;
+
+type Node_Cycle_Fragment = { __typename?: "Cycle" } & Pick<Cycle, "id">;
+
+type Node_Document_Fragment = { __typename?: "Document" } & Pick<Document, "id">;
+
+type Node_DocumentStep_Fragment = { __typename?: "DocumentStep" } & Pick<DocumentStep, "id">;
+
+type Node_DocumentVersion_Fragment = { __typename?: "DocumentVersion" } & Pick<DocumentVersion, "id">;
+
+type Node_Emoji_Fragment = { __typename?: "Emoji" } & Pick<Emoji, "id">;
+
+type Node_Favorite_Fragment = { __typename?: "Favorite" } & Pick<Favorite, "id">;
+
+type Node_Integration_Fragment = { __typename?: "Integration" } & Pick<Integration, "id">;
+
+type Node_IntegrationResource_Fragment = { __typename?: "IntegrationResource" } & Pick<IntegrationResource, "id">;
+
+type Node_Issue_Fragment = { __typename?: "Issue" } & Pick<Issue, "id">;
+
+type Node_IssueHistory_Fragment = { __typename?: "IssueHistory" } & Pick<IssueHistory, "id">;
+
+type Node_IssueImport_Fragment = { __typename?: "IssueImport" } & Pick<IssueImport, "id">;
+
+type Node_IssueLabel_Fragment = { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+
+type Node_IssueRelation_Fragment = { __typename?: "IssueRelation" } & Pick<IssueRelation, "id">;
+
+type Node_Milestone_Fragment = { __typename?: "Milestone" } & Pick<Milestone, "id">;
+
+type Node_Notification_Fragment = { __typename?: "Notification" } & Pick<Notification, "id">;
+
+type Node_NotificationSubscription_Fragment = { __typename?: "NotificationSubscription" } & Pick<
+  NotificationSubscription,
+  "id"
+>;
+
+type Node_OauthClient_Fragment = { __typename?: "OauthClient" } & Pick<OauthClient, "id">;
+
+type Node_Organization_Fragment = { __typename?: "Organization" } & Pick<Organization, "id">;
+
+type Node_OrganizationDomain_Fragment = { __typename?: "OrganizationDomain" } & Pick<OrganizationDomain, "id">;
+
+type Node_OrganizationInvite_Fragment = { __typename?: "OrganizationInvite" } & Pick<OrganizationInvite, "id">;
+
+type Node_Project_Fragment = { __typename?: "Project" } & Pick<Project, "id">;
+
+type Node_ProjectLink_Fragment = { __typename?: "ProjectLink" } & Pick<ProjectLink, "id">;
+
+type Node_PushSubscription_Fragment = { __typename?: "PushSubscription" } & Pick<PushSubscription, "id">;
+
+type Node_Reaction_Fragment = { __typename?: "Reaction" } & Pick<Reaction, "id">;
+
+type Node_Subscription_Fragment = { __typename?: "Subscription" } & Pick<Subscription, "id">;
+
+type Node_Team_Fragment = { __typename?: "Team" } & Pick<Team, "id">;
+
+type Node_TeamMembership_Fragment = { __typename?: "TeamMembership" } & Pick<TeamMembership, "id">;
+
+type Node_Template_Fragment = { __typename?: "Template" } & Pick<Template, "id">;
+
+type Node_User_Fragment = { __typename?: "User" } & Pick<User, "id">;
+
+type Node_UserSettings_Fragment = { __typename?: "UserSettings" } & Pick<UserSettings, "id">;
+
+type Node_ViewPreferences_Fragment = { __typename?: "ViewPreferences" } & Pick<ViewPreferences, "id">;
+
+type Node_Webhook_Fragment = { __typename?: "Webhook" } & Pick<Webhook, "id">;
+
+type Node_WorkflowState_Fragment = { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
+
+export type NodeFragment =
+  | Node_ApiKey_Fragment
+  | Node_Attachment_Fragment
+  | Node_AuditEntry_Fragment
+  | Node_Comment_Fragment
+  | Node_CustomView_Fragment
+  | Node_Cycle_Fragment
+  | Node_Document_Fragment
+  | Node_DocumentStep_Fragment
+  | Node_DocumentVersion_Fragment
+  | Node_Emoji_Fragment
+  | Node_Favorite_Fragment
+  | Node_Integration_Fragment
+  | Node_IntegrationResource_Fragment
+  | Node_Issue_Fragment
+  | Node_IssueHistory_Fragment
+  | Node_IssueImport_Fragment
+  | Node_IssueLabel_Fragment
+  | Node_IssueRelation_Fragment
+  | Node_Milestone_Fragment
+  | Node_Notification_Fragment
+  | Node_NotificationSubscription_Fragment
+  | Node_OauthClient_Fragment
+  | Node_Organization_Fragment
+  | Node_OrganizationDomain_Fragment
+  | Node_OrganizationInvite_Fragment
+  | Node_Project_Fragment
+  | Node_ProjectLink_Fragment
+  | Node_PushSubscription_Fragment
+  | Node_Reaction_Fragment
+  | Node_Subscription_Fragment
+  | Node_Team_Fragment
+  | Node_TeamMembership_Fragment
+  | Node_Template_Fragment
+  | Node_User_Fragment
+  | Node_UserSettings_Fragment
+  | Node_ViewPreferences_Fragment
+  | Node_Webhook_Fragment
+  | Node_WorkflowState_Fragment;
+
 export type NotificationConnectionFragment = { __typename?: "NotificationConnection" } & {
   nodes: Array<{ __typename?: "Notification" } & NotificationFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
@@ -14401,6 +14520,17 @@ export const MilestonePayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<MilestonePayloadFragment, unknown>;
+export const NodeFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Node" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Node" } },
+      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }] },
+    },
+  ],
+} as unknown as DocumentNode<NodeFragment, unknown>;
 export const NotificationFragmentDoc = {
   kind: "Document",
   definitions: [
