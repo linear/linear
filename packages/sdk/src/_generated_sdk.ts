@@ -188,7 +188,7 @@ export class ApiKey extends Request {
   public label: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
 }
@@ -293,6 +293,7 @@ export class ArchiveResponse extends Request {
     super(request);
     this.archive = data.archive;
     this.databaseVersion = data.databaseVersion;
+    this.includesDependencies = data.includesDependencies;
     this.totalCount = data.totalCount;
   }
 
@@ -300,6 +301,8 @@ export class ArchiveResponse extends Request {
   public archive: string;
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   public databaseVersion: number;
+  /** Whether the dependencies for the model objects are included in the archive. */
+  public includesDependencies: boolean;
   /** The total number of entities in the archive. */
   public totalCount: number;
 }
@@ -350,7 +353,7 @@ export class Attachment extends Request {
   public title: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Location of the attachment which is also used as an identifier. */
@@ -463,7 +466,7 @@ export class AuditEntry extends Request {
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user that caused the audit entry to be created. */
@@ -670,7 +673,8 @@ export class CollaborationDocumentUpdatePayload extends Request {
  */
 export class Comment extends Request {
   private _issue: L.CommentFragment["issue"];
-  private _user: L.CommentFragment["user"];
+  private _parent?: L.CommentFragment["parent"];
+  private _user?: L.CommentFragment["user"];
 
   public constructor(request: LinearRequest, data: L.CommentFragment) {
     super(request);
@@ -682,7 +686,8 @@ export class Comment extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._issue = data.issue;
-    this._user = data.user;
+    this._parent = data.parent ?? undefined;
+    this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -697,7 +702,7 @@ export class Comment extends Request {
   public id: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Comment's URL. */
@@ -706,11 +711,18 @@ export class Comment extends Request {
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
+  /** The parent of the comment. */
+  public get parent(): LinearFetch<Comment> | undefined {
+    return this._parent?.id ? new CommentQuery(this._request).fetch(this._parent?.id) : undefined;
+  }
   /** The user who wrote the comment. */
   public get user(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._user.id);
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-
+  /** The children of the comment. */
+  public children(variables?: Omit<L.Comment_ChildrenQueryVariables, "id">) {
+    return new Comment_ChildrenQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Deletes a comment. */
   public delete() {
     return new CommentDeleteMutation(this._request).fetch(this.id);
@@ -892,7 +904,7 @@ export class CustomView extends Request {
   public shared: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user who created the custom view. */
@@ -1022,7 +1034,7 @@ export class Cycle extends Request {
   public startsAt: Date;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The team that the cycle is associated with. */
@@ -1170,7 +1182,7 @@ export class Document extends Request {
   public title: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user who created the document. */
@@ -1271,7 +1283,7 @@ export class DocumentStep extends Request {
   public step: Record<string, unknown>;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Step version. */
@@ -1314,7 +1326,7 @@ export class DocumentVersion extends Request {
   public title: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user who created the version. */
@@ -1428,7 +1440,7 @@ export class Emoji extends Request {
   public source: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The emoji image URL. */
@@ -1521,6 +1533,7 @@ export class Favorite extends Request {
   private _issue?: L.FavoriteFragment["issue"];
   private _label?: L.FavoriteFragment["label"];
   private _parent?: L.FavoriteFragment["parent"];
+  private _predefinedViewTeam?: L.FavoriteFragment["predefinedViewTeam"];
   private _project?: L.FavoriteFragment["project"];
   private _projectTeam?: L.FavoriteFragment["projectTeam"];
   private _user: L.FavoriteFragment["user"];
@@ -1531,6 +1544,7 @@ export class Favorite extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.folderName = data.folderName ?? undefined;
     this.id = data.id;
+    this.predefinedViewType = data.predefinedViewType ?? undefined;
     this.sortOrder = data.sortOrder;
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -1540,6 +1554,7 @@ export class Favorite extends Request {
     this._issue = data.issue ?? undefined;
     this._label = data.label ?? undefined;
     this._parent = data.parent ?? undefined;
+    this._predefinedViewTeam = data.predefinedViewTeam ?? undefined;
     this._project = data.project ?? undefined;
     this._projectTeam = data.projectTeam ?? undefined;
     this._user = data.user;
@@ -1553,13 +1568,15 @@ export class Favorite extends Request {
   public folderName?: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The type of favorited predefiend view. */
+  public predefinedViewType?: string;
   /** The order of the item in the favorites list. */
   public sortOrder: number;
   /** The type of the favorite. */
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The favorited custom view. */
@@ -1585,6 +1602,10 @@ export class Favorite extends Request {
   /** The parent folder of the favorite. */
   public get parent(): LinearFetch<Favorite> | undefined {
     return this._parent?.id ? new FavoriteQuery(this._request).fetch(this._parent?.id) : undefined;
+  }
+  /** The team of the favorited predefiend view. */
+  public get predefinedViewTeam(): LinearFetch<Team> | undefined {
+    return this._predefinedViewTeam?.id ? new TeamQuery(this._request).fetch(this._predefinedViewTeam?.id) : undefined;
   }
   /** The favorited project. */
   public get project(): LinearFetch<Project> | undefined {
@@ -1892,7 +1913,7 @@ export class Integration extends Request {
   public service: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user that added the integration. */
@@ -2003,7 +2024,7 @@ export class IntegrationResource extends Request {
   public resourceType: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Detailed information about the external resource. */
@@ -2253,7 +2274,7 @@ export class Issue extends Request {
   public trashed?: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Issue URL. */
@@ -2382,51 +2403,6 @@ export class IssueConnection extends Connection<Issue> {
   }
 }
 /**
- * IssueDescriptionHistory model
- *
- * @param request - function to call the graphql client
- * @param data - L.IssueDescriptionHistoryFragment response data
- */
-export class IssueDescriptionHistory extends Request {
-  public constructor(request: LinearRequest, data: L.IssueDescriptionHistoryFragment) {
-    super(request);
-    this.actorId = data.actorId ?? undefined;
-    this.descriptionData = data.descriptionData;
-    this.id = data.id;
-    this.type = data.type;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-  }
-
-  /** The ID of the author of the change. */
-  public actorId?: string;
-  /** The description data of the issue as a JSON serialized string. */
-  public descriptionData: string;
-  /** The UUID of the change. */
-  public id: string;
-  /** The type of the revision, whether it was the creation or update of the issue. */
-  public type: string;
-  /** The date when the description was updated. */
-  public updatedAt: Date;
-}
-/**
- * IssueDescriptionHistoryPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.IssueDescriptionHistoryPayloadFragment response data
- */
-export class IssueDescriptionHistoryPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueDescriptionHistoryPayloadFragment) {
-    super(request);
-    this.success = data.success;
-    this.history = data.history ? data.history.map(node => new IssueDescriptionHistory(request, node)) : undefined;
-  }
-
-  /** Whether the operation was successful. */
-  public success: boolean;
-  /** The issue that was created or updated. */
-  public history?: IssueDescriptionHistory[];
-}
-/**
  * A record of changes to an issue.
  *
  * @param request - function to call the graphql client
@@ -2434,6 +2410,7 @@ export class IssueDescriptionHistoryPayload extends Request {
  */
 export class IssueHistory extends Request {
   private _actor?: L.IssueHistoryFragment["actor"];
+  private _attachment?: L.IssueHistoryFragment["attachment"];
   private _fromAssignee?: L.IssueHistoryFragment["fromAssignee"];
   private _fromCycle?: L.IssueHistoryFragment["fromCycle"];
   private _fromParent?: L.IssueHistoryFragment["fromParent"];
@@ -2475,6 +2452,7 @@ export class IssueHistory extends Request {
       ? data.relationChanges.map(node => new IssueRelationHistoryPayload(request, node))
       : undefined;
     this._actor = data.actor ?? undefined;
+    this._attachment = data.attachment ?? undefined;
     this._fromAssignee = data.fromAssignee ?? undefined;
     this._fromCycle = data.fromCycle ?? undefined;
     this._fromParent = data.fromParent ?? undefined;
@@ -2526,7 +2504,7 @@ export class IssueHistory extends Request {
   public trashed?: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Whether the issue's description was updated. */
@@ -2538,6 +2516,10 @@ export class IssueHistory extends Request {
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The linked attachment. */
+  public get attachment(): LinearFetch<Attachment> | undefined {
+    return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
   }
   /** The user from whom the issue was re-assigned from. */
   public get fromAssignee(): LinearFetch<User> | undefined {
@@ -2651,7 +2633,7 @@ export class IssueImport extends Request {
   public status: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
 
@@ -2743,7 +2725,7 @@ export class IssueLabel extends Request {
   public name: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user who created the label. */
@@ -2764,6 +2746,10 @@ export class IssueLabel extends Request {
   /** Archives an issue label. */
   public archive() {
     return new IssueLabelArchiveMutation(this._request).fetch(this.id);
+  }
+  /** Deletes an issue label. */
+  public delete() {
+    return new IssueLabelDeleteMutation(this._request).fetch(this.id);
   }
   /** Updates an label. */
   public update(input: L.IssueLabelUpdateInput) {
@@ -2890,7 +2876,7 @@ export class IssueRelation extends Request {
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The issue whose relationship is being described. */
@@ -3063,7 +3049,7 @@ export class Milestone extends Request {
   public sortOrder: number;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The organization that the milestone belongs to. */
@@ -3179,7 +3165,7 @@ export class Notification extends Request {
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The comment which the notification is associated with. */
@@ -3291,7 +3277,7 @@ export class NotificationSubscription extends Request {
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Subscribed project. */
@@ -3463,7 +3449,7 @@ export class OauthClient extends Request {
   public redirectUris: string[];
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The resource types to request when creating new webhooks. */
@@ -3578,7 +3564,7 @@ export class Organization extends Request {
   public samlEnabled: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The organization's unique URL key. */
@@ -3683,7 +3669,7 @@ export class OrganizationDomain extends Request {
   public name: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** E-mail used to verify this domain */
@@ -3773,6 +3759,7 @@ export class OrganizationInvite extends Request {
     this.expiresAt = parseDate(data.expiresAt) ?? undefined;
     this.external = data.external;
     this.id = data.id;
+    this.permission = data.permission ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._invitee = data.invitee ?? undefined;
     this._inviter = data.inviter;
@@ -3792,9 +3779,11 @@ export class OrganizationInvite extends Request {
   public external: boolean;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The permission that the invitee will receive upon accepting invite. */
+  public permission?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
@@ -3853,6 +3842,7 @@ export class OrganizationInviteDetailsPayload extends Request {
     this.organizationId = data.organizationId;
     this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
     this.organizationName = data.organizationName;
+    this.permission = data.permission ?? undefined;
   }
 
   /** Whether the invite has already been accepted. */
@@ -3871,6 +3861,8 @@ export class OrganizationInviteDetailsPayload extends Request {
   public organizationLogoUrl?: string;
   /** Name of the workspace the invite is for. */
   public organizationName: string;
+  /** Whether the invite should grant admin permissions */
+  public permission?: string;
 }
 /**
  * OrganizationInvitePayload model
@@ -4034,7 +4026,7 @@ export class Project extends Request {
   public targetDate?: L.Scalars["TimelessDate"];
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Project URL. */
@@ -4074,6 +4066,10 @@ export class Project extends Request {
   /** Archives a project. */
   public archive() {
     return new ProjectArchiveMutation(this._request).fetch(this.id);
+  }
+  /** Deletes a project. All issues will be disassociated from the deleted project. */
+  public delete() {
+    return new ProjectDeleteMutation(this._request).fetch(this.id);
   }
   /** Unarchives a project. */
   public unarchive() {
@@ -4137,7 +4133,7 @@ export class ProjectLink extends Request {
   public label: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The link's URL. */
@@ -4296,7 +4292,7 @@ export class PushSubscription extends Request {
   public id: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
 
@@ -4360,6 +4356,57 @@ export class PushSubscriptionTestPayload extends Request {
   public success: boolean;
 }
 /**
+ * RateLimitPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.RateLimitPayloadFragment response data
+ */
+export class RateLimitPayload extends Request {
+  public constructor(request: LinearRequest, data: L.RateLimitPayloadFragment) {
+    super(request);
+    this.identifier = data.identifier ?? undefined;
+    this.kind = data.kind;
+    this.limits = data.limits.map(node => new RateLimitResultPayload(request, node));
+  }
+
+  /** The identifier we rate limit on. */
+  public identifier?: string;
+  /** The kind of rate limit selected for this request. */
+  public kind: string;
+  /** The state of the rate limit. */
+  public limits: RateLimitResultPayload[];
+}
+/**
+ * RateLimitResultPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.RateLimitResultPayloadFragment response data
+ */
+export class RateLimitResultPayload extends Request {
+  public constructor(request: LinearRequest, data: L.RateLimitResultPayloadFragment) {
+    super(request);
+    this.allowedAmount = data.allowedAmount;
+    this.period = data.period;
+    this.remainingAmount = data.remainingAmount;
+    this.requestedAmount = data.requestedAmount;
+    this.reset = data.reset;
+    this.type = data.type;
+  }
+
+  /** The total allowed quantity for this type of limit. */
+  public allowedAmount: number;
+  /** The period in which the rate limit is fully replenished in ms. */
+  public period: number;
+  /** The remaining quantity for this type of limit after this request. */
+  public remainingAmount: number;
+  /** The requested quantity for this type of limit. */
+  public requestedAmount: number;
+  /** The timestamp after the rate limit is fully replenished as a UNIX timestamp. */
+  public reset: number;
+  /** What is being rate limited. */
+  public type: string;
+}
+/**
  * A reaction associated with a comment.
  *
  * @param request - function to call the graphql client
@@ -4390,7 +4437,7 @@ export class Reaction extends Request {
   public id: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The comment that the reaction is associated with. */
@@ -4470,7 +4517,7 @@ export class RotateSecretPayload extends Request {
   public success: boolean;
 }
 /**
- * The integration resource's settings
+ * SamlConfiguration model
  *
  * @param request - function to call the graphql client
  * @param data - L.SamlConfigurationFragment response data
@@ -4498,6 +4545,33 @@ export class SamlConfiguration extends Request {
   public ssoSignAlgo?: string;
   /** X.509 Signing Certificate in string form. */
   public ssoSigningCert?: string;
+}
+/**
+ * The organization's SAML configuration
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SamlConfigurationPayloadFragment response data
+ */
+export class SamlConfigurationPayload extends Request {
+  public constructor(request: LinearRequest, data: L.SamlConfigurationPayloadFragment) {
+    super(request);
+    this.allowedDomains = data.allowedDomains ?? undefined;
+    this.issuerEntityId = data.issuerEntityId ?? undefined;
+    this.ssoBinding = data.ssoBinding ?? undefined;
+    this.ssoEndpoint = data.ssoEndpoint ?? undefined;
+    this.ssoSignAlgo = data.ssoSignAlgo ?? undefined;
+  }
+
+  /** List of allowed email domains for SAML authentication. */
+  public allowedDomains?: string[];
+  /** The issuer's custom entity ID. */
+  public issuerEntityId?: string;
+  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
+  public ssoBinding?: string;
+  /** Sign in endpoint URL for the identity provider. */
+  public ssoEndpoint?: string;
+  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
+  public ssoSignAlgo?: string;
 }
 /**
  * Sentry issue data
@@ -4657,7 +4731,7 @@ export class Subscription extends Request {
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The creator of the subscription. */
@@ -4934,7 +5008,7 @@ export class Team extends Request {
   public upcomingCycleCount: number;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Team's currently active cycle. */
@@ -5096,7 +5170,7 @@ export class TeamMembership extends Request {
   public owner?: boolean;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The team that the membership is associated with. */
@@ -5230,7 +5304,7 @@ export class Template extends Request {
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user who created the template. */
@@ -5386,6 +5460,7 @@ export class User extends Request {
     this.disableReason = data.disableReason ?? undefined;
     this.displayName = data.displayName;
     this.email = data.email;
+    this.guest = data.guest;
     this.id = data.id;
     this.inviteHash = data.inviteHash;
     this.isMe = data.isMe;
@@ -5419,6 +5494,8 @@ export class User extends Request {
   public displayName: string;
   /** The user's email address. */
   public email: string;
+  /** Whether the user is a guest in the workspace and limited to accessing a subset of teams. */
+  public guest: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** Unique hash for the user to be used in invite URLs. */
@@ -5439,7 +5516,7 @@ export class User extends Request {
   public timezone?: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** User's profile URL. */
@@ -5649,7 +5726,7 @@ export class UserSettings extends Request {
   public unsubscribedFrom: string[];
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The user associated with these settings. */
@@ -5768,7 +5845,7 @@ export class ViewPreferences extends Request {
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The view type. */
@@ -5812,7 +5889,7 @@ export class ViewPreferencesPayload extends Request {
  */
 export class Webhook extends Request {
   private _creator?: L.WebhookFragment["creator"];
-  private _team: L.WebhookFragment["team"];
+  private _team?: L.WebhookFragment["team"];
 
   public constructor(request: LinearRequest, data: L.WebhookFragment) {
     super(request);
@@ -5824,11 +5901,10 @@ export class Webhook extends Request {
     this.label = data.label;
     this.resourceTypes = data.resourceTypes;
     this.secret = data.secret ?? undefined;
-    this.teamIds = data.teamIds;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url ?? undefined;
     this._creator = data.creator ?? undefined;
-    this._team = data.team;
+    this._team = data.team ?? undefined;
   }
 
   /** Whether the Webhook is enabled for all public teams, including teams created after the webhook was created. */
@@ -5847,11 +5923,9 @@ export class Webhook extends Request {
   public resourceTypes: string[];
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
-  /** The ids of teams that the webhook is associated with. */
-  public teamIds: string[];
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** Webhook URL */
@@ -5860,9 +5934,9 @@ export class Webhook extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The team that the webhook is associated with. */
+  /** The team that the webhook is associated with. If null, the webhook is associated with all public teams of the organization. */
   public get team(): LinearFetch<Team> | undefined {
-    return new TeamQuery(this._request).fetch(this._team.id);
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 
   /** Deletes a Webhook. */
@@ -5961,7 +6035,7 @@ export class WorkflowState extends Request {
   public type: string;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
   /** The team to which this state belongs to. */
@@ -6081,6 +6155,34 @@ export class AdministrableTeamsQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable ApplicationInfo Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ApplicationInfoQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ApplicationInfo query and return a Application
+   *
+   * @param clientId - required clientId to pass to applicationInfo
+   * @returns parsed response from ApplicationInfoQuery
+   */
+  public async fetch(clientId: string): LinearFetch<Application> {
+    const response = await this._request<L.ApplicationInfoQuery, L.ApplicationInfoQueryVariables>(
+      L.ApplicationInfoDocument,
+      {
+        clientId,
+      }
+    );
+    const data = response.applicationInfo;
+    return new Application(this._request, data);
   }
 }
 
@@ -7619,6 +7721,31 @@ export class PushSubscriptionTestQuery extends Request {
 }
 
 /**
+ * A fetchable RateLimitStatus Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class RateLimitStatusQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the RateLimitStatus query and return a RateLimitPayload
+   *
+   * @returns parsed response from RateLimitStatusQuery
+   */
+  public async fetch(): LinearFetch<RateLimitPayload> {
+    const response = await this._request<L.RateLimitStatusQuery, L.RateLimitStatusQueryVariables>(
+      L.RateLimitStatusDocument,
+      {}
+    );
+    const data = response.rateLimitStatus;
+    return new RateLimitPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable Reaction Query
  *
  * @param request - function to call the graphql client
@@ -8202,6 +8329,45 @@ export class AttachmentDeleteMutation extends Request {
     );
     const data = response.attachmentDelete;
     return new ArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AttachmentLinkDiscord Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentLinkDiscordMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentLinkDiscord mutation and return a AttachmentPayload
+   *
+   * @param channelId - required channelId to pass to attachmentLinkDiscord
+   * @param issueId - required issueId to pass to attachmentLinkDiscord
+   * @param messageId - required messageId to pass to attachmentLinkDiscord
+   * @param url - required url to pass to attachmentLinkDiscord
+   * @returns parsed response from AttachmentLinkDiscordMutation
+   */
+  public async fetch(
+    channelId: string,
+    issueId: string,
+    messageId: string,
+    url: string
+  ): LinearFetch<AttachmentPayload> {
+    const response = await this._request<L.AttachmentLinkDiscordMutation, L.AttachmentLinkDiscordMutationVariables>(
+      L.AttachmentLinkDiscordDocument,
+      {
+        channelId,
+        issueId,
+        messageId,
+        url,
+      }
+    );
+    const data = response.attachmentLinkDiscord;
+    return new AttachmentPayload(this._request, data);
   }
 }
 
@@ -9319,6 +9485,36 @@ export class IntegrationDeleteMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationDiscord Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationDiscordMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationDiscord mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationDiscord
+   * @param redirectUri - required redirectUri to pass to integrationDiscord
+   * @returns parsed response from IntegrationDiscordMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationDiscordMutation, L.IntegrationDiscordMutationVariables>(
+      L.IntegrationDiscordDocument,
+      {
+        code,
+        redirectUri,
+      }
+    );
+    const data = response.integrationDiscord;
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IntegrationFigma Mutation
  *
  * @param request - function to call the graphql client
@@ -10324,6 +10520,34 @@ export class IssueLabelCreateMutation extends Request {
 }
 
 /**
+ * A fetchable IssueLabelDelete Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueLabelDeleteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueLabelDelete mutation and return a ArchivePayload
+   *
+   * @param id - required id to pass to issueLabelDelete
+   * @returns parsed response from IssueLabelDeleteMutation
+   */
+  public async fetch(id: string): LinearFetch<ArchivePayload> {
+    const response = await this._request<L.IssueLabelDeleteMutation, L.IssueLabelDeleteMutationVariables>(
+      L.IssueLabelDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response.issueLabelDelete;
+    return new ArchivePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IssueLabelUpdate Mutation
  *
  * @param request - function to call the graphql client
@@ -11283,6 +11507,34 @@ export class ProjectCreateMutation extends Request {
 }
 
 /**
+ * A fetchable ProjectDelete Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectDeleteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectDelete mutation and return a ArchivePayload
+   *
+   * @param id - required id to pass to projectDelete
+   * @returns parsed response from ProjectDeleteMutation
+   */
+  public async fetch(id: string): LinearFetch<ArchivePayload> {
+    const response = await this._request<L.ProjectDeleteMutation, L.ProjectDeleteMutationVariables>(
+      L.ProjectDeleteDocument,
+      {
+        id,
+      }
+    );
+    const data = response.projectDelete;
+    return new ArchivePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable ProjectLinkCreate Mutation
  *
  * @param request - function to call the graphql client
@@ -11933,6 +12185,64 @@ export class UserDemoteAdminMutation extends Request {
 }
 
 /**
+ * A fetchable UserDiscordConnect Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserDiscordConnectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserDiscordConnect mutation and return a UserPayload
+   *
+   * @param code - required code to pass to userDiscordConnect
+   * @param redirectUri - required redirectUri to pass to userDiscordConnect
+   * @returns parsed response from UserDiscordConnectMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<UserPayload> {
+    const response = await this._request<L.UserDiscordConnectMutation, L.UserDiscordConnectMutationVariables>(
+      L.UserDiscordConnectDocument,
+      {
+        code,
+        redirectUri,
+      }
+    );
+    const data = response.userDiscordConnect;
+    return new UserPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserExternalUserDisconnect Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserExternalUserDisconnectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserExternalUserDisconnect mutation and return a UserPayload
+   *
+   * @param service - required service to pass to userExternalUserDisconnect
+   * @returns parsed response from UserExternalUserDisconnectMutation
+   */
+  public async fetch(service: string): LinearFetch<UserPayload> {
+    const response = await this._request<
+      L.UserExternalUserDisconnectMutation,
+      L.UserExternalUserDisconnectMutationVariables
+    >(L.UserExternalUserDisconnectDocument, {
+      service,
+    });
+    const data = response.userExternalUserDisconnect;
+    return new UserPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UserFlagUpdate Mutation
  *
  * @param request - function to call the graphql client
@@ -12031,12 +12341,15 @@ export class UserSettingsFlagsResetMutation extends Request {
   /**
    * Call the UserSettingsFlagsReset mutation and return a UserSettingsFlagsResetPayload
    *
+   * @param variables - variables to pass into the UserSettingsFlagsResetMutation
    * @returns parsed response from UserSettingsFlagsResetMutation
    */
-  public async fetch(): LinearFetch<UserSettingsFlagsResetPayload> {
+  public async fetch(
+    variables?: L.UserSettingsFlagsResetMutationVariables
+  ): LinearFetch<UserSettingsFlagsResetPayload> {
     const response = await this._request<L.UserSettingsFlagsResetMutation, L.UserSettingsFlagsResetMutationVariables>(
       L.UserSettingsFlagsResetDocument,
-      {}
+      variables
     );
     const data = response.userSettingsFlagsReset;
     return new UserSettingsFlagsResetPayload(this._request, data);
@@ -12923,6 +13236,54 @@ export class CollaborativeDocumentJoin_StepsQuery extends Request {
     });
     const data = response.collaborativeDocumentJoin.steps;
     return data ? new StepsResponse(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable Comment_Children Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to comment
+ * @param variables - variables without 'id' to pass into the Comment_ChildrenQuery
+ */
+export class Comment_ChildrenQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Comment_ChildrenQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Comment_ChildrenQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Comment_Children query and return a CommentConnection
+   *
+   * @param variables - variables without 'id' to pass into the Comment_ChildrenQuery
+   * @returns parsed response from Comment_ChildrenQuery
+   */
+  public async fetch(variables?: Omit<L.Comment_ChildrenQueryVariables, "id">): LinearFetch<CommentConnection> {
+    const response = await this._request<L.Comment_ChildrenQuery, L.Comment_ChildrenQueryVariables>(
+      L.Comment_ChildrenDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.comment.children;
+    return new CommentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -14898,6 +15259,15 @@ export class LinearSdk extends Request {
     return new AdministrableTeamsQuery(this._request).fetch(variables);
   }
   /**
+   * Get basic information for an application.
+   *
+   * @param clientId - required clientId to pass to applicationInfo
+   * @returns Application
+   */
+  public applicationInfo(clientId: string): LinearFetch<Application> {
+    return new ApplicationInfoQuery(this._request).fetch(clientId);
+  }
+  /**
    * Get information for an application and whether a user has approved it for the given scopes.
    *
    * @param clientId - required clientId to pass to applicationWithAuthorization
@@ -15381,6 +15751,14 @@ export class LinearSdk extends Request {
     return new PushSubscriptionTestQuery(this._request).fetch();
   }
   /**
+   * The status of the rate limiter.
+   *
+   * @returns RateLimitPayload
+   */
+  public get rateLimitStatus(): LinearFetch<RateLimitPayload> {
+    return new RateLimitStatusQuery(this._request).fetch();
+  }
+  /**
    * A specific reaction.
    *
    * @param id - required id to pass to reaction
@@ -15568,6 +15946,23 @@ export class LinearSdk extends Request {
    */
   public attachmentDelete(id: string): LinearFetch<ArchivePayload> {
     return new AttachmentDeleteMutation(this._request).fetch(id);
+  }
+  /**
+   * Link an existing Discord message to an issue.
+   *
+   * @param channelId - required channelId to pass to attachmentLinkDiscord
+   * @param issueId - required issueId to pass to attachmentLinkDiscord
+   * @param messageId - required messageId to pass to attachmentLinkDiscord
+   * @param url - required url to pass to attachmentLinkDiscord
+   * @returns AttachmentPayload
+   */
+  public attachmentLinkDiscord(
+    channelId: string,
+    issueId: string,
+    messageId: string,
+    url: string
+  ): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkDiscordMutation(this._request).fetch(channelId, issueId, messageId, url);
   }
   /**
    * Link an existing Front conversation to an issue.
@@ -15952,6 +16347,16 @@ export class LinearSdk extends Request {
    */
   public integrationDelete(id: string): LinearFetch<ArchivePayload> {
     return new IntegrationDeleteMutation(this._request).fetch(id);
+  }
+  /**
+   * Integrates the organization with Discord.
+   *
+   * @param code - required code to pass to integrationDiscord
+   * @param redirectUri - required redirectUri to pass to integrationDiscord
+   * @returns IntegrationPayload
+   */
+  public integrationDiscord(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationDiscordMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Integrates the organization with Figma.
@@ -16353,6 +16758,15 @@ export class LinearSdk extends Request {
     return new IssueLabelCreateMutation(this._request).fetch(input, variables);
   }
   /**
+   * Deletes an issue label.
+   *
+   * @param id - required id to pass to issueLabelDelete
+   * @returns ArchivePayload
+   */
+  public issueLabelDelete(id: string): LinearFetch<ArchivePayload> {
+    return new IssueLabelDeleteMutation(this._request).fetch(id);
+  }
+  /**
    * Updates an label.
    *
    * @param id - required id to pass to issueLabelUpdate
@@ -16669,6 +17083,15 @@ export class LinearSdk extends Request {
     return new ProjectCreateMutation(this._request).fetch(input);
   }
   /**
+   * Deletes a project. All issues will be disassociated from the deleted project.
+   *
+   * @param id - required id to pass to projectDelete
+   * @returns ArchivePayload
+   */
+  public projectDelete(id: string): LinearFetch<ArchivePayload> {
+    return new ProjectDeleteMutation(this._request).fetch(id);
+  }
+  /**
    * Creates a new project link.
    *
    * @param input - required input to pass to projectLinkCreate
@@ -16885,6 +17308,25 @@ export class LinearSdk extends Request {
     return new UserDemoteAdminMutation(this._request).fetch(id);
   }
   /**
+   * Connects the Discord user to this Linear account via OAuth2.
+   *
+   * @param code - required code to pass to userDiscordConnect
+   * @param redirectUri - required redirectUri to pass to userDiscordConnect
+   * @returns UserPayload
+   */
+  public userDiscordConnect(code: string, redirectUri: string): LinearFetch<UserPayload> {
+    return new UserDiscordConnectMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
+   * Disconnects the external user from this Linear account.
+   *
+   * @param service - required service to pass to userExternalUserDisconnect
+   * @returns UserPayload
+   */
+  public userExternalUserDisconnect(service: string): LinearFetch<UserPayload> {
+    return new UserExternalUserDisconnectMutation(this._request).fetch(service);
+  }
+  /**
    * Updates a user's settings flag.
    *
    * @param flag - required flag to pass to userFlagUpdate
@@ -16918,10 +17360,13 @@ export class LinearSdk extends Request {
   /**
    * Resets user's setting flags.
    *
+   * @param variables - variables to pass into the UserSettingsFlagsResetMutation
    * @returns UserSettingsFlagsResetPayload
    */
-  public get userSettingsFlagsReset(): LinearFetch<UserSettingsFlagsResetPayload> {
-    return new UserSettingsFlagsResetMutation(this._request).fetch();
+  public userSettingsFlagsReset(
+    variables?: L.UserSettingsFlagsResetMutationVariables
+  ): LinearFetch<UserSettingsFlagsResetPayload> {
+    return new UserSettingsFlagsResetMutation(this._request).fetch(variables);
   }
   /**
    * Updates the user's settings.

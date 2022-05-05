@@ -245,6 +245,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test ApplicationInfo query */
+  describe("ApplicationInfo", () => {
+    /** Test the root model query for ApplicationInfo */
+    it("applicationInfo", async () => {
+      const applicationInfo: L.Application | undefined = await client.applicationInfo("mock-clientId");
+      expect(applicationInfo instanceof L.Application);
+    });
+  });
+
   /** Test ApplicationWithAuthorization query */
   describe("ApplicationWithAuthorization", () => {
     /** Test the root model query for ApplicationWithAuthorization */
@@ -546,6 +555,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment connection query for the Comment */
+    it("comment.children", async () => {
+      if (_comment) {
+        const children: L.CommentConnection | undefined = await _comment.children();
+        expect(children instanceof L.CommentConnection);
+      } else {
+        console.warn("codegen-doc:print: No comment found - cannot test _comment.children query");
+      }
+    });
+
     /** Test the comment.issue query for L.Issue */
     it("comment.issue", async () => {
       if (_comment) {
@@ -553,6 +572,16 @@ describe("generated", () => {
         expect(comment_issue instanceof L.Issue);
       } else {
         console.warn("codegen-doc:print: No Comment found - cannot test comment.issue query");
+      }
+    });
+
+    /** Test the comment.parent query for L.Comment */
+    it("comment.parent", async () => {
+      if (_comment) {
+        const comment_parent: L.Comment | undefined = await _comment.parent;
+        expect(comment_parent instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No Comment found - cannot test comment.parent query");
       }
     });
 
@@ -868,6 +897,16 @@ describe("generated", () => {
         expect(favorite_parent instanceof L.Favorite);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.parent query");
+      }
+    });
+
+    /** Test the favorite.predefinedViewTeam query for L.Team */
+    it("favorite.predefinedViewTeam", async () => {
+      if (_favorite) {
+        const favorite_predefinedViewTeam: L.Team | undefined = await _favorite.predefinedViewTeam;
+        expect(favorite_predefinedViewTeam instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.predefinedViewTeam query");
       }
     });
 
@@ -1964,6 +2003,15 @@ describe("generated", () => {
     it("pushSubscriptionTest", async () => {
       const pushSubscriptionTest: L.PushSubscriptionTestPayload | undefined = await client.pushSubscriptionTest;
       expect(pushSubscriptionTest instanceof L.PushSubscriptionTestPayload);
+    });
+  });
+
+  /** Test RateLimitStatus query */
+  describe("RateLimitStatus", () => {
+    /** Test the root model query for RateLimitStatus */
+    it("rateLimitStatus", async () => {
+      const rateLimitStatus: L.RateLimitPayload | undefined = await client.rateLimitStatus;
+      expect(rateLimitStatus instanceof L.RateLimitPayload);
     });
   });
 

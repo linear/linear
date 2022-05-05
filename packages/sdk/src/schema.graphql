@@ -26,7 +26,7 @@ type ApiKey implements Node {
   label: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -129,6 +129,10 @@ type ArchiveResponse {
   """
   databaseVersion: Float!
   """
+  Whether the dependencies for the model objects are included in the archive.
+  """
+  includesDependencies: Boolean!
+  """
   The total number of entities in the archive.
   """
   totalCount: Float!
@@ -184,7 +188,7 @@ type Attachment implements Node {
   title: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -208,6 +212,10 @@ input AttachmentCreateInput {
   [Internal] Create a linked comment with Prosemirror body. Please use `commentBody` instead
   """
   commentBodyData: JSONObject
+  """
+  Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  """
+  createAsUser: String
   """
   Indicates if attachments for the same source application should be grouped in the Linear UI.
   """
@@ -361,7 +369,7 @@ type AuditEntry implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -561,6 +569,10 @@ input BooleanComparator {
   Equals constraint.
   """
   eq: Boolean
+  """
+  Not equals constraint.
+  """
+  neq: Boolean
 }
 
 type Card {
@@ -617,6 +629,39 @@ type Comment implements Node {
   """
   body: String!
   """
+  The children of the comment.
+  """
+  children(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    [Alpha] Filter returned comments.
+    """
+    filter: CommentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CommentConnection!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -633,8 +678,12 @@ type Comment implements Node {
   """
   issue: Issue!
   """
+  The parent of the comment.
+  """
+  parent: Comment
+  """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -644,7 +693,7 @@ type Comment implements Node {
   """
   The user who wrote the comment.
   """
-  user: User!
+  user: User
 }
 
 """
@@ -709,6 +758,10 @@ input CommentCreateInput {
   """
   bodyData: JSON
   """
+  Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  """
+  createAsUser: String
+  """
   The identifier. If none is provided, the backend will generate one.
   """
   id: String
@@ -716,6 +769,10 @@ input CommentCreateInput {
   The issue to associate the comment with.
   """
   issueId: String!
+  """
+  [Internal] The parent under which to nest the comment.
+  """
+  parentId: String
 }
 
 type CommentEdge {
@@ -808,6 +865,10 @@ input ContactCreateInput {
   User's browser information.
   """
   browser: String
+  """
+  User's Linear client information.
+  """
+  clientVersion: String
   """
   User's device information.
   """
@@ -930,7 +991,7 @@ type CustomView implements Node {
   team: Team
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -1170,7 +1231,7 @@ type Cycle implements Node {
   ): IssueConnection!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -1421,7 +1482,7 @@ type Document implements Node {
   title: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -1516,7 +1577,7 @@ type DocumentStep implements Node {
   step: JSON!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -1590,7 +1651,7 @@ type DocumentVersion implements Node {
   title: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -1709,7 +1770,7 @@ type Emoji implements Node {
   source: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -1866,6 +1927,14 @@ type Favorite implements Node {
   """
   parent: Favorite
   """
+  The team of the favorited predefiend view.
+  """
+  predefinedViewTeam: Team
+  """
+  The type of favorited predefiend view.
+  """
+  predefinedViewType: String
+  """
   The favorited project.
   """
   project: Project
@@ -1883,7 +1952,7 @@ type Favorite implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -1932,6 +2001,14 @@ input FavoriteCreateInput {
   """
   parentId: String
   """
+  The identifier of team for the predefined view to favorite.
+  """
+  predefinedViewTeamId: String
+  """
+  The type of the predefined view to favorite.
+  """
+  predefinedViewType: String
+  """
   The identifier of the project to favorite.
   """
   projectId: String
@@ -1969,6 +2046,10 @@ type FavoritePayload {
 }
 
 input FavoriteUpdateInput {
+  """
+  The name of the favorite folder.
+  """
+  folderName: String
   """
   The id of the folder to move the favorite under.
   """
@@ -2221,7 +2302,7 @@ type Integration implements Node {
   team: Team
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -2297,7 +2378,7 @@ type IntegrationResource implements Node {
   resourceType: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -2828,7 +2909,7 @@ type Issue implements Node {
   trashed: Boolean
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -2899,7 +2980,7 @@ input IssueCollectionFilter {
   """
   Filters that the issues creator must satisfy.
   """
-  creator: UserFilter
+  creator: NullableUserFilter
   """
   Filters that the issues cycle must satisfy.
   """
@@ -2994,6 +3075,10 @@ input IssueCreateInput {
   """
   boardOrder: Float
   """
+  Create issue as a user with the provided name. This option is only available to OAuth applications creating issues in `actor=application` mode.
+  """
+  createAsUser: String
+  """
   The cycle associated with the issue.
   """
   cycleId: String
@@ -3063,40 +3148,6 @@ input IssueCreateInput {
   title: String!
 }
 
-type IssueDescriptionHistory {
-  """
-  The ID of the author of the change.
-  """
-  actorId: String
-  """
-  The description data of the issue as a JSON serialized string.
-  """
-  descriptionData: String!
-  """
-  The UUID of the change.
-  """
-  id: String!
-  """
-  The type of the revision, whether it was the creation or update of the issue.
-  """
-  type: String!
-  """
-  The date when the description was updated.
-  """
-  updatedAt: DateTime!
-}
-
-type IssueDescriptionHistoryPayload {
-  """
-  The issue that was created or updated.
-  """
-  history: [IssueDescriptionHistory!]
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
 type IssueEdge {
   """
   Used in `before` and `after` args
@@ -3152,7 +3203,7 @@ input IssueFilter {
   """
   Filters that the issues creator must satisfy.
   """
-  creator: UserFilter
+  creator: NullableUserFilter
   """
   Filters that the issues cycle must satisfy.
   """
@@ -3243,6 +3294,10 @@ type IssueHistory implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  The linked attachment.
+  """
+  attachment: Attachment
   autoArchived: Boolean
   autoClosed: Boolean
   """
@@ -3359,7 +3414,7 @@ type IssueHistory implements Node {
   trashed: Boolean
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -3420,7 +3475,7 @@ type IssueImport implements Node {
   status: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -3552,7 +3607,7 @@ type IssueLabel implements Node {
   team: Team
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -3764,7 +3819,7 @@ type IssueRelation implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -4124,7 +4179,7 @@ type Milestone implements Node {
   sortOrder: Float!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -4268,6 +4323,27 @@ type Mutation {
     """
     id: String!
   ): ArchivePayload!
+  """
+  Link an existing Discord message to an issue.
+  """
+  attachmentLinkDiscord(
+    """
+    The Discord channel ID for the message to link.
+    """
+    channelId: String!
+    """
+    The issue for which to link the Discord message.
+    """
+    issueId: String!
+    """
+    The Discord message ID for the message to link.
+    """
+    messageId: String!
+    """
+    The Discord message URL for the message to link.
+    """
+    url: String!
+  ): AttachmentPayload!
   """
   Link an existing Front conversation to an issue.
   """
@@ -4690,6 +4766,19 @@ type Mutation {
     id: String!
   ): ArchivePayload!
   """
+  Integrates the organization with Discord.
+  """
+  integrationDiscord(
+    """
+    The Discord OAuth code.
+    """
+    code: String!
+    """
+    The Discord OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
+  """
   Integrates the organization with Figma.
   """
   integrationFigma(
@@ -4780,7 +4869,7 @@ type Mutation {
   """
   Enables Loom integration for the organization.
   """
-  integrationLoom: IntegrationPayload!
+  integrationLoom: IntegrationPayload! @deprecated(reason: "Not available.")
   """
   Archives an integration resource.
   """
@@ -4833,7 +4922,7 @@ type Mutation {
     """
     redirectUri: String!
     """
-    Whether or not v2 of Slack OAuth should be used
+    [DEPRECATED] Whether or not v2 of Slack OAuth should be used. No longer used.
     """
     shouldUseV2Auth: Boolean
   ): IntegrationPayload!
@@ -4876,7 +4965,7 @@ type Mutation {
     """
     redirectUri: String!
     """
-    Whether or not v2 of Slack OAuth should be used
+    [DEPRECATED] Whether or not v2 of Slack OAuth should be used. No longer used.
     """
     shouldUseV2Auth: Boolean
     """
@@ -5141,7 +5230,7 @@ type Mutation {
     The identifier of the label to archive.
     """
     id: String!
-  ): ArchivePayload!
+  ): ArchivePayload! @deprecated(reason: "Labels are deleted instead of archived.")
   """
   Creates a new label.
   """
@@ -5155,6 +5244,15 @@ type Mutation {
     """
     replaceTeamLabels: Boolean
   ): IssueLabelPayload!
+  """
+  Deletes an issue label.
+  """
+  issueLabelDelete(
+    """
+    The identifier of the label to delete.
+    """
+    id: String!
+  ): ArchivePayload!
   """
   Updates an label.
   """
@@ -5262,7 +5360,7 @@ type Mutation {
   """
   milestoneDelete(
     """
-    The identifier of the milestone to delete. Only milestones without projects can be deleted.
+    The identifier of the milestone to delete.
     """
     id: String!
   ): ArchivePayload!
@@ -5512,7 +5610,7 @@ type Mutation {
     The identifier of the project to archive. Also the identifier from the URL is accepted.
     """
     id: String!
-  ): ArchivePayload!
+  ): ArchivePayload! @deprecated(reason: "Deprecated in favor of projectDelete.")
   """
   Creates a new project.
   """
@@ -5522,6 +5620,15 @@ type Mutation {
     """
     input: ProjectCreateInput!
   ): ProjectPayload!
+  """
+  Deletes a project. All issues will be disassociated from the deleted project.
+  """
+  projectDelete(
+    """
+    The identifier of the project to delete. Also the identifier from the URL is accepted.
+    """
+    id: String!
+  ): ArchivePayload!
   """
   Creates a new project link.
   """
@@ -5806,6 +5913,28 @@ type Mutation {
     id: String!
   ): UserAdminPayload!
   """
+  Connects the Discord user to this Linear account via OAuth2.
+  """
+  userDiscordConnect(
+    """
+    The Discord OAuth code.
+    """
+    code: String!
+    """
+    The Discord OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): UserPayload!
+  """
+  Disconnects the external user from this Linear account.
+  """
+  userExternalUserDisconnect(
+    """
+    The external service to disconnect
+    """
+    service: String!
+  ): UserPayload!
+  """
   Updates a user's settings flag.
   """
   userFlagUpdate(
@@ -5839,7 +5968,12 @@ type Mutation {
   """
   Resets user's setting flags.
   """
-  userSettingsFlagsReset: UserSettingsFlagsResetPayload!
+  userSettingsFlagsReset(
+    """
+    The flags to reset. If not provided all flags will be reset.
+    """
+    flags: [UserFlagType!]
+  ): UserSettingsFlagsResetPayload!
   """
   Updates the user's settings.
   """
@@ -6103,7 +6237,7 @@ type Notification implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -6171,7 +6305,7 @@ type NotificationSubscription implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -6595,6 +6729,14 @@ input NullableTimelessDateComparator {
 """
 input NullableUserFilter {
   """
+  Comparator for the user's activity status.
+  """
+  active: BooleanComparator
+  """
+  Comparator for the user's admin status.
+  """
+  admin: BooleanComparator
+  """
   Compound filters, all of which need to be matched by the user.
   """
   and: [UserFilter!]
@@ -6607,11 +6749,11 @@ input NullableUserFilter {
   """
   createdAt: DateComparator
   """
-  Comparator for the users display name.
+  Comparator for the user's display name.
   """
   displayName: StringComparator
   """
-  Comparator for the users email.
+  Comparator for the user's email.
   """
   email: StringComparator
   """
@@ -6623,7 +6765,7 @@ input NullableUserFilter {
   """
   isMe: BooleanComparator
   """
-  Comparator for the users name.
+  Comparator for the user's name.
   """
   name: StringComparator
   """
@@ -6761,7 +6903,7 @@ type OauthClient implements Node {
   redirectUris: [String!]!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -7106,7 +7248,7 @@ type Organization implements Node {
   ): TemplateConnection!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -7192,7 +7334,7 @@ type OrganizationDomain implements Node {
   name: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -7309,8 +7451,12 @@ type OrganizationInvite implements Node {
   """
   organization: Organization!
   """
+  The permission that the invitee will receive upon accepting invite.
+  """
+  permission: String
+  """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -7334,6 +7480,10 @@ input OrganizationInviteCreateInput {
   The message to send to the invitee.
   """
   message: String
+  """
+  Whether the invite should grant admin permissions.
+  """
+  permission: String
   """
   The teams that the user has been invited to.
   """
@@ -7373,6 +7523,10 @@ type OrganizationInviteDetailsPayload {
   Name of the workspace the invite is for.
   """
   organizationName: String!
+  """
+  Whether the invite should grant admin permissions
+  """
+  permission: String
 }
 
 type OrganizationInviteEdge {
@@ -7715,7 +7869,7 @@ type Project implements Node {
   ): TeamConnection!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -7955,7 +8109,7 @@ type ProjectLink implements Node {
   project: Project!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -8148,7 +8302,7 @@ type PushSubscription implements Node {
   id: ID!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -8264,9 +8418,22 @@ type Query {
     orderBy: PaginationOrderBy
   ): ApiKeyConnection!
   """
+  Get basic information for an application.
+  """
+  applicationInfo(
+    """
+    The client ID of the application.
+    """
+    clientId: String!
+  ): Application!
+  """
   Get information for an application and whether a user has approved it for the given scopes.
   """
   applicationWithAuthorization(
+    """
+    Actor mode used for the authorization.
+    """
+    actor: String = "user"
     """
     The client ID of the application.
     """
@@ -8590,6 +8757,10 @@ type Query {
     """
     identifier: String!
     """
+    Whether to also include the dependent model referenced by the given identifier in the response.
+    """
+    includeDependent: Boolean
+    """
     The class name of the model to load.
     """
     modelClass: String!
@@ -8782,10 +8953,6 @@ type Query {
   """
   issue(id: String!): Issue!
   """
-  [Internal] The history of issue descriptions.
-  """
-  issueDescriptionHistory(id: String!): IssueDescriptionHistoryPayload!
-  """
   Fetches the GitHub token, completing the OAuth flow.
   """
   issueImportFinishGithubOAuth(
@@ -8901,10 +9068,19 @@ type Query {
     """
     orderBy: PaginationOrderBy
     """
-    Search string to look for.
+    [Deprecated] Search string to look for.
     """
     query: String!
   ): IssueConnection!
+  """
+  [Internal] Find issue based on the VCS branch name.
+  """
+  issueVcsBranchSearch(
+    """
+    The VCS branch name to search for.
+    """
+    branchName: String!
+  ): Issue
   """
   All issues.
   """
@@ -9161,6 +9337,10 @@ type Query {
   """
   pushSubscriptionTest: PushSubscriptionTestPayload!
   """
+  The status of the rate limiter.
+  """
+  rateLimitStatus: RateLimitPayload!
+  """
   A specific reaction.
   """
   reaction(
@@ -9228,10 +9408,6 @@ type Query {
   [Internal] Fetch data to catch up the client to the state of the world.
   """
   syncBootstrap(
-    """
-    [Deprecated] If set, we'll use a new internal way of bootstrapping.
-    """
-    newVersion: Boolean
     """
     If defined, only models of the given type will be loaded.
     """
@@ -9472,6 +9648,48 @@ type Query {
   ): WorkflowStateConnection!
 }
 
+type RateLimitPayload {
+  """
+  The identifier we rate limit on.
+  """
+  identifier: String
+  """
+  The kind of rate limit selected for this request.
+  """
+  kind: String!
+  """
+  The state of the rate limit.
+  """
+  limits: [RateLimitResultPayload!]!
+}
+
+type RateLimitResultPayload {
+  """
+  The total allowed quantity for this type of limit.
+  """
+  allowedAmount: Float!
+  """
+  The period in which the rate limit is fully replenished in ms.
+  """
+  period: Float!
+  """
+  The remaining quantity for this type of limit after this request.
+  """
+  remainingAmount: Float!
+  """
+  The requested quantity for this type of limit.
+  """
+  requestedAmount: Float!
+  """
+  The timestamp after the rate limit is fully replenished as a UNIX timestamp.
+  """
+  reset: Float!
+  """
+  What is being rate limited.
+  """
+  type: String!
+}
+
 """
 A reaction associated with a comment.
 """
@@ -9498,7 +9716,7 @@ type Reaction implements Node {
   id: ID!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -9556,9 +9774,6 @@ type RotateSecretPayload {
   success: Boolean!
 }
 
-"""
-The integration resource's settings
-"""
 type SamlConfiguration {
   """
   List of allowed email domains for SAML authentication.
@@ -9611,6 +9826,32 @@ input SamlConfigurationInput {
   X.509 Signing Certificate in string form.
   """
   ssoSigningCert: String
+}
+
+"""
+The organization's SAML configuration
+"""
+type SamlConfigurationPayload {
+  """
+  List of allowed email domains for SAML authentication.
+  """
+  allowedDomains: [String!]
+  """
+  The issuer's custom entity ID.
+  """
+  issuerEntityId: String
+  """
+  Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  """
+  ssoBinding: String
+  """
+  Sign in endpoint URL for the identity provider.
+  """
+  ssoEndpoint: String
+  """
+  The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  """
+  ssoSignAlgo: String
 }
 
 """
@@ -9829,7 +10070,7 @@ type Subscription implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -10385,7 +10626,7 @@ type Team implements Node {
   upcomingCycleCount: Float!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -10624,7 +10865,7 @@ type TeamMembership implements Node {
   team: Team!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -10900,7 +11141,7 @@ type Template implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -11311,6 +11552,10 @@ type User implements Node {
   """
   email: String!
   """
+  Whether the user is a guest in the workspace and limited to accessing a subset of teams.
+  """
+  guest: Boolean!
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -11414,7 +11659,7 @@ type User implements Node {
   timezone: String
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -11529,6 +11774,14 @@ type UserEdge {
 """
 input UserFilter {
   """
+  Comparator for the user's activity status.
+  """
+  active: BooleanComparator
+  """
+  Comparator for the user's admin status.
+  """
+  admin: BooleanComparator
+  """
   Compound filters, all of which need to be matched by the user.
   """
   and: [UserFilter!]
@@ -11541,11 +11794,11 @@ input UserFilter {
   """
   createdAt: DateComparator
   """
-  Comparator for the users display name.
+  Comparator for the user's display name.
   """
   displayName: StringComparator
   """
-  Comparator for the users email.
+  Comparator for the user's email.
   """
   email: StringComparator
   """
@@ -11557,7 +11810,7 @@ input UserFilter {
   """
   isMe: BooleanComparator
   """
-  Comparator for the users name.
+  Comparator for the user's name.
   """
   name: StringComparator
   """
@@ -11574,6 +11827,7 @@ input UserFilter {
 The types of flags that the user can have.
 """
 enum UserFlagType {
+  all
   analyticsWelcomeDismissed
   canPlaySnake
   canPlayTetris
@@ -11591,6 +11845,7 @@ enum UserFlagType {
   issueMovePromptCompleted
   listSelectionTip
   migrateThemePreference
+  projectBacklogWelcomeDismissed
   projectWelcomeDismissed
   slackCommentReactionTipShown
   triageWelcomeDismissed
@@ -11647,7 +11902,7 @@ type UserSettings implements Node {
   unsubscribedFrom: [String!]!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -11745,7 +12000,7 @@ type ViewPreferences implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -11843,7 +12098,14 @@ enum ViewType {
   myIssues
   project
   projects
+  projectsAll
+  projectsBacklog
+  projectsClosed
   roadmap
+  roadmapAll
+  roadmapBacklog
+  roadmapClosed
+  search
   triage
   userProfile
 }
@@ -11889,16 +12151,12 @@ type Webhook implements Node {
   """
   secret: String
   """
-  The team that the webhook is associated with.
+  The team that the webhook is associated with. If null, the webhook is associated with all public teams of the organization.
   """
-  team: Team!
-  """
-  The ids of teams that the webhook is associated with.
-  """
-  teamIds: [String!]! @deprecated(reason: "This field will no longer be used, and will return an empty array.")
+  team: Team
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -12069,7 +12327,7 @@ type WorkflowState implements Node {
   type: String!
   """
   The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been update after creation.
+      entity hasn't been updated after creation.
   """
   updatedAt: DateTime!
 }
