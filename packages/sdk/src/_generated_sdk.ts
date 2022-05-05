@@ -3116,6 +3116,21 @@ export class MilestonePayload extends Request {
   }
 }
 /**
+ * Node model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.NodeFragment response data
+ */
+export class Node extends Request {
+  public constructor(request: LinearRequest, data: L.NodeFragment) {
+    super(request);
+    this.id = data.id;
+  }
+
+  /** The unique identifier of the entity. */
+  public id: string;
+}
+/**
  * A notification sent to a user.
  *
  * @param request - function to call the graphql client

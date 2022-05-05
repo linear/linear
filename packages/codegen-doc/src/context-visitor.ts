@@ -1,6 +1,12 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
-import { FieldDefinitionNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode } from "graphql";
+import {
+  FieldDefinitionNode,
+  GraphQLSchema,
+  InterfaceTypeDefinitionNode,
+  ObjectTypeDefinitionNode,
+  ScalarTypeDefinitionNode,
+} from "graphql";
 import { OperationType, PluginConfig, PluginContext } from "./types";
 
 /**
@@ -11,6 +17,7 @@ export class ContextVisitor<Config extends PluginConfig> {
   private _config: Config;
   private _scalars: typeof DEFAULT_SCALARS = DEFAULT_SCALARS;
   private _objects: ObjectTypeDefinitionNode[] = [];
+  private _interfaces: InterfaceTypeDefinitionNode[] = [];
   private _queries: FieldDefinitionNode[] = [];
   private _mutations: FieldDefinitionNode[] = [];
 
@@ -31,6 +38,7 @@ export class ContextVisitor<Config extends PluginConfig> {
       config: this._config,
       scalars: this._scalars,
       objects: this._objects,
+      interfaces: this._interfaces,
       queries: this._queries,
       mutations: this._mutations,
       operationMap: {
@@ -63,6 +71,14 @@ export class ContextVisitor<Config extends PluginConfig> {
         this._mutations = node.fields as FieldDefinitionNode[];
       }
 
+      return node;
+    },
+  };
+
+  public InterfaceTypeDefinition = {
+    /** Record all interface types */
+    enter: (node: InterfaceTypeDefinitionNode): InterfaceTypeDefinitionNode => {
+      this._interfaces = [...this._interfaces, node];
       return node;
     },
   };

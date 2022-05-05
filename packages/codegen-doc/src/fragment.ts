@@ -1,4 +1,9 @@
-import { FieldDefinitionNode, ObjectTypeDefinitionNode, OperationTypeDefinitionNode } from "graphql";
+import {
+  FieldDefinitionNode,
+  InterfaceTypeDefinitionNode,
+  ObjectTypeDefinitionNode,
+  OperationTypeDefinitionNode,
+} from "graphql";
 import { isEdge, isOperationRoot } from "./object";
 import { printTypescriptType } from "./print";
 import { Named, NamedFields, PluginContext } from "./types";
@@ -9,7 +14,7 @@ import { Named, NamedFields, PluginContext } from "./types";
 export function findFragment(
   context: PluginContext,
   node?: OperationTypeDefinitionNode | FieldDefinitionNode | Named<FieldDefinitionNode>
-): NamedFields<ObjectTypeDefinitionNode> | undefined {
+): NamedFields<ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode> | undefined {
   if (node) {
     const type = printTypescriptType(context, node.type).replace("[]", "");
     return context.fragments.find(operation => operation.name === type);
@@ -18,9 +23,9 @@ export function findFragment(
 }
 
 /**
- * Check whether this fragment has valid content and is not a connection, edge or root
+ * Check whether this object has valid content and is not a connection, edge or root
  */
-export function isValidFragment(context: PluginContext, fragment: NamedFields<ObjectTypeDefinitionNode>): boolean {
+export function isValidObject(context: PluginContext, fragment: NamedFields<ObjectTypeDefinitionNode>): boolean {
   const hasFields = (fragment.fields ?? []).filter(Boolean).length;
   return Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment));
 }

@@ -12,7 +12,13 @@ import {
   reduceNonNullType,
 } from "@linear/codegen-doc";
 import autoBind from "auto-bind";
-import { DocumentNode, FieldDefinitionNode, Kind, ObjectTypeDefinitionNode } from "graphql";
+import {
+  DocumentNode,
+  FieldDefinitionNode,
+  InterfaceTypeDefinitionNode,
+  Kind,
+  ObjectTypeDefinitionNode,
+} from "graphql";
 import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import {
@@ -32,7 +38,7 @@ import {
 /**
  * Ensure the models is not a root operation or edge
  */
-function isValidModel(model: ObjectTypeDefinitionNode) {
+function isValidModel(model: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode) {
   return !Object.keys(OperationType).includes(lowerFirst(model.name.value)) && !model.name.value.endsWith("Edge");
 }
 
@@ -60,33 +66,12 @@ export class ModelVisitor {
 
   public ObjectTypeDefinition = {
     /** Return an processed valid models */
-    leave: (_node: ObjectTypeDefinitionNode): SdkModel | undefined => {
-      if (isValidModel(_node) && _node.fields?.length) {
-        const node = _node as SdkModelNode;
-        const name = node.name.value;
-        const fields = node.fields;
+    leave: leaveObjectOrInterface,
+  };
 
-        return {
-          name,
-          fragment: `${printNamespaced(this._context, name)}Fragment`,
-          node,
-          fields: {
-            all: fields ?? [],
-            scalar: (fields?.filter(field => field.__typename === SdkModelFieldType.scalar) ?? []) as SdkScalarField[],
-            query: (fields?.filter(field => field.__typename === SdkModelFieldType.query) ?? []) as SdkQueryField[],
-            object: (fields?.filter(field => field.__typename === SdkModelFieldType.object) ?? []) as SdkObjectField[],
-            list: (fields?.filter(field => field.__typename === SdkModelFieldType.list) ?? []) as SdkListField[],
-            scalarList: (fields?.filter(field => field.__typename === SdkModelFieldType.scalarList) ??
-              []) as SdkScalarListField[],
-            connection: (fields?.filter(field => field.__typename === SdkModelFieldType.connection) ??
-              []) as SdkConnectionField[],
-          },
-        };
-      } else {
-        /** Ignore this object */
-        return undefined;
-      }
-    },
+  public InterfaceTypeDefinition = {
+    /** Return an processed valid models */
+    leave: leaveObjectOrInterface,
   };
 
   public FieldDefinition = {
@@ -183,4 +168,32 @@ export class ModelVisitor {
       return null;
     },
   };
+}
+
+function leaveObjectOrInterface(_node: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode): SdkModel | undefined {
+  if (isValidModel(_node) && _node.fields?.length) {
+    const node = _node as SdkModelNode;
+    const name = node.name.value;
+    const fields = node.fields;
+
+    return {
+      name,
+      fragment: `${printNamespaced(this._context, name)}Fragment`,
+      node,
+      fields: {
+        all: fields ?? [],
+        scalar: (fields?.filter(field => field.__typename === SdkModelFieldType.scalar) ?? []) as SdkScalarField[],
+        query: (fields?.filter(field => field.__typename === SdkModelFieldType.query) ?? []) as SdkQueryField[],
+        object: (fields?.filter(field => field.__typename === SdkModelFieldType.object) ?? []) as SdkObjectField[],
+        list: (fields?.filter(field => field.__typename === SdkModelFieldType.list) ?? []) as SdkListField[],
+        scalarList: (fields?.filter(field => field.__typename === SdkModelFieldType.scalarList) ??
+          []) as SdkScalarListField[],
+        connection: (fields?.filter(field => field.__typename === SdkModelFieldType.connection) ??
+          []) as SdkConnectionField[],
+      },
+    };
+  } else {
+    /** Ignore this object */
+    return undefined;
+  }
 }

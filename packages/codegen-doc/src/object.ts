@@ -1,4 +1,4 @@
-import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
+import { FieldDefinitionNode, InterfaceTypeDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { Named, NamedFields, PluginContext } from "./types";
 import { reduceTypeName } from "./utils";
 
@@ -12,6 +12,20 @@ export function findObject(
   if (field) {
     const type = reduceTypeName(field.type);
     return context.objects.find(operation => operation.name.value === type);
+  }
+  return undefined;
+}
+
+/**
+ * Get the interface type matching the name arg
+ */
+export function findInterface(
+  context: PluginContext,
+  field?: FieldDefinitionNode | Named<FieldDefinitionNode>
+): InterfaceTypeDefinitionNode | undefined {
+  if (field) {
+    const type = reduceTypeName(field.type);
+    return context.interfaces.find(operation => operation.name.value === type);
   }
   return undefined;
 }
