@@ -110,6 +110,8 @@ export interface PluginContext<C extends PluginConfig = PluginConfig> {
   mutations: readonly FieldDefinitionNode[];
   /** A map for determining operation type names */
   operationMap: Record<OperationType, string>;
+  /** All implementations of an interface */
+  interfaceImplementations: { [interfaceName: string]: ObjectTypeDefinitionNode[] };
   /** The plugin config */
   config: C;
 }

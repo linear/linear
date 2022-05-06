@@ -1,5 +1,20 @@
+# A basic entity.
+fragment Entity on Entity {
+  __typename
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A comment associated with an issue.
 fragment Comment on Comment {
+  __typename
   # Comment's URL.
   url
   # The comment content in markdown format.
@@ -31,6 +46,7 @@ fragment Comment on Comment {
 
 # A custom emoji.
 fragment Emoji on Emoji {
+  __typename
   # The emoji image URL.
   url
   # The emoji's name.
@@ -54,6 +70,7 @@ fragment Emoji on Emoji {
 
 # A custom view that has been saved by a user.
 fragment CustomView on CustomView {
+  __typename
   # The color of the icon of the custom view.
   color
   # The description of the custom view.
@@ -89,6 +106,7 @@ fragment CustomView on CustomView {
 
 # A document for a project.
 fragment Document on Document {
+  __typename
   # The color of the icon.
   color
   # The document content as JSON.
@@ -126,6 +144,7 @@ fragment Document on Document {
 
 # A milestone that contains projects.
 fragment Milestone on Milestone {
+  __typename
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been updated after creation.
   updatedAt
@@ -143,29 +162,12 @@ fragment Milestone on Milestone {
 
 # A notification sent to a user.
 fragment Notification on Notification {
-  # Name of the reaction emoji associated with the notification.
-  reactionEmoji
+  __typename
   # Notification type
   type
-  # The comment which the notification is associated with.
-  comment {
-    id
-  }
-  # The issue that the notification is associated with.
-  issue {
-    id
-  }
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been updated after creation.
   updatedAt
-  # The recipient of the notification.
-  user {
-    id
-  }
-  # The team which the notification is associated with.
-  team {
-    id
-  }
   # The time at when an email reminder for this notification was sent to the user. Null, if no email
   #     reminder has been sent.
   emailedAt
@@ -179,10 +181,19 @@ fragment Notification on Notification {
   snoozedUntilAt
   # The unique identifier of the entity.
   id
+  # The user that received the notification.
+  user {
+    id
+  }
+
+  ... on IssueNotification {
+    ...IssueNotification
+  }
 }
 
 # A project.
 fragment Project on Project {
+  __typename
   # Project URL.
   url
   # The estimated completion date of the project.
@@ -250,6 +261,7 @@ fragment Project on Project {
 
 # A reaction associated with a comment.
 fragment Reaction on Reaction {
+  __typename
   # Name of the reaction's emoji.
   emoji
   # The comment that the reaction is associated with.
@@ -273,6 +285,7 @@ fragment Reaction on Reaction {
 
 # A record of changes to an issue.
 fragment IssueHistory on IssueHistory {
+  __typename
   # Changed issue relationships.
   relationChanges {
     ...IssueRelationHistoryPayload
@@ -384,6 +397,7 @@ fragment IssueHistory on IssueHistory {
 
 # A relation between two issues.
 fragment IssueRelation on IssueRelation {
+  __typename
   # The issue whose relationship is being described.
   issue {
     id
@@ -407,6 +421,7 @@ fragment IssueRelation on IssueRelation {
 
 # A set of issues to be resolved in a specified amount of time.
 fragment Cycle on Cycle {
+  __typename
   # The completion time of the cycle. If null, the cycle hasn't been completed.
   completedAt
   # The custom name of the cycle.
@@ -446,6 +461,7 @@ fragment Cycle on Cycle {
 
 # A state in a team workflow.
 fragment WorkflowState on WorkflowState {
+  __typename
   # Description of the state.
   description
   # The last time at which the entity was updated. This is the same as the creation time if the
@@ -473,6 +489,7 @@ fragment WorkflowState on WorkflowState {
 
 # A template object used for creating entities faster.
 fragment Template on Template {
+  __typename
   # Template data.
   templateData
   # Template description.
@@ -502,6 +519,7 @@ fragment Template on Template {
 
 # A user account.
 fragment UserAccount on UserAccount {
+  __typename
   # The authentication service used to create the account.
   service
   # The models identifier.
@@ -524,6 +542,7 @@ fragment UserAccount on UserAccount {
 
 # A user that has access to the the resources of an organization.
 fragment User on User {
+  __typename
   # A date at which the user current status should be cleared.
   statusUntilAt
   # A short description of the user, either its title or bio.
@@ -573,6 +592,7 @@ fragment User on User {
 
 # A user's web browser push notification subscription.
 fragment PushSubscription on PushSubscription {
+  __typename
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been updated after creation.
   updatedAt
@@ -586,6 +606,7 @@ fragment PushSubscription on PushSubscription {
 
 # A version of a document.
 fragment DocumentVersion on DocumentVersion {
+  __typename
   # The document's content in markdown format.
   content
   # The document's title.
@@ -613,6 +634,7 @@ fragment DocumentVersion on DocumentVersion {
 
 # A webhook used to send HTTP notifications over data updates
 fragment Webhook on Webhook {
+  __typename
   # Secret token for verifying the origin on the recipient side.
   secret
   # The last time at which the entity was updated. This is the same as the creation time if the
@@ -646,6 +668,7 @@ fragment Webhook on Webhook {
 
 # An API key. Grants access to the user's resources.
 fragment ApiKey on ApiKey {
+  __typename
   # The label of the API key.
   label
   # The last time at which the entity was updated. This is the same as the creation time if the
@@ -661,6 +684,7 @@ fragment ApiKey on ApiKey {
 
 # An external link for a project.
 fragment ProjectLink on ProjectLink {
+  __typename
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been updated after creation.
   updatedAt
@@ -686,6 +710,7 @@ fragment ProjectLink on ProjectLink {
 
 # An import job for data from an external service
 fragment IssueImport on IssueImport {
+  __typename
   # The data mapping configuration for the import job.
   mapping
   # The id for the user that started the job.
@@ -709,6 +734,7 @@ fragment IssueImport on IssueImport {
 
 # An integration resource created by an external service.
 fragment IntegrationResource on IntegrationResource {
+  __typename
   # Detailed information about the external resource.
   data {
     ...IntegrationResourceData
@@ -742,6 +768,7 @@ fragment IntegrationResource on IntegrationResource {
 
 # An integration with an external service.
 fragment Integration on Integration {
+  __typename
   # The integration's type.
   service
   # The last time at which the entity was updated. This is the same as the creation time if the
@@ -765,6 +792,7 @@ fragment Integration on Integration {
 
 # An invitation to the organization that has been sent via email.
 fragment OrganizationInvite on OrganizationInvite {
+  __typename
   # The invite was sent to external address.
   external
   # The invitees email address.
@@ -794,8 +822,50 @@ fragment OrganizationInvite on OrganizationInvite {
   }
 }
 
+# An issue related notification
+fragment IssueNotification on IssueNotification {
+  __typename
+  # Name of the reaction emoji related to the notification.
+  reactionEmoji
+  # Notification type
+  type
+  # The comment related to the notification.
+  comment {
+    id
+  }
+  # The issue related to the notification.
+  issue {
+    id
+  }
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been updated after creation.
+  updatedAt
+  # The team related to the notification.
+  team {
+    id
+  }
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that received the notification.
+  user {
+    id
+  }
+}
+
 # An issue.
 fragment Issue on Issue {
+  __typename
   # A flag that indicates whether the issue is in the trash bin.
   trashed
   # Issue URL.
@@ -885,6 +955,7 @@ fragment Issue on Issue {
 
 # An organization. Organizations are root-level objects that contain user accounts and teams.
 fragment Organization on Organization {
+  __typename
   # Allowed authentication providers, empty array means all are allowed
   allowedAuthServices
   # How git branches are formatted. If null, default formatting will be used.
@@ -924,6 +995,7 @@ fragment Organization on Organization {
 
 # An organizational unit that contains issues.
 fragment Team on Team {
+  __typename
   # Auto assign completed issues to current cycle.
   cycleIssueAutoAssignCompleted
   # Auto assign started issues to current cycle.
@@ -1041,6 +1113,7 @@ fragment Team on Team {
 
 # Collaborative editing steps for documents.
 fragment DocumentStep on DocumentStep {
+  __typename
   # Connected client ID.
   clientId
   # Step data.
@@ -1060,6 +1133,7 @@ fragment DocumentStep on DocumentStep {
 
 # Contains a delta sync.
 fragment SyncDeltaResponse on SyncDeltaResponse {
+  __typename
   # A JSON serialized collection of delta packets.
   updates
   # Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap.
@@ -1071,6 +1145,7 @@ fragment SyncDeltaResponse on SyncDeltaResponse {
 # Contains either the full serialized state of the application or delta packets that the requester can
 # apply to the local data set in order to be up-to-date.
 fragment SyncResponse on SyncResponse {
+  __typename
   # JSON serialized delta changes that the client can apply to its local state
   #     in order to catch up with the state of the world.
   delta
@@ -1087,6 +1162,7 @@ fragment SyncResponse on SyncResponse {
 
 # Contains requested archived model objects.
 fragment ArchiveResponse on ArchiveResponse {
+  __typename
   # A JSON serialized collection of model objects loaded from the archive
   archive
   # The total number of entities in the archive.
@@ -1099,18 +1175,21 @@ fragment ArchiveResponse on ArchiveResponse {
 
 # Contains the requested dependencies.
 fragment DependencyResponse on DependencyResponse {
+  __typename
   # A JSON serialized collection of dependencies.
   dependencies
 }
 
 # Contains the requested relations.
 fragment SyncBatchResponse on SyncBatchResponse {
+  __typename
   # A JSON serialized collection of relations model object.
   models
 }
 
 # Defines the membership of a user to a team.
 fragment TeamMembership on TeamMembership {
+  __typename
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been updated after creation.
   updatedAt
@@ -1134,6 +1213,7 @@ fragment TeamMembership on TeamMembership {
 
 # Defines the use of a domain by an organization.
 fragment OrganizationDomain on OrganizationDomain {
+  __typename
   # Domain name
   name
   # E-mail used to verify this domain
@@ -1157,6 +1237,7 @@ fragment OrganizationDomain on OrganizationDomain {
 
 # GitHub OAuth token, plus information about the organizations the user is a member of.
 fragment GithubOAuthTokenPayload on GithubOAuthTokenPayload {
+  __typename
   # A list of the GitHub organizations the user is a member of with attached repositories.
   organizations {
     ...GithubOrg
@@ -1167,6 +1248,7 @@ fragment GithubOAuthTokenPayload on GithubOAuthTokenPayload {
 
 # GitHub's commit data
 fragment CommitPayload on CommitPayload {
+  __typename
   added
   id
   message
@@ -1178,6 +1260,7 @@ fragment CommitPayload on CommitPayload {
 
 # Google Sheets specific settings.
 fragment GoogleSheetsSettings on GoogleSheetsSettings {
+  __typename
   sheetId
   spreadsheetId
   spreadsheetUrl
@@ -1186,6 +1269,7 @@ fragment GoogleSheetsSettings on GoogleSheetsSettings {
 
 # Integration resource's payload
 fragment IntegrationResourceData on IntegrationResourceData {
+  __typename
   # The payload for an IntegrationResource of type 'githubCommit'
   githubCommit {
     ...CommitPayload
@@ -1206,6 +1290,7 @@ fragment IntegrationResourceData on IntegrationResourceData {
 
 # Intercom specific settings.
 fragment IntercomSettings on IntercomSettings {
+  __typename
   # Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
   sendNoteOnStatusChange
   # Whether an internal message should be added when someone comments on an issue.
@@ -1214,6 +1299,7 @@ fragment IntercomSettings on IntercomSettings {
 
 # Issue relation history's payload
 fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
+  __typename
   # The identifier of the related issue.
   identifier
   # The type of the change.
@@ -1222,6 +1308,7 @@ fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
 
 # Jira specific settings.
 fragment JiraSettings on JiraSettings {
+  __typename
   # The Jira projects for the organization.
   projects {
     ...JiraProjectData
@@ -1234,6 +1321,7 @@ fragment JiraSettings on JiraSettings {
 
 # Labels that can be associated with issues.
 fragment IssueLabel on IssueLabel {
+  __typename
   # The label's color as a HEX string.
   color
   # The label's description.
@@ -1261,6 +1349,7 @@ fragment IssueLabel on IssueLabel {
 
 # Metadata about a Jira project.
 fragment JiraProjectData on JiraProjectData {
+  __typename
   # The Jira id for this project.
   id
   # The Jira key for this project, such as ENG.
@@ -1271,6 +1360,7 @@ fragment JiraProjectData on JiraProjectData {
 
 # Notification subscriptions for models.
 fragment NotificationSubscription on NotificationSubscription {
+  __typename
   # Subscribed project.
   project {
     id
@@ -1298,6 +1388,7 @@ fragment NotificationSubscription on NotificationSubscription {
 
 # OAuth2 client application
 fragment OauthClient on OauthClient {
+  __typename
   # Image of the application.
   imageUrl
   # Information about the application.
@@ -1333,6 +1424,7 @@ fragment OauthClient on OauthClient {
 
 # Object representing Figma preview information.
 fragment FigmaEmbed on FigmaEmbed {
+  __typename
   # Date when the file was updated at the time of embedding.
   lastModified
   # Figma file name.
@@ -1345,6 +1437,7 @@ fragment FigmaEmbed on FigmaEmbed {
 
 # Object representing Google Cloud upload policy, plus additional data.
 fragment UploadFile on UploadFile {
+  __typename
   # The asset URL for the uploaded file. (assigned automatically)
   assetUrl
   # The content type.
@@ -1363,6 +1456,7 @@ fragment UploadFile on UploadFile {
 
 # Public information of the OAuth application, plus the authorized scopes for a given user.
 fragment AuthorizedApplication on AuthorizedApplication {
+  __typename
   # Application name.
   name
   # Image of the application.
@@ -1386,6 +1480,7 @@ fragment AuthorizedApplication on AuthorizedApplication {
 # Public information of the OAuth application, plus whether the application has been authorized for
 # the given scopes.
 fragment UserAuthorizedApplication on UserAuthorizedApplication {
+  __typename
   # Application name.
   name
   # Image of the application.
@@ -1408,6 +1503,7 @@ fragment UserAuthorizedApplication on UserAuthorizedApplication {
 
 # Public information of the OAuth application.
 fragment Application on Application {
+  __typename
   # Application name.
   name
   # Image of the application.
@@ -1424,6 +1520,7 @@ fragment Application on Application {
 
 # Pull request data
 fragment PullRequestPayload on PullRequestPayload {
+  __typename
   branch
   closedAt
   createdAt
@@ -1443,6 +1540,7 @@ fragment PullRequestPayload on PullRequestPayload {
 
 # Relevant information for the GitHub organization.
 fragment GithubOrg on GithubOrg {
+  __typename
   # GitHub organization id.
   id
   # Repositories that the organization owns.
@@ -1457,6 +1555,7 @@ fragment GithubOrg on GithubOrg {
 
 # Relevant information for the GitHub repository.
 fragment GithubRepo on GithubRepo {
+  __typename
   # The id of the GitHub repository.
   id
   # The name of the GitHub repository.
@@ -1465,6 +1564,7 @@ fragment GithubRepo on GithubRepo {
 
 # Sentry issue data
 fragment SentryIssuePayload on SentryIssuePayload {
+  __typename
   # The Sentry identifier for the issue.
   issueId
   # The Sentry identifier of the actor who created the issue.
@@ -1491,12 +1591,14 @@ fragment SentryIssuePayload on SentryIssuePayload {
 
 # Sentry specific settings.
 fragment SentrySettings on SentrySettings {
+  __typename
   # The slug of the Sentry organization being connected.
   organizationSlug
 }
 
 # Slack notification specific settings.
 fragment SlackPostSettings on SlackPostSettings {
+  __typename
   channel
   channelId
   configurationUrl
@@ -1504,6 +1606,7 @@ fragment SlackPostSettings on SlackPostSettings {
 
 # The integration resource's settings
 fragment IntegrationSettings on IntegrationSettings {
+  __typename
   googleSheets {
     ...GoogleSheetsSettings
   }
@@ -1529,6 +1632,7 @@ fragment IntegrationSettings on IntegrationSettings {
 
 # The organization's SAML configuration
 fragment SamlConfigurationPayload on SamlConfigurationPayload {
+  __typename
   # Binding method for authentication call. Can be either `post` (default) or `redirect`.
   ssoBinding
   # List of allowed email domains for SAML authentication.
@@ -1543,6 +1647,7 @@ fragment SamlConfigurationPayload on SamlConfigurationPayload {
 
 # The settings of a user as a JSON object.
 fragment UserSettings on UserSettings {
+  __typename
   # The email types the user has unsubscribed from.
   unsubscribedFrom
   # The last time at which the entity was updated. This is the same as the creation time if the
@@ -1564,6 +1669,7 @@ fragment UserSettings on UserSettings {
 
 # The subscription of an organization.
 fragment Subscription on Subscription {
+  __typename
   # The creator of the subscription.
   creator {
     id
@@ -1591,6 +1697,7 @@ fragment Subscription on Subscription {
 
 # Tuple for mapping Jira projects to Linear teams.
 fragment JiraLinearMapping on JiraLinearMapping {
+  __typename
   # The Jira id for this project.
   jiraProjectId
   # The Linear team id to map to the given project.
@@ -1599,6 +1706,7 @@ fragment JiraLinearMapping on JiraLinearMapping {
 
 # User favorites presented in the sidebar.
 fragment Favorite on Favorite {
+  __typename
   # The favorited custom view.
   customView {
     id
@@ -1660,6 +1768,7 @@ fragment Favorite on Favorite {
 
 # View preferences.
 fragment ViewPreferences on ViewPreferences {
+  __typename
   # The last time at which the entity was updated. This is the same as the creation time if the
   #     entity hasn't been updated after creation.
   updatedAt
@@ -1677,6 +1786,7 @@ fragment ViewPreferences on ViewPreferences {
 
 # Workspace audit log entry object.
 fragment AuditEntry on AuditEntry {
+  __typename
   # Additional metadata related to the audit entry.
   metadata
   # Country code of request resulting to audit entry.
@@ -1703,6 +1813,7 @@ fragment AuditEntry on AuditEntry {
 
 # Zendesk specific settings.
 fragment ZendeskSettings on ZendeskSettings {
+  __typename
   # The ID of the Linear bot user.
   botUserId
   # The URL of the connected Zendesk organization.
@@ -1713,6 +1824,7 @@ fragment ZendeskSettings on ZendeskSettings {
 
 # [Alpha] Issue attachment (e.g. support ticket, pull request).
 fragment Attachment on Attachment {
+  __typename
   # An accessor helper to source.type, defines the source type of the attachment.
   sourceType
   # Content for the subtitle line in the Linear attachment widget.
@@ -1747,6 +1859,7 @@ fragment Attachment on Attachment {
 }
 
 fragment ApiKeyConnection on ApiKeyConnection {
+  __typename
   nodes {
     ...ApiKey
   }
@@ -1756,6 +1869,7 @@ fragment ApiKeyConnection on ApiKeyConnection {
 }
 
 fragment ApiKeyPayload on ApiKeyPayload {
+  __typename
   # The API key that was created.
   apiKey {
     ...ApiKey
@@ -1767,6 +1881,7 @@ fragment ApiKeyPayload on ApiKeyPayload {
 }
 
 fragment ArchivePayload on ArchivePayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -1774,6 +1889,7 @@ fragment ArchivePayload on ArchivePayload {
 }
 
 fragment AttachmentConnection on AttachmentConnection {
+  __typename
   nodes {
     ...Attachment
   }
@@ -1783,6 +1899,7 @@ fragment AttachmentConnection on AttachmentConnection {
 }
 
 fragment AttachmentPayload on AttachmentPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The issue attachment that was created.
@@ -1794,6 +1911,7 @@ fragment AttachmentPayload on AttachmentPayload {
 }
 
 fragment AuditEntryConnection on AuditEntryConnection {
+  __typename
   nodes {
     ...AuditEntry
   }
@@ -1803,6 +1921,7 @@ fragment AuditEntryConnection on AuditEntryConnection {
 }
 
 fragment AuditEntryType on AuditEntryType {
+  __typename
   # Description of the audit entry type.
   description
   # The audit entry type.
@@ -1810,6 +1929,7 @@ fragment AuditEntryType on AuditEntryType {
 }
 
 fragment AuthResolverResponse on AuthResolverResponse {
+  __typename
   # Email for the authenticated account.
   email
   # ID of the organization last accessed by the user.
@@ -1831,6 +1951,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
 }
 
 fragment BillingDetailsPayload on BillingDetailsPayload {
+  __typename
   # List of invoices, if any.
   invoices {
     ...Invoice
@@ -1846,6 +1967,7 @@ fragment BillingDetailsPayload on BillingDetailsPayload {
 }
 
 fragment BillingEmailPayload on BillingEmailPayload {
+  __typename
   # The customer's email address the invoices are sent to.
   email
   # Whether the operation was successful.
@@ -1853,6 +1975,7 @@ fragment BillingEmailPayload on BillingEmailPayload {
 }
 
 fragment Card on Card {
+  __typename
   # The brand of the card, e.g. Visa.
   brand
   # The last four digits used to identify the card.
@@ -1860,6 +1983,7 @@ fragment Card on Card {
 }
 
 fragment CollaborationDocumentUpdatePayload on CollaborationDocumentUpdatePayload {
+  __typename
   # Document steps the client has not seen yet and need to rebase it's local steps on.
   steps {
     ...StepsResponse
@@ -1869,6 +1993,7 @@ fragment CollaborationDocumentUpdatePayload on CollaborationDocumentUpdatePayloa
 }
 
 fragment CommentConnection on CommentConnection {
+  __typename
   nodes {
     ...Comment
   }
@@ -1878,6 +2003,7 @@ fragment CommentConnection on CommentConnection {
 }
 
 fragment CommentPayload on CommentPayload {
+  __typename
   # The comment that was created or updated.
   comment {
     id
@@ -1889,22 +2015,26 @@ fragment CommentPayload on CommentPayload {
 }
 
 fragment ContactPayload on ContactPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment CreateCsvExportReportPayload on CreateCsvExportReportPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment CreateOrJoinOrganizationResponse on CreateOrJoinOrganizationResponse {
+  __typename
   user {
     id
   }
 }
 
 fragment CustomViewConnection on CustomViewConnection {
+  __typename
   nodes {
     ...CustomView
   }
@@ -1914,6 +2044,7 @@ fragment CustomViewConnection on CustomViewConnection {
 }
 
 fragment CustomViewPayload on CustomViewPayload {
+  __typename
   # The custom view that was created or updated.
   customView {
     id
@@ -1925,6 +2056,7 @@ fragment CustomViewPayload on CustomViewPayload {
 }
 
 fragment CycleConnection on CycleConnection {
+  __typename
   nodes {
     ...Cycle
   }
@@ -1934,6 +2066,7 @@ fragment CycleConnection on CycleConnection {
 }
 
 fragment CyclePayload on CyclePayload {
+  __typename
   # The Cycle that was created or updated.
   cycle {
     id
@@ -1945,11 +2078,13 @@ fragment CyclePayload on CyclePayload {
 }
 
 fragment DebugPayload on DebugPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment DocumentConnection on DocumentConnection {
+  __typename
   nodes {
     ...Document
   }
@@ -1959,6 +2094,7 @@ fragment DocumentConnection on DocumentConnection {
 }
 
 fragment DocumentPayload on DocumentPayload {
+  __typename
   # The document that was created or updated.
   document {
     id
@@ -1970,6 +2106,7 @@ fragment DocumentPayload on DocumentPayload {
 }
 
 fragment DocumentVersionConnection on DocumentVersionConnection {
+  __typename
   nodes {
     ...DocumentVersion
   }
@@ -1979,16 +2116,19 @@ fragment DocumentVersionConnection on DocumentVersionConnection {
 }
 
 fragment EmailSubscribePayload on EmailSubscribePayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment EmailUnsubscribePayload on EmailUnsubscribePayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeResponse {
+  __typename
   # Supported challenge for this user account. Can be either verificationCode or password.
   authType
   # Whether the operation was successful.
@@ -1996,6 +2136,7 @@ fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeR
 }
 
 fragment EmojiConnection on EmojiConnection {
+  __typename
   nodes {
     ...Emoji
   }
@@ -2005,6 +2146,7 @@ fragment EmojiConnection on EmojiConnection {
 }
 
 fragment EmojiPayload on EmojiPayload {
+  __typename
   # The emoji that was created.
   emoji {
     id
@@ -2016,11 +2158,13 @@ fragment EmojiPayload on EmojiPayload {
 }
 
 fragment EventPayload on EventPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment FavoriteConnection on FavoriteConnection {
+  __typename
   nodes {
     ...Favorite
   }
@@ -2030,6 +2174,7 @@ fragment FavoriteConnection on FavoriteConnection {
 }
 
 fragment FavoritePayload on FavoritePayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The object that was added as a favorite.
@@ -2041,11 +2186,13 @@ fragment FavoritePayload on FavoritePayload {
 }
 
 fragment FeedbackPayload on FeedbackPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment FigmaEmbedPayload on FigmaEmbedPayload {
+  __typename
   # Figma embed information.
   figmaEmbed {
     ...FigmaEmbed
@@ -2055,6 +2202,7 @@ fragment FigmaEmbedPayload on FigmaEmbedPayload {
 }
 
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -2062,6 +2210,7 @@ fragment FrontAttachmentPayload on FrontAttachmentPayload {
 }
 
 fragment GitHubCommitIntegrationPayload on GitHubCommitIntegrationPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The integration that was created or updated.
@@ -2075,6 +2224,7 @@ fragment GitHubCommitIntegrationPayload on GitHubCommitIntegrationPayload {
 }
 
 fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
+  __typename
   # The URL containing the image.
   url
   # The identifier of the last sync operation.
@@ -2084,6 +2234,7 @@ fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
 }
 
 fragment IntegrationConnection on IntegrationConnection {
+  __typename
   nodes {
     ...Integration
   }
@@ -2093,6 +2244,7 @@ fragment IntegrationConnection on IntegrationConnection {
 }
 
 fragment IntegrationPayload on IntegrationPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The integration that was created or updated.
@@ -2104,6 +2256,7 @@ fragment IntegrationPayload on IntegrationPayload {
 }
 
 fragment IntegrationResourceConnection on IntegrationResourceConnection {
+  __typename
   nodes {
     ...IntegrationResource
   }
@@ -2113,6 +2266,7 @@ fragment IntegrationResourceConnection on IntegrationResourceConnection {
 }
 
 fragment Invoice on Invoice {
+  __typename
   # The URL at which the invoice can be viewed or paid.
   url
   # The creation date of the invoice.
@@ -2126,6 +2280,7 @@ fragment Invoice on Invoice {
 }
 
 fragment IssueBatchPayload on IssueBatchPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The issues that were updated.
@@ -2137,6 +2292,7 @@ fragment IssueBatchPayload on IssueBatchPayload {
 }
 
 fragment IssueConnection on IssueConnection {
+  __typename
   nodes {
     ...Issue
   }
@@ -2146,6 +2302,7 @@ fragment IssueConnection on IssueConnection {
 }
 
 fragment IssueHistoryConnection on IssueHistoryConnection {
+  __typename
   nodes {
     ...IssueHistory
   }
@@ -2155,6 +2312,7 @@ fragment IssueHistoryConnection on IssueHistoryConnection {
 }
 
 fragment IssueImportDeletePayload on IssueImportDeletePayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The import job that was deleted.
@@ -2166,6 +2324,7 @@ fragment IssueImportDeletePayload on IssueImportDeletePayload {
 }
 
 fragment IssueImportPayload on IssueImportPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The import job that was created or updated.
@@ -2177,6 +2336,7 @@ fragment IssueImportPayload on IssueImportPayload {
 }
 
 fragment IssueLabelConnection on IssueLabelConnection {
+  __typename
   nodes {
     ...IssueLabel
   }
@@ -2186,6 +2346,7 @@ fragment IssueLabelConnection on IssueLabelConnection {
 }
 
 fragment IssueLabelPayload on IssueLabelPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The label that was created or updated.
@@ -2197,6 +2358,7 @@ fragment IssueLabelPayload on IssueLabelPayload {
 }
 
 fragment IssuePayload on IssuePayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The issue that was created or updated.
@@ -2208,6 +2370,7 @@ fragment IssuePayload on IssuePayload {
 }
 
 fragment IssuePriorityValue on IssuePriorityValue {
+  __typename
   # Priority's label.
   label
   # Priority's number value.
@@ -2215,6 +2378,7 @@ fragment IssuePriorityValue on IssuePriorityValue {
 }
 
 fragment IssueRelationConnection on IssueRelationConnection {
+  __typename
   nodes {
     ...IssueRelation
   }
@@ -2224,6 +2388,7 @@ fragment IssueRelationConnection on IssueRelationConnection {
 }
 
 fragment IssueRelationPayload on IssueRelationPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The issue relation that was created or updated.
@@ -2235,6 +2400,7 @@ fragment IssueRelationPayload on IssueRelationPayload {
 }
 
 fragment MilestoneConnection on MilestoneConnection {
+  __typename
   nodes {
     ...Milestone
   }
@@ -2244,6 +2410,7 @@ fragment MilestoneConnection on MilestoneConnection {
 }
 
 fragment MilestonePayload on MilestonePayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The milesteone that was created or updated.
@@ -2255,10 +2422,13 @@ fragment MilestonePayload on MilestonePayload {
 }
 
 fragment Node on Node {
+  __typename
   # The unique identifier of the entity.
   id
 }
+
 fragment NotificationConnection on NotificationConnection {
+  __typename
   nodes {
     ...Notification
   }
@@ -2268,17 +2438,19 @@ fragment NotificationConnection on NotificationConnection {
 }
 
 fragment NotificationPayload on NotificationPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The notification that was created or updated.
   notification {
-    id
+    ...Notification
   }
   # Whether the operation was successful.
   success
 }
 
 fragment NotificationSubscriptionConnection on NotificationSubscriptionConnection {
+  __typename
   nodes {
     ...NotificationSubscription
   }
@@ -2288,6 +2460,7 @@ fragment NotificationSubscriptionConnection on NotificationSubscriptionConnectio
 }
 
 fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The notification subscription that was created or updated.
@@ -2299,11 +2472,13 @@ fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
 }
 
 fragment OauthAuthStringAuthorizePayload on OauthAuthStringAuthorizePayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment OauthAuthStringChallengePayload on OauthAuthStringChallengePayload {
+  __typename
   # The created authentication string.
   authString
   # Whether the operation was successful.
@@ -2311,6 +2486,7 @@ fragment OauthAuthStringChallengePayload on OauthAuthStringChallengePayload {
 }
 
 fragment OauthAuthStringCheckPayload on OauthAuthStringCheckPayload {
+  __typename
   # Access token for use.
   token
   # Whether the operation was successful.
@@ -2318,6 +2494,7 @@ fragment OauthAuthStringCheckPayload on OauthAuthStringCheckPayload {
 }
 
 fragment OauthClientPayload on OauthClientPayload {
+  __typename
   # The OAuth client application that was created or updated.
   oauthClient {
     ...OauthClient
@@ -2329,21 +2506,25 @@ fragment OauthClientPayload on OauthClientPayload {
 }
 
 fragment OauthTokenRevokePayload on OauthTokenRevokePayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment OrganizationCancelDeletePayload on OrganizationCancelDeletePayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment OrganizationDeletePayload on OrganizationDeletePayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment OrganizationDomainPayload on OrganizationDomainPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The organization domain that was created or updated.
@@ -2355,11 +2536,13 @@ fragment OrganizationDomainPayload on OrganizationDomainPayload {
 }
 
 fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment OrganizationExistsPayload on OrganizationExistsPayload {
+  __typename
   # Whether the operation was successful.
   success
   # Whether the organization exists.
@@ -2367,6 +2550,7 @@ fragment OrganizationExistsPayload on OrganizationExistsPayload {
 }
 
 fragment OrganizationInviteConnection on OrganizationInviteConnection {
+  __typename
   nodes {
     ...OrganizationInvite
   }
@@ -2376,6 +2560,7 @@ fragment OrganizationInviteConnection on OrganizationInviteConnection {
 }
 
 fragment OrganizationInviteDetailsPayload on OrganizationInviteDetailsPayload {
+  __typename
   # ID of the workspace the invite is for.
   organizationId
   # Name of the workspace the invite is for.
@@ -2397,6 +2582,7 @@ fragment OrganizationInviteDetailsPayload on OrganizationInviteDetailsPayload {
 }
 
 fragment OrganizationInvitePayload on OrganizationInvitePayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The organization invite that was created or updated.
@@ -2408,6 +2594,7 @@ fragment OrganizationInvitePayload on OrganizationInvitePayload {
 }
 
 fragment OrganizationPayload on OrganizationPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -2415,6 +2602,7 @@ fragment OrganizationPayload on OrganizationPayload {
 }
 
 fragment PageInfo on PageInfo {
+  __typename
   # Cursor representing the first result in the paginated results.
   startCursor
   # Cursor representing the last result in the paginated results.
@@ -2426,6 +2614,7 @@ fragment PageInfo on PageInfo {
 }
 
 fragment ProjectConnection on ProjectConnection {
+  __typename
   nodes {
     ...Project
   }
@@ -2435,6 +2624,7 @@ fragment ProjectConnection on ProjectConnection {
 }
 
 fragment ProjectLinkConnection on ProjectLinkConnection {
+  __typename
   nodes {
     ...ProjectLink
   }
@@ -2444,6 +2634,7 @@ fragment ProjectLinkConnection on ProjectLinkConnection {
 }
 
 fragment ProjectLinkPayload on ProjectLinkPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The project that was created or updated.
@@ -2455,6 +2646,7 @@ fragment ProjectLinkPayload on ProjectLinkPayload {
 }
 
 fragment ProjectPayload on ProjectPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The project that was created or updated.
@@ -2466,6 +2658,7 @@ fragment ProjectPayload on ProjectPayload {
 }
 
 fragment PushSubscriptionConnection on PushSubscriptionConnection {
+  __typename
   nodes {
     ...PushSubscription
   }
@@ -2475,6 +2668,7 @@ fragment PushSubscriptionConnection on PushSubscriptionConnection {
 }
 
 fragment PushSubscriptionPayload on PushSubscriptionPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -2482,11 +2676,13 @@ fragment PushSubscriptionPayload on PushSubscriptionPayload {
 }
 
 fragment PushSubscriptionTestPayload on PushSubscriptionTestPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment RateLimitPayload on RateLimitPayload {
+  __typename
   # The identifier we rate limit on.
   identifier
   # The kind of rate limit selected for this request.
@@ -2498,6 +2694,7 @@ fragment RateLimitPayload on RateLimitPayload {
 }
 
 fragment RateLimitResultPayload on RateLimitResultPayload {
+  __typename
   # The period in which the rate limit is fully replenished in ms.
   period
   # The remaining quantity for this type of limit after this request.
@@ -2513,6 +2710,7 @@ fragment RateLimitResultPayload on RateLimitResultPayload {
 }
 
 fragment ReactionConnection on ReactionConnection {
+  __typename
   nodes {
     ...Reaction
   }
@@ -2522,6 +2720,7 @@ fragment ReactionConnection on ReactionConnection {
 }
 
 fragment ReactionPayload on ReactionPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   reaction {
@@ -2531,6 +2730,7 @@ fragment ReactionPayload on ReactionPayload {
 }
 
 fragment RotateSecretPayload on RotateSecretPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -2538,6 +2738,7 @@ fragment RotateSecretPayload on RotateSecretPayload {
 }
 
 fragment SamlConfiguration on SamlConfiguration {
+  __typename
   # Binding method for authentication call. Can be either `post` (default) or `redirect`.
   ssoBinding
   # List of allowed email domains for SAML authentication.
@@ -2553,6 +2754,7 @@ fragment SamlConfiguration on SamlConfiguration {
 }
 
 fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
+  __typename
   # SAML SSO sign-in URL.
   samlSsoUrl
   # Whether the operation was successful.
@@ -2560,6 +2762,7 @@ fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
 }
 
 fragment StepsResponse on StepsResponse {
+  __typename
   # Client's document version.
   version
   # List of client IDs for the document steps.
@@ -2569,6 +2772,7 @@ fragment StepsResponse on StepsResponse {
 }
 
 fragment SubscriptionPayload on SubscriptionPayload {
+  __typename
   # The date the subscription was set to cancel at the end of the billing period, if any.
   canceledAt
   # The identifier of the last sync operation.
@@ -2578,16 +2782,19 @@ fragment SubscriptionPayload on SubscriptionPayload {
 }
 
 fragment SubscriptionSessionPayload on SubscriptionSessionPayload {
+  __typename
   # The subscription session that was created or updated.
   session
 }
 
 fragment SynchronizedPayload on SynchronizedPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
 }
 
 fragment TeamConnection on TeamConnection {
+  __typename
   nodes {
     ...Team
   }
@@ -2597,6 +2804,7 @@ fragment TeamConnection on TeamConnection {
 }
 
 fragment TeamMembershipConnection on TeamMembershipConnection {
+  __typename
   nodes {
     ...TeamMembership
   }
@@ -2606,6 +2814,7 @@ fragment TeamMembershipConnection on TeamMembershipConnection {
 }
 
 fragment TeamMembershipPayload on TeamMembershipPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The team membership that was created or updated.
@@ -2617,6 +2826,7 @@ fragment TeamMembershipPayload on TeamMembershipPayload {
 }
 
 fragment TeamPayload on TeamPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The team that was created or updated.
@@ -2628,12 +2838,14 @@ fragment TeamPayload on TeamPayload {
 }
 
 fragment TemplateConnection on TemplateConnection {
+  __typename
   pageInfo {
     ...PageInfo
   }
 }
 
 fragment TemplatePayload on TemplatePayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The template that was created or updated.
@@ -2645,6 +2857,7 @@ fragment TemplatePayload on TemplatePayload {
 }
 
 fragment UploadFileHeader on UploadFileHeader {
+  __typename
   # Upload file header key.
   key
   # Upload file header value.
@@ -2652,6 +2865,7 @@ fragment UploadFileHeader on UploadFileHeader {
 }
 
 fragment UploadPayload on UploadPayload {
+  __typename
   # Object describing the file to be uploaded.
   uploadFile {
     ...UploadFile
@@ -2663,11 +2877,13 @@ fragment UploadPayload on UploadPayload {
 }
 
 fragment UserAdminPayload on UserAdminPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment UserConnection on UserConnection {
+  __typename
   nodes {
     ...User
   }
@@ -2677,6 +2893,7 @@ fragment UserConnection on UserConnection {
 }
 
 fragment UserPayload on UserPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The user that was created or updated.
@@ -2688,6 +2905,7 @@ fragment UserPayload on UserPayload {
 }
 
 fragment UserSettingsFlagPayload on UserSettingsFlagPayload {
+  __typename
   # The flag key which was updated.
   flag
   # The flag value after update.
@@ -2699,6 +2917,7 @@ fragment UserSettingsFlagPayload on UserSettingsFlagPayload {
 }
 
 fragment UserSettingsFlagsResetPayload on UserSettingsFlagsResetPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -2706,6 +2925,7 @@ fragment UserSettingsFlagsResetPayload on UserSettingsFlagsResetPayload {
 }
 
 fragment UserSettingsPayload on UserSettingsPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -2713,11 +2933,13 @@ fragment UserSettingsPayload on UserSettingsPayload {
 }
 
 fragment UserSubscribeToNewsletterPayload on UserSubscribeToNewsletterPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
 
 fragment ViewPreferencesPayload on ViewPreferencesPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The view preferences entity being mutated.
@@ -2729,6 +2951,7 @@ fragment ViewPreferencesPayload on ViewPreferencesPayload {
 }
 
 fragment WebhookConnection on WebhookConnection {
+  __typename
   nodes {
     ...Webhook
   }
@@ -2738,6 +2961,7 @@ fragment WebhookConnection on WebhookConnection {
 }
 
 fragment WebhookPayload on WebhookPayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The webhook entity being mutated.
@@ -2749,6 +2973,7 @@ fragment WebhookPayload on WebhookPayload {
 }
 
 fragment WorkflowStateConnection on WorkflowStateConnection {
+  __typename
   nodes {
     ...WorkflowState
   }
@@ -2758,6 +2983,7 @@ fragment WorkflowStateConnection on WorkflowStateConnection {
 }
 
 fragment WorkflowStatePayload on WorkflowStatePayload {
+  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # The state that was created or updated.

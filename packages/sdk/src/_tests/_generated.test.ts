@@ -1630,7 +1630,7 @@ describe("generated", () => {
 
   /** Test all Notification queries */
   describe("Notifications", () => {
-    let _notification: L.Notification | undefined;
+    let _notification: L.Notification | L.IssueNotification | undefined;
     let _notification_id: string | undefined;
 
     /** Test the root connection query for the Notification */
@@ -1644,41 +1644,13 @@ describe("generated", () => {
     /** Test the root query for a single Notification */
     it("notification", async () => {
       if (_notification_id) {
-        const notification: L.Notification | undefined = await client.notification(_notification_id);
+        const notification: L.Notification | L.IssueNotification | undefined = await client.notification(
+          _notification_id
+        );
         _notification = notification;
         expect(notification instanceof L.Notification);
       } else {
         console.warn("codegen-doc:print: No first Notification found in connection - cannot test notification query");
-      }
-    });
-
-    /** Test the notification.comment query for L.Comment */
-    it("notification.comment", async () => {
-      if (_notification) {
-        const notification_comment: L.Comment | undefined = await _notification.comment;
-        expect(notification_comment instanceof L.Comment);
-      } else {
-        console.warn("codegen-doc:print: No Notification found - cannot test notification.comment query");
-      }
-    });
-
-    /** Test the notification.issue query for L.Issue */
-    it("notification.issue", async () => {
-      if (_notification) {
-        const notification_issue: L.Issue | undefined = await _notification.issue;
-        expect(notification_issue instanceof L.Issue);
-      } else {
-        console.warn("codegen-doc:print: No Notification found - cannot test notification.issue query");
-      }
-    });
-
-    /** Test the notification.team query for L.Team */
-    it("notification.team", async () => {
-      if (_notification) {
-        const notification_team: L.Team | undefined = await _notification.team;
-        expect(notification_team instanceof L.Team);
-      } else {
-        console.warn("codegen-doc:print: No Notification found - cannot test notification.team query");
       }
     });
 

@@ -1,5 +1,10 @@
 import { ArgDefinition, ArgList, PluginConfig, PluginContext } from "@linear/codegen-doc";
-import { FieldDefinitionNode, ObjectTypeDefinitionNode, OperationDefinitionNode } from "graphql";
+import {
+  FieldDefinitionNode,
+  InterfaceTypeDefinitionNode,
+  ObjectTypeDefinitionNode,
+  OperationDefinitionNode,
+} from "graphql";
 
 /**
  * Parsed sdk plugin config
@@ -65,7 +70,7 @@ export interface SdkOperation {
   /** The query for this operation */
   query?: FieldDefinitionNode;
   /** The fragment returned by this operation */
-  fragment?: ObjectTypeDefinitionNode;
+  fragment?: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode;
   /** The model for this operation */
   model?: SdkModel;
   /** All args for this operation */
@@ -120,6 +125,7 @@ export enum SdkModelFieldType {
   scalar = "SdkScalarField ",
   query = "SdkQueryField ",
   object = "SdkObjectField ",
+  interface = "SdkInterfaceField ",
   list = "SdkListField ",
   scalarList = "SdkScalarListField",
   connection = "SdkConnectionField",
@@ -170,6 +176,15 @@ export interface SdkObjectField extends Omit<SdkScalarField, "__typename"> {
 }
 
 /**
+ * A field with interface type
+ */
+export interface SdkInterfaceField extends Omit<SdkScalarField, "__typename"> {
+  __typename: SdkModelFieldType.interface;
+  /** The interface matching this field */
+  object: InterfaceTypeDefinitionNode;
+}
+
+/**
  * A field with connection object type
  */
 export interface SdkConnectionField extends Omit<SdkScalarField, "__typename"> {
@@ -194,6 +209,7 @@ export type SdkModelField =
   | SdkScalarField
   | SdkQueryField
   | SdkObjectField
+  | SdkInterfaceField
   | SdkListField
   | SdkScalarListField
   | SdkConnectionField;
@@ -201,7 +217,7 @@ export type SdkModelField =
 /**
  * The processed sdk model node
  */
-export interface SdkModelNode extends Omit<ObjectTypeDefinitionNode, "fields"> {
+export interface SdkModelNode extends Omit<ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode, "fields"> {
   /** The processed field nodes */
   fields?: SdkModelField[];
 }
@@ -222,6 +238,7 @@ export interface SdkModel {
     scalar: SdkScalarField[];
     query: SdkQueryField[];
     object: SdkObjectField[];
+    interface: SdkInterfaceField[];
     list: SdkListField[];
     scalarList: SdkScalarListField[];
     connection: SdkConnectionField[];

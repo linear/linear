@@ -23,6 +23,7 @@ import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import {
   SdkConnectionField,
+  SdkInterfaceField,
   SdkListField,
   SdkModel,
   SdkModelField,
@@ -185,6 +186,8 @@ function leaveObjectOrInterface(_node: ObjectTypeDefinitionNode | InterfaceTypeD
         scalar: (fields?.filter(field => field.__typename === SdkModelFieldType.scalar) ?? []) as SdkScalarField[],
         query: (fields?.filter(field => field.__typename === SdkModelFieldType.query) ?? []) as SdkQueryField[],
         object: (fields?.filter(field => field.__typename === SdkModelFieldType.object) ?? []) as SdkObjectField[],
+        interface: (fields?.filter(field => field.__typename === SdkModelFieldType.interface) ??
+          []) as SdkInterfaceField[],
         list: (fields?.filter(field => field.__typename === SdkModelFieldType.list) ?? []) as SdkListField[],
         scalarList: (fields?.filter(field => field.__typename === SdkModelFieldType.scalarList) ??
           []) as SdkScalarListField[],
