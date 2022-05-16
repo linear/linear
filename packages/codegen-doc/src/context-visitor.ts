@@ -20,6 +20,7 @@ export class ContextVisitor<Config extends PluginConfig> {
   private _interfaces: InterfaceTypeDefinitionNode[] = [];
   private _queries: FieldDefinitionNode[] = [];
   private _mutations: FieldDefinitionNode[] = [];
+  private _interfaceImplementations: { [interfaceName: string]: ObjectTypeDefinitionNode[] } = {};
 
   /** Initialize the visitor */
   public constructor(schema: GraphQLSchema, config: Config) {
@@ -45,6 +46,16 @@ export class ContextVisitor<Config extends PluginConfig> {
         [OperationType.query]: this._schema.getQueryType()?.name ?? "Query",
         [OperationType.mutation]: this._schema.getMutationType()?.name ?? "Mutation",
       },
+      interfaceImplementations: Object.fromEntries(
+        this._interfaces
+          .filter(interfaceDefinition => !["Node", "Entity"].includes(interfaceDefinition.name.value))
+          .map(interfaceDefinition => [
+            interfaceDefinition.name.value,
+            this._objects.filter(objectDefinition =>
+              objectDefinition.interfaces?.some(i => i.name.value === interfaceDefinition.name.value)
+            ),
+          ])
+      ),
     };
   }
 

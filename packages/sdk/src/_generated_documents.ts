@@ -1135,6 +1135,21 @@ export type EmojiPayload = {
   success: Scalars["Boolean"];
 };
 
+/** A basic entity. */
+export type Entity = {
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
 export type EventCreateInput = {
   /** The category of the event to create. */
   category: Scalars["String"];
@@ -2232,6 +2247,45 @@ export type IssueLabelUpdateInput = {
   /** The name of the label. */
   name?: Maybe<Scalars["String"]>;
 };
+
+/** An issue related notification */
+export type IssueNotification = Entity &
+  Node &
+  Notification & {
+    __typename?: "IssueNotification";
+    /** The time at which the entity was archived. Null if the entity has not been archived. */
+    archivedAt?: Maybe<Scalars["DateTime"]>;
+    /** The comment related to the notification. */
+    comment?: Maybe<Comment>;
+    /** The time at which the entity was created. */
+    createdAt: Scalars["DateTime"];
+    /**
+     * The time at when an email reminder for this notification was sent to the user. Null, if no email
+     *     reminder has been sent.
+     */
+    emailedAt?: Maybe<Scalars["DateTime"]>;
+    /** The unique identifier of the entity. */
+    id: Scalars["ID"];
+    /** The issue related to the notification. */
+    issue: Issue;
+    /** Name of the reaction emoji related to the notification. */
+    reactionEmoji?: Maybe<Scalars["String"]>;
+    /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+    readAt?: Maybe<Scalars["DateTime"]>;
+    /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+    snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
+    /** The team related to the notification. */
+    team: Team;
+    /** Notification type */
+    type: Scalars["String"];
+    /**
+     * The last time at which the entity was updated. This is the same as the creation time if the
+     *     entity hasn't been updated after creation.
+     */
+    updatedAt: Scalars["DateTime"];
+    /** The user that received the notification. */
+    user: User;
+  };
 
 export type IssuePayload = {
   __typename?: "IssuePayload";
@@ -3663,12 +3717,9 @@ export type Node = {
 };
 
 /** A notification sent to a user. */
-export type Notification = Node & {
-  __typename?: "Notification";
+export type Notification = {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The comment which the notification is associated with. */
-  comment?: Maybe<Comment>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /**
@@ -3678,16 +3729,10 @@ export type Notification = Node & {
   emailedAt?: Maybe<Scalars["DateTime"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** The issue that the notification is associated with. */
-  issue: Issue;
-  /** Name of the reaction emoji associated with the notification. */
-  reactionEmoji?: Maybe<Scalars["String"]>;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   readAt?: Maybe<Scalars["DateTime"]>;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
   snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
-  /** The team which the notification is associated with. */
-  team: Team;
   /** Notification type */
   type: Scalars["String"];
   /**
@@ -3695,7 +3740,7 @@ export type Notification = Node & {
    *     entity hasn't been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
-  /** The recipient of the notification. */
+  /** The user that received the notification. */
   user: User;
 };
 
@@ -7161,7 +7206,12 @@ export type ZendeskSettingsInput = {
   url: Scalars["String"];
 };
 
-export type CommentFragment = { __typename?: "Comment" } & Pick<
+export type EntityFragment = { __typename: "IssueNotification" } & Pick<
+  IssueNotification,
+  "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
+export type CommentFragment = { __typename: "Comment" } & Pick<
   Comment,
   "url" | "body" | "updatedAt" | "archivedAt" | "createdAt" | "editedAt" | "id"
 > & {
@@ -7170,12 +7220,12 @@ export type CommentFragment = { __typename?: "Comment" } & Pick<
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
-export type EmojiFragment = { __typename?: "Emoji" } & Pick<
+export type EmojiFragment = { __typename: "Emoji" } & Pick<
   Emoji,
   "url" | "name" | "updatedAt" | "source" | "archivedAt" | "createdAt" | "id"
 > & { creator: { __typename?: "User" } & Pick<User, "id"> };
 
-export type CustomViewFragment = { __typename?: "CustomView" } & Pick<
+export type CustomViewFragment = { __typename: "CustomView" } & Pick<
   CustomView,
   | "color"
   | "description"
@@ -7190,7 +7240,7 @@ export type CustomViewFragment = { __typename?: "CustomView" } & Pick<
   | "filterData"
 > & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
 
-export type DocumentFragment = { __typename?: "Document" } & Pick<
+export type DocumentFragment = { __typename: "Document" } & Pick<
   Document,
   "color" | "contentData" | "content" | "title" | "slugId" | "icon" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
@@ -7199,22 +7249,17 @@ export type DocumentFragment = { __typename?: "Document" } & Pick<
     updatedBy: { __typename?: "User" } & Pick<User, "id">;
   };
 
-export type MilestoneFragment = { __typename?: "Milestone" } & Pick<
+export type MilestoneFragment = { __typename: "Milestone" } & Pick<
   Milestone,
   "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
 >;
 
-export type NotificationFragment = { __typename?: "Notification" } & Pick<
-  Notification,
-  "reactionEmoji" | "type" | "updatedAt" | "emailedAt" | "readAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
-> & {
-    comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
-    user: { __typename?: "User" } & Pick<User, "id">;
-    team: { __typename?: "Team" } & Pick<Team, "id">;
-  };
+export type NotificationFragment = { __typename: "IssueNotification" } & Pick<
+  IssueNotification,
+  "type" | "updatedAt" | "emailedAt" | "readAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+> & { user: { __typename?: "User" } & Pick<User, "id"> } & IssueNotificationFragment;
 
-export type ProjectFragment = { __typename?: "Project" } & Pick<
+export type ProjectFragment = { __typename: "Project" } & Pick<
   Project,
   | "url"
   | "targetDate"
@@ -7247,12 +7292,12 @@ export type ProjectFragment = { __typename?: "Project" } & Pick<
     creator: { __typename?: "User" } & Pick<User, "id">;
   };
 
-export type ReactionFragment = { __typename?: "Reaction" } & Pick<
+export type ReactionFragment = { __typename: "Reaction" } & Pick<
   Reaction,
   "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { comment: { __typename?: "Comment" } & Pick<Comment, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
 
-export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
+export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
   IssueHistory,
   | "addedLabelIds"
   | "removedLabelIds"
@@ -7296,12 +7341,12 @@ export type IssueHistoryFragment = { __typename?: "IssueHistory" } & Pick<
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
-export type IssueRelationFragment = { __typename?: "IssueRelation" } & Pick<
+export type IssueRelationFragment = { __typename: "IssueRelation" } & Pick<
   IssueRelation,
   "updatedAt" | "type" | "archivedAt" | "createdAt" | "id"
 > & { issue: { __typename?: "Issue" } & Pick<Issue, "id">; relatedIssue: { __typename?: "Issue" } & Pick<Issue, "id"> };
 
-export type CycleFragment = { __typename?: "Cycle" } & Pick<
+export type CycleFragment = { __typename: "Cycle" } & Pick<
   Cycle,
   | "completedAt"
   | "name"
@@ -7320,12 +7365,12 @@ export type CycleFragment = { __typename?: "Cycle" } & Pick<
   | "id"
 > & { team: { __typename?: "Team" } & Pick<Team, "id"> };
 
-export type WorkflowStateFragment = { __typename?: "WorkflowState" } & Pick<
+export type WorkflowStateFragment = { __typename: "WorkflowState" } & Pick<
   WorkflowState,
   "description" | "updatedAt" | "position" | "color" | "name" | "archivedAt" | "createdAt" | "type" | "id"
 > & { team: { __typename?: "Team" } & Pick<Team, "id"> };
 
-export type TemplateFragment = { __typename?: "Template" } & Pick<
+export type TemplateFragment = { __typename: "Template" } & Pick<
   Template,
   "templateData" | "description" | "type" | "updatedAt" | "name" | "archivedAt" | "createdAt" | "id"
 > & {
@@ -7333,12 +7378,12 @@ export type TemplateFragment = { __typename?: "Template" } & Pick<
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
-export type UserAccountFragment = { __typename?: "UserAccount" } & Pick<
+export type UserAccountFragment = { __typename: "UserAccount" } & Pick<
   UserAccount,
   "service" | "id" | "archivedAt" | "createdAt" | "updatedAt" | "email" | "name"
 > & { users: Array<{ __typename?: "User" } & UserFragment> };
 
-export type UserFragment = { __typename?: "User" } & Pick<
+export type UserFragment = { __typename: "User" } & Pick<
   User,
   | "statusUntilAt"
   | "description"
@@ -7364,17 +7409,17 @@ export type UserFragment = { __typename?: "User" } & Pick<
   | "isMe"
 >;
 
-export type PushSubscriptionFragment = { __typename?: "PushSubscription" } & Pick<
+export type PushSubscriptionFragment = { __typename: "PushSubscription" } & Pick<
   PushSubscription,
   "updatedAt" | "archivedAt" | "createdAt" | "id"
 >;
 
-export type DocumentVersionFragment = { __typename?: "DocumentVersion" } & Pick<
+export type DocumentVersionFragment = { __typename: "DocumentVersion" } & Pick<
   DocumentVersion,
   "content" | "title" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "revision"
 > & { project: { __typename?: "Project" } & Pick<Project, "id">; creator: { __typename?: "User" } & Pick<User, "id"> };
 
-export type WebhookFragment = { __typename?: "Webhook" } & Pick<
+export type WebhookFragment = { __typename: "Webhook" } & Pick<
   Webhook,
   | "secret"
   | "updatedAt"
@@ -7391,22 +7436,22 @@ export type WebhookFragment = { __typename?: "Webhook" } & Pick<
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
-export type ApiKeyFragment = { __typename?: "ApiKey" } & Pick<
+export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
   ApiKey,
   "label" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 >;
 
-export type ProjectLinkFragment = { __typename?: "ProjectLink" } & Pick<
+export type ProjectLinkFragment = { __typename: "ProjectLink" } & Pick<
   ProjectLink,
   "updatedAt" | "url" | "label" | "archivedAt" | "createdAt" | "id"
 > & { project: { __typename?: "Project" } & Pick<Project, "id">; creator: { __typename?: "User" } & Pick<User, "id"> };
 
-export type IssueImportFragment = { __typename?: "IssueImport" } & Pick<
+export type IssueImportFragment = { __typename: "IssueImport" } & Pick<
   IssueImport,
   "mapping" | "creatorId" | "updatedAt" | "service" | "status" | "archivedAt" | "createdAt" | "id" | "error"
 >;
 
-export type IntegrationResourceFragment = { __typename?: "IntegrationResource" } & Pick<
+export type IntegrationResourceFragment = { __typename: "IntegrationResource" } & Pick<
   IntegrationResource,
   "resourceId" | "resourceType" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
@@ -7416,12 +7461,12 @@ export type IntegrationResourceFragment = { __typename?: "IntegrationResource" }
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
   };
 
-export type IntegrationFragment = { __typename?: "Integration" } & Pick<
+export type IntegrationFragment = { __typename: "Integration" } & Pick<
   Integration,
   "service" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
 
-export type OrganizationInviteFragment = { __typename?: "OrganizationInvite" } & Pick<
+export type OrganizationInviteFragment = { __typename: "OrganizationInvite" } & Pick<
   OrganizationInvite,
   "external" | "email" | "updatedAt" | "permission" | "archivedAt" | "createdAt" | "acceptedAt" | "expiresAt" | "id"
 > & {
@@ -7429,7 +7474,17 @@ export type OrganizationInviteFragment = { __typename?: "OrganizationInvite" } &
     invitee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
-export type IssueFragment = { __typename?: "Issue" } & Pick<
+export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pick<
+  IssueNotification,
+  "reactionEmoji" | "type" | "updatedAt" | "emailedAt" | "readAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+> & {
+    comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+    team: { __typename?: "Team" } & Pick<Team, "id">;
+    user: { __typename?: "User" } & Pick<User, "id">;
+  };
+
+export type IssueFragment = { __typename: "Issue" } & Pick<
   Issue,
   | "trashed"
   | "url"
@@ -7468,7 +7523,7 @@ export type IssueFragment = { __typename?: "Issue" } & Pick<
     state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
   };
 
-export type OrganizationFragment = { __typename?: "Organization" } & Pick<
+export type OrganizationFragment = { __typename: "Organization" } & Pick<
   Organization,
   | "allowedAuthServices"
   | "gitBranchFormat"
@@ -7489,7 +7544,7 @@ export type OrganizationFragment = { __typename?: "Organization" } & Pick<
   | "roadmapEnabled"
 >;
 
-export type TeamFragment = { __typename?: "Team" } & Pick<
+export type TeamFragment = { __typename: "Team" } & Pick<
   Team,
   | "cycleIssueAutoAssignCompleted"
   | "cycleIssueAutoAssignStarted"
@@ -7540,81 +7595,81 @@ export type TeamFragment = { __typename?: "Team" } & Pick<
     triageIssueState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
   };
 
-export type DocumentStepFragment = { __typename?: "DocumentStep" } & Pick<
+export type DocumentStepFragment = { __typename: "DocumentStep" } & Pick<
   DocumentStep,
   "clientId" | "step" | "version" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 >;
 
-export type SyncDeltaResponseFragment = { __typename?: "SyncDeltaResponse" } & Pick<
+export type SyncDeltaResponseFragment = { __typename: "SyncDeltaResponse" } & Pick<
   SyncDeltaResponse,
   "updates" | "success" | "loadMore"
 >;
 
-export type SyncResponseFragment = { __typename?: "SyncResponse" } & Pick<
+export type SyncResponseFragment = { __typename: "SyncResponse" } & Pick<
   SyncResponse,
   "delta" | "state" | "lastSyncId" | "subscribedSyncGroups" | "databaseVersion"
 >;
 
-export type ArchiveResponseFragment = { __typename?: "ArchiveResponse" } & Pick<
+export type ArchiveResponseFragment = { __typename: "ArchiveResponse" } & Pick<
   ArchiveResponse,
   "archive" | "totalCount" | "databaseVersion" | "includesDependencies"
 >;
 
-export type DependencyResponseFragment = { __typename?: "DependencyResponse" } & Pick<
+export type DependencyResponseFragment = { __typename: "DependencyResponse" } & Pick<
   DependencyResponse,
   "dependencies"
 >;
 
-export type SyncBatchResponseFragment = { __typename?: "SyncBatchResponse" } & Pick<SyncBatchResponse, "models">;
+export type SyncBatchResponseFragment = { __typename: "SyncBatchResponse" } & Pick<SyncBatchResponse, "models">;
 
-export type TeamMembershipFragment = { __typename?: "TeamMembership" } & Pick<
+export type TeamMembershipFragment = { __typename: "TeamMembership" } & Pick<
   TeamMembership,
   "updatedAt" | "archivedAt" | "createdAt" | "id" | "owner"
 > & { team: { __typename?: "Team" } & Pick<Team, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
 
-export type OrganizationDomainFragment = { __typename?: "OrganizationDomain" } & Pick<
+export type OrganizationDomainFragment = { __typename: "OrganizationDomain" } & Pick<
   OrganizationDomain,
   "name" | "verificationEmail" | "verified" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
-export type GithubOAuthTokenPayloadFragment = { __typename?: "GithubOAuthTokenPayload" } & Pick<
+export type GithubOAuthTokenPayloadFragment = { __typename: "GithubOAuthTokenPayload" } & Pick<
   GithubOAuthTokenPayload,
   "token"
 > & { organizations?: Maybe<Array<{ __typename?: "GithubOrg" } & GithubOrgFragment>> };
 
-export type CommitPayloadFragment = { __typename?: "CommitPayload" } & Pick<
+export type CommitPayloadFragment = { __typename: "CommitPayload" } & Pick<
   CommitPayload,
   "added" | "id" | "message" | "modified" | "removed" | "timestamp" | "url"
 >;
 
-export type GoogleSheetsSettingsFragment = { __typename?: "GoogleSheetsSettings" } & Pick<
+export type GoogleSheetsSettingsFragment = { __typename: "GoogleSheetsSettings" } & Pick<
   GoogleSheetsSettings,
   "sheetId" | "spreadsheetId" | "spreadsheetUrl" | "updatedIssuesAt"
 >;
 
-export type IntegrationResourceDataFragment = { __typename?: "IntegrationResourceData" } & {
+export type IntegrationResourceDataFragment = { __typename: "IntegrationResourceData" } & {
   githubCommit?: Maybe<{ __typename?: "CommitPayload" } & CommitPayloadFragment>;
   githubPullRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
   gitlabMergeRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
   sentryIssue?: Maybe<{ __typename?: "SentryIssuePayload" } & SentryIssuePayloadFragment>;
 };
 
-export type IntercomSettingsFragment = { __typename?: "IntercomSettings" } & Pick<
+export type IntercomSettingsFragment = { __typename: "IntercomSettings" } & Pick<
   IntercomSettings,
   "sendNoteOnStatusChange" | "sendNoteOnComment"
 >;
 
-export type IssueRelationHistoryPayloadFragment = { __typename?: "IssueRelationHistoryPayload" } & Pick<
+export type IssueRelationHistoryPayloadFragment = { __typename: "IssueRelationHistoryPayload" } & Pick<
   IssueRelationHistoryPayload,
   "identifier" | "type"
 >;
 
-export type JiraSettingsFragment = { __typename?: "JiraSettings" } & {
+export type JiraSettingsFragment = { __typename: "JiraSettings" } & {
   projects: Array<{ __typename?: "JiraProjectData" } & JiraProjectDataFragment>;
   projectMapping?: Maybe<Array<{ __typename?: "JiraLinearMapping" } & JiraLinearMappingFragment>>;
 };
 
-export type IssueLabelFragment = { __typename?: "IssueLabel" } & Pick<
+export type IssueLabelFragment = { __typename: "IssueLabel" } & Pick<
   IssueLabel,
   "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
@@ -7622,9 +7677,9 @@ export type IssueLabelFragment = { __typename?: "IssueLabel" } & Pick<
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
-export type JiraProjectDataFragment = { __typename?: "JiraProjectData" } & Pick<JiraProjectData, "id" | "key" | "name">;
+export type JiraProjectDataFragment = { __typename: "JiraProjectData" } & Pick<JiraProjectData, "id" | "key" | "name">;
 
-export type NotificationSubscriptionFragment = { __typename?: "NotificationSubscription" } & Pick<
+export type NotificationSubscriptionFragment = { __typename: "NotificationSubscription" } & Pick<
   NotificationSubscription,
   "updatedAt" | "archivedAt" | "createdAt" | "type" | "id"
 > & {
@@ -7633,7 +7688,7 @@ export type NotificationSubscriptionFragment = { __typename?: "NotificationSubsc
     user: { __typename?: "User" } & Pick<User, "id">;
   };
 
-export type OauthClientFragment = { __typename?: "OauthClient" } & Pick<
+export type OauthClientFragment = { __typename: "OauthClient" } & Pick<
   OauthClient,
   | "imageUrl"
   | "description"
@@ -7652,17 +7707,17 @@ export type OauthClientFragment = { __typename?: "OauthClient" } & Pick<
   | "publicEnabled"
 >;
 
-export type FigmaEmbedFragment = { __typename?: "FigmaEmbed" } & Pick<
+export type FigmaEmbedFragment = { __typename: "FigmaEmbed" } & Pick<
   FigmaEmbed,
   "lastModified" | "name" | "url" | "nodeName"
 >;
 
-export type UploadFileFragment = { __typename?: "UploadFile" } & Pick<
+export type UploadFileFragment = { __typename: "UploadFile" } & Pick<
   UploadFile,
   "assetUrl" | "contentType" | "filename" | "uploadUrl" | "size" | "metaData"
 > & { headers: Array<{ __typename?: "UploadFileHeader" } & UploadFileHeaderFragment> };
 
-export type AuthorizedApplicationFragment = { __typename?: "AuthorizedApplication" } & Pick<
+export type AuthorizedApplicationFragment = { __typename: "AuthorizedApplication" } & Pick<
   AuthorizedApplication,
   | "name"
   | "imageUrl"
@@ -7675,7 +7730,7 @@ export type AuthorizedApplicationFragment = { __typename?: "AuthorizedApplicatio
   | "webhooksEnabled"
 >;
 
-export type UserAuthorizedApplicationFragment = { __typename?: "UserAuthorizedApplication" } & Pick<
+export type UserAuthorizedApplicationFragment = { __typename: "UserAuthorizedApplication" } & Pick<
   UserAuthorizedApplication,
   | "name"
   | "imageUrl"
@@ -7688,12 +7743,12 @@ export type UserAuthorizedApplicationFragment = { __typename?: "UserAuthorizedAp
   | "isAuthorized"
 >;
 
-export type ApplicationFragment = { __typename?: "Application" } & Pick<
+export type ApplicationFragment = { __typename: "Application" } & Pick<
   Application,
   "name" | "imageUrl" | "description" | "developer" | "clientId" | "developerUrl"
 >;
 
-export type PullRequestPayloadFragment = { __typename?: "PullRequestPayload" } & Pick<
+export type PullRequestPayloadFragment = { __typename: "PullRequestPayload" } & Pick<
   PullRequestPayload,
   | "branch"
   | "closedAt"
@@ -7712,13 +7767,13 @@ export type PullRequestPayloadFragment = { __typename?: "PullRequestPayload" } &
   | "userLogin"
 >;
 
-export type GithubOrgFragment = { __typename?: "GithubOrg" } & Pick<GithubOrg, "id" | "login" | "name"> & {
+export type GithubOrgFragment = { __typename: "GithubOrg" } & Pick<GithubOrg, "id" | "login" | "name"> & {
     repositories: Array<{ __typename?: "GithubRepo" } & GithubRepoFragment>;
   };
 
-export type GithubRepoFragment = { __typename?: "GithubRepo" } & Pick<GithubRepo, "id" | "name">;
+export type GithubRepoFragment = { __typename: "GithubRepo" } & Pick<GithubRepo, "id" | "name">;
 
-export type SentryIssuePayloadFragment = { __typename?: "SentryIssuePayload" } & Pick<
+export type SentryIssuePayloadFragment = { __typename: "SentryIssuePayload" } & Pick<
   SentryIssuePayload,
   | "issueId"
   | "actorId"
@@ -7733,14 +7788,14 @@ export type SentryIssuePayloadFragment = { __typename?: "SentryIssuePayload" } &
   | "actorType"
 >;
 
-export type SentrySettingsFragment = { __typename?: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
+export type SentrySettingsFragment = { __typename: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
 
-export type SlackPostSettingsFragment = { __typename?: "SlackPostSettings" } & Pick<
+export type SlackPostSettingsFragment = { __typename: "SlackPostSettings" } & Pick<
   SlackPostSettings,
   "channel" | "channelId" | "configurationUrl"
 >;
 
-export type IntegrationSettingsFragment = { __typename?: "IntegrationSettings" } & {
+export type IntegrationSettingsFragment = { __typename: "IntegrationSettings" } & {
   googleSheets?: Maybe<{ __typename?: "GoogleSheetsSettings" } & GoogleSheetsSettingsFragment>;
   intercom?: Maybe<{ __typename?: "IntercomSettings" } & IntercomSettingsFragment>;
   jira?: Maybe<{ __typename?: "JiraSettings" } & JiraSettingsFragment>;
@@ -7750,17 +7805,17 @@ export type IntegrationSettingsFragment = { __typename?: "IntegrationSettings" }
   zendesk?: Maybe<{ __typename?: "ZendeskSettings" } & ZendeskSettingsFragment>;
 };
 
-export type SamlConfigurationPayloadFragment = { __typename?: "SamlConfigurationPayload" } & Pick<
+export type SamlConfigurationPayloadFragment = { __typename: "SamlConfigurationPayload" } & Pick<
   SamlConfigurationPayload,
   "ssoBinding" | "allowedDomains" | "ssoEndpoint" | "ssoSignAlgo" | "issuerEntityId"
 >;
 
-export type UserSettingsFragment = { __typename?: "UserSettings" } & Pick<
+export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
   UserSettings,
   "unsubscribedFrom" | "updatedAt" | "notificationPreferences" | "archivedAt" | "createdAt" | "id"
 > & { user: { __typename?: "User" } & Pick<User, "id"> };
 
-export type SubscriptionFragment = { __typename?: "Subscription" } & Pick<
+export type SubscriptionFragment = { __typename: "Subscription" } & Pick<
   Subscription,
   | "canceledAt"
   | "nextBillingAt"
@@ -7773,12 +7828,12 @@ export type SubscriptionFragment = { __typename?: "Subscription" } & Pick<
   | "id"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
-export type JiraLinearMappingFragment = { __typename?: "JiraLinearMapping" } & Pick<
+export type JiraLinearMappingFragment = { __typename: "JiraLinearMapping" } & Pick<
   JiraLinearMapping,
   "jiraProjectId" | "linearTeamId"
 >;
 
-export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
+export type FavoriteFragment = { __typename: "Favorite" } & Pick<
   Favorite,
   "updatedAt" | "folderName" | "sortOrder" | "archivedAt" | "createdAt" | "predefinedViewType" | "type" | "id"
 > & {
@@ -7794,22 +7849,22 @@ export type FavoriteFragment = { __typename?: "Favorite" } & Pick<
     predefinedViewTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
   };
 
-export type ViewPreferencesFragment = { __typename?: "ViewPreferences" } & Pick<
+export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
   ViewPreferences,
   "updatedAt" | "archivedAt" | "createdAt" | "id" | "type" | "viewType"
 >;
 
-export type AuditEntryFragment = { __typename?: "AuditEntry" } & Pick<
+export type AuditEntryFragment = { __typename: "AuditEntry" } & Pick<
   AuditEntry,
   "metadata" | "countryCode" | "ip" | "actorId" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "type"
 > & { actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
-export type ZendeskSettingsFragment = { __typename?: "ZendeskSettings" } & Pick<
+export type ZendeskSettingsFragment = { __typename: "ZendeskSettings" } & Pick<
   ZendeskSettings,
   "botUserId" | "url" | "subdomain"
 >;
 
-export type AttachmentFragment = { __typename?: "Attachment" } & Pick<
+export type AttachmentFragment = { __typename: "Attachment" } & Pick<
   Attachment,
   | "sourceType"
   | "subtitle"
@@ -7827,35 +7882,35 @@ export type AttachmentFragment = { __typename?: "Attachment" } & Pick<
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
   };
 
-export type ApiKeyConnectionFragment = { __typename?: "ApiKeyConnection" } & {
+export type ApiKeyConnectionFragment = { __typename: "ApiKeyConnection" } & {
   nodes: Array<{ __typename?: "ApiKey" } & ApiKeyFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type ApiKeyPayloadFragment = { __typename?: "ApiKeyPayload" } & Pick<ApiKeyPayload, "lastSyncId" | "success"> & {
+export type ApiKeyPayloadFragment = { __typename: "ApiKeyPayload" } & Pick<ApiKeyPayload, "lastSyncId" | "success"> & {
     apiKey: { __typename?: "ApiKey" } & ApiKeyFragment;
   };
 
-export type ArchivePayloadFragment = { __typename?: "ArchivePayload" } & Pick<ArchivePayload, "lastSyncId" | "success">;
+export type ArchivePayloadFragment = { __typename: "ArchivePayload" } & Pick<ArchivePayload, "lastSyncId" | "success">;
 
-export type AttachmentConnectionFragment = { __typename?: "AttachmentConnection" } & {
+export type AttachmentConnectionFragment = { __typename: "AttachmentConnection" } & {
   nodes: Array<{ __typename?: "Attachment" } & AttachmentFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type AttachmentPayloadFragment = { __typename?: "AttachmentPayload" } & Pick<
+export type AttachmentPayloadFragment = { __typename: "AttachmentPayload" } & Pick<
   AttachmentPayload,
   "lastSyncId" | "success"
 > & { attachment: { __typename?: "Attachment" } & Pick<Attachment, "id"> };
 
-export type AuditEntryConnectionFragment = { __typename?: "AuditEntryConnection" } & {
+export type AuditEntryConnectionFragment = { __typename: "AuditEntryConnection" } & {
   nodes: Array<{ __typename?: "AuditEntry" } & AuditEntryFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type AuditEntryTypeFragment = { __typename?: "AuditEntryType" } & Pick<AuditEntryType, "description" | "type">;
+export type AuditEntryTypeFragment = { __typename: "AuditEntryType" } & Pick<AuditEntryType, "description" | "type">;
 
-export type AuthResolverResponseFragment = { __typename?: "AuthResolverResponse" } & Pick<
+export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" } & Pick<
   AuthResolverResponse,
   "email" | "lastUsedOrganizationId" | "token" | "allowDomainAccess" | "id"
 > & {
@@ -7863,7 +7918,7 @@ export type AuthResolverResponseFragment = { __typename?: "AuthResolverResponse"
     users: Array<{ __typename?: "User" } & UserFragment>;
   };
 
-export type BillingDetailsPayloadFragment = { __typename?: "BillingDetailsPayload" } & Pick<
+export type BillingDetailsPayloadFragment = { __typename: "BillingDetailsPayload" } & Pick<
   BillingDetailsPayload,
   "email" | "success"
 > & {
@@ -7871,293 +7926,293 @@ export type BillingDetailsPayloadFragment = { __typename?: "BillingDetailsPayloa
     paymentMethod?: Maybe<{ __typename?: "Card" } & CardFragment>;
   };
 
-export type BillingEmailPayloadFragment = { __typename?: "BillingEmailPayload" } & Pick<
+export type BillingEmailPayloadFragment = { __typename: "BillingEmailPayload" } & Pick<
   BillingEmailPayload,
   "email" | "success"
 >;
 
-export type CardFragment = { __typename?: "Card" } & Pick<Card, "brand" | "last4">;
+export type CardFragment = { __typename: "Card" } & Pick<Card, "brand" | "last4">;
 
-export type CollaborationDocumentUpdatePayloadFragment = { __typename?: "CollaborationDocumentUpdatePayload" } & Pick<
+export type CollaborationDocumentUpdatePayloadFragment = { __typename: "CollaborationDocumentUpdatePayload" } & Pick<
   CollaborationDocumentUpdatePayload,
   "success"
 > & { steps?: Maybe<{ __typename?: "StepsResponse" } & StepsResponseFragment> };
 
-export type CommentConnectionFragment = { __typename?: "CommentConnection" } & {
+export type CommentConnectionFragment = { __typename: "CommentConnection" } & {
   nodes: Array<{ __typename?: "Comment" } & CommentFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type CommentPayloadFragment = { __typename?: "CommentPayload" } & Pick<
+export type CommentPayloadFragment = { __typename: "CommentPayload" } & Pick<
   CommentPayload,
   "lastSyncId" | "success"
 > & { comment: { __typename?: "Comment" } & Pick<Comment, "id"> };
 
-export type ContactPayloadFragment = { __typename?: "ContactPayload" } & Pick<ContactPayload, "success">;
+export type ContactPayloadFragment = { __typename: "ContactPayload" } & Pick<ContactPayload, "success">;
 
-export type CreateCsvExportReportPayloadFragment = { __typename?: "CreateCsvExportReportPayload" } & Pick<
+export type CreateCsvExportReportPayloadFragment = { __typename: "CreateCsvExportReportPayload" } & Pick<
   CreateCsvExportReportPayload,
   "success"
 >;
 
-export type CreateOrJoinOrganizationResponseFragment = { __typename?: "CreateOrJoinOrganizationResponse" } & {
+export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJoinOrganizationResponse" } & {
   user: { __typename?: "User" } & Pick<User, "id">;
 };
 
-export type CustomViewConnectionFragment = { __typename?: "CustomViewConnection" } & {
+export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" } & {
   nodes: Array<{ __typename?: "CustomView" } & CustomViewFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type CustomViewPayloadFragment = { __typename?: "CustomViewPayload" } & Pick<
+export type CustomViewPayloadFragment = { __typename: "CustomViewPayload" } & Pick<
   CustomViewPayload,
   "lastSyncId" | "success"
 > & { customView: { __typename?: "CustomView" } & Pick<CustomView, "id"> };
 
-export type CycleConnectionFragment = { __typename?: "CycleConnection" } & {
+export type CycleConnectionFragment = { __typename: "CycleConnection" } & {
   nodes: Array<{ __typename?: "Cycle" } & CycleFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type CyclePayloadFragment = { __typename?: "CyclePayload" } & Pick<CyclePayload, "lastSyncId" | "success"> & {
+export type CyclePayloadFragment = { __typename: "CyclePayload" } & Pick<CyclePayload, "lastSyncId" | "success"> & {
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
   };
 
-export type DebugPayloadFragment = { __typename?: "DebugPayload" } & Pick<DebugPayload, "success">;
+export type DebugPayloadFragment = { __typename: "DebugPayload" } & Pick<DebugPayload, "success">;
 
-export type DocumentConnectionFragment = { __typename?: "DocumentConnection" } & {
+export type DocumentConnectionFragment = { __typename: "DocumentConnection" } & {
   nodes: Array<{ __typename?: "Document" } & DocumentFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type DocumentPayloadFragment = { __typename?: "DocumentPayload" } & Pick<
+export type DocumentPayloadFragment = { __typename: "DocumentPayload" } & Pick<
   DocumentPayload,
   "lastSyncId" | "success"
 > & { document: { __typename?: "Document" } & Pick<Document, "id"> };
 
-export type DocumentVersionConnectionFragment = { __typename?: "DocumentVersionConnection" } & {
+export type DocumentVersionConnectionFragment = { __typename: "DocumentVersionConnection" } & {
   nodes: Array<{ __typename?: "DocumentVersion" } & DocumentVersionFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type EmailSubscribePayloadFragment = { __typename?: "EmailSubscribePayload" } & Pick<
+export type EmailSubscribePayloadFragment = { __typename: "EmailSubscribePayload" } & Pick<
   EmailSubscribePayload,
   "success"
 >;
 
-export type EmailUnsubscribePayloadFragment = { __typename?: "EmailUnsubscribePayload" } & Pick<
+export type EmailUnsubscribePayloadFragment = { __typename: "EmailUnsubscribePayload" } & Pick<
   EmailUnsubscribePayload,
   "success"
 >;
 
 export type EmailUserAccountAuthChallengeResponseFragment = {
-  __typename?: "EmailUserAccountAuthChallengeResponse";
+  __typename: "EmailUserAccountAuthChallengeResponse";
 } & Pick<EmailUserAccountAuthChallengeResponse, "authType" | "success">;
 
-export type EmojiConnectionFragment = { __typename?: "EmojiConnection" } & {
+export type EmojiConnectionFragment = { __typename: "EmojiConnection" } & {
   nodes: Array<{ __typename?: "Emoji" } & EmojiFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type EmojiPayloadFragment = { __typename?: "EmojiPayload" } & Pick<EmojiPayload, "lastSyncId" | "success"> & {
+export type EmojiPayloadFragment = { __typename: "EmojiPayload" } & Pick<EmojiPayload, "lastSyncId" | "success"> & {
     emoji: { __typename?: "Emoji" } & Pick<Emoji, "id">;
   };
 
-export type EventPayloadFragment = { __typename?: "EventPayload" } & Pick<EventPayload, "success">;
+export type EventPayloadFragment = { __typename: "EventPayload" } & Pick<EventPayload, "success">;
 
-export type FavoriteConnectionFragment = { __typename?: "FavoriteConnection" } & {
+export type FavoriteConnectionFragment = { __typename: "FavoriteConnection" } & {
   nodes: Array<{ __typename?: "Favorite" } & FavoriteFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type FavoritePayloadFragment = { __typename?: "FavoritePayload" } & Pick<
+export type FavoritePayloadFragment = { __typename: "FavoritePayload" } & Pick<
   FavoritePayload,
   "lastSyncId" | "success"
 > & { favorite: { __typename?: "Favorite" } & Pick<Favorite, "id"> };
 
-export type FeedbackPayloadFragment = { __typename?: "FeedbackPayload" } & Pick<FeedbackPayload, "success">;
+export type FeedbackPayloadFragment = { __typename: "FeedbackPayload" } & Pick<FeedbackPayload, "success">;
 
-export type FigmaEmbedPayloadFragment = { __typename?: "FigmaEmbedPayload" } & Pick<FigmaEmbedPayload, "success"> & {
+export type FigmaEmbedPayloadFragment = { __typename: "FigmaEmbedPayload" } & Pick<FigmaEmbedPayload, "success"> & {
     figmaEmbed?: Maybe<{ __typename?: "FigmaEmbed" } & FigmaEmbedFragment>;
   };
 
-export type FrontAttachmentPayloadFragment = { __typename?: "FrontAttachmentPayload" } & Pick<
+export type FrontAttachmentPayloadFragment = { __typename: "FrontAttachmentPayload" } & Pick<
   FrontAttachmentPayload,
   "lastSyncId" | "success"
 >;
 
-export type GitHubCommitIntegrationPayloadFragment = { __typename?: "GitHubCommitIntegrationPayload" } & Pick<
+export type GitHubCommitIntegrationPayloadFragment = { __typename: "GitHubCommitIntegrationPayload" } & Pick<
   GitHubCommitIntegrationPayload,
   "lastSyncId" | "webhookSecret" | "success"
 > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 
-export type ImageUploadFromUrlPayloadFragment = { __typename?: "ImageUploadFromUrlPayload" } & Pick<
+export type ImageUploadFromUrlPayloadFragment = { __typename: "ImageUploadFromUrlPayload" } & Pick<
   ImageUploadFromUrlPayload,
   "url" | "lastSyncId" | "success"
 >;
 
-export type IntegrationConnectionFragment = { __typename?: "IntegrationConnection" } & {
+export type IntegrationConnectionFragment = { __typename: "IntegrationConnection" } & {
   nodes: Array<{ __typename?: "Integration" } & IntegrationFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type IntegrationPayloadFragment = { __typename?: "IntegrationPayload" } & Pick<
+export type IntegrationPayloadFragment = { __typename: "IntegrationPayload" } & Pick<
   IntegrationPayload,
   "lastSyncId" | "success"
 > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 
-export type IntegrationResourceConnectionFragment = { __typename?: "IntegrationResourceConnection" } & {
+export type IntegrationResourceConnectionFragment = { __typename: "IntegrationResourceConnection" } & {
   nodes: Array<{ __typename?: "IntegrationResource" } & IntegrationResourceFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type InvoiceFragment = { __typename?: "Invoice" } & Pick<
+export type InvoiceFragment = { __typename: "Invoice" } & Pick<
   Invoice,
   "url" | "created" | "dueDate" | "total" | "status"
 >;
 
-export type IssueBatchPayloadFragment = { __typename?: "IssueBatchPayload" } & Pick<
+export type IssueBatchPayloadFragment = { __typename: "IssueBatchPayload" } & Pick<
   IssueBatchPayload,
   "lastSyncId" | "success"
 > & { issues: Array<{ __typename?: "Issue" } & IssueFragment> };
 
-export type IssueConnectionFragment = { __typename?: "IssueConnection" } & {
+export type IssueConnectionFragment = { __typename: "IssueConnection" } & {
   nodes: Array<{ __typename?: "Issue" } & IssueFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type IssueHistoryConnectionFragment = { __typename?: "IssueHistoryConnection" } & {
+export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnection" } & {
   nodes: Array<{ __typename?: "IssueHistory" } & IssueHistoryFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type IssueImportDeletePayloadFragment = { __typename?: "IssueImportDeletePayload" } & Pick<
+export type IssueImportDeletePayloadFragment = { __typename: "IssueImportDeletePayload" } & Pick<
   IssueImportDeletePayload,
   "lastSyncId" | "success"
 > & { issueImport?: Maybe<{ __typename?: "IssueImport" } & IssueImportFragment> };
 
-export type IssueImportPayloadFragment = { __typename?: "IssueImportPayload" } & Pick<
+export type IssueImportPayloadFragment = { __typename: "IssueImportPayload" } & Pick<
   IssueImportPayload,
   "lastSyncId" | "success"
 > & { issueImport?: Maybe<{ __typename?: "IssueImport" } & IssueImportFragment> };
 
-export type IssueLabelConnectionFragment = { __typename?: "IssueLabelConnection" } & {
+export type IssueLabelConnectionFragment = { __typename: "IssueLabelConnection" } & {
   nodes: Array<{ __typename?: "IssueLabel" } & IssueLabelFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type IssueLabelPayloadFragment = { __typename?: "IssueLabelPayload" } & Pick<
+export type IssueLabelPayloadFragment = { __typename: "IssueLabelPayload" } & Pick<
   IssueLabelPayload,
   "lastSyncId" | "success"
 > & { issueLabel: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id"> };
 
-export type IssuePayloadFragment = { __typename?: "IssuePayload" } & Pick<IssuePayload, "lastSyncId" | "success"> & {
+export type IssuePayloadFragment = { __typename: "IssuePayload" } & Pick<IssuePayload, "lastSyncId" | "success"> & {
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
   };
 
-export type IssuePriorityValueFragment = { __typename?: "IssuePriorityValue" } & Pick<
+export type IssuePriorityValueFragment = { __typename: "IssuePriorityValue" } & Pick<
   IssuePriorityValue,
   "label" | "priority"
 >;
 
-export type IssueRelationConnectionFragment = { __typename?: "IssueRelationConnection" } & {
+export type IssueRelationConnectionFragment = { __typename: "IssueRelationConnection" } & {
   nodes: Array<{ __typename?: "IssueRelation" } & IssueRelationFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type IssueRelationPayloadFragment = { __typename?: "IssueRelationPayload" } & Pick<
+export type IssueRelationPayloadFragment = { __typename: "IssueRelationPayload" } & Pick<
   IssueRelationPayload,
   "lastSyncId" | "success"
 > & { issueRelation: { __typename?: "IssueRelation" } & Pick<IssueRelation, "id"> };
 
-export type MilestoneConnectionFragment = { __typename?: "MilestoneConnection" } & {
+export type MilestoneConnectionFragment = { __typename: "MilestoneConnection" } & {
   nodes: Array<{ __typename?: "Milestone" } & MilestoneFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type MilestonePayloadFragment = { __typename?: "MilestonePayload" } & Pick<
+export type MilestonePayloadFragment = { __typename: "MilestonePayload" } & Pick<
   MilestonePayload,
   "lastSyncId" | "success"
 > & { milestone?: Maybe<{ __typename?: "Milestone" } & Pick<Milestone, "id">> };
 
-type Node_ApiKey_Fragment = { __typename?: "ApiKey" } & Pick<ApiKey, "id">;
+type Node_ApiKey_Fragment = { __typename: "ApiKey" } & Pick<ApiKey, "id">;
 
-type Node_Attachment_Fragment = { __typename?: "Attachment" } & Pick<Attachment, "id">;
+type Node_Attachment_Fragment = { __typename: "Attachment" } & Pick<Attachment, "id">;
 
-type Node_AuditEntry_Fragment = { __typename?: "AuditEntry" } & Pick<AuditEntry, "id">;
+type Node_AuditEntry_Fragment = { __typename: "AuditEntry" } & Pick<AuditEntry, "id">;
 
-type Node_Comment_Fragment = { __typename?: "Comment" } & Pick<Comment, "id">;
+type Node_Comment_Fragment = { __typename: "Comment" } & Pick<Comment, "id">;
 
-type Node_CustomView_Fragment = { __typename?: "CustomView" } & Pick<CustomView, "id">;
+type Node_CustomView_Fragment = { __typename: "CustomView" } & Pick<CustomView, "id">;
 
-type Node_Cycle_Fragment = { __typename?: "Cycle" } & Pick<Cycle, "id">;
+type Node_Cycle_Fragment = { __typename: "Cycle" } & Pick<Cycle, "id">;
 
-type Node_Document_Fragment = { __typename?: "Document" } & Pick<Document, "id">;
+type Node_Document_Fragment = { __typename: "Document" } & Pick<Document, "id">;
 
-type Node_DocumentStep_Fragment = { __typename?: "DocumentStep" } & Pick<DocumentStep, "id">;
+type Node_DocumentStep_Fragment = { __typename: "DocumentStep" } & Pick<DocumentStep, "id">;
 
-type Node_DocumentVersion_Fragment = { __typename?: "DocumentVersion" } & Pick<DocumentVersion, "id">;
+type Node_DocumentVersion_Fragment = { __typename: "DocumentVersion" } & Pick<DocumentVersion, "id">;
 
-type Node_Emoji_Fragment = { __typename?: "Emoji" } & Pick<Emoji, "id">;
+type Node_Emoji_Fragment = { __typename: "Emoji" } & Pick<Emoji, "id">;
 
-type Node_Favorite_Fragment = { __typename?: "Favorite" } & Pick<Favorite, "id">;
+type Node_Favorite_Fragment = { __typename: "Favorite" } & Pick<Favorite, "id">;
 
-type Node_Integration_Fragment = { __typename?: "Integration" } & Pick<Integration, "id">;
+type Node_Integration_Fragment = { __typename: "Integration" } & Pick<Integration, "id">;
 
-type Node_IntegrationResource_Fragment = { __typename?: "IntegrationResource" } & Pick<IntegrationResource, "id">;
+type Node_IntegrationResource_Fragment = { __typename: "IntegrationResource" } & Pick<IntegrationResource, "id">;
 
-type Node_Issue_Fragment = { __typename?: "Issue" } & Pick<Issue, "id">;
+type Node_Issue_Fragment = { __typename: "Issue" } & Pick<Issue, "id">;
 
-type Node_IssueHistory_Fragment = { __typename?: "IssueHistory" } & Pick<IssueHistory, "id">;
+type Node_IssueHistory_Fragment = { __typename: "IssueHistory" } & Pick<IssueHistory, "id">;
 
-type Node_IssueImport_Fragment = { __typename?: "IssueImport" } & Pick<IssueImport, "id">;
+type Node_IssueImport_Fragment = { __typename: "IssueImport" } & Pick<IssueImport, "id">;
 
-type Node_IssueLabel_Fragment = { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+type Node_IssueLabel_Fragment = { __typename: "IssueLabel" } & Pick<IssueLabel, "id">;
 
-type Node_IssueRelation_Fragment = { __typename?: "IssueRelation" } & Pick<IssueRelation, "id">;
+type Node_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<IssueNotification, "id">;
 
-type Node_Milestone_Fragment = { __typename?: "Milestone" } & Pick<Milestone, "id">;
+type Node_IssueRelation_Fragment = { __typename: "IssueRelation" } & Pick<IssueRelation, "id">;
 
-type Node_Notification_Fragment = { __typename?: "Notification" } & Pick<Notification, "id">;
+type Node_Milestone_Fragment = { __typename: "Milestone" } & Pick<Milestone, "id">;
 
-type Node_NotificationSubscription_Fragment = { __typename?: "NotificationSubscription" } & Pick<
+type Node_NotificationSubscription_Fragment = { __typename: "NotificationSubscription" } & Pick<
   NotificationSubscription,
   "id"
 >;
 
-type Node_OauthClient_Fragment = { __typename?: "OauthClient" } & Pick<OauthClient, "id">;
+type Node_OauthClient_Fragment = { __typename: "OauthClient" } & Pick<OauthClient, "id">;
 
-type Node_Organization_Fragment = { __typename?: "Organization" } & Pick<Organization, "id">;
+type Node_Organization_Fragment = { __typename: "Organization" } & Pick<Organization, "id">;
 
-type Node_OrganizationDomain_Fragment = { __typename?: "OrganizationDomain" } & Pick<OrganizationDomain, "id">;
+type Node_OrganizationDomain_Fragment = { __typename: "OrganizationDomain" } & Pick<OrganizationDomain, "id">;
 
-type Node_OrganizationInvite_Fragment = { __typename?: "OrganizationInvite" } & Pick<OrganizationInvite, "id">;
+type Node_OrganizationInvite_Fragment = { __typename: "OrganizationInvite" } & Pick<OrganizationInvite, "id">;
 
-type Node_Project_Fragment = { __typename?: "Project" } & Pick<Project, "id">;
+type Node_Project_Fragment = { __typename: "Project" } & Pick<Project, "id">;
 
-type Node_ProjectLink_Fragment = { __typename?: "ProjectLink" } & Pick<ProjectLink, "id">;
+type Node_ProjectLink_Fragment = { __typename: "ProjectLink" } & Pick<ProjectLink, "id">;
 
-type Node_PushSubscription_Fragment = { __typename?: "PushSubscription" } & Pick<PushSubscription, "id">;
+type Node_PushSubscription_Fragment = { __typename: "PushSubscription" } & Pick<PushSubscription, "id">;
 
-type Node_Reaction_Fragment = { __typename?: "Reaction" } & Pick<Reaction, "id">;
+type Node_Reaction_Fragment = { __typename: "Reaction" } & Pick<Reaction, "id">;
 
-type Node_Subscription_Fragment = { __typename?: "Subscription" } & Pick<Subscription, "id">;
+type Node_Subscription_Fragment = { __typename: "Subscription" } & Pick<Subscription, "id">;
 
-type Node_Team_Fragment = { __typename?: "Team" } & Pick<Team, "id">;
+type Node_Team_Fragment = { __typename: "Team" } & Pick<Team, "id">;
 
-type Node_TeamMembership_Fragment = { __typename?: "TeamMembership" } & Pick<TeamMembership, "id">;
+type Node_TeamMembership_Fragment = { __typename: "TeamMembership" } & Pick<TeamMembership, "id">;
 
-type Node_Template_Fragment = { __typename?: "Template" } & Pick<Template, "id">;
+type Node_Template_Fragment = { __typename: "Template" } & Pick<Template, "id">;
 
-type Node_User_Fragment = { __typename?: "User" } & Pick<User, "id">;
+type Node_User_Fragment = { __typename: "User" } & Pick<User, "id">;
 
-type Node_UserSettings_Fragment = { __typename?: "UserSettings" } & Pick<UserSettings, "id">;
+type Node_UserSettings_Fragment = { __typename: "UserSettings" } & Pick<UserSettings, "id">;
 
-type Node_ViewPreferences_Fragment = { __typename?: "ViewPreferences" } & Pick<ViewPreferences, "id">;
+type Node_ViewPreferences_Fragment = { __typename: "ViewPreferences" } & Pick<ViewPreferences, "id">;
 
-type Node_Webhook_Fragment = { __typename?: "Webhook" } & Pick<Webhook, "id">;
+type Node_Webhook_Fragment = { __typename: "Webhook" } & Pick<Webhook, "id">;
 
-type Node_WorkflowState_Fragment = { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
+type Node_WorkflowState_Fragment = { __typename: "WorkflowState" } & Pick<WorkflowState, "id">;
 
 export type NodeFragment =
   | Node_ApiKey_Fragment
@@ -8177,9 +8232,9 @@ export type NodeFragment =
   | Node_IssueHistory_Fragment
   | Node_IssueImport_Fragment
   | Node_IssueLabel_Fragment
+  | Node_IssueNotification_Fragment
   | Node_IssueRelation_Fragment
   | Node_Milestone_Fragment
-  | Node_Notification_Fragment
   | Node_NotificationSubscription_Fragment
   | Node_OauthClient_Fragment
   | Node_Organization_Fragment
@@ -8199,82 +8254,82 @@ export type NodeFragment =
   | Node_Webhook_Fragment
   | Node_WorkflowState_Fragment;
 
-export type NotificationConnectionFragment = { __typename?: "NotificationConnection" } & {
-  nodes: Array<{ __typename?: "Notification" } & NotificationFragment>;
+export type NotificationConnectionFragment = { __typename: "NotificationConnection" } & {
+  nodes: Array<{ __typename?: "IssueNotification" } & NotificationFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type NotificationPayloadFragment = { __typename?: "NotificationPayload" } & Pick<
+export type NotificationPayloadFragment = { __typename: "NotificationPayload" } & Pick<
   NotificationPayload,
   "lastSyncId" | "success"
-> & { notification: { __typename?: "Notification" } & Pick<Notification, "id"> };
+> & { notification: { __typename?: "IssueNotification" } & NotificationFragment };
 
-export type NotificationSubscriptionConnectionFragment = { __typename?: "NotificationSubscriptionConnection" } & {
+export type NotificationSubscriptionConnectionFragment = { __typename: "NotificationSubscriptionConnection" } & {
   nodes: Array<{ __typename?: "NotificationSubscription" } & NotificationSubscriptionFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type NotificationSubscriptionPayloadFragment = { __typename?: "NotificationSubscriptionPayload" } & Pick<
+export type NotificationSubscriptionPayloadFragment = { __typename: "NotificationSubscriptionPayload" } & Pick<
   NotificationSubscriptionPayload,
   "lastSyncId" | "success"
 > & { notificationSubscription: { __typename?: "NotificationSubscription" } & Pick<NotificationSubscription, "id"> };
 
-export type OauthAuthStringAuthorizePayloadFragment = { __typename?: "OauthAuthStringAuthorizePayload" } & Pick<
+export type OauthAuthStringAuthorizePayloadFragment = { __typename: "OauthAuthStringAuthorizePayload" } & Pick<
   OauthAuthStringAuthorizePayload,
   "success"
 >;
 
-export type OauthAuthStringChallengePayloadFragment = { __typename?: "OauthAuthStringChallengePayload" } & Pick<
+export type OauthAuthStringChallengePayloadFragment = { __typename: "OauthAuthStringChallengePayload" } & Pick<
   OauthAuthStringChallengePayload,
   "authString" | "success"
 >;
 
-export type OauthAuthStringCheckPayloadFragment = { __typename?: "OauthAuthStringCheckPayload" } & Pick<
+export type OauthAuthStringCheckPayloadFragment = { __typename: "OauthAuthStringCheckPayload" } & Pick<
   OauthAuthStringCheckPayload,
   "token" | "success"
 >;
 
-export type OauthClientPayloadFragment = { __typename?: "OauthClientPayload" } & Pick<
+export type OauthClientPayloadFragment = { __typename: "OauthClientPayload" } & Pick<
   OauthClientPayload,
   "lastSyncId" | "success"
 > & { oauthClient: { __typename?: "OauthClient" } & OauthClientFragment };
 
-export type OauthTokenRevokePayloadFragment = { __typename?: "OauthTokenRevokePayload" } & Pick<
+export type OauthTokenRevokePayloadFragment = { __typename: "OauthTokenRevokePayload" } & Pick<
   OauthTokenRevokePayload,
   "success"
 >;
 
-export type OrganizationCancelDeletePayloadFragment = { __typename?: "OrganizationCancelDeletePayload" } & Pick<
+export type OrganizationCancelDeletePayloadFragment = { __typename: "OrganizationCancelDeletePayload" } & Pick<
   OrganizationCancelDeletePayload,
   "success"
 >;
 
-export type OrganizationDeletePayloadFragment = { __typename?: "OrganizationDeletePayload" } & Pick<
+export type OrganizationDeletePayloadFragment = { __typename: "OrganizationDeletePayload" } & Pick<
   OrganizationDeletePayload,
   "success"
 >;
 
-export type OrganizationDomainPayloadFragment = { __typename?: "OrganizationDomainPayload" } & Pick<
+export type OrganizationDomainPayloadFragment = { __typename: "OrganizationDomainPayload" } & Pick<
   OrganizationDomainPayload,
   "lastSyncId" | "success"
 > & { organizationDomain: { __typename?: "OrganizationDomain" } & OrganizationDomainFragment };
 
-export type OrganizationDomainSimplePayloadFragment = { __typename?: "OrganizationDomainSimplePayload" } & Pick<
+export type OrganizationDomainSimplePayloadFragment = { __typename: "OrganizationDomainSimplePayload" } & Pick<
   OrganizationDomainSimplePayload,
   "success"
 >;
 
-export type OrganizationExistsPayloadFragment = { __typename?: "OrganizationExistsPayload" } & Pick<
+export type OrganizationExistsPayloadFragment = { __typename: "OrganizationExistsPayload" } & Pick<
   OrganizationExistsPayload,
   "success" | "exists"
 >;
 
-export type OrganizationInviteConnectionFragment = { __typename?: "OrganizationInviteConnection" } & {
+export type OrganizationInviteConnectionFragment = { __typename: "OrganizationInviteConnection" } & {
   nodes: Array<{ __typename?: "OrganizationInvite" } & OrganizationInviteFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type OrganizationInviteDetailsPayloadFragment = { __typename?: "OrganizationInviteDetailsPayload" } & Pick<
+export type OrganizationInviteDetailsPayloadFragment = { __typename: "OrganizationInviteDetailsPayload" } & Pick<
   OrganizationInviteDetailsPayload,
   | "organizationId"
   | "organizationName"
@@ -8287,197 +8342,197 @@ export type OrganizationInviteDetailsPayloadFragment = { __typename?: "Organizat
   | "permission"
 >;
 
-export type OrganizationInvitePayloadFragment = { __typename?: "OrganizationInvitePayload" } & Pick<
+export type OrganizationInvitePayloadFragment = { __typename: "OrganizationInvitePayload" } & Pick<
   OrganizationInvitePayload,
   "lastSyncId" | "success"
 > & { organizationInvite: { __typename?: "OrganizationInvite" } & Pick<OrganizationInvite, "id"> };
 
-export type OrganizationPayloadFragment = { __typename?: "OrganizationPayload" } & Pick<
+export type OrganizationPayloadFragment = { __typename: "OrganizationPayload" } & Pick<
   OrganizationPayload,
   "lastSyncId" | "success"
 >;
 
-export type PageInfoFragment = { __typename?: "PageInfo" } & Pick<
+export type PageInfoFragment = { __typename: "PageInfo" } & Pick<
   PageInfo,
   "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
 >;
 
-export type ProjectConnectionFragment = { __typename?: "ProjectConnection" } & {
+export type ProjectConnectionFragment = { __typename: "ProjectConnection" } & {
   nodes: Array<{ __typename?: "Project" } & ProjectFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type ProjectLinkConnectionFragment = { __typename?: "ProjectLinkConnection" } & {
+export type ProjectLinkConnectionFragment = { __typename: "ProjectLinkConnection" } & {
   nodes: Array<{ __typename?: "ProjectLink" } & ProjectLinkFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type ProjectLinkPayloadFragment = { __typename?: "ProjectLinkPayload" } & Pick<
+export type ProjectLinkPayloadFragment = { __typename: "ProjectLinkPayload" } & Pick<
   ProjectLinkPayload,
   "lastSyncId" | "success"
 > & { projectLink: { __typename?: "ProjectLink" } & Pick<ProjectLink, "id"> };
 
-export type ProjectPayloadFragment = { __typename?: "ProjectPayload" } & Pick<
+export type ProjectPayloadFragment = { __typename: "ProjectPayload" } & Pick<
   ProjectPayload,
   "lastSyncId" | "success"
 > & { project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">> };
 
-export type PushSubscriptionConnectionFragment = { __typename?: "PushSubscriptionConnection" } & {
+export type PushSubscriptionConnectionFragment = { __typename: "PushSubscriptionConnection" } & {
   nodes: Array<{ __typename?: "PushSubscription" } & PushSubscriptionFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type PushSubscriptionPayloadFragment = { __typename?: "PushSubscriptionPayload" } & Pick<
+export type PushSubscriptionPayloadFragment = { __typename: "PushSubscriptionPayload" } & Pick<
   PushSubscriptionPayload,
   "lastSyncId" | "success"
 >;
 
-export type PushSubscriptionTestPayloadFragment = { __typename?: "PushSubscriptionTestPayload" } & Pick<
+export type PushSubscriptionTestPayloadFragment = { __typename: "PushSubscriptionTestPayload" } & Pick<
   PushSubscriptionTestPayload,
   "success"
 >;
 
-export type RateLimitPayloadFragment = { __typename?: "RateLimitPayload" } & Pick<
+export type RateLimitPayloadFragment = { __typename: "RateLimitPayload" } & Pick<
   RateLimitPayload,
   "identifier" | "kind"
 > & { limits: Array<{ __typename?: "RateLimitResultPayload" } & RateLimitResultPayloadFragment> };
 
-export type RateLimitResultPayloadFragment = { __typename?: "RateLimitResultPayload" } & Pick<
+export type RateLimitResultPayloadFragment = { __typename: "RateLimitResultPayload" } & Pick<
   RateLimitResultPayload,
   "period" | "remainingAmount" | "requestedAmount" | "reset" | "allowedAmount" | "type"
 >;
 
-export type ReactionConnectionFragment = { __typename?: "ReactionConnection" } & {
+export type ReactionConnectionFragment = { __typename: "ReactionConnection" } & {
   nodes: Array<{ __typename?: "Reaction" } & ReactionFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type ReactionPayloadFragment = { __typename?: "ReactionPayload" } & Pick<
+export type ReactionPayloadFragment = { __typename: "ReactionPayload" } & Pick<
   ReactionPayload,
   "lastSyncId" | "success"
 > & { reaction: { __typename?: "Reaction" } & Pick<Reaction, "id"> };
 
-export type RotateSecretPayloadFragment = { __typename?: "RotateSecretPayload" } & Pick<
+export type RotateSecretPayloadFragment = { __typename: "RotateSecretPayload" } & Pick<
   RotateSecretPayload,
   "lastSyncId" | "success"
 >;
 
-export type SamlConfigurationFragment = { __typename?: "SamlConfiguration" } & Pick<
+export type SamlConfigurationFragment = { __typename: "SamlConfiguration" } & Pick<
   SamlConfiguration,
   "ssoBinding" | "allowedDomains" | "ssoEndpoint" | "ssoSignAlgo" | "issuerEntityId" | "ssoSigningCert"
 >;
 
-export type SsoUrlFromEmailResponseFragment = { __typename?: "SsoUrlFromEmailResponse" } & Pick<
+export type SsoUrlFromEmailResponseFragment = { __typename: "SsoUrlFromEmailResponse" } & Pick<
   SsoUrlFromEmailResponse,
   "samlSsoUrl" | "success"
 >;
 
-export type StepsResponseFragment = { __typename?: "StepsResponse" } & Pick<
+export type StepsResponseFragment = { __typename: "StepsResponse" } & Pick<
   StepsResponse,
   "version" | "clientIds" | "steps"
 >;
 
-export type SubscriptionPayloadFragment = { __typename?: "SubscriptionPayload" } & Pick<
+export type SubscriptionPayloadFragment = { __typename: "SubscriptionPayload" } & Pick<
   SubscriptionPayload,
   "canceledAt" | "lastSyncId" | "success"
 >;
 
-export type SubscriptionSessionPayloadFragment = { __typename?: "SubscriptionSessionPayload" } & Pick<
+export type SubscriptionSessionPayloadFragment = { __typename: "SubscriptionSessionPayload" } & Pick<
   SubscriptionSessionPayload,
   "session"
 >;
 
-export type SynchronizedPayloadFragment = { __typename?: "SynchronizedPayload" } & Pick<
+export type SynchronizedPayloadFragment = { __typename: "SynchronizedPayload" } & Pick<
   SynchronizedPayload,
   "lastSyncId"
 >;
 
-export type TeamConnectionFragment = { __typename?: "TeamConnection" } & {
+export type TeamConnectionFragment = { __typename: "TeamConnection" } & {
   nodes: Array<{ __typename?: "Team" } & TeamFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type TeamMembershipConnectionFragment = { __typename?: "TeamMembershipConnection" } & {
+export type TeamMembershipConnectionFragment = { __typename: "TeamMembershipConnection" } & {
   nodes: Array<{ __typename?: "TeamMembership" } & TeamMembershipFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type TeamMembershipPayloadFragment = { __typename?: "TeamMembershipPayload" } & Pick<
+export type TeamMembershipPayloadFragment = { __typename: "TeamMembershipPayload" } & Pick<
   TeamMembershipPayload,
   "lastSyncId" | "success"
 > & { teamMembership?: Maybe<{ __typename?: "TeamMembership" } & Pick<TeamMembership, "id">> };
 
-export type TeamPayloadFragment = { __typename?: "TeamPayload" } & Pick<TeamPayload, "lastSyncId" | "success"> & {
+export type TeamPayloadFragment = { __typename: "TeamPayload" } & Pick<TeamPayload, "lastSyncId" | "success"> & {
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
   };
 
-export type TemplateConnectionFragment = { __typename?: "TemplateConnection" } & {
+export type TemplateConnectionFragment = { __typename: "TemplateConnection" } & {
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type TemplatePayloadFragment = { __typename?: "TemplatePayload" } & Pick<
+export type TemplatePayloadFragment = { __typename: "TemplatePayload" } & Pick<
   TemplatePayload,
   "lastSyncId" | "success"
 > & { template: { __typename?: "Template" } & Pick<Template, "id"> };
 
-export type UploadFileHeaderFragment = { __typename?: "UploadFileHeader" } & Pick<UploadFileHeader, "key" | "value">;
+export type UploadFileHeaderFragment = { __typename: "UploadFileHeader" } & Pick<UploadFileHeader, "key" | "value">;
 
-export type UploadPayloadFragment = { __typename?: "UploadPayload" } & Pick<UploadPayload, "lastSyncId" | "success"> & {
+export type UploadPayloadFragment = { __typename: "UploadPayload" } & Pick<UploadPayload, "lastSyncId" | "success"> & {
     uploadFile?: Maybe<{ __typename?: "UploadFile" } & UploadFileFragment>;
   };
 
-export type UserAdminPayloadFragment = { __typename?: "UserAdminPayload" } & Pick<UserAdminPayload, "success">;
+export type UserAdminPayloadFragment = { __typename: "UserAdminPayload" } & Pick<UserAdminPayload, "success">;
 
-export type UserConnectionFragment = { __typename?: "UserConnection" } & {
+export type UserConnectionFragment = { __typename: "UserConnection" } & {
   nodes: Array<{ __typename?: "User" } & UserFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type UserPayloadFragment = { __typename?: "UserPayload" } & Pick<UserPayload, "lastSyncId" | "success"> & {
+export type UserPayloadFragment = { __typename: "UserPayload" } & Pick<UserPayload, "lastSyncId" | "success"> & {
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
-export type UserSettingsFlagPayloadFragment = { __typename?: "UserSettingsFlagPayload" } & Pick<
+export type UserSettingsFlagPayloadFragment = { __typename: "UserSettingsFlagPayload" } & Pick<
   UserSettingsFlagPayload,
   "flag" | "value" | "lastSyncId" | "success"
 >;
 
-export type UserSettingsFlagsResetPayloadFragment = { __typename?: "UserSettingsFlagsResetPayload" } & Pick<
+export type UserSettingsFlagsResetPayloadFragment = { __typename: "UserSettingsFlagsResetPayload" } & Pick<
   UserSettingsFlagsResetPayload,
   "lastSyncId" | "success"
 >;
 
-export type UserSettingsPayloadFragment = { __typename?: "UserSettingsPayload" } & Pick<
+export type UserSettingsPayloadFragment = { __typename: "UserSettingsPayload" } & Pick<
   UserSettingsPayload,
   "lastSyncId" | "success"
 >;
 
-export type UserSubscribeToNewsletterPayloadFragment = { __typename?: "UserSubscribeToNewsletterPayload" } & Pick<
+export type UserSubscribeToNewsletterPayloadFragment = { __typename: "UserSubscribeToNewsletterPayload" } & Pick<
   UserSubscribeToNewsletterPayload,
   "success"
 >;
 
-export type ViewPreferencesPayloadFragment = { __typename?: "ViewPreferencesPayload" } & Pick<
+export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPayload" } & Pick<
   ViewPreferencesPayload,
   "lastSyncId" | "success"
 > & { viewPreferences: { __typename?: "ViewPreferences" } & ViewPreferencesFragment };
 
-export type WebhookConnectionFragment = { __typename?: "WebhookConnection" } & {
+export type WebhookConnectionFragment = { __typename: "WebhookConnection" } & {
   nodes: Array<{ __typename?: "Webhook" } & WebhookFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type WebhookPayloadFragment = { __typename?: "WebhookPayload" } & Pick<
+export type WebhookPayloadFragment = { __typename: "WebhookPayload" } & Pick<
   WebhookPayload,
   "lastSyncId" | "success"
 > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> };
 
-export type WorkflowStateConnectionFragment = { __typename?: "WorkflowStateConnection" } & {
+export type WorkflowStateConnectionFragment = { __typename: "WorkflowStateConnection" } & {
   nodes: Array<{ __typename?: "WorkflowState" } & WorkflowStateFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type WorkflowStatePayloadFragment = { __typename?: "WorkflowStatePayload" } & Pick<
+export type WorkflowStatePayloadFragment = { __typename: "WorkflowStatePayload" } & Pick<
   WorkflowStatePayload,
   "lastSyncId" | "success"
 > & { workflowState: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id"> };
@@ -9260,7 +9315,7 @@ export type NotificationQueryVariables = Exact<{
 }>;
 
 export type NotificationQuery = { __typename?: "Query" } & {
-  notification: { __typename?: "Notification" } & NotificationFragment;
+  notification: { __typename?: "IssueNotification" } & NotificationFragment;
 };
 
 export type NotificationSubscriptionQueryVariables = Exact<{
@@ -11327,6 +11382,26 @@ export type WorkflowStateUpdateMutation = { __typename?: "Mutation" } & {
   workflowStateUpdate: { __typename?: "WorkflowStatePayload" } & WorkflowStatePayloadFragment;
 };
 
+export const EntityFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Entity" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Entity" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<EntityFragment, unknown>;
 export const TemplateFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -11337,6 +11412,7 @@ export const TemplateFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "templateData" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
@@ -11376,6 +11452,7 @@ export const UserFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "statusUntilAt" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
@@ -11413,6 +11490,7 @@ export const UserAccountFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "service" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
@@ -11444,6 +11522,7 @@ export const DocumentStepFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "clientId" } },
           { kind: "Field", name: { kind: "Name", value: "step" } },
           { kind: "Field", name: { kind: "Name", value: "version" } },
@@ -11466,6 +11545,7 @@ export const SyncDeltaResponseFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "updates" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
           { kind: "Field", name: { kind: "Name", value: "loadMore" } },
@@ -11484,6 +11564,7 @@ export const SyncResponseFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "delta" } },
           { kind: "Field", name: { kind: "Name", value: "state" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
@@ -11504,6 +11585,7 @@ export const ArchiveResponseFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "archive" } },
           { kind: "Field", name: { kind: "Name", value: "totalCount" } },
           { kind: "Field", name: { kind: "Name", value: "databaseVersion" } },
@@ -11522,7 +11604,10 @@ export const DependencyResponseFragmentDoc = {
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DependencyResponse" } },
       selectionSet: {
         kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "dependencies" } }],
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "dependencies" } },
+        ],
       },
     },
   ],
@@ -11534,7 +11619,13 @@ export const SyncBatchResponseFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SyncBatchResponse" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SyncBatchResponse" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "models" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "models" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<SyncBatchResponseFragment, unknown>;
@@ -11548,6 +11639,7 @@ export const GithubRepoFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
         ],
@@ -11565,6 +11657,7 @@ export const GithubOrgFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -11592,6 +11685,7 @@ export const GithubOAuthTokenPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "organizations" },
@@ -11617,6 +11711,7 @@ export const AuthorizedApplicationFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
@@ -11641,6 +11736,7 @@ export const UserAuthorizedApplicationFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
@@ -11665,6 +11761,7 @@ export const ApplicationFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
@@ -11686,6 +11783,7 @@ export const GoogleSheetsSettingsFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "sheetId" } },
           { kind: "Field", name: { kind: "Name", value: "spreadsheetId" } },
           { kind: "Field", name: { kind: "Name", value: "spreadsheetUrl" } },
@@ -11705,6 +11803,7 @@ export const IntercomSettingsFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "sendNoteOnStatusChange" } },
           { kind: "Field", name: { kind: "Name", value: "sendNoteOnComment" } },
         ],
@@ -11722,6 +11821,7 @@ export const JiraProjectDataFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "key" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
@@ -11740,6 +11840,7 @@ export const JiraLinearMappingFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "jiraProjectId" } },
           { kind: "Field", name: { kind: "Name", value: "linearTeamId" } },
         ],
@@ -11757,6 +11858,7 @@ export const JiraSettingsFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "projects" },
@@ -11789,7 +11891,10 @@ export const SentrySettingsFragmentDoc = {
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SentrySettings" } },
       selectionSet: {
         kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "organizationSlug" } }],
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationSlug" } },
+        ],
       },
     },
   ],
@@ -11804,6 +11909,7 @@ export const SlackPostSettingsFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "channel" } },
           { kind: "Field", name: { kind: "Name", value: "channelId" } },
           { kind: "Field", name: { kind: "Name", value: "configurationUrl" } },
@@ -11822,6 +11928,7 @@ export const ZendeskSettingsFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "botUserId" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "subdomain" } },
@@ -11840,6 +11947,7 @@ export const IntegrationSettingsFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "googleSheets" },
@@ -11917,6 +12025,7 @@ export const SamlConfigurationPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "ssoBinding" } },
           { kind: "Field", name: { kind: "Name", value: "allowedDomains" } },
           { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" } },
@@ -11937,6 +12046,7 @@ export const UserSettingsFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "unsubscribedFrom" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "notificationPreferences" } },
@@ -11966,6 +12076,7 @@ export const SubscriptionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
@@ -11998,6 +12109,7 @@ export const ApiKeyFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "label" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
@@ -12018,6 +12130,7 @@ export const PageInfoFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "startCursor" } },
           { kind: "Field", name: { kind: "Name", value: "endCursor" } },
           { kind: "Field", name: { kind: "Name", value: "hasPreviousPage" } },
@@ -12037,6 +12150,7 @@ export const ApiKeyConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -12070,6 +12184,7 @@ export const ApiKeyPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "apiKey" },
@@ -12096,6 +12211,7 @@ export const ArchivePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -12113,6 +12229,7 @@ export const AttachmentFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "sourceType" } },
           { kind: "Field", name: { kind: "Name", value: "subtitle" } },
           { kind: "Field", name: { kind: "Name", value: "title" } },
@@ -12155,6 +12272,7 @@ export const AttachmentConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -12188,6 +12306,7 @@ export const AttachmentPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -12213,6 +12332,7 @@ export const AuditEntryFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "metadata" } },
           { kind: "Field", name: { kind: "Name", value: "countryCode" } },
           { kind: "Field", name: { kind: "Name", value: "ip" } },
@@ -12245,6 +12365,7 @@ export const AuditEntryConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -12278,6 +12399,7 @@ export const AuditEntryTypeFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
         ],
@@ -12295,6 +12417,7 @@ export const OrganizationFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" } },
           { kind: "Field", name: { kind: "Name", value: "gitBranchFormat" } },
           { kind: "Field", name: { kind: "Name", value: "userCount" } },
@@ -12327,6 +12450,7 @@ export const AuthResolverResponseFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "email" } },
           { kind: "Field", name: { kind: "Name", value: "lastUsedOrganizationId" } },
           { kind: "Field", name: { kind: "Name", value: "token" } },
@@ -12365,6 +12489,7 @@ export const InvoiceFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "created" } },
           { kind: "Field", name: { kind: "Name", value: "dueDate" } },
@@ -12385,6 +12510,7 @@ export const CardFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "brand" } },
           { kind: "Field", name: { kind: "Name", value: "last4" } },
         ],
@@ -12402,6 +12528,7 @@ export const BillingDetailsPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "invoices" },
@@ -12437,6 +12564,7 @@ export const BillingEmailPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "email" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -12454,6 +12582,7 @@ export const StepsResponseFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "version" } },
           { kind: "Field", name: { kind: "Name", value: "clientIds" } },
           { kind: "Field", name: { kind: "Name", value: "steps" } },
@@ -12472,6 +12601,7 @@ export const CollaborationDocumentUpdatePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "steps" },
@@ -12497,6 +12627,7 @@ export const CommentFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "body" } },
           {
@@ -12543,6 +12674,7 @@ export const CommentConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -12576,6 +12708,7 @@ export const CommentPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
@@ -12598,7 +12731,13 @@ export const ContactPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "ContactPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ContactPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<ContactPayloadFragment, unknown>;
@@ -12609,7 +12748,13 @@ export const CreateCsvExportReportPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "CreateCsvExportReportPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CreateCsvExportReportPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<CreateCsvExportReportPayloadFragment, unknown>;
@@ -12623,6 +12768,7 @@ export const CreateOrJoinOrganizationResponseFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "user" },
@@ -12646,6 +12792,7 @@ export const CustomViewFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "color" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "filters" } },
@@ -12688,6 +12835,7 @@ export const CustomViewConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -12721,6 +12869,7 @@ export const CustomViewPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "customView" },
@@ -12746,6 +12895,7 @@ export const CycleFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "completedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "endsAt" } },
@@ -12784,6 +12934,7 @@ export const CycleConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -12817,6 +12968,7 @@ export const CyclePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "cycle" },
@@ -12839,7 +12991,13 @@ export const DebugPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "DebugPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DebugPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<DebugPayloadFragment, unknown>;
@@ -12853,6 +13011,7 @@ export const DocumentFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "color" } },
           { kind: "Field", name: { kind: "Name", value: "contentData" } },
           { kind: "Field", name: { kind: "Name", value: "content" } },
@@ -12902,6 +13061,7 @@ export const DocumentConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -12935,6 +13095,7 @@ export const DocumentPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "document" },
@@ -12960,6 +13121,7 @@ export const DocumentVersionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "content" } },
           { kind: "Field", name: { kind: "Name", value: "title" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -12998,6 +13160,7 @@ export const DocumentVersionConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -13028,7 +13191,13 @@ export const EmailSubscribePayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "EmailSubscribePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailSubscribePayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<EmailSubscribePayloadFragment, unknown>;
@@ -13039,7 +13208,13 @@ export const EmailUnsubscribePayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "EmailUnsubscribePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailUnsubscribePayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<EmailUnsubscribePayloadFragment, unknown>;
@@ -13053,6 +13228,7 @@ export const EmailUserAccountAuthChallengeResponseFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "authType" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -13070,6 +13246,7 @@ export const EmojiFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -13100,6 +13277,7 @@ export const EmojiConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -13133,6 +13311,7 @@ export const EmojiPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "emoji" },
@@ -13155,7 +13334,13 @@ export const EventPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "EventPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EventPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<EventPayloadFragment, unknown>;
@@ -13169,6 +13354,7 @@ export const FavoriteFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "customView" },
@@ -13272,6 +13458,7 @@ export const FavoriteConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -13305,6 +13492,7 @@ export const FavoritePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -13327,7 +13515,13 @@ export const FeedbackPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "FeedbackPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FeedbackPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<FeedbackPayloadFragment, unknown>;
@@ -13341,6 +13535,7 @@ export const FigmaEmbedFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastModified" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
@@ -13360,6 +13555,7 @@ export const FigmaEmbedPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "figmaEmbed" },
@@ -13385,6 +13581,7 @@ export const FrontAttachmentPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -13402,6 +13599,7 @@ export const GitHubCommitIntegrationPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -13428,6 +13626,7 @@ export const ImageUploadFromUrlPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
@@ -13446,6 +13645,7 @@ export const IntegrationFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "service" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
@@ -13482,6 +13682,7 @@ export const IntegrationConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -13515,6 +13716,7 @@ export const IntegrationPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -13540,6 +13742,7 @@ export const CommitPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "added" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "message" } },
@@ -13562,6 +13765,7 @@ export const PullRequestPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "branch" } },
           { kind: "Field", name: { kind: "Name", value: "closedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
@@ -13592,6 +13796,7 @@ export const SentryIssuePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "issueId" } },
           { kind: "Field", name: { kind: "Name", value: "actorId" } },
           { kind: "Field", name: { kind: "Name", value: "projectId" } },
@@ -13618,6 +13823,7 @@ export const IntegrationResourceDataFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "githubCommit" },
@@ -13668,6 +13874,7 @@ export const IntegrationResourceFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "data" },
@@ -13723,6 +13930,7 @@ export const IntegrationResourceConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -13756,6 +13964,7 @@ export const IssueFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "identifier" } },
@@ -13861,6 +14070,7 @@ export const IssueBatchPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -13887,6 +14097,7 @@ export const IssueConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -13920,6 +14131,7 @@ export const IssueRelationHistoryPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "identifier" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
         ],
@@ -13937,6 +14149,7 @@ export const IssueImportFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "mapping" } },
           { kind: "Field", name: { kind: "Name", value: "creatorId" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -13961,6 +14174,7 @@ export const IssueHistoryFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "relationChanges" },
@@ -14134,6 +14348,7 @@ export const IssueHistoryConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -14167,6 +14382,7 @@ export const IssueImportDeletePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -14193,6 +14409,7 @@ export const IssueImportPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -14219,6 +14436,7 @@ export const IssueLabelFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "color" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
@@ -14257,6 +14475,7 @@ export const IssueLabelConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -14290,6 +14509,7 @@ export const IssueLabelPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -14315,6 +14535,7 @@ export const IssuePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -14340,6 +14561,7 @@ export const IssuePriorityValueFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "label" } },
           { kind: "Field", name: { kind: "Name", value: "priority" } },
         ],
@@ -14357,6 +14579,7 @@ export const IssueRelationFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
@@ -14393,6 +14616,7 @@ export const IssueRelationConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -14426,6 +14650,7 @@ export const IssueRelationPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -14451,6 +14676,7 @@ export const MilestoneFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
@@ -14472,6 +14698,7 @@ export const MilestoneConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -14505,6 +14732,7 @@ export const MilestonePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -14527,20 +14755,27 @@ export const NodeFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "Node" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Node" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<NodeFragment, unknown>;
-export const NotificationFragmentDoc = {
+export const IssueNotificationFragmentDoc = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Notification" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Notification" } },
+      name: { kind: "Name", value: "IssueNotification" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueNotification" } },
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "reactionEmoji" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           {
@@ -14562,14 +14797,6 @@ export const NotificationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
-            name: { kind: "Name", value: "user" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          {
-            kind: "Field",
             name: { kind: "Name", value: "team" },
             selectionSet: {
               kind: "SelectionSet",
@@ -14582,9 +14809,58 @@ export const NotificationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "snoozedUntilAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
         ],
       },
     },
+  ],
+} as unknown as DocumentNode<IssueNotificationFragment, unknown>;
+export const NotificationFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Notification" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Notification" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "emailedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "readAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "snoozedUntilAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "InlineFragment",
+            typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueNotification" } },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueNotification" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationFragment, unknown>;
 export const NotificationConnectionFragmentDoc = {
@@ -14597,6 +14873,7 @@ export const NotificationConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -14630,19 +14907,21 @@ export const NotificationPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "notification" },
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Notification" } }],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
     },
+    ...NotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationPayloadFragment, unknown>;
 export const NotificationSubscriptionFragmentDoc = {
@@ -14655,6 +14934,7 @@ export const NotificationSubscriptionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "project" },
@@ -14699,6 +14979,7 @@ export const NotificationSubscriptionConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -14732,6 +15013,7 @@ export const NotificationSubscriptionPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -14754,7 +15036,13 @@ export const OauthAuthStringAuthorizePayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OauthAuthStringAuthorizePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthAuthStringAuthorizePayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<OauthAuthStringAuthorizePayloadFragment, unknown>;
@@ -14768,6 +15056,7 @@ export const OauthAuthStringChallengePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "authString" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -14785,6 +15074,7 @@ export const OauthAuthStringCheckPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "token" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -14802,6 +15092,7 @@ export const OauthClientFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "redirectUris" } },
@@ -14832,6 +15123,7 @@ export const OauthClientPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "oauthClient" },
@@ -14855,7 +15147,13 @@ export const OauthTokenRevokePayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OauthTokenRevokePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthTokenRevokePayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<OauthTokenRevokePayloadFragment, unknown>;
@@ -14866,7 +15164,13 @@ export const OrganizationCancelDeletePayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationCancelDeletePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationCancelDeletePayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<OrganizationCancelDeletePayloadFragment, unknown>;
@@ -14877,7 +15181,13 @@ export const OrganizationDeletePayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationDeletePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDeletePayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<OrganizationDeletePayloadFragment, unknown>;
@@ -14891,6 +15201,7 @@ export const OrganizationDomainFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "verificationEmail" } },
           { kind: "Field", name: { kind: "Name", value: "verified" } },
@@ -14921,6 +15232,7 @@ export const OrganizationDomainPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -14944,7 +15256,13 @@ export const OrganizationDomainSimplePayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "OrganizationDomainSimplePayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainSimplePayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<OrganizationDomainSimplePayloadFragment, unknown>;
@@ -14958,6 +15276,7 @@ export const OrganizationExistsPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
           { kind: "Field", name: { kind: "Name", value: "exists" } },
         ],
@@ -14975,6 +15294,7 @@ export const OrganizationInviteFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "external" } },
           { kind: "Field", name: { kind: "Name", value: "email" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -15015,6 +15335,7 @@ export const OrganizationInviteConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -15048,6 +15369,7 @@ export const OrganizationInviteDetailsPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
           { kind: "Field", name: { kind: "Name", value: "organizationName" } },
           { kind: "Field", name: { kind: "Name", value: "email" } },
@@ -15072,6 +15394,7 @@ export const OrganizationInvitePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -15097,6 +15420,7 @@ export const OrganizationPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -15114,6 +15438,7 @@ export const ProjectFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
           { kind: "Field", name: { kind: "Name", value: "icon" } },
@@ -15178,6 +15503,7 @@ export const ProjectConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -15211,6 +15537,7 @@ export const ProjectLinkFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "label" } },
@@ -15248,6 +15575,7 @@ export const ProjectLinkConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -15281,6 +15609,7 @@ export const ProjectLinkPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -15306,6 +15635,7 @@ export const ProjectPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -15331,6 +15661,7 @@ export const PushSubscriptionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
@@ -15350,6 +15681,7 @@ export const PushSubscriptionConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -15383,6 +15715,7 @@ export const PushSubscriptionPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -15397,7 +15730,13 @@ export const PushSubscriptionTestPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "PushSubscriptionTestPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionTestPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<PushSubscriptionTestPayloadFragment, unknown>;
@@ -15411,6 +15750,7 @@ export const RateLimitResultPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "period" } },
           { kind: "Field", name: { kind: "Name", value: "remainingAmount" } },
           { kind: "Field", name: { kind: "Name", value: "requestedAmount" } },
@@ -15432,6 +15772,7 @@ export const RateLimitPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "identifier" } },
           { kind: "Field", name: { kind: "Name", value: "kind" } },
           {
@@ -15458,6 +15799,7 @@ export const ReactionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "emoji" } },
           {
             kind: "Field",
@@ -15494,6 +15836,7 @@ export const ReactionConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -15527,6 +15870,7 @@ export const ReactionPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -15552,6 +15896,7 @@ export const RotateSecretPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -15569,6 +15914,7 @@ export const SamlConfigurationFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "ssoBinding" } },
           { kind: "Field", name: { kind: "Name", value: "allowedDomains" } },
           { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" } },
@@ -15590,6 +15936,7 @@ export const SsoUrlFromEmailResponseFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "samlSsoUrl" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -15607,6 +15954,7 @@ export const SubscriptionPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "canceledAt" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
@@ -15622,7 +15970,13 @@ export const SubscriptionSessionPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "SubscriptionSessionPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SubscriptionSessionPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "session" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "session" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<SubscriptionSessionPayloadFragment, unknown>;
@@ -15635,7 +15989,10 @@ export const SynchronizedPayloadFragmentDoc = {
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SynchronizedPayload" } },
       selectionSet: {
         kind: "SelectionSet",
-        selections: [{ kind: "Field", name: { kind: "Name", value: "lastSyncId" } }],
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+        ],
       },
     },
   ],
@@ -15650,6 +16007,7 @@ export const TeamFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "cycleIssueAutoAssignCompleted" } },
           { kind: "Field", name: { kind: "Name", value: "cycleIssueAutoAssignStarted" } },
           { kind: "Field", name: { kind: "Name", value: "cycleCalenderUrl" } },
@@ -15781,6 +16139,7 @@ export const TeamConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -15814,6 +16173,7 @@ export const TeamMembershipFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
@@ -15850,6 +16210,7 @@ export const TeamMembershipConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -15883,6 +16244,7 @@ export const TeamMembershipPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -15908,6 +16270,7 @@ export const TeamPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -15933,6 +16296,7 @@ export const TemplateConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
@@ -15957,6 +16321,7 @@ export const TemplatePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -15982,6 +16347,7 @@ export const UploadFileHeaderFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "key" } },
           { kind: "Field", name: { kind: "Name", value: "value" } },
         ],
@@ -15999,6 +16365,7 @@ export const UploadFileFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "assetUrl" } },
           { kind: "Field", name: { kind: "Name", value: "contentType" } },
           { kind: "Field", name: { kind: "Name", value: "filename" } },
@@ -16029,6 +16396,7 @@ export const UploadPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "uploadFile" },
@@ -16052,7 +16420,13 @@ export const UserAdminPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserAdminPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAdminPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<UserAdminPayloadFragment, unknown>;
@@ -16066,6 +16440,7 @@ export const UserConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -16099,6 +16474,7 @@ export const UserPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -16124,6 +16500,7 @@ export const UserSettingsFlagPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "flag" } },
           { kind: "Field", name: { kind: "Name", value: "value" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
@@ -16143,6 +16520,7 @@ export const UserSettingsFlagsResetPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -16160,6 +16538,7 @@ export const UserSettingsPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
@@ -16174,7 +16553,13 @@ export const UserSubscribeToNewsletterPayloadFragmentDoc = {
       kind: "FragmentDefinition",
       name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" },
       typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" } },
-      selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "success" } }] },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
     },
   ],
 } as unknown as DocumentNode<UserSubscribeToNewsletterPayloadFragment, unknown>;
@@ -16188,6 +16573,7 @@ export const ViewPreferencesFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
@@ -16209,6 +16595,7 @@ export const ViewPreferencesPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -16235,6 +16622,7 @@ export const WebhookFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "secret" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "resourceTypes" } },
@@ -16276,6 +16664,7 @@ export const WebhookConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -16309,6 +16698,7 @@ export const WebhookPayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -16334,6 +16724,7 @@ export const WorkflowStateFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "position" } },
@@ -16366,6 +16757,7 @@ export const WorkflowStateConnectionFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "nodes" },
@@ -16399,6 +16791,7 @@ export const WorkflowStatePayloadFragmentDoc = {
       selectionSet: {
         kind: "SelectionSet",
         selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",

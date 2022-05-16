@@ -7,6 +7,7 @@ import {
   printSet,
   printTernary,
 } from "@linear/codegen-doc";
+import { ObjectTypeDefinitionNode } from "graphql";
 import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import { isConnectionModel } from "./print-connection";
@@ -64,10 +65,24 @@ function printOperationCall(context: SdkPluginContext, operation: SdkOperation):
   const optionalArgs = operation.sdkPath.length > 0 ? operation.optionalArgs.args : [];
   const parentArgNames = operation.parentArgs.args.map(arg => arg.name);
   const responseType = printNamespaced(context, operation.print.response);
+
+  const returnsInterface = context.interfaces?.some(i => i.name.value === operation.print.model);
+
+  const implementations: string[] = returnsInterface
+    ? context.interfaceImplementations[operation.print.model]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ??
+      []
+    : [];
+
   const operationCall = operation.print.list
-    ? `${Sdk.DATA_NAME}.map(node => new ${operation.print.list}(${printList([`this._${Sdk.REQUEST_NAME}`, "node"])}))`
+    ? `return ${Sdk.DATA_NAME}.map(node => {
+          ${
+            returnsInterface
+              ? printObjectInstantiationSwitch(implementations, operation, "node")
+              : printObjectInstantiation(operation, "node")
+          }
+        })`
     : isConnectionModel(operation.model)
-    ? `new ${operation.print.model}(${printList([
+    ? `return new ${operation.print.model}(${printList([
         `this._${Sdk.REQUEST_NAME}`,
         `${Sdk.CONNECTION_NAME} => this.${Sdk.FETCH_NAME}(${printList([
           ...operation.requiredArgs.args.filter(arg => !parentArgNames.includes(arg.name)).map(arg => arg.name),
@@ -81,7 +96,9 @@ function printOperationCall(context: SdkPluginContext, operation: SdkOperation):
         ])})`,
         Sdk.DATA_NAME,
       ])})`
-    : `new ${operation.print.model}(${printList([`this._${Sdk.REQUEST_NAME}`, Sdk.DATA_NAME])})`;
+    : returnsInterface
+    ? printObjectInstantiationSwitch(implementations, operation)
+    : printObjectInstantiation(operation);
 
   return printLines([
     `public async ${Sdk.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
@@ -89,10 +106,49 @@ function printOperationCall(context: SdkPluginContext, operation: SdkOperation):
       operation.print.variables
     }>(${printList([operation.print.document, printOperationArgs(operation)])})
         ${printSet(`const ${Sdk.DATA_NAME}`, `${operation.print.responsePath}`)}
-        return ${operation.nonNull ? operationCall : printTernary(Sdk.DATA_NAME, operationCall)}
+        ${operationCall}
       }
     `,
   ]);
+}
+
+/**
+ * Print a (possibly ternary) instantiation of an object.
+ */
+function printObjectInstantiation(op: SdkOperation, nodeName: string = Sdk.DATA_NAME) {
+  const name = op.print.list ?? op.print.model;
+  const nonNull = op.nonNull;
+  const instantiation = `new ${name}(${printList([`this._${Sdk.REQUEST_NAME}`, nodeName])})`;
+  return `return ${nonNull ? instantiation : printTernary(nodeName, instantiation)}`;
+}
+
+/**
+ * Print a switch based on the __typename. Used to instantiate interface type objects.
+ */
+function printObjectInstantiationSwitch(impl: string[], op: SdkOperation, nodeName: string = Sdk.DATA_NAME) {
+  const name = op.print.list ?? op.print.model;
+  const nonNull = op.nonNull;
+
+  return `
+  ${
+    nonNull
+      ? ""
+      : `
+    if (!${nodeName}) {
+      return undefined
+    }`
+  }
+
+  switch (${nodeName}.__typename) {
+    ${impl.map(
+      objectType => `case "${objectType}":
+        return new ${objectType}(this._${Sdk.REQUEST_NAME}, ${nodeName} as L.${objectType}Fragment)
+      `
+    )}
+
+    default:
+      return new ${name}(this._${Sdk.REQUEST_NAME}, ${nodeName})
+  }`;
 }
 
 /**

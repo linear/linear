@@ -17,7 +17,7 @@
     "dist"
   ],
   "scripts": {
-    "build:clean": "npx rimraf dist",
+    "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
     "build:sdk": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",
     "generate:changeset:dependencies": "ts-node scripts/generate-dependencies-changeset.ts",

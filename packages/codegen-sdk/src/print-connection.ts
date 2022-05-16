@@ -8,6 +8,7 @@ import {
   printSet,
   printTernary,
 } from "@linear/codegen-doc";
+import { ObjectTypeDefinitionNode } from "graphql";
 import { Sdk } from "./constants";
 import { getRequestArg } from "./print-request";
 import { SdkModel, SdkPluginContext } from "./types";
@@ -38,7 +39,7 @@ function printAbstractConnection(): string {
 
       public constructor(${Sdk.REQUEST_NAME}: ${Sdk.REQUEST_TYPE}) {
         super(${Sdk.REQUEST_NAME})
-        this.${Sdk.PAGEINFO_NAME} = new ${Sdk.PAGEINFO_TYPE}(${Sdk.REQUEST_NAME}, { hasNextPage:false, hasPreviousPage:false }) 
+        this.${Sdk.PAGEINFO_NAME} = new ${Sdk.PAGEINFO_TYPE}(${Sdk.REQUEST_NAME}, { hasNextPage:false, hasPreviousPage:false, __typename: "PageInfo" })
         this.${Sdk.NODE_NAME} = []
       }
     }`,
@@ -66,9 +67,9 @@ function printConnectionVariables(): string {
 function printConnectionDefault(): string {
   return printLines([
     printComment(["Default connection variables required for pagination", "Defaults to 50 as per the Linear API"]),
-    `function ${Sdk.CONNECTION_DEFAULT}<${Sdk.VARIABLE_TYPE} extends ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE}>(${Sdk.VARIABLE_NAME}: ${Sdk.VARIABLE_TYPE}): ${Sdk.VARIABLE_TYPE} { 
+    `function ${Sdk.CONNECTION_DEFAULT}<${Sdk.VARIABLE_TYPE} extends ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE}>(${Sdk.VARIABLE_NAME}: ${Sdk.VARIABLE_TYPE}): ${Sdk.VARIABLE_TYPE} {
       return {
-        ...${Sdk.VARIABLE_NAME}, 
+        ...${Sdk.VARIABLE_NAME},
         ${Sdk.CONNECTION_FIRST}: ${Sdk.VARIABLE_NAME}.${Sdk.CONNECTION_FIRST} ?? (${Sdk.VARIABLE_NAME}.${Sdk.CONNECTION_AFTER} ? 50 : undefined),
         ${Sdk.CONNECTION_LAST}: ${Sdk.VARIABLE_NAME}.${Sdk.CONNECTION_LAST} ?? (${Sdk.VARIABLE_NAME}.${Sdk.CONNECTION_BEFORE} ? 50 : undefined),
       }
@@ -126,14 +127,14 @@ export function printConnection(): string {
     printComment([`The base connection class to provide pagination`, "Follows the Relay spec", ...args.jsdoc]),
     `export class ${Sdk.CONNECTION_CLASS}<${Sdk.NODE_TYPE}> extends ${Sdk.CONNECTION_TYPE}<${Sdk.NODE_TYPE}> {
       private _${Sdk.FETCH_NAME}: ${fetchType}
-    
+
       public constructor(${args.printInput}) {
         super(${Sdk.REQUEST_NAME})
         ${printSet(`this._${Sdk.FETCH_NAME}`, Sdk.FETCH_NAME)}
         ${printSet(`this.${Sdk.NODE_NAME}`, Sdk.NODE_NAME)}
         ${printSet(`this.${Sdk.PAGEINFO_NAME}`, Sdk.PAGEINFO_NAME)}
       }
-      
+
       ${printComment(["Add nodes to the end of the existing nodes"])}
       private _appendNodes(${Sdk.NODE_NAME}?: ${Sdk.NODE_TYPE}[]) {
         ${printSet(
@@ -145,7 +146,7 @@ export function printConnection(): string {
           )
         )}
       }
-    
+
       ${printComment(["Add nodes to the start of the existing nodes"])}
       private _prependNodes(${Sdk.NODE_NAME}?: ${Sdk.NODE_TYPE}[]) {
         ${printSet(
@@ -171,7 +172,7 @@ export function printConnection(): string {
           )}
         }
       }
-    
+
       ${printComment(["Update the pagination start cursor"])}
       private _prependPageInfo(${Sdk.PAGEINFO_NAME}?: ${Sdk.PAGEINFO_TYPE}) {
         if (this.${Sdk.PAGEINFO_NAME}) {
@@ -185,19 +186,19 @@ export function printConnection(): string {
           )}
         }
       }
-    
+
       ${printComment(["Fetch the next page of results and append to nodes"])}
       public async ${Sdk.FETCH_NAME}Next(): Promise<this> {
         if (this.${Sdk.PAGEINFO_NAME}?.hasNextPage) {
           const ${Sdk.RESPONSE_NAME} = await this._${Sdk.FETCH_NAME}({
-            ${Sdk.CONNECTION_AFTER}: this.${Sdk.PAGEINFO_NAME}?.endCursor 
+            ${Sdk.CONNECTION_AFTER}: this.${Sdk.PAGEINFO_NAME}?.endCursor
           })
           this._appendNodes(${Sdk.RESPONSE_NAME}?.${Sdk.NODE_NAME})
           this._appendPageInfo(${Sdk.RESPONSE_NAME}?.${Sdk.PAGEINFO_NAME})
         }
         return Promise.resolve(this)
       }
-    
+
       ${printComment(["Fetch the previous page of results and prepend to nodes"])}
       public async ${Sdk.FETCH_NAME}Previous(): Promise<this> {
         if (this.${Sdk.PAGEINFO_NAME}?.hasPreviousPage) {
@@ -218,14 +219,23 @@ export function printConnection(): string {
  */
 export function printConnectionModel(context: SdkPluginContext, model: SdkModel): string {
   const nodesField = model.fields.list.find(field => field.name === Sdk.NODE_NAME);
+
   const modelType = nodesField?.listType;
+  const returnsInterface = context.interfaces?.some(i => i.name.value === modelType);
+
+  const implementations: string[] =
+    returnsInterface && modelType
+      ? context.interfaceImplementations[modelType]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ?? []
+      : [];
+
+  const returnValue = returnsInterface ? [...implementations, modelType].join(" | ") : modelType;
 
   const args = getArgList([
     getRequestArg(),
     {
       name: Sdk.FETCH_NAME,
       optional: false,
-      type: `(${Sdk.CONNECTION_NAME}?: ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE}) => ${Sdk.FETCH_TYPE}<${Sdk.CONNECTION_TYPE}<${modelType}> | undefined>`,
+      type: `(${Sdk.CONNECTION_NAME}?: ${Sdk.CONNECTION_TYPE}${Sdk.VARIABLE_TYPE}) => ${Sdk.FETCH_TYPE}<${Sdk.CONNECTION_TYPE}<${returnValue}> | undefined>`,
       description: `function to trigger a refetch of this ${model.name} model`,
     },
     {
@@ -236,13 +246,27 @@ export function printConnectionModel(context: SdkPluginContext, model: SdkModel)
     },
   ]);
 
-  const nodesCall = `${Sdk.DATA_NAME}.${Sdk.NODE_NAME}.map(node => new ${modelType}(${Sdk.REQUEST_NAME}, node))`;
   const pageInfoCall = `new ${Sdk.PAGEINFO_TYPE}(${Sdk.REQUEST_NAME}, ${Sdk.DATA_NAME}.${Sdk.PAGEINFO_NAME})`;
+  let nodesCall = `${Sdk.DATA_NAME}.${Sdk.NODE_NAME}.map(node => new ${modelType}(${Sdk.REQUEST_NAME}, node))`;
+  if (returnsInterface) {
+    nodesCall = `${Sdk.DATA_NAME}.${Sdk.NODE_NAME}.map(node => {
+      switch (node.__typename) {
+        ${implementations.map(
+          objectType =>
+            `case "${objectType}":
+            return new ${objectType}(${Sdk.REQUEST_NAME}, node as L.${objectType}Fragment)
+          `
+        )}
+        default:
+          return new ${modelType}(${Sdk.REQUEST_NAME}, node)
+      }
+    })`;
+  }
 
   return printLines([
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
-    `export class ${model.name} extends ${Sdk.CONNECTION_CLASS}<${modelType}> {
+    `export class ${model.name} extends ${Sdk.CONNECTION_CLASS}<${returnValue}> {
         public constructor(${args.printInput}) {
           super(${printList([
             Sdk.REQUEST_NAME,

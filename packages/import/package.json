@@ -23,7 +23,7 @@
     "dev:import": "NODE_ENV=development yarn build:import",
     "build:import": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",
-    "build:clean": "npx rimraf dist"
+    "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@linear/sdk": "^1.21.0",

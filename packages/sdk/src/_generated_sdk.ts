@@ -56,7 +56,7 @@ export class LinearConnection<Node> extends Request {
 
   public constructor(request: LinearRequest) {
     super(request);
-    this.pageInfo = new PageInfo(request, { hasNextPage: false, hasPreviousPage: false });
+    this.pageInfo = new PageInfo(request, { hasNextPage: false, hasPreviousPage: false, __typename: "PageInfo" });
     this.nodes = [];
   }
 }
@@ -1506,6 +1506,33 @@ export class EmojiPayload extends Request {
   }
 }
 /**
+ * A basic entity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.EntityFragment response data
+ */
+export class Entity extends Request {
+  public constructor(request: LinearRequest, data: L.EntityFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been updated after creation.
+   */
+  public updatedAt: Date;
+}
+/**
  * EventPayload model
  *
  * @param request - function to call the graphql client
@@ -2803,6 +2830,76 @@ export class IssueLabelPayload extends Request {
   }
 }
 /**
+ * An issue related notification
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueNotificationFragment response data
+ */
+export class IssueNotification extends Request {
+  private _comment?: L.IssueNotificationFragment["comment"];
+  private _issue: L.IssueNotificationFragment["issue"];
+  private _team: L.IssueNotificationFragment["team"];
+  private _user: L.IssueNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.IssueNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.reactionEmoji = data.reactionEmoji ?? undefined;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._comment = data.comment ?? undefined;
+    this._issue = data.issue;
+    this._team = data.team;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  public emailedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Name of the reaction emoji related to the notification. */
+  public reactionEmoji?: string;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  public readAt?: Date;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  public snoozedUntilAt?: Date;
+  /** Notification type */
+  public type: string;
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The comment related to the notification. */
+  public get comment(): LinearFetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
+  }
+  /** The issue related to the notification. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issue.id);
+  }
+  /** The team related to the notification. */
+  public get team(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The user that received the notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+}
+/**
  * IssuePayload model
  *
  * @param request - function to call the graphql client
@@ -3137,9 +3234,6 @@ export class Node extends Request {
  * @param data - L.NotificationFragment response data
  */
 export class Notification extends Request {
-  private _comment?: L.NotificationFragment["comment"];
-  private _issue: L.NotificationFragment["issue"];
-  private _team: L.NotificationFragment["team"];
   private _user: L.NotificationFragment["user"];
 
   public constructor(request: LinearRequest, data: L.NotificationFragment) {
@@ -3148,14 +3242,10 @@ export class Notification extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
-    this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this._comment = data.comment ?? undefined;
-    this._issue = data.issue;
-    this._team = data.team;
     this._user = data.user;
   }
 
@@ -3170,8 +3260,6 @@ export class Notification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Name of the reaction emoji associated with the notification. */
-  public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -3183,19 +3271,7 @@ export class Notification extends Request {
    *     entity hasn't been updated after creation.
    */
   public updatedAt: Date;
-  /** The comment which the notification is associated with. */
-  public get comment(): LinearFetch<Comment> | undefined {
-    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
-  }
-  /** The issue that the notification is associated with. */
-  public get issue(): LinearFetch<Issue> | undefined {
-    return new IssueQuery(this._request).fetch(this._issue.id);
-  }
-  /** The team which the notification is associated with. */
-  public get team(): LinearFetch<Team> | undefined {
-    return new TeamQuery(this._request).fetch(this._team.id);
-  }
-  /** The recipient of the notification. */
+  /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
@@ -3220,16 +3296,26 @@ export class Notification extends Request {
  * @param fetch - function to trigger a refetch of this NotificationConnection model
  * @param data - NotificationConnection response data
  */
-export class NotificationConnection extends Connection<Notification> {
+export class NotificationConnection extends Connection<IssueNotification | Notification> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Notification> | undefined>,
+    fetch: (
+      connection?: LinearConnectionVariables
+    ) => LinearFetch<LinearConnection<IssueNotification | Notification> | undefined>,
     data: L.NotificationConnectionFragment
   ) {
     super(
       request,
       fetch,
-      data.nodes.map(node => new Notification(request, node)),
+      data.nodes.map(node => {
+        switch (node.__typename) {
+          case "IssueNotification":
+            return new IssueNotification(request, node as L.IssueNotificationFragment);
+
+          default:
+            return new Notification(request, node);
+        }
+      }),
       new PageInfo(request, data.pageInfo)
     );
   }
@@ -3241,23 +3327,16 @@ export class NotificationConnection extends Connection<Notification> {
  * @param data - L.NotificationPayloadFragment response data
  */
 export class NotificationPayload extends Request {
-  private _notification: L.NotificationPayloadFragment["notification"];
-
   public constructor(request: LinearRequest, data: L.NotificationPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
-    this._notification = data.notification;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The notification that was created or updated. */
-  public get notification(): LinearFetch<Notification> | undefined {
-    return new NotificationQuery(this._request).fetch(this._notification.id);
-  }
 }
 /**
  * Notification subscriptions for models.
@@ -6427,7 +6506,9 @@ export class AuditEntryTypesQuery extends Request {
       {}
     );
     const data = response.auditEntryTypes;
-    return data.map(node => new AuditEntryType(this._request, node));
+    return data.map(node => {
+      return new AuditEntryType(this._request, node);
+    });
   }
 }
 
@@ -6452,7 +6533,9 @@ export class AuthorizedApplicationsQuery extends Request {
       {}
     );
     const data = response.authorizedApplications;
-    return data.map(node => new AuthorizedApplication(this._request, node));
+    return data.map(node => {
+      return new AuthorizedApplication(this._request, node);
+    });
   }
 }
 
@@ -7122,7 +7205,9 @@ export class IssuePriorityValuesQuery extends Request {
       {}
     );
     const data = response.issuePriorityValues;
-    return data.map(node => new IssuePriorityValue(this._request, node));
+    return data.map(node => {
+      return new IssuePriorityValue(this._request, node);
+    });
   }
 }
 
@@ -7338,12 +7423,19 @@ export class NotificationQuery extends Request {
    * @param id - required id to pass to notification
    * @returns parsed response from NotificationQuery
    */
-  public async fetch(id: string): LinearFetch<Notification> {
+  public async fetch(id: string): LinearFetch<IssueNotification | Notification> {
     const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
       id,
     });
     const data = response.notification;
-    return new Notification(this._request, data);
+
+    switch (data.__typename) {
+      case "IssueNotification":
+        return new IssueNotification(this._request, data as L.IssueNotificationFragment);
+
+      default:
+        return new Notification(this._request, data);
+    }
   }
 }
 
@@ -8038,7 +8130,9 @@ export class TemplatesQuery extends Request {
   public async fetch(): LinearFetch<Template[]> {
     const response = await this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(L.TemplatesDocument, {});
     const data = response.templates;
-    return data.map(node => new Template(this._request, node));
+    return data.map(node => {
+      return new Template(this._request, node);
+    });
   }
 }
 
@@ -15643,7 +15737,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to notification
    * @returns Notification
    */
-  public notification(id: string): LinearFetch<Notification> {
+  public notification(id: string): LinearFetch<IssueNotification | Notification> {
     return new NotificationQuery(this._request).fetch(id);
   }
   /**

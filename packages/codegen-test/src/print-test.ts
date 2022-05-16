@@ -9,6 +9,7 @@ import {
   printSet,
 } from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
+import { ObjectTypeDefinitionNode } from "graphql";
 import { printTestHooks } from "./print-hooks";
 
 /**
@@ -165,13 +166,22 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
   const itemOperationArgs = itemArgs.length ? `(${printList(itemArgs.map(arg => `_${itemField}_${arg.name}`))})` : "";
   const itemQueries = itemOperation?.model?.fields.query ?? [];
 
+  /* For interfaces the type of item can be any of the implementations (plus the interface type) */
+  const modelName = itemOperation?.print.model;
+  const returnsInterface = modelName ? context.interfaces?.some(i => i.name.value === modelName) : false;
+  const implementations: string[] =
+    returnsInterface && modelName
+      ? context.interfaceImplementations[modelName]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ?? []
+      : [];
+  const itemTypes = printList([itemType, ...implementations.map(imp => printList([Sdk.NAMESPACE, imp], "."))], " | ");
+
   return printDescribe(
     operation.name,
     [`Test all ${connectionType} queries`],
     printLines([
       itemOperation
         ? printLines([
-            `let _${itemField}: ${itemType} | undefined`,
+            `let _${itemField}: ${itemTypes} | undefined`,
             ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
             "\n",
           ])
@@ -215,7 +225,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                 ),
                 printLines([
                   `const ${itemField}: ${printResponseType(
-                    itemType,
+                    itemTypes,
                     operation.print.list
                   )} = await ${clientName}.${itemField}${itemOperationArgs}`,
                   itemOperations.length || itemQueries.length ? printSet(`_${itemField}`, itemField) : undefined,
